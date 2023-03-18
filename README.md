@@ -11,26 +11,26 @@ Isn't it cute?
 ## Propositional Sharing
 
 By *propositional sharing*, we mean *sharing* of mutable state
-under a protocol expressed by separation-logic *propositions*.
+under a protocol expressed by separation-logic *propositions* `P: iProp`.
 Such sharing has been essential in the modern usage of separation logic.
 
 ### Examples
 
-One example is a shared invariant `inv N P`
+One example is a shared invariant `inv N P : iProp`
 in the separation logic [Iris](https://iris-project.org/).
-Using this, we can *share* some mutable state, expressed by a separation-logic proposition `P`, across threads.
+Using this, we can *share* some mutable state, expressed by a separation-logic proposition `P: iProp`, across threads.
 
-Another example is a full borrow `&{κ} P`,
+Another example is a full borrow `&{κ} P : iProp`,
 of [RustBelt](https://plv.mpi-sws.org/rustbelt/popl18/)'s lifetime logic in Iris,
 for modeling a mutable borrow `&'a mut T` in [Rust](https://www.rust-lang.org/).
-Using this, we can borrow, during the lifetime `κ`, some mutable state expressed by an Iris proposition `P`,
+Using this, we can borrow, during the lifetime `κ`, some mutable state expressed by an Iris proposition `P: iProp`,
 returned to the lender after `κ` ends.
 Although the lifetime `κ` separates access to the mutable state,
 the borrower and lender still *share* information about `P`.
 
 ## Step-Indexing
 
-Step-indexing is to layer the logic world with step-indices `0, 1, 2, …: ℕ`,
+Step-indexing is layering the logic world with step-indices `0, 1, 2, …: ℕ`,
 having notions more defined as the index grows.
 Existing separation logics with propositional sharing,
 such as [iCAP](https://www.cs.au.dk/~birke/papers/icap-conf.pdf) and Iris,
@@ -39,20 +39,22 @@ depend on *step-indexing*.
 ### Why Need It?
 
 Why do such separation logics need step-indexing?
-Their separation-logic proposition `SLProp` is a predicate over an abstract resource `Res`.
+Their separation-logic proposition `iProp` is a predicate over an abstract resource `Res`.
 For propositional sharing, `Res` should be able to model agreement on propositions.
-So they define `Res` as some data type depending on `SLProp`.
-Naively, they have domain equations like:
+So they define `Res` as some data type depending on `iProp`.
+Naively, they have a domain equation like:
 ```
-SLProp := Res -> Prop
-Res := F SLProp
+iProp :=  Res → Prop
+  Res :=  F iProp
 ```
 Alas, this is a circular definition!
-So they introduce step-indexing to guard `SLProp` in `Res` by one step-index, like:
+They make this solvable using step-indexing, like:
 ```
-SLProp := Res -> (ℕ -> Prop)
-Res := F (▶ SLProp)
+iProp :=  Res → sProp
+  Res :=  F (▶ iProp)
 ```
+Here, `sProp` is a step-indexed proposition `ℕ →anti Prop`
+and `▶` delays the definition of a data type by one step-index.
 
 ### Problems
 
@@ -91,16 +93,18 @@ And at the same time, we can use propositional sharing, like shared invariants a
 
 Separation logics like iCAP and Iris are fully semantic, using no syntax for propositions.
 
-Instead, Noix introduces a closed-world *syntax* `NxProp` for propositions and judgments over `NxProp`.
+Instead, Noix introduces a closed-world *syntax* `nProp` for propositions and judgments over `nProp`.
 
-Then we interpret that syntactic separation logic in a *semantic* separation logic (more specifically, Iris<sup>light</sup>).
-The resource `Res` (or `Σ`) for a semantic proposition `SLProp` (or `iProp Σ`) can now easily model agreement on `NxProp`, like:
+Then we interpret that *syntactic* separation logic in a *semantic* separation logic (more specifically, Iris<sup>light</sup>).
+Now we have broken the circular definition
+because the resource `Res` for a semantic proposition `iProp` depends just on `nProp`, like:
 ```
-SLProp := Res -> Prop
-Res := F NxProp
+iProp :=  Res → Prop
+  Res :=  F nProp
 ```
-Then we give an interpretation `NxProp -> SLProp`
+Then we give an interpretation `⟦ ⟧ : nProp → iProp`
 and prove the soundness of the syntactic logic for the semantics.
+Easy!
 
 ### Avoiding the Paradox
 
@@ -112,7 +116,7 @@ and thus liberates Noix from the paradox analogous to Landin's knot.
 
 ### Infinite Propositions
 
-A proposition in `NxProp` can have an *infinite syntax tree*.
+A proposition in `nProp` can have an *infinite syntax tree*.
 This is useful for constructing assertions for infinite data structures.
 
 ### Mechanization
