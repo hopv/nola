@@ -1,7 +1,7 @@
 # Noix: Propositional Sharing without Step-Indexing
 
-Noix is a new approach to *propositional sharing*
-in *non-step-indexed* separation logic.
+Noix is a new approach to propositional sharing
+in non-step-indexed separation logic.
 It is fully mechanized in [Coq](https://coq.inria.fr/) with the [Iris](https://iris-project.org/) separation logic framework.
 
 The name Noix comes from English *NO IndeX* and French [*noix*](https://en.wiktionary.org/wiki/noix) for a nut.
@@ -10,8 +10,8 @@ Isn't it cute?
 
 ## Propositional Sharing
 
-By *propositional sharing*, we mean *sharing* of mutable state
-under a protocol expressed by separation-logic *propositions* `P: iProp`.
+By propositional sharing, we mean *sharing* of mutable state
+under a protocol expressed by *separation-logic propositions* `P`.
 Such sharing has been essential in the modern usage of separation logic.
 
 ### Examples
@@ -34,7 +34,7 @@ Step-indexing is layering the logic world with step-indices `0, 1, 2, …: ℕ`,
 having notions more defined as the index grows.
 Existing separation logics with propositional sharing,
 such as [iCAP](https://www.cs.au.dk/~birke/papers/icap-conf.pdf) and Iris,
-depend on *step-indexing*.
+depend on step-indexing.
 
 ### Why Need It?
 
@@ -44,14 +44,12 @@ For propositional sharing, `Res` should be able to model agreement on propositio
 So they define `Res` as some data type depending on `iProp`.
 Naively, they have a domain equation like:
 ```
-iProp :=  Res → Prop
-  Res :=  F iProp
+iProp  ≜  Res → Prop       Res  ≜  F iProp
 ```
 Alas, this is a circular definition!
 They make this solvable using step-indexing, like:
 ```
-iProp :=  Res → sProp
-  Res :=  F (▶ iProp)
+iProp  ≜  Res → sProp      Res  ≜  F (▶ iProp)
 ```
 Here, `sProp` is a step-indexed proposition `ℕ →anti Prop`
 and `▶` delays the definition of a data type by one step-index.
@@ -60,14 +58,14 @@ and `▶` delays the definition of a data type by one step-index.
 
 Sounds fine? But this comes with costs.
 
-First, we suffer from the *later modality* `▷`, which is non-idempotent and doesn't commute with the fancy update modality `|==>`.
+First, we suffer from the later modality `▷`, which is non-idempotent and doesn't commute with the fancy update modality `|==>`.
 Despite efforts like [later credits](https://plv.mpi-sws.org/later-credits/), it is still hard to manage.
 
 More fundamentally, step-indexing is at odds with liveness verification.
-This is because, roughly speaking, the later modality `▷` automatically makes predicates on programs the greatest fixed points,
+Roughly speaking, the later modality `▷` automatically makes predicates on programs the greatest fixed points,
 while liveness verification involves the least or mixed fixed points.
 
-Indeed, [Simuliris](https://iris-project.org/pdfs/2022-popl-simuliris.pdf) uses Iris<sup>light</sup>, a *non-step-indexed* variant of Iris, to construct a predicate for fair termination preservation, defined as the mixed fixed point.
+Indeed, [Simuliris](https://iris-project.org/pdfs/2022-popl-simuliris.pdf) uses Iris<sup>light</sup>, a non-step-indexed variant of Iris, to construct a predicate for fair termination preservation, defined as the mixed fixed point.
 
 ### Paradox
 
@@ -77,7 +75,7 @@ That was believed impossible because of a known paradox for a naive shared invar
 At the high level, the paradox corresponds to a folklore technique called Landin's knot,
 causing a program loop using a shared mutable reference over the arrow type `evil: (unit -> unit) ref`:
 ```ocaml
-let evil = ref (fun _ -> ()) in  
+let evil = ref (fun _ -> ()) in
 evil := (fun _ -> !evil ());
 !evil ()
 ```
@@ -94,13 +92,11 @@ And at the same time, we can use propositional sharing, like shared invariants a
 Separation logics like iCAP and Iris are fully semantic, using no syntax for propositions.
 
 Instead, Noix introduces a closed-world *syntax* `nProp` for propositions and judgments over `nProp`.
-
-Then we interpret that *syntactic* separation logic in a *semantic* separation logic (more specifically, Iris<sup>light</sup>).
+Then we interpret Noix's syntactic separation logic in a semantic separation logic, Iris<sup>light</sup>.
 Now we have broken the circular definition
 because the resource `Res` for a semantic proposition `iProp` depends just on `nProp`, like:
 ```
-iProp :=  Res → Prop
-  Res :=  F nProp
+iProp  ≜  Res → Prop       Res  ≜  F nProp
 ```
 Then we give an interpretation `⟦ ⟧ : nProp → iProp`
 and prove the soundness of the syntactic logic for the semantics.
@@ -108,19 +104,21 @@ Easy!
 
 ### Avoiding the Paradox
 
-For soundness, Noix imposes a *syntactic* restriction:
-roughly, we can't use the *fancy update modality* `|==>` in the proposition `P` of a shared invariant `inv N P`, full borrow `&{κ} P`, etc.
+For soundness, Noix imposes a syntactic restriction:
+roughly, we can't use the fancy update modality `|==>` in the proposition `P` of a shared invariant `inv N P`, full borrow `&{κ} P`, etc.
 
 This amounts to restricting shared mutable references containing the arrow type, like `evil: (unit -> unit) ref`,
 and thus liberates Noix from the paradox analogous to Landin's knot.
 
 ### Infinite Propositions
 
-A proposition in `nProp` can have an *infinite syntax tree*.
-This is useful for constructing assertions for infinite data structures.
+A proposition `P : nProp` can have an infinite syntax tree,
+which helps construct assertions for infinite data structures.
+To reason about such infinite syntax, we take advantage of parameterized coinduction by [Paco](https://plv.mpi-sws.org/paco/).
 
 ### Mechanization
 
 Noix is fully mechanized in Coq with the Iris framework.
 The semantics of the logic is constructed in the Iris separation logic.
-Also, reasoning about the syntactic logic is accelerated with [MoSeL](https://iris-project.org/mosel/).
+Also, reasoning about Noix's syntactic logic is accelerated
+with a variant of [Iris Proof Mode](https://iris-project.org/pdfs/2017-popl-proofmode-final.pdf).
