@@ -113,12 +113,6 @@ roughly, we can't use the fancy update modality `|=[W]=>` in the proposition `P`
 That amounts to restricting shared mutable references containing the arrow type, like `evil: (unit -> unit) ref`,
 liberating Noix from the paradox analogous to Landin's knot.
 
-### Infinite Propositions
-
-A Noix proposition `P : nProp` can have an infinite syntax tree,
-which helps construct assertions for infinite data structures.
-To reason about such infinite syntax, we take advantage of parameterized coinduction by [Paco](https://plv.mpi-sws.org/paco/).
-
 ### Mechanization
 
 Noix is fully mechanized in Coq with the Iris framework.
