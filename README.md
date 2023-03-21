@@ -8,6 +8,11 @@ The name Noix comes from English *No* step-*i*nde*x* and French [*noix*](https:/
 Its pronunciation is /nwa/ (like noir without r).
 Isn't it cute?
 
+- [Propositional Sharing](#propositional-sharing)
+- [Nightmare: Step-Indexing](#nightmare-step-indexing)
+- [Solution: Noix](#solution-noix)
+- [Getting Started](#getting-started)
+
 ## Propositional Sharing
 
 We give a name *propositional sharing*
@@ -29,7 +34,7 @@ returned to the lender after `κ` ends.
 Although the lifetime `κ` separates access to the mutable state,
 the borrower and lender still *share* information about `P`.
 
-## Step-Indexing
+## Nightmare: Step-Indexing
 
 Step-indexing is layering the logic world with step-indices `0, 1, 2, …: ℕ`,
 having notions more defined as the index grows.
@@ -113,7 +118,13 @@ roughly, we can't use the fancy update modality `|=[W]=>` in the proposition `P`
 That amounts to restricting shared mutable references containing the arrow type, like `evil: (unit -> unit) ref`,
 liberating Noix from the paradox analogous to Landin's knot.
 
-### Mechanization
+### Infinite Propositions
+
+A Noix proposition `P : nProp` can have an infinite syntax tree,
+which helps construct assertions for infinite data structures.
+To reason about such infinite syntax, we take advantage of parameterized coinduction by [Paco](https://plv.mpi-sws.org/paco/).
+
+### Hacking Coq & Iris
 
 Noix is fully mechanized in Coq with the Iris framework.
 Noix's semantics is constructed in Iris<sup>light</sup>.
