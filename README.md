@@ -119,3 +119,35 @@ Noix is fully mechanized in Coq with the Iris framework.
 Noix's semantics is constructed in Iris<sup>light</sup>.
 Also, reasoning about Noix's syntactic logic is accelerated
 with a variant of [Iris Proof Mode](https://iris-project.org/pdfs/2017-popl-proofmode-final.pdf).
+
+## Getting Started
+
+We use [opam](https://opam.ocaml.org/) ver 2.* for package management.
+
+To set up an [opam switch](https://opam.ocaml.org/doc/man/opam-switch.html) for Noix and link it to the folder:
+```bash
+opam switch create noix 4.14 # Choose an OCaml version
+opam switch link noix .
+```
+
+To set up opam repos for Coq and Iris for the current opam switch:
+```bash
+opam repo add coq-released https://coq.inria.fr/opam/released
+opam repo add iris-dev https://gitlab.mpi-sws.org/iris/opam.git
+```
+
+To fix development dependencies and compile Coq code:
+```bash
+make devdep
+make -j16 # Choose a job number
+```
+
+Or to install as a library locally:
+```bash
+opam install .
+```
+
+To generate and browse a document:
+```bash
+make viewdoc
+```
