@@ -1,10 +1,9 @@
 # Compile Coq code
-all: Makefile.coq Makefile.coq.conf
-	@# Process Coq files with Makefile.coq
+all: Makefile.coq
 	@$(MAKE) -f Makefile.coq all
 .PHONY: all
 
-# Clean up Coq-generated files and Makefile.coq(.conf)
+# Clean up Coq-generated files and Makefile.coq
 clean:
 	@$(MAKE) -f Makefile.coq cleanall
 	rm -f Makefile.coq Makefile.coq.conf
@@ -26,12 +25,12 @@ doc: Makefile.coq
 .PHONY: doc
 
 # Browse a Coq document
-viewdoc: html
+viewdoc: doc
 	open ./html/toc.html
 .PHONY: viewdoc
 
-# Generate Makefile.coq(.conf) from _CoqProject
-Makefile.coq Makefile.coq.conf : _CoqProject
+# Generate Makefile.coq from _CoqProject
+Makefile.coq : _CoqProject
 	coq_makefile -f _CoqProject -o Makefile.coq
 
 # Generate devdep/*-devdep.opam from *.opam,
