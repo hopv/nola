@@ -1,6 +1,10 @@
 .vscode/
 .DS_Store
 
+# opam
+
+_opam
+
 # Coq
 
 .*.aux
