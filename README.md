@@ -1,16 +1,15 @@
-# Noix: Propositional Sharing without Step-Indexing
+# Nola: Deep-Embed Separation Logic to Wipe Laters Out
 
-Noix is a new approach to propositional sharing
+Nola is a new approach to propositional sharing
 in non-step-indexed separation logic.
 It is fully mechanized in [Coq](https://coq.inria.fr/) with the [Iris](https://iris-project.org/) separation logic framework.
 
-The name Noix comes from English *No* step-*i*nde*x* and French [*noix*](https://en.wiktionary.org/wiki/noix) for a nut.
-Its pronunciation is /nwa/ (like noir without r).
-Isn't it cute?
+The name Nola comes from *No* *la*ters.
+It is also a nickname for New Orleans, a city I like.
 
 - [Propositional Sharing](#propositional-sharing)
 - [Nightmare: Step-Indexing](#nightmare-step-indexing)
-- [Solution: Noix](#solution-noix)
+- [Solution: Nola](#solution-nola)
 - [Getting Started](#getting-started)
 
 ## Propositional Sharing
@@ -88,9 +87,9 @@ evil := (fun _ -> !evil ());
 !evil ()
 ```
 
-## Solution: Noix
+## Solution: Nola
 
-Noix achieves propositional sharing without step-indexing!
+Nola achieves propositional sharing without step-indexing!
 
 We no longer suffer from the later modality `▷` and can do advanced liveness verification like Simuliris.
 And at the same time, we can use propositional sharing, like shared invariants and full borrows, for flexible reasoning.
@@ -99,8 +98,8 @@ And at the same time, we can use propositional sharing, like shared invariants a
 
 Separation logics like iCAP and Iris are fully semantic, using no syntax for propositions.
 
-Instead, Noix introduces a closed-world *syntax* `nProp` for propositions and judgments over `nProp`.
-Then we interpret Noix's syntactic separation logic in a semantic separation logic, Iris<sup>light</sup>.
+Instead, Nola introduces a closed-world *syntax* `nProp` for propositions and judgments over `nProp`.
+Then we interpret Nola's syntactic separation logic in a semantic separation logic, Iris<sup>light</sup>.
 Now we have broken the circular definition
 because the resource `Res` for a semantic proposition `iProp` depends just on `nProp`, like:
 ```
@@ -112,33 +111,33 @@ Easy!
 
 ### Avoiding the Paradox
 
-For soundness, Noix imposes a syntactic restriction:
+For soundness, Nola imposes a syntactic restriction:
 roughly, we can't use the fancy update modality `|=[W]=>` in the proposition `P` of a shared invariant `inv N P`, full borrow `&{κ} P`, etc.
 
 That amounts to restricting shared mutable references containing the arrow type, like `evil: (unit -> unit) ref`,
-liberating Noix from the paradox analogous to Landin's knot.
+liberating Nola from the paradox analogous to Landin's knot.
 
 ### Infinite Propositions
 
-A Noix proposition `P : nProp` can have an infinite syntax tree,
+A Nola proposition `P : nProp` can have an infinite syntax tree,
 which helps construct assertions for infinite data structures.
 To reason about such infinite syntax, we take advantage of parameterized coinduction by [Paco](https://plv.mpi-sws.org/paco/).
 
 ### Hacking Coq & Iris
 
-Noix is fully mechanized in Coq with the Iris framework.
-Noix's semantics is constructed in Iris<sup>light</sup>.
-Also, reasoning about Noix's syntactic logic is accelerated
+Nola is fully mechanized in Coq with the Iris framework.
+Nola's semantics is constructed in Iris<sup>light</sup>.
+Also, reasoning about Nola's syntactic logic is accelerated
 with a variant of [Iris Proof Mode](https://iris-project.org/pdfs/2017-popl-proofmode-final.pdf).
 
 ## Getting Started
 
 We use [opam](https://opam.ocaml.org/) ver 2.* for package management.
 
-To set up an [opam switch](https://opam.ocaml.org/doc/man/opam-switch.html) for Noix and link it to the folder:
+To set up an [opam switch](https://opam.ocaml.org/doc/man/opam-switch.html) for Nola and link it to the folder:
 ```bash
-opam switch create noix 4.14 # Choose an OCaml version
-opam switch link noix .
+opam switch create nola 4.14 # Choose an OCaml version
+opam switch link nola .
 ```
 
 To set up opam repos for Coq and Iris for the current opam switch:

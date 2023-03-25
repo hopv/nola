@@ -1,9 +1,9 @@
 opam-version: "2.0"
-synopsis: "Propositional sharing without step-indexing"
+synopsis: "Deep-embed separation logic to wipe laters out"
 maintainer: "Yusuke Matsushita <ysk.m24t@gmail.com>"
 authors: ["Yusuke Matsushita <ysk.m24t@gmail.com>"]
-homepage: "https://github.com/hopv/noix"
-bug-reports: "https://github.com/hopv/noix/issues"
+homepage: "https://github.com/hopv/nola"
+bug-reports: "https://github.com/hopv/nola/issues"
 
 depends: [
   "coq-iris" { (= "dev.2023-03-19.1.e1aa9b82") }
