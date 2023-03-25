@@ -8,7 +8,7 @@ The name Nola comes from *No* *la*ters.
 It is also a nickname for New Orleans, a city I like.
 
 - [Propositional Sharing](#propositional-sharing)
-- [Nightmare: Step-Indexing](#nightmare-step-indexing)
+- [Obstacle: Laters](#obstacle-laters)
 - [Solution: Nola](#solution-nola)
 - [Getting Started](#getting-started)
 
@@ -33,18 +33,16 @@ returned to the lender after `κ` ends.
 Although the lifetime `κ` separates access to the mutable state,
 the borrower and lender still *share* information about `P`.
 
-## Nightmare: Step-Indexing
+## Obstacle: Laters
 
-Step-indexing is layering the logic world with step-indices `0, 1, 2, …: ℕ`,
-having notions more defined as the index grows.
+### Step-Indexing
 
-Existing separation logics with propositional sharing,
+All the existing separation logics with propositional sharing,
 such as [iCAP](https://www.cs.au.dk/~birke/papers/icap-conf.pdf) and Iris,
-depend on step-indexing.
-
-### Why?
-
-Why do such separation logics resort to step-indexing?
+resort to *step-indexing*.
+It is the technique of layering the logic world with step-indices `0, 1, 2, …: ℕ`,
+having notions more defined as the step-index grows.
+Why?
 
 Their separation-logic proposition `iProp` is a predicate over an abstract resource `Res`.
 For propositional sharing, `Res` should be able to model agreement on propositions.
@@ -61,23 +59,26 @@ iProp  ≜  Res → sProp     Res  ≜  F (▶ iProp)
 Here, `sProp` is a step-indexed proposition `ℕ →anti Prop`
 and `▶` delays the definition of a data type by one step-index.
 
-### Problems
+### Laters in the Way
 
-Sounds fine? But this comes with costs.
+Sounds fine? But this comes with the cost of the *later modality* `▷`.
 
-First, we suffer from the later modality `▷`, which is non-idempotent and doesn't commute with the fancy update modality `|==>`.
-Despite efforts like [later credits](https://plv.mpi-sws.org/later-credits/), it is still hard to manage.
+Due to `▶` added to `iProp`, we can use propositional sharing only for propositions under `▷`,
+which delays the definition of a proposition by one step-index.
+This causes significant practical issues, especially for dealing with nested propositional sharing.
 
-More fundamentally, step-indexing is at odds with liveness verification.
-Roughly speaking, the later modality `▷` automatically makes predicates on programs coinductive,
-while liveness verification calls for inductive predicates.
+The later modality `▷` is ill-behaved: it is non-idempotent and doesn't commute with the fancy update modality `|==>`.
+Various efforts, such as [later credits](https://plv.mpi-sws.org/later-credits/), have been made to manage `▷`, but it is still hard to use.
 
-Indeed, [Simuliris](https://iris-project.org/pdfs/2022-popl-simuliris.pdf) uses Iris<sup>light</sup>, a non-step-indexed variant of Iris, to construct a predicate for fair termination preservation, defined as a mixed fixed point.
+More fundamentally, the power to strip off `▷` makes program predicates weaker,
+ensuring only safety properties (absence of bad behaviors witnessed by finite steps),
+but not liveness properties (absence of bad behaviors witnessed only by an infinite execution).
+Indeed, [Simuliris](https://iris-project.org/pdfs/2022-popl-simuliris.pdf) just gave up *propositional sharing* in its program logic built in Iris for fair termination preservation, a rich liveness property.
 
 ### Paradox
 
-Can't we have propositional sharing without step-indexing?
-That was believed impossible because of a known paradox for a naive shared invariant without the later modality.
+Can't we have propositional sharing without laters `▷`?
+That was believed impossible because of a known paradox for a naive shared invariant without `▷`.
 
 At the high level, the paradox corresponds to a folklore technique called Landin's knot,
 causing a program loop using a shared mutable reference over the arrow type `evil: (unit -> unit) ref`:
@@ -89,17 +90,18 @@ evil := (fun _ -> !evil ());
 
 ## Solution: Nola
 
-Nola achieves propositional sharing without step-indexing!
+Surprisingly, Nola achieves propositional sharing without laters!
 
 We no longer suffer from the later modality `▷` and can do advanced liveness verification like Simuliris.
 And at the same time, we can use propositional sharing, like shared invariants and full borrows, for flexible reasoning.
 
 ### Core Idea
 
-Separation logics like iCAP and Iris are fully semantic, using no syntax for propositions.
+Separation logics like iCAP and Iris are fully semantic, using *shallow embedding*, without syntax for propositions.
 
-Instead, Nola introduces a closed-world *syntax* `nProp` for propositions and judgments over `nProp`.
-Then we interpret Nola's syntactic separation logic in a semantic separation logic, Iris<sup>light</sup>.
+Instead, Nola uses *deep embedding*.
+It constructs *syntax* `nProp` for propositions and judgments over `nProp`.
+Then we interpret Nola's syntactic separation logic in a semantic separation logic, Iris.
 Now we have broken the circular definition
 because the resource `Res` for a semantic proposition `iProp` depends just on `nProp`, like:
 ```
@@ -121,14 +123,12 @@ liberating Nola from the paradox analogous to Landin's knot.
 
 A Nola proposition `P : nProp` can have an infinite syntax tree,
 which helps construct assertions for infinite data structures.
-To reason about such infinite syntax, we take advantage of parameterized coinduction by [Paco](https://plv.mpi-sws.org/paco/).
+To reason about such infinite syntax, we take advantage of parameterized coinduction.
 
-### Hacking Coq & Iris
+### Extensibility
 
-Nola is fully mechanized in Coq with the Iris framework.
-Nola's semantics is constructed in Iris<sup>light</sup>.
-Also, reasoning about Nola's syntactic logic is accelerated
-with a variant of [Iris Proof Mode](https://iris-project.org/pdfs/2017-popl-proofmode-final.pdf).
+Using syntax might sound not extensible.
+Amazingly, Nola is *extensible*, thanks to parameterization on the syntax.
 
 ## Getting Started
 
