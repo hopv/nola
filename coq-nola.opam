@@ -2,11 +2,14 @@ opam-version: "2.0"
 synopsis: "Deep-embed separation logic to wipe laters out"
 maintainer: "Yusuke Matsushita <ysk.m24t@gmail.com>"
 authors: ["Yusuke Matsushita <ysk.m24t@gmail.com>"]
+license: "MIT"
 homepage: "https://github.com/hopv/nola"
 bug-reports: "https://github.com/hopv/nola/issues"
+dev-repo: "git+https://github.com/hopv/nola.git"
+version: "dev"
 
 depends: [
-  "coq-iris" { (= "dev.2023-03-19.1.e1aa9b82") }
+  "coq-iris" { (= "dev.2023-03-26.2.03eaffa") | (= "dev") }
 ]
 
 build: [make "-j%{jobs}%"]
