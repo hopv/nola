@@ -15,10 +15,10 @@ Structure wfo := Wfo {
   wfo_lt_wf : wf wfo_lt;
 }.
 
-Global Arguments wfo_car : simpl never.
-Global Arguments wfo_lt {_} _ _ : simpl never, rename.
-Global Arguments wfo_lt_trans {_ _ _ _} _ _ : simpl never.
-Global Arguments wfo_lt_wf {_} : simpl never.
+Arguments wfo_car : simpl never.
+Arguments wfo_lt {_} _ _ : simpl never, rename.
+Arguments wfo_lt_trans {_ _ _ _} _ _ : simpl never.
+Arguments wfo_lt_wf {_} : simpl never.
 
 (** ** Derived notions for [wfo] *)
 Section wfo_derived.

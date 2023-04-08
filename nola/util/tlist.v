@@ -9,8 +9,8 @@ Inductive tlist (T : Type) : Type :=
 | tnil : tlist T
 | tcons : T -> tlist T -> tlist T.
 
-Global Arguments tnil {_}.
-Global Arguments tcons {_} _ _.
+Arguments tnil {_}.
+Arguments tcons {_} _ _.
 
 (** Concatenate [tlist]s *)
 Fixpoint tapp {T} (ts us : tlist T) : tlist T :=
@@ -35,9 +35,9 @@ Import TlistNotations.
 Variant cunit : Set := cnil.
 (** Product type for [tcons] *)
 Record cprod (A B : Type) : Type := ccons { chd : A; ctl : B }.
-Global Arguments ccons {_ _} _ _.
-Global Arguments chd {_ _} _.
-Global Arguments ctl {_ _} _.
+Arguments ccons {_ _} _ _.
+Arguments chd {_ _} _.
+Arguments ctl {_ _} _.
 
 (** [clist]: Heterogeneous list type calculated from [tlist] *)
 Fixpoint clist {T} (F : T → Type) (ts : tlist T) : Type :=
@@ -78,8 +78,8 @@ Import ClistNotations.
 Variant cempty : Set := .
 (** Sum type for [tcons] *)
 Variant csum (A B : Type) : Type := cbyhd (_ : A) | cbytl (_ : B).
-Global Arguments cbyhd {_ _} _.
-Global Arguments cbytl {_ _} _.
+Arguments cbyhd {_ _} _.
+Arguments cbytl {_ _} _.
 
 (** [cchoice]: Sum type calculated from [tlist] *)
 Fixpoint cchoice {T} (F : T → Type) (ts : tlist T) : Type :=
