@@ -19,39 +19,33 @@ Arguments wfo_car : simpl never.
 Arguments wfo_lt {_} _ _ : simpl never, rename.
 Arguments wfo_lt_trans {_ _ _ _} _ _ : simpl never.
 Arguments wfo_lt_wf {_} : simpl never.
+Infix "≺" := wfo_lt (at level 70, no associativity).
 
-(** ** Derived notions for [wfo] *)
-Section wfo_derived.
-  Context {A : wfo}.
-  (** Inverse of [wfo_lt] *)
-  Definition wfo_gt (a b : A) := wfo_lt b a.
-  (** Reflexive closure of [wfo_lt]/[wfo_gt] *)
-  Definition wfo_le (a b : A) := wfo_lt a b ∨ a = b.
-  Definition wfo_ge (a b : A) := wfo_le b a.
-End wfo_derived.
+(** Inverse of [≺] *)
+Definition wfo_gt {A : wfo} (a b : A) := b ≺ a.
+Infix "≻" := wfo_gt (at level 70, no associativity).
 
-(** ** Notations for [wfo] *)
-Module WfoNotations.
-  Infix "≺" := wfo_lt (at level 70, no associativity).
-  Infix "≻" := wfo_gt (at level 70, no associativity).
-  Infix "≼" := wfo_le (at level 70, no associativity).
-  Infix "≽" := wfo_ge (at level 70, no associativity).
-End WfoNotations.
-Import WfoNotations.
+(** Reflexive closure of [≺] *)
+Definition wfo_le {A : wfo} (a b : A) := a ≺ b ∨ a = b.
+Infix "≼" := wfo_le (at level 70, no associativity).
+
+(** Inverse of [≼] *)
+Definition wfo_ge {A : wfo} (a b : A) := b ≼ a.
+Infix "≽" := wfo_ge (at level 70, no associativity).
 
 (** ** Facts about [wfo] *)
 Section wfo_facts.
   Context {A : wfo}.
   Implicit Type a b c : A.
 
-  (** [wfo_le] is transitive *)
+  (** [≼] is transitive *)
   Lemma wfo_le_trans a b c : a ≼ b → b ≼ c → a ≼ c.
   Proof.
     move=> [ab|<-] [bc|<-]; [left|by left|by left|by right].
     exact (wfo_lt_trans ab bc).
   Qed.
 
-  (** [wfo_lt] is irreflexive *)
+  (** [≺] is irreflexive *)
   Lemma wfo_lt_irrefl a : ¬ a ≺ a.
   Proof.
     move=> aa. move: (wfo_lt_wf a). fix FIX 1. move=> Acca. apply FIX.
@@ -71,7 +65,6 @@ End nat_wfo.
 (** ** Equip [sigT] with the lexicographic order *)
 
 Section sigT_wfo.
-  Import EqNotations SigTNotations.
   Context {A : wfo} (F : A → wfo).
 
   (** Lexicographic well-founded relation for [sigT] *)

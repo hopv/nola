@@ -4,6 +4,7 @@ From iris.prelude Require Export prelude.
 
 (** Admit Streicher's Axiom K *)
 From Coq Require Export Program.Equality.
+Export EqNotations.
 
 (** Admit functional extensionality *)
 From Coq Require Export FunctionalExtensionality.
@@ -13,10 +14,8 @@ From Coq Require Export FunctionalExtensionality.
 Ltac fun_ext := apply functional_extensionality.
 Ltac fun_ext_dep := apply functional_extensionality_dep.
 
-(** ** Notations for [sigT] *)
+(** ** Syntax sugar for [sigT] *)
 
-Module SigTNotations.
-  Notation "( x ,^ .. ,^ y ,^ z )" := (existT x .. (existT y z) ..).
-  Notation "a .^1" := (projT1 a) (at level 2).
-  Notation "a .^2" := (projT2 a) (at level 2).
-End SigTNotations.
+Notation "( x ,^ .. ,^ y ,^ z )" := (existT x .. (existT y z) ..).
+Notation "a .^1" := (projT1 a) (at level 2).
+Notation "a .^2" := (projT2 a) (at level 2).

@@ -12,22 +12,19 @@ Inductive tlist (T : Type) : Type :=
 Arguments tnil {_}.
 Arguments tcons {_} _ _.
 
+Notation "^[]" := tnil.
+Infix "^::" := tcons (at level 60, right associativity).
+Notation "^[ x ; .. ; z ]" := (x ^:: .. (z ^:: ^[]) ..)
+  (at level 1, format "^[ x ;  .. ;  z ]").
+
 (** Concatenate [tlist]s *)
+Reserved Infix "^++" (at level 60, right associativity).
 Fixpoint tapp {T} (ts us : tlist T) : tlist T :=
   match ts with
-  | tnil => us
-  | tcons t ts => tcons t (tapp ts us)
-  end.
-
-(** Notations for [tlist] *)
-Module TlistNotations.
-  Notation "^[]" := tnil.
-  Infix "^::" := tcons (at level 60, right associativity).
-  Notation "^[ x ; .. ; z ]" := (x ^:: .. (z ^:: ^[]) ..)
-    (at level 1, format "^[ x ;  .. ;  z ]").
-  Infix "^++" := tapp (at level 60, right associativity).
-End TlistNotations.
-Import TlistNotations.
+  | ^[] => us
+  | t ^:: ts => t ^:: ts ^++ us
+  end
+where "ts ^++ us" := (tapp ts us).
 
 (** ** [clist]: Heterogeneous list type calculated from [tlist] *)
 
@@ -39,38 +36,36 @@ Arguments ccons {_ _} _ _.
 Arguments chd {_ _} _.
 Arguments ctl {_ _} _.
 
+Notation "*[ ]" := cunit (at level 1, format "*[ ]") : type_scope.
+Infix "*::" := cprod (at level 60, right associativity) : type_scope.
+Notation "*[ A ; .. ; Z ]" := (A *:: .. (Z *:: *[]) ..)
+  (at level 1, format "*[ A ;  .. ;  Z ]") : type_scope.
+
+Notation "-[ ]" := cnil (at level 1, format "-[ ]").
+Infix "-::" := ccons (at level 60, right associativity).
+Notation "-[ x ; .. ; z ]" := (x -:: .. (z -:: -[]) ..)
+  (at level 1, format "-[ x ;  .. ;  z ]").
+
 (** [clist]: Heterogeneous list type calculated from [tlist] *)
 Fixpoint clist {T} (F : T → Type) (ts : tlist T) : Type :=
   match ts with
-  | ^[] => cunit
-  | t ^:: ts => cprod (F t) (clist F ts)
+  | ^[] => *[]
+  | t ^:: ts => F t *:: clist F ts
   end.
+
+Notation "[*] t ∈ ts , A" := (clist (λ t, A) ts)
+  (at level 200, ts at level 10, t binder, right associativity,
+    format "[*]  t  ∈  ts ,  A").
 
 (** Append [clist]s *)
+Reserved Infix "-++" (at level 60, right associativity).
 Fixpoint capp {T} {F : T → Type} {ts us : tlist T}
-  (xs : clist F ts) (ys : clist F us) : clist F (ts ^++ us) :=
+  (xs : [*] t ∈ ts , F t) (ys : [*] t ∈ us , F t) : [*] t ∈ ts ^++ us , F t :=
   match ts, xs with
   | ^[], _ => ys
-  | _ ^:: _, ccons x xs => ccons x (capp xs ys)
-  end.
-
-(** Notations for [clist] *)
-Module ClistNotations.
-  Notation "[*] t ∈ ts , A" := (clist (λ t, A) ts)
-    (at level 200, ts at level 10, t binder, right associativity,
-      format "[*]  t  ∈  ts ,  A").
-  Notation "*[ ]" := cunit (at level 1, format "*[ ]") : type_scope.
-  Infix "*::" := cprod (at level 60, right associativity) : type_scope.
-  Notation "*[ A ; .. ; Z ]" := (A *:: .. (Z *:: *[]) ..)
-    (at level 1, format "*[ A ;  .. ;  Z ]") : type_scope.
-
-  Notation "-[ ]" := cnil (at level 1, format "-[ ]").
-  Infix "-::" := ccons (at level 60, right associativity).
-  Notation "-[ x ; .. ; z ]" := (x -:: .. (z -:: -[]) ..)
-    (at level 1, format "-[ x ;  .. ;  z ]").
-  Infix "-++" := capp (at level 60, right associativity).
-End ClistNotations.
-Import ClistNotations.
+  | _ ^:: _, x -:: xs => x -:: xs -++ ys
+  end
+where "xs -++ ys" := (capp xs ys).
 
 (** ** [cchoice]: Sum type calculated from [tlist] *)
 
@@ -81,30 +76,26 @@ Variant csum (A B : Type) : Type := cbyhd (_ : A) | cbytl (_ : B).
 Arguments cbyhd {_ _} _.
 Arguments cbytl {_ _} _.
 
+Notation "+[ ]" := cempty (at level 1, format "+[ ]") : type_scope.
+Infix "+::" := csum (at level 60, right associativity) : type_scope.
+Notation "+[ A ; .. ; Z ]" := (A +:: .. (Z +:: +[]) ..)
+  (at level 1, format "+[ A ;  .. ;  Z ]") : type_scope.
+
+Notation "-# x" := (cbyhd x)
+  (at level 20, right associativity, format "-#  x").
+Notation "-/ x" := (cbytl x)
+  (at level 20, right associativity, format "-/ x").
+
 (** [cchoice]: Sum type calculated from [tlist] *)
 Fixpoint cchoice {T} (F : T → Type) (ts : tlist T) : Type :=
   match ts with
-  | ^[] => cempty
-  | t ^:: ts => csum (F t) (cchoice F ts)
+  | ^[] => +[]
+  | t ^:: ts => F t +:: cchoice F ts
   end.
 
-(** Notations for [cchoice] *)
-Module CchoiceNotations.
-  Notation "[+] t ∈ ts , A" := (cchoice (λ t, A) ts)
-    (at level 200, ts at level 10, t binder, right associativity,
-      format "[+]  t  ∈  ts ,  A").
-
-  Notation "+[ ]" := cempty (at level 1, format "+[ ]") : type_scope.
-  Infix "+::" := csum (at level 60, right associativity) : type_scope.
-  Notation "+[ A ; .. ; Z ]" := (A +:: .. (Z +:: +[]) ..)
-    (at level 1, format "+[ A ;  .. ;  Z ]") : type_scope.
-
-  Notation "-# x" := (cbyhd x)
-    (at level 20, right associativity, format "-#  x").
-  Notation "-/ x" := (cbytl x)
-    (at level 20, right associativity, format "-/ x").
-End CchoiceNotations.
-Import CchoiceNotations.
+Notation "[+] t ∈ ts , A" := (cchoice (λ t, A) ts)
+  (at level 200, ts at level 10, t binder, right associativity,
+    format "[+]  t  ∈  ts ,  A").
 
 (** Lift [[+] t ∈ ts, F t] into [[+] t ∈ ts ^++ us, F t] *)
 Fixpoint cbyleft {T} {F : T → Type} {ts us : tlist T}
