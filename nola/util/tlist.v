@@ -54,8 +54,7 @@ Fixpoint clist {T} (F : T → Type) (ts : tlist T) : Type :=
   end.
 
 Notation "[*] t ∈ ts , A" := (clist (λ t, A) ts)
-  (at level 200, ts at level 10, t binder, right associativity,
-    format "[*]  t  ∈  ts ,  A").
+  (at level 200, ts at level 10, t binder, right associativity).
 
 (** Append [clist]s *)
 Reserved Infix "-++" (at level 60, right associativity).
@@ -94,8 +93,7 @@ Fixpoint cchoice {T} (F : T → Type) (ts : tlist T) : Type :=
   end.
 
 Notation "[+] t ∈ ts , A" := (cchoice (λ t, A) ts)
-  (at level 200, ts at level 10, t binder, right associativity,
-    format "[+]  t  ∈  ts ,  A").
+  (at level 200, ts at level 10, t binder, right associativity).
 
 (** Lift [[+] t ∈ ts, F t] into [[+] t ∈ ts ^++ us, F t] *)
 Fixpoint cbyleft {T} {F : T → Type} {ts us : tlist T}
