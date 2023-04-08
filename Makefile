@@ -21,7 +21,7 @@ uninstall: Makefile.coq
 
 # Generate a Coq document
 doc: Makefile.coq
-	@$(MAKE) -f Makefile.coq COQDOCEXTRAFLAGS=--parse-comments html
+	@$(MAKE) -f Makefile.coq COQDOCEXTRAFLAGS="--no-index --parse-comments" html
 .PHONY: doc
 
 # Browse a Coq document
