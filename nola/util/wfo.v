@@ -86,8 +86,8 @@ Section sigT_wfo.
     ∀ b , Acc wfo_lt b → Acc sigT_lt (a ,^ b).
   Proof.
     fix FIX 2. move=> b Accb. apply Acc_intro=> [[a' b']] [|]/=.
-    - move=> a'a. apply IH. exact a'a.
-    - move=> [?+]. subst. simpl_eq=> b'b. apply FIX. exact (Acc_inv Accb b'b).
+    - move=> a'a. apply (IH _ a'a).
+    - move=> [?+]. subst. simpl_eq=> b'b. apply (FIX _ (Acc_inv Accb b'b)).
   Qed.
 
   (** [sigT_lt] is well-founded *)
@@ -95,10 +95,10 @@ Section sigT_wfo.
   Proof.
     move=> [a b]. move: a (wfo_lt_wf a) b. fix FIX 2. move=> a Acca b.
     apply Acc_intro=> [[a' b']] [|]/=.
-    - move=> a'a. apply FIX. exact (Acc_inv Acca a'a).
+    - move=> a'a. apply (FIX _ (Acc_inv Acca a'a)).
     - move=> [?+]. subst. simpl_eq=> b'b.
       apply sigT_lt_wf_pre; [|exact (wfo_lt_wf b')].
-      clear dependent b b'=> a' a'a b. apply FIX. exact (Acc_inv Acca a'a).
+      clear dependent b b'=> a' a'a b. apply (FIX _ (Acc_inv Acca a'a)).
   Qed.
 
   Canonical sigT_wfo := Wfo (sigT F) sigT_lt sigT_lt_trans sigT_lt_wf.
