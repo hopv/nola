@@ -39,7 +39,9 @@ Section pnu.
   Context {A : Type} (F : (A → Prop) → A → Prop).
 
   (** [pnu]: Parameterized greatest fixpoint *)
-  CoInductive pnu (φ : A → Prop) a : Prop := Pnu {
+  CoInductive pnu (φ : A → Prop) a : Prop := {
+    (* The type is equivalent to [F (por pnu φ) a] if [F] is monotone;
+      parameterization by [pnuor] serves for strict positivity *)
     pnu_out : ∃ pnuor, (pnuor →1 por pnu φ) ∧ F pnuor a;
   }.
 
@@ -93,7 +95,9 @@ Section pmu.
   Context {A : Type} (F : (A → Prop) → A → Prop).
 
   (** [pmu]: Parameterized least fixpoint *)
-  Inductive pmu (φ : A → Prop) a : Prop := Pmu {
+  Inductive pmu (φ : A → Prop) a : Prop := {
+    (* The type is equivalent to [F (pand pmu φ) a] if [F] is monotone;
+      parameterization by [pmuand] serves for strict positivity *)
     pmu_out : ∃ pmuand, (pmuand →1 pand pmu φ) ∧ F pmuand a;
   }.
 
