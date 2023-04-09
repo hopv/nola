@@ -17,9 +17,9 @@ It is also a nickname for New Orleans, a city I like.
 
 We use [opam](https://opam.ocaml.org/) ver 2.* for package management.
 
-To set up an [opam switch](https://opam.ocaml.org/doc/man/opam-switch.html) for Nola and link it to the folder:
+To set up an [opam switch](https://opam.ocaml.org/doc/man/opam-switch.html) named `nola` and link it to the folder:
 ```bash
-opam switch create nola 4.14 # Choose an OCaml version
+opam switch create nola 5.0.0 # Choose an OCaml version
 opam switch link nola .
 ```
 
