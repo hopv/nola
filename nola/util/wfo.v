@@ -2,7 +2,6 @@
 
 From nola Require Import prelude.
 From stdpp Require Export well_founded.
-From stdpp Require Import relations.
 
 (** ** [wfo]: Type with a well-founded order *)
 
