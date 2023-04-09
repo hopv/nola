@@ -26,6 +26,15 @@ Fixpoint tapp {T} (ts us : tlist T) : tlist T :=
   end
 where "ts ^++ us" := (tapp ts us).
 
+(** Map over [tlist] *)
+Reserved Infix "^$" (at level 60, right associativity).
+Fixpoint tmap {T U} (f : T → U) (ts : tlist T) : tlist U :=
+  match ts with
+  | ^[] => ^[]
+  | t ^:: ts => f t ^:: f ^$ ts
+  end
+where "f ^$ ts" := (tmap f ts).
+
 (** ** [clist]: Heterogeneous list type calculated from [tlist] *)
 
 (** Unit type for [tnil] *)
@@ -65,6 +74,16 @@ Fixpoint capp {T} {F : T → Type} {ts us : tlist T}
   | _ ^:: _, x -:: xs => x -:: xs -++ ys
   end
 where "xs -++ ys" := (capp xs ys).
+
+(** Map over [clist] *)
+Reserved Infix "-*$" (at level 60, right associativity).
+Fixpoint cmap {T} {F G : T → Type} (f : ∀ t, F t → G t) {ts : tlist T}
+  (xs : [*] t ∈ ts , F t) : [*] t ∈ ts , G t :=
+  match ts, xs with
+  | ^[], -[] => -[]
+  | _ ^:: _, x -:: xs => f _ x -:: f -*$ xs
+  end
+where "f -*$ xs" := (cmap f xs).
 
 (** ** [cchoice]: Sum type calculated from [tlist] *)
 
@@ -121,3 +140,14 @@ Fixpoint caccess {T} {F G : T → Type} {A : Type}
   | _ ^:: _, x -:: _, -# y => f _ x y
   | _ ^:: _, _ -:: xs, -/ y => caccess f xs y
   end.
+
+(** Map over [cchoice] *)
+Reserved Infix "-+$" (at level 60, right associativity).
+Fixpoint ccmap {T} {F G : T → Type} (f : ∀ t, F t → G t) {ts : tlist T}
+  (x : [+] t ∈ ts, F t) : [+] t ∈ ts, G t :=
+  match ts, x with
+  | ^[], _ => match x with end
+  | _ ^:: _, -# x => -# f _ x
+  | _ ^:: _, -/ x => -/ (f -+$ x)
+  end
+where "f -+$ x" := (ccmap f x).
