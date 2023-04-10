@@ -20,11 +20,11 @@ Structure wfo := Wfo {
 }.
 
 Arguments wfo_car : simpl never.
-Arguments wfo_lt {_} _ _ : simpl never, rename.
-Arguments wfo_le {_} _ _ : simpl never, rename.
-Arguments wfo_le_lteq {_ _ _} : simpl never.
-Arguments wfo_lt_trans {_ _ _ _} _ _ : simpl never.
-Arguments wfo_lt_wf {_} : simpl never.
+Arguments wfo_lt {A} _ _ : simpl never, rename.
+Arguments wfo_le {A} _ _ : simpl never, rename.
+Arguments wfo_le_lteq {A _ _} : simpl never, rename.
+Arguments wfo_lt_trans {A _ _ _} _ _ : simpl never, rename.
+Arguments wfo_lt_wf {A} : simpl never, rename.
 Infix "≺" := wfo_lt (at level 70, no associativity).
 Infix "≼" := wfo_le (at level 70, no associativity).
 
