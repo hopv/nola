@@ -7,7 +7,7 @@ From nola Require Import prelude.
   a higher universe, which includes [list] itself. *)
 Inductive tlist (T : Type) : Type :=
 | tnil : tlist T
-| tcons : T -> tlist T -> tlist T.
+| tcons : T → tlist T → tlist T.
 
 Arguments tnil {_}.
 Arguments tcons {_} _ _.

@@ -8,9 +8,9 @@ From stdpp Require Export well_founded.
 Structure wfo := Wfo {
   wfo_car :> Type;
   (** Strict order *)
-  wfo_lt : wfo_car -> wfo_car -> Prop;
+  wfo_lt : wfo_car → wfo_car → Prop;
   (** Reflexive order *)
-  wfo_le : wfo_car -> wfo_car -> Prop;
+  wfo_le : wfo_car → wfo_car → Prop;
   (** [wfo_le] is the reflexive closure of [wfo_lt] *)
   wfo_le_lteq : ∀a b , wfo_le a b ↔ wfo_lt a b ∨ a = b;
   (** [wfo_lt] is transitive *)
