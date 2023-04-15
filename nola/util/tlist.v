@@ -131,15 +131,16 @@ Fixpoint cbyright {T} {F : T → Type} {ts us : tlist T}
   | _ ^:: _ => -/ cbyright x
   end.
 
-(** Access [clist] with [cchoice] *)
-Fixpoint caccess {T} {F G : T → Type} {A : Type}
-  (f : ∀ t , F t → G t → A) {ts : tlist T}
-  (xs : [*] t ∈ ts, F t) (y : [+] t ∈ ts, G t) : A :=
-  match ts, xs, y with
-  | ^[], _, _ => match y with end
-  | _ ^:: _, x -:: _, -# y => f _ x y
-  | _ ^:: _, _ -:: xs, -/ y => caccess f xs y
-  end.
+(** Apply a function of [clist] to a value of [cchoice] *)
+Reserved Infix "*$+" (at level 20, no associativity).
+Fixpoint capply {T} {F : T → Type} {A : Type} {ts : tlist T}
+  (fs : [*] t ∈ ts, F t → A) (x : [+] t ∈ ts, F t) : A :=
+  match ts, fs, x with
+  | ^[], _, _ => match x with end
+  | _ ^:: _, f -:: _, -# x => f x
+  | _ ^:: _, _ -:: fs, -/ x => fs *$+ x
+  end
+where "fs *$+ x" := (capply fs x) : nola_scope.
 
 (** Map over [cchoice] *)
 Reserved Infix "-+$" (at level 60, right associativity).
