@@ -11,20 +11,20 @@ Definition True1 {A} (a : A) : Prop := True.
 
 Definition or1 {A} (φ ψ : A → Prop) a : Prop := φ a ∨ ψ a.
 Infix "∨1" := or1 (at level 50, left associativity).
-Notation "(∨1)" := or1 (only parsing).
+Notation "(∨1)" := or1 (only parsing) : nola_scope.
 
 Definition and1 {A} (φ ψ : A → Prop) a : Prop := φ a ∧ ψ a.
 Infix "∧1" := and1 (at level 40, left associativity).
-Notation "(∧1)" := and1 (only parsing).
+Notation "(∧1)" := and1 (only parsing) : nola_scope.
 
 Infix "→0" := impl (at level 99, right associativity).
-Notation "(→0)" := impl (only parsing).
-Notation "(→0@{ A } )" := (@impl A) (only parsing).
+Notation "(→0)" := impl (only parsing) : nola_scope.
+Notation "(→0@{ A } )" := (@impl A) (only parsing) : nola_scope.
 
 Definition impl1 {A} := pointwise_relation A impl.
 Infix "→1" := impl1 (at level 99, right associativity).
-Notation "(→1@{ A } )" := (@impl1 A) (only parsing).
-Notation "(→1)" := (impl1) (only parsing).
+Notation "(→1@{ A } )" := (@impl1 A) (only parsing) : nola_scope.
+Notation "(→1)" := (impl1) (only parsing) : nola_scope.
 
 (** Parameterized predicate weakened/strengthened by the parameter *)
 Definition por {A} (p : (A → Prop) → A → Prop) (φ : A → Prop) : A → Prop :=
@@ -34,7 +34,8 @@ Definition pand {A} (p : (A → Prop) → A → Prop) (φ : A → Prop) : A → 
 
 (** ** Monotonicity *)
 
-Notation "Mono1@{ A , B }" := (Proper ((→1@{A}) ==> (→1@{B}))) (only parsing).
+Notation "Mono1@{ A , B }" := (Proper ((→1@{A}) ==> (→1@{B})))
+  (only parsing) : nola_scope.
 Notation Mono1 := (Mono1@{_, _}).
 
 Lemma go_mono1 `(monop : Mono1@{A,B} p) φ ψ a : (φ →1 ψ) → p φ a → p ψ a.

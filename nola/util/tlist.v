@@ -12,10 +12,10 @@ Inductive tlist (T : Type) : Type :=
 Arguments tnil {_}.
 Arguments tcons {_} _ _.
 
-Notation "^[]" := tnil.
-Infix "^::" := tcons (at level 60, right associativity).
+Notation "^[]" := tnil : nola_scope.
+Infix "^::" := tcons (at level 60, right associativity) : nola_scope.
 Notation "^[ x ; .. ; z ]" := (x ^:: .. (z ^:: ^[]) ..)
-  (at level 1, format "^[ x ;  .. ;  z ]").
+  (at level 1, format "^[ x ;  .. ;  z ]") : nola_scope.
 
 (** Concatenate [tlist]s *)
 Reserved Infix "^++" (at level 60, right associativity).
@@ -24,7 +24,7 @@ Fixpoint tapp {T} (ts us : tlist T) : tlist T :=
   | ^[] => us
   | t ^:: ts => t ^:: ts ^++ us
   end
-where "ts ^++ us" := (tapp ts us).
+where "ts ^++ us" := (tapp ts us) : nola_scope.
 
 (** Map over [tlist] *)
 Reserved Infix "^$" (at level 60, right associativity).
@@ -33,7 +33,7 @@ Fixpoint tmap {T U} (f : T → U) (ts : tlist T) : tlist U :=
   | ^[] => ^[]
   | t ^:: ts => f t ^:: f ^$ ts
   end
-where "f ^$ ts" := (tmap f ts).
+where "f ^$ ts" := (tmap f ts) : nola_scope.
 
 (** ** [clist]: Heterogeneous list type calculated from [tlist] *)
 
@@ -45,15 +45,15 @@ Arguments ccons {_ _} _ _.
 Arguments chd {_ _} _.
 Arguments ctl {_ _} _.
 
-Notation "*[ ]" := cunit (at level 1, format "*[ ]") : type_scope.
-Infix "*::" := cprod (at level 60, right associativity) : type_scope.
+Notation "*[ ]" := cunit (at level 1, format "*[ ]") : nola_scope.
+Infix "*::" := cprod (at level 60, right associativity) : nola_scope.
 Notation "*[ A ; .. ; Z ]" := (A *:: .. (Z *:: *[]) ..)
-  (at level 1, format "*[ A ;  .. ;  Z ]") : type_scope.
+  (at level 1, format "*[ A ;  .. ;  Z ]") : nola_scope.
 
-Notation "-[ ]" := cnil (at level 1, format "-[ ]").
-Infix "-::" := ccons (at level 60, right associativity).
+Notation "-[ ]" := cnil (at level 1, format "-[ ]") : nola_scope.
+Infix "-::" := ccons (at level 60, right associativity) : nola_scope.
 Notation "-[ x ; .. ; z ]" := (x -:: .. (z -:: -[]) ..)
-  (at level 1, format "-[ x ;  .. ;  z ]").
+  (at level 1, format "-[ x ;  .. ;  z ]") : nola_scope.
 
 (** [clist]: Heterogeneous list type calculated from [tlist] *)
 Fixpoint clist {T} (F : T → Type) (ts : tlist T) : Type :=
@@ -63,7 +63,7 @@ Fixpoint clist {T} (F : T → Type) (ts : tlist T) : Type :=
   end.
 
 Notation "[*] t ∈ ts , A" := (clist (λ t, A) ts)
-  (at level 200, ts at level 10, t binder, right associativity).
+  (at level 200, ts at level 10, t binder, right associativity) : nola_scope.
 
 (** Append [clist]s *)
 Reserved Infix "-++" (at level 60, right associativity).
@@ -73,7 +73,7 @@ Fixpoint capp {T} {F : T → Type} {ts us : tlist T}
   | ^[], _ => ys
   | _ ^:: _, x -:: xs => x -:: xs -++ ys
   end
-where "xs -++ ys" := (capp xs ys).
+where "xs -++ ys" := (capp xs ys) : nola_scope.
 
 (** Map over [clist] *)
 Reserved Infix "-*$" (at level 60, right associativity).
@@ -83,7 +83,7 @@ Fixpoint cmap {T} {F G : T → Type} (f : ∀ t, F t → G t) {ts : tlist T}
   | ^[], -[] => -[]
   | _ ^:: _, x -:: xs => f _ x -:: f -*$ xs
   end
-where "f -*$ xs" := (cmap f xs).
+where "f -*$ xs" := (cmap f xs) : nola_scope.
 
 (** ** [cchoice]: Sum type calculated from [tlist] *)
 
@@ -94,15 +94,15 @@ Variant csum (A B : Type) : Type := cbyhd (_ : A) | cbytl (_ : B).
 Arguments cbyhd {_ _} _.
 Arguments cbytl {_ _} _.
 
-Notation "+[ ]" := cempty (at level 1, format "+[ ]") : type_scope.
-Infix "+::" := csum (at level 60, right associativity) : type_scope.
+Notation "+[ ]" := cempty (at level 1, format "+[ ]") : nola_scope.
+Infix "+::" := csum (at level 60, right associativity) : nola_scope.
 Notation "+[ A ; .. ; Z ]" := (A +:: .. (Z +:: +[]) ..)
-  (at level 1, format "+[ A ;  .. ;  Z ]") : type_scope.
+  (at level 1, format "+[ A ;  .. ;  Z ]") : nola_scope.
 
 Notation "-# x" := (cbyhd x)
-  (at level 20, right associativity, format "-#  x").
+  (at level 20, right associativity, format "-#  x") : nola_scope.
 Notation "-/ x" := (cbytl x)
-  (at level 20, right associativity, format "-/ x").
+  (at level 20, right associativity, format "-/ x") : nola_scope.
 
 (** [cchoice]: Sum type calculated from [tlist] *)
 Fixpoint cchoice {T} (F : T → Type) (ts : tlist T) : Type :=
@@ -112,7 +112,7 @@ Fixpoint cchoice {T} (F : T → Type) (ts : tlist T) : Type :=
   end.
 
 Notation "[+] t ∈ ts , A" := (cchoice (λ t, A) ts)
-  (at level 200, ts at level 10, t binder, right associativity).
+  (at level 200, ts at level 10, t binder, right associativity) : nola_scope.
 
 (** Lift [[+] t ∈ ts, F t] into [[+] t ∈ ts ^++ us, F t] *)
 Fixpoint cbyleft {T} {F : T → Type} {ts us : tlist T}
@@ -150,4 +150,4 @@ Fixpoint ccmap {T} {F G : T → Type} (f : ∀ t, F t → G t) {ts : tlist T}
   | _ ^:: _, -# x => -# f _ x
   | _ ^:: _, -/ x => -/ (f -+$ x)
   end
-where "f -+$ x" := (ccmap f x).
+where "f -+$ x" := (ccmap f x) : nola_scope.

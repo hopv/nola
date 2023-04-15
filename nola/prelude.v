@@ -4,10 +4,14 @@ From iris.prelude Require Export prelude.
 
 (** Admit Streicher's Axiom K *)
 From Coq Require Export Program.Equality.
-Export EqNotations.
 
 (** Admit functional extensionality *)
 From Coq Require Export FunctionalExtensionality.
+
+(** ** Nola notation scope *)
+Declare Scope nola_scope.
+Delimit Scope nola_scope with nola.
+Open Scope nola_scope.
 
 (** ** Utility for functional extensionality *)
 

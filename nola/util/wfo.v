@@ -25,16 +25,16 @@ Arguments wfo_le {A} _ _ : simpl never, rename.
 Arguments wfo_le_lteq {A _ _} : simpl never, rename.
 Arguments wfo_lt_trans {A _ _ _} _ _ : simpl never, rename.
 Arguments wfo_lt_wf {A} : simpl never, rename.
-Infix "≺" := wfo_lt (at level 70, no associativity).
-Infix "≼" := wfo_le (at level 70, no associativity).
+Infix "≺" := wfo_lt (at level 70, no associativity) : nola_scope.
+Infix "≼" := wfo_le (at level 70, no associativity) : nola_scope.
 
 (** Inverse of [≺] *)
 Definition wfo_gt {A : wfo} (a b : A) := b ≺ a.
-Infix "≻" := wfo_gt (at level 70, no associativity).
+Infix "≻" := wfo_gt (at level 70, no associativity) : nola_scope.
 
 (** Inverse of [≼] *)
 Definition wfo_ge {A : wfo} (a b : A) := b ≼ a.
-Infix "≽" := wfo_ge (at level 70, no associativity).
+Infix "≽" := wfo_ge (at level 70, no associativity) : nola_scope.
 
 (** ** Facts about [wfo] *)
 Section wfo_facts.
