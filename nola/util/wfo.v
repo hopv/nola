@@ -27,10 +27,17 @@ Infix "≻" := wfo_gt (at level 70, no associativity) : nola_scope.
 Notation "(≻)" := wfo_gt (only parsing) : nola_scope.
 
 (** [≺] is irreflexive *)
-Lemma wfo_lt_irrefl {A : wfo} (a : A) : ¬ a ≺ a.
+#[export] Instance wfo_lt_irrefl {A : wfo} : Irreflexive A.(wfo_lt).
 Proof.
-  move=> aa. move: (wfo_lt_wf a). fix FIX 1. move=> Acca. apply FIX.
+  move=> a aa. move: (wfo_lt_wf a). fix FIX 1. move=> Acca. apply FIX.
   apply (Acc_inv Acca aa).
+Qed.
+
+(** [≺] is asymmetric *)
+#[export] Instance wfo_lt_asymm {A : wfo} : Asymmetric A.(wfo_lt).
+Proof.
+  move=> a b. move: a (wfo_lt_wf a) b. fix FIX 2. move=> a Acca b ab ba.
+  by apply (FIX b (Acc_inv Acca ba) a).
 Qed.
 
 (** ** Equip [nat] with [lt] *)
