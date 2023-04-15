@@ -45,13 +45,13 @@ Proof. by move=> /monop->. Qed.
 
 (** Proper instances for [Mono1] *)
 
-Global Instance Mono1_flip `(Mono1@{A,B} p) : Proper ((→1) --> flip (→1)) p.
+#[export] Instance Mono1_flip `(Mono1@{A,B} p) : Proper ((→1) --> flip (→1)) p.
 Proof. move=> ψ φ /=? a +. by apply use_mono1. Qed.
 
-Global Instance Mono1_impl `(Mono1@{A,B} p) : Proper ((→1) ==> (=) ==> (→0)) p.
+#[export] Instance Mono1_impl `(Mono1@{A,B} p) : Proper ((→1) ==> (=) ==> (→0)) p.
 Proof. move=> φ ψ /=? a _ <- +. by apply use_mono1. Qed.
 
-Global Instance Mono1_flip_impl `(Mono1@{A,B} p) :
+#[export] Instance Mono1_flip_impl `(Mono1@{A,B} p) :
   Proper ((→1) --> (=) ==> flip (→0)) p.
 Proof. move=> ψ φ /=? a _ <- +. by apply use_mono1. Qed.
 
@@ -76,7 +76,7 @@ Section pnu.
   Proof. move=> /pnu_out[_[->]]. done. Qed.
 
   (** Monotonicity of [pnu] *)
-  Global Instance pnu_mono : Mono1 pnu.
+  #[export] Instance pnu_mono : Mono1 pnu.
   Proof.
     move=> φ ψ φψ. cofix FIX=> a /pnu_out[pnuor[pnuorto ?]]. split.
     exists pnuor. split; [|done]=> ? /pnuorto[/FIX|/φψ]; by [left|right].
@@ -143,7 +143,7 @@ Section pmu.
   Proof. move=> /pmu_out[_[->]]. done. Qed.
 
   (** Monotonicity of [pmu] *)
-  Global Instance pmu_mono : Mono1 pmu.
+  #[export] Instance pmu_mono : Mono1 pmu.
   Proof.
     move=> φ ψ φψ ++. fix FIX 2=> a /pmu_out[pmuand[pmuandto ?]]. split.
     exists pmuand. split; [|done]=> ? /pmuandto[/FIX+ /φψ]//.
