@@ -73,7 +73,8 @@ Section wsum.
     ∃ eq : v.(wsum_idx) = w.(wsum_idx),
       rew[F] eq in v.(wsum_val) ≺ w.(wsum_val).
 
-  (** Lemma for [wsum_lt_wf] *)
+  (** [wsum_lt] is well-founded *)
+
   Local Lemma wsum_lt_wf_pre a
     (IH : ∀ a', a' ≺ a → ∀ b , Acc wsum_lt (Wsum a' b)) :
     ∀ b , Acc wfo_lt b → Acc wsum_lt (Wsum a b).
@@ -83,7 +84,6 @@ Section wsum.
     - move=> [?+]. subst. simpl_eq=> b'b. apply (FIX _ (Acc_inv Accb b'b)).
   Qed.
 
-  (** [wsum_lt] is well-founded *)
   Lemma wsum_lt_wf : wf wsum_lt.
   Proof.
     move=> [a b]. move: a (wfo_lt_wf a) b. fix FIX 2. move=> a Acca b.
@@ -94,7 +94,8 @@ Section wsum.
       clear dependent b b'=> a' a'a b. apply (FIX _ (Acc_inv Acca a'a)).
   Qed.
 
-  Canonical wsum_wfo := Wfo (wsum) wsum_lt wsum_lt_wf.
+  (** [wsum] forms [wfo] *)
+  Canonical wsum_wfo := Wfo wsum wsum_lt wsum_lt_wf.
 End wsum.
 
 Arguments wsum {A} F.
@@ -137,7 +138,7 @@ Qed.
 
 (** Get [≼*] out of a monotone function *)
 Lemma wfo_sim_fun {A B : wfo} (f : A → B) :
-  (∀ a a', a' ≺ a → f a' ≺ f a) → ∀ a, a ≼* f a.
+  (∀ a a', a ≺ a' → f a ≺ f a') → ∀ a, a ≼* f a.
 Proof.
   move=> fmono a. apply (wfo_sim_coind (λ a b, b = f a)); [|done]. clear a.
   move=> a _ -> a' a'a. exists (f a'). split; [by apply fmono|done].
