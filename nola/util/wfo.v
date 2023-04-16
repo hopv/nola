@@ -47,16 +47,25 @@ Proof. apply well_founded_ltof. Qed.
 
 Canonical nat_wfo := Wfo nat lt lt_wf.
 
-(** ** Indexed sum of [wfo]s *)
+(** ** Make [fin n] [wfo] *)
+
+Definition fin_lt {n} (i j : fin n) := i < j.
+
+Lemma fin_lt_wf {n} : wf (@fin_lt n).
+Proof. apply well_founded_ltof. Qed.
+
+Canonical fin_wfo n := Wfo (fin n) fin_lt fin_lt_wf.
+
+(** ** [wsum]: Indexed sum of [wfo]s *)
 
 Section wsum.
   Context {A : wfo} {F : A → wfo}.
 
+  (** [wsum]: Indexed sum of [wfo]s *)
   Record wsum : Type := Wsum {
     wsum_idx : A;
     wsum_val : F wsum_idx;
   }.
-  Check eq_rect.
 
   (** Strict order for [wsum] *)
   Definition wsum_lt (v w : wsum) : Prop :=
