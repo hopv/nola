@@ -90,8 +90,8 @@ Section wsum.
   (** [wsum_lt] is well-founded *)
 
   Local Lemma wsum_lt_wf_pre a
-    (IH : ∀ a', a' ≺ a → ∀ b , Acc wsum_lt (Wsum a' b)) :
-    ∀ b , Acc wfo_lt b → Acc wsum_lt (Wsum a b).
+    (IH : ∀ a', a' ≺ a → ∀ b, Acc wsum_lt (Wsum a' b)) :
+    ∀ b, Acc wfo_lt b → Acc wsum_lt (Wsum a b).
   Proof.
     fix FIX 2. move=> b Accb. apply Acc_intro=> [[a' b']] [|]/=.
     - move=> a'a. apply (IH _ a'a).
@@ -240,7 +240,7 @@ Proof. split; apply _. Qed.
 (** [≺*!] is well-founded *)
 
 Local Lemma anywfo_lt_wf_pre {A : wfo} (a : A) :
-  Acc (≺) a → ∀{B : wfo} (b : B) , b ≼* a → Acc (≺*!) (Anywfo B b).
+  Acc (≺) a → ∀{B : wfo} (b : B), b ≼* a → Acc (≺*!) (Anywfo B b).
 Proof.
   move: a. fix FIX 2=> a Acca B b /wfo_sim_unfold bsa. apply Acc_intro.
   move=> [C c] [/=b' [csb' b'b]]. move: {bsa}(bsa b' b'b)=> [a' [a'a b'sa']].

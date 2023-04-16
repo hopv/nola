@@ -68,7 +68,7 @@ Notation "[*] t ∈ ts , A" := (clist (λ t, A) ts)
 (** Append [clist]s *)
 Reserved Infix "-++" (at level 60, right associativity).
 Fixpoint capp {T} {F : T → Type} {ts us : tlist T}
-  (xs : [*] t ∈ ts , F t) (ys : [*] t ∈ us , F t) : [*] t ∈ ts ^++ us , F t :=
+  (xs : [*] t ∈ ts, F t) (ys : [*] t ∈ us, F t) : [*] t ∈ ts ^++ us, F t :=
   match ts, xs with
   | ^[], _ => ys
   | _ ^:: _, x -:: xs => x -:: xs -++ ys
@@ -78,7 +78,7 @@ where "xs -++ ys" := (capp xs ys) : nola_scope.
 (** Map over [clist] *)
 Reserved Infix "-*$" (at level 60, right associativity).
 Fixpoint cmap {T} {F G : T → Type} (f : ∀ t, F t → G t) {ts : tlist T}
-  (xs : [*] t ∈ ts , F t) : [*] t ∈ ts , G t :=
+  (xs : [*] t ∈ ts, F t) : [*] t ∈ ts, G t :=
   match ts, xs with
   | ^[], -[] => -[]
   | _ ^:: _, x -:: xs => f _ x -:: f -*$ xs
