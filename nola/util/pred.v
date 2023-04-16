@@ -34,24 +34,23 @@ Definition pand {A} (p : (A → Prop) → A → Prop) (φ : A → Prop) : A → 
 
 (** ** [Mono1]: Monotonicity *)
 
-Notation "Mono1@{ A , B }" := (Proper ((→1@{A}) ==> (→1@{B})))
-  (only parsing) : nola_scope.
-Notation Mono1 := (Mono1@{_, _}).
+Notation Mono1' A B := (Proper ((→1@{A}) ==> (→1@{B}))) (only parsing).
+Notation Mono1 := (Mono1' _ _).
 
 (** Utility for [mono1] *)
 
-Lemma use_mono1 `{monop : Mono1@{A,B} p} φ ψ : (φ →1 ψ) → p φ →1 p ψ.
+Lemma use_mono1 `{monop : Mono1' A B p} φ ψ : (φ →1 ψ) → p φ →1 p ψ.
 Proof. by move=> /monop->. Qed.
 
 (** Proper instances for [Mono1] *)
 
-#[export] Instance Mono1_flip `(Mono1@{A,B} p) : Proper ((→1) --> flip (→1)) p.
+#[export] Instance Mono1_flip `(Mono1' A B p) : Proper ((→1) --> flip (→1)) p.
 Proof. move=> ψ φ /=? a +. by apply use_mono1. Qed.
 
-#[export] Instance Mono1_impl `(Mono1@{A,B} p) : Proper ((→1) ==> (=) ==> (→0)) p.
+#[export] Instance Mono1_impl `(Mono1' A B p) : Proper ((→1) ==> (=) ==> (→0)) p.
 Proof. move=> φ ψ /=? a _ <- +. by apply use_mono1. Qed.
 
-#[export] Instance Mono1_flip_impl `(Mono1@{A,B} p) :
+#[export] Instance Mono1_flip_impl `(Mono1' A B p) :
   Proper ((→1) --> (=) ==> flip (→0)) p.
 Proof. move=> ψ φ /=? a _ <- +. by apply use_mono1. Qed.
 
