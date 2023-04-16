@@ -47,39 +47,48 @@ Proof. apply well_founded_ltof. Qed.
 
 Canonical nat_wfo := Wfo nat lt lt_wf.
 
-(** ** Equip [sigT] with the lexicographic order *)
+(** ** Indexed sum of [wfo]s *)
 
-Section sigT_wfo.
-  Context {A : wfo} (F : A → wfo).
+Section wsum.
+  Context {A : wfo} {F : A → wfo}.
 
-  (** Lexicographic strict and reflexive order for [sigT] *)
-  Definition sigT_lt (p q : sigT F) : Prop :=
-    projT1 p ≺ projT1 q  ∨
-    ∃ eq : projT1 p = projT1 q, rew eq in projT2 p ≺ projT2 q.
+  Record wsum : Type := Wsum {
+    wsum_idx : A;
+    wsum_val : F wsum_idx;
+  }.
+  Check eq_rect.
 
-  (** Lemma for [sigT_lt_wf] *)
-  Lemma sigT_lt_wf_pre a
-    (IH : ∀ a', a' ≺ a → ∀ b , Acc sigT_lt (existT a' b)) :
-    ∀ b , Acc wfo_lt b → Acc sigT_lt (existT a b).
+  (** Strict order for [wsum] *)
+  Definition wsum_lt (v w : wsum) : Prop :=
+    v.(wsum_idx) ≺ w.(wsum_idx)  ∨
+    ∃ eq : v.(wsum_idx) = w.(wsum_idx),
+      rew[F] eq in v.(wsum_val) ≺ w.(wsum_val).
+
+  (** Lemma for [wsum_lt_wf] *)
+  Lemma wsum_lt_wf_pre a
+    (IH : ∀ a', a' ≺ a → ∀ b , Acc wsum_lt (Wsum a' b)) :
+    ∀ b , Acc wfo_lt b → Acc wsum_lt (Wsum a b).
   Proof.
     fix FIX 2. move=> b Accb. apply Acc_intro=> [[a' b']] [|]/=.
     - move=> a'a. apply (IH _ a'a).
     - move=> [?+]. subst. simpl_eq=> b'b. apply (FIX _ (Acc_inv Accb b'b)).
   Qed.
 
-  (** [sigT_lt] is well-founded *)
-  Lemma sigT_lt_wf : wf sigT_lt.
+  (** [wsum_lt] is well-founded *)
+  Lemma wsum_lt_wf : wf wsum_lt.
   Proof.
     move=> [a b]. move: a (wfo_lt_wf a) b. fix FIX 2. move=> a Acca b.
     apply Acc_intro=> [[a' b']] [|]/=.
     - move=> a'a. apply (FIX _ (Acc_inv Acca a'a)).
     - move=> [?+]. subst. simpl_eq=> b'b.
-      apply sigT_lt_wf_pre; [|exact (wfo_lt_wf b')].
+      apply wsum_lt_wf_pre; [|exact (wfo_lt_wf b')].
       clear dependent b b'=> a' a'a b. apply (FIX _ (Acc_inv Acca a'a)).
   Qed.
 
-  Canonical sigT_wfo := Wfo (sigT F) sigT_lt sigT_lt_wf.
-End sigT_wfo.
+  Canonical wsum_wfo := Wfo (wsum) wsum_lt wsum_lt_wf.
+End wsum.
+
+Arguments wsum {A} F.
 
 (** ** [≼*]: Simulation between [wfo]s *)
 
