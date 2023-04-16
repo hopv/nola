@@ -4,6 +4,26 @@ From nola Require Import prelude util.pred.
 From stdpp Require Export well_founded.
 Import EqNotations.
 
+(** ** Facts about well-founded relations *)
+Section wf_facts.
+  (** Take any well-founded relation [R] *)
+  Context {A : Type} {R : A → A → Prop} (wfR : wf R).
+
+  (** [R] is irreflexive *)
+  Lemma wf_irrefl : Irreflexive R.
+  Proof.
+    move=> a aa. move: (wfR a). fix FIX 1=> Acca. apply FIX.
+    exact (Acc_inv Acca aa).
+  Qed.
+
+  (** [R] is asymmetric *)
+  Lemma wf_asymm : Asymmetric R.
+  Proof.
+    move=> a b. move: a (wfR a) b. fix FIX 2=> a Acca b ab ba.
+    by apply (FIX b (Acc_inv Acca ba) a).
+  Qed.
+End wf_facts.
+
 (** ** [wfo]: Type with a well-founded order *)
 
 Structure wfo := Wfo {
@@ -28,17 +48,11 @@ Notation "(≻)" := wfo_gt (only parsing) : nola_scope.
 
 (** [≺] is irreflexive *)
 #[export] Instance wfo_lt_irrefl {A : wfo} : Irreflexive A.(wfo_lt).
-Proof.
-  move=> a aa. move: (wfo_lt_wf a). fix FIX 1. move=> Acca. apply FIX.
-  apply (Acc_inv Acca aa).
-Qed.
+Proof. apply wf_irrefl, wfo_lt_wf. Qed.
 
 (** [≺] is asymmetric *)
 #[export] Instance wfo_lt_asymm {A : wfo} : Asymmetric A.(wfo_lt).
-Proof.
-  move=> a b. move: a (wfo_lt_wf a) b. fix FIX 2. move=> a Acca b ab ba.
-  by apply (FIX b (Acc_inv Acca ba) a).
-Qed.
+Proof. apply wf_asymm, wfo_lt_wf. Qed.
 
 (** ** Make [nat] [wfo] *)
 
@@ -240,14 +254,8 @@ Qed.
 
 (** [≺*] is irreflexive *)
 #[export] Instance wfo_sim_lt_irrefl {A : wfo} : Irreflexive (@wfo_sim_lt A A).
-Proof.
-  move=> a asta. move: (anywfo_lt_wf (Anywfo A a)). fix FIX 1=> Acca.
-  apply FIX. exact (Acc_inv Acca (Anywfo A a) asta).
-Qed.
+Proof. move=> a. exact (wf_irrefl anywfo_lt_wf (Anywfo A a)). Qed.
 
 (** [≺*] is asymmetric *)
 Lemma wfo_sim_lt_asymm {A B : wfo} (a : A) (b : B) : a ≺* b → ¬ b ≺* a.
-Proof.
-  move: A a (anywfo_lt_wf (Anywfo A a)) B b. fix FIX 3=> A a Acca B b astb bsta.
-  by apply (FIX B b (Acc_inv Acca (Anywfo B b) bsta) A a).
-Qed.
+Proof. exact (wf_asymm anywfo_lt_wf (Anywfo A a) (Anywfo B b)). Qed.
