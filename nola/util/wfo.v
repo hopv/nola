@@ -236,3 +236,17 @@ Lemma anywfo_lt_wf : wf (≺*!).
 Proof.
   move=> [A a]. eapply anywfo_lt_wf_pre; [apply wfo_lt_wf|apply wfo_sim_refl].
 Qed.
+
+(** [≺*] is irreflexive *)
+#[export] Instance wfo_sim_lt_irrefl {A : wfo} : Irreflexive (@wfo_sim_lt A A).
+Proof.
+  move=> a asta. move: (anywfo_lt_wf (Anywfo A a)). fix FIX 1=> Acca.
+  apply FIX. exact (Acc_inv Acca (Anywfo A a) asta).
+Qed.
+
+(** [≺*] is asymmetric *)
+Lemma wfo_sim_lt_asymm {A B : wfo} (a : A) (b : B) : a ≺* b → ¬ b ≺* a.
+Proof.
+  move: A a (anywfo_lt_wf (Anywfo A a)) B b. fix FIX 3=> A a Acca B b astb bsta.
+  by apply (FIX B b (Acc_inv Acca (Anywfo B b) bsta) A a).
+Qed.
