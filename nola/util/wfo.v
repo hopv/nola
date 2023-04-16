@@ -40,7 +40,7 @@ Proof.
   by apply (FIX b (Acc_inv Acca ba) a).
 Qed.
 
-(** ** Equip [nat] with [lt] *)
+(** ** Make [nat] [wfo] *)
 
 Lemma lt_wf : wf lt.
 Proof. apply well_founded_ltof. Qed.
