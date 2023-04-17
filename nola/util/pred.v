@@ -47,7 +47,8 @@ Proof. by move=> /monop->. Qed.
 #[export] Instance Mono1_flip `{Mono1' A B p} : Proper ((→1) --> flip (→1)) p.
 Proof. move=> ψ φ /=? a +. by apply use_mono1. Qed.
 
-#[export] Instance Mono1_impl `{Mono1' A B p} : Proper ((→1) ==> (=) ==> (→0)) p.
+#[export] Instance Mono1_impl `{Mono1' A B p} :
+  Proper ((→1) ==> (=) ==> (→0)) p.
 Proof. move=> φ ψ /=? a _ <- +. by apply use_mono1. Qed.
 
 #[export] Instance Mono1_flip_impl `{Mono1' A B p} :
