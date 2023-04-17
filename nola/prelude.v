@@ -23,10 +23,10 @@ Ltac fun_ext_dep := apply functional_extensionality_dep.
 Arguments subrelation {A} (R R')%signature.
 
 #[export] Instance eq_subrel_respect {A B}
-  `(subR : subrelation A R (=)) `(subR' : subrelation B (=) R') :
+  `{subR : subrelation A R (=)} `{subR' : subrelation B (=) R'} :
   subrelation (=) (R ==> R').
 Proof. move=> f _ <- a _ /subR<-. by apply subR'. Qed.
 
-#[export] Instance pointwise_subrel_eq {A B} `(subR : subrelation B R (=)) :
+#[export] Instance pointwise_subrel_eq {A B} `{subR : subrelation B R (=)} :
   subrelation (pointwise_relation A R) (=).
 Proof. move=> f g Rfg. fun_ext=> a. by apply subR. Qed.
