@@ -122,8 +122,8 @@ Proof.
 Qed.
 
 (** Turn [≼*] into [≺*] assuming transitivity of the target *)
-Lemma wfo_sim_to_sim_lt {A B : wfo} `{Transitive _ B.(wfo_lt)}
-  (a : A) (b : B) : a ≺* b → a ≼* b.
+Lemma wfo_sim_to_sim_lt {A B : wfo} `{Transitive _ B.(wfo_lt)} (a : A) (b : B) :
+  a ≺* b → a ≼* b.
 Proof.
   move=> [b' [/sim_unfold asb' b'b]]. apply sim_fold=> a' a'a.
   move: {asb'}(asb' a' a'a)=> [b'' [b''b' a'sb'']]. exists b''. split; [|done].
