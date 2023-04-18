@@ -93,8 +93,8 @@ Arguments wsum {A} F.
 (** ** [≼*]: Simulation between [wfo]s *)
 
 (** Generator for [wfo_sim] *)
-Definition wfo_sim_gen {A B : wfo} (self : A * B → Prop) (ab : A * B) :=
-  let '(a, b) := ab in ∀ a', a' ≺ a → ∃ b', b' ≺ b ∧ self (a', b').
+Definition wfo_sim_gen {A B : wfo} (self : A * B → Prop) :=
+  λ '(a, b), ∀ a', a' ≺ a → ∃ b', b' ≺ b ∧ self (a', b').
 
 (** [wfo_sim_gen] is monotone *)
 #[export] Instance wfo_sim_gen_mono A B : Mono1 (@wfo_sim_gen A B).
