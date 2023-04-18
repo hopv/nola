@@ -69,22 +69,19 @@ Section wsum.
   (** [wsum_lt] is well-founded *)
 
   Local Lemma wsum_lt_wf_pre a
-    (IH : ∀ a', a' ≺ a → ∀ b, Acc wsum_lt (Wsum a' b)) :
-    ∀ b, Acc wfo_lt b → Acc wsum_lt (Wsum a b).
+    (IH : ∀ a', a' ≺ a → ∀ b, Acc wsum_lt (Wsum a' b)) b :
+    Acc wsum_lt (Wsum a b).
   Proof.
-    fix FIX 2. move=> b Accb. apply Acc_intro=> [[a' b']] [|]/=.
+    elim: {b}(wfo_lt_wf b)=> b _ IH'. apply Acc_intro=> [[a' b']] [|]/=.
     - move=> a'a. apply (IH _ a'a).
-    - move=> [?+]. subst. simpl_eq=> b'b. apply (FIX _ (Acc_inv Accb b'b)).
+    - move=> [?+]. subst=>/=. by apply IH'.
   Qed.
 
   Lemma wsum_lt_wf : wf wsum_lt.
   Proof.
-    move=> [a b]. move: a (wfo_lt_wf a) b. fix FIX 2. move=> a Acca b.
-    apply Acc_intro=> [[a' b']] [|]/=.
-    - move=> a'a. apply (FIX _ (Acc_inv Acca a'a)).
-    - move=> [?+]. subst. simpl_eq=> b'b.
-      apply wsum_lt_wf_pre; [|exact (wfo_lt_wf b')].
-      clear dependent b b'=> a' a'a b. apply (FIX _ (Acc_inv Acca a'a)).
+    move=> [a +]. elim: {a}(wfo_lt_wf a)=> a _ IH b.
+    apply Acc_intro=> [[a' b']] [?|]/=; [by apply IH|]=> [[? _]]. subst.
+    by apply wsum_lt_wf_pre.
   Qed.
 
   (** [wsum] forms [wfo] *)
@@ -218,18 +215,17 @@ Proof. split; apply _. Qed.
 
 (** [≺*!] is well-founded *)
 
-Local Lemma anywfo_lt_wf_pre {A : wfo} (a : A) :
-  Acc (≺) a → ∀{B : wfo} (b : B), b ≼* a → Acc (≺*!) (Anywfo B b).
+Local Lemma anywfo_lt_wf_pre {A B : wfo} (a : A) (b : B) :
+  b ≼* a → Acc (≺*!) (Anywfo B b).
 Proof.
-  move: a. fix FIX 2=> a Acca B b /wfo_sim_unfold bsa. apply Acc_intro.
-  move=> [C c] [/=b' [csb' b'b]]. move: {bsa}(bsa b' b'b)=> [a' [a'a b'sa']].
-  eapply FIX; [exact (Acc_inv Acca a' a'a)|]. by eapply wfo_sim_trans.
+  move: (wfo_lt_wf a) B b. elim {a}=> a _ IH B b /wfo_sim_unfold bsa.
+  apply Acc_intro=> [[C c] [/=b' [csb' b'b]]].
+  move: {bsa}(bsa b' b'b)=> [a' [a'a b'sa']]. eapply IH; [done|].
+  by eapply wfo_sim_trans.
 Qed.
 
 Lemma anywfo_lt_wf : wf (≺*!).
-Proof.
-  move=> [A a]. eapply anywfo_lt_wf_pre; [apply wfo_lt_wf|apply wfo_sim_refl].
-Qed.
+Proof. move=> [A a]. eapply anywfo_lt_wf_pre, wfo_sim_refl. Qed.
 
 (** [≺*] is irreflexive *)
 #[export] Instance wfo_sim_lt_irrefl {A : wfo} : Irreflexive (@wfo_sim_lt A A).
