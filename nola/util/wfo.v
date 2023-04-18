@@ -92,63 +92,9 @@ Arguments wsum {A} F.
 
 (** ** [≼*]: Simulation between [wfo]s *)
 
-(** Generator for [wfo_sim] *)
-Definition wfo_sim_gen {A B : wfo} (self : A * B → Prop) :=
-  λ '(a, b), ∀ a', a' ≺ a → ∃ b', b' ≺ b ∧ self (a', b').
-
-(** [wfo_sim_gen] is monotone *)
-#[export] Instance wfo_sim_gen_mono A B : Mono1 (@wfo_sim_gen A B).
-Proof.
-  move=> φ ψ φψ [a b]/= W a' a'a. move: (W a' a'a)=> [b' [b'b /φψ ψa'b']].
-  by exists b'.
-Qed.
-
 (** [≼*]: Simulation between [wfo]s *)
-Definition wfo_sim {A B : wfo} (a : A) (b : B) : Prop := nu wfo_sim_gen (a, b).
+Definition wfo_sim {A B : wfo} (a : A) (b : B) : Prop := sim (≻) (≻) a b.
 Infix "≼*" := wfo_sim (at level 70, no associativity) : nola_scope.
-
-(** Fold [≼*] *)
-Lemma wfo_sim_fold {A B : wfo} (a : A) (b : B) :
-  (∀ a', a' ≺ a → ∃ b', b' ≺ b ∧ a' ≼* b') → a ≼* b.
-Proof. move=> ?. by apply nu_fold. Qed.
-
-(** Unfold [≼*] *)
-Lemma wfo_sim_unfold {A B : wfo} (a : A) (b : B) :
-  a ≼* b → ∀ a', a' ≺ a → ∃ b', b' ≺ b ∧ a' ≼* b'.
-Proof. move=> asb. by apply nu_unfold in asb. Qed.
-
-(** Prove [≼*] by coinduction *)
-Lemma wfo_sim_coind {A B : wfo} (φ : A → B → Prop) :
-  (∀ a b, φ a b → (∀ a', a' ≺ a → ∃ b', b' ≺ b ∧ φ a' b')) →
-  ∀ a b, φ a b → a ≼* b.
-Proof.
-  move=> CH a b φab. apply (nu_coind (uncurry φ)); [|done]. clear a b φab.
-  move=> [a b]/= φab. by apply CH.
-Qed.
-
-(** Get [≼*] out of a monotone function *)
-Lemma wfo_sim_fun {A B : wfo} (f : A → B) :
-  (∀ a a', a ≺ a' → f a ≺ f a') → ∀ a, a ≼* f a.
-Proof.
-  move=> fmono a. apply (wfo_sim_coind (λ a b, b = f a)); [|done]. clear a.
-  move=> a _ -> a' a'a. exists (f a'). split; [by apply fmono|done].
-Qed.
-
-(** [≼*] is reflexive *)
-#[export] Instance wfo_sim_refl {A : wfo} : Reflexive (@wfo_sim A A).
-Proof. move=> a. by apply (wfo_sim_fun id). Qed.
-
-(** [≼*] is transitive *)
-Lemma wfo_sim_trans {A B C : wfo} (a : A) (b : B) (c : C) :
-  a ≼* b → b ≼* c → a ≼* c.
-Proof.
-  move=> ab bc.
-  apply (wfo_sim_coind (λ a c, ∃ (b : B), a ≼* b ∧ b ≼* c)); [|by exists b].
-  clear. move=> a c [b [/wfo_sim_unfold ab /wfo_sim_unfold bc]] a' a'a.
-  move: {ab}(ab a' a'a)=> [b' [b'b a'sb']].
-  move: {bc}(bc b' b'b)=> [c' [c'c b'sc']].
-  exists c'. split; [done|]. by exists b'.
-Qed.
 
 (** [≺*]: [≼*] composed with [≺] *)
 Definition wfo_sim_lt {A B : wfo} (a : A) (b : B) : Prop :=
@@ -157,32 +103,31 @@ Infix "≺*" := wfo_sim_lt (at level 70, no associativity) : nola_scope.
 
 (** Turn [≺] into [≺*] *)
 Lemma wfo_lt_to_sim_lt {A : wfo} (a b : A) : a ≺ b → a ≺* b.
-Proof. move=> ab. exists a. split; [by apply wfo_sim_refl|done]. Qed.
+Proof. move=> ab. exists a. split; [by apply sim_refl|done]. Qed.
 
 (** Compose [≼*] and [≺*] *)
 Lemma wfo_sim_sim_lt_trans {A B C : wfo} (a : A) (b : B) (c : C) :
   a ≼* b → b ≺* c → a ≺* c.
 Proof.
-  move=> asb [c' [bsc' c'c]]. exists c'. split; [|done].
-  by eapply wfo_sim_trans.
+  move=> asb [c' [bsc' c'c]]. exists c'. split; [|done]. by eapply sim_trans.
 Qed.
 
 (** Compose [≺*] and [≼*] *)
 Lemma wfo_sim_lt_sim_trans {A B C : wfo} (a : A) (b : B) (c : C) :
   a ≺* b → b ≼* c → a ≺* c.
 Proof.
-  move=> [b' [asb' b'b]] /wfo_sim_unfold bsc.
+  move=> [b' [asb' b'b]] /sim_unfold bsc.
   move: {bsc}(bsc b' b'b)=> [c' [c'c b'sc']]. exists c'. split; [|done].
-  by eapply wfo_sim_trans.
+  by eapply sim_trans.
 Qed.
 
 (** Turn [≼*] into [≺*] assuming transitivity of the target *)
 Lemma wfo_sim_to_sim_lt {A B : wfo} `{Transitive _ B.(wfo_lt)}
   (a : A) (b : B) : a ≺* b → a ≼* b.
 Proof.
-  move=> [b' [/wfo_sim_unfold asb' b'b]]. apply wfo_sim_fold=> a' a'a.
+  move=> [b' [/sim_unfold asb' b'b]]. apply sim_fold=> a' a'a.
   move: {asb'}(asb' a' a'a)=> [b'' [b''b' a'sb'']]. exists b''. split; [|done].
-  by etrans.
+  unfold wfo_gt. by etrans.
 Qed.
 
 (** ** [anywfo]: Direct sum of all [wfo]s
@@ -203,11 +148,11 @@ Notation "(≺*!)" := anywfo_lt (only parsing) : nola_scope.
 
 (** [≼*!] is reflexive *)
 #[export] Instance anywfo_le_refl : Reflexive anywfo_le.
-Proof. move=> a. apply wfo_sim_refl. Qed.
+Proof. move=> a. apply sim_refl. Qed.
 
 (** [≼*!] is transitive *)
 #[export] Instance anywfo_le_trans : Transitive anywfo_le.
-Proof. move=> a b c. apply wfo_sim_trans. Qed.
+Proof. move=> a b c. apply sim_trans. Qed.
 
 (** [≼*!] is a preorder *)
 #[export] Instance anywfo_le_preorder : PreOrder anywfo_le.
@@ -218,14 +163,14 @@ Proof. split; apply _. Qed.
 Local Lemma anywfo_lt_wf_pre {A B : wfo} (a : A) (b : B) :
   b ≼* a → Acc (≺*!) (Anywfo B b).
 Proof.
-  move: (wfo_lt_wf a) B b. elim {a}=> a _ IH B b /wfo_sim_unfold bsa.
+  move: (wfo_lt_wf a) B b. elim {a}=> a _ IH B b /sim_unfold bsa.
   apply Acc_intro=> [[C c] [/=b' [csb' b'b]]].
   move: {bsa}(bsa b' b'b)=> [a' [a'a b'sa']]. eapply IH; [done|].
-  by eapply wfo_sim_trans.
+  by eapply sim_trans.
 Qed.
 
 Lemma anywfo_lt_wf : wf (≺*!).
-Proof. move=> [A a]. eapply anywfo_lt_wf_pre, wfo_sim_refl. Qed.
+Proof. move=> [A a]. eapply anywfo_lt_wf_pre, sim_refl. Qed.
 
 (** [≺*] is irreflexive *)
 #[export] Instance wfo_sim_lt_irrefl {A : wfo} : Irreflexive (@wfo_sim_lt A A).
