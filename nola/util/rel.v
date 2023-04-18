@@ -44,16 +44,12 @@ Section wf_facts.
 
   (** [R] is irreflexive *)
   Lemma wf_irrefl : Irreflexive R.
-  Proof.
-    move=> a aa. move: (wfR a). fix FIX 1=> Acca. apply FIX.
-    exact (Acc_inv Acca aa).
-  Qed.
+  Proof. move=> a. elim: {a}(wfR a)=> a _ IH aa. exact (IH _ aa aa). Qed.
 
   (** [R] is asymmetric *)
   Lemma wf_asymm : Asymmetric R.
   Proof.
-    move=> a b. move: a (wfR a) b. fix FIX 2=> a Acca b ab ba.
-    by apply (FIX b (Acc_inv Acca ba) a).
+    move=> a. elim: {a}(wfR a)=> a _ IH b ab ba. exact (IH b ba a ba ab).
   Qed.
 
   (** [tc R] is well-founded *)
@@ -100,16 +96,16 @@ Section sim_facts.
     (∀ a b, φ a b → (∀ a', R a a' → ∃ b', R' b b' ∧ φ a' b')) →
     ∀ a b, φ a b → sim R R' a b.
   Proof.
-    move=> CH a b φab. apply (nu_coind (uncurry φ)); [|done]. clear a b φab.
-    move=> [a b]/= φab. by apply CH.
+    move=> CH a b φab. apply (nu_coind (uncurry φ)); [|done].
+    move{a b φab}=> [a b]/= φab. by apply CH.
   Qed.
 
   (** Get [sim] out of a monotone function *)
   Lemma sim_fun (f : A → B) :
     (∀ a a', R a a' → R' (f a) (f a')) → ∀ a, sim R R' a (f a).
   Proof.
-    move=> fmono a. apply (sim_coind (λ a b, b = f a)); [|done]. clear a.
-    move=> a _ -> a' aa'. exists (f a'). split; [by apply fmono|done].
+    move=> fmono a. apply (sim_coind (λ a b, b = f a)); [|done].
+    move{a}=> a _ -> a' aa'. exists (f a'). split; [by apply fmono|done].
   Qed.
 End sim_facts.
 
@@ -124,7 +120,7 @@ Lemma sim_trans {A B C}
 Proof.
   move=> sab sbc.
   apply (sim_coind (λ a c, ∃ b, sim R R' a b ∧ sim R' R'' b c)); [|by exists b].
-  clear. move=> a c [b [/sim_unfold sab /sim_unfold sbc]] a' aa'.
+  clear=> a c [b [/sim_unfold sab /sim_unfold sbc]] a' aa'.
   move: {sab}(sab a' aa')=> [b' [bb' sa'b']].
   move: {sbc}(sbc b' bb')=> [c' [cc' sb'c']].
   exists c'. split; [done|]. by exists b'.
