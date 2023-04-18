@@ -163,7 +163,7 @@ Proof. split; apply _. Qed.
 Local Lemma anywfo_lt_wf_pre {A B : wfo} (a : A) (b : B) :
   b ≼* a → Acc (≺*!) (Anywfo B b).
 Proof.
-  move: (wfo_lt_wf a) B b. elim {a}=> a _ IH B b /sim_unfold bsa.
+  move: B b. elim: {a}(wfo_lt_wf a)=> a _ IH B b /sim_unfold bsa.
   apply Acc_intro=> [[C c] [/=b' [csb' b'b]]].
   move: {bsa}(bsa b' b'b)=> [a' [a'a b'sa']]. eapply IH; [done|].
   by eapply sim_trans.
