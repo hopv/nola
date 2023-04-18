@@ -4,4 +4,4 @@ nola/prelude.v
 nola/util/tlist.v
 nola/util/pred.v
 nola/util/rel.v
-nola/util/wfo.v
+nola/util/wft.v
