@@ -136,9 +136,9 @@ with nPropL {Ξ : nsx} : tlist Type → tlist Type → Type :=
     (Ξ.(nsxs_parcl) d → nPropL ^[] (Γ ^++ Δ)) → nPropL Γ Δ
 (** Extension by [Ξ.(nsx_l)], [nPropL] only *)
 | npl_exl Γ {Δ} d :
-    (Ξ.(nsxs_paru) d → nPropL Γ Δ) →
-    (Ξ.(nsxs_parcs) d → nPropS ^[] (Γ ^++ Δ)) →
-    (Ξ.(nsxs_parcl) d → nPropL ^[] (Γ ^++ Δ)) → nPropL Γ Δ.
+    (Ξ.(nsxl_paru) d → nPropL Γ Δ) →
+    (Ξ.(nsxl_parcs) d → nPropS ^[] (Γ ^++ Δ)) →
+    (Ξ.(nsxl_parcl) d → nPropL ^[] (Γ ^++ Δ)) → nPropL Γ Δ.
 
 Arguments nPropS Ξ Γ Δ : clear implicits.
 Arguments nPropL Ξ Γ Δ : clear implicits.
