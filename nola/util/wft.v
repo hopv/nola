@@ -13,9 +13,9 @@ Structure wft := Wft {
   (** Registered relation
 
     Transitivity is not required despite the name/notation *)
-  wft_lt : wft_car → wft_car → Prop;
+  #[canonical=no] wft_lt : wft_car → wft_car → Prop;
   (** [wft_lt] is well-founded *)
-  wft_lt_wf : wf wft_lt;
+  #[canonical=no] wft_lt_wf : wf wft_lt;
 }.
 
 Arguments wft_car : simpl never.
@@ -39,19 +39,11 @@ Proof. apply wf_asymm, wft_lt_wf. Qed.
 
 (** ** Make [nat] [wft] *)
 
-Lemma lt_wf : wf lt.
-Proof. apply well_founded_ltof. Qed.
-
-Canonical nat_wft := Wft nat lt lt_wf.
+Canonical nat_wft := Wft nat (<) (well_founded_ltof _ _).
 
 (** ** Make [fin n] [wft] *)
 
-Definition fin_lt {n} (i j : fin n) := i < j.
-
-Lemma fin_lt_wf {n} : wf (@fin_lt n).
-Proof. apply well_founded_ltof. Qed.
-
-Canonical fin_wft n := Wft (fin n) fin_lt fin_lt_wf.
+Canonical fin_wft n := Wft (fin n) (<) (well_founded_ltof _ _).
 
 (** ** [wfsum]: Indexed sum of [wft]s *)
 

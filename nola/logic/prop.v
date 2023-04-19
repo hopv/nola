@@ -12,11 +12,11 @@ Structure nsxs : Type := Nsxs {
   (** Data *)
   nsxs_data : Type;
   (** Parameter for usual [nPropS]/[nPropL] arguments *)
-  nsxs_paru : nsxs_data → Type;
+  #[canonical=no] nsxs_paru : nsxs_data → Type;
   (** Parameter for contractive [nPropS] arguments *)
-  nsxs_parcs : nsxs_data → Type;
+  #[canonical=no] nsxs_parcs : nsxs_data → Type;
   (** Parameter for contractive [nPropL] arguments *)
-  nsxs_parcl : nsxs_data → Type;
+  #[canonical=no] nsxs_parcl : nsxs_data → Type;
 }.
 
 (** [nsxl]: Syntactic extension for [nPropL] only *)
@@ -26,11 +26,11 @@ Structure nsxl : Type := Nsxl {
   (** Data *)
   nsxl_data : Type;
   (** Parameter for usual [nPropL] arguments *)
-  nsxl_paru : nsxl_data → Type;
+  #[canonical=no] nsxl_paru : nsxl_data → Type;
   (** Parameter for contractive [nPropS] arguments *)
-  nsxl_parcs : nsxl_data → Type;
+  #[canonical=no] nsxl_parcs : nsxl_data → Type;
   (** Parameter for contractive [nPropL] arguments *)
-  nsxl_parcl : nsxl_data → Type;
+  #[canonical=no] nsxl_parcl : nsxl_data → Type;
 }.
 
 (** [nsx]: Syntactic extension for [nProp], combination of [nsxs] and [nsxl] *)
