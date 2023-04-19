@@ -59,10 +59,8 @@ Section wfsum.
   Add Printing Constructor wfsum.
 
   (** Relation for [wfsum] *)
-  Definition wfsum_lt (v w : wfsum) : Prop :=
-    v.(wfsum_idx) ≺ w.(wfsum_idx)  ∨
-    ∃ eq : v.(wfsum_idx) = w.(wfsum_idx),
-      rew[F] eq in v.(wfsum_val) ≺ w.(wfsum_val).
+  Definition wfsum_lt : wfsum → wfsum → Prop := λ '(Wfsum a b) '(Wfsum a' b'),
+    a ≺ a'  ∨  ∃ eq : a = a', rew[F] eq in b ≺ b'.
 
   (** [wfsum_lt] is well-founded *)
 
@@ -70,7 +68,7 @@ Section wfsum.
     (IH : ∀ a', a' ≺ a → ∀ b, Acc wfsum_lt (Wfsum a' b)) b :
     Acc wfsum_lt (Wfsum a b).
   Proof.
-    elim: {b}(wft_lt_wf b)=> b _ IH'. apply Acc_intro=> [[a' b']] [|]/=.
+    elim: {b}(wft_lt_wf b)=> b _ IH'. apply Acc_intro=> [[a' b']] [|].
     - move=> a'a. apply (IH _ a'a).
     - move=> [?+]. subst=>/=. by apply IH'.
   Qed.
@@ -78,7 +76,7 @@ Section wfsum.
   Lemma wfsum_lt_wf : wf wfsum_lt.
   Proof.
     move=> [a +]. elim: {a}(wft_lt_wf a)=> a _ IH b.
-    apply Acc_intro=> [[a' b']] [?|]/=; [by apply IH|]=> [[? _]]. subst.
+    apply Acc_intro=> [[a' b']] [?|]; [by apply IH|]=> [[? _]]. subst.
     by apply wfsum_lt_wf_pre.
   Qed.
 
