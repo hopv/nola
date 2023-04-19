@@ -2,9 +2,6 @@
 
 From iris.prelude Require Export prelude.
 
-(** Admit Streicher's Axiom K *)
-From Coq Require Export Program.Equality.
-
 (** Admit functional extensionality *)
 From Coq Require Export FunctionalExtensionality.
 
