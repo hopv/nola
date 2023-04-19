@@ -1,4 +1,4 @@
-(** * Syntax of Nola *)
+(** * [nProp]: Nola syntactic proposition *)
 
 From nola Require Import prelude util.tlist util.wft.
 From iris.bi Require Import notation.
