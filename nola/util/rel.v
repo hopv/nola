@@ -1,6 +1,7 @@
 (** * Utility for binary relations *)
 
-From nola Require Import prelude util.pred.
+From nola Require Export prelude.
+From nola.util Require Import pred.
 
 (** ** Transitive closure *)
 

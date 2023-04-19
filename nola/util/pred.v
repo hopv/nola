@@ -1,6 +1,6 @@
 (** * Utility for predicates *)
 
-From nola Require Import prelude.
+From nola Require Export prelude.
 
 (** ** Basics *)
 

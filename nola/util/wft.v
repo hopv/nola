@@ -1,6 +1,7 @@
 (** * [wft]: Type with a well-founded relation *)
 
-From nola Require Import prelude util.pred util.rel.
+From nola Require Export prelude.
+From nola.util Require Import pred rel.
 Import EqNotations.
 
 (** ** [wft]: Type with a well-founded relation *)

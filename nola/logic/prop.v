@@ -1,6 +1,6 @@
 (** * [nProp]: Nola syntactic proposition *)
 
-From nola Require Import prelude util.tlist util.wft.
+From nola.util Require Export tlist wft.
 From iris.bi Require Import notation.
 
 (** ** [nsx]: Syntactic extension for [nProp] *)

@@ -1,6 +1,6 @@
 (** * Utility for [tlist], [plist] and [csum] *)
 
-From nola Require Import prelude.
+From nola Require Export prelude.
 
 (** ** [tlist]: List of elements in a higher universe
   It is almost the same as [list], but the element type can belong to
