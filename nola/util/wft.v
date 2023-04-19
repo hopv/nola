@@ -60,6 +60,7 @@ Section wfsum.
     wfsum_idx : A;
     wfsum_val : F wfsum_idx;
   }.
+  Add Printing Constructor wfsum.
 
   (** Relation for [wfsum] *)
   Definition wfsum_lt (v w : wfsum) : Prop :=
@@ -136,6 +137,7 @@ Qed.
   due to the universe hierarchy *)
 
 Record anywft := Anywft { anywft_wft : wft; anywft_val : anywft_wft }.
+Add Printing Constructor anywft.
 
 (** [≼*!]: [≼*] over [anywft]s *)
 Definition anywft_le (a b : anywft) : Prop := a.(anywft_val) ≼* b.(anywft_val).
