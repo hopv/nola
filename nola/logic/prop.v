@@ -53,40 +53,49 @@ Definition nvar (Γ : nctx) : Type := [+] A ∈ Γ, A.
 
 (** [nPropS]: Nola syntactic proposition, small *)
 Inductive nPropS {Ξ : nsx} : tlist Type → tlist Type → Type :=
-| (** Inner variable *) nps_var {Γ Δ} : nvar Δ → nPropS Γ Δ
-| (** Judgment derivability *)
-  nps_deriv Γ {Δ} (I : wft) :
+(** Inner variable *)
+| nps_var {Γ Δ} : nvar Δ → nPropS Γ Δ
+(** Judgment derivability *)
+| nps_deriv Γ {Δ} (I : wft) :
     I → nPropL ^[] (Γ ^++ Δ) → nPropL ^[] (Γ ^++ Δ) → nPropS Γ Δ
-| (** Empty proposition *) nps_emp {Γ Δ} : nPropS Γ Δ
-| (** Pure proposition *) nps_pure {Γ Δ} : Prop → nPropS Γ Δ
-| (** Conjunction *) nps_and {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ → nPropS Γ Δ
-| (** Disjunction *) nps_or {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ → nPropS Γ Δ
-| (** Implication *) nps_impl {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ → nPropS Γ Δ
-| (** Separating conjunction *)
-  nps_sep {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ → nPropS Γ Δ
-| (** Magic wand *) nps_wand {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ → nPropS Γ Δ
-| (** Universal quantification *)
-  nps_forall {Γ Δ} (A : Type) : (A → nPropS Γ Δ) → nPropS Γ Δ
-| (** Existential quantification *)
-  nps_exist {Γ Δ} (A : Type) : (A → nPropS Γ Δ) → nPropS Γ Δ
-| (** Second-order universal quantification over [A → nPropS] *)
-  nps_so_forall {Γ Δ} (A : Type) : nPropS (A ^:: Γ) Δ → nPropS Γ Δ
-| (** Second-order existential quantification over [A → nPropS] *)
-  nps_so_exist {Γ Δ} (A : Type) : nPropS (A ^:: Γ) Δ → nPropS Γ Δ
-| (** Persistence modality *)
-  nps_persistently {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ
-| (** Plainly modality *) nps_plainly {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ
-| (** Later modality
+(** Empty proposition *)
+| nps_emp {Γ Δ} : nPropS Γ Δ
+(** Pure proposition *)
+| nps_pure {Γ Δ} : Prop → nPropS Γ Δ
+(** Conjunction *)
+| nps_and {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ → nPropS Γ Δ
+(** Disjunction *)
+| nps_or {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ → nPropS Γ Δ
+(** Implication *)
+| nps_impl {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ → nPropS Γ Δ
+(** Separating conjunction *)
+| nps_sep {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ → nPropS Γ Δ
+(** Magic wand *)
+| nps_wand {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ → nPropS Γ Δ
+(** Universal quantification *)
+| nps_forall {Γ Δ} (A : Type) : (A → nPropS Γ Δ) → nPropS Γ Δ
+(** Existential quantification *)
+| nps_exist {Γ Δ} (A : Type) : (A → nPropS Γ Δ) → nPropS Γ Δ
+(** Second-order universal quantification over [A → nPropS] *)
+| nps_so_forall {Γ Δ} (A : Type) : nPropS (A ^:: Γ) Δ → nPropS Γ Δ
+(** Second-order existential quantification over [A → nPropS] *)
+| nps_so_exist {Γ Δ} (A : Type) : nPropS (A ^:: Γ) Δ → nPropS Γ Δ
+(** Persistence modality *)
+| nps_persistently {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ
+(** Plainly modality *)
+| nps_plainly {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ
+(** Later modality
 
-    Because it is contractive, its argument proposition can be in [nPropL]
-    and have outer variables flushed
+  Because it is contractive, its argument proposition can be in [nPropL]
+  and have outer variables flushed
 
-    For the users to aid type inference around [^++], we expose [Γ]
-    as the explicit parameter (the same applies to [nps_ex] and [nps_exl]) *)
-  nps_later Γ {Δ} : nPropL ^[] (Γ ^++ Δ) → nPropS Γ Δ
-| (** Basic update modality *) nps_bupd {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ
-| (** Extension by [Ξ.(nsx_s)] *)
-  nps_exs Γ {Δ} d :
+  For the users to aid type inference around [^++], we expose [Γ]
+  as the explicit parameter (the same applies to [nps_ex] and [nps_exl]) *)
+| nps_later Γ {Δ} : nPropL ^[] (Γ ^++ Δ) → nPropS Γ Δ
+(** Basic update modality *)
+| nps_bupd {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ
+(** Extension by [Ξ.(nsx_s)] *)
+| nps_exs Γ {Δ} d :
     (Ξ.(nsxs_paru) d → nPropS Γ Δ) →
     (Ξ.(nsxs_parcs) d → nPropS ^[] (Γ ^++ Δ)) →
     (Ξ.(nsxs_parcl) d → nPropL ^[] (Γ ^++ Δ)) → nPropS Γ Δ
@@ -96,8 +105,8 @@ Inductive nPropS {Ξ : nsx} : tlist Type → tlist Type → Type :=
   Most connectives are the same as [nPropS] *)
 with nPropL {Ξ : nsx} : tlist Type → tlist Type → Type :=
 | npl_var {Γ Δ} : nvar Δ → nPropL Γ Δ
-| (** Outer variable, [nPropL] only *)
-  npl_ovar {Γ Δ} : nvar Γ → nPropL Γ Δ
+(** Outer variable, [nPropL] only *)
+| npl_ovar {Γ Δ} : nvar Γ → nPropL Γ Δ
 | npl_deriv Γ {Δ} (I : wft) :
     I → nPropL ^[] (Γ ^++ Δ) → nPropL ^[] (Γ ^++ Δ) → nPropL Γ Δ
 | npl_emp {Γ Δ} : nPropL Γ Δ
@@ -119,8 +128,8 @@ with nPropL {Ξ : nsx} : tlist Type → tlist Type → Type :=
     (Ξ.(nsxs_paru) d → nPropL Γ Δ) →
     (Ξ.(nsxs_parcs) d → nPropS ^[] (Γ ^++ Δ)) →
     (Ξ.(nsxs_parcl) d → nPropL ^[] (Γ ^++ Δ)) → nPropL Γ Δ
-| (** Extension by [Ξ.(nsx_l)], [nPropL] only *)
-  npl_exl Γ {Δ} d :
+(** Extension by [Ξ.(nsx_l)], [nPropL] only *)
+| npl_exl Γ {Δ} d :
     (Ξ.(nsxs_paru) d → nPropL Γ Δ) →
     (Ξ.(nsxs_parcs) d → nPropS ^[] (Γ ^++ Δ)) →
     (Ξ.(nsxs_parcl) d → nPropL ^[] (Γ ^++ Δ)) → nPropL Γ Δ.
