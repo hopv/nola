@@ -6,6 +6,7 @@ Import EqNotations.
 
 (** ** [wft]: Type with a well-founded relation *)
 
+#[projections(primitive)]
 Structure wft := Wft {
   (** Underlying type *)
   wft_car :> Type;
@@ -58,6 +59,7 @@ Section wfsum.
   Context {A : wft} {F : A → wft}.
 
   (** [wfsum]: Indexed sum of [wft]s *)
+  #[projections(primitive)]
   Record wfsum : Type := Wfsum {
     wfsum_idx : A;
     wfsum_val : F wfsum_idx;
@@ -137,7 +139,7 @@ Qed.
 (** ** [anywft]: Direct sum of all [wft]s
   Note that [anywft] itself can't belong to [wft]
   due to the universe hierarchy *)
-
+#[projections(primitive)]
 Record anywft := Anywft { anywft_wft : wft; anywft_val : anywft_wft }.
 Add Printing Constructor anywft.
 

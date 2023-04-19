@@ -6,6 +6,8 @@ From iris.bi Require Import notation.
 (** ** [nsx]: Syntactic extension for [nProp] *)
 
 (** [nsxs]: Syntactic extension for both [nPropS] and [nPropL] *)
+
+#[projections(primitive)]
 Structure nsxs : Type := Nsxs {
   (** Data *)
   nsxs_data : Type;
@@ -18,6 +20,8 @@ Structure nsxs : Type := Nsxs {
 }.
 
 (** [nsxl]: Syntactic extension for [nPropL] only *)
+
+#[projections(primitive)]
 Structure nsxl : Type := Nsxl {
   (** Data *)
   nsxl_data : Type;
@@ -30,6 +34,8 @@ Structure nsxl : Type := Nsxl {
 }.
 
 (** [nsx]: Syntactic extension for [nProp], combination of [nsxs] and [nsxl] *)
+
+#[projections(primitive)]
 Record nsx : Type := Nsx { nsx_s :> nsxs; nsx_l :> nsxl; }.
 
 (** ** [nctx]: Context of [nProp] *)

@@ -53,6 +53,7 @@ where "f ^<$> ts" := (tmap f ts) : nola_scope.
 (** Unit type for [tnil] *)
 Variant punit : Set := pnil.
 (** Product type for [tcons] *)
+#[projections(primitive)]
 Record pprod (A B : Type) : Type := pcons { phd : A; ptl : B }.
 Arguments pcons {_ _} _ _.
 Arguments phd {_ _} _.
