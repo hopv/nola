@@ -9,7 +9,8 @@ Structure wft := Wft {
   (** Underlying type *)
   wft_car :> Type;
   (** Registered relation
-    Transitivity is not required *)
+
+    Transitivity is not required despite the name/notation *)
   wft_lt : wft_car → wft_car → Prop;
   (** [wft_lt] is well-founded *)
   wft_lt_wf : wf wft_lt;
