@@ -61,7 +61,8 @@ Inductive nProp {Ξ : nsx} : nsort → tlist Type → tlist Type → Type :=
 | (** Outer variable, available only in [nPropL] *)
   np_ovar {Γ Δ} : nvar Γ → nProp nL Γ Δ
 | (** Judgment derivability *)
-  np_deriv {σ Γ Δ} (I : wft) : I → nProp σ Γ Δ → nProp σ Γ Δ → nProp σ Γ Δ
+  np_deriv {σ Δ} Γ (I : wft) :
+    I → nProp nL ^[] (Γ ^++ Δ) → nProp nL ^[] (Γ ^++ Δ) → nProp σ Γ Δ
 | (** Empty proposition *) np_emp {σ Γ Δ} : nProp σ Γ Δ
 | (** Pure proposition *) np_pure {σ Γ Δ} : Prop → nProp σ Γ Δ
 | (** Conjunction *) np_and {σ Γ Δ} : nProp σ Γ Δ → nProp σ Γ Δ → nProp σ Γ Δ
@@ -117,9 +118,14 @@ Delimit Scope nProp_scope with nP.
 Bind Scope nProp_scope with nProp.
 Notation "% a" := (np_var a) (at level 99, no associativity) : nProp_scope.
 Notation "%ₒ a" := (np_ovar a) (at level 99, no associativity) : nProp_scope.
-Notation "[ P ⊢{ i } Q ]" := (np_deriv _ i P Q) : nProp_scope.
-Notation "[ P ⊢{ i @ I } Q ]" := (np_deriv I i P Q)
-  (only parsing) : nProp_scope.
+Notation "P ⊢!{ i @ I }{ Γ } Q" := (np_deriv Γ I i P Q)
+  (at level 99, Q at level 200, only parsing) : nProp_scope.
+Notation "P ⊢!{ i }{ Γ } Q " := (np_deriv Γ _ i P Q)
+  (at level 99, Q at level 200, only parsing) : nProp_scope.
+Notation "P ⊢!{ i @ I } Q" := (np_deriv _ I i P Q)
+  (at level 99, Q at level 200, only parsing) : nProp_scope.
+Notation "P ⊢!{ i } Q" := (np_deriv _ _ i P Q)
+  (at level 99, Q at level 200, format "P  ⊢!{ i }  Q") : nProp_scope.
 Notation "'emp'" := (np_emp) : nProp_scope.
 Notation "'⌜' φ '⌝'" := (np_pure φ%type%stdpp%nola) : nProp_scope.
 Notation "'True'" := (np_pure True) : nProp_scope.
@@ -146,5 +152,6 @@ Notation "∃: A →nP , P" := (np_so_exist A P)
 Notation "□ P" := (np_persistently P) : nProp_scope.
 Notation "■ P" := (np_plainly P) : nProp_scope.
 Notation "▷{ Γ } P" := (np_later Γ P)
-  (at level 20, right associativity, format "▷{ Γ }  P") : nProp_scope.
+  (at level 20, right associativity, only parsing) : nProp_scope.
+Notation "▷ P" := (np_later _ P) : nProp_scope.
 Notation "|==> P" := (np_bupd P) : nProp_scope.
