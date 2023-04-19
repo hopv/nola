@@ -233,3 +233,90 @@ Notation "▷ P" := (nps_later _ P) : nPropS_scope.
 Notation "▷ P" := (npl_later _ P) : nPropL_scope.
 Notation "|==> P" := (nps_bupd P) : nPropS_scope.
 Notation "|==> P" := (npl_bupd P) : nPropL_scope.
+
+(** ** [nlarge]: Turn [nPropS] into [nPropL] *)
+
+Fixpoint nlarge {Ξ : nsx} {Γ Δ : nctx} (P : nPropS Ξ Γ Δ) : nPropL Ξ Γ Δ :=
+  match P with
+  | (% a)%nS => % a
+  | (P ⊢!{i} Q)%nS => P ⊢!{i} Q
+  | emp%nS => emp
+  | ⌜φ⌝%nS => ⌜φ⌝
+  | (P ∧ Q)%nS => nlarge P ∧ nlarge Q
+  | (P ∨ Q)%nS => nlarge P ∨ nlarge Q
+  | (P → Q)%nS => nlarge P → nlarge Q
+  | (P ∗ Q)%nS => nlarge P ∗ nlarge Q
+  | (P -∗ Q)%nS => nlarge P -∗ nlarge Q
+  | (∀' Φ)%nS => ∀' nlarge ∘ Φ
+  | (∃' Φ)%nS => ∃' nlarge ∘ Φ
+  | (∀: _ →nS, P)%nS => ∀: _ →nS, nlarge P
+  | (∃: _ →nS, P)%nS => ∃: _ →nS, nlarge P
+  | (□ P)%nS => □ nlarge P
+  | (■ P)%nS => ■ nlarge P
+  | (▷ P)%nS => ▷ P
+  | (|==> P)%nS => |==> nlarge P
+  | nps_exs _ d Φu Φcs Φcl => npl_exs _ d (nlarge ∘ Φu) Φcs Φcl
+  end.
+
+(** ** [Nsmall]: [nPropL] that can be turned into [nPropS] *)
+
+Class Nsmall {Ξ Γ Δ} (P : nPropL Ξ Γ Δ) := {
+  (** [nsmall]: Turn [P : nPropL] into [nPropS] *)
+  nsmall : nPropS Ξ Γ Δ;
+  (** [nlarge (nsmall P) = P] *)
+  nsmall_eq : nlarge nsmall = P
+}.
+Arguments nsmall {Ξ Γ Δ} P {_}.
+
+(** [Nsmall] instances *)
+
+#[export] Instance nsmall_var {Ξ Γ Δ a} : @Nsmall Ξ Γ Δ (% a) :=
+  { nsmall := % a; nsmall_eq := eq_refl }.
+#[export] Instance nsmall_deriv {Ξ Γ Δ I i P Q} : @Nsmall Ξ Γ Δ (P ⊢!{i @ I} Q)
+  := { nsmall := P ⊢!{i} Q; nsmall_eq := eq_refl }.
+#[export] Instance nsmall_pure {Ξ Γ Δ φ} : @Nsmall Ξ Γ Δ ⌜φ⌝ :=
+  { nsmall := ⌜φ⌝; nsmall_eq := eq_refl }.
+#[export] Instance nsmall_emp {Ξ Γ Δ} : @Nsmall Ξ Γ Δ emp :=
+  { nsmall := emp; nsmall_eq := eq_refl }.
+#[export] Program Instance nsmall_and {Ξ Γ Δ} `{!Nsmall P, !Nsmall Q}
+  : @Nsmall Ξ Γ Δ (P ∧ Q) := { nsmall := nsmall P ∧ nsmall Q }.
+Next Obligation. move=>/= >. by rewrite !nsmall_eq. Qed.
+#[export] Program Instance nsmall_or {Ξ Γ Δ} `{!Nsmall P, !Nsmall Q}
+  : @Nsmall Ξ Γ Δ (P ∨ Q) := { nsmall := nsmall P ∨ nsmall Q }.
+Next Obligation. move=>/= >. by rewrite !nsmall_eq. Qed.
+#[export] Program Instance nsmall_impl {Ξ Γ Δ} `{!Nsmall P, !Nsmall Q}
+  : @Nsmall Ξ Γ Δ (P → Q) := { nsmall := nsmall P → nsmall Q }.
+Next Obligation. move=>/= >. by rewrite !nsmall_eq. Qed.
+#[export] Program Instance nsmall_sep {Ξ Γ Δ} `{!Nsmall P, !Nsmall Q}
+  : @Nsmall Ξ Γ Δ (P ∗ Q) := { nsmall := nsmall P ∗ nsmall Q }.
+Next Obligation. move=>/= >. by rewrite !nsmall_eq. Qed.
+#[export] Program Instance nsmall_wand {Ξ Γ Δ} `{!Nsmall P, !Nsmall Q}
+  : @Nsmall Ξ Γ Δ (P -∗ Q) := { nsmall := nsmall P -∗ nsmall Q }.
+Next Obligation. move=>/= >. by rewrite !nsmall_eq. Qed.
+#[export] Program Instance nsmall_forall {Ξ Γ Δ} `{!∀ x : A, Nsmall (Φ x)}
+  : @Nsmall Ξ Γ Δ (∀' Φ) := { nsmall := ∀ x, nsmall (Φ x) }.
+Next Obligation. move=>/= >. f_equal. fun_ext=>/= ?. by rewrite nsmall_eq. Qed.
+#[export] Program Instance nsmall_exist {Ξ Γ Δ} `{!∀ x : A, Nsmall (Φ x)}
+  : @Nsmall Ξ Γ Δ (∃' Φ) := { nsmall := ∃ x, nsmall (Φ x) }.
+Next Obligation. move=>/= >. f_equal. fun_ext=>/= ?. by rewrite nsmall_eq. Qed.
+#[export] Program Instance nsmall_so_forall {Ξ Γ Δ A} `{!Nsmall P}
+  : @Nsmall Ξ Γ Δ (∀: A →nS, P) := { nsmall := ∀: _ →nS, nsmall P }.
+Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
+#[export] Program Instance nsmall_so_exist {Ξ Γ Δ A} `{!Nsmall P}
+  : @Nsmall Ξ Γ Δ (∃: A →nS, P) := { nsmall := ∃: _ →nS, nsmall P }.
+Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
+#[export] Program Instance nsmall_persistently {Ξ Γ Δ} `{!Nsmall P}
+  : @Nsmall Ξ Γ Δ (□ P) := { nsmall := □ nsmall P }.
+Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
+#[export] Program Instance nsmall_plainly {Ξ Γ Δ} `{!Nsmall P}
+  : @Nsmall Ξ Γ Δ (■ P) := { nsmall := ■ nsmall P }.
+Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
+#[export] Program Instance nsmall_later {Ξ Γ Δ P}
+  : @Nsmall Ξ Γ Δ (▷ P) := { nsmall := ▷ P; nsmall_eq := eq_refl }.
+#[export] Program Instance nsmall_bupd {Ξ Γ Δ} `{!Nsmall P}
+  : @Nsmall Ξ Γ Δ (|==> P) := { nsmall := |==> nsmall P }.
+Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
+#[export] Program Instance nsmall_exs {Ξ Γ Δ d Φu Φcs Φcl}
+  `{!∀ x, Nsmall (Φu x)} : @Nsmall Ξ Γ Δ (npl_exs _ d Φu Φcs Φcl) :=
+  { nsmall := nps_exs Γ d (λ x, nsmall (Φu x)) Φcs Φcl}.
+Next Obligation. move=>/= >. f_equal. fun_ext=>/= ?. by rewrite nsmall_eq. Qed.
