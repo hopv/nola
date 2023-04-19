@@ -5,3 +5,4 @@ nola/util/tlist.v
 nola/util/pred.v
 nola/util/rel.v
 nola/util/wft.v
+nola/syntax.v
