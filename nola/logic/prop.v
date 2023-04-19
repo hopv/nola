@@ -73,9 +73,9 @@ Inductive nPropS {Ξ : nsx} : tlist Type → tlist Type → Type :=
 (** Magic wand *)
 | nps_wand {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ → nPropS Γ Δ
 (** Universal quantification *)
-| nps_forall {Γ Δ} (A : Type) : (A → nPropS Γ Δ) → nPropS Γ Δ
+| nps_forall {Γ Δ} {A : Type} : (A → nPropS Γ Δ) → nPropS Γ Δ
 (** Existential quantification *)
-| nps_exist {Γ Δ} (A : Type) : (A → nPropS Γ Δ) → nPropS Γ Δ
+| nps_exist {Γ Δ} {A : Type} : (A → nPropS Γ Δ) → nPropS Γ Δ
 (** Second-order universal quantification over [A → nPropS] *)
 | nps_so_forall {Γ Δ} (A : Type) : nPropS (A ^:: Γ) Δ → nPropS Γ Δ
 (** Second-order existential quantification over [A → nPropS] *)
@@ -116,8 +116,8 @@ with nPropL {Ξ : nsx} : tlist Type → tlist Type → Type :=
 | npl_impl {Γ Δ} : nPropL Γ Δ → nPropL Γ Δ → nPropL Γ Δ
 | npl_sep {Γ Δ} : nPropL Γ Δ → nPropL Γ Δ → nPropL Γ Δ
 | npl_wand {Γ Δ} : nPropL Γ Δ → nPropL Γ Δ → nPropL Γ Δ
-| npl_forall {Γ Δ} (A : Type) : (A → nPropL Γ Δ) → nPropL Γ Δ
-| npl_exist {Γ Δ} (A : Type) : (A → nPropL Γ Δ) → nPropL Γ Δ
+| npl_forall {Γ Δ} {A : Type} : (A → nPropL Γ Δ) → nPropL Γ Δ
+| npl_exist {Γ Δ} {A : Type} : (A → nPropL Γ Δ) → nPropL Γ Δ
 | npl_so_forall {Γ Δ} (A : Type) : nPropL (A ^:: Γ) Δ → nPropL Γ Δ
 | npl_so_exist {Γ Δ} (A : Type) : nPropL (A ^:: Γ) Δ → nPropL Γ Δ
 | npl_persistently {Γ Δ} : nPropL Γ Δ → nPropL Γ Δ
@@ -192,22 +192,36 @@ Notation "(∗)" := nps_sep (only parsing) : nPropS_scope.
 Notation "(∗)" := npl_sep (only parsing) : nPropL_scope.
 Infix "-∗" := nps_wand : nPropS_scope.
 Infix "-∗" := npl_wand : nPropL_scope.
+Notation "∀' Φ" := (nps_forall Φ)
+  (at level 200, right associativity, only parsing) : nPropS_scope.
+Notation "∀' Φ" := (npl_forall Φ) (only parsing) : nPropL_scope.
 Notation "∀ x .. z , P" :=
-  (nps_forall _ (λ x, .. (nps_forall _ (λ z, P%nS)) ..)) : nPropS_scope.
+  (nps_forall (λ x, .. (nps_forall (λ z, P%nS)) ..)) : nPropS_scope.
 Notation "∀ x .. z , P" :=
-  (npl_forall _ (λ x, .. (npl_forall _ (λ z, P%nL)) ..)) : nPropL_scope.
+  (npl_forall (λ x, .. (npl_forall (λ z, P%nL)) ..)) : nPropL_scope.
+Notation "∃' Φ" := (nps_exist Φ)
+  (at level 200, right associativity, only parsing) : nPropS_scope.
+Notation "∃' Φ" := (npl_exist Φ) (only parsing) : nPropL_scope.
 Notation "∃ x .. z , P" :=
-  (nps_exist _ (λ x, .. (nps_exist _ (λ z, P%nS)) ..)) : nPropS_scope.
+  (nps_exist (λ x, .. (nps_exist (λ z, P%nS)) ..)) : nPropS_scope.
 Notation "∃ x .. z , P" :=
-  (npl_exist _ (λ x, .. (npl_exist _ (λ z, P%nL)) ..)) : nPropL_scope.
-Notation "∀: A →nP , P" := (nps_so_forall A P)
+  (npl_exist (λ x, .. (npl_exist (λ z, P%nL)) ..)) : nPropL_scope.
+Notation "∀: A →nS , P" := (nps_so_forall A P)
   (at level 200, right associativity,
-    format "'[' '[' ∀:  A  →nP ']' ,  '/' P ']'") : nPropS_scope.
-Notation "∀: A →nP , P" := (npl_so_forall A P) : nPropL_scope.
-Notation "∃: A →nP , P" := (nps_so_exist A P)
+    format "'[' '[' ∀:  A  →nS ']' ,  '/' P ']'") : nPropS_scope.
+Notation "∀: A →nS , P" := (npl_so_forall A P) : nPropL_scope.
+Notation "∀: 'nS' , P" := (nps_so_forall unit P)
   (at level 200, right associativity,
-  format "'[' '[' ∃:  A  →nP ']' ,  '/' P ']'") : nPropS_scope.
-Notation "∃: A →nP , P" := (npl_so_exist A P) : nPropL_scope.
+    format "'[' '[' ∀:  'nS' ']' ,  '/' P ']'") : nPropS_scope.
+Notation "∀: 'nS' , P" := (npl_so_forall unit P) : nPropL_scope.
+Notation "∃: A →nS , P" := (nps_so_exist A P)
+  (at level 200, right associativity,
+  format "'[' '[' ∃:  A  →nS ']' ,  '/' P ']'") : nPropS_scope.
+Notation "∃: A →nS , P" := (npl_so_exist A P) : nPropL_scope.
+Notation "∃: 'nS' , P" := (nps_so_exist unit P)
+  (at level 200, right associativity,
+  format "'[' '[' ∃:  'nS' ']' ,  '/' P ']'") : nPropS_scope.
+Notation "∃: 'nS' , P" := (npl_so_exist unit P) : nPropL_scope.
 Notation "□ P" := (nps_persistently P) : nPropS_scope.
 Notation "□ P" := (npl_persistently P) : nPropL_scope.
 Notation "■ P" := (nps_plainly P) : nPropS_scope.
