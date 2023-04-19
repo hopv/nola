@@ -101,10 +101,9 @@ Inductive nPropS {Ξ : nsx} : tlist Type → tlist Type → Type :=
 (** Basic update modality *)
 | nps_bupd {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ
 (** Extension by [Ξ.(nsx_s)] *)
-| nps_exs Γ {Δ} d :
-    (Ξ.(nsxs_paru) d → nPropS Γ Δ) →
-    (Ξ.(nsxs_parcs) d → nPropS ^[] (Γ ^++ Δ)) →
-    (Ξ.(nsxs_parcl) d → nPropL ^[] (Γ ^++ Δ)) → nPropS Γ Δ
+| nps_exs Γ {Δ} : let '(Nsxs _ Pu Pcs Pcl) := Ξ.(nsx_s) in
+    ∀ d, (Pu d → nPropS Γ Δ) → (Pcs d → nPropS ^[] (Γ ^++ Δ)) →
+    (Pcl d → nPropL ^[] (Γ ^++ Δ)) → nPropS Γ Δ
 
 (** [nPropL]: Nola syntactic proposition, large
 
@@ -130,15 +129,13 @@ with nPropL {Ξ : nsx} : tlist Type → tlist Type → Type :=
 | npl_plainly {Γ Δ} : nPropL Γ Δ → nPropL Γ Δ
 | npl_later Γ {Δ} : nPropL ^[] (Γ ^++ Δ) → nPropL Γ Δ
 | npl_bupd {Γ Δ} : nPropL Γ Δ → nPropL Γ Δ
-| npl_exs Γ {Δ} d :
-    (Ξ.(nsxs_paru) d → nPropL Γ Δ) →
-    (Ξ.(nsxs_parcs) d → nPropS ^[] (Γ ^++ Δ)) →
-    (Ξ.(nsxs_parcl) d → nPropL ^[] (Γ ^++ Δ)) → nPropL Γ Δ
+| npl_exs Γ {Δ} : let '(Nsxs _ Pu Pcs Pcl) := Ξ.(nsx_s) in
+    ∀ d, (Pu d → nPropL Γ Δ) → (Pcs d → nPropS ^[] (Γ ^++ Δ)) →
+    (Pcl d → nPropL ^[] (Γ ^++ Δ)) → nPropL Γ Δ
 (** Extension by [Ξ.(nsx_l)], [nPropL] only *)
-| npl_exl Γ {Δ} d :
-    (Ξ.(nsxl_paru) d → nPropL Γ Δ) →
-    (Ξ.(nsxl_parcs) d → nPropS ^[] (Γ ^++ Δ)) →
-    (Ξ.(nsxl_parcl) d → nPropL ^[] (Γ ^++ Δ)) → nPropL Γ Δ.
+| npl_exl Γ {Δ} : let '(Nsxl _ Pu Pcs Pcl) := Ξ.(nsx_l) in
+    ∀ d, (Pu d → nPropL Γ Δ) → (Pcs d → nPropS ^[] (Γ ^++ Δ)) →
+    (Pcl d → nPropL ^[] (Γ ^++ Δ)) → nPropL Γ Δ.
 
 Arguments nPropS Ξ Γ Δ : clear implicits.
 Arguments nPropL Ξ Γ Δ : clear implicits.
