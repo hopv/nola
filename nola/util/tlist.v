@@ -1,4 +1,4 @@
-(** * Utility for [tlist], [clist] and [cchoice] *)
+(** * Utility for [tlist], [plist] and [csum] *)
 
 From nola Require Import prelude.
 
@@ -17,6 +17,17 @@ Infix "^::" := tcons (at level 60, right associativity) : nola_scope.
 Notation "^[ x ; .. ; z ]" := (x ^:: .. (z ^:: ^[]) ..)
   (at level 1, format "^[ x ;  .. ;  z ]") : nola_scope.
 
+(** Wildcard patterns for [tlist] of n or more elements *)
+Notation "^+1" := (_ ^:: _) (only parsing) : nola_scope.
+Notation "^+2" := (_ ^:: ^+1) (only parsing) : nola_scope.
+Notation "^+3" := (_ ^:: ^+2) (only parsing) : nola_scope.
+Notation "^+4" := (_ ^:: ^+3) (only parsing) : nola_scope.
+Notation "^+5" := (_ ^:: ^+4) (only parsing) : nola_scope.
+Notation "^+6" := (_ ^:: ^+5) (only parsing) : nola_scope.
+Notation "^+7" := (_ ^:: ^+6) (only parsing) : nola_scope.
+Notation "^+8" := (_ ^:: ^+7) (only parsing) : nola_scope.
+Notation "^+9" := (_ ^:: ^+8) (only parsing) : nola_scope.
+
 (** Concatenate [tlist]s *)
 Reserved Infix "^++" (at level 60, right associativity).
 Fixpoint tapp {T} (ts us : tlist T) : tlist T :=
@@ -27,128 +38,114 @@ Fixpoint tapp {T} (ts us : tlist T) : tlist T :=
 where "ts ^++ us" := (tapp ts us) : nola_scope.
 
 (** Map over [tlist] *)
-Reserved Infix "^$" (at level 60, right associativity).
+Reserved Infix "^<$>" (at level 61, left associativity).
 Fixpoint tmap {T U} (f : T → U) (ts : tlist T) : tlist U :=
   match ts with
   | ^[] => ^[]
-  | t ^:: ts => f t ^:: f ^$ ts
+  | t ^:: ts => f t ^:: (f ^<$> ts)
   end
-where "f ^$ ts" := (tmap f ts) : nola_scope.
+where "f ^<$> ts" := (tmap f ts) : nola_scope.
 
-(** ** [clist]: Heterogeneous list type calculated from [tlist] *)
+#[export] Instance tlist_fmap : FMap tlist := λ _ _, tmap.
+
+(** ** [plist]: Product type calculated over elements of [tlist] *)
 
 (** Unit type for [tnil] *)
-Variant cunit : Set := cnil.
+Variant punit : Set := pnil.
 (** Product type for [tcons] *)
-Record cprod (A B : Type) : Type := ccons { chd : A; ctl : B }.
-Arguments ccons {_ _} _ _.
-Arguments chd {_ _} _.
-Arguments ctl {_ _} _.
+Record pprod (A B : Type) : Type := pcons { phd : A; ptl : B }.
+Arguments pcons {_ _} _ _.
+Arguments phd {_ _} _.
+Arguments ptl {_ _} _.
 
-Notation "*[ ]" := cunit (at level 1, format "*[ ]") : nola_scope.
-Infix "*::" := cprod (at level 60, right associativity) : nola_scope.
+Notation "*[ ]" := punit (at level 1, format "*[ ]") : nola_scope.
+Infix "*::" := pprod (at level 60, right associativity) : nola_scope.
 Notation "*[ A ; .. ; Z ]" := (A *:: .. (Z *:: *[]) ..)
   (at level 1, format "*[ A ;  .. ;  Z ]") : nola_scope.
 
-Notation "-[ ]" := cnil (at level 1, format "-[ ]") : nola_scope.
-Infix "-::" := ccons (at level 60, right associativity) : nola_scope.
+Notation "-[ ]" := pnil (at level 1, format "-[ ]") : nola_scope.
+Infix "-::" := pcons (at level 60, right associativity) : nola_scope.
 Notation "-[ x ; .. ; z ]" := (x -:: .. (z -:: -[]) ..)
   (at level 1, format "-[ x ;  .. ;  z ]") : nola_scope.
 
-(** [clist]: Heterogeneous list type calculated from [tlist] *)
-Fixpoint clist {T} (F : T → Type) (ts : tlist T) : Type :=
+(** [plist]: Heterogeneous list type calculated from [tlist] *)
+Fixpoint plist {T} (F : T → Type) (ts : tlist T) : Type :=
   match ts with
   | ^[] => *[]
-  | t ^:: ts => F t *:: clist F ts
+  | t ^:: ts => F t *:: plist F ts
   end.
 
-Notation "[*] t ∈ ts , A" := (clist (λ t, A) ts)
+Notation "[*] t ∈ ts , A" := (plist (λ t, A) ts)
   (at level 200, ts at level 10, t binder, right associativity) : nola_scope.
 
-(** Append [clist]s *)
+(** Append [plist]s *)
 Reserved Infix "-++" (at level 60, right associativity).
-Fixpoint capp {T} {F : T → Type} {ts us : tlist T}
+Fixpoint papp {T} {F : T → Type} {ts us : tlist T}
   (xs : [*] t ∈ ts, F t) (ys : [*] t ∈ us, F t) : [*] t ∈ ts ^++ us, F t :=
   match ts, xs with
   | ^[], _ => ys
   | _ ^:: _, x -:: xs => x -:: xs -++ ys
   end
-where "xs -++ ys" := (capp xs ys) : nola_scope.
+where "xs -++ ys" := (papp xs ys) : nola_scope.
 
-(** Map over [clist] *)
-Reserved Infix "-*$" (at level 60, right associativity).
-Fixpoint cmap {T} {F G : T → Type} (f : ∀ t, F t → G t) {ts : tlist T}
+(** Map over [plist] *)
+Reserved Infix "-<$>" (at level 61, left associativity).
+Fixpoint pmap {T} {F G : T → Type} (f : ∀ t, F t → G t) {ts : tlist T}
   (xs : [*] t ∈ ts, F t) : [*] t ∈ ts, G t :=
   match ts, xs with
   | ^[], -[] => -[]
-  | _ ^:: _, x -:: xs => f _ x -:: f -*$ xs
+  | _ ^:: _, x -:: xs => f _ x -:: (f -<$> xs)
   end
-where "f -*$ xs" := (cmap f xs) : nola_scope.
+where "f -<$> xs" := (pmap f xs) : nola_scope.
 
-(** ** [cchoice]: Sum type calculated from [tlist] *)
+(** ** [lsum]: Variant choosing an element of [tlist] with a value *)
 
-(** Empty type for [tnil] *)
-Variant cempty : Set := .
-(** Sum type for [tcons] *)
-Variant csum (A B : Type) : Type := cbyhd (_ : A) | cbytl (_ : B).
-Arguments cbyhd {_ _} _.
-Arguments cbytl {_ _} _.
+Inductive lsum {T} (F : T → Type) : tlist T → Type :=
+| cbyhd {t ts} : F t → lsum F (t ^:: ts)
+| cbytl {t ts} : lsum F ts → lsum F (t ^:: ts).
+Arguments cbyhd {T F t ts} _.
+Arguments cbytl {T F t ts} _.
 
-Notation "+[ ]" := cempty (at level 1, format "+[ ]") : nola_scope.
-Infix "+::" := csum (at level 60, right associativity) : nola_scope.
-Notation "+[ A ; .. ; Z ]" := (A +:: .. (Z +:: +[]) ..)
-  (at level 1, format "+[ A ;  .. ;  Z ]") : nola_scope.
-
-Notation "-# x" := (cbyhd x)
-  (at level 20, right associativity, format "-#  x") : nola_scope.
-Notation "-/ x" := (cbytl x)
-  (at level 20, right associativity, format "-/ x") : nola_scope.
-
-(** [cchoice]: Sum type calculated from [tlist] *)
-Fixpoint cchoice {T} (F : T → Type) (ts : tlist T) : Type :=
-  match ts with
-  | ^[] => +[]
-  | t ^:: ts => F t +:: cchoice F ts
-  end.
-
-Notation "[+] t ∈ ts , A" := (cchoice (λ t, A) ts)
+Notation "# x" := (cbyhd x)
+  (at level 20, right associativity, format "#  x") : nola_scope.
+Notation "+. x" := (cbytl x)
+  (at level 20, right associativity, format "+. x") : nola_scope.
+Notation "[+] t ∈ ts , A" := (lsum (λ t, A) ts)
   (at level 200, ts at level 10, t binder, right associativity) : nola_scope.
 
 (** Lift [[+] t ∈ ts, F t] into [[+] t ∈ ts ^++ us, F t] *)
-Fixpoint cbyleft {T} {F : T → Type} {ts us : tlist T}
+Fixpoint cbylapp {T} {F : T → Type} {ts us : tlist T}
   (x : [+] t ∈ ts, F t) : [+] t ∈ ts ^++ us, F t :=
-  match ts, x with
-  | ^[], _ => match x with end
-  | _ ^:: _, -# x => -# x
-  | _ ^:: _, -/ x => -/ cbyleft x
+  match x with
+  | # x => # x
+  | +. x => +. cbylapp x
   end.
 
 (** Lift [[+] t ∈ us, F t] into [[+] t ∈ ts ^++ us, F t] *)
-Fixpoint cbyright {T} {F : T → Type} {ts us : tlist T}
+Fixpoint cbyrapp {T} {F : T → Type} {ts us : tlist T}
   (x : [+] t ∈ us, F t) : [+] t ∈ ts ^++ us, F t :=
   match ts with
   | ^[] => x
-  | _ ^:: _ => -/ cbyright x
+  | _ ^:: _ => +. cbyrapp x
   end.
 
-(** Apply a function of [clist] to a value of [cchoice] *)
-Reserved Infix "*$+" (at level 20, no associativity).
-Fixpoint capply {T} {F : T → Type} {A : Type} {ts : tlist T}
+(** Apply a function of [plist] to a value of [csum] *)
+Reserved Infix "-$+" (at level 20, no associativity).
+Fixpoint pcapply {T} {F : T → Type} {A : Type} {ts : tlist T}
   (fs : [*] t ∈ ts, F t → A) (x : [+] t ∈ ts, F t) : A :=
-  match ts, fs, x with
-  | ^[], _, _ => match x with end
-  | _ ^:: _, f -:: _, -# x => f x
-  | _ ^:: _, _ -:: fs, -/ x => fs *$+ x
+  match x, fs with
+  | # x, f -:: _ => f x
+  | +. x, _ -:: fs => fs -$+ x
   end
-where "fs *$+ x" := (capply fs x) : nola_scope.
+where "fs -$+ x" := (pcapply fs x) : nola_scope.
 
-(** Map over [cchoice] *)
-Reserved Infix "-+$" (at level 60, right associativity).
-Fixpoint ccmap {T} {F G : T → Type} (f : ∀ t, F t → G t) {ts : tlist T}
+(** Map over [csum] *)
+Reserved Infix "+<$>" (at level 61, left associativity).
+Fixpoint cmap {T} {F G : T → Type} (f : ∀ t, F t → G t) {ts : tlist T}
   (x : [+] t ∈ ts, F t) : [+] t ∈ ts, G t :=
   match ts, x with
   | ^[], _ => match x with end
-  | _ ^:: _, -# x => -# f _ x
-  | _ ^:: _, -/ x => -/ (f -+$ x)
+  | _ ^:: _, # x => # f _ x
+  | _ ^:: _, +. x => +. (f +<$> x)
   end
-where "f -+$ x" := (ccmap f x) : nola_scope.
+where "f +<$> x" := (cmap f x) : nola_scope.
