@@ -34,7 +34,8 @@ Class Nsubesx (Ξ' Ξ : nesx) := {
   (** Inclusion between [nesx_pnl] *)
   nsubesx_pnl d : Ξ.(nesx_pnl) (nsubesx_d d) → Ξ'.(nesx_pnl) d;
 }.
-Notation "Ξ' ⊑esx Ξ" := (Nsubesx Ξ' Ξ) (at level 70, no associativity).
+Notation "Ξ' ⊑esx Ξ" := (Nsubesx Ξ' Ξ) (at level 70, no associativity)
+  : nola_scope.
 
 (** [⊑esx] is reflexive *)
 #[export] Instance Nsubesx_refl {Ξ} : Ξ ⊑esx Ξ := {
@@ -355,6 +356,15 @@ Notation "▷ P" := (ns_later _ _ P) : nPropS_scope.
 Notation "▷ P" := (nl_later _ _ P) : nPropL_scope.
 Notation "|==> P" := (ns_bupd P) : nPropS_scope.
 Notation "|==> P" := (nl_bupd P) : nPropL_scope.
+Notation "+!!{ Γₒₛ ; Γₒₗ }" := (ns_sxs Γₒₛ Γₒₗ) (only parsing) : nPropS_scope.
+Notation "+!!{ Γₒₛ ; Γₒₗ }" := (nl_sxs Γₒₛ Γₒₗ) (only parsing) : nPropL_scope.
+Notation "+!!{ Γₒₛ }" := (ns_sxs Γₒₛ _) (only parsing) : nPropS_scope.
+Notation "+!!{ Γₒₛ }" := (nl_sxs Γₒₛ _) (only parsing) : nPropL_scope.
+Notation "+!!" := (ns_sxs _ _) : nPropS_scope.
+Notation "+!!" := (nl_sxs _ _) : nPropL_scope.
+Notation "+!!ₗ{ Γₒₛ ; Γₒₗ }" := (nl_sxl Γₒₛ Γₒₗ) (only parsing) : nPropL_scope.
+Notation "+!!ₗ{ Γₒₛ }" := (nl_sxl Γₒₛ _) (only parsing) : nPropL_scope.
+Notation "+!!ₗ" := (nl_sxl _ _) : nPropL_scope.
 Notation "+!{ Γₒₛ ; Γₒₗ }" := (ns_subsxs Γₒₛ Γₒₗ) (only parsing) : nPropS_scope.
 Notation "+!{ Γₒₛ ; Γₒₗ }" := (nl_subsxs Γₒₛ Γₒₗ) (only parsing) : nPropL_scope.
 Notation "+!{ Γₒₛ }" := (ns_subsxs Γₒₛ _) (only parsing) : nPropS_scope.
@@ -390,7 +400,7 @@ Fixpoint nlarge {Ξ : nsx} {Γ : nctx} (P : nPropS Ξ Γ) : nPropL Ξ Γ :=
   | (■ P)%nS => ■ nlarge P
   | (▷ P)%nS => ▷ P
   | (|==> P)%nS => |==> nlarge P
-  | ns_sxs _ _ d Φᵤ Φₙₛ Φₙₗ => nl_sxs _ _ d (nlarge ∘ Φᵤ) Φₙₛ Φₙₗ
+  | (+!! d Φᵤ Φₙₛ Φₙₗ)%nS => +!! d (nlarge ∘ Φᵤ) Φₙₛ Φₙₗ
   end.
 
 (** ** [Nsmall]: [nPropL] that can be turned into [nPropS] *)
@@ -460,6 +470,6 @@ Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
   : @Nsmall Ξ Γ (|==> P) := { nsmall := |==> nsmall P }.
 Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
 #[export] Program Instance nsmall_sxs {Ξ Γ d Φᵤ Φₙₛ Φₙₗ}
-  `{!∀ x, Nsmall (Φᵤ x)} : @Nsmall Ξ Γ (nl_sxs _ _ d Φᵤ Φₙₛ Φₙₗ) :=
-  { nsmall := ns_sxs _ _ d (λ x, nsmall (Φᵤ x)) Φₙₛ Φₙₗ}.
+  `{!∀ x, Nsmall (Φᵤ x)} : @Nsmall Ξ Γ (+!! d Φᵤ Φₙₛ Φₙₗ) :=
+  { nsmall := +!! d (λ x, nsmall (Φᵤ x)) Φₙₛ Φₙₗ}.
 Next Obligation. move=>/= >. f_equal. fun_ext=>/= ?. by rewrite nsmall_eq. Qed.
