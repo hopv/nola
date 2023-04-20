@@ -52,7 +52,7 @@ Definition nvar (Γ : nctx) : Type := [+] A ∈ Γ, A.
 
   Its universe level is strictly higher than those of [Γ : nctx],
   the index [I : wft] of the judgment derivability,
-  and the domain [A : Type] of [nps_forall]/[nps_exists]
+  and the domain [A : Type] of [ns_forall]/[ns_exists]
 
   We make [Ξ] implicit for each constructor;
   we later make it explicit for [nPropS]/[nPropL] *)
@@ -60,48 +60,48 @@ Definition nvar (Γ : nctx) : Type := [+] A ∈ Γ, A.
 (** [nPropS]: Nola syntactic proposition, small *)
 Inductive nPropS {Ξ : nsx} : tlist Type → tlist Type → Type :=
 (** Inner variable *)
-| nps_var {Γ Δ} : nvar Δ → nPropS Γ Δ
+| ns_var {Γ Δ} : nvar Δ → nPropS Γ Δ
 (** Judgment derivability *)
-| nps_deriv Γ {Δ} (I : wft) :
+| ns_deriv Γ {Δ} (I : wft) :
     I → nPropL ^[] (Γ ^++ Δ) → nPropL ^[] (Γ ^++ Δ) → nPropS Γ Δ
 (** Empty proposition *)
-| nps_emp {Γ Δ} : nPropS Γ Δ
+| ns_emp {Γ Δ} : nPropS Γ Δ
 (** Pure proposition *)
-| nps_pure {Γ Δ} : Prop → nPropS Γ Δ
+| ns_pure {Γ Δ} : Prop → nPropS Γ Δ
 (** Conjunction *)
-| nps_and {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ → nPropS Γ Δ
+| ns_and {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ → nPropS Γ Δ
 (** Disjunction *)
-| nps_or {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ → nPropS Γ Δ
+| ns_or {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ → nPropS Γ Δ
 (** Implication *)
-| nps_impl {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ → nPropS Γ Δ
+| ns_impl {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ → nPropS Γ Δ
 (** Separating conjunction *)
-| nps_sep {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ → nPropS Γ Δ
+| ns_sep {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ → nPropS Γ Δ
 (** Magic wand *)
-| nps_wand {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ → nPropS Γ Δ
+| ns_wand {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ → nPropS Γ Δ
 (** Universal quantification *)
-| nps_forall {Γ Δ} {A : Type} : (A → nPropS Γ Δ) → nPropS Γ Δ
+| ns_forall {Γ Δ} {A : Type} : (A → nPropS Γ Δ) → nPropS Γ Δ
 (** Existential quantification *)
-| nps_exist {Γ Δ} {A : Type} : (A → nPropS Γ Δ) → nPropS Γ Δ
+| ns_exist {Γ Δ} {A : Type} : (A → nPropS Γ Δ) → nPropS Γ Δ
 (** Second-order universal quantification over [A → nPropS] *)
-| nps_so_forall {Γ Δ} (A : Type) : nPropS (A ^:: Γ) Δ → nPropS Γ Δ
+| ns_so_forall {Γ Δ} (A : Type) : nPropS (A ^:: Γ) Δ → nPropS Γ Δ
 (** Second-order existential quantification over [A → nPropS] *)
-| nps_so_exist {Γ Δ} (A : Type) : nPropS (A ^:: Γ) Δ → nPropS Γ Δ
+| ns_so_exist {Γ Δ} (A : Type) : nPropS (A ^:: Γ) Δ → nPropS Γ Δ
 (** Persistence modality *)
-| nps_persistently {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ
+| ns_persistently {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ
 (** Plainly modality *)
-| nps_plainly {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ
+| ns_plainly {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ
 (** Later modality
 
   Because it is contractive, its argument proposition can be in [nPropL]
   and have outer variables flushed
 
   For the users to aid type inference around [^++], we expose [Γ]
-  as the explicit parameter (the same applies to [nps_ex] and [nps_exl]) *)
-| nps_later Γ {Δ} : nPropL ^[] (Γ ^++ Δ) → nPropS Γ Δ
+  as the explicit parameter (the same applies to [ns_ex] and [ns_exl]) *)
+| ns_later Γ {Δ} : nPropL ^[] (Γ ^++ Δ) → nPropS Γ Δ
 (** Basic update modality *)
-| nps_bupd {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ
+| ns_bupd {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ
 (** Extension by [Ξ.(nsx_s)] *)
-| nps_exs Γ {Δ} : let '(Nsxs _ Pᵤ Pₙₛ Pₙₗ) := Ξ.(nsx_s) in
+| ns_exs Γ {Δ} : let '(Nsxs _ Pᵤ Pₙₛ Pₙₗ) := Ξ.(nsx_s) in
     ∀ d, (Pᵤ d → nPropS Γ Δ) → (Pₙₛ d → nPropS ^[] (Γ ^++ Δ)) →
     (Pₙₗ d → nPropL ^[] (Γ ^++ Δ)) → nPropS Γ Δ
 
@@ -109,31 +109,31 @@ Inductive nPropS {Ξ : nsx} : tlist Type → tlist Type → Type :=
 
   Most connectives are the same as [nPropS] *)
 with nPropL {Ξ : nsx} : tlist Type → tlist Type → Type :=
-| npl_var {Γ Δ} : nvar Δ → nPropL Γ Δ
+| nl_var {Γ Δ} : nvar Δ → nPropL Γ Δ
 (** Outer variable, [nPropL] only *)
-| npl_ovar {Γ Δ} : nvar Γ → nPropL Γ Δ
-| npl_deriv Γ {Δ} (I : wft) :
+| nl_ovar {Γ Δ} : nvar Γ → nPropL Γ Δ
+| nl_deriv Γ {Δ} (I : wft) :
     I → nPropL ^[] (Γ ^++ Δ) → nPropL ^[] (Γ ^++ Δ) → nPropL Γ Δ
-| npl_emp {Γ Δ} : nPropL Γ Δ
-| npl_pure {Γ Δ} : Prop → nPropL Γ Δ
-| npl_and {Γ Δ} : nPropL Γ Δ → nPropL Γ Δ → nPropL Γ Δ
-| npl_or {Γ Δ} : nPropL Γ Δ → nPropL Γ Δ → nPropL Γ Δ
-| npl_impl {Γ Δ} : nPropL Γ Δ → nPropL Γ Δ → nPropL Γ Δ
-| npl_sep {Γ Δ} : nPropL Γ Δ → nPropL Γ Δ → nPropL Γ Δ
-| npl_wand {Γ Δ} : nPropL Γ Δ → nPropL Γ Δ → nPropL Γ Δ
-| npl_forall {Γ Δ} {A : Type} : (A → nPropL Γ Δ) → nPropL Γ Δ
-| npl_exist {Γ Δ} {A : Type} : (A → nPropL Γ Δ) → nPropL Γ Δ
-| npl_so_forall {Γ Δ} (A : Type) : nPropL (A ^:: Γ) Δ → nPropL Γ Δ
-| npl_so_exist {Γ Δ} (A : Type) : nPropL (A ^:: Γ) Δ → nPropL Γ Δ
-| npl_persistently {Γ Δ} : nPropL Γ Δ → nPropL Γ Δ
-| npl_plainly {Γ Δ} : nPropL Γ Δ → nPropL Γ Δ
-| npl_later Γ {Δ} : nPropL ^[] (Γ ^++ Δ) → nPropL Γ Δ
-| npl_bupd {Γ Δ} : nPropL Γ Δ → nPropL Γ Δ
-| npl_exs Γ {Δ} : let '(Nsxs _ Pᵤ Pₙₛ Pₙₗ) := Ξ.(nsx_s) in
+| nl_emp {Γ Δ} : nPropL Γ Δ
+| nl_pure {Γ Δ} : Prop → nPropL Γ Δ
+| nl_and {Γ Δ} : nPropL Γ Δ → nPropL Γ Δ → nPropL Γ Δ
+| nl_or {Γ Δ} : nPropL Γ Δ → nPropL Γ Δ → nPropL Γ Δ
+| nl_impl {Γ Δ} : nPropL Γ Δ → nPropL Γ Δ → nPropL Γ Δ
+| nl_sep {Γ Δ} : nPropL Γ Δ → nPropL Γ Δ → nPropL Γ Δ
+| nl_wand {Γ Δ} : nPropL Γ Δ → nPropL Γ Δ → nPropL Γ Δ
+| nl_forall {Γ Δ} {A : Type} : (A → nPropL Γ Δ) → nPropL Γ Δ
+| nl_exist {Γ Δ} {A : Type} : (A → nPropL Γ Δ) → nPropL Γ Δ
+| nl_so_forall {Γ Δ} (A : Type) : nPropL (A ^:: Γ) Δ → nPropL Γ Δ
+| nl_so_exist {Γ Δ} (A : Type) : nPropL (A ^:: Γ) Δ → nPropL Γ Δ
+| nl_persistently {Γ Δ} : nPropL Γ Δ → nPropL Γ Δ
+| nl_plainly {Γ Δ} : nPropL Γ Δ → nPropL Γ Δ
+| nl_later Γ {Δ} : nPropL ^[] (Γ ^++ Δ) → nPropL Γ Δ
+| nl_bupd {Γ Δ} : nPropL Γ Δ → nPropL Γ Δ
+| nl_exs Γ {Δ} : let '(Nsxs _ Pᵤ Pₙₛ Pₙₗ) := Ξ.(nsx_s) in
     ∀ d, (Pᵤ d → nPropL Γ Δ) → (Pₙₛ d → nPropS ^[] (Γ ^++ Δ)) →
     (Pₙₗ d → nPropL ^[] (Γ ^++ Δ)) → nPropL Γ Δ
 (** Extension by [Ξ.(nsx_l)], [nPropL] only *)
-| npl_exl Γ {Δ} : let '(Nsxl _ Pᵤ Pₙₛ Pₙₗ) := Ξ.(nsx_l) in
+| nl_exl Γ {Δ} : let '(Nsxl _ Pᵤ Pₙₛ Pₙₗ) := Ξ.(nsx_l) in
     ∀ d, (Pᵤ d → nPropL Γ Δ) → (Pₙₛ d → nPropS ^[] (Γ ^++ Δ)) →
     (Pₙₗ d → nPropL ^[] (Γ ^++ Δ)) → nPropL Γ Δ.
 
@@ -150,92 +150,92 @@ Bind Scope nPropS_scope with nPropS.
 Declare Scope nPropL_scope.
 Delimit Scope nPropL_scope with nL.
 Bind Scope nPropL_scope with nPropL.
-Notation "% a" := (nps_var a) (at level 99, no associativity) : nPropS_scope.
-Notation "% a" := (npl_var a) (at level 99, no associativity) : nPropL_scope.
-Notation "%ₒ a" := (npl_ovar a) (at level 99, no associativity) : nPropL_scope.
-Notation "P ⊢!{ i @ I }{ Γ } Q" := (nps_deriv Γ I i P Q)
+Notation "% a" := (ns_var a) (at level 99, no associativity) : nPropS_scope.
+Notation "% a" := (nl_var a) (at level 99, no associativity) : nPropL_scope.
+Notation "%ₒ a" := (nl_ovar a) (at level 99, no associativity) : nPropL_scope.
+Notation "P ⊢!{ i @ I }{ Γ } Q" := (ns_deriv Γ I i P Q)
   (at level 99, Q at level 200, only parsing) : nPropS_scope.
-Notation "P ⊢!{ i @ I }{ Γ } Q" := (npl_deriv Γ I i P Q)
+Notation "P ⊢!{ i @ I }{ Γ } Q" := (nl_deriv Γ I i P Q)
   (only parsing): nPropL_scope.
-Notation "P ⊢!{ i }{ Γ } Q " := (nps_deriv Γ _ i P Q)
+Notation "P ⊢!{ i }{ Γ } Q " := (ns_deriv Γ _ i P Q)
   (at level 99, Q at level 200, only parsing) : nPropS_scope.
-Notation "P ⊢!{ i }{ Γ } Q" := (npl_deriv Γ _ i P Q)
+Notation "P ⊢!{ i }{ Γ } Q" := (nl_deriv Γ _ i P Q)
   (only parsing): nPropL_scope.
-Notation "P ⊢!{ i @ I } Q" := (nps_deriv _ I i P Q)
+Notation "P ⊢!{ i @ I } Q" := (ns_deriv _ I i P Q)
   (at level 99, Q at level 200, only parsing) : nPropS_scope.
-Notation "P ⊢!{ i @ I } Q" := (npl_deriv _ I i P Q)
+Notation "P ⊢!{ i @ I } Q" := (nl_deriv _ I i P Q)
   (only parsing): nPropL_scope.
-Notation "P ⊢!{ i } Q" := (nps_deriv _ _ i P Q)
+Notation "P ⊢!{ i } Q" := (ns_deriv _ _ i P Q)
   (at level 99, Q at level 200, format "P  ⊢!{ i }  Q") : nPropS_scope.
-Notation "P ⊢!{ i } Q" := (npl_deriv _ _ i P Q)
+Notation "P ⊢!{ i } Q" := (nl_deriv _ _ i P Q)
   (format "P  ⊢!{ i }  Q") : nPropL_scope.
-Notation "'emp'" := (nps_emp) : nPropS_scope.
-Notation "'emp'" := (npl_emp) : nPropL_scope.
-Notation "'⌜' φ '⌝'" := (nps_pure φ%type%stdpp%nola) : nPropS_scope.
-Notation "'⌜' φ '⌝'" := (npl_pure φ%type%stdpp%nola) : nPropL_scope.
-Notation "'True'" := (nps_pure True) : nPropS_scope.
-Notation "'True'" := (npl_pure True) : nPropL_scope.
-Notation "'False'" := (nps_pure False) : nPropS_scope.
-Notation "'False'" := (npl_pure False) : nPropL_scope.
-Infix "∧" := nps_and : nPropS_scope.
-Infix "∧" := npl_and : nPropL_scope.
-Notation "(∧)" := nps_and (only parsing) : nPropS_scope.
-Notation "(∧)" := npl_and (only parsing) : nPropL_scope.
-Infix "∨" := nps_or : nPropS_scope.
-Infix "∨" := npl_or : nPropL_scope.
-Notation "(∨)" := nps_or (only parsing) : nPropS_scope.
-Notation "(∨)" := npl_or (only parsing) : nPropL_scope.
-Infix "→" := nps_impl : nPropS_scope.
-Infix "→" := npl_impl : nPropL_scope.
+Notation "'emp'" := (ns_emp) : nPropS_scope.
+Notation "'emp'" := (nl_emp) : nPropL_scope.
+Notation "'⌜' φ '⌝'" := (ns_pure φ%type%stdpp%nola) : nPropS_scope.
+Notation "'⌜' φ '⌝'" := (nl_pure φ%type%stdpp%nola) : nPropL_scope.
+Notation "'True'" := (ns_pure True) : nPropS_scope.
+Notation "'True'" := (nl_pure True) : nPropL_scope.
+Notation "'False'" := (ns_pure False) : nPropS_scope.
+Notation "'False'" := (nl_pure False) : nPropL_scope.
+Infix "∧" := ns_and : nPropS_scope.
+Infix "∧" := nl_and : nPropL_scope.
+Notation "(∧)" := ns_and (only parsing) : nPropS_scope.
+Notation "(∧)" := nl_and (only parsing) : nPropL_scope.
+Infix "∨" := ns_or : nPropS_scope.
+Infix "∨" := nl_or : nPropL_scope.
+Notation "(∨)" := ns_or (only parsing) : nPropS_scope.
+Notation "(∨)" := nl_or (only parsing) : nPropL_scope.
+Infix "→" := ns_impl : nPropS_scope.
+Infix "→" := nl_impl : nPropL_scope.
 Notation "¬ P" := (P → False)%nS : nPropS_scope.
 Notation "¬ P" := (P → False)%nL : nPropL_scope.
-Infix "∗" := nps_sep : nPropS_scope.
-Infix "∗" := npl_sep : nPropL_scope.
-Notation "(∗)" := nps_sep (only parsing) : nPropS_scope.
-Notation "(∗)" := npl_sep (only parsing) : nPropL_scope.
-Infix "-∗" := nps_wand : nPropS_scope.
-Infix "-∗" := npl_wand : nPropL_scope.
-Notation "∀' Φ" := (nps_forall Φ)
+Infix "∗" := ns_sep : nPropS_scope.
+Infix "∗" := nl_sep : nPropL_scope.
+Notation "(∗)" := ns_sep (only parsing) : nPropS_scope.
+Notation "(∗)" := nl_sep (only parsing) : nPropL_scope.
+Infix "-∗" := ns_wand : nPropS_scope.
+Infix "-∗" := nl_wand : nPropL_scope.
+Notation "∀' Φ" := (ns_forall Φ)
   (at level 200, right associativity, only parsing) : nPropS_scope.
-Notation "∀' Φ" := (npl_forall Φ) (only parsing) : nPropL_scope.
+Notation "∀' Φ" := (nl_forall Φ) (only parsing) : nPropL_scope.
 Notation "∀ x .. z , P" :=
-  (nps_forall (λ x, .. (nps_forall (λ z, P%nS)) ..)) : nPropS_scope.
+  (ns_forall (λ x, .. (ns_forall (λ z, P%nS)) ..)) : nPropS_scope.
 Notation "∀ x .. z , P" :=
-  (npl_forall (λ x, .. (npl_forall (λ z, P%nL)) ..)) : nPropL_scope.
-Notation "∃' Φ" := (nps_exist Φ)
+  (nl_forall (λ x, .. (nl_forall (λ z, P%nL)) ..)) : nPropL_scope.
+Notation "∃' Φ" := (ns_exist Φ)
   (at level 200, right associativity, only parsing) : nPropS_scope.
-Notation "∃' Φ" := (npl_exist Φ) (only parsing) : nPropL_scope.
+Notation "∃' Φ" := (nl_exist Φ) (only parsing) : nPropL_scope.
 Notation "∃ x .. z , P" :=
-  (nps_exist (λ x, .. (nps_exist (λ z, P%nS)) ..)) : nPropS_scope.
+  (ns_exist (λ x, .. (ns_exist (λ z, P%nS)) ..)) : nPropS_scope.
 Notation "∃ x .. z , P" :=
-  (npl_exist (λ x, .. (npl_exist (λ z, P%nL)) ..)) : nPropL_scope.
-Notation "∀: A →nS , P" := (nps_so_forall A P)
+  (nl_exist (λ x, .. (nl_exist (λ z, P%nL)) ..)) : nPropL_scope.
+Notation "∀: A →nS , P" := (ns_so_forall A P)
   (at level 200, right associativity,
     format "'[' '[' ∀:  A  →nS ']' ,  '/' P ']'") : nPropS_scope.
-Notation "∀: A →nS , P" := (npl_so_forall A P) : nPropL_scope.
-Notation "∀: 'nS' , P" := (nps_so_forall unit P)
+Notation "∀: A →nS , P" := (nl_so_forall A P) : nPropL_scope.
+Notation "∀: 'nS' , P" := (ns_so_forall unit P)
   (at level 200, right associativity,
     format "'[' '[' ∀:  'nS' ']' ,  '/' P ']'") : nPropS_scope.
-Notation "∀: 'nS' , P" := (npl_so_forall unit P) : nPropL_scope.
-Notation "∃: A →nS , P" := (nps_so_exist A P)
+Notation "∀: 'nS' , P" := (nl_so_forall unit P) : nPropL_scope.
+Notation "∃: A →nS , P" := (ns_so_exist A P)
   (at level 200, right associativity,
   format "'[' '[' ∃:  A  →nS ']' ,  '/' P ']'") : nPropS_scope.
-Notation "∃: A →nS , P" := (npl_so_exist A P) : nPropL_scope.
-Notation "∃: 'nS' , P" := (nps_so_exist unit P)
+Notation "∃: A →nS , P" := (nl_so_exist A P) : nPropL_scope.
+Notation "∃: 'nS' , P" := (ns_so_exist unit P)
   (at level 200, right associativity,
   format "'[' '[' ∃:  'nS' ']' ,  '/' P ']'") : nPropS_scope.
-Notation "∃: 'nS' , P" := (npl_so_exist unit P) : nPropL_scope.
-Notation "□ P" := (nps_persistently P) : nPropS_scope.
-Notation "□ P" := (npl_persistently P) : nPropL_scope.
-Notation "■ P" := (nps_plainly P) : nPropS_scope.
-Notation "■ P" := (npl_plainly P) : nPropL_scope.
-Notation "▷{ Γ } P" := (nps_later Γ P)
+Notation "∃: 'nS' , P" := (nl_so_exist unit P) : nPropL_scope.
+Notation "□ P" := (ns_persistently P) : nPropS_scope.
+Notation "□ P" := (nl_persistently P) : nPropL_scope.
+Notation "■ P" := (ns_plainly P) : nPropS_scope.
+Notation "■ P" := (nl_plainly P) : nPropL_scope.
+Notation "▷{ Γ } P" := (ns_later Γ P)
   (at level 20, right associativity, only parsing) : nPropS_scope.
-Notation "▷{ Γ } P" := (npl_later Γ P) (only parsing) : nPropL_scope.
-Notation "▷ P" := (nps_later _ P) : nPropS_scope.
-Notation "▷ P" := (npl_later _ P) : nPropL_scope.
-Notation "|==> P" := (nps_bupd P) : nPropS_scope.
-Notation "|==> P" := (npl_bupd P) : nPropL_scope.
+Notation "▷{ Γ } P" := (nl_later Γ P) (only parsing) : nPropL_scope.
+Notation "▷ P" := (ns_later _ P) : nPropS_scope.
+Notation "▷ P" := (nl_later _ P) : nPropL_scope.
+Notation "|==> P" := (ns_bupd P) : nPropS_scope.
+Notation "|==> P" := (nl_bupd P) : nPropL_scope.
 
 (** ** [nlarge]: Turn [nPropS] into [nPropL] *)
 
@@ -258,7 +258,7 @@ Fixpoint nlarge {Ξ : nsx} {Γ Δ : nctx} (P : nPropS Ξ Γ Δ) : nPropL Ξ Γ �
   | (■ P)%nS => ■ nlarge P
   | (▷ P)%nS => ▷ P
   | (|==> P)%nS => |==> nlarge P
-  | nps_exs _ d Φᵤ Φₙₛ Φₙₗ => npl_exs _ d (nlarge ∘ Φᵤ) Φₙₛ Φₙₗ
+  | ns_exs _ d Φᵤ Φₙₛ Φₙₗ => nl_exs _ d (nlarge ∘ Φᵤ) Φₙₛ Φₙₗ
   end.
 
 (** ** [Nsmall]: [nPropL] that can be turned into [nPropS] *)
@@ -320,6 +320,6 @@ Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
   : @Nsmall Ξ Γ Δ (|==> P) := { nsmall := |==> nsmall P }.
 Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
 #[export] Program Instance nsmall_exs {Ξ Γ Δ d Φᵤ Φₙₛ Φₙₗ}
-  `{!∀ x, Nsmall (Φᵤ x)} : @Nsmall Ξ Γ Δ (npl_exs _ d Φᵤ Φₙₛ Φₙₗ) :=
-  { nsmall := nps_exs Γ d (λ x, nsmall (Φᵤ x)) Φₙₛ Φₙₗ}.
+  `{!∀ x, Nsmall (Φᵤ x)} : @Nsmall Ξ Γ Δ (nl_exs _ d Φᵤ Φₙₛ Φₙₗ) :=
+  { nsmall := ns_exs Γ d (λ x, nsmall (Φᵤ x)) Φₙₛ Φₙₗ}.
 Next Obligation. move=>/= >. f_equal. fun_ext=>/= ?. by rewrite nsmall_eq. Qed.
