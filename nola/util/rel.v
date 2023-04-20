@@ -69,7 +69,7 @@ Definition sim_gen {A B} (R : A → A → Prop) (R' : B → B → Prop)
   λ '(a, b), ∀ a', R a a' → ∃ b', R' b b' ∧ self (a', b').
 
 (** [sim_gen] is monotone *)
-#[export] Instance sim_gen_mono A B R R' : Mono1 (@sim_gen A B R R').
+#[export] Instance sim_gen_mono A B R R' : Mono₁₁ (@sim_gen A B R R').
 Proof.
   move=> φ ψ φψ [a b]/= W a' aa'. move: (W a' aa')=> [b' [bb' /φψ ψa'b']].
   by exists b'.

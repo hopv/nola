@@ -6,54 +6,54 @@ From nola Require Export prelude.
 
 (** Lifted [False], [True], [∨], [∧] and [→] *)
 
-Definition False1 {A} (a : A) : Prop := False.
-Definition True1 {A} (a : A) : Prop := True.
+Definition False₁ {A} (a : A) : Prop := False.
+Definition True₁ {A} (a : A) : Prop := True.
 
-Definition or1 {A} (φ ψ : A → Prop) a : Prop := φ a ∨ ψ a.
-Infix "∨1" := or1 (at level 50, left associativity).
-Notation "(∨1)" := or1 (only parsing) : nola_scope.
+Definition or₁ {A} (φ ψ : A → Prop) a : Prop := φ a ∨ ψ a.
+Infix "∨₁" := or₁ (at level 50, left associativity).
+Notation "(∨₁)" := or₁ (only parsing) : nola_scope.
 
-Definition and1 {A} (φ ψ : A → Prop) a : Prop := φ a ∧ ψ a.
-Infix "∧1" := and1 (at level 40, left associativity).
-Notation "(∧1)" := and1 (only parsing) : nola_scope.
+Definition and₁ {A} (φ ψ : A → Prop) a : Prop := φ a ∧ ψ a.
+Infix "∧₁" := and₁ (at level 40, left associativity).
+Notation "(∧₁)" := and₁ (only parsing) : nola_scope.
 
-Infix "→0" := impl (at level 99, right associativity).
-Notation "(→0)" := impl (only parsing) : nola_scope.
-Notation "(→0@{ A } )" := (@impl A) (only parsing) : nola_scope.
+Infix "→₀" := impl (at level 99, right associativity).
+Notation "(→₀)" := impl (only parsing) : nola_scope.
+Notation "(→₀@{ A } )" := (@impl A) (only parsing) : nola_scope.
 
-Definition impl1 {A} := pointwise_relation A impl.
-Infix "→1" := impl1 (at level 99, right associativity).
-Notation "(→1@{ A } )" := (@impl1 A) (only parsing) : nola_scope.
-Notation "(→1)" := (impl1) (only parsing) : nola_scope.
+Definition impl₁ {A} := pointwise_relation A impl.
+Infix "→₁" := impl₁ (at level 99, right associativity).
+Notation "(→₁@{ A } )" := (@impl₁ A) (only parsing) : nola_scope.
+Notation "(→₁)" := (impl₁) (only parsing) : nola_scope.
 
 (** Parameterized predicate weakened/strengthened by the parameter *)
 Definition por {A} (p : (A → Prop) → A → Prop) (φ : A → Prop) : A → Prop :=
-  p φ ∨1 φ.
+  p φ ∨₁ φ.
 Definition pand {A} (p : (A → Prop) → A → Prop) (φ : A → Prop) : A → Prop :=
-  p φ ∧1 φ.
+  p φ ∧₁ φ.
 
-(** ** [Mono1]: Monotonicity *)
+(** ** [Mono₁₁]: Monotonicity *)
 
-Notation Mono1' A B := (Proper ((→1@{A}) ==> (→1@{B}))) (only parsing).
-Notation Mono1 := (Mono1' _ _).
+Notation Mono₁₁' A B := (Proper ((→₁@{A}) ==> (→₁@{B}))) (only parsing).
+Notation Mono₁₁ := (Mono₁₁' _ _).
 
-(** Utility for [mono1] *)
+(** Utility for [Mono₁₁] *)
 
-Lemma use_mono1 `{monop : Mono1' A B p} φ ψ : (φ →1 ψ) → p φ →1 p ψ.
+Lemma use_mono₁₁ `{monop : Mono₁₁' A B p} φ ψ : (φ →₁ ψ) → p φ →₁ p ψ.
 Proof. by move=> /monop->. Qed.
 
-(** Proper instances for [Mono1] *)
+(** Proper instances for [Mono₁₁] *)
 
-#[export] Instance Mono1_flip `{Mono1' A B p} : Proper ((→1) --> flip (→1)) p.
-Proof. move=> ψ φ /=? a +. by apply use_mono1. Qed.
+#[export] Instance Mono₁₁_flip `{Mono₁₁' A B p} : Proper ((→₁) --> flip (→₁)) p.
+Proof. move=> ψ φ /=? a +. by apply use_mono₁₁. Qed.
 
-#[export] Instance Mono1_impl `{Mono1' A B p} :
-  Proper ((→1) ==> (=) ==> (→0)) p.
-Proof. move=> φ ψ /=? a _ <- +. by apply use_mono1. Qed.
+#[export] Instance Mono₁₁_impl `{Mono₁₁' A B p} :
+  Proper ((→₁) ==> (=) ==> (→₀)) p.
+Proof. move=> φ ψ /=? a _ <- +. by apply use_mono₁₁. Qed.
 
-#[export] Instance Mono1_flip_impl `{Mono1' A B p} :
-  Proper ((→1) --> (=) ==> flip (→0)) p.
-Proof. move=> ψ φ /=? a _ <- +. by apply use_mono1. Qed.
+#[export] Instance Mono₁₁_flip_impl `{Mono₁₁' A B p} :
+  Proper ((→₁) --> (=) ==> flip (→₀)) p.
+Proof. move=> ψ φ /=? a _ <- +. by apply use_mono₁₁. Qed.
 
 (** ** [pnu]: Parameterized greatest fixpoint *)
 
@@ -64,7 +64,7 @@ Section pnu.
   CoInductive pnu (φ : A → Prop) a : Prop := {
     (* The type is equivalent to [F (por pnu φ) a] if [F] is monotone;
       parameterization by [pnuor] serves for strict positivity *)
-    pnu_out : ∃ pnuor, (pnuor →1 por pnu φ) ∧ F pnuor a;
+    pnu_out : ∃ pnuor, (pnuor →₁ por pnu φ) ∧ F pnuor a;
   }.
 
   (** Fold [pnu] *)
@@ -72,50 +72,50 @@ Section pnu.
   Proof. move=> ?. split. exists (por pnu φ). split; by [move=> >|]. Qed.
 
   (** Unfold [pnu] *)
-  Lemma pnu_unfold `{Mono1 F} φ a : pnu φ a → F (por pnu φ) a.
+  Lemma pnu_unfold `{Mono₁₁ F} φ a : pnu φ a → F (por pnu φ) a.
   Proof. move=> /pnu_out[_[->]]. done. Qed.
 
   (** Monotonicity of [pnu] *)
-  #[export] Instance pnu_mono : Mono1 pnu.
+  #[export] Instance pnu_mono : Mono₁₁ pnu.
   Proof.
     move=> φ ψ φψ. cofix FIX=> a /pnu_out[pnuor[pnuorto ?]]. split.
     exists pnuor. split; [|done]=> ? /pnuorto[/FIX|/φψ]; by [left|right].
   Qed.
 
   (** Accumulate coinductive hypotheses *)
-  Lemma pnu_acc `{Mono1 F} {φ} ψ : (ψ →1 pnu (φ ∨1 ψ)) → ψ →1 pnu φ.
+  Lemma pnu_acc `{Mono₁₁ F} {φ} ψ : (ψ →₁ pnu (φ ∨₁ ψ)) → ψ →₁ pnu φ.
   Proof.
     move=> topnuφψ=> a /topnuφψ +. move: a. cofix FIX=> a /pnu_unfold ?.
-    split. exists (por pnu (φ ∨1 ψ)). split; [|done]. clear dependent a.
+    split. exists (por pnu (φ ∨₁ ψ)). split; [|done]. clear dependent a.
     move=> ? [/FIX|[|/topnuφψ/FIX]]; by [left|right|left].
   Qed.
 
   (** [nu]: Non-parameterized greatest fixpoint *)
-  Definition nu : A → Prop := pnu False1.
+  Definition nu : A → Prop := pnu False₁.
 
   (** Fold [nu] *)
-  Lemma nu_fold `{Mono1 F} a : F nu a → nu a.
+  Lemma nu_fold `{Mono₁₁ F} a : F nu a → nu a.
   Proof.
-    move=> Fnua. apply pnu_fold. move: Fnua. apply use_mono1. move{a}=> a nua.
-    left. move: nua. by apply use_mono1.
+    move=> Fnua. apply pnu_fold. move: Fnua. apply use_mono₁₁. move{a}=> a nua.
+    left. move: nua. by apply use_mono₁₁.
   Qed.
 
   (** Unfold [nu] *)
-  Lemma nu_unfold `{Mono1 F} a : nu a → F nu a.
-  Proof. move/pnu_unfold. apply use_mono1. move=> _ [//|[]]. Qed.
+  Lemma nu_unfold `{Mono₁₁ F} a : nu a → F nu a.
+  Proof. move/pnu_unfold. apply use_mono₁₁. move=> _ [//|[]]. Qed.
 
   (** Prove a lower bound of [nu] via [pnu] *)
-  Lemma nu_pnu `{Mono1 F} φ : (φ →1 pnu φ) → φ →1 nu.
+  Lemma nu_pnu `{Mono₁₁ F} φ : (φ →₁ pnu φ) → φ →₁ nu.
   Proof.
-    move=> φpnuφ. apply pnu_acc=> a /φpnuφ. apply use_mono1. move{a}=> a φa.
+    move=> φpnuφ. apply pnu_acc=> a /φpnuφ. apply use_mono₁₁. move{a}=> a φa.
     by right.
   Qed.
 
   (** Prove a lower bound of [nu] via [F] *)
-  Lemma nu_coind `{Mono1 F} φ : (φ →1 F φ) → φ →1 nu.
+  Lemma nu_coind `{Mono₁₁ F} φ : (φ →₁ F φ) → φ →₁ nu.
   Proof.
     move=> φFφ. apply nu_pnu=> a /φFφ Fφa. apply pnu_fold. move: Fφa.
-    apply use_mono1. move{a}=> a Fφa. by right.
+    apply use_mono₁₁. move{a}=> a Fφa. by right.
   Qed.
 End pnu.
 
@@ -131,7 +131,7 @@ Section pmu.
   Inductive pmu (φ : A → Prop) a : Prop := {
     (* The type is equivalent to [F (pand pmu φ) a] if [F] is monotone;
       parameterization by [pmuand] serves for strict positivity *)
-    pmu_out : ∃ pmuand, (pmuand →1 pand pmu φ) ∧ F pmuand a;
+    pmu_out : ∃ pmuand, (pmuand →₁ pand pmu φ) ∧ F pmuand a;
   }.
 
   (** Fold [pmu] *)
@@ -139,51 +139,51 @@ Section pmu.
   Proof. move=> ?. split. exists (pand pmu φ). split; by [move=> >|]. Qed.
 
   (** Unfold [pmu] *)
-  Lemma pmu_unfold `{Mono1 F} φ a : pmu φ a → F (pand pmu φ) a.
+  Lemma pmu_unfold `{Mono₁₁ F} φ a : pmu φ a → F (pand pmu φ) a.
   Proof. move=> /pmu_out[_[->]]. done. Qed.
 
   (** Monotonicity of [pmu] *)
-  #[export] Instance pmu_mono : Mono1 pmu.
+  #[export] Instance pmu_mono : Mono₁₁ pmu.
   Proof.
     move=> φ ψ φψ ++. fix FIX 2=> a /pmu_out[pmuand[pmuandto ?]]. split.
     exists pmuand. split; [|done]=> ? /pmuandto[/FIX+ /φψ]//.
   Qed.
 
   (** Accumulate inductive hypotheses *)
-  Lemma pmu_acc `{Mono1 F} {φ} ψ : (pmu (φ ∧1 ψ) →1 ψ) → pmu φ →1 ψ.
+  Lemma pmu_acc `{Mono₁₁ F} {φ} ψ : (pmu (φ ∧₁ ψ) →₁ ψ) → pmu φ →₁ ψ.
   Proof.
     move=> topmuφψ a pmuφa. apply topmuφψ. move: a pmuφa. fix FIX 2=> a.
     move=> [[pmuand[pmuandto Fpmuanda]]]. apply pmu_fold. move: Fpmuanda.
-    apply use_mono1. move{a}=> a /pmuandto[/FIX pmuφψa φa].
+    apply use_mono₁₁. move{a}=> a /pmuandto[/FIX pmuφψa φa].
     split; [done|]. split; [done|]. by apply topmuφψ.
   Qed.
 
   (** [mu]: Non-parameterized least fixpoint *)
-  Definition mu : A → Prop := pmu True1.
+  Definition mu : A → Prop := pmu True₁.
 
   (** Fold [mu] *)
-  Lemma mu_fold `{Mono1 F} a : F mu a → mu a.
+  Lemma mu_fold `{Mono₁₁ F} a : F mu a → mu a.
   Proof.
-    move=> Fmua. apply pmu_fold. move: Fmua. apply use_mono1. move{a}=> a mua.
-    split; [|done]. move: mua. by apply use_mono1.
+    move=> Fmua. apply pmu_fold. move: Fmua. apply use_mono₁₁. move{a}=> a mua.
+    split; [|done]. move: mua. by apply use_mono₁₁.
   Qed.
 
   (** Unfold [mu] *)
-  Lemma mu_unfold `{Mono1 F} a : mu a → F mu a.
-  Proof. move/pmu_unfold. apply use_mono1. by move=> ?[??]. Qed.
+  Lemma mu_unfold `{Mono₁₁ F} a : mu a → F mu a.
+  Proof. move/pmu_unfold. apply use_mono₁₁. by move=> ?[??]. Qed.
 
   (** Prove an upper bound of [mu] via [pmu] *)
-  Lemma mu_pmu `{Mono1 F} φ : (pmu φ →1 φ) → mu →1 φ.
+  Lemma mu_pmu `{Mono₁₁ F} φ : (pmu φ →₁ φ) → mu →₁ φ.
   Proof.
     move=> pmuφφ. apply pmu_acc=> a pmuandφa. apply pmuφφ. move: pmuandφa.
-    apply use_mono1. move{a}=> a [_]. done.
+    apply use_mono₁₁. move{a}=> a [_]. done.
   Qed.
 
   (** Prove an upper bound of [mu] via [F] *)
-  Lemma mu_ind `{Mono1 F} φ : (F φ →1 φ) → mu →1 φ.
+  Lemma mu_ind `{Mono₁₁ F} φ : (F φ →₁ φ) → mu →₁ φ.
   Proof.
     move=> Fφφ. apply mu_pmu=> a /pmu_unfold Fandφa. apply Fφφ. move: Fandφa.
-    apply use_mono1. move{a}=> a [_]. done.
+    apply use_mono₁₁. move{a}=> a [_]. done.
   Qed.
 End pmu.
 
