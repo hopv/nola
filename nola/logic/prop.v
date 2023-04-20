@@ -209,6 +209,14 @@ Notation "P ⊢!{ i }{ Γₒₛ ; Γₒₗ } Q " := (ns_deriv Γₒₛ Γₒₗ 
   (at level 99, Q at level 200, only parsing) : nPropS_scope.
 Notation "P ⊢!{ i }{ Γₒₛ ; Γₒₗ } Q" := (nl_deriv Γₒₛ Γₒₗ _ i P Q)
   (only parsing): nPropL_scope.
+Notation "P ⊢!{ i @ I }{ Γₒₛ } Q" := (ns_deriv Γₒₛ _ I i P Q)
+  (at level 99, Q at level 200, only parsing) : nPropS_scope.
+Notation "P ⊢!{ i @ I }{ Γₒₛ } Q" := (nl_deriv Γₒₛ _ I i P Q)
+  (only parsing): nPropL_scope.
+Notation "P ⊢!{ i }{ Γₒₛ } Q " := (ns_deriv Γₒₛ _ _ i P Q)
+  (at level 99, Q at level 200, only parsing) : nPropS_scope.
+Notation "P ⊢!{ i }{ Γₒₛ } Q" := (nl_deriv Γₒₛ _ _ i P Q)
+  (only parsing): nPropL_scope.
 Notation "P ⊢!{ i @ I } Q" := (ns_deriv _ _ I i P Q)
   (at level 99, Q at level 200, only parsing) : nPropS_scope.
 Notation "P ⊢!{ i @ I } Q" := (nl_deriv _ _ I i P Q)
@@ -297,6 +305,9 @@ Notation "▷{ Γₒₛ ; Γₒₗ } P" := (ns_later Γₒₛ Γₒₗ P)
   (at level 20, right associativity, only parsing) : nPropS_scope.
 Notation "▷{ Γₒₛ ; Γₒₗ } P" := (nl_later Γₒₛ Γₒₗ P)
   (only parsing) : nPropL_scope.
+Notation "▷{ Γₒₛ } P" := (ns_later Γₒₛ _ P)
+  (at level 20, right associativity, only parsing) : nPropS_scope.
+Notation "▷{ Γₒₛ } P" := (nl_later Γₒₛ _ P) (only parsing) : nPropL_scope.
 Notation "▷ P" := (ns_later _ _ P) : nPropS_scope.
 Notation "▷ P" := (nl_later _ _ P) : nPropL_scope.
 Notation "|==> P" := (ns_bupd P) : nPropS_scope.
