@@ -5,38 +5,52 @@ From iris.bi Require Import notation.
 
 (** ** [nsx]: Syntactic extension for [nProp] *)
 
-(** [nsxs]: Syntactic extension for both [nPropS] and [nPropL] *)
+(** [nesx]: Elemental syntactic extension *)
 
 #[projections(primitive)]
-Structure nsxs : Type := Nsxs {
-  (** Data *)
-  nsxs_data : Type;
+Structure nesx : Type := Nesx {
+  (** Proposition data *)
+  nesx_d :> Type;
   (** Parameter for usual [nPropS]/[nPropL] arguments *)
-  #[canonical=no] nsxs_paru : nsxs_data → Type;
+  #[canonical=no] nesx_pu : nesx_d → Type;
   (** Parameter for nominal [nPropS] arguments *)
-  #[canonical=no] nsxs_parns : nsxs_data → Type;
+  #[canonical=no] nesx_pns : nesx_d → Type;
   (** Parameter for nominal [nPropL] arguments *)
-  #[canonical=no] nsxs_parnl : nsxs_data → Type;
+  #[canonical=no] nesx_pnl : nesx_d → Type;
+}.
+Arguments nesx_pu {Ξ} d : rename.
+Arguments nesx_pns {Ξ} d : rename.
+Arguments nesx_pnl {Ξ} d : rename.
+
+(** [Nsubesx]: Inclusion between [nesx]s *)
+
+Class Nsubesx (Ξ' Ξ : nesx) := {
+  (** Inclusion between [nesx_d] *)
+  nsubesx_d : Ξ'.(nesx_d) → Ξ.(nesx_d);
+  (** Inclusion between [nesx_pu] *)
+  nsubesx_pu d : Ξ.(nesx_pu) (nsubesx_d d) → Ξ'.(nesx_pu) d;
+  (** Inclusion between [nesx_pns] *)
+  nsubesx_pns d : Ξ.(nesx_pns) (nsubesx_d d) → Ξ'.(nesx_pns) d;
+  (** Inclusion between [nesx_pnl] *)
+  nsubesx_pnl d : Ξ.(nesx_pnl) (nsubesx_d d) → Ξ'.(nesx_pnl) d;
+}.
+Notation "Ξ' ⊑esx Ξ" := (Nsubesx Ξ' Ξ) (at level 70, no associativity).
+
+(** [⊑esx] is reflexive *)
+#[export] Instance Nsubesx_refl {Ξ} : Ξ ⊑esx Ξ := {
+  nsubesx_d := id;
+  nsubesx_pu _ := id; nsubesx_pns _ := id; nsubesx_pnl _ := id;
 }.
 
-(** [nsxl]: Syntactic extension for [nPropL] only *)
+(** [nsx]: Syntactic extension for [nProp] *)
 
 #[projections(primitive)]
-Structure nsxl : Type := Nsxl {
-  (** Data *)
-  nsxl_data : Type;
-  (** Parameter for usual [nPropL] arguments *)
-  #[canonical=no] nsxl_paru : nsxl_data → Type;
-  (** Parameter for nominal [nPropS] arguments *)
-  #[canonical=no] nsxl_parns : nsxl_data → Type;
-  (** Parameter for nominal [nPropL] arguments *)
-  #[canonical=no] nsxl_parnl : nsxl_data → Type;
+Record nsx : Type := Nsx {
+  (** For both [nPropS] and [nPropL] *)
+  nsx_s : nesx;
+  (** For [nPropL] only *)
+  nsx_l : nesx;
 }.
-
-(** [nsx]: Syntactic extension for [nProp], combination of [nsxs] and [nsxl] *)
-
-#[projections(primitive)]
-Record nsx : Type := Nsx { nsx_s :> nsxs; nsx_l :> nsxl; }.
 
 (** ** [nctx]: Context of [nProp] *)
 
@@ -137,11 +151,12 @@ Inductive nPropS {Ξ : nsx} : nctx → Type :=
     nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ) → nPropS (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
 (** Basic update modality *)
 | ns_bupd {Γ} : nPropS Γ → nPropS Γ
-(** Extension by [Ξ.(nsx_s)] *)
-| ns_exs Γₒₛ {Γₛ} Γₒₗ {Γₗ} : let '(Nsxs _ Pᵤ Pₙₛ Pₙₗ) := Ξ.(nsx_s) in
-    ∀ d, (Pᵤ d → nPropS (Γₒₛ, Γₛ; Γₒₗ, Γₗ)) →
-    (Pₙₛ d → nPropS (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ)) →
-    (Pₙₗ d → nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ)) → nPropS (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
+(** Proposition by [Ξ.(nsx_s)] *)
+| ns_sxs Γₒₛ {Γₛ} Γₒₗ {Γₗ} d :
+    (Ξ.(nsx_s).(nesx_pu) d → nPropS (Γₒₛ, Γₛ; Γₒₗ, Γₗ)) →
+    (Ξ.(nsx_s).(nesx_pns) d → nPropS (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ)) →
+    (Ξ.(nsx_s).(nesx_pnl) d → nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ)) →
+    nPropS (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
 
 (** [nPropL]: Nola syntactic proposition, large
 
@@ -176,18 +191,46 @@ with nPropL {Ξ : nsx} : nctx → Type :=
 | nl_later Γₒₛ {Γₛ} Γₒₗ {Γₗ} :
     nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ) → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
 | nl_bupd {Γ} : nPropL Γ → nPropL Γ
-| nl_exs Γₒₛ {Γₛ} Γₒₗ {Γₗ} : let '(Nsxs _ Pᵤ Pₙₛ Pₙₗ) := Ξ.(nsx_s) in
-    ∀ d, (Pᵤ d → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)) →
-    (Pₙₛ d → nPropS (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ)) →
-    (Pₙₗ d → nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ)) → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
-(** Extension by [Ξ.(nsx_l)], [nPropL] only *)
-| nl_exl Γₒₛ {Γₛ} Γₒₗ {Γₗ} : let '(Nsxl _ Pᵤ Pₙₛ Pₙₗ) := Ξ.(nsx_l) in
-    ∀ d, (Pᵤ d → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)) →
-    (Pₙₛ d → nPropS (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ)) →
-    (Pₙₗ d → nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ)) → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ).
+| nl_sxs Γₒₛ {Γₛ} Γₒₗ {Γₗ} d :
+    (Ξ.(nsx_s).(nesx_pu) d → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)) →
+    (Ξ.(nsx_s).(nesx_pns) d → nPropS (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ)) →
+    (Ξ.(nsx_s).(nesx_pnl) d → nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ)) →
+    nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
+(** Proposition by [Ξ.(nsx_l)], [nPropL] only *)
+| nl_sxl Γₒₛ {Γₛ} Γₒₗ {Γₗ} d :
+    (Ξ.(nsx_l).(nesx_pu) d → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)) →
+    (Ξ.(nsx_l).(nesx_pns) d → nPropS (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ)) →
+    (Ξ.(nsx_l).(nesx_pnl) d → nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ)) →
+    nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ).
 
 Arguments nPropS Ξ Γ : clear implicits.
 Arguments nPropL Ξ Γ : clear implicits.
+
+(** Proposition by extension and inclusion *)
+
+Definition ns_subsxs Γₒₛ {Γₛ} Γₒₗ {Γₗ} `{Ξₛ ⊑esx Ξ.(nsx_s)} d
+  (Φᵤ : Ξₛ.(nesx_pu) d → nPropS Ξ (Γₒₛ, Γₛ; Γₒₗ, Γₗ))
+  (Φₙₛ : Ξₛ.(nesx_pns) d → nPropS Ξ (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ))
+  (Φₙₗ : Ξₛ.(nesx_pnl) d → nPropL Ξ (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ))
+  : nPropS Ξ (Γₒₛ, Γₛ; Γₒₗ, Γₗ) :=
+  ns_sxs Γₒₛ Γₒₗ (nsubesx_d d)
+    (Φᵤ ∘ nsubesx_pu d) (Φₙₛ ∘ nsubesx_pns d) (Φₙₗ ∘ nsubesx_pnl d).
+
+Definition nl_subsxs Γₒₛ {Γₛ} Γₒₗ {Γₗ} `{Ξₛ ⊑esx Ξ.(nsx_s)} d
+  (Φᵤ : Ξₛ.(nesx_pu) d → nPropL Ξ (Γₒₛ, Γₛ; Γₒₗ, Γₗ))
+  (Φₙₛ : Ξₛ.(nesx_pns) d → nPropS Ξ (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ))
+  (Φₙₗ : Ξₛ.(nesx_pnl) d → nPropL Ξ (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ))
+  : nPropL Ξ (Γₒₛ, Γₛ; Γₒₗ, Γₗ) :=
+  nl_sxs Γₒₛ Γₒₗ (nsubesx_d d)
+    (Φᵤ ∘ nsubesx_pu d) (Φₙₛ ∘ nsubesx_pns d) (Φₙₗ ∘ nsubesx_pnl d).
+
+Definition nl_subsxl Γₒₛ {Γₛ} Γₒₗ {Γₗ} `{Ξₛ ⊑esx Ξ.(nsx_l)} d
+  (Φᵤ : Ξₛ.(nesx_pu) d → nPropL Ξ (Γₒₛ, Γₛ; Γₒₗ, Γₗ))
+  (Φₙₛ : Ξₛ.(nesx_pns) d → nPropS Ξ (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ))
+  (Φₙₗ : Ξₛ.(nesx_pnl) d → nPropL Ξ (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ))
+  : nPropL Ξ (Γₒₛ, Γₛ; Γₒₗ, Γₗ) :=
+  nl_sxl Γₒₛ Γₒₗ (nsubesx_d d)
+    (Φᵤ ∘ nsubesx_pu d) (Φₙₛ ∘ nsubesx_pns d) (Φₙₗ ∘ nsubesx_pnl d).
 
 (** Notations for connectives *)
 Declare Scope nPropS_scope.
@@ -312,6 +355,16 @@ Notation "▷ P" := (ns_later _ _ P) : nPropS_scope.
 Notation "▷ P" := (nl_later _ _ P) : nPropL_scope.
 Notation "|==> P" := (ns_bupd P) : nPropS_scope.
 Notation "|==> P" := (nl_bupd P) : nPropL_scope.
+Notation "+!{ Γₒₛ ; Γₒₗ }" := (ns_subsxs Γₒₛ Γₒₗ) (only parsing) : nPropS_scope.
+Notation "+!{ Γₒₛ ; Γₒₗ }" := (nl_subsxs Γₒₛ Γₒₗ) (only parsing) : nPropL_scope.
+Notation "+!{ Γₒₛ }" := (ns_subsxs Γₒₛ _) (only parsing) : nPropS_scope.
+Notation "+!{ Γₒₛ }" := (nl_subsxs Γₒₛ _) (only parsing) : nPropL_scope.
+Notation "+!" := (ns_subsxs _ _) : nPropS_scope.
+Notation "+!" := (nl_subsxs _ _) : nPropL_scope.
+Notation "+!ₗ{ Γₒₛ ; Γₒₗ }" := (nl_subsxl Γₒₛ Γₒₗ) (only parsing)
+  : nPropL_scope.
+Notation "+!ₗ{ Γₒₛ }" := (nl_subsxl Γₒₛ _) (only parsing) : nPropL_scope.
+Notation "+!ₗ" := (nl_subsxl _ _) : nPropL_scope.
 
 (** ** [nlarge]: Turn [nPropS] into [nPropL] *)
 
@@ -337,7 +390,7 @@ Fixpoint nlarge {Ξ : nsx} {Γ : nctx} (P : nPropS Ξ Γ) : nPropL Ξ Γ :=
   | (■ P)%nS => ■ nlarge P
   | (▷ P)%nS => ▷ P
   | (|==> P)%nS => |==> nlarge P
-  | ns_exs _ _ d Φᵤ Φₙₛ Φₙₗ => nl_exs _ _ d (nlarge ∘ Φᵤ) Φₙₛ Φₙₗ
+  | ns_sxs _ _ d Φᵤ Φₙₛ Φₙₗ => nl_sxs _ _ d (nlarge ∘ Φᵤ) Φₙₛ Φₙₗ
   end.
 
 (** ** [Nsmall]: [nPropL] that can be turned into [nPropS] *)
@@ -406,7 +459,7 @@ Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
 #[export] Program Instance nsmall_bupd {Ξ Γ} `{!Nsmall P}
   : @Nsmall Ξ Γ (|==> P) := { nsmall := |==> nsmall P }.
 Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
-#[export] Program Instance nsmall_exs {Ξ Γ d Φᵤ Φₙₛ Φₙₗ}
-  `{!∀ x, Nsmall (Φᵤ x)} : @Nsmall Ξ Γ (nl_exs _ _ d Φᵤ Φₙₛ Φₙₗ) :=
-  { nsmall := ns_exs _ _ d (λ x, nsmall (Φᵤ x)) Φₙₛ Φₙₗ}.
+#[export] Program Instance nsmall_sxs {Ξ Γ d Φᵤ Φₙₛ Φₙₗ}
+  `{!∀ x, Nsmall (Φᵤ x)} : @Nsmall Ξ Γ (nl_sxs _ _ d Φᵤ Φₙₛ Φₙₗ) :=
+  { nsmall := ns_sxs _ _ d (λ x, nsmall (Φᵤ x)) Φₙₛ Φₙₗ}.
 Next Obligation. move=>/= >. f_equal. fun_ext=>/= ?. by rewrite nsmall_eq. Qed.
