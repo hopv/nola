@@ -113,8 +113,6 @@ Inductive nPropS {Ξ : nsx} : nctx → Type :=
 | ns_deriv Γₒₛ {Γₛ} Γₒₗ {Γₗ} (I : wft) :
     I → nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ) → nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ) →
     nPropS (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
-(** Empty proposition *)
-| ns_emp {Γ} : nPropS Γ
 (** Pure proposition *)
 | ns_pure {Γ} : Prop → nPropS Γ
 (** Conjunction *)
@@ -170,7 +168,6 @@ with nPropL {Ξ : nsx} : nctx → Type :=
 | nl_deriv Γₒₛ {Γₛ} Γₒₗ {Γₗ} (I : wft) :
     I → nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ) → nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ) →
     nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
-| nl_emp {Γ} : nPropL Γ
 | nl_pure {Γ} : Prop → nPropL Γ
 | nl_and {Γ} : nPropL Γ → nPropL Γ → nPropL Γ
 | nl_or {Γ} : nPropL Γ → nPropL Γ → nPropL Γ
@@ -269,8 +266,6 @@ Notation "P ⊢!{ i } Q" := (ns_deriv _ _ _ i P Q)
   (at level 99, Q at level 200, format "P  ⊢!{ i }  Q") : nPropS_scope.
 Notation "P ⊢!{ i } Q" := (nl_deriv _ _ _ i P Q)
   (format "P  ⊢!{ i }  Q") : nPropL_scope.
-Notation "'emp'" := (ns_emp) : nPropS_scope.
-Notation "'emp'" := (nl_emp) : nPropL_scope.
 Notation "'⌜' φ '⌝'" := (ns_pure φ%type%stdpp%nola) : nPropS_scope.
 Notation "'⌜' φ '⌝'" := (nl_pure φ%type%stdpp%nola) : nPropL_scope.
 Notation "'True'" := (ns_pure True) : nPropS_scope.
@@ -383,7 +378,6 @@ Fixpoint nlarge {Ξ : nsx} {Γ : nctx} (P : nPropS Ξ Γ) : nPropL Ξ Γ :=
   | (%ₛ a)%nS => %ₛ a
   | (%ₗ a)%nS => %ₗ a
   | (P ⊢!{i} Q)%nS => P ⊢!{i} Q
-  | emp%nS => emp
   | ⌜φ⌝%nS => ⌜φ⌝
   | (P ∧ Q)%nS => nlarge P ∧ nlarge Q
   | (P ∨ Q)%nS => nlarge P ∨ nlarge Q
@@ -423,8 +417,6 @@ Arguments nsmall {Ξ Γ} P {_}.
   := { nsmall := P ⊢!{i} Q; nsmall_eq := eq_refl }.
 #[export] Instance nsmall_pure {Ξ Γ φ} : @Nsmall Ξ Γ ⌜φ⌝ :=
   { nsmall := ⌜φ⌝; nsmall_eq := eq_refl }.
-#[export] Instance nsmall_emp {Ξ Γ} : @Nsmall Ξ Γ emp :=
-  { nsmall := emp; nsmall_eq := eq_refl }.
 #[export] Program Instance nsmall_and {Ξ Γ} `{!Nsmall P, !Nsmall Q}
   : @Nsmall Ξ Γ (P ∧ Q) := { nsmall := nsmall P ∧ nsmall Q }.
 Next Obligation. move=>/= >. by rewrite !nsmall_eq. Qed.
