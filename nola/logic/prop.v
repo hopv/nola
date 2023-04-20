@@ -166,7 +166,7 @@ with nPropL {Ξ : nsx} : nctx → Type :=
 | nl_vars {Γₒₛ Γₛ Γₒₗ Γₗ} : npick Γₛ → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
 | nl_varl {Γₒₛ Γₛ Γₒₗ Γₗ} : npick Γₗ → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
 (** Outer small variable, [nPropL] only *)
-| nl_varos {Γₒₛ Γₛ Γₒₗ Γₗ} : npick Γₛ → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
+| nl_varos {Γₒₛ Γₛ Γₒₗ Γₗ} : npick Γₒₛ → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
 | nl_deriv Γₒₛ {Γₛ} Γₒₗ {Γₗ} (I : wft) :
     I → nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ) → nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ) →
     nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
