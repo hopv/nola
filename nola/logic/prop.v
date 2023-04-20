@@ -413,8 +413,8 @@ Arguments nsmall {Ξ Γ} P {_}.
   { nsmall := %ₛ a; nsmall_eq := eq_refl }.
 #[export] Instance nsmall_varl {Ξ Γ a} : @Nsmall Ξ Γ (%ₗ a) :=
   { nsmall := %ₗ a; nsmall_eq := eq_refl }.
-#[export] Instance nsmall_deriv {Ξ Γ I i P Q} : @Nsmall Ξ Γ (P ⊢!{i @ I} Q)
-  := { nsmall := P ⊢!{i} Q; nsmall_eq := eq_refl }.
+#[export] Instance nsmall_deriv {Ξ Γ I i P Q} : @Nsmall Ξ Γ (P ⊢!{i @ I} Q) :=
+  { nsmall := P ⊢!{i} Q; nsmall_eq := eq_refl }.
 #[export] Instance nsmall_pure {Ξ Γ φ} : @Nsmall Ξ Γ ⌜φ⌝ :=
   { nsmall := ⌜φ⌝; nsmall_eq := eq_refl }.
 #[export] Program Instance nsmall_and {Ξ Γ} `{!Nsmall P, !Nsmall Q}
