@@ -50,14 +50,23 @@ Record nctx : Type := Nctx {
   nctx_os : nectx;
   (** Inner small proposition variables *)
   nctx_s : nectx;
+  (** Outer large proposition variables *)
+  nctx_ol : nectx;
+  (** Inner large proposition variables *)
+  nctx_l : nectx;
 }.
 
 Declare Scope nctx_scope.
 Delimit Scope nctx_scope with nctx.
 Bind Scope nctx_scope with nctx.
-Notation "( Γₒₛ ; Γₛ )" := (Nctx Γₒₛ Γₛ) : nctx_scope.
-Notation "( ; Γₛ )" := (Nctx ^[] Γₛ) (format "( ;  Γₛ )") : nctx_scope.
-Notation "( ; )" := (Nctx ^[] ^[]) (format "( ; )") : nctx_scope.
+Notation "( Γₒₛ , Γₛ ; Γₒₗ , Γₗ )" := (Nctx Γₒₛ Γₛ Γₒₗ Γₗ) : nctx_scope.
+Notation "( Γₛ ; Γₗ )" := (Nctx ^[] Γₛ ^[] Γₗ) : nctx_scope.
+Notation "( Γₒₛ , Γₛ ; )" := (Nctx Γₒₛ Γₛ ^[] ^[]) : nctx_scope.
+Notation "( Γₛ ; )" := (Nctx ^[] Γₛ ^[] ^[]) : nctx_scope.
+Notation "( ; Γₒₗ , Γₗ )" := (Nctx ^[] ^[] Γₒₗ Γₗ)
+  (format "( ;  Γₒₗ ,  Γₗ )") : nctx_scope.
+Notation "( ; Γₗ )" := (Nctx ^[] ^[] ^[] Γₗ) (format "( ;  Γₗ )") : nctx_scope.
+Notation "( ; )" := (Nctx ^[] ^[] ^[] ^[]) (format "( ; )") : nctx_scope.
 
 (** Pick one variable in an elemental context with an argument value *)
 Definition npick (Γₑ : nectx) : Type := [+] A ∈ Γₑ, A.
@@ -74,18 +83,21 @@ Definition npick (Γₑ : nectx) : Type := [+] A ∈ Γₑ, A.
   Connectives that operate on the context [Γ : nctx] take decomposed contexts
   [Γₒₛ, Γₛ] for smooth type inference
 
-  In nominal proposition arguments (e.g., [ns_deriv]'s arguments),
-  outer variables are flushed into inner, using the context [(; Γₒₛ ^++ Γₛ)];
-  for connectives with such arguments we make [Γₒₛ] explicit for the users
+  In nominal proposition arguments (e.g., [ns_deriv]'s arguments), outer
+  variables are flushed into inner, with the context [(Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ)];
+  for connectives with such arguments we make [Γₒₛ, Γₒₗ] explicit for the users
   to aid type inference around [^++] *)
 
 (** [nPropS]: Nola syntactic proposition, small *)
 Inductive nPropS {Ξ : nsx} : nctx → Type :=
-(** Inner variable *)
-| ns_var {Γₒₛ Γₛ} : npick Γₛ → nPropS (Γₒₛ; Γₛ)
+(** Inner small variable *)
+| ns_vars {Γₒₛ Γₛ Γₒₗ Γₗ} : npick Γₛ → nPropS (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
+(** Inner large variable *)
+| ns_varl {Γₒₛ Γₛ Γₒₗ Γₗ} : npick Γₗ → nPropS (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
 (** Judgment derivability *)
-| ns_deriv Γₒₛ {Γₛ} (I : wft) :
-    I → nPropL (; Γₒₛ ^++ Γₛ) → nPropL (; Γₒₛ ^++ Γₛ) → nPropS (Γₒₛ; Γₛ)
+| ns_deriv Γₒₛ {Γₛ} Γₒₗ {Γₗ} (I : wft) :
+    I → nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ) → nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ) →
+    nPropS (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
 (** Empty proposition *)
 | ns_emp {Γ} : nPropS Γ
 (** Pure proposition *)
@@ -104,32 +116,44 @@ Inductive nPropS {Ξ : nsx} : nctx → Type :=
 | ns_forall {Γ} {A : Type} : (A → nPropS Γ) → nPropS Γ
 (** Existential quantification *)
 | ns_exist {Γ} {A : Type} : (A → nPropS Γ) → nPropS Γ
-(** Second-order universal quantification over [A → nPropS] *)
-| ns_so_forall {Γₒₛ Γₛ} (A : Type) : nPropS (A ^:: Γₒₛ; Γₛ) → nPropS (Γₒₛ; Γₛ)
-(** Second-order existential quantification over [A → nPropS] *)
-| ns_so_exist {Γₒₛ Γₛ} (A : Type) : nPropS (A ^:: Γₒₛ; Γₛ) → nPropS (Γₒₛ; Γₛ)
+(** Universal quantification over [A → nPropS] *)
+| ns_ns_forall {Γₒₛ Γₛ Γₒₗ Γₗ} (A : Type) :
+    nPropS (A ^:: Γₒₛ, Γₛ; Γₒₗ, Γₗ) → nPropS (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
+(** Existential quantification over [A → nPropS] *)
+| ns_ns_exist {Γₒₛ Γₛ Γₒₗ Γₗ} (A : Type) :
+    nPropS (A ^:: Γₒₛ, Γₛ; Γₒₗ, Γₗ) → nPropS (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
+(** Universal quantification over [A → nPropL] *)
+| ns_nl_forall {Γₒₛ Γₛ Γₒₗ Γₗ} (A : Type) :
+    nPropS (Γₒₛ, Γₛ; A ^:: Γₒₗ, Γₗ) → nPropS (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
+(** Existential quantification over [A → nPropL] *)
+| ns_nl_exist {Γₒₛ Γₛ Γₒₗ Γₗ} (A : Type) :
+    nPropS (Γₒₛ, Γₛ; A ^:: Γₒₗ, Γₗ) → nPropS (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
 (** Persistence modality *)
 | ns_persistently {Γ} : nPropS Γ → nPropS Γ
 (** Plainly modality *)
 | ns_plainly {Γ} : nPropS Γ → nPropS Γ
 (** Later modality *)
-| ns_later Γₒₛ {Γₛ} : nPropL (; Γₒₛ ^++ Γₛ) → nPropS (Γₒₛ; Γₛ)
+| ns_later Γₒₛ {Γₛ} Γₒₗ {Γₗ} :
+    nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ) → nPropS (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
 (** Basic update modality *)
 | ns_bupd {Γ} : nPropS Γ → nPropS Γ
 (** Extension by [Ξ.(nsx_s)] *)
-| ns_exs Γₒₛ {Γₛ} : let '(Nsxs _ Pᵤ Pₙₛ Pₙₗ) := Ξ.(nsx_s) in
-    ∀ d, (Pᵤ d → nPropS (Γₒₛ; Γₛ)) → (Pₙₛ d → nPropS (; Γₒₛ ^++ Γₛ)) →
-    (Pₙₗ d → nPropL (; Γₒₛ ^++ Γₛ)) → nPropS (Γₒₛ; Γₛ)
+| ns_exs Γₒₛ {Γₛ} Γₒₗ {Γₗ} : let '(Nsxs _ Pᵤ Pₙₛ Pₙₗ) := Ξ.(nsx_s) in
+    ∀ d, (Pᵤ d → nPropS (Γₒₛ, Γₛ; Γₒₗ, Γₗ)) →
+    (Pₙₛ d → nPropS (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ)) →
+    (Pₙₗ d → nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ)) → nPropS (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
 
 (** [nPropL]: Nola syntactic proposition, large
 
   Most connectives are the same as [nPropS] *)
 with nPropL {Ξ : nsx} : nctx → Type :=
-| nl_var {Γₒₛ Γₛ} : npick Γₛ → nPropL (Γₒₛ; Γₛ)
-(** Outer variable, [nPropL] only *)
-| nl_ovar {Γₒₛ Γₛ} : npick Γₛ → nPropL (Γₒₛ; Γₛ)
-| nl_deriv Γₒₛ {Γₛ} (I : wft) :
-    I → nPropL (; Γₒₛ ^++ Γₛ) → nPropL (; Γₒₛ ^++ Γₛ) → nPropL (Γₒₛ; Γₛ)
+| nl_vars {Γₒₛ Γₛ Γₒₗ Γₗ} : npick Γₛ → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
+| nl_varl {Γₒₛ Γₛ Γₒₗ Γₗ} : npick Γₗ → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
+(** Outer small variable, [nPropL] only *)
+| nl_varos {Γₒₛ Γₛ Γₒₗ Γₗ} : npick Γₛ → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
+| nl_deriv Γₒₛ {Γₛ} Γₒₗ {Γₗ} (I : wft) :
+    I → nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ) → nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ) →
+    nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
 | nl_emp {Γ} : nPropL Γ
 | nl_pure {Γ} : Prop → nPropL Γ
 | nl_and {Γ} : nPropL Γ → nPropL Γ → nPropL Γ
@@ -139,19 +163,28 @@ with nPropL {Ξ : nsx} : nctx → Type :=
 | nl_wand {Γ} : nPropL Γ → nPropL Γ → nPropL Γ
 | nl_forall {Γ} {A : Type} : (A → nPropL Γ) → nPropL Γ
 | nl_exist {Γ} {A : Type} : (A → nPropL Γ) → nPropL Γ
-| nl_so_forall {Γₒₛ Γₛ} (A : Type) : nPropL (A ^:: Γₒₛ; Γₛ) → nPropL (Γₒₛ; Γₛ)
-| nl_so_exist {Γₒₛ Γₛ} (A : Type) : nPropL (A ^:: Γₒₛ; Γₛ) → nPropL (Γₒₛ; Γₛ)
+| nl_ns_forall {Γₒₛ Γₛ Γₒₗ Γₗ} (A : Type) :
+    nPropL (A ^:: Γₒₛ, Γₛ; Γₒₗ, Γₗ) → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
+| nl_ns_exist {Γₒₛ Γₛ Γₒₗ Γₗ} (A : Type) :
+    nPropL (A ^:: Γₒₛ, Γₛ; Γₒₗ, Γₗ) → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
+| nl_nl_forall {Γₒₛ Γₛ Γₒₗ Γₗ} (A : Type) :
+    nPropL (Γₒₛ, Γₛ; A ^:: Γₒₗ, Γₗ) → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
+| nl_nl_exist {Γₒₛ Γₛ Γₒₗ Γₗ} (A : Type) :
+    nPropL (Γₒₛ, Γₛ; A ^:: Γₒₗ, Γₗ) → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
 | nl_persistently {Γ} : nPropL Γ → nPropL Γ
 | nl_plainly {Γ} : nPropL Γ → nPropL Γ
-| nl_later Γₒₛ {Γₛ} : nPropL (; Γₒₛ ^++ Γₛ) → nPropL (Γₒₛ; Γₛ)
+| nl_later Γₒₛ {Γₛ} Γₒₗ {Γₗ} :
+    nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ) → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
 | nl_bupd {Γ} : nPropL Γ → nPropL Γ
-| nl_exs Γₒₛ {Γₛ} : let '(Nsxs _ Pᵤ Pₙₛ Pₙₗ) := Ξ.(nsx_s) in
-    ∀ d, (Pᵤ d → nPropL (Γₒₛ; Γₛ)) → (Pₙₛ d → nPropS (; Γₒₛ ^++ Γₛ)) →
-    (Pₙₗ d → nPropL (; Γₒₛ ^++ Γₛ)) → nPropL (Γₒₛ; Γₛ)
+| nl_exs Γₒₛ {Γₛ} Γₒₗ {Γₗ} : let '(Nsxs _ Pᵤ Pₙₛ Pₙₗ) := Ξ.(nsx_s) in
+    ∀ d, (Pᵤ d → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)) →
+    (Pₙₛ d → nPropS (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ)) →
+    (Pₙₗ d → nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ)) → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
 (** Extension by [Ξ.(nsx_l)], [nPropL] only *)
-| nl_exl Γₒₛ {Γₛ} : let '(Nsxl _ Pᵤ Pₙₛ Pₙₗ) := Ξ.(nsx_l) in
-    ∀ d, (Pᵤ d → nPropL (Γₒₛ; Γₛ)) → (Pₙₛ d → nPropS (; Γₒₛ ^++ Γₛ)) →
-    (Pₙₗ d → nPropL (; Γₒₛ ^++ Γₛ)) → nPropL (Γₒₛ; Γₛ).
+| nl_exl Γₒₛ {Γₛ} Γₒₗ {Γₗ} : let '(Nsxl _ Pᵤ Pₙₛ Pₙₗ) := Ξ.(nsx_l) in
+    ∀ d, (Pᵤ d → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)) →
+    (Pₙₛ d → nPropS (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ)) →
+    (Pₙₗ d → nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ)) → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ).
 
 Arguments nPropS Ξ Γ : clear implicits.
 Arguments nPropL Ξ Γ : clear implicits.
@@ -163,24 +196,26 @@ Bind Scope nPropS_scope with nPropS.
 Declare Scope nPropL_scope.
 Delimit Scope nPropL_scope with nL.
 Bind Scope nPropL_scope with nPropL.
-Notation "% a" := (ns_var a) (at level 99, no associativity) : nPropS_scope.
-Notation "% a" := (nl_var a) (at level 99, no associativity) : nPropL_scope.
-Notation "%ₒ a" := (nl_ovar a) (at level 99, no associativity) : nPropL_scope.
-Notation "P ⊢!{ i @ I }{ Γₒₛ } Q" := (ns_deriv Γₒₛ I i P Q)
+Notation "%ₛ a" := (ns_vars a) (at level 99, no associativity) : nPropS_scope.
+Notation "%ₛ a" := (nl_vars a) (at level 99, no associativity) : nPropL_scope.
+Notation "%ₗ a" := (ns_varl a) (at level 99, no associativity) : nPropS_scope.
+Notation "%ₗ a" := (nl_varl a) (at level 99, no associativity) : nPropL_scope.
+Notation "%ₒₛ a" := (nl_varos a) (at level 99, no associativity) : nPropL_scope.
+Notation "P ⊢!{ i @ I }{ Γₒₛ ; Γₒₗ } Q" := (ns_deriv Γₒₛ Γₒₗ I i P Q)
   (at level 99, Q at level 200, only parsing) : nPropS_scope.
-Notation "P ⊢!{ i @ I }{ Γₒₛ } Q" := (nl_deriv Γₒₛ I i P Q)
+Notation "P ⊢!{ i @ I }{ Γₒₛ ; Γₒₗ } Q" := (nl_deriv Γₒₛ Γₒₗ I i P Q)
   (only parsing): nPropL_scope.
-Notation "P ⊢!{ i }{ Γₒₛ } Q " := (ns_deriv Γₒₛ _ i P Q)
+Notation "P ⊢!{ i }{ Γₒₛ ; Γₒₗ } Q " := (ns_deriv Γₒₛ Γₒₗ _ i P Q)
   (at level 99, Q at level 200, only parsing) : nPropS_scope.
-Notation "P ⊢!{ i }{ Γₒₛ } Q" := (nl_deriv Γₒₛ _ i P Q)
+Notation "P ⊢!{ i }{ Γₒₛ ; Γₒₗ } Q" := (nl_deriv Γₒₛ Γₒₗ _ i P Q)
   (only parsing): nPropL_scope.
-Notation "P ⊢!{ i @ I } Q" := (ns_deriv _ I i P Q)
+Notation "P ⊢!{ i @ I } Q" := (ns_deriv _ _ I i P Q)
   (at level 99, Q at level 200, only parsing) : nPropS_scope.
-Notation "P ⊢!{ i @ I } Q" := (nl_deriv _ I i P Q)
+Notation "P ⊢!{ i @ I } Q" := (nl_deriv _ _ I i P Q)
   (only parsing): nPropL_scope.
-Notation "P ⊢!{ i } Q" := (ns_deriv _ _ i P Q)
+Notation "P ⊢!{ i } Q" := (ns_deriv _ _ _ i P Q)
   (at level 99, Q at level 200, format "P  ⊢!{ i }  Q") : nPropS_scope.
-Notation "P ⊢!{ i } Q" := (nl_deriv _ _ i P Q)
+Notation "P ⊢!{ i } Q" := (nl_deriv _ _ _ i P Q)
   (format "P  ⊢!{ i }  Q") : nPropL_scope.
 Notation "'emp'" := (ns_emp) : nPropS_scope.
 Notation "'emp'" := (nl_emp) : nPropL_scope.
@@ -222,31 +257,48 @@ Notation "∃ x .. z , P" :=
   (ns_exist (λ x, .. (ns_exist (λ z, P%nS)) ..)) : nPropS_scope.
 Notation "∃ x .. z , P" :=
   (nl_exist (λ x, .. (nl_exist (λ z, P%nL)) ..)) : nPropL_scope.
-Notation "∀: A →nS , P" := (ns_so_forall A P)
+Notation "∀: A →nS , P" := (ns_ns_forall A P)
   (at level 200, right associativity,
     format "'[' '[' ∀:  A  →nS ']' ,  '/' P ']'") : nPropS_scope.
-Notation "∀: A →nS , P" := (nl_so_forall A P) : nPropL_scope.
-Notation "∀: 'nS' , P" := (ns_so_forall unit P)
+Notation "∀: A →nS , P" := (nl_ns_forall A P) : nPropL_scope.
+Notation "∀: 'nS' , P" := (ns_ns_forall unit P)
   (at level 200, right associativity,
     format "'[' '[' ∀:  'nS' ']' ,  '/' P ']'") : nPropS_scope.
-Notation "∀: 'nS' , P" := (nl_so_forall unit P) : nPropL_scope.
-Notation "∃: A →nS , P" := (ns_so_exist A P)
+Notation "∀: 'nS' , P" := (nl_ns_forall unit P) : nPropL_scope.
+Notation "∃: A →nS , P" := (ns_ns_exist A P)
   (at level 200, right associativity,
   format "'[' '[' ∃:  A  →nS ']' ,  '/' P ']'") : nPropS_scope.
-Notation "∃: A →nS , P" := (nl_so_exist A P) : nPropL_scope.
-Notation "∃: 'nS' , P" := (ns_so_exist unit P)
+Notation "∃: A →nS , P" := (nl_ns_exist A P) : nPropL_scope.
+Notation "∃: 'nS' , P" := (ns_ns_exist unit P)
   (at level 200, right associativity,
   format "'[' '[' ∃:  'nS' ']' ,  '/' P ']'") : nPropS_scope.
-Notation "∃: 'nS' , P" := (nl_so_exist unit P) : nPropL_scope.
+Notation "∃: 'nS' , P" := (nl_ns_exist unit P) : nPropL_scope.
+Notation "∀: A →nL , P" := (ns_nl_forall A P)
+  (at level 200, right associativity,
+    format "'[' '[' ∀:  A  →nL ']' ,  '/' P ']'") : nPropS_scope.
+Notation "∀: A →nL , P" := (nl_nl_forall A P) : nPropL_scope.
+Notation "∀: 'nL' , P" := (ns_nl_forall unit P)
+  (at level 200, right associativity,
+    format "'[' '[' ∀:  'nL' ']' ,  '/' P ']'") : nPropS_scope.
+Notation "∀: 'nL' , P" := (nl_nl_forall unit P) : nPropL_scope.
+Notation "∃: A →nL , P" := (ns_nl_exist A P)
+  (at level 200, right associativity,
+  format "'[' '[' ∃:  A  →nL ']' ,  '/' P ']'") : nPropS_scope.
+Notation "∃: A →nL , P" := (nl_nl_exist A P) : nPropL_scope.
+Notation "∃: 'nL' , P" := (ns_nl_exist unit P)
+  (at level 200, right associativity,
+  format "'[' '[' ∃:  'nL' ']' ,  '/' P ']'") : nPropS_scope.
+Notation "∃: 'nL' , P" := (nl_nl_exist unit P) : nPropL_scope.
 Notation "□ P" := (ns_persistently P) : nPropS_scope.
 Notation "□ P" := (nl_persistently P) : nPropL_scope.
 Notation "■ P" := (ns_plainly P) : nPropS_scope.
 Notation "■ P" := (nl_plainly P) : nPropL_scope.
-Notation "▷{ Γₒₛ } P" := (ns_later Γₒₛ P)
+Notation "▷{ Γₒₛ ; Γₒₗ } P" := (ns_later Γₒₛ Γₒₗ P)
   (at level 20, right associativity, only parsing) : nPropS_scope.
-Notation "▷{ Γₒₛ } P" := (nl_later Γₒₛ P) (only parsing) : nPropL_scope.
-Notation "▷ P" := (ns_later _ P) : nPropS_scope.
-Notation "▷ P" := (nl_later _ P) : nPropL_scope.
+Notation "▷{ Γₒₛ ; Γₒₗ } P" := (nl_later Γₒₛ Γₒₗ P)
+  (only parsing) : nPropL_scope.
+Notation "▷ P" := (ns_later _ _ P) : nPropS_scope.
+Notation "▷ P" := (nl_later _ _ P) : nPropL_scope.
 Notation "|==> P" := (ns_bupd P) : nPropS_scope.
 Notation "|==> P" := (nl_bupd P) : nPropL_scope.
 
@@ -254,7 +306,8 @@ Notation "|==> P" := (nl_bupd P) : nPropL_scope.
 
 Fixpoint nlarge {Ξ : nsx} {Γ : nctx} (P : nPropS Ξ Γ) : nPropL Ξ Γ :=
   match P with
-  | (% a)%nS => % a
+  | (%ₛ a)%nS => %ₛ a
+  | (%ₗ a)%nS => %ₗ a
   | (P ⊢!{i} Q)%nS => P ⊢!{i} Q
   | emp%nS => emp
   | ⌜φ⌝%nS => ⌜φ⌝
@@ -267,11 +320,13 @@ Fixpoint nlarge {Ξ : nsx} {Γ : nctx} (P : nPropS Ξ Γ) : nPropL Ξ Γ :=
   | (∃' Φ)%nS => ∃' nlarge ∘ Φ
   | (∀: _ →nS, P)%nS => ∀: _ →nS, nlarge P
   | (∃: _ →nS, P)%nS => ∃: _ →nS, nlarge P
+  | (∀: _ →nL, P)%nS => ∀: _ →nL, nlarge P
+  | (∃: _ →nL, P)%nS => ∃: _ →nL, nlarge P
   | (□ P)%nS => □ nlarge P
   | (■ P)%nS => ■ nlarge P
   | (▷ P)%nS => ▷ P
   | (|==> P)%nS => |==> nlarge P
-  | ns_exs _ d Φᵤ Φₙₛ Φₙₗ => nl_exs _ d (nlarge ∘ Φᵤ) Φₙₛ Φₙₗ
+  | ns_exs _ _ d Φᵤ Φₙₛ Φₙₗ => nl_exs _ _ d (nlarge ∘ Φᵤ) Φₙₛ Φₙₗ
   end.
 
 (** ** [Nsmall]: [nPropL] that can be turned into [nPropS] *)
@@ -286,8 +341,10 @@ Arguments nsmall {Ξ Γ} P {_}.
 
 (** [Nsmall] instances *)
 
-#[export] Instance nsmall_var {Ξ Γ a} : @Nsmall Ξ Γ (% a) :=
-  { nsmall := % a; nsmall_eq := eq_refl }.
+#[export] Instance nsmall_vars {Ξ Γ a} : @Nsmall Ξ Γ (%ₛ a) :=
+  { nsmall := %ₛ a; nsmall_eq := eq_refl }.
+#[export] Instance nsmall_varl {Ξ Γ a} : @Nsmall Ξ Γ (%ₗ a) :=
+  { nsmall := %ₗ a; nsmall_eq := eq_refl }.
 #[export] Instance nsmall_deriv {Ξ Γ I i P Q} : @Nsmall Ξ Γ (P ⊢!{i @ I} Q)
   := { nsmall := P ⊢!{i} Q; nsmall_eq := eq_refl }.
 #[export] Instance nsmall_pure {Ξ Γ φ} : @Nsmall Ξ Γ ⌜φ⌝ :=
@@ -315,11 +372,17 @@ Next Obligation. move=>/= >. f_equal. fun_ext=>/= ?. by rewrite nsmall_eq. Qed.
 #[export] Program Instance nsmall_exist {Ξ Γ} `{!∀ x : A, Nsmall (Φ x)}
   : @Nsmall Ξ Γ (∃' Φ) := { nsmall := ∃ x, nsmall (Φ x) }.
 Next Obligation. move=>/= >. f_equal. fun_ext=>/= ?. by rewrite nsmall_eq. Qed.
-#[export] Program Instance nsmall_so_forall {Ξ Γ A} `{!Nsmall P}
+#[export] Program Instance nsmall_ns_forall {Ξ Γ A} `{!Nsmall P}
   : @Nsmall Ξ Γ (∀: A →nS, P) := { nsmall := ∀: _ →nS, nsmall P }.
 Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
-#[export] Program Instance nsmall_so_exist {Ξ Γ A} `{!Nsmall P}
+#[export] Program Instance nsmall_ns_exist {Ξ Γ A} `{!Nsmall P}
   : @Nsmall Ξ Γ (∃: A →nS, P) := { nsmall := ∃: _ →nS, nsmall P }.
+Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
+#[export] Program Instance nsmall_nl_forall {Ξ Γ A} `{!Nsmall P}
+  : @Nsmall Ξ Γ (∀: A →nL, P) := { nsmall := ∀: _ →nL, nsmall P }.
+Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
+#[export] Program Instance nsmall_nl_exist {Ξ Γ A} `{!Nsmall P}
+  : @Nsmall Ξ Γ (∃: A →nL, P) := { nsmall := ∃: _ →nL, nsmall P }.
 Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
 #[export] Program Instance nsmall_persistently {Ξ Γ} `{!Nsmall P}
   : @Nsmall Ξ Γ (□ P) := { nsmall := □ nsmall P }.
@@ -333,6 +396,6 @@ Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
   : @Nsmall Ξ Γ (|==> P) := { nsmall := |==> nsmall P }.
 Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
 #[export] Program Instance nsmall_exs {Ξ Γ d Φᵤ Φₙₛ Φₙₗ}
-  `{!∀ x, Nsmall (Φᵤ x)} : @Nsmall Ξ Γ (nl_exs _ d Φᵤ Φₙₛ Φₙₗ) :=
-  { nsmall := ns_exs _ d (λ x, nsmall (Φᵤ x)) Φₙₛ Φₙₗ}.
+  `{!∀ x, Nsmall (Φᵤ x)} : @Nsmall Ξ Γ (nl_exs _ _ d Φᵤ Φₙₛ Φₙₗ) :=
+  { nsmall := ns_exs _ _ d (λ x, nsmall (Φᵤ x)) Φₙₛ Φₙₗ}.
 Next Obligation. move=>/= >. f_equal. fun_ext=>/= ?. by rewrite nsmall_eq. Qed.
