@@ -107,10 +107,17 @@ Inductive lsum {T} (F : T → Type) : tlist T → Type :=
 Arguments cbyhd {T F t ts} _.
 Arguments cbytl {T F t ts} _.
 
-Notation "# x" := (cbyhd x)
-  (at level 20, right associativity, format "#  x") : nola_scope.
-Notation "+. x" := (cbytl x)
-  (at level 20, right associativity, format "+. x") : nola_scope.
+Notation "#0 a" := (cbyhd a) (at level 20) : nola_scope.
+Notation "+/ a" := (cbytl a) (at level 20, right associativity) : nola_scope.
+Notation "#1 a" := (+/ #0 a) (at level 20) : nola_scope.
+Notation "#2 a" := (+/ #1 a) (at level 20) : nola_scope.
+Notation "#3 a" := (+/ #2 a) (at level 20) : nola_scope.
+Notation "#4 a" := (+/ #3 a) (at level 20) : nola_scope.
+Notation "#5 a" := (+/ #4 a) (at level 20) : nola_scope.
+Notation "#6 a" := (+/ #5 a) (at level 20) : nola_scope.
+Notation "#7 a" := (+/ #6 a) (at level 20) : nola_scope.
+Notation "#8 a" := (+/ #7 a) (at level 20) : nola_scope.
+Notation "#9 a" := (+/ #8 a) (at level 20) : nola_scope.
 Notation "[+] t ∈ ts , A" := (lsum (λ t, A) ts)
   (at level 200, ts at level 10, t binder, right associativity) : nola_scope.
 
@@ -118,8 +125,8 @@ Notation "[+] t ∈ ts , A" := (lsum (λ t, A) ts)
 Fixpoint cbylapp {T} {F : T → Type} {ts us : tlist T}
   (x : [+] t ∈ ts, F t) : [+] t ∈ ts ^++ us, F t :=
   match x with
-  | # x => # x
-  | +. x => +. cbylapp x
+  | #0 x => #0 x
+  | +/ x => +/ cbylapp x
   end.
 
 (** Lift [[+] t ∈ us, F t] into [[+] t ∈ ts ^++ us, F t] *)
@@ -127,7 +134,7 @@ Fixpoint cbyrapp {T} {F : T → Type} {ts us : tlist T}
   (x : [+] t ∈ us, F t) : [+] t ∈ ts ^++ us, F t :=
   match ts with
   | ^[] => x
-  | _ ^:: _ => +. cbyrapp x
+  | _ ^:: _ => +/ cbyrapp x
   end.
 
 (** Apply a function of [plist] to a value of [csum] *)
@@ -135,8 +142,8 @@ Reserved Infix "-$+" (at level 20, no associativity).
 Fixpoint pcapply {T} {F : T → Type} {A : Type} {ts : tlist T}
   (fs : [*] t ∈ ts, F t → A) (x : [+] t ∈ ts, F t) : A :=
   match x, fs with
-  | # x, f -:: _ => f x
-  | +. x, _ -:: fs => fs -$+ x
+  | #0 x, f -:: _ => f x
+  | +/ x, _ -:: fs => fs -$+ x
   end
 where "fs -$+ x" := (pcapply fs x) : nola_scope.
 
@@ -146,7 +153,7 @@ Fixpoint cmap {T} {F G : T → Type} (f : ∀ t, F t → G t) {ts : tlist T}
   (x : [+] t ∈ ts, F t) : [+] t ∈ ts, G t :=
   match ts, x with
   | ^[], _ => match x with end
-  | _ ^:: _, # x => # f _ x
-  | _ ^:: _, +. x => +. (f +<$> x)
+  | _ ^:: _, #0 x => #0 f _ x
+  | _ ^:: _, +/ x => +/ (f +<$> x)
   end
 where "f +<$> x" := (cmap f x) : nola_scope.
