@@ -13,10 +13,10 @@ Structure nsxs : Type := Nsxs {
   nsxs_data : Type;
   (** Parameter for usual [nPropS]/[nPropL] arguments *)
   #[canonical=no] nsxs_paru : nsxs_data → Type;
-  (** Parameter for contractive [nPropS] arguments *)
-  #[canonical=no] nsxs_parcs : nsxs_data → Type;
-  (** Parameter for contractive [nPropL] arguments *)
-  #[canonical=no] nsxs_parcl : nsxs_data → Type;
+  (** Parameter for nominal [nPropS] arguments *)
+  #[canonical=no] nsxs_parns : nsxs_data → Type;
+  (** Parameter for nominal [nPropL] arguments *)
+  #[canonical=no] nsxs_parnl : nsxs_data → Type;
 }.
 
 (** [nsxl]: Syntactic extension for [nPropL] only *)
@@ -27,10 +27,10 @@ Structure nsxl : Type := Nsxl {
   nsxl_data : Type;
   (** Parameter for usual [nPropL] arguments *)
   #[canonical=no] nsxl_paru : nsxl_data → Type;
-  (** Parameter for contractive [nPropS] arguments *)
-  #[canonical=no] nsxl_parcs : nsxl_data → Type;
-  (** Parameter for contractive [nPropL] arguments *)
-  #[canonical=no] nsxl_parcl : nsxl_data → Type;
+  (** Parameter for nominal [nPropS] arguments *)
+  #[canonical=no] nsxl_parns : nsxl_data → Type;
+  (** Parameter for nominal [nPropL] arguments *)
+  #[canonical=no] nsxl_parnl : nsxl_data → Type;
 }.
 
 (** [nsx]: Syntactic extension for [nProp], combination of [nsxs] and [nsxl] *)
@@ -101,9 +101,9 @@ Inductive nPropS {Ξ : nsx} : tlist Type → tlist Type → Type :=
 (** Basic update modality *)
 | nps_bupd {Γ Δ} : nPropS Γ Δ → nPropS Γ Δ
 (** Extension by [Ξ.(nsx_s)] *)
-| nps_exs Γ {Δ} : let '(Nsxs _ Pu Pcs Pcl) := Ξ.(nsx_s) in
-    ∀ d, (Pu d → nPropS Γ Δ) → (Pcs d → nPropS ^[] (Γ ^++ Δ)) →
-    (Pcl d → nPropL ^[] (Γ ^++ Δ)) → nPropS Γ Δ
+| nps_exs Γ {Δ} : let '(Nsxs _ Pᵤ Pₙₛ Pₙₗ) := Ξ.(nsx_s) in
+    ∀ d, (Pᵤ d → nPropS Γ Δ) → (Pₙₛ d → nPropS ^[] (Γ ^++ Δ)) →
+    (Pₙₗ d → nPropL ^[] (Γ ^++ Δ)) → nPropS Γ Δ
 
 (** [nPropL]: Nola syntactic proposition, large
 
@@ -129,13 +129,13 @@ with nPropL {Ξ : nsx} : tlist Type → tlist Type → Type :=
 | npl_plainly {Γ Δ} : nPropL Γ Δ → nPropL Γ Δ
 | npl_later Γ {Δ} : nPropL ^[] (Γ ^++ Δ) → nPropL Γ Δ
 | npl_bupd {Γ Δ} : nPropL Γ Δ → nPropL Γ Δ
-| npl_exs Γ {Δ} : let '(Nsxs _ Pu Pcs Pcl) := Ξ.(nsx_s) in
-    ∀ d, (Pu d → nPropL Γ Δ) → (Pcs d → nPropS ^[] (Γ ^++ Δ)) →
-    (Pcl d → nPropL ^[] (Γ ^++ Δ)) → nPropL Γ Δ
+| npl_exs Γ {Δ} : let '(Nsxs _ Pᵤ Pₙₛ Pₙₗ) := Ξ.(nsx_s) in
+    ∀ d, (Pᵤ d → nPropL Γ Δ) → (Pₙₛ d → nPropS ^[] (Γ ^++ Δ)) →
+    (Pₙₗ d → nPropL ^[] (Γ ^++ Δ)) → nPropL Γ Δ
 (** Extension by [Ξ.(nsx_l)], [nPropL] only *)
-| npl_exl Γ {Δ} : let '(Nsxl _ Pu Pcs Pcl) := Ξ.(nsx_l) in
-    ∀ d, (Pu d → nPropL Γ Δ) → (Pcs d → nPropS ^[] (Γ ^++ Δ)) →
-    (Pcl d → nPropL ^[] (Γ ^++ Δ)) → nPropL Γ Δ.
+| npl_exl Γ {Δ} : let '(Nsxl _ Pᵤ Pₙₛ Pₙₗ) := Ξ.(nsx_l) in
+    ∀ d, (Pᵤ d → nPropL Γ Δ) → (Pₙₛ d → nPropS ^[] (Γ ^++ Δ)) →
+    (Pₙₗ d → nPropL ^[] (Γ ^++ Δ)) → nPropL Γ Δ.
 
 Arguments nPropS Ξ Γ Δ : clear implicits.
 Arguments nPropL Ξ Γ Δ : clear implicits.
@@ -258,7 +258,7 @@ Fixpoint nlarge {Ξ : nsx} {Γ Δ : nctx} (P : nPropS Ξ Γ Δ) : nPropL Ξ Γ �
   | (■ P)%nS => ■ nlarge P
   | (▷ P)%nS => ▷ P
   | (|==> P)%nS => |==> nlarge P
-  | nps_exs _ d Φu Φcs Φcl => npl_exs _ d (nlarge ∘ Φu) Φcs Φcl
+  | nps_exs _ d Φᵤ Φₙₛ Φₙₗ => npl_exs _ d (nlarge ∘ Φᵤ) Φₙₛ Φₙₗ
   end.
 
 (** ** [Nsmall]: [nPropL] that can be turned into [nPropS] *)
@@ -319,7 +319,7 @@ Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
 #[export] Program Instance nsmall_bupd {Ξ Γ Δ} `{!Nsmall P}
   : @Nsmall Ξ Γ Δ (|==> P) := { nsmall := |==> nsmall P }.
 Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
-#[export] Program Instance nsmall_exs {Ξ Γ Δ d Φu Φcs Φcl}
-  `{!∀ x, Nsmall (Φu x)} : @Nsmall Ξ Γ Δ (npl_exs _ d Φu Φcs Φcl) :=
-  { nsmall := nps_exs Γ d (λ x, nsmall (Φu x)) Φcs Φcl}.
+#[export] Program Instance nsmall_exs {Ξ Γ Δ d Φᵤ Φₙₛ Φₙₗ}
+  `{!∀ x, Nsmall (Φᵤ x)} : @Nsmall Ξ Γ Δ (npl_exs _ d Φᵤ Φₙₛ Φₙₗ) :=
+  { nsmall := nps_exs Γ d (λ x, nsmall (Φᵤ x)) Φₙₛ Φₙₗ}.
 Next Obligation. move=>/= >. f_equal. fun_ext=>/= ?. by rewrite nsmall_eq. Qed.
