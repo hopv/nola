@@ -461,7 +461,7 @@ Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
 #[export] Program Instance nsmall_bupd {Ξ Γ} `{!Nsmall P}
   : @Nsmall Ξ Γ (|==> P) := { nsmall := |==> nsmall P }.
 Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
-#[export] Program Instance nsmall_sxs {Ξ Γ d Φᵤ Φₙₛ Φₙₗ}
+#[export] Program Instance nsmall_sxs {Ξ Γ d Φₙₛ Φₙₗ}
   `{!∀ x, Nsmall (Φᵤ x)} : @Nsmall Ξ Γ (+!! d Φᵤ Φₙₛ Φₙₗ) :=
   { nsmall := +!! d (λ x, nsmall (Φᵤ x)) Φₙₛ Φₙₗ}.
 Next Obligation. move=>/= >. f_equal. fun_ext=>/= ?. by rewrite nsmall_eq. Qed.
