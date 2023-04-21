@@ -1,6 +1,6 @@
 (** * [nPropS], [nPropL]: Nola syntactic proposition *)
 
-From nola.util Require Export tlist wft.
+From nola.util Require Export tlist wft funext.
 From iris.bi Require Import notation.
 
 (** ** [nsx]: Syntactic extension for [nProp] *)
@@ -443,10 +443,10 @@ Next Obligation. move=>/= >. by rewrite !nsmall_eq. Qed.
 Next Obligation. move=>/= >. by rewrite !nsmall_eq. Qed.
 #[export] Program Instance nsmall_forall {Ξ Γ} `{!∀ x : A, Nsmall (Φ x)}
   : @Nsmall Ξ Γ (∀' Φ) := { nsmall := ∀ x, nsmall (Φ x) }.
-Next Obligation. move=>/= >. f_equal. fun_ext=>/= ?. by rewrite nsmall_eq. Qed.
+Next Obligation. move=>/= >. f_equal. funext=>/= ?. by rewrite nsmall_eq. Qed.
 #[export] Program Instance nsmall_exist {Ξ Γ} `{!∀ x : A, Nsmall (Φ x)}
   : @Nsmall Ξ Γ (∃' Φ) := { nsmall := ∃ x, nsmall (Φ x) }.
-Next Obligation. move=>/= >. f_equal. fun_ext=>/= ?. by rewrite nsmall_eq. Qed.
+Next Obligation. move=>/= >. f_equal. funext=>/= ?. by rewrite nsmall_eq. Qed.
 #[export] Program Instance nsmall_ns_forall {Ξ Γ A} `{!Nsmall P}
   : @Nsmall Ξ Γ (∀: A →nS, P) := { nsmall := ∀: _ →nS, nsmall P }.
 Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
@@ -473,4 +473,4 @@ Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
 #[export] Program Instance nsmall_sxs {Ξ Γ d Φₙₛ Φₙₗ}
   `{!∀ x, Nsmall (Φᵤ x)} : @Nsmall Ξ Γ (+!! (d; Φᵤ; Φₙₛ; Φₙₗ)) :=
   { nsmall := +!! (d; λ x, nsmall (Φᵤ x); Φₙₛ; Φₙₗ) }.
-Next Obligation. move=>/= >. f_equal. fun_ext=>/= ?. by rewrite nsmall_eq. Qed.
+Next Obligation. move=>/= >. f_equal. funext=>/= ?. by rewrite nsmall_eq. Qed.
