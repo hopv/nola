@@ -410,6 +410,8 @@ Arguments nsmall {Ξ Γ} P {_}.
 
 (** [Nsmall] instances *)
 
+#[export] Instance nsmall_nlarge {Ξ Γ P} : @Nsmall Ξ Γ (nlarge P) | 100 :=
+  { nsmall := P; nsmall_eq := eq_refl }.
 #[export] Instance nsmall_vars {Ξ Γ a} : @Nsmall Ξ Γ (%ₛ a) :=
   { nsmall := %ₛ a; nsmall_eq := eq_refl }.
 #[export] Instance nsmall_varl {Ξ Γ a} : @Nsmall Ξ Γ (%ₗ a) :=
