@@ -396,6 +396,7 @@ Fixpoint nlarge {Ξ : nsx} {Γ : nctx} (P : nPropS Ξ Γ) : nPropL Ξ Γ :=
   | (|==> P)%nS => |==> nlarge P
   | (+!! d Φᵤ Φₙₛ Φₙₗ)%nS => +!! d (nlarge ∘ Φᵤ) Φₙₛ Φₙₗ
   end.
+Coercion nlarge : nPropS >-> nPropL.
 
 (** ** [Nsmall]: [nPropL] that can be turned into [nPropS] *)
 
