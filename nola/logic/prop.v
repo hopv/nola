@@ -18,6 +18,8 @@ Structure nesx : Type := Nesx {
   (** Parameter for nominal [nPropL] arguments *)
   #[canonical=no] nesx_pnl : nesx_d → Type;
 }.
+Add Printing Constructor nesx.
+
 Arguments nesx_pu {Ξ} d : rename.
 Arguments nesx_pns {Ξ} d : rename.
 Arguments nesx_pnl {Ξ} d : rename.
@@ -52,6 +54,7 @@ Record nsx : Type := Nsx {
   (** For [nPropL] only *)
   nsx_l : nesx;
 }.
+Add Printing Constructor nsx.
 
 (** ** [nctx]: Context of [nProp] *)
 

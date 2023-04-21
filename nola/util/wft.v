@@ -17,6 +17,7 @@ Structure wft := Wft {
   (** [wft_lt] is well-founded *)
   #[canonical=no] wft_lt_wf : wf wft_lt;
 }.
+Add Printing Constructor wft.
 
 Arguments wft_car : simpl never.
 Arguments wft_lt {A} _ _ : simpl never, rename.
