@@ -204,31 +204,17 @@ with nPropL {Ξ : nsx} : nctx → Type :=
 Arguments nPropS Ξ Γ : clear implicits.
 Arguments nPropL Ξ Γ : clear implicits.
 
-(** Proposition by extension and inclusion *)
+(** Propositions by [⊑esx] *)
 
-Definition ns_subsxs Γₒₛ {Γₛ} Γₒₗ {Γₗ} `{Ξₛ ⊑esx Ξ.(nsx_s)} d
-  (Φᵤ : Ξₛ.(nesx_pu) d → nPropS Ξ (Γₒₛ, Γₛ; Γₒₗ, Γₗ))
-  (Φₙₛ : Ξₛ.(nesx_pns) d → nPropS Ξ (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ))
-  (Φₙₗ : Ξₛ.(nesx_pnl) d → nPropL Ξ (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ))
-  : nPropS Ξ (Γₒₛ, Γₛ; Γₒₗ, Γₗ) :=
-  ns_sxs Γₒₛ Γₒₗ (nsubesx_d d)
-    (Φᵤ ∘ nsubesx_pu d) (Φₙₛ ∘ nsubesx_pns d) (Φₙₗ ∘ nsubesx_pnl d).
-
-Definition nl_subsxs Γₒₛ {Γₛ} Γₒₗ {Γₗ} `{Ξₛ ⊑esx Ξ.(nsx_s)} d
-  (Φᵤ : Ξₛ.(nesx_pu) d → nPropL Ξ (Γₒₛ, Γₛ; Γₒₗ, Γₗ))
-  (Φₙₛ : Ξₛ.(nesx_pns) d → nPropS Ξ (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ))
-  (Φₙₗ : Ξₛ.(nesx_pnl) d → nPropL Ξ (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ))
-  : nPropL Ξ (Γₒₛ, Γₛ; Γₒₗ, Γₗ) :=
-  nl_sxs Γₒₛ Γₒₗ (nsubesx_d d)
-    (Φᵤ ∘ nsubesx_pu d) (Φₙₛ ∘ nsubesx_pns d) (Φₙₗ ∘ nsubesx_pnl d).
-
-Definition nl_subsxl Γₒₛ {Γₛ} Γₒₗ {Γₗ} `{Ξₛ ⊑esx Ξ.(nsx_l)} d
-  (Φᵤ : Ξₛ.(nesx_pu) d → nPropL Ξ (Γₒₛ, Γₛ; Γₒₗ, Γₗ))
-  (Φₙₛ : Ξₛ.(nesx_pns) d → nPropS Ξ (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ))
-  (Φₙₗ : Ξₛ.(nesx_pnl) d → nPropL Ξ (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ))
-  : nPropL Ξ (Γₒₛ, Γₛ; Γₒₗ, Γₗ) :=
-  nl_sxl Γₒₛ Γₒₗ (nsubesx_d d)
-    (Φᵤ ∘ nsubesx_pu d) (Φₙₛ ∘ nsubesx_pns d) (Φₙₗ ∘ nsubesx_pnl d).
+Notation ns_subsxs Γₒₛ Γₒₗ d Φᵤ Φₙₛ Φₙₗ :=
+  (ns_sxs Γₒₛ Γₒₗ (nsubesx_d d)
+    (Φᵤ ∘ nsubesx_pu d) (Φₙₛ ∘ nsubesx_pns d) (Φₙₗ ∘ nsubesx_pnl d)).
+Notation nl_subsxs Γₒₛ Γₒₗ d Φᵤ Φₙₛ Φₙₗ :=
+  (nl_sxs Γₒₛ Γₒₗ (nsubesx_d d)
+    (Φᵤ ∘ nsubesx_pu d) (Φₙₛ ∘ nsubesx_pns d) (Φₙₗ ∘ nsubesx_pnl d)).
+Notation nl_subsxl Γₒₛ Γₒₗ d Φᵤ Φₙₛ Φₙₗ :=
+  (nl_sxl Γₒₛ Γₒₗ (nsubesx_d d)
+    (Φᵤ ∘ nsubesx_pu d) (Φₙₛ ∘ nsubesx_pns d) (Φₙₗ ∘ nsubesx_pnl d)).
 
 (** Notations for connectives *)
 Declare Scope nPropS_scope.
@@ -351,25 +337,42 @@ Notation "▷ P" := (ns_later _ _ P) : nPropS_scope.
 Notation "▷ P" := (nl_later _ _ P) : nPropL_scope.
 Notation "|==> P" := (ns_bupd P) : nPropS_scope.
 Notation "|==> P" := (nl_bupd P) : nPropL_scope.
-Notation "+!!{ Γₒₛ ; Γₒₗ }" := (ns_sxs Γₒₛ Γₒₗ) (only parsing) : nPropS_scope.
-Notation "+!!{ Γₒₛ ; Γₒₗ }" := (nl_sxs Γₒₛ Γₒₗ) (only parsing) : nPropL_scope.
-Notation "+!!{ Γₒₛ }" := (ns_sxs Γₒₛ _) (only parsing) : nPropS_scope.
-Notation "+!!{ Γₒₛ }" := (nl_sxs Γₒₛ _) (only parsing) : nPropL_scope.
-Notation "+!!" := (ns_sxs _ _) : nPropS_scope.
-Notation "+!!" := (nl_sxs _ _) : nPropL_scope.
-Notation "+!!ₗ{ Γₒₛ ; Γₒₗ }" := (nl_sxl Γₒₛ Γₒₗ) (only parsing) : nPropL_scope.
-Notation "+!!ₗ{ Γₒₛ }" := (nl_sxl Γₒₛ _) (only parsing) : nPropL_scope.
-Notation "+!!ₗ" := (nl_sxl _ _) : nPropL_scope.
-Notation "+!{ Γₒₛ ; Γₒₗ }" := (ns_subsxs Γₒₛ Γₒₗ) (only parsing) : nPropS_scope.
-Notation "+!{ Γₒₛ ; Γₒₗ }" := (nl_subsxs Γₒₛ Γₒₗ) (only parsing) : nPropL_scope.
-Notation "+!{ Γₒₛ }" := (ns_subsxs Γₒₛ _) (only parsing) : nPropS_scope.
-Notation "+!{ Γₒₛ }" := (nl_subsxs Γₒₛ _) (only parsing) : nPropL_scope.
-Notation "+!" := (ns_subsxs _ _) : nPropS_scope.
-Notation "+!" := (nl_subsxs _ _) : nPropL_scope.
-Notation "+!ₗ{ Γₒₛ ; Γₒₗ }" := (nl_subsxl Γₒₛ Γₒₗ) (only parsing)
+Notation "+!! { Γₒₛ ; Γₒₗ } ( d ; Φᵤ ; Φₙₛ ; Φₙₗ )" :=
+  (ns_sxs Γₒₛ Γₒₗ d Φᵤ Φₙₛ Φₙₗ) (only parsing) : nPropS_scope.
+Notation "+!! { Γₒₛ ; Γₒₗ } ( d ; Φᵤ ; Φₙₛ ; Φₙₗ )" :=
+  (nl_sxs Γₒₛ Γₒₗ d Φᵤ Φₙₛ Φₙₗ) (only parsing) : nPropL_scope.
+Notation "+!! { Γₒₛ } ( d ; Φᵤ ; Φₙₛ ; Φₙₗ )" :=
+  (ns_sxs Γₒₛ _ d Φᵤ Φₙₛ Φₙₗ) (only parsing) : nPropS_scope.
+Notation "+!! { Γₒₛ } ( d ; Φᵤ ; Φₙₛ ; Φₙₗ )" :=
+  (nl_sxs Γₒₛ _ d Φᵤ Φₙₛ Φₙₗ) (only parsing) : nPropL_scope.
+Notation "+!! ( d ; Φᵤ ; Φₙₛ ; Φₙₗ )" := (ns_sxs _ _ d Φᵤ Φₙₛ Φₙₗ)
+  : nPropS_scope.
+Notation "+!! ( d ; Φᵤ ; Φₙₛ ; Φₙₗ )" := (nl_sxs _ _ d Φᵤ Φₙₛ Φₙₗ)
   : nPropL_scope.
-Notation "+!ₗ{ Γₒₛ }" := (nl_subsxl Γₒₛ _) (only parsing) : nPropL_scope.
-Notation "+!ₗ" := (nl_subsxl _ _) : nPropL_scope.
+Notation "+!!ₗ { Γₒₛ ; Γₒₗ } ( d ; Φᵤ ; Φₙₛ ; Φₙₗ )" :=
+  (nl_sxl Γₒₛ Γₒₗ d Φᵤ Φₙₛ Φₙₗ) (only parsing) : nPropL_scope.
+Notation "+!!ₗ { Γₒₛ } ( d ; Φᵤ ; Φₙₛ ; Φₙₗ )" :=
+  (nl_sxl Γₒₛ _ d Φᵤ Φₙₛ Φₙₗ) (only parsing) : nPropL_scope.
+Notation "+!!ₗ ( d ; Φᵤ ; Φₙₛ ; Φₙₗ )" := (nl_sxl _ _ d Φᵤ Φₙₛ Φₙₗ)
+  : nPropL_scope.
+Notation "+! { Γₒₛ ; Γₒₗ } ( d ; Φᵤ ; Φₙₛ ; Φₙₗ )" :=
+  (ns_subsxs Γₒₛ Γₒₗ d Φᵤ Φₙₛ Φₙₗ) (only parsing) : nPropS_scope.
+Notation "+! { Γₒₛ ; Γₒₗ } ( d ; Φᵤ ; Φₙₛ ; Φₙₗ )" :=
+  (nl_subsxs Γₒₛ Γₒₗ d Φᵤ Φₙₛ Φₙₗ) (only parsing) : nPropL_scope.
+Notation "+! { Γₒₛ } ( d ; Φᵤ ; Φₙₛ ; Φₙₗ )" :=
+  (ns_subsxs Γₒₛ _ d Φᵤ Φₙₛ Φₙₗ) (only parsing) : nPropS_scope.
+Notation "+! { Γₒₛ } ( d ; Φᵤ ; Φₙₛ ; Φₙₗ )" := (nl_subsxs Γₒₛ _ d Φᵤ Φₙₛ Φₙₗ)
+  (only parsing) : nPropL_scope.
+Notation "+! ( d ; Φᵤ ; Φₙₛ ; Φₙₗ )" := (ns_subsxs _ _ d Φᵤ Φₙₛ Φₙₗ)
+  : nPropS_scope.
+Notation "+! ( d ; Φᵤ ; Φₙₛ ; Φₙₗ )" := (nl_subsxs _ _ d Φᵤ Φₙₛ Φₙₗ)
+  : nPropL_scope.
+Notation "+!ₗ { Γₒₛ ; Γₒₗ } ( d ; Φᵤ ; Φₙₛ ; Φₙₗ )" :=
+  (nl_subsxl Γₒₛ Γₒₗ d Φᵤ Φₙₛ Φₙₗ) (only parsing) : nPropL_scope.
+Notation "+!ₗ { Γₒₛ } ( d ; Φᵤ ; Φₙₛ ; Φₙₗ )" :=
+  (nl_subsxl Γₒₛ _ d Φᵤ Φₙₛ Φₙₗ) (only parsing) : nPropL_scope.
+Notation "+!ₗ ( d ; Φᵤ ; Φₙₛ ; Φₙₗ )" :=
+  (nl_subsxl _ _ d Φᵤ Φₙₛ Φₙₗ) : nPropL_scope.
 
 (** ** [nlarge]: Turn [nPropS] into [nPropL] *)
 
@@ -394,7 +397,7 @@ Fixpoint nlarge {Ξ : nsx} {Γ : nctx} (P : nPropS Ξ Γ) : nPropL Ξ Γ :=
   | (■ P)%nS => ■ nlarge P
   | (▷ P)%nS => ▷ P
   | (|==> P)%nS => |==> nlarge P
-  | (+!! d Φᵤ Φₙₛ Φₙₗ)%nS => +!! d (nlarge ∘ Φᵤ) Φₙₛ Φₙₗ
+  | (+!! (d; Φᵤ; Φₙₛ; Φₙₗ))%nS => +!! (d; nlarge ∘ Φᵤ; Φₙₛ; Φₙₗ)
   end.
 Coercion nlarge : nPropS >-> nPropL.
 
@@ -465,6 +468,6 @@ Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
   : @Nsmall Ξ Γ (|==> P) := { nsmall := |==> nsmall P }.
 Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
 #[export] Program Instance nsmall_sxs {Ξ Γ d Φₙₛ Φₙₗ}
-  `{!∀ x, Nsmall (Φᵤ x)} : @Nsmall Ξ Γ (+!! d Φᵤ Φₙₛ Φₙₗ) :=
-  { nsmall := +!! d (λ x, nsmall (Φᵤ x)) Φₙₛ Φₙₗ}.
+  `{!∀ x, Nsmall (Φᵤ x)} : @Nsmall Ξ Γ (+!! (d; Φᵤ; Φₙₛ; Φₙₗ)) :=
+  { nsmall := +!! (d; λ x, nsmall (Φᵤ x); Φₙₛ; Φₙₗ) }.
 Next Obligation. move=>/= >. f_equal. fun_ext=>/= ?. by rewrite nsmall_eq. Qed.
