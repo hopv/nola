@@ -1,6 +1,6 @@
 (** * Conversion between [nPropS] and [nPropL] *)
 
-From nola.logic Require Export notate.
+From nola.logic Require Export prop.
 From nola.util Require Import funext.
 
 (** ** [nlarge]: Turn [nPropS] into [nPropL] *)
