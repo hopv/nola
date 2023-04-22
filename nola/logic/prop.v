@@ -24,9 +24,9 @@ From iris.bi Require Import notation.
 (** [nPropS]: Nola syntactic proposition, small *)
 Inductive nPropS {Ξ : nsx} : nctx → Type :=
 (** Inner small variable *)
-| ns_vars {Γₒₛ Γₛ Γₒₗ Γₗ} : npick Γₛ → nPropS (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
+| ns_vars {Γₒₛ Γₛ Γₒₗ Γₗ} : tysum Γₛ → nPropS (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
 (** Inner large variable *)
-| ns_varl {Γₒₛ Γₛ Γₒₗ Γₗ} : npick Γₗ → nPropS (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
+| ns_varl {Γₒₛ Γₛ Γₒₗ Γₗ} : tysum Γₗ → nPropS (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
 (** Judgment derivability *)
 | ns_deriv Γₒₛ {Γₛ} Γₒₗ {Γₗ} (I : wft) :
     I → nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ) → nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ) →
@@ -79,10 +79,10 @@ Inductive nPropS {Ξ : nsx} : nctx → Type :=
 
   Most connectives are the same as [nPropS] *)
 with nPropL {Ξ : nsx} : nctx → Type :=
-| nl_vars {Γₒₛ Γₛ Γₒₗ Γₗ} : npick Γₛ → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
-| nl_varl {Γₒₛ Γₛ Γₒₗ Γₗ} : npick Γₗ → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
+| nl_vars {Γₒₛ Γₛ Γₒₗ Γₗ} : tysum Γₛ → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
+| nl_varl {Γₒₛ Γₛ Γₒₗ Γₗ} : tysum Γₗ → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
 (** Outer small variable, [nPropL] only *)
-| nl_varos {Γₒₛ Γₛ Γₒₗ Γₗ} : npick Γₒₛ → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
+| nl_varos {Γₒₛ Γₛ Γₒₗ Γₗ} : tysum Γₒₛ → nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)
 | nl_deriv Γₒₛ {Γₛ} Γₒₗ {Γₗ} (I : wft) :
     I → nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ) → nPropL (Γₒₛ ^++ Γₛ; Γₒₗ ^++ Γₗ) →
     nPropL (Γₒₛ, Γₛ; Γₒₗ, Γₗ)

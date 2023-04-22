@@ -2,26 +2,18 @@
 
 From nola.util Require Export tlist.
 
-(** ** [nectx]: Elemental context of [nProp] *)
-
-Definition nectx : Type := tlist Type.
-
-(** Pick one variable in an elemental context with an argument value *)
-
-Definition npick (Γₑ : nectx) : Type := [+] A ∈ Γₑ, A.
-
-(** ** [nctx]: Global context of [nProp] *)
+(** ** [nctx]: Context of [nProp] *)
 
 #[projections(primitive)]
 Record nctx : Type := Nctx {
   (** Outer small proposition variables *)
-  nctx_os : nectx;
+  nctx_os : Types;
   (** Inner small proposition variables *)
-  nctx_s : nectx;
+  nctx_s : Types;
   (** Outer large proposition variables *)
-  nctx_ol : nectx;
+  nctx_ol : Types;
   (** Inner large proposition variables *)
-  nctx_l : nectx;
+  nctx_l : Types;
 }.
 
 (** Notations for [nctx] *)
