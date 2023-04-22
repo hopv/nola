@@ -80,12 +80,13 @@ Fixpoint plist {T} (F : T → Type) (ts : tlist T) : Type :=
   end.
 
 Notation "[*] t ∈ ts , A" := (plist (λ t, A) ts)
-  (at level 200, ts at level 10, t binder, right associativity) : nola_scope.
+  (at level 200, ts at level 10, t binder, right associativity, only parsing)
+  : nola_scope.
 
 (** Append [plist]s *)
 Reserved Infix "-++" (at level 60, right associativity).
-Fixpoint papp {T} {F : T → Type} {ts us : tlist T}
-  (xs : [*] t ∈ ts, F t) (ys : [*] t ∈ us, F t) : [*] t ∈ ts ^++ us, F t :=
+Fixpoint papp {T F} {ts us : tlist T}
+  (xs : plist F ts) (ys : plist F us) : plist F (ts ^++ us) :=
   match ts, xs with
   | ^[], _ => ys
   | _ ^:: _, x -:: xs => x -:: xs -++ ys
@@ -95,21 +96,26 @@ where "xs -++ ys" := (papp xs ys) : nola_scope.
 (** Map over [plist] *)
 Reserved Infix "-<$>" (at level 61, left associativity).
 Fixpoint pmap {T} {F G : T → Type} (f : ∀ t, F t → G t) {ts : tlist T}
-  (xs : [*] t ∈ ts, F t) : [*] t ∈ ts, G t :=
+  (xs : plist F ts) : plist G ts :=
   match ts, xs with
   | ^[], -[] => -[]
   | _ ^:: _, x -:: xs => f _ x -:: (f -<$> xs)
   end
 where "f -<$> xs" := (pmap f xs) : nola_scope.
 
-(** ** [lsum]: Variant choosing an element of [tlist] with a value *)
+(** ** [csum]: Variant choosing an element of [tlist] with a value *)
 
-Inductive lsum {T} (F : T → Type) : tlist T → Type :=
-| cbyhd {t ts} : F t → lsum F (t ^:: ts)
-| cbytl {t ts} : lsum F ts → lsum F (t ^:: ts).
+Inductive csum {T} (F : T → Type) : tlist T → Type :=
+| cbyhd {t ts} : F t → csum F (t ^:: ts)
+| cbytl {t ts} : csum F ts → csum F (t ^:: ts).
 Arguments cbyhd {T F t ts} _.
 Arguments cbytl {T F t ts} _.
 
+Notation "[+] t ∈ ts , A" := (csum (λ t, A) ts)
+  (at level 200, ts at level 10, t binder, right associativity, only parsing)
+  : nola_scope.
+
+(** Utility patterns for [csum] *)
 Notation "#0 a" := (cbyhd a) (at level 20) : nola_scope.
 Notation "+/ a" := (cbytl a) (at level 20, right associativity) : nola_scope.
 Notation "#1 a" := (+/ #0 a) (at level 20) : nola_scope.
@@ -121,45 +127,65 @@ Notation "#6 a" := (+/ #5 a) (at level 20) : nola_scope.
 Notation "#7 a" := (+/ #6 a) (at level 20) : nola_scope.
 Notation "#8 a" := (+/ #7 a) (at level 20) : nola_scope.
 Notation "#9 a" := (+/ #8 a) (at level 20) : nola_scope.
-Notation "[+] t ∈ ts , A" := (lsum (λ t, A) ts)
-  (at level 200, ts at level 10, t binder, right associativity) : nola_scope.
 
-(** [lsum] over [Types] *)
-Notation tysum := (lsum id).
+(** [csum] over [Types] *)
+Notation tysum := (csum id).
 
-(** Lift [[+] t ∈ ts, F t] into [[+] t ∈ ts ^++ us, F t] *)
-Fixpoint cbylapp {T} {F : T → Type} {ts us : tlist T}
-  (x : [+] t ∈ ts, F t) : [+] t ∈ ts ^++ us, F t :=
-  match x with
-  | #0 x => #0 x
-  | +/ x => +/ cbylapp x
+(** [csum F (t ^:: ts)] destructed *)
+Variant csum' {T} (F : T → Type) (t : T) (ts : tlist T) :=
+| cbyhd' : F t → csum' F t ts
+| cbytl' : csum F ts → csum' F t ts.
+Arguments cbyhd' {T F t ts} _.
+Arguments cbytl' {T F t ts} _.
+Notation "#0' a" := (cbyhd' a) (at level 20) : nola_scope.
+Notation "+/' a" := (cbytl' a) (at level 20, right associativity) : nola_scope.
+
+(** Destruct [csum F (t ^:: ts)] into [csum' F t ts] *)
+Definition cinv {T F} {t : T} {ts} (s : csum F (t ^:: ts)) : csum' F t ts :=
+  match s with #0 a => #0' a | +/ s => +/' s end.
+
+(** Lift [csum], inserting an element to the list *)
+Fixpoint clift {T F} {ts us : tlist T} {t : T}
+  : csum F (ts ^++ us) → csum F (ts ^++ t ^:: us) :=
+  match ts with
+  | ^[] => λ s, +/ s
+  | _ ^:: _ => λ s, match cinv s with
+    | #0' a => #0 a
+    | +/' s => +/ clift s
+    end
   end.
 
-(** Lift [[+] t ∈ us, F t] into [[+] t ∈ ts ^++ us, F t] *)
-Fixpoint cbyrapp {T} {F : T → Type} {ts us : tlist T}
-  (x : [+] t ∈ us, F t) : [+] t ∈ ts ^++ us, F t :=
+(** Turn [csum F ts] into [csum F (ts ^++ us)] *)
+Fixpoint cbylapp {T F} {ts us : tlist T} (s : csum F ts) : csum F (ts ^++ us) :=
+  match s with
+  | #0 a => #0 a
+  | +/ s => +/ cbylapp s
+  end.
+
+(** Turn [csum F us] into [csum F (ts ^++ us)] *)
+Fixpoint cbyrapp {T F} {ts us : tlist T} (s : csum F us) : csum F (ts ^++ us) :=
   match ts with
-  | ^[] => x
-  | _ ^:: _ => +/ cbyrapp x
+  | ^[] => s
+  | _ ^:: _ => +/ cbyrapp s
   end.
 
 (** Apply a function of [plist] to a value of [csum] *)
 Reserved Infix "-$+" (at level 20, no associativity).
-Fixpoint pcapply {T} {F : T → Type} {A : Type} {ts : tlist T}
-  (fs : [*] t ∈ ts, F t → A) (x : [+] t ∈ ts, F t) : A :=
-  match x, fs with
-  | #0 x, f -:: _ => f x
-  | +/ x, _ -:: fs => fs -$+ x
+Fixpoint pcapply {T F} {A : Type} {ts : tlist T}
+  (fs : plist (λ t, F t → A) ts) (s : csum F ts) : A :=
+  match s, fs with
+  | #0 a, f -:: _ => f a
+  | +/ s, _ -:: fs => fs -$+ s
   end
-where "fs -$+ x" := (pcapply fs x) : nola_scope.
+where "fs -$+ s" := (pcapply fs s) : nola_scope.
 
 (** Map over [csum] *)
 Reserved Infix "+<$>" (at level 61, left associativity).
-Fixpoint cmap {T} {F G : T → Type} (f : ∀ t, F t → G t) {ts : tlist T}
-  (x : [+] t ∈ ts, F t) : [+] t ∈ ts, G t :=
-  match ts, x with
-  | ^[], _ => match x with end
-  | _ ^:: _, #0 x => #0 f _ x
-  | _ ^:: _, +/ x => +/ (f +<$> x)
+Fixpoint cmap {T F G} (f : ∀ t, F t → G t) {ts : tlist T}
+  (s : csum F ts) : csum G ts :=
+  match ts, s with
+  | ^[], _ => match s with end
+  | _ ^:: _, #0 a => #0 f _ a
+  | _ ^:: _, +/ s => +/ (f +<$> s)
   end
-where "f +<$> x" := (cmap f x) : nola_scope.
+where "f +<$> s" := (cmap f s) : nola_scope.
