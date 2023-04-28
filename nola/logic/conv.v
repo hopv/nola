@@ -2,6 +2,7 @@
 
 From nola.logic Require Export prop.
 From nola.util Require Import funext.
+Import EqNotations.
 
 (** ** [nlarge]: Turn [nProp Ξ σ Γ] into [nPropL Ξ Γ]
 
@@ -93,3 +94,83 @@ Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
   `{!∀ x, Nsmall (Φᵤ x)} : @Nsmall Ξ Γ (+!! (d; Φᵤ; Φₙₛ; Φₙₗ)) :=
   { nsmall := +!! (d; λ x, nsmall (Φᵤ x); Φₙₛ; Φₙₗ) }.
 Next Obligation. move=>/= >. f_equal. funext=>/= ?. by rewrite nsmall_eq. Qed.
+
+(** ** [nrewi eq P]: Rewrite the inner context of [P : nProp] with [eq] *)
+
+Notation nrewi eq P := (rew[λ Γᵢ, nProp _ _ (; Γᵢ)] eq in P) (only parsing).
+
+(** ** [ninserti], [ninserto]: Insert a variable to [nProp] *)
+
+(** [ninserti]: Insert an inner variable to [nProp] *)
+
+Fixpoint ninserti {Ξ σ Γₒ Γᵢ} (v : nvar) (i : nat) (P : nProp Ξ σ (Γₒ; Γᵢ))
+  : nProp Ξ σ (Γₒ; tinsert v i Γᵢ) :=
+  match P with
+  | (% a)%n => % cinsert v i a
+  | (%ₒ a)%n => %ₒ a
+  | (P ⊢!{ j } Q)%n =>
+      nrewi tinsert_lapp (ninserti v _ P) ⊢!{ j }
+        nrewi tinsert_lapp (ninserti v _ Q)
+  | ⌜φ⌝%n => ⌜φ⌝
+  | (P ∧ Q)%n => ninserti v i P ∧ ninserti v i Q
+  | (P ∨ Q)%n => ninserti v i P ∨ ninserti v i Q
+  | (P → Q)%n => ninserti v i P → ninserti v i Q
+  | (P ∗ Q)%n => ninserti v i P ∗ ninserti v i Q
+  | (P -∗ Q)%n => ninserti v i P -∗ ninserti v i Q
+  | (∀' Φ)%n => ∀ a, ninserti v i (Φ a)
+  | (∃' Φ)%n => ∃ a, ninserti v i (Φ a)
+  | (∀: w, P)%n => ∀: w, ninserti v i P
+  | (∃: w, P)%n => ∃: w, ninserti v i P
+  | (□ P)%n => □ ninserti v i P
+  | (■ P)%n => ■ ninserti v i P
+  | (▷ P)%n => ▷ nrewi tinsert_lapp (ninserti v _ P)
+  | (|==> P)%n => |==> ninserti v i P
+  | (+!! (d; Φᵤ; Φₙₛ; Φₙₗ))%n => +!! (d; λ a, ninserti v i (Φᵤ a);
+      λ a, nrewi tinsert_lapp (ninserti v _ (Φₙₛ a));
+      λ a, nrewi tinsert_lapp (ninserti v _ (Φₙₗ a)))
+  | (+!!ₗ (d; Φᵤ; Φₙₛ; Φₙₗ))%n => +!!ₗ (d; λ a, ninserti v i (Φᵤ a);
+      λ a, nrewi tinsert_lapp (ninserti v _ (Φₙₛ a));
+      λ a, nrewi tinsert_lapp (ninserti v _ (Φₙₗ a)))
+  end.
+
+(** [naddi]: Add an inner variable to [nProp] *)
+
+Definition naddi {Ξ σ Γₒ Γᵢ} (v : nvar) (P : nProp Ξ σ (Γₒ; Γᵢ))
+  : nProp Ξ σ (Γₒ; v ^:: Γᵢ) := ninserti v 0 P.
+
+(** [ninserto]: Insert an outer variable to [nProp] *)
+
+Fixpoint ninserto {Ξ σ Γₒ Γᵢ} (v : nvar) (i : nat) (P : nProp Ξ σ (Γₒ; Γᵢ))
+  : nProp Ξ σ (tinsert v i Γₒ; Γᵢ) :=
+  match P with
+  | (% a)%n => % a
+  | (%ₒ a)%n => %ₒ cinsert v i a
+  | (P ⊢!{ j } Q)%n =>
+      nrewi tinsert_rapp (ninserti v _ P) ⊢!{ j }
+        nrewi tinsert_rapp (ninserti v _ Q)
+  | ⌜φ⌝%n => ⌜φ⌝
+  | (P ∧ Q)%n => ninserto v i P ∧ ninserto v i Q
+  | (P ∨ Q)%n => ninserto v i P ∨ ninserto v i Q
+  | (P → Q)%n => ninserto v i P → ninserto v i Q
+  | (P ∗ Q)%n => ninserto v i P ∗ ninserto v i Q
+  | (P -∗ Q)%n => ninserto v i P -∗ ninserto v i Q
+  | (∀' Φ)%n => ∀ a, ninserto v i (Φ a)
+  | (∃' Φ)%n => ∃ a, ninserto v i (Φ a)
+  | (∀: w, P)%n => ∀: w, ninserto v (S i) P
+  | (∃: w, P)%n => ∃: w, ninserto v (S i) P
+  | (□ P)%n => □ ninserto v i P
+  | (■ P)%n => ■ ninserto v i P
+  | (▷ P)%n => ▷ nrewi tinsert_rapp (ninserti v _ P)
+  | (|==> P)%n => |==> ninserto v i P
+  | (+!! (d; Φᵤ; Φₙₛ; Φₙₗ))%n => +!! (d; λ a, ninserto v i (Φᵤ a);
+      λ a, nrewi tinsert_rapp (ninserti v _ (Φₙₛ a));
+      λ a, nrewi tinsert_rapp (ninserti v _ (Φₙₗ a)))
+  | (+!!ₗ (d; Φᵤ; Φₙₛ; Φₙₗ))%n => +!!ₗ (d; λ a, ninserto v i (Φᵤ a);
+      λ a, nrewi tinsert_rapp (ninserti v _ (Φₙₛ a));
+      λ a, nrewi tinsert_rapp (ninserti v _ (Φₙₗ a)))
+  end.
+
+(** [naddo]: Add an outer variable to [nProp] *)
+
+Definition naddo {Ξ σ Γₒ Γᵢ} (v : nvar) (P : nProp Ξ σ (Γₒ; Γᵢ))
+  : nProp Ξ σ (v ^:: Γₒ; Γᵢ) := ninserto v 0 P.
