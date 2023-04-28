@@ -113,17 +113,17 @@ Notation "[+] t ∈ ts , A" := (csum (λ t, A) ts)
   : nola_scope.
 
 (** Utility patterns for [csum] *)
-Notation "#0 a" := (cbyhd a) (at level 20) : nola_scope.
+Notation "#0 a" := (cbyhd a) (at level 20, right associativity) : nola_scope.
 Notation "+/ a" := (cbytl a) (at level 20, right associativity) : nola_scope.
-Notation "#1 a" := (+/ #0 a) (at level 20) : nola_scope.
-Notation "#2 a" := (+/ #1 a) (at level 20) : nola_scope.
-Notation "#3 a" := (+/ #2 a) (at level 20) : nola_scope.
-Notation "#4 a" := (+/ #3 a) (at level 20) : nola_scope.
-Notation "#5 a" := (+/ #4 a) (at level 20) : nola_scope.
-Notation "#6 a" := (+/ #5 a) (at level 20) : nola_scope.
-Notation "#7 a" := (+/ #6 a) (at level 20) : nola_scope.
-Notation "#8 a" := (+/ #7 a) (at level 20) : nola_scope.
-Notation "#9 a" := (+/ #8 a) (at level 20) : nola_scope.
+Notation "#1 a" := (+/ #0 a) (at level 20, right associativity) : nola_scope.
+Notation "#2 a" := (+/ #1 a) (at level 20, right associativity) : nola_scope.
+Notation "#3 a" := (+/ #2 a) (at level 20, right associativity) : nola_scope.
+Notation "#4 a" := (+/ #3 a) (at level 20, right associativity) : nola_scope.
+Notation "#5 a" := (+/ #4 a) (at level 20, right associativity) : nola_scope.
+Notation "#6 a" := (+/ #5 a) (at level 20, right associativity) : nola_scope.
+Notation "#7 a" := (+/ #6 a) (at level 20, right associativity) : nola_scope.
+Notation "#8 a" := (+/ #7 a) (at level 20, right associativity) : nola_scope.
+Notation "#9 a" := (+/ #8 a) (at level 20, right associativity) : nola_scope.
 
 (** [csum F (t ^:: ts)] destructed *)
 Variant csum' {T} (F : T → Type) (t : T) (ts : tlist T) :=
@@ -131,7 +131,7 @@ Variant csum' {T} (F : T → Type) (t : T) (ts : tlist T) :=
 | cbytl' : csum F ts → csum' F t ts.
 Arguments cbyhd' {T F t ts} _.
 Arguments cbytl' {T F t ts} _.
-Notation "#0' a" := (cbyhd' a) (at level 20) : nola_scope.
+Notation "#0' a" := (cbyhd' a) (at level 20, right associativity) : nola_scope.
 Notation "+/' a" := (cbytl' a) (at level 20, right associativity) : nola_scope.
 
 (** Destruct [csum F (t ^:: ts)] into [csum' F t ts] *)
