@@ -3,32 +3,33 @@
 From nola.logic Require Export prop.
 From nola.util Require Import funext.
 
-(** ** [nlarge]: Turn [nPropS] into [nPropL] *)
+(** ** [nlarge]: Turn [nProp] into [nPropL] *)
 
-Fixpoint nlarge {Ξ : nsx} {Γ : nctx} (P : nPropS Ξ Γ) : nPropL Ξ Γ :=
+Fixpoint nlarge {Ξ σ Γ} (P : nProp Ξ σ Γ) : nPropL Ξ Γ :=
   match P with
-  | (%ₛ a)%nS => %ₛ a
-  | (%ₗ a)%nS => %ₗ a
-  | (P ⊢!{i} Q)%nS => P ⊢!{i} Q
-  | ⌜φ⌝%nS => ⌜φ⌝
-  | (P ∧ Q)%nS => nlarge P ∧ nlarge Q
-  | (P ∨ Q)%nS => nlarge P ∨ nlarge Q
-  | (P → Q)%nS => nlarge P → nlarge Q
-  | (P ∗ Q)%nS => nlarge P ∗ nlarge Q
-  | (P -∗ Q)%nS => nlarge P -∗ nlarge Q
-  | (∀' Φ)%nS => ∀' nlarge ∘ Φ
-  | (∃' Φ)%nS => ∃' nlarge ∘ Φ
-  | (∀: _ →nS, P)%nS => ∀: _ →nS, nlarge P
-  | (∃: _ →nS, P)%nS => ∃: _ →nS, nlarge P
-  | (∀: _ →nL, P)%nS => ∀: _ →nL, nlarge P
-  | (∃: _ →nL, P)%nS => ∃: _ →nL, nlarge P
-  | (□ P)%nS => □ nlarge P
-  | (■ P)%nS => ■ nlarge P
-  | (▷ P)%nS => ▷ P
-  | (|==> P)%nS => |==> nlarge P
-  | (+!! (d; Φᵤ; Φₙₛ; Φₙₗ))%nS => +!! (d; nlarge ∘ Φᵤ; Φₙₛ; Φₙₗ)
+  | (%ₛ a)%n => %ₛ a
+  | (%ₗ a)%n => %ₗ a
+  | (%ₒₛ a)%n => %ₒₛ a
+  | (P ⊢!{i} Q)%n => P ⊢!{i} Q
+  | ⌜φ⌝%n => ⌜φ⌝
+  | (P ∧ Q)%n => nlarge P ∧ nlarge Q
+  | (P ∨ Q)%n => nlarge P ∨ nlarge Q
+  | (P → Q)%n => nlarge P → nlarge Q
+  | (P ∗ Q)%n => nlarge P ∗ nlarge Q
+  | (P -∗ Q)%n => nlarge P -∗ nlarge Q
+  | (∀' Φ)%n => ∀' nlarge ∘ Φ
+  | (∃' Φ)%n => ∃' nlarge ∘ Φ
+  | (∀: _ →nS, P)%n => ∀: _ →nS, nlarge P
+  | (∃: _ →nS, P)%n => ∃: _ →nS, nlarge P
+  | (∀: _ →nL, P)%n => ∀: _ →nL, nlarge P
+  | (∃: _ →nL, P)%n => ∃: _ →nL, nlarge P
+  | (□ P)%n => □ nlarge P
+  | (■ P)%n => ■ nlarge P
+  | (▷ P)%n => ▷ P
+  | (|==> P)%n => |==> nlarge P
+  | (+!! (d; Φᵤ; Φₙₛ; Φₙₗ))%n => +!! (d; nlarge ∘ Φᵤ; Φₙₛ; Φₙₗ)
+  | (+!!ₗ (d; Φᵤ; Φₙₛ; Φₙₗ))%n => +!!ₗ (d; nlarge ∘ Φᵤ; Φₙₛ; Φₙₗ)
   end.
-Coercion nlarge : nPropS >-> nPropL.
 
 (** ** [Nsmall]: [nPropL] that can be turned into [nPropS] *)
 
