@@ -1,15 +1,17 @@
-(** * Conversion between [nPropS] and [nPropL] *)
+(** * Conversion of [nProp] *)
 
 From nola.logic Require Export prop.
 From nola.util Require Import funext.
 
-(** ** [nlarge]: Turn [nProp] into [nPropL] *)
+(** ** [nlarge]: Turn [nProp Ξ σ Γ] into [nPropL Ξ Γ]
+
+  Although the main interest is the case [σ = nS],
+  we keep the function polymorphic over [σ] for ease of definition *)
 
 Fixpoint nlarge {Ξ σ Γ} (P : nProp Ξ σ Γ) : nPropL Ξ Γ :=
   match P with
-  | (%ₛ a)%n => %ₛ a
-  | (%ₗ a)%n => %ₗ a
-  | (%ₒₛ a)%n => %ₒₛ a
+  | (% a)%n => % a
+  | (%ₒ a)%n => %ₒ a
   | (P ⊢!{i} Q)%n => P ⊢!{i} Q
   | ⌜φ⌝%n => ⌜φ⌝
   | (P ∧ Q)%n => nlarge P ∧ nlarge Q
@@ -19,10 +21,8 @@ Fixpoint nlarge {Ξ σ Γ} (P : nProp Ξ σ Γ) : nPropL Ξ Γ :=
   | (P -∗ Q)%n => nlarge P -∗ nlarge Q
   | (∀' Φ)%n => ∀' nlarge ∘ Φ
   | (∃' Φ)%n => ∃' nlarge ∘ Φ
-  | (∀: _ →nS, P)%n => ∀: _ →nS, nlarge P
-  | (∃: _ →nS, P)%n => ∃: _ →nS, nlarge P
-  | (∀: _ →nL, P)%n => ∀: _ →nL, nlarge P
-  | (∃: _ →nL, P)%n => ∃: _ →nL, nlarge P
+  | (∀: v, P)%n => ∀: v, nlarge P
+  | (∃: v, P)%n => ∃: v, nlarge P
   | (□ P)%n => □ nlarge P
   | (■ P)%n => ■ nlarge P
   | (▷ P)%n => ▷ P
@@ -45,10 +45,8 @@ Arguments nsmall {Ξ Γ} P {_}.
 
 #[export] Instance nsmall_nlarge {Ξ Γ P} : @Nsmall Ξ Γ (nlarge P) | 100 :=
   { nsmall := P; nsmall_eq := eq_refl }.
-#[export] Instance nsmall_vars {Ξ Γ a} : @Nsmall Ξ Γ (%ₛ a) :=
-  { nsmall := %ₛ a; nsmall_eq := eq_refl }.
-#[export] Instance nsmall_varl {Ξ Γ a} : @Nsmall Ξ Γ (%ₗ a) :=
-  { nsmall := %ₗ a; nsmall_eq := eq_refl }.
+#[export] Instance nsmall_var {Ξ Γ a} : @Nsmall Ξ Γ (% a) :=
+  { nsmall := % a; nsmall_eq := eq_refl }.
 #[export] Instance nsmall_deriv {Ξ Γ I i P Q} : @Nsmall Ξ Γ (P ⊢!{i @ I} Q) :=
   { nsmall := P ⊢!{i} Q; nsmall_eq := eq_refl }.
 #[export] Instance nsmall_pure {Ξ Γ φ} : @Nsmall Ξ Γ ⌜φ⌝ :=
@@ -74,17 +72,11 @@ Next Obligation. move=>/= >. f_equal. funext=>/= ?. by rewrite nsmall_eq. Qed.
 #[export] Program Instance nsmall_exist {Ξ Γ} `{!∀ x : A, Nsmall (Φ x)}
   : @Nsmall Ξ Γ (∃' Φ) := { nsmall := ∃ x, nsmall (Φ x) }.
 Next Obligation. move=>/= >. f_equal. funext=>/= ?. by rewrite nsmall_eq. Qed.
-#[export] Program Instance nsmall_ns_forall {Ξ Γ A} `{!Nsmall P}
-  : @Nsmall Ξ Γ (∀: A →nS, P) := { nsmall := ∀: _ →nS, nsmall P }.
+#[export] Program Instance nsmall_n_forall {Ξ Γ v} `{!Nsmall P}
+  : @Nsmall Ξ Γ (∀: v, P) := { nsmall := ∀: v, nsmall P }.
 Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
-#[export] Program Instance nsmall_ns_exist {Ξ Γ A} `{!Nsmall P}
-  : @Nsmall Ξ Γ (∃: A →nS, P) := { nsmall := ∃: _ →nS, nsmall P }.
-Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
-#[export] Program Instance nsmall_nl_forall {Ξ Γ A} `{!Nsmall P}
-  : @Nsmall Ξ Γ (∀: A →nL, P) := { nsmall := ∀: _ →nL, nsmall P }.
-Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
-#[export] Program Instance nsmall_nl_exist {Ξ Γ A} `{!Nsmall P}
-  : @Nsmall Ξ Γ (∃: A →nL, P) := { nsmall := ∃: _ →nL, nsmall P }.
+#[export] Program Instance nsmall_n_exist {Ξ Γ v} `{!Nsmall P}
+  : @Nsmall Ξ Γ (∃: v, P) := { nsmall := ∃: v, nsmall P }.
 Next Obligation. move=>/= >. by rewrite nsmall_eq. Qed.
 #[export] Program Instance nsmall_persistently {Ξ Γ} `{!Nsmall P}
   : @Nsmall Ξ Γ (□ P) := { nsmall := □ nsmall P }.

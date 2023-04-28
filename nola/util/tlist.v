@@ -28,9 +28,6 @@ Notation "^+7" := (_ ^:: ^+6) (only parsing) : nola_scope.
 Notation "^+8" := (_ ^:: ^+7) (only parsing) : nola_scope.
 Notation "^+9" := (_ ^:: ^+8) (only parsing) : nola_scope.
 
-(** Type list *)
-Notation Types := (tlist Type).
-
 (** Concatenate [tlist]s *)
 Reserved Infix "^++" (at level 60, right associativity).
 Fixpoint tapp {T} (ts us : tlist T) : tlist T :=
@@ -127,9 +124,6 @@ Notation "#6 a" := (+/ #5 a) (at level 20) : nola_scope.
 Notation "#7 a" := (+/ #6 a) (at level 20) : nola_scope.
 Notation "#8 a" := (+/ #7 a) (at level 20) : nola_scope.
 Notation "#9 a" := (+/ #8 a) (at level 20) : nola_scope.
-
-(** [csum] over [Types] *)
-Notation tysum := (csum id).
 
 (** [csum F (t ^:: ts)] destructed *)
 Variant csum' {T} (F : T → Type) (t : T) (ts : tlist T) :=

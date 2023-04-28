@@ -2,32 +2,51 @@
 
 From nola.util Require Export tlist.
 
+(** ** [nvar]: Variable *)
+
+Variant nvar :=
+| nvar_ns : Type → nvar
+| nvar_nl : Type → nvar.
+
+(** Notations for [nvar] *)
+Notation "A →nS" := (nvar_ns A) (at level 1) : nola_scope.
+Notation "A →nL" := (nvar_nl A) (at level 1) : nola_scope.
+Notation nS := (nvar_ns unit).
+Notation nL := (nvar_nl unit).
+
+(** ** [narg], [nargs]: Argument to [nvar] *)
+
+(** [narg]: Argument to [nvar] *)
+
+Variant narg : nvar → Type :=
+| narg_s {A} : A → narg (A →nS)
+| narg_l {A} : A → narg (A →nL).
+
+Notation "!ₛ a" := (narg_s a) (at level 20, right associativity) : nola_scope.
+Notation "!ₗ a" := (narg_l a) (at level 20, right associativity) : nola_scope.
+
+(** [nargo]: Argument to outer [nvar] *)
+
+Variant nargo : nvar → Type :=
+| nargo_s {A} : A → nargo (A →nS).
+
+Notation "!ₒₛ a" := (nargo_s a) (at level 20, right associativity) : nola_scope.
+
 (** ** [nctx]: Context of [nProp] *)
 
 #[projections(primitive)]
 Record nctx : Type := Nctx {
-  (** Outer small proposition variables *)
-  nctx_os : Types;
-  (** Inner small proposition variables *)
-  nctx_s : Types;
-  (** Outer large proposition variables *)
-  nctx_ol : Types;
-  (** Inner large proposition variables *)
-  nctx_l : Types;
+  (** Outer variables *)
+  nctx_o : tlist nvar;
+  (** Inner variables *)
+  nctx_i : tlist nvar;
 }.
 
 (** Notations for [nctx] *)
-
 Declare Scope nctx_scope.
 Delimit Scope nctx_scope with nctx.
 Bind Scope nctx_scope with nctx.
-
-Notation "( Γₒₛ , Γₛ ; Γₒₗ , Γₗ )" := (Nctx Γₒₛ Γₛ Γₒₗ Γₗ) : nctx_scope.
-Notation "( Γₛ ; Γₗ )" := (Nctx ^[] Γₛ ^[] Γₗ) : nctx_scope.
-Notation "( Γₒₛ , ; Γₒₗ , )" := (Nctx Γₒₛ ^[] Γₒₗ ^[]) : nctx_scope.
-Notation "( Γₒₛ , Γₛ ; )" := (Nctx Γₒₛ Γₛ ^[] ^[]) : nctx_scope.
-Notation "( Γₛ ; )" := (Nctx ^[] Γₛ ^[] ^[]) : nctx_scope.
-Notation "( ; Γₒₗ , Γₗ )" := (Nctx ^[] ^[] Γₒₗ Γₗ)
-  (format "( ;  Γₒₗ ,  Γₗ )") : nctx_scope.
-Notation "( ; Γₗ )" := (Nctx ^[] ^[] ^[] Γₗ) (format "( ;  Γₗ )") : nctx_scope.
+Notation "( Γₒ ; Γᵢ )" := (Nctx Γₒ Γᵢ) : nctx_scope.
+Notation "( Γₒ ; )" := (Nctx Γₒ ^[]) : nctx_scope.
+Notation "( ; Γᵢ )" := (Nctx ^[] Γᵢ) (format "( ;  Γᵢ )") : nctx_scope.
 Notation "( ; )" := (Nctx ^[] ^[] ^[] ^[]) (format "( ; )") : nctx_scope.
