@@ -102,19 +102,18 @@ where "f -<$> xs" := (pmap f xs) : nola_scope.
 
 (** ** [csum]: Variant choosing an element of [tlist] with a value *)
 
-Inductive csum {T} (F : T → Type) : tlist T → Type :=
-| cbyhd {t ts} : F t → csum F (t ^:: ts)
-| cbytl {t ts} : csum F ts → csum F (t ^:: ts).
-Arguments cbyhd {T F t ts} _.
-Arguments cbytl {T F t ts} _.
+Inductive csum {T} {F : T → Type} : tlist T → Type :=
+| cbyhd {t} : F t → ∀ ts, csum (t ^:: ts)
+| cbytl {ts} : ∀t, csum ts → csum (t ^:: ts).
+Arguments csum {T} F ts.
 
 Notation "[+] t ∈ ts , A" := (csum (λ t, A) ts)
   (at level 200, ts at level 10, t binder, right associativity, only parsing)
   : nola_scope.
 
 (** Utility patterns for [csum] *)
-Notation "#0 a" := (cbyhd a) (at level 20, right associativity) : nola_scope.
-Notation "+/ a" := (cbytl a) (at level 20, right associativity) : nola_scope.
+Notation "#0 a" := (cbyhd a _) (at level 20, right associativity) : nola_scope.
+Notation "+/ s" := (cbytl _ s) (at level 20, right associativity) : nola_scope.
 Notation "#1 a" := (+/ #0 a) (at level 20, right associativity) : nola_scope.
 Notation "#2 a" := (+/ #1 a) (at level 20, right associativity) : nola_scope.
 Notation "#3 a" := (+/ #2 a) (at level 20, right associativity) : nola_scope.
@@ -126,13 +125,14 @@ Notation "#8 a" := (+/ #7 a) (at level 20, right associativity) : nola_scope.
 Notation "#9 a" := (+/ #8 a) (at level 20, right associativity) : nola_scope.
 
 (** [csum F (t ^:: ts)] destructed *)
-Variant csum' {T} (F : T → Type) (t : T) (ts : tlist T) :=
-| cbyhd' : F t → csum' F t ts
-| cbytl' : csum F ts → csum' F t ts.
-Arguments cbyhd' {T F t ts} _.
-Arguments cbytl' {T F t ts} _.
-Notation "#0' a" := (cbyhd' a) (at level 20, right associativity) : nola_scope.
-Notation "+/' a" := (cbytl' a) (at level 20, right associativity) : nola_scope.
+Variant csum' {T} {F : T → Type} (t : T) (ts : tlist T) :=
+| cbyhd' : F t → csum' t ts
+| cbytl' : csum F ts → csum' t ts.
+Arguments csum' {T} F t ts.
+Notation "#0' a" := (cbyhd' _ _ a) (at level 20, right associativity)
+  : nola_scope.
+Notation "+/' s" := (cbytl' _ _ s) (at level 20, right associativity)
+  : nola_scope.
 
 (** Destruct [csum F (t ^:: ts)] into [csum' F t ts] *)
 Definition cdestr {T F} {t : T} {ts} (s : csum F (t ^:: ts)) : csum' F t ts :=
@@ -150,17 +150,17 @@ Fixpoint clift {T F} {ts us : tlist T} {t : T}
   end.
 
 (** Turn [csum F ts] into [csum F (ts ^++ us)] *)
-Fixpoint cbylapp {T F} {ts us : tlist T} (s : csum F ts) : csum F (ts ^++ us) :=
+Fixpoint cbylapp {T F} {ts : tlist T} (s : csum F ts) us : csum F (ts ^++ us) :=
   match s with
   | #0 a => #0 a
-  | +/ s => +/ cbylapp s
+  | +/ s => +/ cbylapp s us
   end.
 
 (** Turn [csum F us] into [csum F (ts ^++ us)] *)
-Fixpoint cbyrapp {T F} {ts us : tlist T} (s : csum F us) : csum F (ts ^++ us) :=
+Fixpoint cbyrapp {T F} ts {us : tlist T} (s : csum F us) : csum F (ts ^++ us) :=
   match ts with
   | ^[] => s
-  | _ ^:: _ => +/ cbyrapp s
+  | _ ^:: ts => +/ cbyrapp ts s
   end.
 
 (** Apply a function of [plist] to a value of [csum] *)
