@@ -48,6 +48,43 @@ where "f ^<$> ts" := (tmap f ts) : nola_scope.
 
 #[export] Instance tlist_fmap : FMap tlist := λ _ _, tmap.
 
+(** ** [tlength]: Length of a list *)
+
+Fixpoint tlength {T} (ts : tlist T) : nat :=
+  match ts with
+  | ^[] => 0
+  | _ ^:: ts => S (tlength ts)
+  end.
+
+(** ** [tinsert]: Insert an element to the i-th position of a list *)
+
+Fixpoint tinsert {T} (u : T) (i : nat) (ts : tlist T) : tlist T :=
+  match i, ts with
+  | 0, _ => u ^:: ts
+  | S i, t ^:: ts => t ^:: tinsert u i ts
+  | S i, ^[] => ^[u]
+  end.
+
+(** Pull [_ ^++] out of [tinsert]
+
+  We keep it computable to use it with [eq_rect] *)
+Fixpoint tinsert_lapp {T} {v : T} {i ts us} :
+  tinsert v (tlength ts + i) (ts ^++ us) = ts ^++ tinsert v i us :=
+  match ts with
+  | ^[] => eq_refl
+  | _ ^:: _ => f_equal _ tinsert_lapp
+  end.
+
+(** Pull [^++ _] out of [tinsert]
+
+  We keep it computable to use it with [eq_rect] *)
+Fixpoint tinsert_rapp {T} {v : T} {i ts us} :
+  tinsert v (min (tlength ts) i) (ts ^++ us) = tinsert v i ts ^++ us :=
+  match ts with
+  | ^[] => match i with 0 => eq_refl | S _ => eq_refl end
+  | _ ^:: _ => match i with 0 => eq_refl | S _ => f_equal _ tinsert_rapp end
+  end.
+
 (** ** [plist]: Product type calculated over elements of [tlist] *)
 
 (** Unit type for [tnil] *)
@@ -138,15 +175,14 @@ Notation "+/' s" := (cbytl' _ _ s) (at level 20, right associativity)
 Definition cdestr {T F} {t : T} {ts} (s : csum F (t ^:: ts)) : csum' F t ts :=
   match s with #0 a => #0' a | +/ s => +/' s end.
 
-(** Lift [csum], inserting an element to the list *)
-Fixpoint clift {T F} {ts us : tlist T} {t : T}
-  : csum F (ts ^++ us) → csum F (ts ^++ t ^:: us) :=
-  match ts with
-  | ^[] => λ s, +/ s
-  | _ ^:: _ => λ s, match cdestr s with
-    | #0' a => #0 a
-    | +/' s => +/ clift s
-    end
+(** Insert an element to the list of [csum] *)
+Fixpoint cinsert {T F} (u : T) (i : nat) {ts} (s : csum F ts)
+  : csum F (tinsert u i ts) :=
+  match i, s with
+  | 0, #0 a => #1 a
+  | S _, #0 a => #0 a
+  | 0, +/ s => +/ +/ s
+  | S i, +/ s => +/ cinsert u i s
   end.
 
 (** Turn [csum F ts] into [csum F (ts ^++ us)] *)
