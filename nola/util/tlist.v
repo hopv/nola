@@ -141,7 +141,7 @@ Notation "#0' a" := (cbyhd' a) (at level 20) : nola_scope.
 Notation "+/' a" := (cbytl' a) (at level 20, right associativity) : nola_scope.
 
 (** Destruct [csum F (t ^:: ts)] into [csum' F t ts] *)
-Definition cinv {T F} {t : T} {ts} (s : csum F (t ^:: ts)) : csum' F t ts :=
+Definition cdestr {T F} {t : T} {ts} (s : csum F (t ^:: ts)) : csum' F t ts :=
   match s with #0 a => #0' a | +/ s => +/' s end.
 
 (** Lift [csum], inserting an element to the list *)
@@ -149,7 +149,7 @@ Fixpoint clift {T F} {ts us : tlist T} {t : T}
   : csum F (ts ^++ us) → csum F (ts ^++ t ^:: us) :=
   match ts with
   | ^[] => λ s, +/ s
-  | _ ^:: _ => λ s, match cinv s with
+  | _ ^:: _ => λ s, match cdestr s with
     | #0' a => #0 a
     | +/' s => +/ clift s
     end
