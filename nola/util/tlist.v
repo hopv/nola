@@ -79,7 +79,7 @@ Fixpoint tinsert_lapp {T} {v : T} {i ts us} :
 
   We keep it computable to use it with [eq_rect] *)
 Fixpoint tinsert_rapp {T} {v : T} {i ts us} :
-  tinsert v (min (tlength ts) i) (ts ^++ us) = tinsert v i ts ^++ us :=
+  tinsert v (tlength ts `min` i) (ts ^++ us) = tinsert v i ts ^++ us :=
   match ts with
   | ^[] => match i with 0 => eq_refl | S _ => eq_refl end
   | _ ^:: _ => match i with 0 => eq_refl | S _ => f_equal _ tinsert_rapp end
