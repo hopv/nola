@@ -113,10 +113,6 @@ Fixpoint plist {T} (F : T → Type) (ts : tlist T) : Type :=
   | t ^:: ts => F t *:: plist F ts
   end.
 
-Notation "[*] t ∈ ts , A" := (plist (λ t, A) ts)
-  (at level 200, ts at level 10, t binder, right associativity, only parsing)
-  : nola_scope.
-
 (** Append [plist]s *)
 Reserved Infix "-++" (at level 60, right associativity).
 Fixpoint papp {T F} {ts us : tlist T}
@@ -143,10 +139,6 @@ Inductive csum {T} {F : T → Type} : tlist T → Type :=
 | cbyhd {t} : F t → ∀ ts, csum (t ^:: ts)
 | cbytl {ts} : ∀t, csum ts → csum (t ^:: ts).
 Arguments csum {T} F ts.
-
-Notation "[+] t ∈ ts , A" := (csum (λ t, A) ts)
-  (at level 200, ts at level 10, t binder, right associativity, only parsing)
-  : nola_scope.
 
 (** Utility patterns for [csum] *)
 Notation "#0 a" := (cbyhd a _) (at level 20, right associativity) : nola_scope.
