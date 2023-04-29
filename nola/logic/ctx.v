@@ -49,4 +49,4 @@ Bind Scope nctx_scope with nctx.
 Notation "( Γₒ ; Γᵢ )" := (Nctx Γₒ Γᵢ) : nctx_scope.
 Notation "( Γₒ ; )" := (Nctx Γₒ ^[]) : nctx_scope.
 Notation "( ; Γᵢ )" := (Nctx ^[] Γᵢ) (format "( ;  Γᵢ )") : nctx_scope.
-Notation "( ; )" := (Nctx ^[] ^[] ^[] ^[]) (format "( ; )") : nctx_scope.
+Notation "( ; )" := (Nctx ^[] ^[]) (format "( ; )") : nctx_scope.
