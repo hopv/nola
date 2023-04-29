@@ -106,11 +106,20 @@ Notation nrewi eq P := (rew[λ Γᵢ, nProp _ _ (; Γᵢ)] eq in P) (only parsin
 Fixpoint ninserti {Ξ σ Γₒ Γᵢ} (v : nvar) (i : nat) (P : nProp Ξ σ (Γₒ; Γᵢ))
   : nProp Ξ σ (Γₒ; tinsert v i Γᵢ) :=
   match P with
+<<<<<<< HEAD
   | (% a)%n => % cinsert v i a
   | (%ₒ a)%n => %ₒ a
-  | (P ⊢!{ j } Q)%n =>
-      nrewi tinsert_lapp (ninserti v _ P) ⊢!{ j }
+  | (P ⊢!{j} Q)%n =>
+      nrewi tinsert_lapp (ninserti v _ P) ⊢!{j}
         nrewi tinsert_lapp (ninserti v _ Q)
+=======
+  | (%ᵢₛ a)%n => %ᵢₛ cinsert V i a
+  | (%ᵢₗ a)%n => %ᵢₗ cinsert V i a
+  | (%ₒₛ a)%n => %ₒₛ a
+  | (P ⊢!{j} Q)%n =>
+      nrewi tinsert_lapp (ninserti V _ P) ⊢!{j}
+        nrewi tinsert_lapp (ninserti V _ Q)
+>>>>>>> 04fc607 (Layout tweak)
   | ⌜φ⌝%n => ⌜φ⌝
   | (P ∧ Q)%n => ninserti v i P ∧ ninserti v i Q
   | (P ∨ Q)%n => ninserti v i P ∨ ninserti v i Q
@@ -145,8 +154,8 @@ Fixpoint ninserto {Ξ σ Γₒ Γᵢ} (v : nvar) (i : nat) (P : nProp Ξ σ (Γ�
   match P with
   | (% a)%n => % a
   | (%ₒ a)%n => %ₒ cinsert v i a
-  | (P ⊢!{ j } Q)%n =>
-      nrewi tinsert_rapp (ninserti v _ P) ⊢!{ j }
+  | (P ⊢!{j} Q)%n =>
+      nrewi tinsert_rapp (ninserti v _ P) ⊢!{j}
         nrewi tinsert_rapp (ninserti v _ Q)
   | ⌜φ⌝%n => ⌜φ⌝
   | (P ∧ Q)%n => ninserto v i P ∧ ninserto v i Q
@@ -162,12 +171,14 @@ Fixpoint ninserto {Ξ σ Γₒ Γᵢ} (v : nvar) (i : nat) (P : nProp Ξ σ (Γ�
   | (■ P)%n => ■ ninserto v i P
   | (▷ P)%n => ▷ nrewi tinsert_rapp (ninserti v _ P)
   | (|==> P)%n => |==> ninserto v i P
-  | (+!! (d; Φᵤ; Φₙₛ; Φₙₗ))%n => +!! (d; λ a, ninserto v i (Φᵤ a);
-      λ a, nrewi tinsert_rapp (ninserti v _ (Φₙₛ a));
-      λ a, nrewi tinsert_rapp (ninserti v _ (Φₙₗ a)))
-  | (+!!ₗ (d; Φᵤ; Φₙₛ; Φₙₗ))%n => +!!ₗ (d; λ a, ninserto v i (Φᵤ a);
-      λ a, nrewi tinsert_rapp (ninserti v _ (Φₙₛ a));
-      λ a, nrewi tinsert_rapp (ninserti v _ (Φₙₗ a)))
+  | (+!! (d; Φᵤ; Φₙₛ; Φₙₗ))%n =>
+      +!! (d; λ a, ninserto v i (Φᵤ a);
+        λ a, nrewi tinsert_rapp (ninserti v _ (Φₙₛ a));
+        λ a, nrewi tinsert_rapp (ninserti v _ (Φₙₗ a)))
+  | (+!!ₗ (d; Φᵤ; Φₙₛ; Φₙₗ))%n =>
+      +!!ₗ (d; λ a, ninserto v i (Φᵤ a);
+        λ a, nrewi tinsert_rapp (ninserti v _ (Φₙₛ a));
+        λ a, nrewi tinsert_rapp (ninserti v _ (Φₙₗ a)))
   end.
 
 (** [naddo]: Add an outer variable to [nProp] *)
