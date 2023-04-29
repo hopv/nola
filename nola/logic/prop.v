@@ -4,9 +4,6 @@ From nola.logic Require Export sx ctx.
 From nola.util Require Export wft.
 From iris.bi Require Import notation.
 
-(** ** [nsort]: Sort of [nProp], [nS] or [nL] *)
-Variant nsort : Set := (* small *) nS | (* large *) nL.
-
 (** ** [nProp]: Nola syntactic proposition
 
   Its universe level is strictly higher than those of [Γ : nctx],
@@ -25,10 +22,12 @@ Variant nsort : Set := (* small *) nS | (* large *) nL.
   to aid type inference around [^++] *)
 
 Inductive nProp {Ξ : nsx} : nsort → nctx → Type :=
-(** Inner variable *)
-| n_var {σ Γₒ Γᵢ} : csum narg Γᵢ → nProp σ (Γₒ; Γᵢ)
-(** Outer variable, [nPropL] only *)
-| n_varo {Γₒ Γᵢ} : csum nargo Γₒ → nProp nL (Γₒ; Γᵢ)
+(** Inner small variable *)
+| n_varis {σ Γₒ Γᵢ} : csum (nparg nS) Γᵢ → nProp σ (Γₒ; Γᵢ)
+(** Inner large variable, [nPropL] only *)
+| n_varil {Γₒ Γᵢ} : csum (nparg nL) Γᵢ → nProp nL (Γₒ; Γᵢ)
+(** Outer small variable, [nPropL] only *)
+| n_varos {Γₒ Γᵢ} : csum (nparg nS) Γₒ → nProp nL (Γₒ; Γᵢ)
 (** Judgment derivability *)
 | n_deriv {σ} Γₒ {Γᵢ} (I : wft) :
     I → nProp nL (; Γₒ ^++ Γᵢ) → nProp nL (; Γₒ ^++ Γᵢ) → nProp σ (Γₒ; Γᵢ)
@@ -49,9 +48,9 @@ Inductive nProp {Ξ : nsx} : nsort → nctx → Type :=
 (** Existential quantification *)
 | n_exist {σ Γ} {A : Type} : (A → nProp σ Γ) → nProp σ Γ
 (** Universal quantification over [A → nProp] *)
-| n_n_forall {σ Γₒ Γᵢ} v : nProp σ (v ^:: Γₒ; Γᵢ) → nProp σ (Γₒ; Γᵢ)
+| n_n_forall {σ Γₒ Γᵢ} V : nProp σ (V ^:: Γₒ; Γᵢ) → nProp σ (Γₒ; Γᵢ)
 (** Existential quantification over [A → nProp] *)
-| n_n_exist {σ Γₒ Γᵢ} v : nProp σ (v ^:: Γₒ; Γᵢ) → nProp σ (Γₒ; Γᵢ)
+| n_n_exist {σ Γₒ Γᵢ} V : nProp σ (V ^:: Γₒ; Γᵢ) → nProp σ (Γₒ; Γᵢ)
 (** Persistence modality *)
 | n_persistently {σ Γ} : nProp σ Γ → nProp σ Γ
 (** Plainly modality *)
@@ -94,8 +93,12 @@ Declare Scope nProp_scope.
 Delimit Scope nProp_scope with n.
 Bind Scope nProp_scope with nProp.
 
-Notation "% a" := (n_var a) (at level 20, right associativity) : nProp_scope.
-Notation "%ₒ a" := (n_varo a) (at level 20, right associativity) : nProp_scope.
+Notation "%ᵢₛ a" := (n_varis a) (at level 20, right associativity)
+  : nProp_scope.
+Notation "%ᵢₗ a" := (n_varil a) (at level 20, right associativity)
+  : nProp_scope.
+Notation "%ₒₛ a" := (n_varos a) (at level 20, right associativity)
+  : nProp_scope.
 
 Notation "P ⊢!{ i @ I }{ Γₒ } Q" := (n_deriv Γₒ I i P Q)
   (at level 99, Q at level 200, only parsing) : nProp_scope.
@@ -129,12 +132,12 @@ Notation "∃' Φ" := (n_exist Φ)
 Notation "∃ x .. z , P" :=
   (n_exist (λ x, .. (n_exist (λ z, P%n)) ..)) : nProp_scope.
 
-Notation "∀: v , P" := (n_n_forall v P)
+Notation "∀: V , P" := (n_n_forall V P)
   (at level 200, right associativity,
-    format "'[' '[' ∀:  v ']' ,  '/' P ']'") : nProp_scope.
-Notation "∃: v , P" := (n_n_exist v P)
+    format "'[' '[' ∀:  V ']' ,  '/' P ']'") : nProp_scope.
+Notation "∃: V , P" := (n_n_exist V P)
   (at level 200, right associativity,
-    format "'[' '[' ∃:  v ']' ,  '/' P ']'") : nProp_scope.
+    format "'[' '[' ∃:  V ']' ,  '/' P ']'") : nProp_scope.
 
 Notation "□ P" := (n_persistently P) : nProp_scope.
 Notation "■ P" := (n_plainly P) : nProp_scope.

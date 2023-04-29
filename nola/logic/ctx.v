@@ -2,44 +2,41 @@
 
 From nola.util Require Export tlist.
 
-(** ** [nvar]: Variable *)
+(** ** [nsort]: Sort of [nProp], [nS] or [nL] *)
 
-Variant nvar :=
-| nvar_ns : Type → nvar
-| nvar_nl : Type → nvar.
+Variant nsort : Set := (* small *) nS | (* large *) nL.
 
-(** Notations for [nvar] *)
-Notation "A →nS" := (nvar_ns A) (at level 1) : nola_scope.
-Notation "A →nL" := (nvar_nl A) (at level 1) : nola_scope.
-Notation nS := (nvar_ns unit).
-Notation nL := (nvar_nl unit).
+(** ** [npvar]: Predicate variable *)
 
-(** ** [narg], [nargs]: Argument to [nvar] *)
+#[projections(primitive)]
+Record npvar := Npvar {
+  npvar_argty : Type;
+  npvar_sort : nsort;
+}.
 
-(** [narg]: Argument to [nvar] *)
+(** Notations for [npvar] *)
+Notation "A →nP σ" := (Npvar A σ) (at level 1, no associativity) : nola_scope.
+Notation "A →nPS" := (A →nP nS) (at level 1) : nola_scope.
+Notation "A →nPL" := (A →nP nL) (at level 1) : nola_scope.
+Notation nP σ := (unit →nP σ).
+Notation nPS := (unit →nPS).
+Notation nPL := (unit →nPL).
 
-Variant narg : nvar → Type :=
-| narg_s {A} : A → narg (A →nS)
-| narg_l {A} : A → narg (A →nL).
+(** ** [nparg]: Argument to [npvar], with [nsort] specified *)
 
-Notation "!ₛ a" := (narg_s a) (at level 20, right associativity) : nola_scope.
-Notation "!ₗ a" := (narg_l a) (at level 20, right associativity) : nola_scope.
-
-(** [nargo]: Argument to outer [nvar] *)
-
-Variant nargo : nvar → Type :=
-| nargo_s {A} : A → nargo (A →nS).
-
-Notation "!ₒₛ a" := (nargo_s a) (at level 20, right associativity) : nola_scope.
+Variant nparg {σ : nsort} : npvar → Type :=
+| Nparg {A} : A → nparg (A →nP σ).
+Arguments nparg σ V : clear implicits.
+Notation "@! a" := (Nparg a) (at level 20, right associativity) : nola_scope.
 
 (** ** [nctx]: Context of [nProp] *)
 
 #[projections(primitive)]
 Record nctx : Type := Nctx {
-  (** Outer variables *)
-  nctx_o : tlist nvar;
-  (** Inner variables *)
-  nctx_i : tlist nvar;
+  (** Outer (i.e., unguarded) variables *)
+  nctx_o : tlist npvar;
+  (** Inner (i.e., guarded) variables *)
+  nctx_i : tlist npvar;
 }.
 
 (** Notations for [nctx] *)
