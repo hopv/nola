@@ -17,6 +17,18 @@ Infix "^::" := tcons (at level 60, right associativity) : nola_scope.
 Notation "^[ x ; .. ; z ]" := (x ^:: .. (z ^:: ^[]) ..)
   (at level 1, format "^[ x ;  .. ;  z ]") : nola_scope.
 
+(** Wildcard patterns for [tlist] of n elements *)
+Notation "^0" := ^[] (only parsing) : nola_scope.
+Notation "^1" := ^[_] (only parsing) : nola_scope.
+Notation "^2" := (_ ^:: ^1) (only parsing) : nola_scope.
+Notation "^3" := (_ ^:: ^2) (only parsing) : nola_scope.
+Notation "^4" := (_ ^:: ^3) (only parsing) : nola_scope.
+Notation "^5" := (_ ^:: ^4) (only parsing) : nola_scope.
+Notation "^6" := (_ ^:: ^5) (only parsing) : nola_scope.
+Notation "^7" := (_ ^:: ^6) (only parsing) : nola_scope.
+Notation "^8" := (_ ^:: ^7) (only parsing) : nola_scope.
+Notation "^9" := (_ ^:: ^8) (only parsing) : nola_scope.
+
 (** Wildcard patterns for [tlist] of n or more elements *)
 Notation "^+1" := (_ ^:: _) (only parsing) : nola_scope.
 Notation "^+2" := (_ ^:: ^+1) (only parsing) : nola_scope.
