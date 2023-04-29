@@ -11,27 +11,27 @@ Import EqNotations.
 
 Fixpoint nlarge {Ξ σ Γ} (P : nProp Ξ σ Γ) : nPropL Ξ Γ :=
   match P with
-  | (%ᵢₛ a)%n => %ᵢₛ a
-  | (%ᵢₗ a)%n => %ᵢₗ a
-  | (%ₒₛ a)%n => %ₒₛ a
-  | (P ⊢!{i} Q)%n => P ⊢!{i} Q
-  | ⌜φ⌝%n => ⌜φ⌝
-  | (P ∧ Q)%n => nlarge P ∧ nlarge Q
-  | (P ∨ Q)%n => nlarge P ∨ nlarge Q
-  | (P → Q)%n => nlarge P → nlarge Q
-  | (P ∗ Q)%n => nlarge P ∗ nlarge Q
-  | (P -∗ Q)%n => nlarge P -∗ nlarge Q
-  | (∀' Φ)%n => ∀' nlarge ∘ Φ
-  | (∃' Φ)%n => ∃' nlarge ∘ Φ
-  | (∀: V, P)%n => ∀: V, nlarge P
-  | (∃: V, P)%n => ∃: V, nlarge P
-  | (□ P)%n => □ nlarge P
-  | (■ P)%n => ■ nlarge P
-  | (▷ P)%n => ▷ P
-  | (|==> P)%n => |==> nlarge P
-  | (+!! (d; Φᵤ; Φₙₛ; Φₙₗ))%n => +!! (d; nlarge ∘ Φᵤ; Φₙₛ; Φₙₗ)
-  | (+!!ₗ (d; Φᵤ; Φₙₛ; Φₙₗ))%n => +!!ₗ (d; nlarge ∘ Φᵤ; Φₙₛ; Φₙₗ)
-  end.
+  | %ᵢₛ a => %ᵢₛ a
+  | %ᵢₗ a => %ᵢₗ a
+  | %ₒₛ a => %ₒₛ a
+  | P ⊢!{i} Q => P ⊢!{i} Q
+  | ⌜φ⌝ => ⌜φ⌝
+  | P ∧ Q => nlarge P ∧ nlarge Q
+  | P ∨ Q => nlarge P ∨ nlarge Q
+  | P → Q => nlarge P → nlarge Q
+  | P ∗ Q => nlarge P ∗ nlarge Q
+  | P -∗ Q => nlarge P -∗ nlarge Q
+  | ∀' Φ => ∀' nlarge ∘ Φ
+  | ∃' Φ => ∃' nlarge ∘ Φ
+  | ∀: V, P => ∀: V, nlarge P
+  | ∃: V, P => ∃: V, nlarge P
+  | □ P => □ nlarge P
+  | ■ P => ■ nlarge P
+  | ▷ P => ▷ P
+  | |==> P => |==> nlarge P
+  | +!! (d; Φᵤ; Φₙₛ; Φₙₗ) => +!! (d; nlarge ∘ Φᵤ; Φₙₛ; Φₙₗ)
+  | +!!ₗ (d; Φᵤ; Φₙₛ; Φₙₗ) => +!!ₗ (d; nlarge ∘ Φᵤ; Φₙₛ; Φₙₗ)
+  end%n.
 
 (** ** [Nsmall]: [nPropL] that can be turned into [nPropS] *)
 
@@ -107,33 +107,33 @@ Notation nrewi eq P := (rew[λ Γᵢ, nProp _ _ (; Γᵢ)] eq in P) (only parsin
 Fixpoint ninserti {Ξ σ Γₒ Γᵢ} (V : npvar) (i : nat) (P : nProp Ξ σ (Γₒ; Γᵢ))
   : nProp Ξ σ (Γₒ; tinsert V i Γᵢ) :=
   match P with
-  | (%ᵢₛ a)%n => %ᵢₛ cinsert V i a
-  | (%ᵢₗ a)%n => %ᵢₗ cinsert V i a
-  | (%ₒₛ a)%n => %ₒₛ a
-  | (P ⊢!{j} Q)%n =>
+  | %ᵢₛ a => %ᵢₛ cinsert V i a
+  | %ᵢₗ a => %ᵢₗ cinsert V i a
+  | %ₒₛ a => %ₒₛ a
+  | P ⊢!{j} Q =>
       nrewi tinsert_lapp (ninserti V _ P) ⊢!{j}
         nrewi tinsert_lapp (ninserti V _ Q)
-  | ⌜φ⌝%n => ⌜φ⌝
-  | (P ∧ Q)%n => ninserti V i P ∧ ninserti V i Q
-  | (P ∨ Q)%n => ninserti V i P ∨ ninserti V i Q
-  | (P → Q)%n => ninserti V i P → ninserti V i Q
-  | (P ∗ Q)%n => ninserti V i P ∗ ninserti V i Q
-  | (P -∗ Q)%n => ninserti V i P -∗ ninserti V i Q
-  | (∀' Φ)%n => ∀ a, ninserti V i (Φ a)
-  | (∃' Φ)%n => ∃ a, ninserti V i (Φ a)
-  | (∀: W, P)%n => ∀: W, ninserti V i P
-  | (∃: W, P)%n => ∃: W, ninserti V i P
-  | (□ P)%n => □ ninserti V i P
-  | (■ P)%n => ■ ninserti V i P
-  | (▷ P)%n => ▷ nrewi tinsert_lapp (ninserti V _ P)
-  | (|==> P)%n => |==> ninserti V i P
-  | (+!! (d; Φᵤ; Φₙₛ; Φₙₗ))%n => +!! (d; λ a, ninserti V i (Φᵤ a);
+  | ⌜φ⌝ => ⌜φ⌝
+  | P ∧ Q => ninserti V i P ∧ ninserti V i Q
+  | P ∨ Q => ninserti V i P ∨ ninserti V i Q
+  | P → Q => ninserti V i P → ninserti V i Q
+  | P ∗ Q => ninserti V i P ∗ ninserti V i Q
+  | P -∗ Q => ninserti V i P -∗ ninserti V i Q
+  | ∀' Φ => ∀ a, ninserti V i (Φ a)
+  | ∃' Φ => ∃ a, ninserti V i (Φ a)
+  | ∀: W, P => ∀: W, ninserti V i P
+  | ∃: W, P => ∃: W, ninserti V i P
+  | □ P => □ ninserti V i P
+  | ■ P => ■ ninserti V i P
+  | ▷ P => ▷ nrewi tinsert_lapp (ninserti V _ P)
+  | |==> P => |==> ninserti V i P
+  | +!! (d; Φᵤ; Φₙₛ; Φₙₗ) => +!! (d; λ a, ninserti V i (Φᵤ a);
       λ a, nrewi tinsert_lapp (ninserti V _ (Φₙₛ a));
       λ a, nrewi tinsert_lapp (ninserti V _ (Φₙₗ a)))
-  | (+!!ₗ (d; Φᵤ; Φₙₛ; Φₙₗ))%n => +!!ₗ (d; λ a, ninserti V i (Φᵤ a);
+  | +!!ₗ (d; Φᵤ; Φₙₛ; Φₙₗ) => +!!ₗ (d; λ a, ninserti V i (Φᵤ a);
       λ a, nrewi tinsert_lapp (ninserti V _ (Φₙₛ a));
       λ a, nrewi tinsert_lapp (ninserti V _ (Φₙₗ a)))
-  end.
+  end%n.
 
 (** [naddi]: Add an inner variable to [nProp] *)
 
@@ -145,34 +145,34 @@ Definition naddi {Ξ σ Γₒ Γᵢ} (V : npvar) (P : nProp Ξ σ (Γₒ; Γᵢ)
 Fixpoint ninserto {Ξ σ Γₒ Γᵢ} (V : npvar) (i : nat) (P : nProp Ξ σ (Γₒ; Γᵢ))
   : nProp Ξ σ (tinsert V i Γₒ; Γᵢ) :=
   match P with
-  | (%ᵢₛ a)%n => %ᵢₛ a
-  | (%ᵢₗ a)%n => %ᵢₗ a
-  | (%ₒₛ a)%n => %ₒₛ cinsert V i a
-  | (P ⊢!{j} Q)%n =>
+  | %ᵢₛ a => %ᵢₛ a
+  | %ᵢₗ a => %ᵢₗ a
+  | %ₒₛ a => %ₒₛ cinsert V i a
+  | P ⊢!{j} Q =>
       nrewi tinsert_rapp (ninserti V _ P) ⊢!{j}
         nrewi tinsert_rapp (ninserti V _ Q)
-  | ⌜φ⌝%n => ⌜φ⌝
-  | (P ∧ Q)%n => ninserto V i P ∧ ninserto V i Q
-  | (P ∨ Q)%n => ninserto V i P ∨ ninserto V i Q
-  | (P → Q)%n => ninserto V i P → ninserto V i Q
-  | (P ∗ Q)%n => ninserto V i P ∗ ninserto V i Q
-  | (P -∗ Q)%n => ninserto V i P -∗ ninserto V i Q
-  | (∀' Φ)%n => ∀ a, ninserto V i (Φ a)
-  | (∃' Φ)%n => ∃ a, ninserto V i (Φ a)
-  | (∀: W, P)%n => ∀: W, ninserto V (S i) P
-  | (∃: W, P)%n => ∃: W, ninserto V (S i) P
-  | (□ P)%n => □ ninserto V i P
-  | (■ P)%n => ■ ninserto V i P
-  | (▷ P)%n => ▷ nrewi tinsert_rapp (ninserti V _ P)
-  | (|==> P)%n => |==> ninserto V i P
-  | (+!! (d; Φᵤ; Φₙₛ; Φₙₗ))%n => +!! (d; λ a, ninserto V i (Φᵤ a);
+  | ⌜φ⌝ => ⌜φ⌝
+  | P ∧ Q => ninserto V i P ∧ ninserto V i Q
+  | P ∨ Q => ninserto V i P ∨ ninserto V i Q
+  | P → Q => ninserto V i P → ninserto V i Q
+  | P ∗ Q => ninserto V i P ∗ ninserto V i Q
+  | P -∗ Q => ninserto V i P -∗ ninserto V i Q
+  | ∀' Φ => ∀ a, ninserto V i (Φ a)
+  | ∃' Φ => ∃ a, ninserto V i (Φ a)
+  | ∀: W, P => ∀: W, ninserto V (S i) P
+  | ∃: W, P => ∃: W, ninserto V (S i) P
+  | □ P => □ ninserto V i P
+  | ■ P => ■ ninserto V i P
+  | ▷ P => ▷ nrewi tinsert_rapp (ninserti V _ P)
+  | |==> P => |==> ninserto V i P
+  | +!! (d; Φᵤ; Φₙₛ; Φₙₗ) => +!! (d; λ a, ninserto V i (Φᵤ a);
       λ a, nrewi tinsert_rapp (ninserti V _ (Φₙₛ a));
       λ a, nrewi tinsert_rapp (ninserti V _ (Φₙₗ a)))
-  | (+!!ₗ (d; Φᵤ; Φₙₛ; Φₙₗ))%n =>
+  | +!!ₗ (d; Φᵤ; Φₙₛ; Φₙₗ) =>
       +!!ₗ (d; λ a, ninserto V i (Φᵤ a);
         λ a, nrewi tinsert_rapp (ninserti V _ (Φₙₛ a));
         λ a, nrewi tinsert_rapp (ninserti V _ (Φₙₗ a)))
-  end.
+  end%n.
 
 (** [naddo]: Add an outer variable to [nProp] *)
 
