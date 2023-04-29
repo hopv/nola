@@ -192,14 +192,12 @@ Fixpoint cbyrapp {T F} ts {us : tlist T} (s : csum F us) : csum F (ts ^++ us) :=
   end.
 
 (** Apply a function of [plist] to a value of [csum] *)
-Reserved Infix "-$+" (at level 20, no associativity).
-Fixpoint pcapply {T F} {A : Type} {ts : tlist T}
-  (fs : plist (λ t, F t → A) ts) (s : csum F ts) : A :=
-  match s, fs with
-  | #0 a, f -:: _ => f a
-  | +/ s, _ -:: fs => fs -$+ s
-  end
-where "fs -$+ s" := (pcapply fs s) : nola_scope.
+Fixpoint pcapply {T F G} {A : Type} {ts : tlist T}
+  (app : ∀ t, F t → G t → A) (xs : plist F ts) (s : csum G ts) : A :=
+  match s, xs with
+  | #0 a, x -:: _ => app _ x a
+  | +/ s, _ -:: xs => pcapply app xs s
+  end.
 
 (** Map over [csum] *)
 Reserved Infix "+<$>" (at level 61, left associativity).
