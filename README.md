@@ -1,15 +1,14 @@
-# Nola: Deep-Embed Separation Logic to Wipe Laters Out
+# Nola: Later-free Shared Mutable State via Syntax
 
-Nola is a new approach to propositional sharing
-in non-step-indexed separation logic.
+Nola is a framework for achieving later-free shared mutable state via syntax.
 It is fully mechanized in [Coq](https://coq.inria.fr/) with the [Iris](https://iris-project.org/) separation logic framework.
 
 The name Nola comes from *No* *la*ters.
-It is also a nickname for New Orleans, a city I like.
+Incidentally, it is also a nickname for New Orleans.
 
 - [Getting Started](#getting-started)
 - [Story](#story)
-  - [Propositional Sharing](#propositional-sharing)
+  - [Semantic Sharing](#semantic-sharing)
   - [Obstacle: Laters](#obstacle-laters)
   - [Solution: Nola](#solution-nola)
 
@@ -47,11 +46,10 @@ make viewdoc
 
 ## Story
 
-### Propositional Sharing
+### Semantic Sharing
 
-We give a name *propositional sharing*
+We give a name *semantic sharing*
 to sharing of mutable state under a protocol expressed by a separation-logic proposition `P` created dynamically.
-
 Such sharing has been essential in the modern usage of separation logic.
 
 #### Examples
@@ -72,7 +70,7 @@ the borrower and lender still *share* information about `P`.
 
 #### Step-Indexing
 
-All the existing separation logics with propositional sharing,
+All the existing separation logics with semantic sharing,
 such as [iCAP](https://www.cs.au.dk/~birke/papers/icap-conf.pdf) and Iris,
 resort to *step-indexing*.
 It is the technique of layering the logic world with step-indices `0, 1, 2, …: ℕ`,
@@ -80,7 +78,7 @@ having notions more defined as the step-index grows.
 Why?
 
 Their separation-logic proposition `iProp` is a predicate over an abstract resource `Res`.
-For propositional sharing, `Res` should be able to model agreement on propositions.
+For semantic sharing, `Res` should be able to model agreement on propositions.
 So they define `Res` as some data type depending on `iProp`.
 Naively, they have a domain equation like the following,
 which is a *circular* definition:
@@ -98,68 +96,33 @@ and `▶` delays the definition of a data type by one step-index.
 
 Sounds fine? But this comes with the cost of the *later modality* `▷`.
 
-Due to `▶` added to `iProp`, we can use propositional sharing only for propositions under `▷`,
+Due to `▶` added to `iProp`, we can use semantic sharing only for propositions under `▷`,
 which delays the definition of a proposition by one step-index.
-This causes significant practical issues, especially for dealing with nested propositional sharing.
+```
+inv N P ={↑N,∅}=> ▷ P ∗ (▷ P ={∅,↑N}=∗ True)
+```
+This causes significant practical issues, especially for dealing with nested semantic sharing.
 
-The later modality `▷` is ill-behaved: it is non-idempotent and doesn't commute with the fancy update modality `|==>`.
+The later modality `▷` is ill-behaved: it is non-idempotent and doesn't commute with the update modality `|==>`.
 Various efforts, such as [later credits](https://plv.mpi-sws.org/later-credits/), have been made to manage `▷`, but it is still hard to use.
 
 More fundamentally, the power to strip off `▷` makes program predicates weaker,
 ensuring only safety properties (absence of bad behaviors witnessed by finite steps),
 but not liveness properties (absence of bad behaviors witnessed only by an infinite execution).
-Indeed, [Simuliris](https://iris-project.org/pdfs/2022-popl-simuliris.pdf) just gave up *propositional sharing* in its program logic built in Iris for fair termination preservation, a rich liveness property.
-
-#### Paradox
-
-Can't we have propositional sharing without laters `▷`?
-That was believed impossible because of a known paradox for a naive shared invariant without `▷`.
-
-At the high level, the paradox corresponds to a folklore technique called Landin's knot,
-causing a program loop using a shared mutable reference over the arrow type `evil: (unit -> unit) ref`:
-```ocaml
-let evil = ref (fun _ -> ()) in
-evil := (fun _ -> !evil ());
-!evil ()
-```
+Indeed, [Simuliris](https://iris-project.org/pdfs/2022-popl-simuliris.pdf) just gave up *semantic sharing* in its program logic built in Iris for fair termination preservation, a rich liveness property.
 
 ### Solution: Nola
 
-Surprisingly, Nola achieves propositional sharing without laters!
+Nola achieves a form of semantic sharing without laters!
 
 We no longer suffer from the later modality `▷` and can do advanced liveness verification like Simuliris.
-And at the same time, we can use propositional sharing, like shared invariants and full borrows, for flexible reasoning.
+And at the same time, we can use shared invariants and full borrows, for flexible reasoning.
 
-#### Core Idea
+#### Core Idea: Syntax
 
-Separation logics like iCAP and Iris are fully semantic, using *shallow embedding*, without syntax for propositions.
-
-Instead, Nola uses *deep embedding*.
-It constructs *syntax* `nProp` for propositions and judgments over `nProp`.
-Then we interpret Nola's syntactic separation logic in a semantic separation logic, Iris.
-Now we have broken the circular definition
-because the resource `Res` for a semantic proposition `iProp` depends just on `nProp`, like:
+To achieve semantic sharing, Nola uses *syntax* `A` equipped with a semantic interpretation as a separation-logic proposition `⟦ ⟧ : A → iProp`.
+Now we have broken the circular definition because the resource `Res` for a semantic proposition `iProp` depends just on `A`, like:
 ```
-iProp  ≜  Res → Prop     Res  ≜  F nProp
+iProp  ≜  Res → Prop     Res  ≜  F A     ⟦ ⟧ : A → iProp
 ```
-Then we give an interpretation `⟦ ⟧ : nProp → iProp`
-and prove the soundness of the syntactic logic for the semantics.
 Easy!
-
-#### Avoiding the Paradox
-
-For soundness, Nola imposes a syntactic restriction:
-roughly, we can't use the fancy update modality `|=[W]=>` in the proposition `P` of a shared invariant `inv N P`, full borrow `&{κ} P`, etc.
-
-That amounts to restricting shared mutable references containing the arrow type, like `evil: (unit -> unit) ref`,
-liberating Nola from the paradox analogous to Landin's knot.
-
-#### Extensibility
-
-Using syntax might sound not extensible.
-Amazingly, Nola is *extensible*.
-Also, Nola's proofs are even composable,
-i.e., proofs from different projects can be composed.
-
-The key technique is parameterization of the syntax.
-This is analogous to Iris's parameterization `iProp Σ` of `iProp` by the family of cameras `Σ`.
