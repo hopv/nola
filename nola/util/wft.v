@@ -38,6 +38,10 @@ Proof. apply wf_irrefl, wft_lt_wf. Qed.
 #[export] Instance wft_lt_asymm {A : wft} : Asymmetric A.(wft_lt).
 Proof. apply wf_asymm, wft_lt_wf. Qed.
 
+(** ** Make [unit] [wft] *)
+
+Canonical unit_wft := Wft unit (λ _ _, False) false_wf.
+
 (** ** Make [nat] [wft] *)
 
 Canonical nat_wft := Wft nat (<) (well_founded_ltof _ _).

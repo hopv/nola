@@ -60,3 +60,7 @@ Section wf_facts.
     case; [by apply IH|]=> [[c [tcRbc /IH Accc]]]. exact (Acc_inv Accc tcRbc).
   Qed.
 End wf_facts.
+
+(** Empty relation is well-founded *)
+Lemma false_wf {A} : wf (λ _ _ : A, False).
+Proof. move=> a. by apply Acc_intro. Qed.
