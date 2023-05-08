@@ -73,12 +73,12 @@ Section pnu.
 
   (** Unfold [pnu] *)
   Lemma pnu_unfold `{Mono₁₁ F} {φ a} : pnu φ a → F (por pnu φ) a.
-  Proof. move=> /pnu_out[_[->]]. done. Qed.
+  Proof. move=> [[_[->]]]. done. Qed.
 
   (** Monotonicity of [pnu] *)
   #[export] Instance pnu_mono : Mono₁₁ pnu.
   Proof.
-    move=> φ ψ φψ. cofix FIX=> a /pnu_out[pnuor[pnuorto ?]]. split.
+    move=> φ ψ φψ. cofix FIX=> a [[pnuor[pnuorto ?]]]. split.
     exists pnuor. split; [|done]=> ? /pnuorto[/FIX|/φψ]; by [left|right].
   Qed.
 
@@ -140,12 +140,12 @@ Section pmu.
 
   (** Unfold [pmu] *)
   Lemma pmu_unfold `{Mono₁₁ F} {φ a} : pmu φ a → F (pand pmu φ) a.
-  Proof. move=> /pmu_out[_[->]]. done. Qed.
+  Proof. move=> [[_[->]]]. done. Qed.
 
   (** Monotonicity of [pmu] *)
   #[export] Instance pmu_mono : Mono₁₁ pmu.
   Proof.
-    move=> φ ψ φψ ++. fix FIX 2=> a /pmu_out[pmuand[pmuandto ?]]. split.
+    move=> φ ψ φψ ++. fix FIX 2=> a [[pmuand[pmuandto ?]]]. split.
     exists pmuand. split; [|done]=> ? /pmuandto[/FIX+ /φψ]//.
   Qed.
 
