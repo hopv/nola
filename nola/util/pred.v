@@ -7,7 +7,9 @@ From nola Require Export prelude.
 (** Lifted [False], [True], [∨], [∧] and [→] *)
 
 Definition False₁ {A} (a : A) : Prop := False.
+Notation "⊥₁" := False₁ : nola_scope.
 Definition True₁ {A} (a : A) : Prop := True.
+Notation "⊤₁" := True₁ : nola_scope.
 
 Definition or₁ {A} (φ ψ : A → Prop) a : Prop := φ a ∨ ψ a.
 Infix "∨₁" := or₁ (at level 50, left associativity).
@@ -91,7 +93,7 @@ Section pnu.
   Qed.
 
   (** [nu]: Non-parameterized greatest fixpoint *)
-  Definition nu : A → Prop := pnu False₁.
+  Definition nu : A → Prop := pnu ⊥₁.
 
   (** Fold [nu] *)
   Lemma nu_fold `{Mono₁₁ F} {a} : F nu a → nu a.
@@ -159,7 +161,7 @@ Section pmu.
   Qed.
 
   (** [mu]: Non-parameterized least fixpoint *)
-  Definition mu : A → Prop := pmu True₁.
+  Definition mu : A → Prop := pmu ⊤₁.
 
   (** Fold [mu] *)
   Lemma mu_fold `{Mono₁₁ F} {a} : F mu a → mu a.
