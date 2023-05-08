@@ -68,11 +68,11 @@ Section pnu.
   }.
 
   (** Fold [pnu] *)
-  Lemma pnu_fold φ a : F (por pnu φ) a → pnu φ a.
+  Lemma pnu_fold {φ a} : F (por pnu φ) a → pnu φ a.
   Proof. move=> ?. split. exists (por pnu φ). split; by [move=> >|]. Qed.
 
   (** Unfold [pnu] *)
-  Lemma pnu_unfold `{Mono₁₁ F} φ a : pnu φ a → F (por pnu φ) a.
+  Lemma pnu_unfold `{Mono₁₁ F} {φ a} : pnu φ a → F (por pnu φ) a.
   Proof. move=> /pnu_out[_[->]]. done. Qed.
 
   (** Monotonicity of [pnu] *)
@@ -94,14 +94,14 @@ Section pnu.
   Definition nu : A → Prop := pnu False₁.
 
   (** Fold [nu] *)
-  Lemma nu_fold `{Mono₁₁ F} a : F nu a → nu a.
+  Lemma nu_fold `{Mono₁₁ F} {a} : F nu a → nu a.
   Proof.
     move=> Fnua. apply pnu_fold. move: Fnua. apply use_mono₁₁. move{a}=> a nua.
     left. move: nua. by apply use_mono₁₁.
   Qed.
 
   (** Unfold [nu] *)
-  Lemma nu_unfold `{Mono₁₁ F} a : nu a → F nu a.
+  Lemma nu_unfold `{Mono₁₁ F} {a} : nu a → F nu a.
   Proof. move/pnu_unfold. apply use_mono₁₁. move=> _ [//|[]]. Qed.
 
   (** Prove a lower bound of [nu] via [pnu] *)
@@ -135,11 +135,11 @@ Section pmu.
   }.
 
   (** Fold [pmu] *)
-  Lemma pmu_fold φ a : F (pand pmu φ) a → pmu φ a.
+  Lemma pmu_fold {φ a} : F (pand pmu φ) a → pmu φ a.
   Proof. move=> ?. split. exists (pand pmu φ). split; by [move=> >|]. Qed.
 
   (** Unfold [pmu] *)
-  Lemma pmu_unfold `{Mono₁₁ F} φ a : pmu φ a → F (pand pmu φ) a.
+  Lemma pmu_unfold `{Mono₁₁ F} {φ a} : pmu φ a → F (pand pmu φ) a.
   Proof. move=> /pmu_out[_[->]]. done. Qed.
 
   (** Monotonicity of [pmu] *)
@@ -162,18 +162,18 @@ Section pmu.
   Definition mu : A → Prop := pmu True₁.
 
   (** Fold [mu] *)
-  Lemma mu_fold `{Mono₁₁ F} a : F mu a → mu a.
+  Lemma mu_fold `{Mono₁₁ F} {a} : F mu a → mu a.
   Proof.
     move=> Fmua. apply pmu_fold. move: Fmua. apply use_mono₁₁. move{a}=> a mua.
     split; [|done]. move: mua. by apply use_mono₁₁.
   Qed.
 
   (** Unfold [mu] *)
-  Lemma mu_unfold `{Mono₁₁ F} a : mu a → F mu a.
+  Lemma mu_unfold `{Mono₁₁ F} {a} : mu a → F mu a.
   Proof. move/pmu_unfold. apply use_mono₁₁. by move=> ?[??]. Qed.
 
   (** Prove an upper bound of [mu] via [pmu] *)
-  Lemma mu_pmu `{Mono₁₁ F} φ : (pmu φ →₁ φ) → mu →₁ φ.
+  Lemma mu_pmu `{Mono₁₁ F} {φ} : (pmu φ →₁ φ) → mu →₁ φ.
   Proof.
     move=> pmuφφ. apply pmu_acc=> a pmuandφa. apply pmuφφ. move: pmuandφa.
     apply use_mono₁₁. move{a}=> a [_]. done.
