@@ -30,8 +30,9 @@ Notation "⊥ᵈ" := Falseᵈ : nola_scope.
 Definition orᵈ {JU} (φ ψ : deriv_ty JU) : deriv_ty JU := λ i J, φ i J ∨ ψ i J.
 Infix "∨ᵈ" := orᵈ (at level 50, left associativity) : nola_scope.
 
-Definition dor {JU} (δ : pderiv_ty JU) (φ : deriv_ty JU) : deriv_ty JU :=
+Definition apporᵈ {JU} (δ : pderiv_ty JU) (φ : deriv_ty JU) : deriv_ty JU :=
   δ φ ∨ᵈ φ.
+Infix "$∨ᵈ" := apporᵈ (at level 50, left associativity) : nola_scope.
 
 Definition implᵈ {JU} (φ ψ : deriv_ty JU) : Prop := ∀ i J, φ i J → ψ i J.
 Infix "→ᵈ" := implᵈ (at level 99, right associativity) : nola_scope.
@@ -52,7 +53,7 @@ Record derivy_gen (JU : judg) (self : pderiv_ty JU → Prop) (δ : pderiv_ty JU)
   derivy_gen_acc {φ} (res : deriv_ty JU) : (res →ᵈ δ (φ ∨ᵈ res)) → res →ᵈ δ φ;
   (** [δ φ i J] can be proved by semantics *)
   derivy_gen_bysem {φ i J} :
-    (∀ δ', self δ' → (δ φ i →₁ judg_sem (δ' ⊥ᵈ) i) → (dor δ φ →ᵈ δ' ⊥ᵈ) →
+    (∀ δ', self δ' → (δ φ i →₁ judg_sem (δ' ⊥ᵈ) i) → (δ $∨ᵈ φ →ᵈ δ' ⊥ᵈ) →
       (δ' ⊥ᵈ →ᵈ[≺ i] judg_sem (δ' ⊥ᵈ)) → judg_sem (δ' ⊥ᵈ) i J) →
     δ φ i J
 }.
@@ -74,8 +75,8 @@ Class inderivy (JU : judg) (δ' δ : pderiv_ty JU) (φ : deriv_ty JU)
   inderivy_derivy :: derivy JU δ';
   (** Interpret [δ φ i] as [judg_sem (δ' ⊥ᵈ) i] *)
   inderivy_sem : δ φ i →₁ judg_sem (δ' ⊥ᵈ) i;
-  (** Turn [dor δ φ] into [δ' ⊥ᵈ] *)
-  inderivy_turn : dor δ φ →ᵈ δ' ⊥ᵈ;
+  (** Turn [δ $∨ᵈ φ] into [δ' ⊥ᵈ] *)
+  inderivy_turn : δ $∨ᵈ φ →ᵈ δ' ⊥ᵈ;
   (** Interpret [δ' ⊥ᵈ j] as [judg_sem (δ' ⊥ᵈ) j] for [j ≺ i] *)
   inderivy_semlow : δ' ⊥ᵈ →ᵈ[≺ i] judg_sem (δ' ⊥ᵈ);
 }.
@@ -96,7 +97,7 @@ Proof. move=> *. apply inderivy_turn. by left. Qed.
 Lemma inderivy_turn_r `{inderivy JU δ' δ φ i} : φ →ᵈ δ' ⊥ᵈ.
 Proof. move=> *. apply inderivy_turn. by right. Qed.
 Lemma inderivy_turn_semlow `{inderivy JU δ' δ φ i} :
-  dor δ φ →ᵈ[≺ i] judg_sem (δ' ⊥ᵈ).
+  δ $∨ᵈ φ →ᵈ[≺ i] judg_sem (δ' ⊥ᵈ).
 Proof. move=> *. apply inderivy_semlow; by [|apply inderivy_turn]. Qed.
 Lemma inderivy_turn_semlow_l `{inderivy JU δ' δ φ i} :
   δ φ →ᵈ[≺ i] judg_sem (δ' ⊥ᵈ).
