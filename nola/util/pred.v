@@ -12,11 +12,11 @@ Definition True₁ {A} (a : A) : Prop := True.
 Notation "⊤₁" := True₁ : nola_scope.
 
 Definition or₁ {A} (φ ψ : A → Prop) a : Prop := φ a ∨ ψ a.
-Infix "∨₁" := or₁ (at level 50, left associativity).
+Infix "∨₁" := or₁ (at level 50, left associativity) : nola_scope.
 Notation "(∨₁)" := or₁ (only parsing) : nola_scope.
 
 Definition and₁ {A} (φ ψ : A → Prop) a : Prop := φ a ∧ ψ a.
-Infix "∧₁" := and₁ (at level 40, left associativity).
+Infix "∧₁" := and₁ (at level 40, left associativity) : nola_scope.
 Notation "(∧₁)" := and₁ (only parsing) : nola_scope.
 
 Infix "→₀" := impl (at level 99, right associativity).
@@ -24,7 +24,7 @@ Notation "(→₀)" := impl (only parsing) : nola_scope.
 Notation "(→₀@{ A } )" := (@impl A) (only parsing) : nola_scope.
 
 Definition impl₁ {A} := pointwise_relation A impl.
-Infix "→₁" := impl₁ (at level 99, right associativity).
+Infix "→₁" := impl₁ (at level 99, right associativity) : nola_scope.
 Notation "(→₁@{ A } )" := (@impl₁ A) (only parsing) : nola_scope.
 Notation "(→₁)" := (impl₁) (only parsing) : nola_scope.
 
