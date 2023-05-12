@@ -6,7 +6,7 @@ From iris.bi Require Import notation.
 (** ** [nProp]: Nola syntactic proposition
 
   Its universe level is strictly higher than those of [V : npvar]
-  and the domain [A : Type] of [n_forall]/[n_exists].
+  and the domain [A : Type] of [n_forall]/[n_exist].
 
   Connectives that operate on the context [Γ : nctx] take decomposed contexts
   [Γₒ, Γᵢ] for smooth type inference
@@ -132,7 +132,7 @@ Notation "%ᵢₗ a" := (n_varil a) (at level 20, right associativity)
 Notation "%ₒₛ a" := (n_varos a) (at level 20, right associativity)
   : nProp_scope.
 
-(** ** [nlarge]: Turn [nProp σ] into [nPropL Ξ]
+(** ** [nlarge]: Turn [nProp σ] into [nPropL σ]
   Although the main interest is the case [σ = nS],
   we keep the function polymorphic over [σ] for ease of definition *)
 Fixpoint nlarge {σ Γ} (P : nProp σ Γ) : nPropL Γ :=
