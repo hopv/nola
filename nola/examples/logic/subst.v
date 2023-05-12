@@ -1,0 +1,75 @@
+(** * Substitution for [nProp] *)
+
+From nola.examples.logic Require Export prop.
+Import EqNotations.
+
+(** [nrewi P eq]: Rewrite the inner context of [P : nProp] with [eq] *)
+
+Notation nrewi P eq := (rew[λ Γᵢ, nProp _ (; Γᵢ)] eq in P)
+  (only parsing).
+
+(** ** [nlift]: Turn [nProp σ (;)] into [nProp σ Γ] *)
+
+(** [nlifti]: Add inner variables at the bottom *)
+
+Definition nlifti_rew {σ Γₒ Γᵢ Δ}
+  (P : nProp σ (; (Γₒ ^++ Γᵢ) ^++ Δ)) : nProp σ (; Γₒ ^++ (Γᵢ ^++ Δ)) :=
+  nrewi P (eq_sym (tapp_assoc Γₒ Γᵢ Δ)).
+Fixpoint nlifti {Δ σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ)) : nProp σ (Γₒ; Γᵢ ^++ Δ) :=
+  match P with
+  | ⌜φ⌝ => ⌜φ⌝
+  | P ∧ Q => nlifti P ∧ nlifti Q
+  | P ∨ Q => nlifti P ∨ nlifti Q
+  | P → Q => nlifti P → nlifti Q
+  | ∀' Φ => ∀' nlifti ∘ Φ
+  | ∃' Φ => ∃' nlifti ∘ Φ
+  | P ∗ Q => nlifti P ∗ nlifti Q
+  | P -∗ Q => nlifti P -∗ nlifti Q
+  | □ P => □ nlifti P
+  | ■ P => ■ nlifti P
+  | |==> P => |==> nlifti P
+  | ▷ P => ▷ nlifti_rew (nlifti P)
+  | P ⊢!{i} Q => nlifti_rew (nlifti P) ⊢!{i} nlifti_rew (nlifti Q)
+  | ∀: V, P => ∀: V, nlifti P
+  | ∃: V, P => ∃: V, nlifti P
+  | %ᵢₛ a => %ᵢₛ cbylapp a _
+  | %ᵢₗ a => %ᵢₗ cbylapp a _
+  | %ₒₛ a => %ₒₛ a
+  end%n.
+
+(** [nliftoi]: Add outer and inner variables at the bottom *)
+Definition nliftoi_rew {σ Γₒ Γᵢ Δₒ Δᵢ} : Γᵢ = ^[] →
+  nProp σ (; (Γₒ ^++ Γᵢ) ^++ Δₒ ^++ Δᵢ) → nProp σ (; (Γₒ ^++ Δₒ) ^++ Δᵢ) :=
+  match Γᵢ with
+  | _ ^:: _ => λ eq, match eq with end
+  | ^[] => λ _ P, nrewi P (eq_trans
+      (eq_sym (tapp_assoc Γₒ ^[] (Δₒ ^++ Δᵢ))) (tapp_assoc Γₒ Δₒ Δᵢ))
+  end.
+Fixpoint nliftoi {Δₒ Δᵢ σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ))
+  : Γᵢ = ^[] → nProp σ (Γₒ ^++ Δₒ; Δᵢ) :=
+  match P with
+  | ⌜φ⌝ => λ _, ⌜φ⌝
+  | P ∧ Q => λ eq, nliftoi P eq ∧ nliftoi Q eq
+  | P ∨ Q => λ eq, nliftoi P eq ∨ nliftoi Q eq
+  | P → Q => λ eq, nliftoi P eq → nliftoi Q eq
+  | ∀' Φ => λ eq, ∀ a, nliftoi (Φ a) eq
+  | ∃' Φ => λ eq, ∃ a, nliftoi (Φ a) eq
+  | P ∗ Q => λ eq, nliftoi P eq ∗ nliftoi Q eq
+  | P -∗ Q => λ eq, nliftoi P eq -∗ nliftoi Q eq
+  | □ P => λ eq, □ nliftoi P eq
+  | ■ P => λ eq, ■ nliftoi P eq
+  | |==> P => λ eq, |==> nliftoi P eq
+  | ▷ P => λ eq, ▷ nliftoi_rew eq (nlifti P)
+  | P ⊢!{i} Q => λ eq,
+      nliftoi_rew eq (nlifti P) ⊢!{i} nliftoi_rew eq (nlifti Q)
+  | ∀: V, P => λ eq, ∀: V, nliftoi P eq
+  | ∃: V, P => λ eq, ∃: V, nliftoi P eq
+  | %ᵢₛ a => match a with
+      #0 _ => λ eq, match eq with end | +/ _ => λ eq, match eq with end end
+  | %ᵢₗ a => match a with
+      #0 _ => λ eq, match eq with end | +/ _ => λ eq, match eq with end end
+  | %ₒₛ a => λ _, %ₒₛ cbylapp a _
+  end%n.
+
+(** [nlift]: Turn [nProp σ (;)] into [nProp σ Γ] *)
+Definition nlift {σ Γ} (P : nProp σ (;)) : nProp σ Γ := nliftoi P eq_refl.

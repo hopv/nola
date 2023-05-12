@@ -49,6 +49,14 @@ Fixpoint tapp {T} (ts us : tlist T) : tlist T :=
   end
 where "ts ^++ us" := (tapp ts us) : nola_scope.
 
+(** Associativity of [^++], defined directly for computation *)
+Fixpoint tapp_assoc {T} (ts us vs : tlist T) :
+  ts ^++ (us ^++ vs) = (ts ^++ us) ^++ vs :=
+  match ts with
+  | ^[] => eq_refl
+  | t ^:: ts => f_equal (tcons t) (tapp_assoc ts us vs)
+  end.
+
 (** Map over [tlist] *)
 Reserved Infix "^<$>" (at level 61, left associativity).
 Fixpoint tmap {T U} (f : T → U) (ts : tlist T) : tlist U :=
