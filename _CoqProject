@@ -4,4 +4,7 @@ nola/prelude.v
 nola/util/pred.v
 nola/util/rel.v
 nola/util/wft.v
+nola/util/tlist.v
 nola/judg.v
+nola/examples/logic/ctx.v
+nola/examples/logic/prop.v
