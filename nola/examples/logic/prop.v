@@ -48,6 +48,12 @@ Inductive nProp : nsort → nctx → Type :=
 | n_deriv {σ} Γₒ {Γᵢ} :
     nat → nProp nL (; Γₒ ^++ Γᵢ) → nProp nL (; Γₒ ^++ Γᵢ) → nProp σ (Γₒ; Γᵢ)
 
+(** Recursive small proposition *)
+| n_recs {σ Γₒ Γᵢ} {A : Type} :
+    (A → nProp nS (A →nPS ^:: Γₒ; Γᵢ)) → A → nProp σ (Γₒ; Γᵢ)
+(** Recursive large proposition *)
+| n_recl {Γₒ Γᵢ} {A : Type} :
+    (A → nProp nL (A →nPL ^:: Γₒ; Γᵢ)) → A → nProp nL (Γₒ; Γᵢ)
 (** Universal quantification over [A → nProp] *)
 | n_n_forall {σ Γₒ Γᵢ} V : nProp σ (V ^:: Γₒ; Γᵢ) → nProp σ (Γₒ; Γᵢ)
 (** Existential quantification over [A → nProp] *)
@@ -102,6 +108,16 @@ Notation "P ⊢!{ i }{ Γₒ } Q" := (n_deriv Γₒ i P Q)
 Notation "P ⊢!{ i } Q" := (n_deriv _ i P Q)
   (at level 99, Q at level 200, format "P  ⊢!{ i }  Q") : nProp_scope.
 
+Notation "rec:ₛ' Φ" := (n_recs Φ)
+  (at level 200, right associativity, only parsing) : nProp_scope.
+Notation "rec:ₛ x , P" := (n_recs (λ x, P))
+  (at level 200, right associativity,
+    format "'[' '[' rec:ₛ  x ,  '/' P ']' ']'") : nProp_scope.
+Notation "rec:ₗ' Φ" := (n_recl Φ)
+  (at level 200, right associativity, only parsing) : nProp_scope.
+Notation "rec:ₗ x , P" := (n_recl (λ x, P))
+  (at level 200, right associativity,
+    format "'[' '[' rec:ₗ  x ,  '/' P ']' ']'") : nProp_scope.
 Notation "∀: V , P" := (n_n_forall V P)
   (at level 200, right associativity,
     format "'[' '[' ∀:  V ']' ,  '/' P ']'") : nProp_scope.
@@ -134,6 +150,8 @@ Fixpoint nlarge {σ Γ} (P : nProp σ Γ) : nPropL Γ :=
   | |==> P => |==> nlarge P
   | ▷ P => ▷ P
   | P ⊢!{i} Q => P ⊢!{i} Q
+  | (rec:ₛ' Φ) a => (rec:ₛ' Φ) a
+  | (rec:ₗ' Φ) a => (rec:ₗ' Φ) a
   | ∀: V, P => ∀: V, nlarge P
   | ∃: V, P => ∃: V, nlarge P
   | %ᵢₛ a => %ᵢₛ a
