@@ -12,9 +12,8 @@ Notation nrewi P eq := (rew[λ Γᵢ, nProp _ (; Γᵢ)] eq in P)
 
 (** [nlifti]: Add inner variables at the bottom *)
 
-Definition nlifti_rew {σ Γₒ Γᵢ Δ}
-  (P : nProp σ (; (Γₒ ^++ Γᵢ) ^++ Δ)) : nProp σ (; Γₒ ^++ (Γᵢ ^++ Δ)) :=
-  nrewi P (eq_sym (tapp_assoc Γₒ Γᵢ Δ)).
+Definition nlifti_rew {σ Γₒ Γᵢ Δ} (P : nProp σ (; (Γₒ ^++ Γᵢ) ^++ Δ))
+  : nProp σ (; Γₒ ^++ (Γᵢ ^++ Δ)) := nrewi P (eq_sym (tapp_assoc Γₒ Γᵢ Δ)).
 Fixpoint nlifti {Δ σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ)) : nProp σ (Γₒ; Γᵢ ^++ Δ) :=
   match P with
   | ⌜φ⌝ => ⌜φ⌝
