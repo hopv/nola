@@ -1,6 +1,6 @@
-# Nola: Later-free Shared Mutable State via Syntax
+# Nola: Power of Syntax for Later-free Shared Mutable State
 
-Nola is a library for achieving later-free shared mutable state via syntax.
+Nola is a library for achieving expressive later-free shared mutable state by the power of syntax.
 It is fully mechanized in [Coq](https://coq.inria.fr/) with the [Iris](https://iris-project.org/) separation logic framework.
 
 The name Nola comes from *No* *la*ters.
