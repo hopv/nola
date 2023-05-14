@@ -1,6 +1,6 @@
-# Nola: Power of Syntax for Later-free Shared Mutable State
+# Nola: Power of Deep Embedding for Later-free Impredicative Invariants
 
-Nola is a library for achieving expressive later-free shared mutable state by the power of syntax.
+Nola is a library for achieving expressive later-free impredicative invariants by the power of deep embedding.
 It is fully mechanized in [Coq](https://coq.inria.fr/) with the [Iris](https://iris-project.org/) separation logic framework.
 
 The name Nola comes from *No* *la*ters.
