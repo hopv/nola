@@ -2,7 +2,6 @@
 
 From nola.examples.logic Require Export subst.
 From iris.base_logic.lib Require Import iprop.
-Require Import Coq.Program.Equality.
 
 (** Modification of [nsubsti] *)
 Definition nsubsti' {σ Γₒ Γᵢ}
@@ -16,9 +15,9 @@ Notation nderiv_ty := (nat → nPropL (;) * nPropL (;) → Prop).
 Section neval_gen.
   Context
     (** Iris resources *) {Σ : gFunctors}
-    (** Derivability predicate *) (d : nderiv_ty)
     (** Evaluation used contractively *)
-    (nev : nderiv_ty → ∀ σ, nProp σ (;) → iProp Σ).
+    (nev : nderiv_ty → ∀ σ, nProp σ (;) → iProp Σ)
+    (** Derivability predicate *) (d : nderiv_ty).
 
   (** ** [nevalS_gen P Φs] : Evaluate small [P] under the environment [Φs] *)
   Fixpoint nevalS_gen {σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ))
@@ -80,11 +79,11 @@ Section neval_gen.
     end%I.
 
   (** [nevalS_gen] coincides with [neval_gen] *)
-  Lemma nevalS_gen_neval_gen {Γₒ Γᵢ} {P : nPropS (Γₒ; Γᵢ)} {Φs eq} :
-    nevalS_gen P eq_refl Φs eq ⊣⊢ neval_gen P Φs eq.
+  Lemma nevalS_gen_neval_gen {σ Γ} {P : nProp σ Γ} {σS Φs eq} :
+    nevalS_gen P σS Φs eq ⊣⊢ neval_gen P Φs eq.
   Proof.
-    move: Γₒ Γᵢ P Φs eq. fix FIX 3=> Γₒ Γᵢ P Φs eq.
-    dependent destruction P=>//=; f_equiv=> >; apply FIX.
+    move: σ Γ P σS Φs eq. fix FIX 3=> σ Γ.
+    case=>//= *; try f_equiv=> >; apply (FIX _ (_; _)%nctx).
   Qed.
 End neval_gen.
 
@@ -94,34 +93,35 @@ Section neval_fp.
 
   (** [nevalS_gen]/[neval_gen] typed as a discrete function *)
   Definition nevalS_gen' : (_ -d> _ -d> _ -d> iProp Σ) ->
-    _ -d> _ -d> _ -d> _ -d> _ -d> _ -d> _ -d> _ -d> iProp Σ :=
-    λ nev d σ Γₒ Γᵢ, nevalS_gen d nev (σ:=σ) (Γₒ:=Γₒ) (Γᵢ:=Γᵢ).
-  Definition neval_gen' : (_ -d> _ -d> _ -d> iProp Σ) ->
     _ -d> _ -d> _ -d> _ -d> _ -d> _ -d> _ -d> iProp Σ :=
-    λ nev d σ Γₒ Γᵢ, neval_gen d nev (σ:=σ) (Γₒ:=Γₒ) (Γᵢ:=Γᵢ).
+    λ nev d σ Γ (P : nProp σ Γ), nevalS_gen nev d P.
+  Definition neval_gen' : (_ -d> _ -d> _ -d> iProp Σ) ->
+    _ -d> _ -d> _ -d> _ -d> _ -d> _ -d> iProp Σ :=
+    λ nev d σ Γ (P : nProp σ Γ), neval_gen nev d P.
 
   (** [nevalS_gen] is contractive *)
   #[export] Instance nevalS_gen_contractive : Contractive nevalS_gen'.
   Proof.
-    move=> i nev nev' nevdist + + + + +. fix FIX 5=> d σ Γₒ Γᵢ P σS Φs eq.
-    dependent destruction P=>/=; (try by clear FIX);
-      (try by f_equiv=> >; apply FIX);
-      (try by f_contractive; apply nevdist); apply FIX.
+    unfold nevalS_gen'=> i nev nev' nevdist + + + +. fix FIX 4=> d σ Γ.
+    case=>/= *>; (try by clear FIX);
+      (try by f_equiv=> >; apply (FIX _ _ (_; _)%nctx));
+      (try by f_contractive; apply nevdist); apply (FIX _ _ (_; _)%nctx).
   Qed.
   (** [neval_gen] is contractive *)
   #[export] Instance neval_gen_contractive : Contractive neval_gen'.
   Proof.
-    move=> i nev nev' nevdist + + + + +. fix FIX 5=> d σ Γₒ Γᵢ P Φs eq.
-    dependent destruction P=>/=; (try by clear FIX);
-      (try by f_equiv=> >; apply FIX);
+    unfold neval_gen'=> i nev nev' nevdist + + + +. fix FIX 4=> d σ Γ.
+    case=>/= *>; (try by clear FIX);
+      (try by f_equiv=> >; apply (FIX _ _ (_; _)%nctx));
       (try by f_contractive; apply nevdist);
-      (try by apply nevalS_gen_contractive); apply FIX.
+      (try by apply (FIX _ _ (_; _)%nctx));
+      apply (nevalS_gen_contractive i nev nev' nevdist _ _ (_; _)%nctx).
   Qed.
 
   (** [neval_pre]: Generator of [neval_fp] *)
   Definition neval_pre
     : (_ -d> _ -d> _ -d> iProp Σ) -> (_ -d> _ -d> _ -d> iProp Σ)
-    := λ nev d σ (P : nProp σ (;)), neval_gen d nev P -[] eq_refl.
+    := λ nev d σ (P : nProp σ (;)), neval_gen' nev d _ _ P -[] eq_refl.
   #[export] Instance neval_pre_contractive : Contractive neval_pre.
   Proof. move=> ???????. by apply neval_gen_contractive. Qed.
 
@@ -134,10 +134,10 @@ End neval_fp.
 
 (** [neval d P]: Evaluation of [P : nProp σ (;)] as [iProp Σ]
   under the derivability [d] *)
-Notation neval d P := (neval_gen d neval_fp (Γₒ:=[]) P -[] eq_refl).
+Notation neval d P := (neval_gen neval_fp d (Γₒ:=[]) P -[] eq_refl).
 (** [neval_env d P Φs]: Evaluation of [P : nProp σ (Γₒ; ) as [iProp Σ]
   under the derivability [d] and the environment [Φs : plist nPred Γₒ] *)
-Notation neval_env d P Φs := (neval_gen d neval_fp P Φs eq_refl).
+Notation neval_env d P Φs := (neval_gen neval_fp d P Φs eq_refl).
 (** [neval_def]: Definied [neval] *)
 Definition neval_def {Σ σ} d (P : nProp σ (;)) : iProp Σ := neval d P.
 Arguments neval_def /.
