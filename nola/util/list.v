@@ -74,10 +74,10 @@ Fixpoint cbyrapp {A F} xs {ys : list A} (s : csum F ys) : csum F (xs ++ ys) :=
   | _ :: xs => +/ cbyrapp xs s
   end.
 
-(** Apply a function of [plist] to a value of [csum] *)
-Fixpoint pcapply {A F G B} {xs : list A}
-  (f : ∀ x, F x → G x → B) (vs : plist F xs) (s : csum G xs) : B :=
+(** Apply to a [csum] a [plist] *)
+Fixpoint cpapply {A F G B} {xs : list A}
+  (f : ∀ x, F x → G x → B) (s : csum F xs) (vs : plist G xs) : B :=
   match s, vs with
-  | #0 w, v -:: _ => f _ v w
-  | +/ s, _ -:: vs => pcapply f vs s
+  | #0 u, v -:: _ => f _ u v
+  | +/ s, _ -:: vs => cpapply f s vs
   end.
