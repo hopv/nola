@@ -1,6 +1,6 @@
 (** * [nctx]: Context of [nProp] *)
 
-From nola.util Require Export tlist.
+From nola.util Require Export list.
 
 (** ** [nsort]: Sort of [nProp], [nS] or [nL] *)
 
@@ -34,9 +34,9 @@ Notation "@! a" := (Nparg a) (at level 20, right associativity) : nola_scope.
 #[projections(primitive)]
 Record nctx : Type := Nctx {
   (** Outer (i.e., unguarded) variables *)
-  nctx_o : tlist npvar;
+  nctx_o : list npvar;
   (** Inner (i.e., guarded) variables *)
-  nctx_i : tlist npvar;
+  nctx_i : list npvar;
 }.
 
 (** Notations for [nctx] *)
@@ -44,6 +44,6 @@ Declare Scope nctx_scope.
 Delimit Scope nctx_scope with nctx.
 Bind Scope nctx_scope with nctx.
 Notation "( Γₒ ; Γᵢ )" := (Nctx Γₒ Γᵢ) : nctx_scope.
-Notation "( Γₒ ; )" := (Nctx Γₒ ^[]) : nctx_scope.
-Notation "( ; Γᵢ )" := (Nctx ^[] Γᵢ) (format "( ;  Γᵢ )") : nctx_scope.
-Notation "( ; )" := (Nctx ^[] ^[]) (format "( ; )") : nctx_scope.
+Notation "( Γₒ ; )" := (Nctx Γₒ []) : nctx_scope.
+Notation "( ; Γᵢ )" := (Nctx [] Γᵢ) (format "( ;  Γᵢ )") : nctx_scope.
+Notation "( ; )" := (Nctx [] []) (format "( ; )") : nctx_scope.

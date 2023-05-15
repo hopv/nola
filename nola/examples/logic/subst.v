@@ -12,9 +12,9 @@ Notation nrewi P eq := (rew[λ Γᵢ, nProp _ (; Γᵢ)] eq in P)
 
 (** [nlifti]: Add inner variables at the bottom *)
 
-Definition nlifti_rew {σ Γₒ Γᵢ Δ} (P : nProp σ (; (Γₒ ^++ Γᵢ) ^++ Δ))
-  : nProp σ (; Γₒ ^++ (Γᵢ ^++ Δ)) := nrewi P (eq_sym (tapp_assoc Γₒ Γᵢ Δ)).
-Fixpoint nlifti {Δ σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ)) : nProp σ (Γₒ; Γᵢ ^++ Δ) :=
+Definition nlifti_rew {σ Γₒ Γᵢ Δ} (P : nProp σ (; (Γₒ ++ Γᵢ) ++ Δ))
+  : nProp σ (; Γₒ ++ (Γᵢ ++ Δ)) := nrewi P (eq_sym (app_assoc_def Γₒ Γᵢ Δ)).
+Fixpoint nlifti {Δ σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ)) : nProp σ (Γₒ; Γᵢ ++ Δ) :=
   match P with
   | ⌜φ⌝ => ⌜φ⌝
   | P ∧ Q => nlifti P ∧ nlifti Q
@@ -39,15 +39,15 @@ Fixpoint nlifti {Δ σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ)) : nProp σ (Γ
   end%n.
 
 (** [nliftoi]: Add outer and inner variables at the bottom *)
-Definition nliftoi_rew {σ Γₒ Γᵢ Δₒ Δᵢ} : Γᵢ = ^[] →
-  nProp σ (; (Γₒ ^++ Γᵢ) ^++ Δₒ ^++ Δᵢ) → nProp σ (; (Γₒ ^++ Δₒ) ^++ Δᵢ) :=
+Definition nliftoi_rew {σ Γₒ Γᵢ Δₒ Δᵢ} : Γᵢ = [] →
+  nProp σ (; (Γₒ ++ Γᵢ) ++ Δₒ ++ Δᵢ) → nProp σ (; (Γₒ ++ Δₒ) ++ Δᵢ) :=
   match Γᵢ with
-  | _ ^:: _ => λ eq, match eq with end
-  | ^[] => λ _ P, nrewi P (eq_trans
-      (eq_sym (tapp_assoc Γₒ ^[] (Δₒ ^++ Δᵢ))) (tapp_assoc Γₒ Δₒ Δᵢ))
+  | _ :: _ => λ eq, match eq with end
+  | [] => λ _ P, nrewi P (eq_trans
+      (eq_sym (app_assoc_def Γₒ [] (Δₒ ++ Δᵢ))) (app_assoc_def Γₒ Δₒ Δᵢ))
   end.
 Fixpoint nliftoi {Δₒ Δᵢ σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ))
-  : Γᵢ = ^[] → nProp σ (Γₒ ^++ Δₒ; Δᵢ) :=
+  : Γᵢ = [] → nProp σ (Γₒ ++ Δₒ; Δᵢ) :=
   match P with
   | ⌜φ⌝ => λ _, ⌜φ⌝
   | P ∧ Q => λ eq, nliftoi P eq ∧ nliftoi Q eq

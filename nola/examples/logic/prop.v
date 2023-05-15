@@ -12,9 +12,9 @@ From iris.bi Require Import notation.
   [Γₒ, Γᵢ] for smooth type inference
 
   In nominal proposition arguments (e.g., [n_deriv]'s arguments), outer
-  variables are flushed into inner, with the context [(; Γₒ ^++ Γᵢ)];
+  variables are flushed into inner, with the context [(; Γₒ ++ Γᵢ)];
   for connectives with such arguments we make [Γₒ] explicit for the users
-  to aid type inference around [^++] *)
+  to aid type inference around [++] *)
 
 Inductive nProp : nsort → nctx → Type :=
 
@@ -43,21 +43,21 @@ Inductive nProp : nsort → nctx → Type :=
 | n_bupd {σ Γ} : nProp σ Γ → nProp σ Γ
 
 (** Later modality *)
-| n_later {σ} Γₒ {Γᵢ} : nProp nL (; Γₒ ^++ Γᵢ) → nProp σ (Γₒ; Γᵢ)
+| n_later {σ} Γₒ {Γᵢ} : nProp nL (; Γₒ ++ Γᵢ) → nProp σ (Γₒ; Γᵢ)
 (** Judgment derivability *)
 | n_deriv {σ} Γₒ {Γᵢ} :
-    nat → nProp nL (; Γₒ ^++ Γᵢ) → nProp nL (; Γₒ ^++ Γᵢ) → nProp σ (Γₒ; Γᵢ)
+    nat → nProp nL (; Γₒ ++ Γᵢ) → nProp nL (; Γₒ ++ Γᵢ) → nProp σ (Γₒ; Γᵢ)
 
 (** Recursive small proposition *)
 | n_recs {σ Γₒ Γᵢ} {A : Type} :
-    (A → nProp nS (A →nPS ^:: Γₒ; Γᵢ)) → A → nProp σ (Γₒ; Γᵢ)
+    (A → nProp nS (A →nPS :: Γₒ; Γᵢ)) → A → nProp σ (Γₒ; Γᵢ)
 (** Recursive large proposition *)
 | n_recl {Γₒ Γᵢ} {A : Type} :
-    (A → nProp nL (A →nPL ^:: Γₒ; Γᵢ)) → A → nProp nL (Γₒ; Γᵢ)
+    (A → nProp nL (A →nPL :: Γₒ; Γᵢ)) → A → nProp nL (Γₒ; Γᵢ)
 (** Universal quantification over [A → nProp] *)
-| n_n_forall {σ Γₒ Γᵢ} V : nProp σ (V ^:: Γₒ; Γᵢ) → nProp σ (Γₒ; Γᵢ)
+| n_n_forall {σ Γₒ Γᵢ} V : nProp σ (V :: Γₒ; Γᵢ) → nProp σ (Γₒ; Γᵢ)
 (** Existential quantification over [A → nProp] *)
-| n_n_exist {σ Γₒ Γᵢ} V : nProp σ (V ^:: Γₒ; Γᵢ) → nProp σ (Γₒ; Γᵢ)
+| n_n_exist {σ Γₒ Γᵢ} V : nProp σ (V :: Γₒ; Γᵢ) → nProp σ (Γₒ; Γᵢ)
 
 (** Inner small variable *)
 | n_varis {σ Γₒ Γᵢ} : csum (nparg nS) Γᵢ → nProp σ (Γₒ; Γᵢ)
