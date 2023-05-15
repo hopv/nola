@@ -40,26 +40,6 @@ Fixpoint plist {A} (F : A → Type) (xs : list A) : Type :=
   | x :: xs => F x *:: plist F xs
   end.
 
-(** Append [plist]s *)
-Reserved Infix "-++" (at level 60, right associativity).
-Fixpoint papp {A F} {xs ys : list A}
-  (us : plist F xs) (vs : plist F ys) : plist F (xs ++ ys) :=
-  match xs, us with
-  | [], _ => vs
-  | _ :: _, u -:: us => u -:: us -++ vs
-  end
-where "us -++ vs" := (papp us vs) : nola_scope.
-
-(** Map over [plist] *)
-Reserved Infix "-<$>" (at level 61, left associativity).
-Fixpoint pmap {A} {F G : A → Type} (f : ∀ x, F x → G x) {xs : list A}
-  (us : plist F xs) : plist G xs :=
-  match xs, us with
-  | [], -[] => -[]
-  | _ :: _, u -:: us => f _ u -:: (f -<$> us)
-  end
-where "f -<$> us" := (pmap f us) : nola_scope.
-
 (** ** [csum]: Variant choosing an element of [list] with a value *)
 
 Inductive csum {A} {F : A → Type} : list A → Type :=
@@ -101,14 +81,3 @@ Fixpoint pcapply {A F G B} {xs : list A}
   | #0 w, v -:: _ => f _ v w
   | +/ s, _ -:: vs => pcapply f vs s
   end.
-
-(** Map over [csum] *)
-Reserved Infix "+<$>" (at level 61, left associativity).
-Fixpoint cmap {A F G} (f : ∀ x, F x → G x) {xs : list A} (s : csum F xs)
-  : csum G xs :=
-  match xs, s with
-  | [], _ => match s with end
-  | _ :: _, #0 a => #0 f _ a
-  | _ :: _, +/ s => +/ (f +<$> s)
-  end
-where "f +<$> s" := (cmap f s) : nola_scope.
