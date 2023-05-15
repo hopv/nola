@@ -3,17 +3,18 @@
 From nola.examples.logic Require Export prop.
 Import EqNotations.
 
-(** [nrewi P eq]: Rewrite the inner context of [P : nProp] with [eq] *)
+(** [nProp_rewi P eq]: Rewrite the inner context of [P : nProp (; Γᵢ)]
+  using [eq] *)
 
-Notation nrewi P eq := (rew[λ Γᵢ, nProp _ (; Γᵢ)] eq in P)
-  (only parsing).
+Notation nProp_rewi P eq := (rew[λ Γᵢ, nProp _ (; Γᵢ)] eq in P) (only parsing).
 
 (** ** [nlift]: Turn [nProp σ (;)] into [nProp σ Γ] *)
 
 (** [nlifti]: Add inner variables at the bottom *)
 
-Definition nlifti_rew {σ Γₒ Γᵢ Δ} (P : nProp σ (; (Γₒ ++ Γᵢ) ++ Δ))
-  : nProp σ (; Γₒ ++ (Γᵢ ++ Δ)) := nrewi P (eq_sym (app_assoc_def Γₒ Γᵢ Δ)).
+Definition nlifti_rew {σ Γₒ Γᵢ Δ}
+  (P : nProp σ (; (Γₒ ++ Γᵢ) ++ Δ)) : nProp σ (; Γₒ ++ (Γᵢ ++ Δ)) :=
+  nProp_rewi P (eq_sym (app_assoc_def _ _ _)).
 Fixpoint nlifti {Δ σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ)) : nProp σ (Γₒ; Γᵢ ++ Δ) :=
   match P with
   | ⌜φ⌝ => ⌜φ⌝
@@ -43,8 +44,8 @@ Definition nliftoi_rew {σ Γₒ Γᵢ Δₒ Δᵢ} : Γᵢ = [] →
   nProp σ (; (Γₒ ++ Γᵢ) ++ Δₒ ++ Δᵢ) → nProp σ (; (Γₒ ++ Δₒ) ++ Δᵢ) :=
   match Γᵢ with
   | _ :: _ => λ eq, match eq with end
-  | [] => λ _ P, nrewi P (eq_trans
-      (eq_sym (app_assoc_def Γₒ [] (Δₒ ++ Δᵢ))) (app_assoc_def Γₒ Δₒ Δᵢ))
+  | [] => λ _ P, nProp_rewi P (eq_trans
+      (eq_sym (app_assoc_def _ [] _)) (app_assoc_def _ Δₒ _))
   end.
 Fixpoint nliftoi {Δₒ Δᵢ σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ))
   : Γᵢ = [] → nProp σ (Γₒ ++ Δₒ; Δᵢ) :=
