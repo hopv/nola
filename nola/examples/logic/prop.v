@@ -125,11 +125,11 @@ Notation "∃: V , P" := (n_n_exist V P)
   (at level 200, right associativity,
     format "'[' '[' ∃:  V ']' ,  '/' P ']'") : nProp_scope.
 
-Notation "%ᵢₛ a" := (n_varis a) (at level 20, right associativity)
+Notation "%ᵢₛ s" := (n_varis s) (at level 20, right associativity)
   : nProp_scope.
-Notation "%ᵢₗ a" := (n_varil a) (at level 20, right associativity)
+Notation "%ᵢₗ s" := (n_varil s) (at level 20, right associativity)
   : nProp_scope.
-Notation "%ₒₛ a" := (n_varos a) (at level 20, right associativity)
+Notation "%ₒₛ s" := (n_varos s) (at level 20, right associativity)
   : nProp_scope.
 
 (** ** [nlarge]: Turn [nProp σ Γ] into [nPropL Γ]
@@ -154,7 +154,7 @@ Fixpoint nlarge {σ Γ} (P : nProp σ Γ) : nPropL Γ :=
   | (rec:ₗ' Φ) a => (rec:ₗ' Φ) a
   | ∀: V, P => ∀: V, nlarge P
   | ∃: V, P => ∃: V, nlarge P
-  | %ᵢₛ a => %ᵢₛ a
-  | %ᵢₗ a => %ᵢₗ a
-  | %ₒₛ a => %ₒₛ a
+  | %ᵢₛ s => %ᵢₛ s
+  | %ᵢₗ s => %ᵢₗ s
+  | %ₒₛ s => %ₒₛ s
   end%n.

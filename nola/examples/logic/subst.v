@@ -34,9 +34,9 @@ Fixpoint nlifti {Δ σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ)) : nProp σ (Γ
   | (rec:ₗ' Φ) a => (rec:ₗ' nlifti ∘ Φ) a
   | ∀: V, P => ∀: V, nlifti P
   | ∃: V, P => ∃: V, nlifti P
-  | %ᵢₛ a => %ᵢₛ cbylapp a _
-  | %ᵢₗ a => %ᵢₗ cbylapp a _
-  | %ₒₛ a => %ₒₛ a
+  | %ᵢₛ s => %ᵢₛ cbylapp s _
+  | %ᵢₗ s => %ᵢₗ cbylapp s _
+  | %ₒₛ s => %ₒₛ s
   end%n.
 
 (** [nliftoi]: Add outer and inner variables at the bottom *)
@@ -68,11 +68,11 @@ Fixpoint nliftoi {Δₒ Δᵢ σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ))
   | (rec:ₗ' Φ) a => λ eq, (rec:ₗ b, nliftoi (Φ b) eq) a
   | ∀: V, P => λ eq, ∀: V, nliftoi P eq
   | ∃: V, P => λ eq, ∃: V, nliftoi P eq
-  | %ᵢₛ a => match a with
+  | %ᵢₛ s => match s with
       #0 _ => λ eq, match eq with end | +/ _ => λ eq, match eq with end end
-  | %ᵢₗ a => match a with
+  | %ᵢₗ s => match s with
       #0 _ => λ eq, match eq with end | +/ _ => λ eq, match eq with end end
-  | %ₒₛ a => λ _, %ₒₛ cbylapp a _
+  | %ₒₛ s => λ _, %ₒₛ cbylapp s _
   end%n.
 
 (** [nlift]: Turn [nProp σ (;)] into [nProp σ Γ] *)
