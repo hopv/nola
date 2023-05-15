@@ -132,7 +132,7 @@ Notation "%ᵢₗ a" := (n_varil a) (at level 20, right associativity)
 Notation "%ₒₛ a" := (n_varos a) (at level 20, right associativity)
   : nProp_scope.
 
-(** ** [nlarge]: Turn [nProp σ] into [nPropL σ]
+(** ** [nlarge]: Turn [nProp σ Γ] into [nPropL Γ]
   Although the main interest is the case [σ = nS],
   we keep the function polymorphic over [σ] for ease of definition *)
 Fixpoint nlarge {σ Γ} (P : nProp σ Γ) : nPropL Γ :=
