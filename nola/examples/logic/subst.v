@@ -134,6 +134,7 @@ Fixpoint nsubstli {σ Γₒ Γᵢ i} (P : nProp σ (Γₒ; Γᵢ))
 (** [nsubsti P Φs]: Substitute [Φs] for all the inner variables of [P] *)
 Definition nsubsti {σ Γᵢ} (P : nProp σ (; Γᵢ)) (Φs : plist nPred Γᵢ)
   : nProp σ (;) := nsubstli (i:=0) P Φs.
+Arguments nsubsti {σ Γᵢ} P Φs /.
 
 (** [nsubstlo i P Φs]: Substitute [Φs] for all but the first [i] outer variables
   of [P] *)
@@ -178,3 +179,4 @@ Fixpoint nsubstlo {σ Γₒ Γᵢ} (i : nat) (P : nProp σ (Γₒ; Γᵢ))
 (** [nsubsto P Φs]: Substitute [Φs] for all the outer variables of [P] *)
 Definition nsubsto {σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ)) (Φs : plist nPred Γₒ)
   (eq : Γᵢ = []) : nProp σ (;) := nsubstlo 0 P eq Φs.
+Arguments nsubsto {σ Γₒ Γᵢ} P Φs eq /.
