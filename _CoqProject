@@ -10,3 +10,4 @@ nola/examples/logic/ctx.v
 nola/examples/logic/prop.v
 nola/examples/logic/subst.v
 nola/examples/logic/eval.v
+nola/examples/logic/deriv.v
