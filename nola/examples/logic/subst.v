@@ -131,10 +131,10 @@ Fixpoint nsubstli {σ Γₒ Γᵢ i} (P : nProp σ (Γₒ; Γᵢ))
   | %ₒₛ s => λ _, %ₒₛ s
   end%n.
 
-(** [nsubsti P Φs]: Substitute [Φs] for all the inner variables of [P] *)
-Definition nsubsti {σ Γᵢ} (P : nProp σ (; Γᵢ)) (Φs : plist nPred Γᵢ)
-  : nProp σ (;) := nsubstli (i:=0) P Φs.
-Arguments nsubsti {σ Γᵢ} P Φs /.
+(** [nsubsti P Φs]: Substitute [Φs] for all the inner variables of [P],
+  just returning [P] when [Φs] is empty *)
+Definition nsubsti {σ Γᵢ} : nProp σ (; Γᵢ) → plist nPred Γᵢ → nProp σ (;) :=
+  match Γᵢ with [] => λ P _, P | _ => nsubstli (i:=0) end.
 
 (** [nsubstlo i P Φs]: Substitute [Φs] for all but the first [i] outer variables
   of [P] *)
@@ -146,37 +146,38 @@ Definition nsubstlo_rew' {i Γₒ Γᵢ} (Φs : plist nPred (drop i Γₒ))
   : Γᵢ = [] → plist nPred (drop i (Γₒ ++ Γᵢ)) :=
   match Γᵢ with _ :: _ => λ eq, match eq with end | [] => λ _,
     nPred_rews Φs (eq_sym (f_equal _ (app_nil_def _))) end.
-Fixpoint nsubstlo {σ Γₒ Γᵢ} (i : nat) (P : nProp σ (Γₒ; Γᵢ))
-  : Γᵢ = [] → plist nPred (drop i Γₒ) → nProp σ (take i Γₒ; ) :=
+Fixpoint nsubstlo {σ Γₒ Γᵢ i} (P : nProp σ (Γₒ; Γᵢ))
+  : plist nPred (drop i Γₒ) → Γᵢ = [] → nProp σ (take i Γₒ; ) :=
   match P with
   | ⌜φ⌝ => λ _ _, ⌜φ⌝
-  | P ∧ Q => λ eq Φs, nsubstlo _ P eq Φs ∧ nsubstlo _ Q eq Φs
-  | P ∨ Q => λ eq Φs, nsubstlo _ P eq Φs ∨ nsubstlo _ Q eq Φs
-  | P → Q => λ eq Φs, nsubstlo _ P eq Φs → nsubstlo _ Q eq Φs
-  | ∀' Φ => λ eq Φs, ∀ a, nsubstlo _ (Φ a) eq Φs
-  | ∃' Φ => λ eq Φs, ∃ a, nsubstlo _ (Φ a) eq Φs
-  | P ∗ Q => λ eq Φs, nsubstlo _ P eq Φs ∗ nsubstlo _ Q eq Φs
-  | P -∗ Q => λ eq Φs, nsubstlo _ P eq Φs -∗ nsubstlo _ Q eq Φs
-  | □ P => λ eq Φs, □ nsubstlo _ P eq Φs
-  | ■ P => λ eq Φs, ■ nsubstlo _ P eq Φs
-  | |==> P => λ eq Φs, |==> nsubstlo _ P eq Φs
-  | ▷ P => λ eq Φs, ▷ nsubstlo_rew eq (nsubstli P (nsubstlo_rew' Φs eq))
-  | P ⊢!{j} Q => λ eq Φs,
+  | P ∧ Q => λ Φs eq, nsubstlo P Φs eq ∧ nsubstlo Q Φs eq
+  | P ∨ Q => λ Φs eq, nsubstlo P Φs eq ∨ nsubstlo Q Φs eq
+  | P → Q => λ Φs eq, nsubstlo P Φs eq → nsubstlo Q Φs eq
+  | ∀' Φ => λ Φs eq, ∀ a, nsubstlo (Φ a) Φs eq
+  | ∃' Φ => λ Φs eq, ∃ a, nsubstlo (Φ a) Φs eq
+  | P ∗ Q => λ Φs eq, nsubstlo P Φs eq ∗ nsubstlo Q Φs eq
+  | P -∗ Q => λ Φs eq, nsubstlo P Φs eq -∗ nsubstlo Q Φs eq
+  | □ P => λ Φs eq, □ nsubstlo P Φs eq
+  | ■ P => λ Φs eq, ■ nsubstlo P Φs eq
+  | |==> P => λ Φs eq, |==> nsubstlo P Φs eq
+  | ▷ P => λ Φs eq, ▷ nsubstlo_rew eq (nsubstli P (nsubstlo_rew' Φs eq))
+  | P ⊢!{j} Q => λ Φs eq,
       nsubstlo_rew eq (nsubstli P (nsubstlo_rew' Φs eq)) ⊢!{j}
         nsubstlo_rew eq (nsubstli Q (nsubstlo_rew' Φs eq))
-  | (rec:ₛ' Φ) a => λ eq Φs, (rec:ₛ b, nsubstlo (S i) (Φ b) eq Φs) a
-  | (rec:ₗ' Φ) a => λ eq Φs, (rec:ₗ b, nsubstlo (S i) (Φ b) eq Φs) a
-  | ∀: V, P => λ eq Φs, ∀: V, nsubstlo (S i) P eq Φs
-  | ∃: V, P => λ eq Φs, ∃: V, nsubstlo (S i) P eq Φs
+  | (rec:ₛ' Φ) a => λ Φs eq, (rec:ₛ b, nsubstlo (i:=S i) (Φ b) Φs eq) a
+  | (rec:ₗ' Φ) a => λ Φs eq, (rec:ₗ b, nsubstlo (i:=S i) (Φ b) Φs eq) a
+  | ∀: V, P => λ Φs eq, ∀: V, nsubstlo (i:=S i) P Φs eq
+  | ∃: V, P => λ Φs eq, ∃: V, nsubstlo (i:=S i) P Φs eq
   | %ᵢₛ s => match s with
-      #0 _ => λ eq, match eq with end | +/ _ => λ eq, match eq with end end
+      #0 _ => λ _ eq, match eq with end | +/ _ => λ _ eq, match eq with end end
   | %ᵢₗ s => match s with
-      #0 _ => λ eq, match eq with end | +/ _ => λ eq, match eq with end end
-  | %ₒₛ s => λ _ Φs, match ctakedrop _ s with
+      #0 _ => λ _ eq, match eq with end | +/ _ => λ _ eq, match eq with end end
+  | %ₒₛ s => λ Φs _, match ctakedrop _ s with
       inl s => %ₒₛ s | inr s => nlift (cpapply (λ _, npargS_apply) s Φs) end
   end%n.
 
-(** [nsubsto P Φs]: Substitute [Φs] for all the outer variables of [P] *)
-Definition nsubsto {σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ)) (Φs : plist nPred Γₒ)
-  (eq : Γᵢ = []) : nProp σ (;) := nsubstlo 0 P eq Φs.
-Arguments nsubsto {σ Γₒ Γᵢ} P Φs eq /.
+(** [nsubsto P Φs]: Substitute [Φs] for all the outer variables of [P],
+  just returning [P] when [Φs] is empty *)
+Definition nsubsto {σ Γₒ Γᵢ}
+  : nProp σ (Γₒ; Γᵢ) → plist nPred Γₒ → Γᵢ = [] → nProp σ (;) :=
+  match Γₒ with [] => λ P _ eq, nProp_rewi P eq | _ => nsubstlo (i:=0) end.
