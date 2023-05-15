@@ -78,7 +78,8 @@ Fixpoint nliftoi {Δₒ Δᵢ σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ))
 (** [nlift]: Turn [nProp σ (;)] into [nProp σ Γ] *)
 Definition nlift {σ Γ} (P : nProp σ (;)) : nProp σ Γ := nliftoi P eq_refl.
 
-(** ** [nsubst P Φs]: Substitute [Φs] for all the outer variables of [P] *)
+(** ** [nsubsti/nsubsto P Φs]: Substitute [Φs] for all the inner/outer variables
+  of [P] *)
 
 (** [nPred V]: Type of an instantiation of [V : npvar] *)
 Definition nPred : npvar → Type := λ '(A →nP σ), A → nProp σ (;).
@@ -95,10 +96,10 @@ Notation nPred_rews Φs eq := (rew[plist nPred] eq in Φs) (only parsing).
 
 (** [nsubstli i P Φs]: Substitute [Φs] for all but the first [i] inner variables
   of [P] *)
-Definition nsubstli_rew {σ Γₒ Γᵢ i}
+Definition nsubsti_rew {σ Γₒ Γᵢ i}
   (P : nProp σ (; take (length Γₒ + i) (Γₒ ++ Γᵢ)))
   : nProp σ (; Γₒ ++ take i Γᵢ) := nProp_rewi P (take_add_app_def _ _ _).
-Definition nsubstli_rew' {i Γₒ Γᵢ} (Φs : plist nPred (drop i Γᵢ))
+Definition nsubsti_rew' {i Γₒ Γᵢ} (Φs : plist nPred (drop i Γᵢ))
   : plist nPred (drop (length Γₒ + i) (Γₒ ++ Γᵢ)) :=
   nPred_rews Φs (eq_sym (drop_add_app_def i Γₒ Γᵢ)).
 Fixpoint nsubstli {σ Γₒ Γᵢ i} (P : nProp σ (Γₒ; Γᵢ))
@@ -115,10 +116,10 @@ Fixpoint nsubstli {σ Γₒ Γᵢ i} (P : nProp σ (Γₒ; Γᵢ))
   | □ P => λ Φs, □ nsubstli P Φs
   | ■ P => λ Φs, ■ nsubstli P Φs
   | |==> P => λ Φs, |==> nsubstli P Φs
-  | ▷ P => λ Φs, ▷ nsubstli_rew (nsubstli P (nsubstli_rew' Φs))
+  | ▷ P => λ Φs, ▷ nsubsti_rew (nsubstli P (nsubsti_rew' Φs))
   | P ⊢!{j} Q => λ Φs,
-      nsubstli_rew (nsubstli P (nsubstli_rew' Φs)) ⊢!{j}
-        nsubstli_rew (nsubstli Q (nsubstli_rew' Φs))
+      nsubsti_rew (nsubstli P (nsubsti_rew' Φs)) ⊢!{j}
+        nsubsti_rew (nsubstli Q (nsubsti_rew' Φs))
   | (rec:ₛ' Φ) a => λ Φs, (rec:ₛ b, nsubstli (Φ b) Φs) a
   | (rec:ₗ' Φ) a => λ Φs, (rec:ₗ b, nsubstli (Φ b) Φs) a
   | ∀: V, P => λ Φs, ∀: V, nsubstli P Φs
@@ -130,9 +131,13 @@ Fixpoint nsubstli {σ Γₒ Γᵢ i} (P : nProp σ (Γₒ; Γᵢ))
   | %ₒₛ s => λ _, %ₒₛ s
   end%n.
 
+(** [nsubsti P Φs]: Substitute [Φs] for all the inner variables of [P] *)
+Definition nsubsti {σ Γᵢ} (P : nProp σ (; Γᵢ)) (Φs : plist nPred Γᵢ)
+  : nProp σ (;) := nsubstli (i:=0) P Φs.
+
 (** [nsubstlo i P Φs]: Substitute [Φs] for all but the first [i] outer variables
   of [P] *)
-Definition nsubstlo_rew {σ Γₒ Γᵢ i}
+  Definition nsubstlo_rew {σ Γₒ Γᵢ i}
   : Γᵢ = [] → nProp σ (; take i (Γₒ ++ Γᵢ)) → nProp σ (; take i Γₒ ++ []) :=
   match Γᵢ with _ :: _ => λ eq, match eq with end | [] => λ _ P, nProp_rewi P
     (eq_trans (f_equal _ (app_nil_def _)) (eq_sym (app_nil_def _))) end.
@@ -170,6 +175,6 @@ Fixpoint nsubstlo {σ Γₒ Γᵢ} (i : nat) (P : nProp σ (Γₒ; Γᵢ))
       inl s => %ₒₛ s | inr s => nlift (cpapply (λ _, npargS_apply) s Φs) end
   end%n.
 
-(** [nsubst P Φs]: Substitute [Φs] for all the outer variables of [P] *)
-Definition nsubst {σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ)) (Φs : plist nPred Γₒ)
+(** [nsubsto P Φs]: Substitute [Φs] for all the outer variables of [P] *)
+Definition nsubsto {σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ)) (Φs : plist nPred Γₒ)
   (eq : Γᵢ = []) : nProp σ (;) := nsubstlo 0 P eq Φs.
