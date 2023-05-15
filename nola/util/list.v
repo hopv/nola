@@ -2,14 +2,37 @@
 
 From nola Require Export prelude.
 
-(** ** Lemmas for [list] *)
+(** ** Lemmas for [list], defined directly for computation *)
 
-(** Associativity of [++], defined directly for computation *)
+(** Reduce [++ []] *)
+Fixpoint app_nil_def {A} (xs : list A) : xs ++ [] = xs :=
+  match xs with
+  | [] => eq_refl
+  | x :: xs => f_equal (cons x) (app_nil_def xs)
+  end.
+
+(** Associativity of [++] *)
 Fixpoint app_assoc_def {A} (xs ys zs : list A)
   : xs ++ (ys ++ zs) = (xs ++ ys) ++ zs :=
   match xs with
   | [] => eq_refl
   | x :: xs => f_equal (cons x) (app_assoc_def xs ys zs)
+  end.
+
+(** [take (length xs ++ i)] over [xs ++ ys] *)
+Fixpoint take_add_app_def {A} i (xs ys : list A)
+  : take (length xs + i) (xs ++ ys) = xs ++ take i ys :=
+  match xs with
+  | [] => eq_refl
+  | x :: xs => f_equal (cons x) (take_add_app_def i xs ys)
+  end.
+
+(** [drop (length xs ++ i)] over [xs ++ ys] *)
+Fixpoint drop_add_app_def {A} i (xs ys : list A)
+  : drop (length xs + i) (xs ++ ys) = drop i ys :=
+  match xs with
+  | [] => eq_refl
+  | _ :: xs => drop_add_app_def i xs ys
   end.
 
 (** ** [plist]: Product type calculated over elements of [list] *)
@@ -72,6 +95,16 @@ Fixpoint cbyrapp {A F} xs {ys : list A} (s : csum F ys) : csum F (xs ++ ys) :=
   match xs with
   | [] => s
   | _ :: xs => +/ cbyrapp xs s
+  end.
+
+(** Decompose [csum] with [take]/[drop] *)
+Fixpoint ctakedrop {A F} i {xs : list A} (s : csum F xs)
+  : csum F (take i xs) + csum F (drop i xs) :=
+  match i, s with
+  | 0, _ => inr s
+  | S i, #0 v => inl (#0 v)
+  | S i, +/ s => match ctakedrop i s with
+      inl s => inl (+/ s) | inr s => inr s end
   end.
 
 (** Apply to a [csum] a [plist] *)

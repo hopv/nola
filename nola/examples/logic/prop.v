@@ -158,3 +158,7 @@ Fixpoint nlarge {σ Γ} (P : nProp σ Γ) : nPropL Γ :=
   | %ᵢₗ s => %ᵢₗ s
   | %ₒₛ s => %ₒₛ s
   end%n.
+
+(** [nunsmall]: Turn [nPropS Γ] into [nProp σ Γ] *)
+Definition nunsmall {σ Γ} (P : nPropS Γ) : nProp σ Γ :=
+  match σ with nS => P | nL => nlarge P end.
