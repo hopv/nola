@@ -60,11 +60,11 @@ Inductive nProp : nsort → nctx → Type :=
 | n_n_exist {σ Γₒ Γᵢ} V : nProp σ (V :: Γₒ; Γᵢ) → nProp σ (Γₒ; Γᵢ)
 
 (** Inner small variable *)
-| n_varis {σ Γₒ Γᵢ} : csum (nparg nS) Γᵢ → nProp σ (Γₒ; Γᵢ)
+| n_varis {σ Γₒ Γᵢ} : csum npargS Γᵢ → nProp σ (Γₒ; Γᵢ)
 (** Inner large variable, [nPropL] only *)
-| n_varil {Γₒ Γᵢ} : csum (nparg nL) Γᵢ → nProp nL (Γₒ; Γᵢ)
+| n_varil {Γₒ Γᵢ} : csum npargL Γᵢ → nProp nL (Γₒ; Γᵢ)
 (** Outer small variable, [nPropL] only *)
-| n_varos {Γₒ Γᵢ} : csum (nparg nS) Γₒ → nProp nL (Γₒ; Γᵢ).
+| n_varos {Γₒ Γᵢ} : csum npargS Γₒ → nProp nL (Γₒ; Γᵢ).
 
 Notation nPropS := (nProp nS).
 Notation nPropL := (nProp nL).

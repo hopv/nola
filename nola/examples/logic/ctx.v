@@ -27,6 +27,8 @@ Notation nPL := (unit →nPL).
 Variant nparg {σ : nsort} : npvar → Type :=
 | Nparg {A} : A → nparg (A →nP σ).
 Arguments nparg σ V : clear implicits.
+Notation npargS := (nparg nS).
+Notation npargL := (nparg nL).
 Notation "@! a" := (Nparg a) (at level 20, right associativity) : nola_scope.
 
 (** ** [nctx]: Context of [nProp] *)
