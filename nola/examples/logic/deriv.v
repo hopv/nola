@@ -15,13 +15,12 @@ Notation nderivy Σ := (derivy (nJudg Σ)).
 Notation ninderivy Σ := (inderivy (nJudg Σ)).
 Notation nderiv Σ := (deriv (nJudg Σ)).
 
-Implicit Type d : nderiv_ty.
-Implicit Type δ : npderiv_ty.
+Implicit Type (d : nderiv_ty) (δ : npderiv_ty) (i j : nat).
 
 (** Operations on [nderiv_ty] *)
 Definition Falseⁿᵈ : nderiv_ty := λ _ _, False.
 Notation "⊥ⁿᵈ" := Falseⁿᵈ : nola_scope.
-Definition orⁿᵈ d d' : nderiv_ty := λ i J, d i J ∨ d' i J.
+Definition orⁿᵈ d d' : nderiv_ty := λ i PQ, d i PQ ∨ d' i PQ.
 Infix "∨ⁿᵈ" := orⁿᵈ (at level 50, left associativity) : nola_scope.
 Definition apporⁿᵈ δ d : nderiv_ty := δ d ∨ⁿᵈ d.
 Infix "$∨ⁿᵈ" := apporⁿᵈ (at level 50, left associativity) : nola_scope.
