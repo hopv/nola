@@ -92,17 +92,17 @@ Lemma derivy_bysem `{D : derivy JU δ} {d i J} :
 Proof. move: D=> /mu_unfold [_ _ bysem]=> H. apply bysem=> *. by apply H. Qed.
 
 (** Lemmas for [inderivy] *)
-Lemma inderivy_turn_l `{inderivy JU δ' δ d i} : δ d →ᵈ δ' ⊥ᵈ.
+Lemma inderivy_turn_l `{!inderivy JU δ' δ d i} : δ d →ᵈ δ' ⊥ᵈ.
 Proof. move=> *. apply inderivy_turn. by left. Qed.
-Lemma inderivy_turn_r `{inderivy JU δ' δ d i} : d →ᵈ δ' ⊥ᵈ.
+Lemma inderivy_turn_r `{!inderivy JU δ' δ d i} : d →ᵈ δ' ⊥ᵈ.
 Proof. move=> *. apply inderivy_turn. by right. Qed.
-Lemma inderivy_turn_semlow `{inderivy JU δ' δ d i} :
+Lemma inderivy_turn_semlow `{!inderivy JU δ' δ d i} :
   δ $∨ᵈ d →ᵈ[≺ i] judg_sem (δ' ⊥ᵈ).
 Proof. move=> *. apply inderivy_semlow; by [|apply inderivy_turn]. Qed.
-Lemma inderivy_turn_semlow_l `{inderivy JU δ' δ d i} :
+Lemma inderivy_turn_semlow_l `{!inderivy JU δ' δ d i} :
   δ d →ᵈ[≺ i] judg_sem (δ' ⊥ᵈ).
 Proof. move=> *. apply inderivy_turn_semlow; by [|left]. Qed.
-Lemma inderivy_turn_semlow_r `{inderivy JU δ' δ d i} :
+Lemma inderivy_turn_semlow_r `{!inderivy JU δ' δ d i} :
   d →ᵈ[≺ i] judg_sem (δ' ⊥ᵈ).
 Proof. move=> *. apply inderivy_turn_semlow; by [|right]. Qed.
 
