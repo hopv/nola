@@ -1,6 +1,7 @@
 (** * [nProp]: Syntactic proposition *)
 
 From nola.examples.logic Require Export ctx.
+From stdpp Require Export coPset.
 From iris.bi Require Import notation.
 
 (** ** [nProp]: Nola syntactic proposition
@@ -41,6 +42,8 @@ Inductive nProp : nsort → nctx → Type :=
 | n_plainly {σ Γ} : nProp σ Γ → nProp σ Γ
 (** Basic update modality *)
 | n_bupd {σ Γ} : nProp σ Γ → nProp σ Γ
+(** Fancy update modality *)
+| n_fupd {σ Γ} : coPset → coPset → nProp σ Γ → nProp σ Γ
 
 (** Later modality *)
 | n_later {σ} Γₒ {Γᵢ} : nProp nL (; Γₒ ++ Γᵢ) → nProp σ (Γₒ; Γᵢ)
@@ -99,6 +102,7 @@ Infix "-∗" := n_wand : nProp_scope.
 Notation "□ P" := (n_persistently P) : nProp_scope.
 Notation "■ P" := (n_plainly P) : nProp_scope.
 Notation "|==> P" := (n_bupd P) : nProp_scope.
+Notation "|={ E , E' }=> P" := (n_fupd E E' P) : nProp_scope.
 
 Notation "▷{ Γₒ } P" := (n_later Γₒ P)
   (at level 20, right associativity, only parsing) : nProp_scope.
@@ -148,6 +152,7 @@ Fixpoint nlarge {σ Γ} (P : nProp σ Γ) : nPropL Γ :=
   | □ P => □ nlarge P
   | ■ P => ■ nlarge P
   | |==> P => |==> nlarge P
+  | |={E,E'}=> P => |={E,E'}=> nlarge P
   | ▷ P => ▷ P
   | P ⊢!{i} Q => P ⊢!{i} Q
   | (rec:ₛ' Φ) a => (rec:ₛ' Φ) a

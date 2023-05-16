@@ -28,6 +28,7 @@ Fixpoint nlifti {Δ σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ)) : nProp σ (Γ
   | □ P => □ nlifti P
   | ■ P => ■ nlifti P
   | |==> P => |==> nlifti P
+  | |={E,E'}=> P => |={E,E'}=> nlifti P
   | ▷ P => ▷ nlifti_rew (nlifti P)
   | P ⊢!{i} Q => nlifti_rew (nlifti P) ⊢!{i} nlifti_rew (nlifti Q)
   | (rec:ₛ' Φ) a => (rec:ₛ' nlifti ∘ Φ) a
@@ -61,6 +62,7 @@ Fixpoint nliftoi {Δₒ Δᵢ σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ))
   | □ P => λ eq, □ nliftoi P eq
   | ■ P => λ eq, ■ nliftoi P eq
   | |==> P => λ eq, |==> nliftoi P eq
+  | |={E,E'}=> P => λ eq, |={E,E'}=> nliftoi P eq
   | ▷ P => λ eq, ▷ nliftoi_rew eq (nlifti P)
   | P ⊢!{i} Q => λ eq,
       nliftoi_rew eq (nlifti P) ⊢!{i} nliftoi_rew eq (nlifti Q)
@@ -116,6 +118,7 @@ Fixpoint nsubstli {σ Γₒ Γᵢ i} (P : nProp σ (Γₒ; Γᵢ))
   | □ P => λ Φs, □ nsubstli P Φs
   | ■ P => λ Φs, ■ nsubstli P Φs
   | |==> P => λ Φs, |==> nsubstli P Φs
+  | |={E,E'}=> P => λ Φs, |={E,E'}=> nsubstli P Φs
   | ▷ P => λ Φs, ▷ nsubsti_rew (nsubstli P (nsubsti_rew' Φs))
   | P ⊢!{j} Q => λ Φs,
       nsubsti_rew (nsubstli P (nsubsti_rew' Φs)) ⊢!{j}
@@ -160,6 +163,7 @@ Fixpoint nsubstlo {σ Γₒ Γᵢ i} (P : nProp σ (Γₒ; Γᵢ))
   | □ P => λ Φs eq, □ nsubstlo P Φs eq
   | ■ P => λ Φs eq, ■ nsubstlo P Φs eq
   | |==> P => λ Φs eq, |==> nsubstlo P Φs eq
+  | |={E,E'}=> P => λ Φs eq, |={E,E'}=> nsubstlo P Φs eq
   | ▷ P => λ Φs eq, ▷ nsubstlo_rew eq (nsubstli P (nsubstlo_rew' Φs eq))
   | P ⊢!{j} Q => λ Φs eq,
       nsubstlo_rew eq (nsubstli P (nsubstlo_rew' Φs eq)) ⊢!{j}

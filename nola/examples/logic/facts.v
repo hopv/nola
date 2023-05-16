@@ -6,7 +6,7 @@ From iris.proofmode Require Import tactics.
 
 (** ** Bi laws *)
 Section bi.
-  Context `{nderivy Σ δ}.
+  Context `{!nevalG Σ, !nderivy Σ δ}.
 
   (** [δ] is reflexive *)
   Lemma n_refl {d i P} : δ d i (P, P).

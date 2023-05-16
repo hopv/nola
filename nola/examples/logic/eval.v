@@ -1,7 +1,7 @@
 (** * [neval]: Evaluation of [nProp] as [iProp] *)
 
 From nola.examples.logic Require Export subst.
-From iris.base_logic.lib Require Import iprop.
+From iris.base_logic.lib Require Import iprop fancy_updates.
 
 (** Modification of [nsubsti] *)
 Definition nsubsti' {σ Γₒ Γᵢ}
@@ -11,10 +11,16 @@ Definition nsubsti' {σ Γₒ Γᵢ}
 
 (** Type of a derivability predicate *)
 Notation nderiv_ty := (nat → nPropL (;) * nPropL (;) → Prop).
+Notation npderiv_ty := (nderiv_ty → nderiv_ty).
+
+(** Nola resources *)
+Class nevalG (Σ : gFunctors) := NevalG {
+  nevalG_invG :: invGS_gen HasNoLc Σ;
+}.
 
 Section neval_gen.
   Context
-    (** Iris resources *) {Σ : gFunctors}
+    (** Iris resources *) `{!nevalG Σ}
     (** Evaluation used contractively *)
     (nev : nderiv_ty → ∀ σ, nProp σ (;) → iProp Σ)
     (** Derivability predicate *) (d : nderiv_ty).
@@ -34,6 +40,7 @@ Section neval_gen.
     | (□ P)%n => λ σS Φs eq, □ nevalS_gen P σS Φs eq
     | (■ P)%n => λ σS Φs eq, ■ nevalS_gen P σS Φs eq
     | (|==> P)%n => λ σS Φs eq, |==> nevalS_gen P σS Φs eq
+    | (|={E,E'}=> P)%n => λ σS Φs eq, |={E,E'}=> nevalS_gen P σS Φs eq
     | (▷ P)%n => λ _ Φs eq, ▷ nev d _ (nsubsti' eq P Φs)
     | (P ⊢!{i} Q)%n => λ _ Φs eq, ⌜d i (nsubsti' eq P Φs, nsubsti' eq P Φs)⌝
     | ((rec:ₛ' Φ) a)%n => λ _ Φs eq, nevalS_gen (Φ a)
@@ -62,6 +69,7 @@ Section neval_gen.
     | (□ P)%n => λ Φs eq, □ neval_gen P Φs eq
     | (■ P)%n => λ Φs eq, ■ neval_gen P Φs eq
     | (|==> P)%n => λ Φs eq, |==> neval_gen P Φs eq
+    | (|={E,E'}=> P)%n => λ Φs eq, |={E,E'}=> neval_gen P Φs eq
     | (▷ P)%n => λ Φs eq, ▷ nev d _ (nsubsti' eq P Φs)
     | (P ⊢!{i} Q)%n => λ Φs eq, ⌜d i (nsubsti' eq P Φs, nsubsti' eq P Φs)⌝
     | ((rec:ₛ' Φ) a)%n => λ Φs eq,
@@ -80,7 +88,7 @@ Section neval_gen.
 End neval_gen.
 
 Section neval_fp.
-  Context (** Iris resources *) {Σ : gFunctors}.
+  Context (** Iris resources *) `{!nevalG Σ}.
 
   (** [nevalS_gen]/[neval_gen] typed as a discrete function *)
   Definition nevalS_gen' : (_ -d> _ -d> _ -d> iProp Σ) ->
@@ -124,21 +132,21 @@ End neval_fp.
   will be printed in (partial) evaluation, yay! *)
 
 Notation neval_env' Σ d σ Γₒ P Φs :=
-  (@neval_gen Σ neval_fp d σ Γₒ [] P Φs eq_refl) (only parsing).
+  (@neval_gen Σ _ neval_fp d σ Γₒ [] P Φs eq_refl) (only parsing).
 Notation neval_env d P Φs := (neval_env' _ d _ _ P Φs).
 Notation neval' Σ d σ P := (neval_env' Σ d σ [] P -[]) (only parsing).
 Notation neval d P := (neval' _ d _ P).
 Notation nevalS_env' Σ d Γₒ P Φs :=
-  (@nevalS_gen Σ neval_fp d nS Γₒ [] P eq_refl Φs eq_refl) (only parsing).
+  (@nevalS_gen Σ _ neval_fp d nS Γₒ [] P eq_refl Φs eq_refl) (only parsing).
 Notation nevalS_env d P Φs := (nevalS_env' _ d _ P Φs).
 Notation nevalS' Σ d P := (nevalS_env' Σ d [] P -[]) (only parsing).
 Notation nevalS d P := (nevalS' _ d P).
 
 Section neval_facts.
-  Context (** Iris resources *) {Σ : gFunctors}.
+  Context (** Iris resources *) `{!nevalG Σ}.
 
   (** [neval_fp] coincides with [neval] *)
-  Lemma neval_fp_neval {d σ P} : neval_fp (Σ:=Σ) d σ P ⊣⊢ neval d P.
+  Lemma neval_fp_neval {d σ P} : neval_fp d σ P ⊣⊢ neval d P.
   Proof. unfold neval_fp. apply (fixpoint_unfold neval_pre). Qed.
 
   (** [nevalS_gen] coincides with [neval_gen] *)
