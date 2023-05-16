@@ -236,4 +236,6 @@ Section bi.
   Proof.
     apply n_bysem=>/= >. rewrite !neval_fp_neval/=. iIntros. by iNext.
   Qed.
+  Lemma n_löb {d i P} : δ d i ((▷{nil} P → P), P)%n.
+  Proof. apply n_bysem=>/= >. rewrite neval_fp_neval/=. apply bi.löb. Qed.
 End bi.
