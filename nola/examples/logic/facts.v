@@ -154,4 +154,59 @@ Section bi.
   Proof. apply n_bysem=>/= ??. apply bupd_frame_r. Qed.
   Lemma n_bupd_plainly {d i P} : δ d i (|==> ■ P, ■ P)%n.
   Proof. apply n_bysem=>/= ??. by iIntros ">?". Qed.
+
+  (** Laws for [▷] *)
+  Lemma n_later_mono {d i P Q} : δ d i (P, Q) → δ d i (▷{nil} P, ▷{nil} Q)%n.
+  Proof.
+    move=> ?. apply n_bysem=>/= ??. f_equiv. rewrite !neval_fp_neval.
+    by apply nin_sem.
+  Qed.
+  Lemma n_later_intro {d i P} : δ d i (P, ▷{nil} P)%n.
+  Proof.
+    apply n_bysem=>/= ??. rewrite neval_fp_neval. apply bi.later_intro.
+  Qed.
+  Lemma n_later_forall_2 {d i A Φ} : δ d i (∀ a : A, ▷ Φ a, ▷ ∀' Φ)%n.
+  Proof.
+    apply n_bysem=>/= ??. setoid_rewrite neval_fp_neval.
+    apply bi.later_forall_2.
+  Qed.
+  Lemma n_later_exist_false {d i A Φ} :
+    δ d i (▷ ∃ a : A, Φ a, ▷ False ∨ (∃ a, ▷ Φ a))%n.
+  Proof.
+    apply n_bysem=>/= ??. setoid_rewrite neval_fp_neval=>/=.
+    apply bi.later_exist_false.
+  Qed.
+  Lemma n_later_sep_1 {d i P Q} : δ d i (▷ (P ∗ Q), ▷ P ∗ ▷ Q)%n.
+  Proof.
+    apply n_bysem=>/= ??. setoid_rewrite neval_fp_neval=>/=.
+    apply bi.later_sep_1.
+  Qed.
+  Lemma n_later_sep_2 {d i P Q} : δ d i (▷ P ∗ ▷ Q, ▷ (P ∗ Q))%n.
+  Proof.
+    apply n_bysem=>/= ??. setoid_rewrite neval_fp_neval=>/=.
+    apply bi.later_sep_2.
+  Qed.
+  Lemma n_later_false_em {d i P} : δ d i (▷ P, ▷ False ∨ (▷ False → P))%n.
+  Proof.
+    apply n_bysem=>/= ??. setoid_rewrite neval_fp_neval=>/=.
+    apply bi.later_false_em.
+  Qed.
+  Lemma n_later_persistently_1 {d i P} : δ d i (▷ □ P, □ ▷ P)%n.
+  Proof.
+    apply n_bysem=>/= ??. setoid_rewrite neval_fp_neval=>/=.
+    iIntros "#? !#". by iNext.
+  Qed.
+  Lemma n_later_persistently_2 {d i P} : δ d i (□ ▷ P, ▷ □ P)%n.
+  Proof.
+    apply n_bysem=>/= ??. setoid_rewrite neval_fp_neval=>/=. iIntros. by iNext.
+  Qed.
+  Lemma n_later_plainly_1 {d i P} : δ d i (▷ ■ P, ■ ▷ P)%n.
+  Proof.
+    apply n_bysem=>/= ??. setoid_rewrite neval_fp_neval=>/=.
+    iIntros "#? !#". by iNext.
+  Qed.
+  Lemma n_later_plainly_2 {d i P} : δ d i (■ ▷ P, ▷ ■ P)%n.
+  Proof.
+    apply n_bysem=>/= ??. setoid_rewrite neval_fp_neval=>/=. iIntros. by iNext.
+  Qed.
 End bi.
