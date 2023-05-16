@@ -107,6 +107,9 @@ Notation "|={ E , E' }=> P" := (n_fupd E E' P) : nProp_scope.
 Notation "▷{ Γₒ } P" := (n_later Γₒ P)
   (at level 20, right associativity, only parsing) : nProp_scope.
 Notation "▷ P" := (n_later _ P) : nProp_scope.
+Definition n_except_0 {σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ)) : nProp σ (Γₒ; Γᵢ)
+  := ▷ False ∨ P.
+Notation "◇ P" := (n_except_0 P) : nProp_scope.
 Notation "P ⊢!{ i }{ Γₒ } Q" := (n_deriv Γₒ i P Q)
   (at level 99, Q at level 200, only parsing) : nProp_scope.
 Notation "P ⊢!{ i } Q" := (n_deriv _ i P Q)

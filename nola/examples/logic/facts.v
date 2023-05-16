@@ -153,6 +153,32 @@ Section bi.
   Lemma n_bupd_plainly {d i P} : δ d i (|==> ■ P, ■ P)%n.
   Proof. apply n_bysem=>/= >. by iIntros ">?". Qed.
 
+  (** Laws for [|={_,_}=>] *)
+  Lemma n_fupd_mask_subseteq {d i E E' P} :
+    E' ⊆ E → δ d i (P, |={E,E'}=> |={E',E}=> True)%n.
+  Proof.
+    move=> ?. apply n_bysem=>/= >. iIntros "_". by iMod fupd_mask_subseteq.
+  Qed.
+  Lemma n_except_0_fupd {d i E E' P} :
+    δ d i (◇ (|={E,E'}=> P), |={E,E'}=> P)%n.
+  Proof.
+    apply n_bysem=>/= >. rewrite neval_fp_neval/=. by iDestruct 1 as "[>?|?]".
+  Qed.
+  Lemma n_fupd_mono {d i E E' P Q} :
+    δ d i (P, Q) → δ d i (|={E,E'}=> P, |={E,E'}=> Q)%n.
+  Proof.
+    move=> ?. apply n_bysem=>/= >. apply fupd_mono. by apply nin_sem.
+  Qed.
+  Lemma n_fupd_trans {d i E E' E'' P} :
+    δ d i (|={E,E'}=> |={E',E''}=> P, |={E,E''}=> P)%n.
+  Proof. apply n_bysem=>/= >. apply fupd_trans. Qed.
+  Lemma n_fupd_mask_frame_r' {d i E E' Ef P} :
+    E ## Ef → δ d i (|={E,E'}=> ⌜E' ## Ef⌝ → P, |={E ∪ Ef,E' ∪ Ef}=> P)%n.
+  Proof. move=> ?. apply n_bysem=>/= >. by apply fupd_mask_frame_r'. Qed.
+  Lemma n_fupd_frame_r {d i E E' P Q} :
+    δ d i ((|={E,E'}=> P) ∗ Q, |={E,E'}=> P ∗ Q)%n.
+  Proof. apply n_bysem=>/= >. apply fupd_frame_r. Qed.
+
   (** Laws for [▷] *)
   Lemma n_later_mono {d i P Q} : δ d i (P, Q) → δ d i (▷{nil} P, ▷{nil} Q)%n.
   Proof.
