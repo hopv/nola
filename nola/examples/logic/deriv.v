@@ -22,7 +22,7 @@ Class ninderivy Σ `{!nevalG Σ} δ δ' d i := Ninderivy {
   ninderivy_inderivy :: inderivy (nJudg Σ) δ δ' d i;
 }.
 
-Definition nderiv Σ `{!nevalG Σ} := deriv (nJudg Σ).
+Definition nderiv Σ `{!nevalG Σ} : npderiv_ty := deriv (nJudg Σ).
 
 (** Operations on [nderiv_ty] *)
 Definition Falseⁿᵈ : nderiv_ty := λ _ _, False.
@@ -89,3 +89,16 @@ Section basic.
     by apply nin_turn_semlow_l in H.
   Qed.
 End basic.
+
+(** ** On [nderiv] *)
+Section nderiv.
+  Context `{!nevalG Σ}.
+
+  (** [nderiv] satisfies [nderivy] *)
+  #[export] Instance nderiv_nderivy : nderivy Σ (nderiv Σ) := _.
+
+  (** [nderiv] is sound *)
+  Lemma nderiv_sound {i P Q} : nderiv Σ ⊥ⁿᵈ i (P, Q) →
+    neval (nderiv Σ ⊥ⁿᵈ) P ⊢ neval (nderiv Σ ⊥ⁿᵈ) Q.
+  Proof. exact (deriv_sound (JU:=nJudg Σ) i (P, Q)). Qed.
+End nderiv.
