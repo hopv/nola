@@ -185,47 +185,55 @@ Section bi.
     move=> ?. apply n_bysem=>/= >. f_equiv. rewrite !neval_fp_neval.
     by apply nin_sem.
   Qed.
-  Lemma n_later_intro {d i P} : δ d i (P, ▷{nil} P)%n.
+  Lemma n_later_intro {d i} {P : nPropL (;)} : δ d i (P, ▷{nil} P)%n.
   Proof.
     apply n_bysem=>/= >. rewrite neval_fp_neval. apply bi.later_intro.
   Qed.
-  Lemma n_later_forall_2 {d i A Φ} : δ d i (∀ a : A, ▷ Φ a, ▷ ∀' Φ)%n.
+  Lemma n_later_forall_2 {d i A} {Φ : A → nPropL (;)} :
+    δ d i (∀ a, ▷{nil} Φ a, ▷{nil} ∀' Φ)%n.
   Proof.
-    apply n_bysem=>/= >. setoid_rewrite neval_fp_neval.
+    apply n_bysem=>/= >. setoid_rewrite neval_fp_neval=>/=.
     apply bi.later_forall_2.
   Qed.
-  Lemma n_later_exist_false {d i A Φ} :
-    δ d i (▷ ∃ a : A, Φ a, ▷ False ∨ (∃ a, ▷ Φ a))%n.
+  Lemma n_later_exist_except_0 {d i A} {Φ : A → nPropL (;)} :
+    δ d i (▷{nil} ∃ a, Φ a, ◇ (∃ a, ▷{nil} Φ a))%n.
   Proof.
     apply n_bysem=>/= >. setoid_rewrite neval_fp_neval=>/=.
     apply bi.later_exist_false.
   Qed.
-  Lemma n_later_sep_1 {d i P Q} : δ d i (▷ (P ∗ Q), ▷ P ∗ ▷ Q)%n.
+  Lemma n_later_sep_1 {d i} {P Q : nPropL (;)} :
+    δ d i (▷{nil} (P ∗ Q), ▷{nil} P ∗ ▷{nil} Q)%n.
   Proof.
-    apply n_bysem=>/= >. rewrite !neval_fp_neval=>/=. apply bi.later_sep_1.
+    apply n_bysem=>/= >. rewrite !neval_fp_neval/=. apply bi.later_sep_1.
   Qed.
-  Lemma n_later_sep_2 {d i P Q} : δ d i (▷ P ∗ ▷ Q, ▷ (P ∗ Q))%n.
+  Lemma n_later_sep_2 {d i} {P Q : nPropL (;)} :
+    δ d i (▷{nil} P ∗ ▷{nil} Q, ▷{nil} (P ∗ Q))%n.
   Proof.
-    apply n_bysem=>/= >. rewrite !neval_fp_neval=>/=. apply bi.later_sep_2.
+    apply n_bysem=>/= >. rewrite !neval_fp_neval/=. apply bi.later_sep_2.
   Qed.
-  Lemma n_later_false_em {d i P} : δ d i (▷ P, ▷ False ∨ (▷ False → P))%n.
+  Lemma n_later_false_em {d i} {P : nPropL (;)} :
+    δ d i (▷{nil} P, ◇ (▷ False → P))%n.
   Proof.
-    apply n_bysem=>/= >. rewrite !neval_fp_neval=>/=. apply bi.later_false_em.
+    apply n_bysem=>/= >. rewrite !neval_fp_neval/=. apply bi.later_false_em.
   Qed.
-  Lemma n_later_persistently_1 {d i P} : δ d i (▷ □ P, □ ▷ P)%n.
+  Lemma n_later_persistently_1 {d i} {P : nPropL (;)} :
+    δ d i (▷{nil} □ P, □ ▷{nil} P)%n.
   Proof.
-    apply n_bysem=>/= >. rewrite !neval_fp_neval=>/=. iIntros "#? !#". by iNext.
+    apply n_bysem=>/= >. rewrite !neval_fp_neval/=. iIntros "#? !#". by iNext.
   Qed.
-  Lemma n_later_persistently_2 {d i P} : δ d i (□ ▷ P, ▷ □ P)%n.
+  Lemma n_later_persistently_2 {d i} {P : nPropL (;)} :
+    δ d i (□ ▷{nil} P, ▷{nil} □ P)%n.
   Proof.
-    apply n_bysem=>/= >. rewrite !neval_fp_neval=>/=. iIntros. by iNext.
+    apply n_bysem=>/= >. rewrite !neval_fp_neval/=. iIntros. by iNext.
   Qed.
-  Lemma n_later_plainly_1 {d i P} : δ d i (▷ ■ P, ■ ▷ P)%n.
+  Lemma n_later_plainly_1 {d i} {P : nPropL (;)} :
+    δ d i (▷{nil} ■ P, ■ ▷{nil} P)%n.
   Proof.
-    apply n_bysem=>/= >. rewrite !neval_fp_neval=>/=. iIntros "#? !#". by iNext.
+    apply n_bysem=>/= >. rewrite !neval_fp_neval/=. iIntros "#? !#". by iNext.
   Qed.
-  Lemma n_later_plainly_2 {d i P} : δ d i (■ ▷ P, ▷ ■ P)%n.
+  Lemma n_later_plainly_2 {d i} {P : nPropL (;)} :
+    δ d i (■ ▷{nil} P, ▷{nil} ■ P)%n.
   Proof.
-    apply n_bysem=>/= >. rewrite !neval_fp_neval=>/=. iIntros. by iNext.
+    apply n_bysem=>/= >. rewrite !neval_fp_neval/=. iIntros. by iNext.
   Qed.
 End bi.
