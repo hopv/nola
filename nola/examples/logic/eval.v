@@ -77,19 +77,10 @@ Section neval_gen.
     | (%ₒₛ s)%n => λ Φs eq,
         nevalS_gen (cpapply (λ _, npargS_apply) s Φs) eq_refl -[] eq_refl
     end%I.
-
-  (** [nevalS_gen] coincides with [neval_gen] *)
-  Lemma nevalS_gen_neval_gen {σ Γ} {P : nProp σ Γ} {σS Φs eq} :
-    nevalS_gen P σS Φs eq ⊣⊢ neval_gen P Φs eq.
-  Proof.
-    move: σ Γ P σS Φs eq. fix FIX 3=> σ Γ.
-    case=>//= *; try f_equiv=> >; apply (FIX _ (_; _)%nctx).
-  Qed.
 End neval_gen.
 
 Section neval_fp.
-  Context
-    (** Iris resources *) {Σ : gFunctors}.
+  Context (** Iris resources *) {Σ : gFunctors}.
 
   (** [nevalS_gen]/[neval_gen] typed as a discrete function *)
   Definition nevalS_gen' : (_ -d> _ -d> _ -d> iProp Σ) ->
@@ -129,19 +120,48 @@ Section neval_fp.
   Definition neval_fp : _ → ∀ σ, nProp σ (;) → iProp Σ := fixpoint neval_pre.
 End neval_fp.
 
-(** The notations [neval] and [neval_env] will be printed
-  in (partial) evaluation, yay! *)
+(** The notations [neval] and [neval_env] (as well as [nevalS] and [nevalS_env])
+  will be printed in (partial) evaluation, yay! *)
 
-(** [neval d P]: Evaluation of [P : nProp σ (;)] as [iProp Σ]
-  under the derivability [d] *)
-Notation neval d P := (neval_gen neval_fp d (Γₒ:=[]) P -[] eq_refl).
-(** [neval_env d P Φs]: Evaluation of [P : nProp σ (Γₒ; ) as [iProp Σ]
-  under the derivability [d] and the environment [Φs : plist nPred Γₒ] *)
-Notation neval_env d P Φs := (neval_gen neval_fp d P Φs eq_refl).
-(** [neval_def]: Definied [neval] *)
-Definition neval_def {Σ σ} d (P : nProp σ (;)) : iProp Σ := neval d P.
-Arguments neval_def /.
+Notation neval_env' Σ d σ Γₒ P Φs :=
+  (@neval_gen Σ neval_fp d σ Γₒ [] P Φs eq_refl) (only parsing).
+Notation neval_env d P Φs := (neval_env' _ d _ _ P Φs).
+Notation neval' Σ d σ P := (neval_env' Σ d σ [] P -[]) (only parsing).
+Notation neval d P := (neval' _ d _ P).
+Notation nevalS_env' Σ d Γₒ P Φs :=
+  (@nevalS_gen Σ neval_fp d nS Γₒ [] P eq_refl Φs eq_refl) (only parsing).
+Notation nevalS_env d P Φs := (nevalS_env' _ d _ P Φs).
+Notation nevalS' Σ d P := (nevalS_env' Σ d [] P -[]) (only parsing).
+Notation nevalS d P := (nevalS' _ d P).
 
-(** [neval_fp] coincides with [neval] *)
-Lemma neval_fp_neval {Σ d σ P} : neval_fp (Σ:=Σ) d σ P ⊣⊢ neval d P.
-Proof. unfold neval_fp. apply (fixpoint_unfold neval_pre). Qed.
+Section neval_facts.
+  Context (** Iris resources *) {Σ : gFunctors}.
+
+  (** [neval_fp] coincides with [neval] *)
+  Lemma neval_fp_neval {d σ P} : neval_fp (Σ:=Σ) d σ P ⊣⊢ neval d P.
+  Proof. unfold neval_fp. apply (fixpoint_unfold neval_pre). Qed.
+
+  (** [nevalS_gen] coincides with [neval_gen] *)
+  Lemma nevalS_gen_neval_gen {nev d σ Γ} {P : nProp σ Γ} {σS Φs eq} :
+    nevalS_gen (Σ:=Σ) nev d P σS Φs eq ⊣⊢ neval_gen nev d P Φs eq.
+  Proof.
+    move: σ Γ P σS Φs eq. fix FIX 3=> σ Γ.
+    case=>//= *; try f_equiv=> >; apply (FIX _ (_; _)%nctx).
+  Qed.
+  (** [nevalS_env] coincides with [neval_env] *)
+  Lemma nevalS_env_neval_env {d Γₒ P Φs} :
+    nevalS_env' Σ d Γₒ P Φs ⊣⊢ neval_env d P Φs.
+  Proof. apply (nevalS_gen_neval_gen (Γ:=(Γₒ; ))). Qed.
+
+  (** Simplify [neval_gen] over [nlarge] *)
+  Lemma neval_gen_nlarge {nev d σ Γ} {P : nProp σ Γ} {Φs eq} :
+    neval_gen (Σ:=Σ) nev d (nlarge P) Φs eq ⊣⊢ neval_gen nev d P Φs eq.
+  Proof.
+    move: σ Γ P Φs eq. fix FIX 3=> σ Γ.
+    case=>//= *; f_equiv=> >; apply (FIX _ (_; _)%nctx).
+  Qed.
+  (** Simplify [neval_env] over [nlarge] *)
+  Lemma neval_env_nlarge {d σ Γₒ P Φs} :
+    neval_env d (nlarge P) Φs ⊣⊢ neval_env' Σ d σ Γₒ P Φs.
+  Proof. apply (neval_gen_nlarge (Γ:=(Γₒ; ))). Qed.
+End neval_facts.
