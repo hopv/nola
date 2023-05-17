@@ -83,7 +83,7 @@ Section neval_gen.
     | (%ᵢₗ s)%n => λ _, match s with
         #0 _ => λ eq, match eq with end | +/ _ => λ eq, match eq with end end
     | (%ₒₛ s)%n => λ Φs eq,
-        nevalS_gen (cpapply (λ _, npargS_apply) s Φs) eq_refl -[] eq_refl
+        nevalS_gen (spapply (λ _, npargS_apply) s Φs) eq_refl -[] eq_refl
     end%I.
 End neval_gen.
 

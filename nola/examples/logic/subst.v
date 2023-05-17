@@ -35,8 +35,8 @@ Fixpoint nlifti {Δ σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ)) : nProp σ (Γ
   | (rec:ₗ' Φ) a => (rec:ₗ' nlifti ∘ Φ) a
   | ∀: V, P => ∀: V, nlifti P
   | ∃: V, P => ∃: V, nlifti P
-  | %ᵢₛ s => %ᵢₛ cbylapp s _
-  | %ᵢₗ s => %ᵢₗ cbylapp s _
+  | %ᵢₛ s => %ᵢₛ sbylapp s _
+  | %ᵢₗ s => %ᵢₗ sbylapp s _
   | %ₒₛ s => %ₒₛ s
   end%n.
 
@@ -74,7 +74,7 @@ Fixpoint nliftoi {Δₒ Δᵢ σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ))
       #0 _ => λ eq, match eq with end | +/ _ => λ eq, match eq with end end
   | %ᵢₗ s => match s with
       #0 _ => λ eq, match eq with end | +/ _ => λ eq, match eq with end end
-  | %ₒₛ s => λ _, %ₒₛ cbylapp s _
+  | %ₒₛ s => λ _, %ₒₛ sbylapp s _
   end%n.
 
 (** [nlift]: Turn [nProp σ (;)] into [nProp σ Γ] *)
@@ -127,10 +127,10 @@ Fixpoint nsubstli {σ Γₒ Γᵢ i} (P : nProp σ (Γₒ; Γᵢ))
   | (rec:ₗ' Φ) a => λ Φs, (rec:ₗ b, nsubstli (Φ b) Φs) a
   | ∀: V, P => λ Φs, ∀: V, nsubstli P Φs
   | ∃: V, P => λ Φs, ∃: V, nsubstli P Φs
-  | %ᵢₛ s => λ Φs, match ctakedrop _ s with
-      inl s => %ᵢₛ s | inr s => nlift (cpapply (λ _, npargS_apply) s Φs) end
-  | %ᵢₗ s => λ Φs, match ctakedrop _ s with
-      inl s => %ᵢₗ s | inr s => nlift (cpapply (λ _, nparg_apply) s Φs) end
+  | %ᵢₛ s => λ Φs, match stakedrop _ s with
+      inl s => %ᵢₛ s | inr s => nlift (spapply (λ _, npargS_apply) s Φs) end
+  | %ᵢₗ s => λ Φs, match stakedrop _ s with
+      inl s => %ᵢₗ s | inr s => nlift (spapply (λ _, nparg_apply) s Φs) end
   | %ₒₛ s => λ _, %ₒₛ s
   end%n.
 
@@ -176,8 +176,8 @@ Fixpoint nsubstlo {σ Γₒ Γᵢ i} (P : nProp σ (Γₒ; Γᵢ))
       #0 _ => λ _ eq, match eq with end | +/ _ => λ _ eq, match eq with end end
   | %ᵢₗ s => match s with
       #0 _ => λ _ eq, match eq with end | +/ _ => λ _ eq, match eq with end end
-  | %ₒₛ s => λ Φs _, match ctakedrop _ s with
-      inl s => %ₒₛ s | inr s => nlift (cpapply (λ _, npargS_apply) s Φs) end
+  | %ₒₛ s => λ Φs _, match stakedrop _ s with
+      inl s => %ₒₛ s | inr s => nlift (spapply (λ _, npargS_apply) s Φs) end
   end%n.
 
 (** [nsubsto P Φs]: Substitute [Φs] for all the outer variables of [P],
