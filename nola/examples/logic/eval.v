@@ -3,11 +3,15 @@
 From nola.examples.logic Require Export subst.
 From iris.base_logic.lib Require Import iprop fancy_updates.
 
-(** Modification of [nsubsti] *)
-Definition nsubsti' {σ Γₒ Γᵢ}
-  : Γᵢ = [] → nProp σ (; Γₒ ++ Γᵢ) → plist nPred Γₒ → nProp σ (;) :=
-  match Γᵢ with _ :: _ => λ σS, match σS with end | [] => λ _ P Φs,
-    nsubsti (nProp_rewi P app_nil_def) Φs end.
+(** Modification of [nsubstsi]/[nsubstso] *)
+Definition nsubstsi_an {σ Γₒ Γᵢ}
+  : nProp σ (; Γₒ ++ Γᵢ) → plist nPred Γₒ → Γᵢ = [] → nProp σ (;) :=
+  match Γᵢ with _ :: _ => λ _ _ eq, match eq with end | [] => λ P Φs _,
+    nsubstsi (nProp_rewi P app_nil_def) Φs end.
+Definition nsubstso_n {σ Γₒ Γᵢ}
+  : nProp σ (Γₒ; Γᵢ) → plist nPred Γₒ → Γᵢ = [] → nProp σ (;) :=
+  match Γᵢ with _ :: _ => λ _ _ eq, match eq with end | [] => λ P Φs _,
+    nsubstso P Φs end.
 
 (** Type of a derivability predicate *)
 Notation nderiv_ty := (nat → nPropL (;) * nPropL (;) → Prop).
@@ -41,10 +45,11 @@ Section neval_gen.
     | (■ P)%n => λ σS Φs eq, ■ nevalS_gen P σS Φs eq
     | (|==> P)%n => λ σS Φs eq, |==> nevalS_gen P σS Φs eq
     | (|={E,E'}=> P)%n => λ σS Φs eq, |={E,E'}=> nevalS_gen P σS Φs eq
-    | (▷ P)%n => λ _ Φs eq, ▷ nev d _ (nsubsti' eq P Φs)
-    | (P ⊢!{i} Q)%n => λ _ Φs eq, ⌜d i (nsubsti' eq P Φs, nsubsti' eq P Φs)⌝
+    | (▷ P)%n => λ _ Φs eq, ▷ nev d _ (nsubstsi_an P Φs eq)
+    | (P ⊢!{i} Q)%n => λ _ Φs eq,
+        ⌜d i (nsubstsi_an P Φs eq, nsubstsi_an P Φs eq)⌝
     | ((rec:ₛ' Φ) a)%n => λ _ Φs eq, nevalS_gen (Φ a)
-        eq_refl ((λ a, nsubsto ((rec:ₛ' Φ)%n a) Φs eq) -:: Φs) eq
+        eq_refl ((λ a, nsubstso_n ((rec:ₛ' Φ)%n a) Φs eq) -:: Φs) eq
     | ((rec:ₗ' Φ) a)%n => λ σS, match σS with end
     | (∀: V, P)%n => λ σS Φs eq, ∀ Ψ, nevalS_gen P σS (Ψ -:: Φs) eq
     | (∃: V, P)%n => λ σS Φs eq, ∃ Ψ, nevalS_gen P σS (Ψ -:: Φs) eq
@@ -70,12 +75,12 @@ Section neval_gen.
     | (■ P)%n => λ Φs eq, ■ neval_gen P Φs eq
     | (|==> P)%n => λ Φs eq, |==> neval_gen P Φs eq
     | (|={E,E'}=> P)%n => λ Φs eq, |={E,E'}=> neval_gen P Φs eq
-    | (▷ P)%n => λ Φs eq, ▷ nev d _ (nsubsti' eq P Φs)
-    | (P ⊢!{i} Q)%n => λ Φs eq, ⌜d i (nsubsti' eq P Φs, nsubsti' eq P Φs)⌝
+    | (▷ P)%n => λ Φs eq, ▷ nev d _ (nsubstsi_an P Φs eq)
+    | (P ⊢!{i} Q)%n => λ Φs eq, ⌜d i (nsubstsi_an P Φs eq, nsubstsi_an P Φs eq)⌝
     | ((rec:ₛ' Φ) a)%n => λ Φs eq,
-        neval_gen (Φ a) ((λ a, nsubsto ((rec:ₛ' Φ)%n a) Φs eq) -:: Φs) eq
+        neval_gen (Φ a) ((λ a, nsubstso_n ((rec:ₛ' Φ)%n a) Φs eq) -:: Φs) eq
     | ((rec:ₗ' Φ) a)%n => λ Φs eq,
-        neval_gen (Φ a) ((λ a, nsubsto ((rec:ₗ' Φ)%n a) Φs eq) -:: Φs) eq
+        neval_gen (Φ a) ((λ a, nsubstso_n ((rec:ₗ' Φ)%n a) Φs eq) -:: Φs) eq
     | (∀: V, P)%n => λ Φs eq, ∀ Ψ, neval_gen P (Ψ -:: Φs) eq
     | (∃: V, P)%n => λ Φs eq, ∃ Ψ, neval_gen P (Ψ -:: Φs) eq
     | (%ᵢₛ s)%n => λ _, match s with

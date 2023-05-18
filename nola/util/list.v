@@ -35,6 +35,34 @@ Fixpoint drop_add_app_def {A i} {xs ys : list A}
   | _ :: xs => drop_add_app_def (xs:=xs)
   end.
 
+(** [take (length xs)] over [xs ++ ys] *)
+Fixpoint take_app_def {A} {xs ys : list A} : take (length xs) (xs ++ ys) = xs :=
+  match xs with
+  | [] => eq_refl
+  | _ :: _ => f_equal _ take_app_def
+  end.
+
+(** [drop (length xs)] over [xs ++ ys] *)
+Fixpoint drop_app_def {A} {xs ys : list A} : drop (length xs) (xs ++ ys) = ys :=
+  match xs with
+  | [] => eq_refl
+  | _ :: xs => drop_app_def (xs:=xs)
+  end.
+
+(** Simplify [rev (xs ++ ys)] *)
+Fixpoint rev_app_def {A} {xs ys : list A} : rev (xs ++ ys) = rev ys ++ rev xs :=
+  match xs with
+  | [] => eq_sym app_nil_def
+  | _ :: _ => eq_trans (f_equal (.++ [_]) rev_app_def) (eq_sym app_assoc_def)
+  end.
+
+(** Simplify [rev (rev xs)] *)
+Fixpoint rev_invol_def {A} {xs : list A} : rev (rev xs) = xs :=
+  match xs with
+  | [] => eq_refl
+  | _ :: _ => eq_trans rev_app_def (f_equal _ rev_invol_def)
+  end.
+
 (** ** [plist]: Product type calculated over elements of [list] *)
 
 (** Unit type for [tnil] *)
@@ -62,6 +90,22 @@ Fixpoint plist {A} (F : A → Type) (xs : list A) : Type :=
   | [] => *[]
   | x :: xs => F x *:: plist F xs
   end.
+
+(** [punappl], [punappr]: Decompose [plist F (xs ++ ys)] *)
+Fixpoint punappl {A F} {xs ys : list A}
+  : plist F (xs ++ ys) → plist F xs :=
+  match xs with
+  | [] => λ _, -[]
+  | _ :: _ => λ '(v -:: vs), v -:: punappl vs
+  end.
+Fixpoint punappr {A F} {xs ys : list A}
+  : plist F (xs ++ ys) → plist F ys :=
+  match xs with
+  | [] => λ vs, vs
+  | _ :: _ => λ '(_ -:: vs), punappr vs
+  end.
+
+(** [punapp]: Decompose [plist F (xs ++ ys)] *)
 
 (** ** [schoice]: Variant choosing an element of [list] with a value *)
 
