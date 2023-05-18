@@ -6,12 +6,14 @@ From iris.base_logic.lib Require Import iprop.
 
 Implicit Type (d : nderiv_ty) (δ : npderiv_ty) (i j : nat).
 
-(** ** [nJudg]: Judgment *)
+(** ** Basic notions *)
+
+(** [nJudg]: Judgment *)
 Definition nJudgTy i : Type := nPropL (;) * nPropL (;).
 Canonical nJudg Σ `{!nevalG Σ} := Judg nat nJudgTy
   (λ d _ '(P, Q), neval' Σ d _ P ⊢ neval d Q).
 
-(** ** [nderivy], [ninderivy], [nderiv]: Derivability *)
+(** *[nderivy], [ninderivy], [nderiv]: Derivability *)
 Class nderivy Σ `{!nevalG Σ} δ := Nderivy {
   nderivy_derivy :: derivy (nJudg Σ) δ;
 }.
@@ -34,7 +36,9 @@ Infix "$∨ⁿᵈ" := apporⁿᵈ (at level 50, left associativity) : nola_scope
 Definition implⁿᵈ d d' : Prop := ∀ i PQ, d i PQ → d' i PQ.
 Infix "→ⁿᵈ" := implⁿᵈ (at level 99, right associativity) : nola_scope.
 
-(** ** Basic laws for [nderivy] *)
+(** ** Lemmas *)
+
+(** Basic laws for [nderivy] *)
 Section basic.
   Context `{!nevalG Σ, !nderivy Σ δ}.
 
@@ -90,7 +94,7 @@ Section basic.
   Qed.
 End basic.
 
-(** ** On [nderiv] *)
+(** On [nderiv] *)
 Section nderiv.
   Context `{!nevalG Σ}.
 
