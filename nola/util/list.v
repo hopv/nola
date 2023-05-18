@@ -84,14 +84,16 @@ Notation "#8 v" := (+/ #7 v) (at level 20, right associativity) : nola_scope.
 Notation "#9 v" := (+/ #8 v) (at level 20, right associativity) : nola_scope.
 
 (** Turn [schoice F xs] into [schoice F (xs ++ ys)] *)
-Fixpoint sbylapp {A F} {xs : list A} (s : schoice F xs) ys : schoice F (xs ++ ys) :=
+Fixpoint sbylapp {A F} {xs : list A} (s : schoice F xs) ys
+  : schoice F (xs ++ ys) :=
   match s with
   | #0 v => #0 v
   | +/ s => +/ sbylapp s ys
   end.
 
 (** Turn [schoice F ys] into [schoice F (xs ++ ys)] *)
-Fixpoint sbyrapp {A F} xs {ys : list A} (s : schoice F ys) : schoice F (xs ++ ys) :=
+Fixpoint sbyrapp {A F} xs {ys : list A} (s : schoice F ys)
+  : schoice F (xs ++ ys) :=
   match xs with
   | [] => s
   | _ :: xs => +/ sbyrapp xs s
