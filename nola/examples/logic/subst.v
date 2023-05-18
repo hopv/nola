@@ -14,7 +14,7 @@ Notation nProp_rewi P eq := (rew[λ Γᵢ, nProp _ (; Γᵢ)] eq in P) (only par
 
 Definition nlifti_rew {σ Γₒ Γᵢ Δ}
   (P : nProp σ (; (Γₒ ++ Γᵢ) ++ Δ)) : nProp σ (; Γₒ ++ (Γᵢ ++ Δ)) :=
-  nProp_rewi P (eq_sym (app_assoc_def _ _ _)).
+  nProp_rewi P (eq_sym app_assoc_def).
 Fixpoint nlifti {Δ σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ)) : nProp σ (Γₒ; Γᵢ ++ Δ) :=
   match P with
   | ⌜φ⌝ => ⌜φ⌝
@@ -46,7 +46,7 @@ Definition nliftoi_rew {σ Γₒ Γᵢ Δₒ Δᵢ} : Γᵢ = [] →
   match Γᵢ with
   | _ :: _ => λ eq, match eq with end
   | [] => λ _ P, nProp_rewi P (eq_trans
-      (eq_sym (app_assoc_def _ [] _)) (app_assoc_def _ Δₒ _))
+      (eq_sym (app_assoc_def (ys:=[]))) (app_assoc_def (ys:=Δₒ)))
   end.
 Fixpoint nliftoi {Δₒ Δᵢ σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ))
   : Γᵢ = [] → nProp σ (Γₒ ++ Δₒ; Δᵢ) :=
@@ -100,10 +100,10 @@ Notation nPred_rews Φs eq := (rew[plist nPred] eq in Φs) (only parsing).
   of [P] *)
 Definition nsubsti_rew {σ Γₒ Γᵢ i}
   (P : nProp σ (; take (length Γₒ + i) (Γₒ ++ Γᵢ)))
-  : nProp σ (; Γₒ ++ take i Γᵢ) := nProp_rewi P (take_add_app_def _ _ _).
+  : nProp σ (; Γₒ ++ take i Γᵢ) := nProp_rewi P take_add_app_def.
 Definition nsubsti_rew' {i Γₒ Γᵢ} (Φs : plist nPred (drop i Γᵢ))
   : plist nPred (drop (length Γₒ + i) (Γₒ ++ Γᵢ)) :=
-  nPred_rews Φs (eq_sym (drop_add_app_def i Γₒ Γᵢ)).
+  nPred_rews Φs (eq_sym drop_add_app_def).
 Fixpoint nsubstli {σ Γₒ Γᵢ i} (P : nProp σ (Γₒ; Γᵢ))
   : plist nPred (drop i Γᵢ) → nProp σ (Γₒ; take i Γᵢ) :=
   match P with
@@ -144,11 +144,11 @@ Definition nsubsti {σ Γᵢ} : nProp σ (; Γᵢ) → plist nPred Γᵢ → nPr
   Definition nsubstlo_rew {σ Γₒ Γᵢ i}
   : Γᵢ = [] → nProp σ (; take i (Γₒ ++ Γᵢ)) → nProp σ (; take i Γₒ ++ []) :=
   match Γᵢ with _ :: _ => λ eq, match eq with end | [] => λ _ P, nProp_rewi P
-    (eq_trans (f_equal _ (app_nil_def _)) (eq_sym (app_nil_def _))) end.
+    (eq_trans (f_equal _ app_nil_def) (eq_sym app_nil_def)) end.
 Definition nsubstlo_rew' {i Γₒ Γᵢ} (Φs : plist nPred (drop i Γₒ))
   : Γᵢ = [] → plist nPred (drop i (Γₒ ++ Γᵢ)) :=
   match Γᵢ with _ :: _ => λ eq, match eq with end | [] => λ _,
-    nPred_rews Φs (eq_sym (f_equal _ (app_nil_def _))) end.
+    nPred_rews Φs (eq_sym (f_equal _ app_nil_def)) end.
 Fixpoint nsubstlo {σ Γₒ Γᵢ i} (P : nProp σ (Γₒ; Γᵢ))
   : plist nPred (drop i Γₒ) → Γᵢ = [] → nProp σ (take i Γₒ; ) :=
   match P with

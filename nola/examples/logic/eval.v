@@ -7,7 +7,7 @@ From iris.base_logic.lib Require Import iprop fancy_updates.
 Definition nsubsti' {σ Γₒ Γᵢ}
   : Γᵢ = [] → nProp σ (; Γₒ ++ Γᵢ) → plist nPred Γₒ → nProp σ (;) :=
   match Γᵢ with _ :: _ => λ σS, match σS with end | [] => λ _ P Φs,
-    nsubsti (nProp_rewi P (app_nil_def _)) Φs end.
+    nsubsti (nProp_rewi P app_nil_def) Φs end.
 
 (** Type of a derivability predicate *)
 Notation nderiv_ty := (nat → nPropL (;) * nPropL (;) → Prop).
