@@ -146,12 +146,9 @@ Definition nsubsti {σ Γᵢ V} (P : nProp σ (; Γᵢ ++ [V])) (Φ : nPred V)
   defined as iterative applications of [nsubsti] *)
 Fixpoint nsubstsi' {σ Γᵢ}
   : nProp σ (; rev Γᵢ) → plist nPred (rev Γᵢ) → nProp σ (;) :=
-  match Γᵢ with
-  | [] => λ P _, P
-  | _ :: _ => λ P Φs, nsubstsi' (nsubsti P (phd (punappr Φs))) (punappl Φs)
-  end.
-Definition nsubstsi {σ Γᵢ}
-  : nProp σ (; Γᵢ) → plist nPred Γᵢ → nProp σ (;) :=
+  match Γᵢ with [] => λ P _, P | _ :: _ => λ P Φs,
+    nsubstsi' (nsubsti P (phd (punappr Φs))) (punappl Φs) end.
+Definition nsubstsi {σ Γᵢ} : nProp σ (; Γᵢ) → plist nPred Γᵢ → nProp σ (;) :=
   rew[λ Γᵢ, nProp σ (; Γᵢ) → plist nPred Γᵢ → _] rev_invol_def in nsubstsi'.
 Arguments nsubstsi {_ _} _ _ /.
 
@@ -207,11 +204,8 @@ Definition nsubsto {σ Γₒ V} (P : nProp σ (Γₒ ++ [V]; )) (Φ : nPred V)
   defined as iterative applications of [nsubsto] *)
 Fixpoint nsubstso' {σ Γₒ}
   : nProp σ (rev Γₒ; ) → plist nPred (rev Γₒ) → nProp σ (;) :=
-  match Γₒ with
-  | [] => λ P _, P
-  | _ :: _ => λ P Φs,
-      nsubstso' (nsubsto P (phd (punappr Φs))) (punappl Φs)
-  end.
+  match Γₒ with [] => λ P _, P | _ :: _ => λ P Φs,
+    nsubstso' (nsubsto P (phd (punappr Φs))) (punappl Φs) end.
 Definition nsubstso {σ Γₒ}
   : nProp σ (Γₒ; ) → plist nPred Γₒ → nProp σ (;) :=
   rew[λ Γₒ, nProp σ (Γₒ; ) → plist nPred Γₒ → _] rev_invol_def in nsubstso'.
