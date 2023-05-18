@@ -105,8 +105,6 @@ Fixpoint punappr {A F} {xs ys : list A}
   | _ :: _ => λ '(_ -:: vs), punappr vs
   end.
 
-(** [punapp]: Decompose [plist F (xs ++ ys)] *)
-
 (** ** [schoice]: Variant choosing an element of [list] with a value *)
 
 Inductive schoice {A} {F : A → Type} : list A → Type :=
