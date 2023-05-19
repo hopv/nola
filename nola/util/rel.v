@@ -9,7 +9,7 @@ Require Import Coq.Logic.Eqdep_dec.
 #[export] Instance eq_dec_proof_irrel `{!EqDecision A} (a b : A) :
   ProofIrrel (a = b).
 Proof.
-  move=> e e'. apply eq_proofs_unicity. clear a b e e'=> a b.
+  move=> e e'. apply eq_proofs_unicity. move{a b e e'}=> a b.
   case (decide (a = b)); by [left|right].
 Qed.
 Lemma eq_dec_refl `{!EqDecision A} {a : A} (eq : a = a) : eq = eq_refl.

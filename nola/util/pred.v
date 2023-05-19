@@ -89,9 +89,9 @@ Section pnu.
   (** Accumulate coinductive hypotheses *)
   Lemma pnu_acc `{Mono₁₁ F} {φ} ψ : (ψ →₁ pnu (φ ∨₁ ψ)) → ψ →₁ pnu φ.
   Proof.
-    move=> topnuφψ=> a /topnuφψ +. move: a. cofix FIX=> a /pnu_unfold ?.
-    split. exists (pnu $∨₁ (φ ∨₁ ψ)). split; [|done]. clear dependent a.
-    move=> ? [/FIX|[|/topnuφψ/FIX]]; by [left|right|left].
+    move=> topnuφψ=> a /topnuφψ +. move: a. cofix FIX=> a /pnu_unfold Fxa.
+    split. exists (pnu $∨₁ (φ ∨₁ ψ)). split; [|done].
+    move{a Fxa}=> ? [/FIX|[|/topnuφψ/FIX]]; by [left|right|left].
   Qed.
 
   (** [nu]: Non-parameterized greatest fixpoint *)
