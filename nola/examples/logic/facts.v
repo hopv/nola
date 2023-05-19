@@ -281,4 +281,10 @@ Section bi.
     move=> ?. apply n_bysem=>/= >. apply bi.exist_elim=> ?.
     rewrite (eq_hwf (rew _ in _)). by apply nin_sem.
   Qed.
+
+  (** Laws for [!ᵒˢ] *)
+  Lemma n_subos_unfold {d i P} : δ d i (!ᵒˢ P, nlarge P)%n.
+  Proof. apply n_bysem=>/= >. by rewrite nevalS_neval neval_nlarge. Qed.
+  Lemma n_subos_fold {d i P} : δ d i (nlarge P, !ᵒˢ P)%n.
+  Proof. apply n_bysem=>/= >. by rewrite neval_nlarge nevalS_neval. Qed.
 End bi.
