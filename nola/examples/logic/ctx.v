@@ -45,7 +45,7 @@ Record nctx : Type := Nctx {
 Declare Scope nctx_scope.
 Delimit Scope nctx_scope with nctx.
 Bind Scope nctx_scope with nctx.
-Notation "( Γₒ ; Γᵢ )" := (Nctx Γₒ Γᵢ) : nctx_scope.
-Notation "( Γₒ ; )" := (Nctx Γₒ []) : nctx_scope.
-Notation "( ; Γᵢ )" := (Nctx [] Γᵢ) (format "( ;  Γᵢ )") : nctx_scope.
+Notation "( Γᵒ ; Γⁱ )" := (Nctx Γᵒ Γⁱ) : nctx_scope.
+Notation "( Γᵒ ; )" := (Nctx Γᵒ []) : nctx_scope.
+Notation "( ; Γⁱ )" := (Nctx [] Γⁱ) (format "( ;  Γⁱ )") : nctx_scope.
 Notation "( ; )" := (Nctx [] []) (format "( ; )") : nctx_scope.

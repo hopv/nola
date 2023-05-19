@@ -4,13 +4,13 @@ From nola.examples.logic Require Export subst.
 From iris.base_logic.lib Require Import iprop fancy_updates.
 
 (** Modification of [nsubstsi]/[nsubstso] *)
-Definition nsubstsi_an {σ Γₒ Γᵢ}
-  : nProp σ (; Γₒ ++ Γᵢ) → plist nPred Γₒ → Γᵢ = [] → nProp σ (;) :=
-  match Γᵢ with _ :: _ => λ _ _ eq, match eq with end | [] => λ P Φs _,
+Definition nsubstsi_an {σ Γᵒ Γⁱ}
+  : nProp σ (; Γᵒ ++ Γⁱ) → plist nPred Γᵒ → Γⁱ = [] → nProp σ (;) :=
+  match Γⁱ with _ :: _ => λ _ _ eq, match eq with end | [] => λ P Φs _,
     nsubstsi (nProp_rewi P app_nil_def) Φs end.
-Definition nsubstso_n {σ Γₒ Γᵢ}
-  : nProp σ (Γₒ; Γᵢ) → plist nPred Γₒ → Γᵢ = [] → nProp σ (;) :=
-  match Γᵢ with _ :: _ => λ _ _ eq, match eq with end | [] => λ P Φs _,
+Definition nsubstso_n {σ Γᵒ Γⁱ}
+  : nProp σ (Γᵒ; Γⁱ) → plist nPred Γᵒ → Γⁱ = [] → nProp σ (;) :=
+  match Γⁱ with _ :: _ => λ _ _ eq, match eq with end | [] => λ P Φs _,
     nsubstso P Φs end.
 
 (** Type of a derivability predicate *)
@@ -30,8 +30,8 @@ Section neval_gen.
     (** Derivability predicate *) (d : nderiv_ty).
 
   (** ** [nevalS_gen P Φs] : Evaluate small [P] under the environment [Φs] *)
-  Fixpoint nevalS_gen {σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ))
-    : σ = nS → plist nPred Γₒ → Γᵢ = [] → iProp Σ :=
+  Fixpoint nevalS_gen {σ Γᵒ Γⁱ} (P : nProp σ (Γᵒ; Γⁱ))
+    : σ = nS → plist nPred Γᵒ → Γⁱ = [] → iProp Σ :=
     match P with
     | ⌜φ⌝%n => λ _ _ _, ⌜φ⌝
     | (P ∧ Q)%n => λ σS Φs eq, nevalS_gen P σS Φs eq ∧ nevalS_gen Q σS Φs eq
@@ -48,20 +48,20 @@ Section neval_gen.
     | (▷ P)%n => λ _ Φs eq, ▷ nev d _ (nsubstsi_an P Φs eq)
     | (P ⊢!{i} Q)%n => λ _ Φs eq,
         ⌜d i (nsubstsi_an P Φs eq, nsubstsi_an P Φs eq)⌝
-    | ((rec:ₛ' Φ) a)%n => λ _ Φs eq, nevalS_gen (Φ a)
-        eq_refl ((λ a, nsubstso_n ((rec:ₛ' Φ)%n a) Φs eq) -:: Φs) eq
-    | ((rec:ₗ' Φ) a)%n => λ σS, match σS with end
+    | ((rec:ˢ' Φ) a)%n => λ _ Φs eq, nevalS_gen (Φ a)
+        eq_refl ((λ a, nsubstso_n ((rec:ˢ' Φ)%n a) Φs eq) -:: Φs) eq
+    | ((rec:ˡ' Φ) a)%n => λ σS, match σS with end
     | (∀: V, P)%n => λ σS Φs eq, ∀ Ψ, nevalS_gen P σS (Ψ -:: Φs) eq
     | (∃: V, P)%n => λ σS Φs eq, ∃ Ψ, nevalS_gen P σS (Ψ -:: Φs) eq
-    | (%ᵢₛ s)%n => λ _ _, match s with
+    | (%ⁱˢ s)%n => λ _ _, match s with
         #0 _ => λ eq, match eq with end | +/ _ => λ eq, match eq with end end
-    | (%ᵢₗ s)%n => λ σS, match σS with end
-    | (%ₒₛ s)%n => λ σS, match σS with end
+    | (%ⁱˡ s)%n => λ σS, match σS with end
+    | (%ᵒˢ s)%n => λ σS, match σS with end
     end%I.
 
   (** ** [neval_gen P Φs] : Evaluate [P] under the environment [Φs] *)
-  Fixpoint neval_gen {σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ))
-    : plist nPred Γₒ → Γᵢ = [] → iProp Σ :=
+  Fixpoint neval_gen {σ Γᵒ Γⁱ} (P : nProp σ (Γᵒ; Γⁱ))
+    : plist nPred Γᵒ → Γⁱ = [] → iProp Σ :=
     match P with
     | ⌜φ⌝%n => λ _ _, ⌜φ⌝
     | (P ∧ Q)%n => λ Φs eq, neval_gen P Φs eq ∧ neval_gen Q Φs eq
@@ -77,17 +77,17 @@ Section neval_gen.
     | (|={E,E'}=> P)%n => λ Φs eq, |={E,E'}=> neval_gen P Φs eq
     | (▷ P)%n => λ Φs eq, ▷ nev d _ (nsubstsi_an P Φs eq)
     | (P ⊢!{i} Q)%n => λ Φs eq, ⌜d i (nsubstsi_an P Φs eq, nsubstsi_an P Φs eq)⌝
-    | ((rec:ₛ' Φ) a)%n => λ Φs eq,
-        neval_gen (Φ a) ((λ a, nsubstso_n ((rec:ₛ' Φ)%n a) Φs eq) -:: Φs) eq
-    | ((rec:ₗ' Φ) a)%n => λ Φs eq,
-        neval_gen (Φ a) ((λ a, nsubstso_n ((rec:ₗ' Φ)%n a) Φs eq) -:: Φs) eq
+    | ((rec:ˢ' Φ) a)%n => λ Φs eq,
+        neval_gen (Φ a) ((λ a, nsubstso_n ((rec:ˢ' Φ)%n a) Φs eq) -:: Φs) eq
+    | ((rec:ˡ' Φ) a)%n => λ Φs eq,
+        neval_gen (Φ a) ((λ a, nsubstso_n ((rec:ˡ' Φ)%n a) Φs eq) -:: Φs) eq
     | (∀: V, P)%n => λ Φs eq, ∀ Ψ, neval_gen P (Ψ -:: Φs) eq
     | (∃: V, P)%n => λ Φs eq, ∃ Ψ, neval_gen P (Ψ -:: Φs) eq
-    | (%ᵢₛ s)%n => λ _, match s with
+    | (%ⁱˢ s)%n => λ _, match s with
         #0 _ => λ eq, match eq with end | +/ _ => λ eq, match eq with end end
-    | (%ᵢₗ s)%n => λ _, match s with
+    | (%ⁱˡ s)%n => λ _, match s with
         #0 _ => λ eq, match eq with end | +/ _ => λ eq, match eq with end end
-    | (%ₒₛ s)%n => λ Φs eq,
+    | (%ᵒˢ s)%n => λ Φs eq,
         nevalS_gen (spapply (λ _, npargS_apply) s Φs) eq_refl -[] eq_refl
     end%I.
 End neval_gen.
@@ -136,13 +136,13 @@ End neval_fp.
 (** The notations [neval] and [neval_env] (as well as [nevalS] and [nevalS_env])
   will be printed in (partial) evaluation, yay! *)
 
-Notation neval_env' Σ d σ Γₒ P Φs :=
-  (@neval_gen Σ _ neval_fp d σ Γₒ [] P Φs eq_refl) (only parsing).
+Notation neval_env' Σ d σ Γᵒ P Φs :=
+  (@neval_gen Σ _ neval_fp d σ Γᵒ [] P Φs eq_refl) (only parsing).
 Notation neval_env d P Φs := (neval_env' _ d _ _ P Φs).
 Notation neval' Σ d σ P := (neval_env' Σ d σ [] P -[]) (only parsing).
 Notation neval d P := (neval' _ d _ P).
-Notation nevalS_env' Σ d Γₒ P Φs :=
-  (@nevalS_gen Σ _ neval_fp d nS Γₒ [] P eq_refl Φs eq_refl) (only parsing).
+Notation nevalS_env' Σ d Γᵒ P Φs :=
+  (@nevalS_gen Σ _ neval_fp d nS Γᵒ [] P eq_refl Φs eq_refl) (only parsing).
 Notation nevalS_env d P Φs := (nevalS_env' _ d _ P Φs).
 Notation nevalS' Σ d P := (nevalS_env' Σ d [] P -[]) (only parsing).
 Notation nevalS d P := (nevalS' _ d P).
@@ -162,9 +162,9 @@ Section neval_facts.
     case=>//= *; try f_equiv=> >; apply (FIX _ (_; _)%nctx).
   Qed.
   (** [nevalS_env] coincides with [neval_env] *)
-  Lemma nevalS_env_neval_env {d Γₒ P Φs} :
-    nevalS_env' Σ d Γₒ P Φs ⊣⊢ neval_env d P Φs.
-  Proof. apply (nevalS_gen_neval_gen (Γ:=(Γₒ; ))). Qed.
+  Lemma nevalS_env_neval_env {d Γᵒ P Φs} :
+    nevalS_env' Σ d Γᵒ P Φs ⊣⊢ neval_env d P Φs.
+  Proof. apply (nevalS_gen_neval_gen (Γ:=(Γᵒ; ))). Qed.
 
   (** Simplify [neval_gen] over [nlarge] *)
   Lemma neval_gen_nlarge {nev d σ Γ} {P : nProp σ Γ} {Φs eq} :
@@ -174,7 +174,7 @@ Section neval_facts.
     case=>//= *; f_equiv=> >; apply (FIX _ (_; _)%nctx).
   Qed.
   (** Simplify [neval_env] over [nlarge] *)
-  Lemma neval_env_nlarge {d σ Γₒ P Φs} :
-    neval_env d (nlarge P) Φs ⊣⊢ neval_env' Σ d σ Γₒ P Φs.
-  Proof. apply (neval_gen_nlarge (Γ:=(Γₒ; ))). Qed.
+  Lemma neval_env_nlarge {d σ Γᵒ P Φs} :
+    neval_env d (nlarge P) Φs ⊣⊢ neval_env' Σ d σ Γᵒ P Φs.
+  Proof. apply (neval_gen_nlarge (Γ:=(Γᵒ; ))). Qed.
 End neval_facts.

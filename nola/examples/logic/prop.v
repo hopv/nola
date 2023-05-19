@@ -10,11 +10,11 @@ From iris.bi Require Import notation.
   and the domain [A : Type] of [n_forall]/[n_exist].
 
   Connectives that operate on the context [Γ : nctx] take decomposed contexts
-  [Γₒ, Γᵢ] for smooth type inference
+  [Γᵒ, Γⁱ] for smooth type inference
 
   In nominal proposition arguments (e.g., [n_deriv]'s arguments), outer
-  variables are flushed into inner, with the context [(; Γₒ ++ Γᵢ)];
-  for connectives with such arguments we make [Γₒ] explicit for the users
+  variables are flushed into inner, with the context [(; Γᵒ ++ Γⁱ)];
+  for connectives with such arguments we make [Γᵒ] explicit for the users
   to aid type inference around [++] *)
 
 Inductive nProp : nsort → nctx → Type :=
@@ -46,28 +46,28 @@ Inductive nProp : nsort → nctx → Type :=
 | n_fupd {σ Γ} : coPset → coPset → nProp σ Γ → nProp σ Γ
 
 (** Later modality *)
-| n_later {σ} Γₒ {Γᵢ} : nProp nL (; Γₒ ++ Γᵢ) → nProp σ (Γₒ; Γᵢ)
+| n_later {σ} Γᵒ {Γⁱ} : nProp nL (; Γᵒ ++ Γⁱ) → nProp σ (Γᵒ; Γⁱ)
 (** Judgment derivability *)
-| n_deriv {σ} Γₒ {Γᵢ} :
-    nat → nProp nL (; Γₒ ++ Γᵢ) → nProp nL (; Γₒ ++ Γᵢ) → nProp σ (Γₒ; Γᵢ)
+| n_deriv {σ} Γᵒ {Γⁱ} :
+    nat → nProp nL (; Γᵒ ++ Γⁱ) → nProp nL (; Γᵒ ++ Γⁱ) → nProp σ (Γᵒ; Γⁱ)
 
 (** Recursive small proposition *)
-| n_recs {σ Γₒ Γᵢ} {A : Type} :
-    (A → nProp nS (A →nPS :: Γₒ; Γᵢ)) → A → nProp σ (Γₒ; Γᵢ)
+| n_recs {σ Γᵒ Γⁱ} {A : Type} :
+    (A → nProp nS (A →nPS :: Γᵒ; Γⁱ)) → A → nProp σ (Γᵒ; Γⁱ)
 (** Recursive large proposition *)
-| n_recl {Γₒ Γᵢ} {A : Type} :
-    (A → nProp nL (A →nPL :: Γₒ; Γᵢ)) → A → nProp nL (Γₒ; Γᵢ)
+| n_recl {Γᵒ Γⁱ} {A : Type} :
+    (A → nProp nL (A →nPL :: Γᵒ; Γⁱ)) → A → nProp nL (Γᵒ; Γⁱ)
 (** Universal quantification over [A → nProp] *)
-| n_n_forall {σ Γₒ Γᵢ} V : nProp σ (V :: Γₒ; Γᵢ) → nProp σ (Γₒ; Γᵢ)
+| n_n_forall {σ Γᵒ Γⁱ} V : nProp σ (V :: Γᵒ; Γⁱ) → nProp σ (Γᵒ; Γⁱ)
 (** Existential quantification over [A → nProp] *)
-| n_n_exist {σ Γₒ Γᵢ} V : nProp σ (V :: Γₒ; Γᵢ) → nProp σ (Γₒ; Γᵢ)
+| n_n_exist {σ Γᵒ Γⁱ} V : nProp σ (V :: Γᵒ; Γⁱ) → nProp σ (Γᵒ; Γⁱ)
 
 (** Inner small variable *)
-| n_varis {σ Γₒ Γᵢ} : schoice npargS Γᵢ → nProp σ (Γₒ; Γᵢ)
+| n_varis {σ Γᵒ Γⁱ} : schoice npargS Γⁱ → nProp σ (Γᵒ; Γⁱ)
 (** Inner large variable, [nPropL] only *)
-| n_varil {Γₒ Γᵢ} : schoice npargL Γᵢ → nProp nL (Γₒ; Γᵢ)
+| n_varil {Γᵒ Γⁱ} : schoice npargL Γⁱ → nProp nL (Γᵒ; Γⁱ)
 (** Outer small variable, [nPropL] only *)
-| n_varos {Γₒ Γᵢ} : schoice npargS Γₒ → nProp nL (Γₒ; Γᵢ).
+| n_varos {Γᵒ Γⁱ} : schoice npargS Γᵒ → nProp nL (Γᵒ; Γⁱ).
 
 Notation nPropS := (nProp nS).
 Notation nPropL := (nProp nL).
@@ -104,27 +104,27 @@ Notation "■ P" := (n_plainly P) : nProp_scope.
 Notation "|==> P" := (n_bupd P) : nProp_scope.
 Notation "|={ E , E' }=> P" := (n_fupd E E' P) : nProp_scope.
 
-Notation "▷{ Γₒ } P" := (n_later Γₒ P)
+Notation "▷{ Γᵒ } P" := (n_later Γᵒ P)
   (at level 20, right associativity, only parsing) : nProp_scope.
 Notation "▷ P" := (n_later _ P) : nProp_scope.
-Definition n_except_0 {σ Γₒ Γᵢ} (P : nProp σ (Γₒ; Γᵢ)) : nProp σ (Γₒ; Γᵢ)
+Definition n_except_0 {σ Γᵒ Γⁱ} (P : nProp σ (Γᵒ; Γⁱ)) : nProp σ (Γᵒ; Γⁱ)
   := ▷ False ∨ P.
 Notation "◇ P" := (n_except_0 P) : nProp_scope.
-Notation "P ⊢!{ i }{ Γₒ } Q" := (n_deriv Γₒ i P Q)
+Notation "P ⊢!{ i }{ Γᵒ } Q" := (n_deriv Γᵒ i P Q)
   (at level 99, Q at level 200, only parsing) : nProp_scope.
 Notation "P ⊢!{ i } Q" := (n_deriv _ i P Q)
   (at level 99, Q at level 200, format "P  ⊢!{ i }  Q") : nProp_scope.
 
-Notation "rec:ₛ' Φ" := (n_recs Φ)
+Notation "rec:ˢ' Φ" := (n_recs Φ)
   (at level 200, right associativity, only parsing) : nProp_scope.
-Notation "rec:ₛ x , P" := (n_recs (λ x, P))
+Notation "rec:ˢ x , P" := (n_recs (λ x, P))
   (at level 200, right associativity,
-    format "'[' '[' rec:ₛ  x ,  '/' P ']' ']'") : nProp_scope.
-Notation "rec:ₗ' Φ" := (n_recl Φ)
+    format "'[' '[' rec:ˢ  x ,  '/' P ']' ']'") : nProp_scope.
+Notation "rec:ˡ' Φ" := (n_recl Φ)
   (at level 200, right associativity, only parsing) : nProp_scope.
-Notation "rec:ₗ x , P" := (n_recl (λ x, P))
+Notation "rec:ˡ x , P" := (n_recl (λ x, P))
   (at level 200, right associativity,
-    format "'[' '[' rec:ₗ  x ,  '/' P ']' ']'") : nProp_scope.
+    format "'[' '[' rec:ˡ  x ,  '/' P ']' ']'") : nProp_scope.
 Notation "∀: V , P" := (n_n_forall V P)
   (at level 200, right associativity,
     format "'[' '[' ∀:  V ']' ,  '/' P ']'") : nProp_scope.
@@ -132,11 +132,11 @@ Notation "∃: V , P" := (n_n_exist V P)
   (at level 200, right associativity,
     format "'[' '[' ∃:  V ']' ,  '/' P ']'") : nProp_scope.
 
-Notation "%ᵢₛ s" := (n_varis s) (at level 20, right associativity)
+Notation "%ⁱˢ s" := (n_varis s) (at level 20, right associativity)
   : nProp_scope.
-Notation "%ᵢₗ s" := (n_varil s) (at level 20, right associativity)
+Notation "%ⁱˡ s" := (n_varil s) (at level 20, right associativity)
   : nProp_scope.
-Notation "%ₒₛ s" := (n_varos s) (at level 20, right associativity)
+Notation "%ᵒˢ s" := (n_varos s) (at level 20, right associativity)
   : nProp_scope.
 
 (** ** [nlarge]: Turn [nProp σ Γ] into [nPropL Γ]
@@ -158,13 +158,13 @@ Fixpoint nlarge {σ Γ} (P : nProp σ Γ) : nPropL Γ :=
   | |={E,E'}=> P => |={E,E'}=> nlarge P
   | ▷ P => ▷ P
   | P ⊢!{i} Q => P ⊢!{i} Q
-  | (rec:ₛ' Φ) a => (rec:ₛ' Φ) a
-  | (rec:ₗ' Φ) a => (rec:ₗ' Φ) a
+  | (rec:ˢ' Φ) a => (rec:ˢ' Φ) a
+  | (rec:ˡ' Φ) a => (rec:ˡ' Φ) a
   | ∀: V, P => ∀: V, nlarge P
   | ∃: V, P => ∃: V, nlarge P
-  | %ᵢₛ s => %ᵢₛ s
-  | %ᵢₗ s => %ᵢₗ s
-  | %ₒₛ s => %ₒₛ s
+  | %ⁱˢ s => %ⁱˢ s
+  | %ⁱˡ s => %ⁱˡ s
+  | %ᵒˢ s => %ᵒˢ s
   end%n.
 
 (** [nunsmall]: Turn [nPropS Γ] into [nProp σ Γ] *)
