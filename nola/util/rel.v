@@ -1,6 +1,19 @@
 (** * Utility for binary relations *)
 
 From nola Require Export prelude.
+Require Import Coq.Logic.Eqdep_dec.
+
+(** ** Equality **)
+
+(** Equality is proof-irrelevant if it is decidable *)
+#[export] Instance eq_dec_proof_irrel `{!EqDecision A} (a b : A) :
+  ProofIrrel (a = b).
+Proof.
+  move=> e e'. apply eq_proofs_unicity. clear a b e e'=> a b.
+  case (decide (a = b)); by [left|right].
+Qed.
+Lemma eq_dec_refl `{!EqDecision A} {a : A} (eq : a = a) : eq = eq_refl.
+Proof. apply proof_irrel. Qed.
 
 (** ** Transitive closure *)
 
