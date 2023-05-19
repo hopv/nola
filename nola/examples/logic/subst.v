@@ -1,8 +1,22 @@
 (** * Substitution for [nProp] *)
 
 From nola.examples.logic Require Export prop.
-From nola Require Import util.funext.
+From nola Require Import util.funext util.hgt.
 Import EqNotations.
+
+(** ** [nheight P]: Height of [P] *)
+
+Fixpoint nheight {σ Γ} (P : nProp σ Γ) : hgt :=
+  match P with
+  | ⌜_⌝ => hgt_0
+  | □ P | ■ P | |==> P | |={_,_}=> P => hgt_1 (nheight P)
+  | P ∧ Q | P ∨ Q | P → Q | P ∗ Q | P -∗ Q => hgt_2 (nheight P) (nheight Q)
+  | ∀' Φ | ∃' Φ => hgt_all (nheight ∘ Φ)
+  | ▷ _ | _ ⊢!{_} _ => hgt_0
+  | (rec:ˢ' Φ) a | (rec:ˡ' Φ) a => hgt_1 (nheight (Φ a))
+  | ∀: _, P | ∃: _, P => hgt_1 (nheight P)
+  | %ⁱˢ _ | %ⁱˡ _ | %ᵒˢ _ | !ᵒˢ _ => hgt_0
+  end%n.
 
 (** [nProp_rewi P eq]/[nProp_rewo P eq]: Rewrite the inner/outer context of
   [P : nProp (; Γⁱ)] using [eq] *)
@@ -197,6 +211,18 @@ Fixpoint nsubstlo {σ Γᵒ Γⁱ i} (P : nProp σ (Γᵒ; Γⁱ))
       inl s => %ᵒˢ s | inr s => !ᵒˢ (spapply (λ _, nparg_apply) s Φs) end
   | !ᵒˢ P => λ _ _, !ᵒˢ P
   end%n.
+
+(** [nsubstlo] preserves [nheight] *)
+Lemma nsubstlo_nheight {σ Γ i} {P : nProp σ Γ} {Φs eq} :
+  nheight (nsubstlo (i:=i) P Φs eq) = nheight P.
+Proof.
+  move: σ Γ i P Φs eq. fix FIX 4=> ???.
+  case=>//=; try (move=>/= *; f_equal; (apply FIX ||
+    (funext=>/= ?; apply FIX) || apply (FIX _ (_::_;_)%nctx (S _)))).
+  - (* %ⁱˢ s *) by move=> ???[].
+  - (* %ⁱˡ s *) by move=> ??[].
+  - (* %ᵒˢ s *) move=> ?? s. by case (stakedrop _ s).
+Qed.
 
 (** [nsubsto P Φ]: Substitute [Φ] for the last outer variable of [P] *)
 Definition nsubsto {σ Γᵒ V} (P : nProp σ (Γᵒ ++ [V]; )) (Φ : nPred V)
