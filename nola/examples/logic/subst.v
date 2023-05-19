@@ -196,10 +196,10 @@ Lemma nsubstlo_nheight {σ Γ i} {P : nProp σ Γ} {Φs eq} :
 Proof.
   move: σ Γ i P Φs eq. fix FIX 4=> ???.
   case=>//=; intros; try (f_equal; (apply FIX ||
-    (funext=>/= ?; apply FIX) || apply (FIX _ (_ :: _; _)%nctx (S _))));
+    (funext=>/= ?; apply FIX) || apply (FIX _ (_::_;_)%nctx (S _))));
     try (by move: eq; case s); try (by case (stakedrop _ s)).
 Qed.
 
 (** [nsubst] preserves [nheight] *)
 Lemma nsubst_nheight {σ V P Φ} : nheight (nsubst (σ:=σ) (V:=V) P Φ) = nheight P.
-Proof. exact (nsubstlo_nheight (Γ:=(_;)%nctx) (i:=0)). Qed.
+Proof. exact (nsubstlo_nheight (Γ:=([_];)) (i:=0)). Qed.
