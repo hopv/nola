@@ -6,7 +6,7 @@ all: Makefile.coq
 # Clean up Coq-generated files and Makefile.coq
 clean:
 	@$(MAKE) -f Makefile.coq cleanall
-	rm -f Makefile.coq Makefile.coq.conf
+	rm -f Makefile.coq Makefile.coq.conf .Makefile.coq.d
 .PHONY: clean
 
 # Install Coq code
