@@ -33,8 +33,8 @@ Fixpoint hwf {h} : hAcc h := HAcc (λ _ _ eq, rew eq_sym eq in hwf).
 (** Under functional extensionality *)
 From nola Require Import util.funext.
 
-(** [hAcc] is proof-irrelevant *)
-Lemma hAcc_irrel {h} (H H' : hAcc h) : H = H'.
+(** The only value of [hAcc h] is [hwf] *)
+Lemma eq_hwf {h} (H : hAcc h) : H = hwf.
 Proof.
-  move: h H H'. fix FIX 1=> ?[?][?]. f_equal. do 3 funext=> ?. by subst.
+  move: h H. fix FIX 1=> [[??]][?]/=. f_equal. do 3 funext=>/= ?. by subst.
 Qed.
