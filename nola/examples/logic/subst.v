@@ -41,6 +41,15 @@ Fixpoint nlifti {Δ σ Γᵒ Γⁱ} (P : nProp σ (Γᵒ; Γⁱ)) : nProp σ (Γ
   | !ᵒˢ P => !ᵒˢ P
   end%n.
 
+(** [nlifti] commutes with [nlarge] *)
+Lemma nlifti_nlarge {σ Γ Δ} {P : nProp σ Γ} :
+  nlifti (Δ:=Δ) (nlarge P) = nlarge (nlifti P).
+Proof.
+  move: σ Γ P. fix FIX 3=> σ Γ.
+  case=>//= *; f_equal; try apply FIX; try (funext=> ?; apply FIX);
+  apply (FIX _ (_ :: _; _)%nctx).
+Qed.
+
 (** [nliftoi]: Add outer and inner variables at the bottom *)
 Definition nliftoi_rew {σ Γᵒ Γⁱ Δᵒ Δⁱ} : Γⁱ = [] →
   nProp σ (; (Γᵒ ++ Γⁱ) ++ Δᵒ ++ Δⁱ) → nProp σ (; (Γᵒ ++ Δᵒ) ++ Δⁱ) :=
@@ -76,8 +85,22 @@ Fixpoint nliftoi {Δᵒ Δⁱ σ Γᵒ Γⁱ} (P : nProp σ (Γᵒ; Γⁱ))
   | !ᵒˢ P => λ _, !ᵒˢ P
   end%n.
 
+(** [nliftoi] commutes with [nlarge] *)
+Lemma nliftoi_nlarge {σ Γ Δᵒ Δⁱ} {P : nProp σ Γ} {eq} :
+  nliftoi (Δᵒ:=Δᵒ) (Δⁱ:=Δⁱ) (nlarge P) eq = nlarge (nliftoi P eq).
+Proof.
+  move: σ Γ P eq. fix FIX 3=> σ Γ.
+  case=>//=; intros; f_equal; try apply FIX; try (funext=> ?; apply FIX);
+  try apply (FIX _ (_ :: _; _)%nctx); by case: s eq.
+Qed.
+
 (** [nlift]: Turn [nProp σ (;)] into [nProp σ Γ] *)
 Definition nlift {σ Γ} (P : nProp σ (;)) : nProp σ Γ := nliftoi P eq_refl.
+
+(** [nlift] commutes with [nlarge] *)
+Lemma nlift_nlarge {σ Γ} {P : nProp σ (;)} :
+  nlift (Γ:=Γ) (nlarge P) = nlarge (nlift P).
+Proof. apply (nliftoi_nlarge (Γ:=(;))). Qed.
 
 (** ** [nsubst P Φ]: Substitute [Φ] for the only outer variable of [P] *)
 
@@ -133,6 +156,18 @@ Fixpoint nsubstli {σ Γᵒ Γⁱ i} (P : nProp σ (Γᵒ; Γⁱ))
   | !ᵒˢ P => λ _, !ᵒˢ P
   end%n.
 
+(** [nsubstli] commutes with [nlarge] *)
+Lemma nsubstli_nlarge {σ Γ i} {P : nProp σ Γ} {Φs} :
+  nsubstli (i:=i) (nlarge P) Φs = nlarge (nsubstli P Φs).
+Proof.
+  move: σ Γ i P Φs. fix FIX 4=> σ Γ i.
+  case=>//=; intros; try (f_equal;
+    apply (FIX _ (_;_)%nctx) || (funext=>/= ?; apply FIX));
+  case (stakedrop i s)=>//= ?; rewrite -nlift_nlarge; f_equal;
+  rewrite (spapply_in nlarge); f_equal; do 3 funext=> ?; symmetry;
+  [apply nlarge_nunsmall|apply nlarge_id].
+Qed.
+
 (** [nsubstlo i P Φs]: Substitute [Φs] for all but the first [i] outer variables
   of [P] *)
 Definition nsubstlo_rew {σ Γᵒ Γⁱ i}
@@ -172,9 +207,26 @@ Fixpoint nsubstlo {σ Γᵒ Γⁱ i} (P : nProp σ (Γᵒ; Γⁱ))
   | !ᵒˢ P => λ _ _, !ᵒˢ P
   end%n.
 
+(** [nsubstlo] commutes with [nlarge] *)
+Lemma nsubstlo_nlarge {σ Γ i} {P : nProp σ Γ} {Φs eq} :
+  nsubstlo (i:=i) (nlarge P) Φs eq = nlarge (nsubstlo P Φs eq).
+Proof.
+  move: σ Γ i P Φs eq. fix FIX 4=> σ Γ i.
+  case=>//=; intros; f_equal; try apply FIX; try (funext=>/= ?; apply FIX);
+  try apply (FIX _ (_ :: _; _)%nctx (S _)); try (by case: s eq);
+  by case (stakedrop i s).
+Qed.
+
 (** [nsubst P Φ]: Substitute [Φ] for the only outer variable of [P] *)
 Definition nsubst {σ V} (P : nProp σ ([V]; )) (Φ : nPred V) : nProp σ (;) :=
   nsubstlo (i:=0) P -[Φ] eq_refl.
+
+(** [nsubst] commutes with [nlarge] *)
+Lemma nsubst_nlarge {σ V} {P : nProp σ ([V]; )} {Φ} :
+  nsubst (nlarge P) Φ = nlarge (nsubst P Φ).
+Proof. apply (nsubstlo_nlarge (Γ:=([_];)) (i:=0)). Qed.
+
+(** [nsubst] commutes with [nsubstlo] *)
 
 (** ** [nheight P]: Height of [P] *)
 

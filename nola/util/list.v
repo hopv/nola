@@ -123,3 +123,8 @@ Fixpoint spapply {A F G B} {xs : list A}
   | #0 u, v -:: _ => f _ u v
   | +/ s, _ -:: vs => spapply f s vs
   end.
+
+(** Let a function go inside [spapply] *)
+Lemma spapply_in {A F G B C xs} {f : ∀ x, F x → G x → B} (g : B → C) {s vs} :
+  g (spapply (A:=A) (xs:=xs) f s vs) = spapply (λ x u v, g (f x u v)) s vs.
+Proof. move: xs s vs. by fix FIX 2=> ?[?|?]/=. Qed.

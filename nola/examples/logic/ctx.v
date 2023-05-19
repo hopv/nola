@@ -6,6 +6,10 @@ From nola.util Require Export list.
 
 Variant nsort : Set := (* small *) nS | (* large *) nL.
 
+(** Equality on [nsort] is decidable *)
+#[export] Instance nsort_eq_dec : EqDecision nsort.
+Proof. case; case; try (by left); by right. Defined.
+
 (** ** [npvar]: Predicate variable *)
 
 #[projections(primitive)]

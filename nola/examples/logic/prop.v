@@ -1,8 +1,10 @@
 (** * [nProp]: Syntactic proposition *)
 
 From nola.examples.logic Require Export ctx.
+From nola Require Export util.funext util.rel.
 From stdpp Require Export coPset.
 From iris.bi Require Import notation.
+Import EqNotations.
 
 (** ** [nProp]: Nola syntactic proposition
 
@@ -175,3 +177,19 @@ Fixpoint nlarge {σ Γ} (P : nProp σ Γ) : nPropL Γ :=
 (** [nunsmall]: Turn [nPropS Γ] into [nProp σ Γ] *)
 Definition nunsmall {σ Γ} (P : nPropS Γ) : nProp σ Γ :=
   match σ with nS => P | nL => nlarge P end.
+
+(** [nlarge] is identity for [nPropL] *)
+Lemma nlarge_id' {σ Γ} {P : nProp σ Γ} (eq : σ = nL) :
+  nlarge P = rew[λ σ, nProp σ Γ] eq in P.
+Proof.
+  move: σ Γ P eq. fix FIX 3=> σ Γ.
+  case=>/=; intros; subst=>//=; f_equal; try exact (FIX _ _ _ eq_refl);
+  try (funext=> ?; exact (FIX _ _ _ eq_refl)); by rewrite (eq_dec_refl eq).
+Qed.
+Lemma nlarge_id {Γ} {P : nPropL Γ} : nlarge P = P.
+Proof. exact (nlarge_id' eq_refl). Qed.
+
+(** [nlarge] over [nunsmall] *)
+Lemma nlarge_nunsmall {Γ σ} {P : nPropS Γ} :
+  nlarge (σ:=σ) (nunsmall P) = nlarge P.
+Proof. case σ=>//=. exact nlarge_id. Qed.

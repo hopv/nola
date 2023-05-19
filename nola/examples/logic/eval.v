@@ -199,4 +199,20 @@ Section neval_facts.
   (** [nevalSx] coincides with [neval] *)
   Lemma nevalSx_neval {d P H} : nevalSx' Σ d P H ⊣⊢ neval d P.
   Proof. rewrite (eq_hwf H). exact nevalS_neval. Qed.
+
+  (** Simplify [neval_gen] over [nlarge] *)
+  Lemma neval_gen_nlarge {nev d σ Γ} {P : nProp σ Γ} {H no ni} :
+    neval_gen (Σ:=Σ) nev d (nlarge P) H no ni ⊣⊢ neval_gen nev d P hwf no ni.
+  Proof.
+    move: σ Γ P H no ni. fix FIX 4=> σ Γ P H.
+    case: P H=>/=; intros; case H=>/= he; f_equiv=> >; try apply FIX;
+    try apply leibniz_equiv, eq_hacc;
+    rewrite (eq_hwf (rew _ in _)); move: nsubst'_nheight=>/=;
+    subst; have EQ := (nsubst_nlarge (P:=n)); move: (nsubst (nlarge n)) EQ;
+    move=> ?->?; apply FIX.
+  Qed.
+
+  (** Simplify [neval] over [nlarge] *)
+  Lemma neval_nlarge {d σ P} : neval d (nlarge P) ⊣⊢ neval' Σ d σ P.
+  Proof. exact neval_gen_nlarge. Qed.
 End neval_facts.

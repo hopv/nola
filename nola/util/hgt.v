@@ -41,3 +41,5 @@ Lemma eq_hwf {h} (H : hAcc h) : H = hwf.
 Proof.
   move: h H. fix FIX 1=> [[??]][?]/=. f_equal. do 3 funext=>/= ?. by subst.
 Qed.
+Lemma eq_hacc {h} (H H' : hAcc h) : H = H'.
+Proof. by rewrite (eq_hwf H) (eq_hwf H'). Qed.
