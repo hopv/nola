@@ -1,6 +1,7 @@
 (** * Substitution for [nProp] *)
 
 From nola.examples.logic Require Export prop.
+From nola Require Import util.funext.
 Import EqNotations.
 
 (** [nProp_rewi P eq]/[nProp_rewo P eq]: Rewrite the inner/outer context of
@@ -39,6 +40,7 @@ Fixpoint nlifti {Δ σ Γᵒ Γⁱ} (P : nProp σ (Γᵒ; Γⁱ)) : nProp σ (Γ
   | %ⁱˢ s => %ⁱˢ sbylapp s _
   | %ⁱˡ s => %ⁱˡ sbylapp s _
   | %ᵒˢ s => %ᵒˢ s
+  | !ᵒˢ P => !ᵒˢ P
   end%n.
 
 (** [nliftoi]: Add outer and inner variables at the bottom *)
@@ -76,6 +78,7 @@ Fixpoint nliftoi {Δᵒ Δⁱ σ Γᵒ Γⁱ} (P : nProp σ (Γᵒ; Γⁱ))
   | %ⁱˡ s => match s with
       #0 _ => λ eq, match eq with end | +/ _ => λ eq, match eq with end end
   | %ᵒˢ s => λ _, %ᵒˢ sbylapp s _
+  | !ᵒˢ P => λ _, !ᵒˢ P
   end%n.
 
 (** [nlift]: Turn [nProp σ (;)] into [nProp σ Γ] *)
@@ -133,6 +136,7 @@ Fixpoint nsubstli {σ Γᵒ Γⁱ i} (P : nProp σ (Γᵒ; Γⁱ))
   | %ⁱˡ s => λ Φs, match stakedrop _ s with
       inl s => %ⁱˡ s | inr s => nlift (spapply (λ _, nparg_apply) s Φs) end
   | %ᵒˢ s => λ _, %ᵒˢ s
+  | !ᵒˢ P => λ _, !ᵒˢ P
   end%n.
 
 (** [nsubsti P Φ]: Substitute [Φ] for the last inner variable of [P] *)
@@ -190,7 +194,8 @@ Fixpoint nsubstlo {σ Γᵒ Γⁱ i} (P : nProp σ (Γᵒ; Γⁱ))
   | %ⁱˡ s => match s with
       #0 _ => λ _ eq, match eq with end | +/ _ => λ _ eq, match eq with end end
   | %ᵒˢ s => λ Φs _, match stakedrop _ s with
-      inl s => %ᵒˢ s | inr s => nlift (spapply (λ _, npargS_apply) s Φs) end
+      inl s => %ᵒˢ s | inr s => !ᵒˢ (spapply (λ _, nparg_apply) s Φs) end
+  | !ᵒˢ P => λ _ _, !ᵒˢ P
   end%n.
 
 (** [nsubsto P Φ]: Substitute [Φ] for the last outer variable of [P] *)

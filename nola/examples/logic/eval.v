@@ -57,6 +57,7 @@ Section neval_gen.
         #0 _ => λ eq, match eq with end | +/ _ => λ eq, match eq with end end
     | (%ⁱˡ s)%n => λ σS, match σS with end
     | (%ᵒˢ s)%n => λ σS, match σS with end
+    | (!ᵒˢ P)%n => λ σS, match σS with end
     end%I.
 
   (** ** [neval_gen P Φs] : Evaluate [P] under the environment [Φs] *)
@@ -89,6 +90,7 @@ Section neval_gen.
         #0 _ => λ eq, match eq with end | +/ _ => λ eq, match eq with end end
     | (%ᵒˢ s)%n => λ Φs eq,
         nevalS_gen (spapply (λ _, npargS_apply) s Φs) eq_refl -[] eq_refl
+    | (!ᵒˢ P)%n => λ _  _, nevalS_gen P eq_refl -[] eq_refl
     end%I.
 End neval_gen.
 

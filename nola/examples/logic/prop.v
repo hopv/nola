@@ -67,7 +67,9 @@ Inductive nProp : nsort → nctx → Type :=
 (** Inner large variable, [nPropL] only *)
 | n_varil {Γᵒ Γⁱ} : schoice npargL Γⁱ → nProp nL (Γᵒ; Γⁱ)
 (** Outer small variable, [nPropL] only *)
-| n_varos {Γᵒ Γⁱ} : schoice npargS Γᵒ → nProp nL (Γᵒ; Γⁱ).
+| n_varos {Γᵒ Γⁱ} : schoice npargS Γᵒ → nProp nL (Γᵒ; Γⁱ)
+(** Substituted [n_varos] *)
+| n_subos {Γᵒ Γⁱ} : nProp nS (;) → nProp nL (Γᵒ; Γⁱ).
 
 Notation nPropS := (nProp nS).
 Notation nPropL := (nProp nL).
@@ -138,6 +140,8 @@ Notation "%ⁱˡ s" := (n_varil s) (at level 20, right associativity)
   : nProp_scope.
 Notation "%ᵒˢ s" := (n_varos s) (at level 20, right associativity)
   : nProp_scope.
+Notation "!ᵒˢ P" := (n_subos P) (at level 20, right associativity)
+  : nProp_scope.
 
 (** ** [nlarge]: Turn [nProp σ Γ] into [nPropL Γ]
   Although the main interest is the case [σ = nS],
@@ -165,6 +169,7 @@ Fixpoint nlarge {σ Γ} (P : nProp σ Γ) : nPropL Γ :=
   | %ⁱˢ s => %ⁱˢ s
   | %ⁱˡ s => %ⁱˡ s
   | %ᵒˢ s => %ᵒˢ s
+  | !ᵒˢ P => !ᵒˢ P
   end%n.
 
 (** [nunsmall]: Turn [nPropS Γ] into [nProp σ Γ] *)
