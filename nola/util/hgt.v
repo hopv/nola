@@ -1,4 +1,4 @@
-(** *  General height of a tree *)
+(** * [hgt]: General height of a tree *)
 
 From nola Require Export prelude.
 Import EqNotations.
