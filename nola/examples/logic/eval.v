@@ -190,7 +190,10 @@ Section neval_facts.
     move: σ Γ P H σS eq. fix FIX 4=> σ Γ P H.
     case: P H; intros; case H=>//= ?; try f_equiv=> >; apply FIX.
   Qed.
+  (** [nevalS] coincides with [neval] *)
+  Lemma nevalS_neval {d P} : nevalS' Σ d P ⊣⊢ neval d P.
+  Proof. exact nevalS_gen_neval_gen. Qed.
   (** [nevalSx] coincides with [neval] *)
   Lemma nevalSx_neval {d P H} : nevalSx' Σ d P H ⊣⊢ neval d P.
-  Proof. rewrite (eq_hwf H). apply nevalS_gen_neval_gen. Qed.
+  Proof. rewrite (eq_hwf H). exact nevalS_neval. Qed.
 End neval_facts.
