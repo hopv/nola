@@ -18,13 +18,16 @@ Definition hgt_2 (h h' : hgt) : hgt :=
 
 (** [hAcc]: Accessibility on [hgt] *)
 Inductive hAcc (h : hgt) : Prop := HAcc {
-  hateq :> ∀ h' a, h' = h a → hAcc h'
+  hateq : ∀ h' a, h' = h a → hAcc h'
 }.
-Arguments HAcc {_} _.
+Arguments HAcc {h} _.
+Arguments hateq {h} H {h'} a : rename.
 Add Printing Constructor hAcc.
 
-(** Destruct [hAcc] in a simple way *)
-Notation hat H a := (H _ a eq_refl).
+(** Destruct [hAcc] *)
+Notation "H ‼ʰ[ eq ] a" := (H.(hateq) a eq) (at level 20, no associativity)
+  : nola_scope.
+Notation hat H a := (H ‼ʰ[ eq_refl ] a).
 Infix "‼ʰ" := hat (at level 20, no associativity) : nola_scope.
 
 (** [hwf]: [hAcc h] for all [h : hgt] *)
