@@ -11,7 +11,7 @@ Implicit Type (d : nderiv_ty) (δ : npderiv_ty) (i j : nat).
 (** [nJudg]: Judgment *)
 Definition nJudgTy i : Type := nPropL (;) * nPropL (;).
 Canonical nJudg Σ `{!nevalG Σ} := Judg nat nJudgTy
-  (λ d _ '(P, Q), neval' Σ d _ P ⊢ neval d Q).
+  (λ d _ '(P, Q), neval' _ d nL P ⊢ neval d Q).
 
 (** *[nderivy], [ninderivy], [nderiv]: Derivability *)
 Class nderivy Σ `{!nevalG Σ} δ := Nderivy {
