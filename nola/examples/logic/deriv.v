@@ -9,7 +9,7 @@ Implicit Type (d : nderiv_ty) (δ : npderiv_ty) (i j : nat).
 (** ** Basic notions *)
 
 (** [nJudg]: Judgment *)
-Definition nJudgTy i : Type := nPropL (;) * nPropL (;).
+Definition nJudgTy i : Type := nPropL (;ᵞ) * nPropL (;ᵞ).
 Canonical nJudg Σ `{!nevalG Σ} := Judg nat nJudgTy
   (λ d _ '(P, Q), neval' _ d nL P ⊢ neval d Q).
 

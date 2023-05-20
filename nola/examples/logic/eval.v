@@ -5,7 +5,7 @@ From iris.base_logic.lib Require Import iprop fancy_updates.
 Import EqNotations.
 
 (** Type of a derivability predicate *)
-Notation nderiv_ty := (nat → nPropL (;) * nPropL (;) → Prop).
+Notation nderiv_ty := (nat → nPropL (;ᵞ) * nPropL (;ᵞ) → Prop).
 Notation npderiv_ty := (nderiv_ty → nderiv_ty).
 
 (** Nola resources *)
@@ -14,37 +14,26 @@ Class nevalG (Σ : gFunctors) := NevalG {
 }.
 
 (** Modification of [nsubst] *)
-Definition nsubst' {σ Γᵘ Γᵍ V} (P : nProp σ (V :: Γᵘ; Γᵍ))
-  (un : Γᵘ = []) (gn : Γᵍ = []) : nPred V → nProp σ (;) :=
-  nsubst
-    (nProp_rewg (rew[λ Γᵘ, nProp _ (_ :: Γᵘ; _)] un in P) gn).
-  Arguments nsubst' {_ _ _ _} _ _ _ /.
+Definition nsubst' {σ Γᵘ Γᵍ V} (P : nProp σ (V :: Γᵘ;ᵞ Γᵍ))
+  (un : Γᵘ = []) (gn : Γᵍ = []) : nPred V → nProp σ (;ᵞ) :=
+  nsubst (rew ctxeq_ug (f_equal (_ ::.) un) gn in P).
+Arguments nsubst' {_ _ _ _} _ _ _ /.
 
 (** [nsubst'] preserves [nheight] *)
-Lemma nsubst'_nheight {σ Γᵘ Γᵍ V} {P : nProp σ (V :: Γᵘ; Γᵍ)} {un gn Φ} :
+Lemma nsubst'_nheight {σ Γᵘ Γᵍ V} {P : nProp σ (V :: Γᵘ;ᵞ Γᵍ)} {un gn Φ} :
   nheight (nsubst' P un gn Φ) = nheight P.
 Proof. subst. apply nsubst_nheight. Qed.
-
-Definition nProp_rewgna {σ Γᵘ Γᵍ} (P : nProp σ (; Γᵘ ++ Γᵍ))
-  (un : Γᵘ = []) (gn : Γᵍ = []) : nProp σ (;) :=
-  nProp_rewg P (eq_trans (f_equal (.++ Γᵍ) un) gn).
-Arguments nProp_rewgna {_ _ _} _ _ _ /.
-
-Definition nPred_rewoin {A σ Γᵘ Γᵍ} (Φ : A → nProp σ (Γᵘ; Γᵍ))
-  (un : Γᵘ = []) (gn : Γᵍ = []) : A → nProp σ (;) :=
-  rew[λ _, _] gn in rew[λ Γᵘ, A → nProp σ (Γᵘ; _)] un in Φ.
-Arguments nPred_rewoin {_ _ _ _} _ _ _ /.
 
 Section neval_gen.
   Context
     (** Iris resources *) `{!nevalG Σ}
     (** Evaluation used contractively *)
-    (nev : nderiv_ty → ∀ σ, nProp σ (;) → iProp Σ)
+    (nev : nderiv_ty → ∀ σ, nProp σ (;ᵞ) → iProp Σ)
     (** Derivability predicate *) (d : nderiv_ty).
 
   (** ** [nevalS_gen P] : Evaluate small [P] *)
   Fixpoint nevalS_gen {σ Γ} (P : nProp σ Γ) (H : hAcc (nheight P))
-    : σ = nS → Γ.(nctx_o) = [] → Γ.(nctx_i) = [] → iProp Σ :=
+    : σ = nS → Γ.ᵞu = [] → Γ.ᵞg = [] → iProp Σ :=
     match P, H with
     | ⌜φ⌝%n, _ => λ _ _ _, ⌜φ⌝
     | (P ∧ Q)%n, _ => λ σS un gn,
@@ -64,11 +53,11 @@ Section neval_gen.
     | (|==> P)%n, _ => λ σS un gn, |==> nevalS_gen P (H ‼ʰ ()) σS un gn
     | (|={E,E'}=> P)%n, _ => λ σS un gn,
         |={E,E'}=> nevalS_gen P (H ‼ʰ ()) σS un gn
-    | (▷ P)%n, _ => λ _ un gn, ▷ nev d _ (nProp_rewgna P un gn)
+    | (▷ P)%n, _ => λ _ un gn, ▷ nev d _ (rew app_eq_nil_ug_g un gn in P)
     | (P ⊢{i} Q)%n, _ => λ _ un gn,
-        ⌜d i (nProp_rewgna P un gn, nProp_rewgna P un gn)⌝
+        ⌜d i ((rew app_eq_nil_ug_g un gn in P), rew app_eq_nil_ug_g un gn in Q)⌝
     | ((rec:ˢ' Φ) a)%n, _ => λ _ un gn, nevalS_gen
-        (nsubst' (Φ a) un gn (nPred_rewoin (rec:ˢ' Φ)%n un gn))
+        (nsubst' (Φ a) un gn (rew[λ _,_] ctxeq_ug un gn in rec:ˢ' Φ)%n)
         (H ‼ʰ[nsubst'_nheight] ()) eq_refl eq_refl eq_refl
     | ((rec:ˡ' Φ) a)%n, _ => λ σS, match σS with end
     | (∀: V, P)%n, _ => λ σS un gn, ∀ Φ, nevalS_gen
@@ -83,7 +72,7 @@ Section neval_gen.
 
   (** ** [neval_gen P] : Evaluate [P] *)
   Fixpoint neval_gen {σ Γ} (P : nProp σ Γ) (H : hAcc (nheight P))
-    : Γ.(nctx_o) = [] → Γ.(nctx_i) = [] → iProp Σ :=
+    : Γ.ᵞu = [] → Γ.ᵞg = [] → iProp Σ :=
     match P, H with
     | ⌜φ⌝%n, _ => λ _ _, ⌜φ⌝
     | (P ∧ Q)%n, _ => λ un gn,
@@ -102,14 +91,14 @@ Section neval_gen.
     | (■ P)%n, _ => λ un gn, ■ neval_gen P (H ‼ʰ ()) un gn
     | (|==> P)%n, _ => λ un gn, |==> neval_gen P (H ‼ʰ ()) un gn
     | (|={E,E'}=> P)%n, _ => λ un gn, |={E,E'}=> neval_gen P (H ‼ʰ ()) un gn
-    | (▷ P)%n, _ => λ un gn, ▷ nev d _ (nProp_rewgna P un gn)
+    | (▷ P)%n, _ => λ un gn, ▷ nev d _ (rew app_eq_nil_ug_g un gn in P)
     | (P ⊢{i} Q)%n, _ => λ un gn,
-        ⌜d i (nProp_rewgna P un gn, nProp_rewgna P un gn)⌝
+        ⌜d i ((rew app_eq_nil_ug_g un gn in P), rew app_eq_nil_ug_g un gn in Q)⌝
     | ((rec:ˢ' Φ) a)%n, _ => λ un gn, neval_gen
-        (nsubst' (Φ a) un gn (nPred_rewoin (rec:ˢ' Φ)%n un gn))
+        (nsubst' (Φ a) un gn (rew[λ _,_] ctxeq_ug un gn in rec:ˢ' Φ)%n)
         (H ‼ʰ[nsubst'_nheight] ()) eq_refl eq_refl
     | ((rec:ˡ' Φ) a)%n, _ => λ un gn, neval_gen
-        (nsubst' (Φ a) un gn (nPred_rewoin (rec:ˡ' Φ)%n un gn))
+        (nsubst' (Φ a) un gn (rew[λ _,_] ctxeq_ug un gn in rec:ˡ' Φ)%n)
         (H ‼ʰ[nsubst'_nheight] ()) eq_refl eq_refl
     | (∀: V, P)%n, _ => λ un gn, ∀ Φ,
         neval_gen (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] ()) eq_refl eq_refl
@@ -138,7 +127,7 @@ Section neval.
   Proof.
     unfold nevalS_gen'=> i nev nev' nevd d + + + + + + +. fix FIX 4=> σ Γ P H.
     case: P H=>/=; intros; case H=>//= ?;
-    try (by f_equiv=> >; apply FIX); try (by f_contractive; apply nevd).
+    try (by f_equiv=> >; apply FIX); by f_contractive; apply nevd.
   Qed.
 
   (** [neval_gen] is contractive *)
@@ -152,24 +141,24 @@ Section neval.
   (** [neval_pre]: Generator of [neval_fp] *)
   Definition neval_pre
     : (_ -d> _ -d> _ -d> iProp Σ) -> (_ -d> _ -d> _ -d> iProp Σ)
-    := λ nev d σ (P : nProp σ (;)), neval_gen' nev d _ _ P hwf eq_refl eq_refl.
+    := λ nev d σ (P : nProp σ (;ᵞ)), neval_gen' nev d _ _ P hwf eq_refl eq_refl.
   #[export] Instance neval_pre_contractive : Contractive neval_pre.
   Proof. move=> ???????. by apply neval_gen_contractive. Qed.
 
-  (** [neval_fp]: Fixpoint evaluation of [nProp σ (;)] *)
-  Definition neval_fp : _ → ∀ σ, nProp σ (;) → iProp Σ := fixpoint neval_pre.
+  (** [neval_fp]: Fixpoint evaluation of [nProp σ (;ᵞ)] *)
+  Definition neval_fp : _ → ∀ σ, nProp σ (;ᵞ) → iProp Σ := fixpoint neval_pre.
 End neval.
 
 (** The notations [neval]/[nevalx] (as well as [nevalS]/[nevalSx])
   will be printed in (partial) evaluation, yay! *)
 
 Notation nevalx' Σ d σ P H :=
-  (@neval_gen Σ _ neval_fp d σ (;) P H eq_refl eq_refl) (only parsing).
+  (@neval_gen Σ _ neval_fp d σ (;ᵞ) P H eq_refl eq_refl) (only parsing).
 Notation neval' Σ d σ P := (nevalx' Σ d σ P hwf).
 Notation nevalx d P H := (nevalx' _ d _ P H).
 Notation neval d P := (nevalx d P hwf).
 Notation nevalSx' Σ d P H :=
-  (@nevalS_gen Σ _ neval_fp d nS (;) P H eq_refl eq_refl eq_refl)
+  (@nevalS_gen Σ _ neval_fp d nS (;ᵞ) P H eq_refl eq_refl eq_refl)
   (only parsing).
 Notation nevalS' Σ d P := (nevalSx' Σ d P hwf).
 Notation nevalSx d P H := (nevalSx' _ d P H).

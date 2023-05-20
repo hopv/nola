@@ -1,10 +1,45 @@
 (** * [nProp]: Syntactic proposition *)
 
-From nola.examples.logic Require Export ctx.
-From nola Require Export util.funext util.rel.
+From nola Require Export util.funext util.rel ctx.
 From stdpp Require Export coPset.
 From iris.bi Require Import notation.
 Import EqNotations.
+
+(** ** [nsort]: Sort of [nProp], [nS] or [nL] *)
+
+Variant nsort : Set := (* small *) nS | (* large *) nL.
+
+(** Equality on [nsort] is decidable *)
+#[export] Instance nsort_eq_dec : EqDecision nsort.
+Proof. case; case; try (by left); by right. Defined.
+
+(** ** [npvar]: Predicate variable *)
+
+#[projections(primitive)]
+Record npvar := Npvar {
+  npvar_argty : Type;
+  npvar_sort : nsort;
+}.
+
+(** Notations for [npvar] *)
+Notation "A →nP σ" := (Npvar A σ) (at level 1, no associativity) : nola_scope.
+Notation "A →nPS" := (A →nP nS) (at level 1) : nola_scope.
+Notation "A →nPL" := (A →nP nL) (at level 1) : nola_scope.
+Notation nP σ := (unit →nP σ).
+Notation nPS := (unit →nPS).
+Notation nPL := (unit →nPL).
+
+(** [nctx]: Context of [nProp] *)
+Notation nctx := (ctx npvar).
+
+(** [nparg]: Argument to [npvar], with [nsort] specified *)
+
+Variant nparg {σ : nsort} : npvar → Type :=
+| Nparg {A} : A → nparg (A →nP σ).
+Arguments nparg σ V : clear implicits.
+Notation npargS := (nparg nS).
+Notation npargL := (nparg nL).
+Notation "@! a" := (Nparg a) (at level 20, right associativity) : nola_scope.
 
 (** ** [nProp]: Nola syntactic proposition
 
@@ -15,7 +50,7 @@ Import EqNotations.
   [Γᵘ, Γᵍ] for smooth type inference
 
   In nominal proposition arguments (e.g., [n_deriv]'s arguments), unguarded
-  variables are flushed into guarded, with the context [(; Γᵘ ++ Γᵍ)];
+  variables are flushed into guarded, with the context [(;ᵞ Γᵘ ++ Γᵍ)];
   for connectives with such arguments we make [Γᵘ] explicit for the users
   to aid type inference around [++] *)
 
@@ -48,30 +83,30 @@ Inductive nProp : nsort → nctx → Type :=
 | n_fupd {σ Γ} : coPset → coPset → nProp σ Γ → nProp σ Γ
 
 (** Later modality *)
-| n_later {σ} Γᵘ {Γᵍ} : nProp nL (; Γᵘ ++ Γᵍ) → nProp σ (Γᵘ; Γᵍ)
+| n_later {σ} Γᵘ {Γᵍ} : nProp nL (;ᵞ Γᵘ ++ Γᵍ) → nProp σ (Γᵘ;ᵞ Γᵍ)
 (** Judgment derivability *)
 | n_deriv {σ} Γᵘ {Γᵍ} :
-    nat → nProp nL (; Γᵘ ++ Γᵍ) → nProp nL (; Γᵘ ++ Γᵍ) → nProp σ (Γᵘ; Γᵍ)
+    nat → nProp nL (;ᵞ Γᵘ ++ Γᵍ) → nProp nL (;ᵞ Γᵘ ++ Γᵍ) → nProp σ (Γᵘ;ᵞ Γᵍ)
 
 (** Recursive small proposition *)
 | n_recs {σ Γᵘ Γᵍ} {A : Type} :
-    (A → nProp nS (A →nPS :: Γᵘ; Γᵍ)) → A → nProp σ (Γᵘ; Γᵍ)
+    (A → nProp nS (A →nPS :: Γᵘ;ᵞ Γᵍ)) → A → nProp σ (Γᵘ;ᵞ Γᵍ)
 (** Recursive large proposition *)
 | n_recl {Γᵘ Γᵍ} {A : Type} :
-    (A → nProp nL (A →nPL :: Γᵘ; Γᵍ)) → A → nProp nL (Γᵘ; Γᵍ)
+    (A → nProp nL (A →nPL :: Γᵘ;ᵞ Γᵍ)) → A → nProp nL (Γᵘ;ᵞ Γᵍ)
 (** Universal quantification over [A → nProp] *)
-| n_n_forall {σ Γᵘ Γᵍ} V : nProp σ (V :: Γᵘ; Γᵍ) → nProp σ (Γᵘ; Γᵍ)
+| n_n_forall {σ Γᵘ Γᵍ} V : nProp σ (V :: Γᵘ;ᵞ Γᵍ) → nProp σ (Γᵘ;ᵞ Γᵍ)
 (** Existential quantification over [A → nProp] *)
-| n_n_exist {σ Γᵘ Γᵍ} V : nProp σ (V :: Γᵘ; Γᵍ) → nProp σ (Γᵘ; Γᵍ)
+| n_n_exist {σ Γᵘ Γᵍ} V : nProp σ (V :: Γᵘ;ᵞ Γᵍ) → nProp σ (Γᵘ;ᵞ Γᵍ)
 
 (** Guarded small variable *)
-| n_vargs {σ Γᵘ Γᵍ} : schoice npargS Γᵍ → nProp σ (Γᵘ; Γᵍ)
+| n_vargs {σ Γᵘ Γᵍ} : schoice npargS Γᵍ → nProp σ (Γᵘ;ᵞ Γᵍ)
 (** Guarded large variable, [nPropL] only *)
-| n_vargl {Γᵘ Γᵍ} : schoice npargL Γᵍ → nProp nL (Γᵘ; Γᵍ)
+| n_vargl {Γᵘ Γᵍ} : schoice npargL Γᵍ → nProp nL (Γᵘ;ᵞ Γᵍ)
 (** Unguarded small variable, [nPropL] only *)
-| n_varus {Γᵘ Γᵍ} : schoice npargS Γᵘ → nProp nL (Γᵘ; Γᵍ)
+| n_varus {Γᵘ Γᵍ} : schoice npargS Γᵘ → nProp nL (Γᵘ;ᵞ Γᵍ)
 (** Substituted [n_varus] *)
-| n_subus {Γᵘ Γᵍ} : nProp nS (;) → nProp nL (Γᵘ; Γᵍ).
+| n_subus {Γᵘ Γᵍ} : nProp nS (;ᵞ) → nProp nL (Γᵘ;ᵞ Γᵍ).
 
 Notation nPropS := (nProp nS).
 Notation nPropL := (nProp nL).
@@ -111,8 +146,7 @@ Notation "|={ E , E' }=> P" := (n_fupd E E' P) : nProp_scope.
 Notation "▷{ Γᵘ } P" := (n_later Γᵘ P)
   (at level 20, right associativity, only parsing) : nProp_scope.
 Notation "▷ P" := (n_later _ P) : nProp_scope.
-Definition n_except_0 {σ Γᵘ Γᵍ} (P : nProp σ (Γᵘ; Γᵍ)) : nProp σ (Γᵘ; Γᵍ)
-  := ▷ False ∨ P.
+Definition n_except_0 {σ Γ} (P : nProp σ Γ) : nProp σ Γ := ▷ False ∨ P.
 Notation "◇ P" := (n_except_0 P) : nProp_scope.
 Notation "P ⊢{ i }{ Γᵘ } Q" := (n_deriv Γᵘ i P Q)
   (at level 99, Q at level 200, only parsing) : nProp_scope.
