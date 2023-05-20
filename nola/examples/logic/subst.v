@@ -1,7 +1,7 @@
 (** * Substitution for [nProp] *)
 
 From nola.examples.logic Require Export prop.
-From nola Require Export util.funext util.hgt.
+From nola Require Export util.funext hgt.
 Import EqNotations.
 
 (** [nProp_rewi P eq]: Rewrite the inner context of [P : nProp (; Γⁱ)]
