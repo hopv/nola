@@ -1,7 +1,6 @@
 (** * Judgment and derivability *)
 
-From nola Require Export prelude.
-From nola.util Require Import pred wft.
+From nola Require Export util.pred util.wft.
 
 (** ** [judg]: Judgment information *)
 #[projections(primitive)]

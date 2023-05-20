@@ -1,6 +1,6 @@
 (** * [nctx]: Context of [nProp] *)
 
-From nola.util Require Export list.
+From nola Require Export util.list.
 
 (** ** [nsort]: Sort of [nProp], [nS] or [nL] *)
 
