@@ -65,7 +65,7 @@ Section neval_gen.
     | (|={E,E'}=> P)%n, _ => λ σS un gn,
         |={E,E'}=> nevalS_gen P (H ‼ʰ ()) σS un gn
     | (▷ P)%n, _ => λ _ un gn, ▷ nev d _ (nProp_rewgna P un gn)
-    | (P ⊢!{i} Q)%n, _ => λ _ un gn,
+    | (P ⊢{i} Q)%n, _ => λ _ un gn,
         ⌜d i (nProp_rewgna P un gn, nProp_rewgna P un gn)⌝
     | ((rec:ˢ' Φ) a)%n, _ => λ _ un gn, nevalS_gen
         (nsubst' (Φ a) un gn (nPred_rewoin (rec:ˢ' Φ)%n un gn))
@@ -103,7 +103,7 @@ Section neval_gen.
     | (|==> P)%n, _ => λ un gn, |==> neval_gen P (H ‼ʰ ()) un gn
     | (|={E,E'}=> P)%n, _ => λ un gn, |={E,E'}=> neval_gen P (H ‼ʰ ()) un gn
     | (▷ P)%n, _ => λ un gn, ▷ nev d _ (nProp_rewgna P un gn)
-    | (P ⊢!{i} Q)%n, _ => λ un gn,
+    | (P ⊢{i} Q)%n, _ => λ un gn,
         ⌜d i (nProp_rewgna P un gn, nProp_rewgna P un gn)⌝
     | ((rec:ˢ' Φ) a)%n, _ => λ un gn, neval_gen
         (nsubst' (Φ a) un gn (nPred_rewoin (rec:ˢ' Φ)%n un gn))

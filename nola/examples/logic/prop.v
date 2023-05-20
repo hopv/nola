@@ -114,10 +114,10 @@ Notation "▷ P" := (n_later _ P) : nProp_scope.
 Definition n_except_0 {σ Γᵘ Γᵍ} (P : nProp σ (Γᵘ; Γᵍ)) : nProp σ (Γᵘ; Γᵍ)
   := ▷ False ∨ P.
 Notation "◇ P" := (n_except_0 P) : nProp_scope.
-Notation "P ⊢!{ i }{ Γᵘ } Q" := (n_deriv Γᵘ i P Q)
+Notation "P ⊢{ i }{ Γᵘ } Q" := (n_deriv Γᵘ i P Q)
   (at level 99, Q at level 200, only parsing) : nProp_scope.
-Notation "P ⊢!{ i } Q" := (n_deriv _ i P Q)
-  (at level 99, Q at level 200, format "P  ⊢!{ i }  Q") : nProp_scope.
+Notation "P ⊢{ i } Q" := (n_deriv _ i P Q)
+  (at level 99, Q at level 200, format "P  ⊢{ i }  Q") : nProp_scope.
 
 Notation "rec:ˢ' Φ" := (n_recs Φ)
   (at level 200, right associativity, only parsing) : nProp_scope.
@@ -163,7 +163,7 @@ Fixpoint nlarge {σ Γ} (P : nProp σ Γ) : nPropL Γ :=
   | |==> P => |==> nlarge P
   | |={E,E'}=> P => |={E,E'}=> nlarge P
   | ▷ P => ▷ P
-  | P ⊢!{i} Q => P ⊢!{i} Q
+  | P ⊢{i} Q => P ⊢{i} Q
   | (rec:ˢ' Φ) a => (rec:ˢ' Φ) a
   | (rec:ˡ' Φ) a => (rec:ˡ' Φ) a
   | ∀: V, P => ∀: V, nlarge P
