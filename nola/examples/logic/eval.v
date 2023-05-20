@@ -14,25 +14,25 @@ Class nevalG (Σ : gFunctors) := NevalG {
 }.
 
 (** Modification of [nsubst] *)
-Definition nsubst' {σ Γᵒ Γⁱ V} (P : nProp σ (V :: Γᵒ; Γⁱ))
-  (no : Γᵒ = []) (ni : Γⁱ = []) : nPred V → nProp σ (;) :=
+Definition nsubst' {σ Γᵘ Γᵍ V} (P : nProp σ (V :: Γᵘ; Γᵍ))
+  (un : Γᵘ = []) (gn : Γᵍ = []) : nPred V → nProp σ (;) :=
   nsubst
-    (nProp_rewi (rew[λ Γᵒ, nProp _ (_ :: Γᵒ; _)] no in P) ni).
+    (nProp_rewg (rew[λ Γᵘ, nProp _ (_ :: Γᵘ; _)] un in P) gn).
   Arguments nsubst' {_ _ _ _} _ _ _ /.
 
 (** [nsubst'] preserves [nheight] *)
-Lemma nsubst'_nheight {σ Γᵒ Γⁱ V} {P : nProp σ (V :: Γᵒ; Γⁱ)} {no ni Φ} :
-  nheight (nsubst' P no ni Φ) = nheight P.
+Lemma nsubst'_nheight {σ Γᵘ Γᵍ V} {P : nProp σ (V :: Γᵘ; Γᵍ)} {un gn Φ} :
+  nheight (nsubst' P un gn Φ) = nheight P.
 Proof. subst. apply nsubst_nheight. Qed.
 
-Definition nProp_rewina {σ Γᵒ Γⁱ} (P : nProp σ (; Γᵒ ++ Γⁱ))
-  (no : Γᵒ = []) (ni : Γⁱ = []) : nProp σ (;) :=
-  nProp_rewi P (eq_trans (f_equal (.++ Γⁱ) no) ni).
-Arguments nProp_rewina {_ _ _} _ _ _ /.
+Definition nProp_rewgna {σ Γᵘ Γᵍ} (P : nProp σ (; Γᵘ ++ Γᵍ))
+  (un : Γᵘ = []) (gn : Γᵍ = []) : nProp σ (;) :=
+  nProp_rewg P (eq_trans (f_equal (.++ Γᵍ) un) gn).
+Arguments nProp_rewgna {_ _ _} _ _ _ /.
 
-Definition nPred_rewoin {A σ Γᵒ Γⁱ} (Φ : A → nProp σ (Γᵒ; Γⁱ))
-  (no : Γᵒ = []) (ni : Γⁱ = []) : A → nProp σ (;) :=
-  rew[λ _, _] ni in rew[λ Γᵒ, A → nProp σ (Γᵒ; _)] no in Φ.
+Definition nPred_rewoin {A σ Γᵘ Γᵍ} (Φ : A → nProp σ (Γᵘ; Γᵍ))
+  (un : Γᵘ = []) (gn : Γᵍ = []) : A → nProp σ (;) :=
+  rew[λ _, _] gn in rew[λ Γᵘ, A → nProp σ (Γᵘ; _)] un in Φ.
 Arguments nPred_rewoin {_ _ _ _} _ _ _ /.
 
 Section neval_gen.
@@ -47,38 +47,38 @@ Section neval_gen.
     : σ = nS → Γ.(nctx_o) = [] → Γ.(nctx_i) = [] → iProp Σ :=
     match P, H with
     | ⌜φ⌝%n, _ => λ _ _ _, ⌜φ⌝
-    | (P ∧ Q)%n, _ => λ σS no ni,
-        nevalS_gen P (H ‼ʰ true) σS no ni ∧ nevalS_gen Q (H ‼ʰ false) σS no ni
-    | (P ∨ Q)%n, _ => λ σS no ni,
-        nevalS_gen P (H ‼ʰ true) σS no ni ∨ nevalS_gen Q (H ‼ʰ false) σS no ni
-    | (P → Q)%n, _ => λ σS no ni,
-        nevalS_gen P (H ‼ʰ true) σS no ni → nevalS_gen Q (H ‼ʰ false) σS no ni
-    | (∀' Φ)%n, _ => λ σS no ni, ∀ a, nevalS_gen (Φ a) (H ‼ʰ a) σS no ni
-    | (∃' Φ)%n, _ => λ σS no ni, ∃ a, nevalS_gen (Φ a) (H ‼ʰ a) σS no ni
-    | (P ∗ Q)%n, _ => λ σS no ni,
-        nevalS_gen P (H ‼ʰ true) σS no ni ∗ nevalS_gen Q (H ‼ʰ false) σS no ni
-    | (P -∗ Q)%n, _ => λ σS no ni,
-        nevalS_gen P (H ‼ʰ true) σS no ni -∗ nevalS_gen Q (H ‼ʰ false) σS no ni
-    | (□ P)%n, _ => λ σS no ni, □ nevalS_gen P (H ‼ʰ ()) σS no ni
-    | (■ P)%n, _ => λ σS no ni, ■ nevalS_gen P (H ‼ʰ ()) σS no ni
-    | (|==> P)%n, _ => λ σS no ni, |==> nevalS_gen P (H ‼ʰ ()) σS no ni
-    | (|={E,E'}=> P)%n, _ => λ σS no ni,
-        |={E,E'}=> nevalS_gen P (H ‼ʰ ()) σS no ni
-    | (▷ P)%n, _ => λ _ no ni, ▷ nev d _ (nProp_rewina P no ni)
-    | (P ⊢!{i} Q)%n, _ => λ _ no ni,
-        ⌜d i (nProp_rewina P no ni, nProp_rewina P no ni)⌝
-    | ((rec:ˢ' Φ) a)%n, _ => λ _ no ni, nevalS_gen
-        (nsubst' (Φ a) no ni (nPred_rewoin (rec:ˢ' Φ)%n no ni))
+    | (P ∧ Q)%n, _ => λ σS un gn,
+        nevalS_gen P (H ‼ʰ true) σS un gn ∧ nevalS_gen Q (H ‼ʰ false) σS un gn
+    | (P ∨ Q)%n, _ => λ σS un gn,
+        nevalS_gen P (H ‼ʰ true) σS un gn ∨ nevalS_gen Q (H ‼ʰ false) σS un gn
+    | (P → Q)%n, _ => λ σS un gn,
+        nevalS_gen P (H ‼ʰ true) σS un gn → nevalS_gen Q (H ‼ʰ false) σS un gn
+    | (∀' Φ)%n, _ => λ σS un gn, ∀ a, nevalS_gen (Φ a) (H ‼ʰ a) σS un gn
+    | (∃' Φ)%n, _ => λ σS un gn, ∃ a, nevalS_gen (Φ a) (H ‼ʰ a) σS un gn
+    | (P ∗ Q)%n, _ => λ σS un gn,
+        nevalS_gen P (H ‼ʰ true) σS un gn ∗ nevalS_gen Q (H ‼ʰ false) σS un gn
+    | (P -∗ Q)%n, _ => λ σS un gn,
+        nevalS_gen P (H ‼ʰ true) σS un gn -∗ nevalS_gen Q (H ‼ʰ false) σS un gn
+    | (□ P)%n, _ => λ σS un gn, □ nevalS_gen P (H ‼ʰ ()) σS un gn
+    | (■ P)%n, _ => λ σS un gn, ■ nevalS_gen P (H ‼ʰ ()) σS un gn
+    | (|==> P)%n, _ => λ σS un gn, |==> nevalS_gen P (H ‼ʰ ()) σS un gn
+    | (|={E,E'}=> P)%n, _ => λ σS un gn,
+        |={E,E'}=> nevalS_gen P (H ‼ʰ ()) σS un gn
+    | (▷ P)%n, _ => λ _ un gn, ▷ nev d _ (nProp_rewgna P un gn)
+    | (P ⊢!{i} Q)%n, _ => λ _ un gn,
+        ⌜d i (nProp_rewgna P un gn, nProp_rewgna P un gn)⌝
+    | ((rec:ˢ' Φ) a)%n, _ => λ _ un gn, nevalS_gen
+        (nsubst' (Φ a) un gn (nPred_rewoin (rec:ˢ' Φ)%n un gn))
         (H ‼ʰ[nsubst'_nheight] ()) eq_refl eq_refl eq_refl
     | ((rec:ˡ' Φ) a)%n, _ => λ σS, match σS with end
-    | (∀: V, P)%n, _ => λ σS no ni, ∀ Φ, nevalS_gen
-        (nsubst' P no ni Φ) (H ‼ʰ[nsubst'_nheight] ()) σS eq_refl eq_refl
-    | (∃: V, P)%n, _ => λ σS no ni, ∃ Φ, nevalS_gen
-        (nsubst' P no ni Φ) (H ‼ʰ[nsubst'_nheight] ()) σS eq_refl eq_refl
-    | (%ⁱˢ s)%n, _ => λ _ _, seqnil s
-    | (%ⁱˡ s)%n, _ => λ σS, match σS with end
-    | (%ᵒˢ s)%n, _ => λ σS, match σS with end
-    | (!ᵒˢ P)%n, _ => λ σS, match σS with end
+    | (∀: V, P)%n, _ => λ σS un gn, ∀ Φ, nevalS_gen
+        (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] ()) σS eq_refl eq_refl
+    | (∃: V, P)%n, _ => λ σS un gn, ∃ Φ, nevalS_gen
+        (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] ()) σS eq_refl eq_refl
+    | (%ᵍˢ s)%n, _ => λ _ _, seqnil s
+    | (%ᵍˡ s)%n, _ => λ σS, match σS with end
+    | (%ᵘˢ s)%n, _ => λ σS, match σS with end
+    | (!ᵘˢ P)%n, _ => λ σS, match σS with end
     end%I.
 
   (** ** [neval_gen P] : Evaluate [P] *)
@@ -86,39 +86,39 @@ Section neval_gen.
     : Γ.(nctx_o) = [] → Γ.(nctx_i) = [] → iProp Σ :=
     match P, H with
     | ⌜φ⌝%n, _ => λ _ _, ⌜φ⌝
-    | (P ∧ Q)%n, _ => λ no ni,
-        neval_gen P (H ‼ʰ true) no ni ∧ neval_gen Q (H ‼ʰ false) no ni
-    | (P ∨ Q)%n, _ => λ no ni,
-        neval_gen P (H ‼ʰ true) no ni ∨ neval_gen Q (H ‼ʰ false) no ni
-    | (P → Q)%n, _ => λ no ni,
-        neval_gen P (H ‼ʰ true) no ni → neval_gen Q (H ‼ʰ false) no ni
-    | (∀' Φ)%n, _ => λ no ni, ∀ a, neval_gen (Φ a) (H ‼ʰ a) no ni
-    | (∃' Φ)%n, _ => λ no ni, ∃ a, neval_gen (Φ a) (H ‼ʰ a) no ni
-    | (P ∗ Q)%n, _ => λ no ni,
-        neval_gen P (H ‼ʰ true) no ni ∗ neval_gen Q (H ‼ʰ false) no ni
-    | (P -∗ Q)%n, _ => λ no ni,
-        neval_gen P (H ‼ʰ true) no ni -∗ neval_gen Q (H ‼ʰ false) no ni
-    | (□ P)%n, _ => λ no ni, □ neval_gen P (H ‼ʰ ()) no ni
-    | (■ P)%n, _ => λ no ni, ■ neval_gen P (H ‼ʰ ()) no ni
-    | (|==> P)%n, _ => λ no ni, |==> neval_gen P (H ‼ʰ ()) no ni
-    | (|={E,E'}=> P)%n, _ => λ no ni, |={E,E'}=> neval_gen P (H ‼ʰ ()) no ni
-    | (▷ P)%n, _ => λ no ni, ▷ nev d _ (nProp_rewina P no ni)
-    | (P ⊢!{i} Q)%n, _ => λ no ni,
-        ⌜d i (nProp_rewina P no ni, nProp_rewina P no ni)⌝
-    | ((rec:ˢ' Φ) a)%n, _ => λ no ni, neval_gen
-        (nsubst' (Φ a) no ni (nPred_rewoin (rec:ˢ' Φ)%n no ni))
+    | (P ∧ Q)%n, _ => λ un gn,
+        neval_gen P (H ‼ʰ true) un gn ∧ neval_gen Q (H ‼ʰ false) un gn
+    | (P ∨ Q)%n, _ => λ un gn,
+        neval_gen P (H ‼ʰ true) un gn ∨ neval_gen Q (H ‼ʰ false) un gn
+    | (P → Q)%n, _ => λ un gn,
+        neval_gen P (H ‼ʰ true) un gn → neval_gen Q (H ‼ʰ false) un gn
+    | (∀' Φ)%n, _ => λ un gn, ∀ a, neval_gen (Φ a) (H ‼ʰ a) un gn
+    | (∃' Φ)%n, _ => λ un gn, ∃ a, neval_gen (Φ a) (H ‼ʰ a) un gn
+    | (P ∗ Q)%n, _ => λ un gn,
+        neval_gen P (H ‼ʰ true) un gn ∗ neval_gen Q (H ‼ʰ false) un gn
+    | (P -∗ Q)%n, _ => λ un gn,
+        neval_gen P (H ‼ʰ true) un gn -∗ neval_gen Q (H ‼ʰ false) un gn
+    | (□ P)%n, _ => λ un gn, □ neval_gen P (H ‼ʰ ()) un gn
+    | (■ P)%n, _ => λ un gn, ■ neval_gen P (H ‼ʰ ()) un gn
+    | (|==> P)%n, _ => λ un gn, |==> neval_gen P (H ‼ʰ ()) un gn
+    | (|={E,E'}=> P)%n, _ => λ un gn, |={E,E'}=> neval_gen P (H ‼ʰ ()) un gn
+    | (▷ P)%n, _ => λ un gn, ▷ nev d _ (nProp_rewgna P un gn)
+    | (P ⊢!{i} Q)%n, _ => λ un gn,
+        ⌜d i (nProp_rewgna P un gn, nProp_rewgna P un gn)⌝
+    | ((rec:ˢ' Φ) a)%n, _ => λ un gn, neval_gen
+        (nsubst' (Φ a) un gn (nPred_rewoin (rec:ˢ' Φ)%n un gn))
         (H ‼ʰ[nsubst'_nheight] ()) eq_refl eq_refl
-    | ((rec:ˡ' Φ) a)%n, _ => λ no ni, neval_gen
-        (nsubst' (Φ a) no ni (nPred_rewoin (rec:ˡ' Φ)%n no ni))
+    | ((rec:ˡ' Φ) a)%n, _ => λ un gn, neval_gen
+        (nsubst' (Φ a) un gn (nPred_rewoin (rec:ˡ' Φ)%n un gn))
         (H ‼ʰ[nsubst'_nheight] ()) eq_refl eq_refl
-    | (∀: V, P)%n, _ => λ no ni, ∀ Φ,
-        neval_gen (nsubst' P no ni Φ) (H ‼ʰ[nsubst'_nheight] ()) eq_refl eq_refl
-    | (∃: V, P)%n, _ => λ no ni, ∃ Φ,
-        neval_gen (nsubst' P no ni Φ) (H ‼ʰ[nsubst'_nheight] ()) eq_refl eq_refl
-    | (%ⁱˢ s)%n, _ => λ _, seqnil s
-    | (%ⁱˡ s)%n, _ => λ _, seqnil s
-    | (%ᵒˢ s)%n, _ => seqnil s
-    | (!ᵒˢ P)%n, _ => λ _ _, nevalS_gen P hwf eq_refl eq_refl eq_refl
+    | (∀: V, P)%n, _ => λ un gn, ∀ Φ,
+        neval_gen (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] ()) eq_refl eq_refl
+    | (∃: V, P)%n, _ => λ un gn, ∃ Φ,
+        neval_gen (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] ()) eq_refl eq_refl
+    | (%ᵍˢ s)%n, _ => λ _, seqnil s
+    | (%ᵍˡ s)%n, _ => λ _, seqnil s
+    | (%ᵘˢ s)%n, _ => seqnil s
+    | (!ᵘˢ P)%n, _ => λ _ _, nevalS_gen P hwf eq_refl eq_refl eq_refl
     end%I.
 End neval_gen.
 
@@ -187,10 +187,10 @@ Section neval_facts.
   Proof. unfold neval_fp. apply (fixpoint_unfold neval_pre). Qed.
 
   (** [nevalS_gen] coincides with [neval_gen] *)
-  Lemma nevalS_gen_neval_gen {nev d σ Γ} {P : nProp σ Γ} {H σS no ni} :
-    nevalS_gen (Σ:=Σ) nev d P H σS no ni ⊣⊢ neval_gen nev d P H no ni.
+  Lemma nevalS_gen_neval_gen {nev d σ Γ} {P : nProp σ Γ} {H σS un gn} :
+    nevalS_gen (Σ:=Σ) nev d P H σS un gn ⊣⊢ neval_gen nev d P H un gn.
   Proof.
-    move: σ Γ P H σS no ni. fix FIX 4=> σ Γ P H.
+    move: σ Γ P H σS un gn. fix FIX 4=> σ Γ P H.
     case: P H; intros; case H=>//= ?; try f_equiv=> >; apply FIX.
   Qed.
   (** [nevalS] coincides with [neval] *)
@@ -201,10 +201,10 @@ Section neval_facts.
   Proof. rewrite (eq_hwf H). exact nevalS_neval. Qed.
 
   (** Simplify [neval_gen] over [nlarge] *)
-  Lemma neval_gen_nlarge {nev d σ Γ} {P : nProp σ Γ} {H no ni} :
-    neval_gen (Σ:=Σ) nev d (nlarge P) H no ni ⊣⊢ neval_gen nev d P hwf no ni.
+  Lemma neval_gen_nlarge {nev d σ Γ} {P : nProp σ Γ} {H un gn} :
+    neval_gen (Σ:=Σ) nev d (nlarge P) H un gn ⊣⊢ neval_gen nev d P hwf un gn.
   Proof.
-    move: σ Γ P H no ni. fix FIX 4=> σ Γ P H.
+    move: σ Γ P H un gn. fix FIX 4=> σ Γ P H.
     case: P H=>/=; intros; case H=>/= he; f_equiv=> >; try apply FIX;
     try apply leibniz_equiv, eq_hacc;
     rewrite (eq_hwf (rew _ in _)); move: nsubst'_nheight=>/=;

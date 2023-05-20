@@ -282,9 +282,9 @@ Section bi.
     rewrite (eq_hwf (rew _ in _)). by apply nin_sem.
   Qed.
 
-  (** Laws for [!ᵒˢ] *)
-  Lemma n_subos_unfold {d i P} : δ d i (!ᵒˢ P, nlarge P)%n.
+  (** Laws for [!ᵘˢ] *)
+  Lemma n_subus_unfold {d i P} : δ d i (!ᵘˢ P, nlarge P)%n.
   Proof. apply n_bysem=>/= >. by rewrite nevalS_neval neval_nlarge. Qed.
-  Lemma n_subos_fold {d i P} : δ d i (nlarge P, !ᵒˢ P)%n.
+  Lemma n_subus_fold {d i P} : δ d i (nlarge P, !ᵘˢ P)%n.
   Proof. apply n_bysem=>/= >. by rewrite neval_nlarge nevalS_neval. Qed.
 End bi.

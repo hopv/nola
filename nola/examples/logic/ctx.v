@@ -39,9 +39,9 @@ Notation "@! a" := (Nparg a) (at level 20, right associativity) : nola_scope.
 
 #[projections(primitive)]
 Record nctx : Type := Nctx {
-  (** Outer (i.e., unguarded) variables *)
+  (** Unguarded variables *)
   nctx_o : list npvar;
-  (** Inner (i.e., guarded) variables *)
+  (** Guarded variables *)
   nctx_i : list npvar;
 }.
 
@@ -49,7 +49,7 @@ Record nctx : Type := Nctx {
 Declare Scope nctx_scope.
 Delimit Scope nctx_scope with nctx.
 Bind Scope nctx_scope with nctx.
-Notation "( Γᵒ ; Γⁱ )" := (Nctx Γᵒ Γⁱ) : nctx_scope.
-Notation "( Γᵒ ; )" := (Nctx Γᵒ []) : nctx_scope.
-Notation "( ; Γⁱ )" := (Nctx [] Γⁱ) (format "( ;  Γⁱ )") : nctx_scope.
+Notation "( Γᵘ ; Γᵍ )" := (Nctx Γᵘ Γᵍ) : nctx_scope.
+Notation "( Γᵘ ; )" := (Nctx Γᵘ []) : nctx_scope.
+Notation "( ; Γᵍ )" := (Nctx [] Γᵍ) (format "( ;  Γᵍ )") : nctx_scope.
 Notation "( ; )" := (Nctx [] []) (format "( ; )") : nctx_scope.
