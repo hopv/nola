@@ -24,6 +24,7 @@ Lemma nsubst'_nheight {σ Γᵘ Γᵍ V} {P : nProp σ (V :: Γᵘ;ᵞ Γᵍ)} {
   nheight (nsubst' P un gn Φ) = nheight P.
 Proof. subst. apply nsubst_nheight. Qed.
 
+(** ** [neval]: Evaluation of [nProp] as [iProp] *)
 Section neval_gen.
   Context
     (** Iris resources *) `{!nevalG Σ}
@@ -31,7 +32,7 @@ Section neval_gen.
     (nev : nderiv_ty → ∀ σ, nProp σ (;ᵞ) → iProp Σ)
     (** Derivability predicate *) (d : nderiv_ty).
 
-  (** ** [nevalS_gen P] : Evaluate small [P] *)
+  (** [nevalS_gen P] : Evaluate small [P] *)
   Fixpoint nevalS_gen {σ Γ} (P : nProp σ Γ) (H : hAcc (nheight P))
     : σ = nS → Γ.ᵞu = [] → Γ.ᵞg = [] → iProp Σ :=
     match P, H with
@@ -70,7 +71,7 @@ Section neval_gen.
     | (!ᵘˢ P)%n, _ => λ σS, match σS with end
     end%I.
 
-  (** ** [neval_gen P] : Evaluate [P] *)
+  (** [neval_gen P] : Evaluate [P] *)
   Fixpoint neval_gen {σ Γ} (P : nProp σ Γ) (H : hAcc (nheight P))
     : Γ.ᵞu = [] → Γ.ᵞg = [] → iProp Σ :=
     match P, H with
@@ -164,6 +165,7 @@ Notation nevalS' Σ d P := (nevalSx' Σ d P hwf).
 Notation nevalSx d P H := (nevalSx' _ d P H).
 Notation nevalS d P := (nevalSx d P hwf).
 
+(** ** Facts on [neval] etc. *)
 Section neval_facts.
   Context (** Iris resources *) `{!nevalG Σ}.
 
@@ -200,8 +202,10 @@ Section neval_facts.
     subst; have EQ := (nsubst_nlarge (P:=n)); move: (nsubst (nlarge n)) EQ;
     move=> ?->?; apply FIX.
   Qed.
-
   (** Simplify [neval] over [nlarge] *)
   Lemma neval_nlarge {d σ P} : neval d (nlarge P) ⊣⊢ neval' Σ d σ P.
   Proof. exact neval_gen_nlarge. Qed.
+  (** [nevalS] coincides with [neval] over [nlarge] *)
+  Lemma nevalS_neval_nlarge {d P} : nevalS' Σ d P ⊣⊢ neval d (nlarge P).
+  Proof. by rewrite nevalS_neval neval_nlarge. Qed.
 End neval_facts.

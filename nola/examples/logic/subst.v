@@ -197,8 +197,6 @@ Lemma nsubst_nlarge {σ V} {P : nProp σ ([V];ᵞ )} {Φ} :
   nsubst (nlarge P) Φ = nlarge (nsubst P Φ).
 Proof. apply (nsubstlu_nlarge (Γ:=([_];ᵞ)) (i:=0)). Qed.
 
-(** [nsubst] commutes with [nsubstlu] *)
-
 (** ** [nheight P]: Height of [P] *)
 
 Fixpoint nheight {σ Γ} (P : nProp σ Γ) : hgt :=

@@ -16,7 +16,7 @@ Section bi.
   (** [δ] is transitive *)
   Lemma n_trans {d i P Q R} : δ d i (P, Q) → δ d i (Q, R) → δ d i (P, R).
   Proof.
-    move=> H H'. apply n_bysem=> ??. by move: H H'=> /nin_sem-> /nin_sem->.
+    move=> H H'. apply n_bysem=> >. by move: H H'=> /nin_sem-> /nin_sem->.
   Qed.
 
   (** Laws for [⌜_⌝] *)
@@ -101,13 +101,11 @@ Section bi.
   (** Laws for [-∗] *)
   Lemma n_wand_intro_r {d i P Q R} : δ d i (P ∗ Q, R)%n → δ d i (P, Q -∗ R)%n.
   Proof.
-    move=> H. apply n_bysem=>/= >. apply bi.wand_intro_r.
-    by apply nin_sem in H.
+    move=> H. apply n_bysem=>/= >. apply bi.wand_intro_r. by apply nin_sem in H.
   Qed.
   Lemma n_wand_elim_l' {d i P Q R} : δ d i (P, Q -∗ R)%n → δ d i (P ∗ Q, R)%n.
   Proof.
-    move=> H. apply n_bysem=>/= >. apply bi.wand_elim_l'.
-    by apply nin_sem in H.
+    move=> H. apply n_bysem=>/= >. apply bi.wand_elim_l'. by apply nin_sem in H.
   Qed.
 
   (** Laws for [□] *)
@@ -265,6 +263,11 @@ Section bi.
     move=> ?. apply n_bysem=>/= >. apply bi.exist_elim=> ?.
     rewrite (eq_hwf (rew _ in _)). by apply nin_sem.
   Qed.
+End bi.
+
+(** ** Nola-specific laws *)
+Section nola.
+  Context `{!nevalG Σ, !nderivy Σ δ}.
 
   (** Laws for [rec:ˢ] *)
   Lemma n_recs_unfold {d i A Φ} {a : A} :
@@ -284,7 +287,7 @@ Section bi.
 
   (** Laws for [!ᵘˢ] *)
   Lemma n_subus_unfold {d i P} : δ d i (!ᵘˢ P, nlarge P)%n.
-  Proof. apply n_bysem=>/= >. by rewrite nevalS_neval neval_nlarge. Qed.
+  Proof. apply n_bysem=>/= >. by rewrite nevalS_neval_nlarge. Qed.
   Lemma n_subus_fold {d i P} : δ d i (nlarge P, !ᵘˢ P)%n.
-  Proof. apply n_bysem=>/= >. by rewrite neval_nlarge nevalS_neval. Qed.
-End bi.
+  Proof. apply n_bysem=>/= >. by rewrite nevalS_neval_nlarge. Qed.
+End nola.
