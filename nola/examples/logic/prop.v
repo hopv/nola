@@ -5,16 +5,16 @@ From stdpp Require Export coPset.
 From iris.bi Require Import notation.
 Import EqNotations.
 
-(** ** [nsort]: Sort of [nProp], [nS] or [nL] *)
+(** ** Preliminaries for [nProp] *)
 
+(** [nsort]: Sort of [nProp], [nS] or [nL] *)
 Variant nsort : Set := (* small *) nS | (* large *) nL.
 
 (** Equality on [nsort] is decidable *)
 #[export] Instance nsort_eq_dec : EqDecision nsort.
 Proof. case; case; try (by left); by right. Defined.
 
-(** ** [npvar]: Predicate variable *)
-
+(** [npvar]: Predicate variable *)
 #[projections(primitive)]
 Record npvar := Npvar {
   npvar_argty : Type;
@@ -33,7 +33,6 @@ Notation nPL := (unit →nPL).
 Notation nctx := (ctx npvar).
 
 (** [nparg]: Argument to [npvar], with [nsort] specified *)
-
 Variant nparg {σ : nsort} : npvar → Type :=
 | Nparg {A} : A → nparg (A →nP σ).
 Arguments nparg σ V : clear implicits.
