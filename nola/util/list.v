@@ -5,34 +5,34 @@ From nola Require Export prelude.
 (** ** Lemmas for [list], defined directly for computation *)
 
 (** Reduce [++ []] *)
-Fixpoint app_nil_def {A} {xs : list A} : xs ++ [] = xs :=
+Fixpoint app_nil_d {A} {xs : list A} : xs ++ [] = xs :=
   match xs with
   | [] => eq_refl
-  | _ :: _ => f_equal _ app_nil_def
+  | _ :: _ => f_equal _ app_nil_d
   end.
 
 (** Associativity of [++] *)
-Fixpoint app_assoc_def {A} {xs ys zs : list A}
+Fixpoint app_assoc_d {A} {xs ys zs : list A}
   : xs ++ (ys ++ zs) = (xs ++ ys) ++ zs :=
   match xs with
   | [] => eq_refl
-  | _ :: _ => f_equal _ app_assoc_def
+  | _ :: _ => f_equal _ app_assoc_d
   end.
 
 (** [take (length xs ++ i)] over [xs ++ ys] *)
-Fixpoint take_add_app_def {A i} {xs ys : list A}
+Fixpoint take_add_app_d {A i} {xs ys : list A}
   : take (length xs + i) (xs ++ ys) = xs ++ take i ys :=
   match xs with
   | [] => eq_refl
-  | _ :: _ => f_equal _ take_add_app_def
+  | _ :: _ => f_equal _ take_add_app_d
   end.
 
 (** [drop (length xs ++ i)] over [xs ++ ys] *)
-Fixpoint drop_add_app_def {A i} {xs ys : list A}
+Fixpoint drop_add_app_d {A i} {xs ys : list A}
   : drop (length xs + i) (xs ++ ys) = drop i ys :=
   match xs with
   | [] => eq_refl
-  | _ :: xs => drop_add_app_def (xs:=xs)
+  | _ :: xs => drop_add_app_d (xs:=xs)
   end.
 
 (** ** [plist]: Product type calculated over elements of [list] *)
