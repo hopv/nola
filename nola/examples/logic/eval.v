@@ -56,14 +56,14 @@ Section neval_gen.
     | (▷ P)%n, _ => λ _ un gn, ▷ nev d _ (rew app_eq_nil_ug_g un gn in P)
     | (P ⊢{i} Q)%n, _ => λ _ un gn,
         ⌜d i ((rew app_eq_nil_ug_g un gn in P), rew app_eq_nil_ug_g un gn in Q)⌝
-    | ((rec:ˢ' Φ) a)%n, _ => λ _ un gn, nevalS_gen
-        (nsubst' (Φ a) un gn (rew[λ _,_] ctxeq_ug un gn in rec:ˢ' Φ)%n)
-        (H ‼ʰ[nsubst'_nheight] ()) eq_refl eq_refl eq_refl
-    | ((rec:ˡ' Φ) a)%n, _ => λ σS, match σS with end
     | (∀: V, P)%n, _ => λ σS un gn, ∀ Φ, nevalS_gen
         (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] ()) σS eq_refl eq_refl
     | (∃: V, P)%n, _ => λ σS un gn, ∃ Φ, nevalS_gen
         (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] ()) σS eq_refl eq_refl
+    | ((rec:ˢ' Φ) a)%n, _ => λ _ un gn, nevalS_gen
+        (nsubst' (Φ a) un gn (rew[λ _,_] ctxeq_ug un gn in rec:ˢ' Φ)%n)
+        (H ‼ʰ[nsubst'_nheight] ()) eq_refl eq_refl eq_refl
+    | ((rec:ˡ' Φ) a)%n, _ => λ σS, match σS with end
     | (%ᵍˢ s)%n, _ => λ _ _, seqnil s
     | (%ᵍˡ s)%n, _ => λ σS, match σS with end
     | (%ᵘˢ s)%n, _ => λ σS, match σS with end
@@ -94,16 +94,16 @@ Section neval_gen.
     | (▷ P)%n, _ => λ un gn, ▷ nev d _ (rew app_eq_nil_ug_g un gn in P)
     | (P ⊢{i} Q)%n, _ => λ un gn,
         ⌜d i ((rew app_eq_nil_ug_g un gn in P), rew app_eq_nil_ug_g un gn in Q)⌝
+    | (∀: V, P)%n, _ => λ un gn, ∀ Φ,
+        neval_gen (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] ()) eq_refl eq_refl
+    | (∃: V, P)%n, _ => λ un gn, ∃ Φ,
+        neval_gen (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] ()) eq_refl eq_refl
     | ((rec:ˢ' Φ) a)%n, _ => λ un gn, neval_gen
         (nsubst' (Φ a) un gn (rew[λ _,_] ctxeq_ug un gn in rec:ˢ' Φ)%n)
         (H ‼ʰ[nsubst'_nheight] ()) eq_refl eq_refl
     | ((rec:ˡ' Φ) a)%n, _ => λ un gn, neval_gen
         (nsubst' (Φ a) un gn (rew[λ _,_] ctxeq_ug un gn in rec:ˡ' Φ)%n)
         (H ‼ʰ[nsubst'_nheight] ()) eq_refl eq_refl
-    | (∀: V, P)%n, _ => λ un gn, ∀ Φ,
-        neval_gen (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] ()) eq_refl eq_refl
-    | (∃: V, P)%n, _ => λ un gn, ∃ Φ,
-        neval_gen (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] ()) eq_refl eq_refl
     | (%ᵍˢ s)%n, _ => λ _, seqnil s
     | (%ᵍˡ s)%n, _ => λ _, seqnil s
     | (%ᵘˢ s)%n, _ => seqnil s

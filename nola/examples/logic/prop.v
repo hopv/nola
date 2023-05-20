@@ -88,16 +88,16 @@ Inductive nProp : nsort → nctx → Type :=
 | n_deriv {σ} Γᵘ {Γᵍ} :
     nat → nProp nL (;ᵞ Γᵘ ++ Γᵍ) → nProp nL (;ᵞ Γᵘ ++ Γᵍ) → nProp σ (Γᵘ;ᵞ Γᵍ)
 
+(** Universal quantification over [A → nProp] *)
+| n_n_forall {σ Γᵘ Γᵍ} V : nProp σ (V :: Γᵘ;ᵞ Γᵍ) → nProp σ (Γᵘ;ᵞ Γᵍ)
+(** Existential quantification over [A → nProp] *)
+| n_n_exist {σ Γᵘ Γᵍ} V : nProp σ (V :: Γᵘ;ᵞ Γᵍ) → nProp σ (Γᵘ;ᵞ Γᵍ)
 (** Recursive small proposition *)
 | n_recs {σ Γᵘ Γᵍ} {A : Type} :
     (A → nProp nS (A →nPS :: Γᵘ;ᵞ Γᵍ)) → A → nProp σ (Γᵘ;ᵞ Γᵍ)
 (** Recursive large proposition *)
 | n_recl {Γᵘ Γᵍ} {A : Type} :
     (A → nProp nL (A →nPL :: Γᵘ;ᵞ Γᵍ)) → A → nProp nL (Γᵘ;ᵞ Γᵍ)
-(** Universal quantification over [A → nProp] *)
-| n_n_forall {σ Γᵘ Γᵍ} V : nProp σ (V :: Γᵘ;ᵞ Γᵍ) → nProp σ (Γᵘ;ᵞ Γᵍ)
-(** Existential quantification over [A → nProp] *)
-| n_n_exist {σ Γᵘ Γᵍ} V : nProp σ (V :: Γᵘ;ᵞ Γᵍ) → nProp σ (Γᵘ;ᵞ Γᵍ)
 
 (** Guarded small variable *)
 | n_vargs {σ Γᵘ Γᵍ} : schoice npargS Γᵍ → nProp σ (Γᵘ;ᵞ Γᵍ)
@@ -153,6 +153,12 @@ Notation "P ⊢{ i }{ Γᵘ } Q" := (n_deriv Γᵘ i P Q)
 Notation "P ⊢{ i } Q" := (n_deriv _ i P Q)
   (at level 99, Q at level 200, format "P  ⊢{ i }  Q") : nProp_scope.
 
+Notation "∀: V , P" := (n_n_forall V P)
+  (at level 200, right associativity,
+    format "'[' '[' ∀:  V ']' ,  '/' P ']'") : nProp_scope.
+Notation "∃: V , P" := (n_n_exist V P)
+  (at level 200, right associativity,
+    format "'[' '[' ∃:  V ']' ,  '/' P ']'") : nProp_scope.
 Notation "rec:ˢ' Φ" := (n_recs Φ)
   (at level 200, right associativity, only parsing) : nProp_scope.
 Notation "rec:ˢ x , P" := (n_recs (λ x, P))
@@ -163,12 +169,6 @@ Notation "rec:ˡ' Φ" := (n_recl Φ)
 Notation "rec:ˡ x , P" := (n_recl (λ x, P))
   (at level 200, right associativity,
     format "'[' '[' rec:ˡ  x ,  '/' P ']' ']'") : nProp_scope.
-Notation "∀: V , P" := (n_n_forall V P)
-  (at level 200, right associativity,
-    format "'[' '[' ∀:  V ']' ,  '/' P ']'") : nProp_scope.
-Notation "∃: V , P" := (n_n_exist V P)
-  (at level 200, right associativity,
-    format "'[' '[' ∃:  V ']' ,  '/' P ']'") : nProp_scope.
 
 Notation "%ᵍˢ s" := (n_vargs s) (at level 20, right associativity)
   : nProp_scope.
@@ -198,10 +198,10 @@ Fixpoint nlarge {σ Γ} (P : nProp σ Γ) : nPropL Γ :=
   | |={E,E'}=> P => |={E,E'}=> nlarge P
   | ▷ P => ▷ P
   | P ⊢{i} Q => P ⊢{i} Q
-  | (rec:ˢ' Φ) a => (rec:ˢ' Φ) a
-  | (rec:ˡ' Φ) a => (rec:ˡ' Φ) a
   | ∀: V, P => ∀: V, nlarge P
   | ∃: V, P => ∃: V, nlarge P
+  | (rec:ˢ' Φ) a => (rec:ˢ' Φ) a
+  | (rec:ˡ' Φ) a => (rec:ˡ' Φ) a
   | %ᵍˢ s => %ᵍˢ s
   | %ᵍˡ s => %ᵍˡ s
   | %ᵘˢ s => %ᵘˢ s

@@ -240,22 +240,6 @@ Section bi.
   Lemma n_löb {d i P} : δ d i ((▷{nil} P → P), P)%n.
   Proof. apply n_bysem=>/= >. rewrite neval_fp_neval/=. apply bi.löb. Qed.
 
-  (** Laws for [rec:ˢ] *)
-  Lemma n_recs_unfold {d i A Φ} {a : A} :
-    δ d i ((rec:ˢ' Φ) a, nlarge (nsubst (Φ a) (rec:ˢ' Φ)))%n.
-  Proof. apply n_bysem=>/= >. by rewrite nevalx_neval neval_nlarge. Qed.
-  Lemma n_recs_fold {d i A Φ} {a : A} :
-    δ d i (nlarge (nsubst (Φ a) (rec:ˢ' Φ)), (rec:ˢ' Φ) a)%n.
-  Proof. apply n_bysem=>/= >. by rewrite neval_nlarge nevalx_neval. Qed.
-
-  (** Laws for [rec:ˡ] *)
-  Lemma n_recl_unfold {d i A Φ} {a : A} :
-    δ d i ((rec:ˡ' Φ) a, nsubst (Φ a) (rec:ˡ' Φ))%n.
-  Proof. apply n_bysem=>/= >. by rewrite nevalx_neval. Qed.
-  Lemma n_recl_fold {d i A Φ} {a : A} :
-    δ d i (nsubst (Φ a) (rec:ˡ' Φ), (rec:ˡ' Φ) a)%n.
-  Proof. apply n_bysem=>/= >. by rewrite (eq_hwf (rew _ in _)). Qed.
-
   (** Laws for [∀:] *)
   Lemma n_n_forall_intro {d i V P Q} :
     (∀ Φ, δ d i (P, nsubst Q Φ)%n) → δ d i (P, ∀: V, Q)%n.
@@ -281,6 +265,22 @@ Section bi.
     move=> ?. apply n_bysem=>/= >. apply bi.exist_elim=> ?.
     rewrite (eq_hwf (rew _ in _)). by apply nin_sem.
   Qed.
+
+  (** Laws for [rec:ˢ] *)
+  Lemma n_recs_unfold {d i A Φ} {a : A} :
+    δ d i ((rec:ˢ' Φ) a, nlarge (nsubst (Φ a) (rec:ˢ' Φ)))%n.
+  Proof. apply n_bysem=>/= >. by rewrite nevalx_neval neval_nlarge. Qed.
+  Lemma n_recs_fold {d i A Φ} {a : A} :
+    δ d i (nlarge (nsubst (Φ a) (rec:ˢ' Φ)), (rec:ˢ' Φ) a)%n.
+  Proof. apply n_bysem=>/= >. by rewrite neval_nlarge nevalx_neval. Qed.
+
+  (** Laws for [rec:ˡ] *)
+  Lemma n_recl_unfold {d i A Φ} {a : A} :
+    δ d i ((rec:ˡ' Φ) a, nsubst (Φ a) (rec:ˡ' Φ))%n.
+  Proof. apply n_bysem=>/= >. by rewrite nevalx_neval. Qed.
+  Lemma n_recl_fold {d i A Φ} {a : A} :
+    δ d i (nsubst (Φ a) (rec:ˡ' Φ), (rec:ˡ' Φ) a)%n.
+  Proof. apply n_bysem=>/= >. by rewrite (eq_hwf (rew _ in _)). Qed.
 
   (** Laws for [!ᵘˢ] *)
   Lemma n_subus_unfold {d i P} : δ d i (!ᵘˢ P, nlarge P)%n.

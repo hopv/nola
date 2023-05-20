@@ -24,10 +24,10 @@ Fixpoint nliftg {Δ σ Γ} (P : nProp σ Γ) : nProp σ (Γ.ᵞu;ᵞ Γ.ᵞg ++ 
   | |={E,E'}=> P => |={E,E'}=> nliftg P
   | ▷ P => ▷ rew app_assoc'_g in nliftg P
   | P ⊢{i} Q => rew app_assoc'_g in nliftg P ⊢{i} rew app_assoc'_g in nliftg Q
-  | (rec:ˢ' Φ) a => (rec:ˢ' nliftg ∘ Φ) a
-  | (rec:ˡ' Φ) a => (rec:ˡ' nliftg ∘ Φ) a
   | ∀: V, P => ∀: V, nliftg P
   | ∃: V, P => ∃: V, nliftg P
+  | (rec:ˢ' Φ) a => (rec:ˢ' nliftg ∘ Φ) a
+  | (rec:ˡ' Φ) a => (rec:ˡ' nliftg ∘ Φ) a
   | %ᵍˢ s => %ᵍˢ sbylapp s _
   | %ᵍˡ s => %ᵍˡ sbylapp s _
   | %ᵘˢ s => %ᵘˢ s
@@ -63,10 +63,10 @@ Fixpoint nliftug {Δᵘ Δᵍ σ Γ} (P : nProp σ Γ)
   | P ⊢{i} Q => λ gn,
       rew app_assoc_eq_nil_g gn in nliftg P ⊢{i}
         rew app_assoc_eq_nil_g gn in nliftg P
-  | (rec:ˢ' Φ) a => λ gn, (rec:ˢ b, nliftug (Φ b) gn) a
-  | (rec:ˡ' Φ) a => λ gn, (rec:ˡ b, nliftug (Φ b) gn) a
   | ∀: V, P => λ gn, ∀: V, nliftug P gn
   | ∃: V, P => λ gn, ∃: V, nliftug P gn
+  | (rec:ˢ' Φ) a => λ gn, (rec:ˢ b, nliftug (Φ b) gn) a
+  | (rec:ˡ' Φ) a => λ gn, (rec:ˡ b, nliftug (Φ b) gn) a
   | %ᵍˢ s | %ᵍˡ s => seqnil s
   | %ᵘˢ s => λ _, %ᵘˢ sbylapp s _
   | !ᵘˢ P => λ _, !ᵘˢ P
@@ -122,10 +122,10 @@ Fixpoint nsubstlg {σ Γ i} (P : nProp σ Γ)
   | P ⊢{j} Q => λ Φs,
       rew take_add_app_g in nsubstlg P (rew drop_add_app'_d in Φs) ⊢{j}
         rew take_add_app_g in nsubstlg Q (rew drop_add_app'_d in Φs)
-  | (rec:ˢ' Φ) a => λ Φs, (rec:ˢ b, nsubstlg (Φ b) Φs) a
-  | (rec:ˡ' Φ) a => λ Φs, (rec:ˡ b, nsubstlg (Φ b) Φs) a
   | ∀: V, P => λ Φs, ∀: V, nsubstlg P Φs
   | ∃: V, P => λ Φs, ∃: V, nsubstlg P Φs
+  | (rec:ˢ' Φ) a => λ Φs, (rec:ˢ b, nsubstlg (Φ b) Φs) a
+  | (rec:ˡ' Φ) a => λ Φs, (rec:ˡ b, nsubstlg (Φ b) Φs) a
   | %ᵍˢ s => λ Φs, match stakedrop _ s with
       inl s => %ᵍˢ s | inr s => nlift (spapply (λ _, npargS_apply) s Φs) end
   | %ᵍˡ s => λ Φs, match stakedrop _ s with
@@ -168,10 +168,10 @@ Fixpoint nsubstlu {σ Γ i} (P : nProp σ Γ)
   | P ⊢{j} Q => λ Φs gn,
       rew f_app_eq_nil_out_g gn in nsubstlg P (rew f_app_eq_nil_d gn in Φs) ⊢{j}
         rew f_app_eq_nil_out_g gn in nsubstlg Q (rew f_app_eq_nil_d gn in Φs)
-  | (rec:ˢ' Φ) a => λ Φs gn, (rec:ˢ b, nsubstlu (i:=S i) (Φ b) Φs gn) a
-  | (rec:ˡ' Φ) a => λ Φs gn, (rec:ˡ b, nsubstlu (i:=S i) (Φ b) Φs gn) a
   | ∀: V, P => λ Φs gn, ∀: V, nsubstlu (i:=S i) P Φs gn
   | ∃: V, P => λ Φs gn, ∃: V, nsubstlu (i:=S i) P Φs gn
+  | (rec:ˢ' Φ) a => λ Φs gn, (rec:ˢ b, nsubstlu (i:=S i) (Φ b) Φs gn) a
+  | (rec:ˡ' Φ) a => λ Φs gn, (rec:ˡ b, nsubstlu (i:=S i) (Φ b) Φs gn) a
   | %ᵍˢ s | %ᵍˡ s => λ _, seqnil s
   | %ᵘˢ s => λ Φs _, match stakedrop _ s with
       inl s => %ᵘˢ s | inr s => !ᵘˢ (spapply (λ _, nparg_apply) s Φs) end
@@ -208,8 +208,8 @@ Fixpoint nheight {σ Γ} (P : nProp σ Γ) : hgt :=
   | P ∧ Q | P ∨ Q | P → Q | P ∗ Q | P -∗ Q => hgt_2 (nheight P) (nheight Q)
   | ∀' Φ | ∃' Φ => hgt_all (nheight ∘ Φ)
   | ▷ _ | _ ⊢{_} _ => hgt_0
-  | (rec:ˢ' Φ) a | (rec:ˡ' Φ) a => hgt_1 (nheight (Φ a))
   | ∀: _, P | ∃: _, P => hgt_1 (nheight P)
+  | (rec:ˢ' Φ) a | (rec:ˡ' Φ) a => hgt_1 (nheight (Φ a))
   | %ᵍˢ _ | %ᵍˡ _ | %ᵘˢ _ | !ᵘˢ _ => hgt_0
   end%n.
 
