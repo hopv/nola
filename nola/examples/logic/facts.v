@@ -25,7 +25,7 @@ Section bi.
   Lemma n_pure_elim {d i} {φ : Prop} {P} :
     (φ → True ⊢{δ d, i} P) → ⌜φ⌝ ⊢{δ d, i} P.
   Proof.
-    move=> H. apply n_bysem=>/= >. apply (bi.pure_elim φ); [done|]=> x.
+    move=> H. apply n_bysem=>/= >. apply bi.pure_elim'=> x.
     move: (H x)=> /nin_sem/= <-. apply bi.True_intro.
   Qed.
 
