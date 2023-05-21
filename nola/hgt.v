@@ -33,6 +33,10 @@ Infix "‼ʰ" := hat (at level 20, no associativity) : nola_scope.
 (** [hwf]: [hAcc h] for all [h : hgt] *)
 Fixpoint hwf {h} : hAcc h := HAcc (λ _ _ eq, rew eq_sym eq in hwf).
 
+(** Simplify [rew eq_sym … in hwf] *)
+Lemma rew_eq_hwf {h h'} (eq : h' = h) : rew[hAcc] eq_sym eq in hwf = hwf.
+Proof. by subst. Qed.
+
 (** Under functional extensionality *)
 From nola Require Import util.funext.
 

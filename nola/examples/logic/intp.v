@@ -169,10 +169,6 @@ Notation nintpS d P := (nintpSx d P hwf).
 Section nintp_facts.
   Context (** Iris resources *) `{!nintpG Σ}.
 
-  (** [nintpx] coincides with [nintp] *)
-  Lemma nintpx_nintp {d σ P H} : nintpx' Σ d σ P H ⊣⊢ nintp d P.
-  Proof. by rewrite (eq_hwf H). Qed.
-
   (** [nintp_fp] coincides with [nintp] *)
   Lemma nintp_fp_nintp {d σ P} : nintp_fp d σ P ⊣⊢ nintp d P.
   Proof. unfold nintp_fp. apply (fixpoint_unfold nintp_pre). Qed.
@@ -187,9 +183,6 @@ Section nintp_facts.
   (** [nintpS] coincides with [nintp] *)
   Lemma nintpS_nintp {d P} : nintpS' Σ d P ⊣⊢ nintp d P.
   Proof. exact nintpS_gen_nintp_gen. Qed.
-  (** [nintpSx] coincides with [nintp] *)
-  Lemma nintpSx_nintp {d P H} : nintpSx' Σ d P H ⊣⊢ nintp d P.
-  Proof. rewrite (eq_hwf H). exact nintpS_nintp. Qed.
 
   (** Simplify [nintp_gen] over [nlarge] *)
   Lemma nintp_gen_nlarge {ni d σ Γ} {P : nProp σ Γ} {H un gn} :
@@ -198,8 +191,8 @@ Section nintp_facts.
     move: σ Γ P H un gn. fix FIX 4=> σ Γ P H.
     case: P H=>/=; intros; case H=>/= he; f_equiv=> >; try apply FIX;
     try apply leibniz_equiv, eq_hacc;
-    rewrite (eq_hwf (rew _ in _)); move: nsubst'_nheight=>/=;
-    subst; have EQ := (nsubst_nlarge (P:=n)); move: (nsubst (nlarge n)) EQ;
+    rewrite rew_eq_hwf; move: nsubst'_nheight=>/=; subst;
+    have EQ := (nsubst_nlarge (P:=n)); move: (nsubst (nlarge n)) EQ;
     move=> ?->?; apply FIX.
   Qed.
   (** Simplify [nintp] over [nlarge] *)
