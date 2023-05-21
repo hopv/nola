@@ -1,4 +1,4 @@
-(** * Judgment and derivability *)
+(** * Judgment derivability *)
 
 From nola Require Export util.pred util.wft.
 

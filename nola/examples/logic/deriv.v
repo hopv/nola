@@ -1,7 +1,7 @@
-(** * Derivability *)
+(** * Judgment derivability *)
 
 From nola.examples.logic Require Export intp.
-From nola Require Export util.wft judg.
+From nola Require Export util.wft deriv.
 From iris.base_logic.lib Require Import iprop.
 
 Implicit Type (d : nderiv_ty) (δ : npderiv_ty) (i j : nat).
