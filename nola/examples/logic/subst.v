@@ -93,6 +93,7 @@ Proof. apply (nliftug_nlarge (Γ:=(;ᵞ))). Qed.
 
 (** [nPred V]: Type of an instantiation of [V : npvar] *)
 Definition nPred : npvar → Type := λ '(A →nP σ), A → nProp σ (;ᵞ).
+Bind Scope nProp_scope with nPred.
 
 (** Apply to [nparg σ V] [nPred V] *)
 Definition nparg_apply {σ V} : nparg σ V → nPred V → nProp σ (;ᵞ) :=

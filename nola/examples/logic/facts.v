@@ -270,18 +270,18 @@ Section nola.
 
   (** Laws for [rec:ˢ] *)
   Lemma n_recs_unfold {d i A Φ} {a : A} :
-    rec:ˢ' Φ a ⊢{δ d, i} nlarge (nsubst (Φ a) (rec:ˢ' Φ)%n).
+    rec:ˢ' Φ a ⊢{δ d, i} nlarge (nsubst (Φ a) (rec:ˢ' Φ)).
   Proof. apply n_bysem=>/= >. by rewrite rew_eq_hwf nintp_nlarge. Qed.
   Lemma n_recs_fold {d i A Φ} {a : A} :
-    nlarge (nsubst (Φ a) (rec:ˢ'%n Φ)) ⊢{δ d, i} rec:ˢ' Φ a.
+    nlarge (nsubst (Φ a) (rec:ˢ' Φ)) ⊢{δ d, i} rec:ˢ' Φ a.
   Proof. apply n_bysem=>/= >. by rewrite nintp_nlarge rew_eq_hwf. Qed.
 
   (** Laws for [rec:ˡ] *)
   Lemma n_recl_unfold {d i A Φ} {a : A} :
-    rec:ˡ' Φ a ⊢{δ d, i} nsubst (Φ a) (rec:ˡ' Φ)%n.
+    rec:ˡ' Φ a ⊢{δ d, i} nsubst (Φ a) (rec:ˡ' Φ).
   Proof. apply n_bysem=>/= >. by rewrite rew_eq_hwf. Qed.
   Lemma n_recl_fold {d i A Φ} {a : A} :
-    nsubst (Φ a) (rec:ˡ' Φ)%n ⊢{δ d, i} rec:ˡ' Φ a.
+    nsubst (Φ a) (rec:ˡ' Φ) ⊢{δ d, i} rec:ˡ' Φ a.
   Proof. apply n_bysem=>/= >. by rewrite rew_eq_hwf. Qed.
 
   (** Laws for [!ᵘˢ] *)
