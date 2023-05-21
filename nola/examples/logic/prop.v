@@ -56,56 +56,56 @@ Notation "@! a" := (Nparg a) (at level 20, right associativity) : nola_scope.
 Inductive nProp : nsort → nctx → Type :=
 
 (** Pure proposition *)
-| n_pure {σ Γ} : Prop → nProp σ Γ
+| n_pure {σ Γ} (φ : Prop) : nProp σ Γ
 (** Conjunction *)
-| n_and {σ Γ} : nProp σ Γ → nProp σ Γ → nProp σ Γ
+| n_and {σ Γ} (P Q : nProp σ Γ) : nProp σ Γ
 (** Disjunction *)
-| n_or {σ Γ} : nProp σ Γ → nProp σ Γ → nProp σ Γ
+| n_or {σ Γ} (P Q : nProp σ Γ) : nProp σ Γ
 (** Implication *)
-| n_impl {σ Γ} : nProp σ Γ → nProp σ Γ → nProp σ Γ
+| n_impl {σ Γ} (P Q : nProp σ Γ) : nProp σ Γ
 (** Universal quantification *)
-| n_forall {σ Γ} {A : Type} : (A → nProp σ Γ) → nProp σ Γ
+| n_forall {σ Γ} {A : Type} (Φ : A → nProp σ Γ) : nProp σ Γ
 (** Existential quantification *)
-| n_exist {σ Γ} {A : Type} : (A → nProp σ Γ) → nProp σ Γ
+| n_exist {σ Γ} {A : Type} (Φ : A → nProp σ Γ) : nProp σ Γ
 
 (** Separating conjunction *)
-| n_sep {σ Γ} : nProp σ Γ → nProp σ Γ → nProp σ Γ
+| n_sep {σ Γ} (P Q : nProp σ Γ) : nProp σ Γ
 (** Magic wand *)
-| n_wand {σ Γ} : nProp σ Γ → nProp σ Γ → nProp σ Γ
+| n_wand {σ Γ} (P Q : nProp σ Γ) : nProp σ Γ
 (** Persistence modality *)
-| n_persistently {σ Γ} : nProp σ Γ → nProp σ Γ
+| n_persistently {σ Γ} (P : nProp σ Γ) : nProp σ Γ
 (** Plainly modality *)
-| n_plainly {σ Γ} : nProp σ Γ → nProp σ Γ
+| n_plainly {σ Γ} (P : nProp σ Γ) : nProp σ Γ
 (** Basic update modality *)
-| n_bupd {σ Γ} : nProp σ Γ → nProp σ Γ
+| n_bupd {σ Γ} (P : nProp σ Γ) : nProp σ Γ
 (** Fancy update modality *)
-| n_fupd {σ Γ} : coPset → coPset → nProp σ Γ → nProp σ Γ
+| n_fupd {σ Γ} (E E' : coPset) (P : nProp σ Γ) : nProp σ Γ
 
 (** Later modality *)
-| n_later {σ} Γᵘ {Γᵍ} : nProp nL (;ᵞ Γᵘ ++ Γᵍ) → nProp σ (Γᵘ;ᵞ Γᵍ)
+| n_later {σ} Γᵘ {Γᵍ} (P : nProp nL (;ᵞ Γᵘ ++ Γᵍ)) : nProp σ (Γᵘ;ᵞ Γᵍ)
 (** Judgment derivability *)
-| n_deriv {σ} Γᵘ {Γᵍ} :
-    nat → nProp nL (;ᵞ Γᵘ ++ Γᵍ) → nProp nL (;ᵞ Γᵘ ++ Γᵍ) → nProp σ (Γᵘ;ᵞ Γᵍ)
+| n_deriv {σ} Γᵘ {Γᵍ} (i : nat) (P Q : nProp nL (;ᵞ Γᵘ ++ Γᵍ)) :
+    nProp σ (Γᵘ;ᵞ Γᵍ)
 
 (** Universal quantification over [A → nProp] *)
-| n_n_forall {σ Γᵘ Γᵍ} V : nProp σ (V :: Γᵘ;ᵞ Γᵍ) → nProp σ (Γᵘ;ᵞ Γᵍ)
+| n_n_forall {σ Γᵘ Γᵍ} V (P : nProp σ (V :: Γᵘ;ᵞ Γᵍ)) : nProp σ (Γᵘ;ᵞ Γᵍ)
 (** Existential quantification over [A → nProp] *)
-| n_n_exist {σ Γᵘ Γᵍ} V : nProp σ (V :: Γᵘ;ᵞ Γᵍ) → nProp σ (Γᵘ;ᵞ Γᵍ)
+| n_n_exist {σ Γᵘ Γᵍ} V (P : nProp σ (V :: Γᵘ;ᵞ Γᵍ)) : nProp σ (Γᵘ;ᵞ Γᵍ)
 (** Recursive small proposition *)
-| n_recs {σ Γᵘ Γᵍ} {A : Type} :
-    (A → nProp nS (A →nPS :: Γᵘ;ᵞ Γᵍ)) → A → nProp σ (Γᵘ;ᵞ Γᵍ)
+| n_recs {σ Γᵘ Γᵍ} {A : Type} (Φ : A → nProp nS (A →nPS :: Γᵘ;ᵞ Γᵍ)) (a : A) :
+    nProp σ (Γᵘ;ᵞ Γᵍ)
 (** Recursive large proposition *)
-| n_recl {Γᵘ Γᵍ} {A : Type} :
-    (A → nProp nL (A →nPL :: Γᵘ;ᵞ Γᵍ)) → A → nProp nL (Γᵘ;ᵞ Γᵍ)
+| n_recl {Γᵘ Γᵍ} {A : Type} (Φ : A → nProp nL (A →nPL :: Γᵘ;ᵞ Γᵍ)) (a : A) :
+    nProp nL (Γᵘ;ᵞ Γᵍ)
 
 (** Guarded small variable *)
-| n_vargs {σ Γᵘ Γᵍ} : schoice npargS Γᵍ → nProp σ (Γᵘ;ᵞ Γᵍ)
+| n_vargs {σ Γᵘ Γᵍ} (s : schoice npargS Γᵍ) : nProp σ (Γᵘ;ᵞ Γᵍ)
 (** Guarded large variable, [nPropL] only *)
-| n_vargl {Γᵘ Γᵍ} : schoice npargL Γᵍ → nProp nL (Γᵘ;ᵞ Γᵍ)
+| n_vargl {Γᵘ Γᵍ} (s : schoice npargL Γᵍ) : nProp nL (Γᵘ;ᵞ Γᵍ)
 (** Unguarded small variable, [nPropL] only *)
-| n_varus {Γᵘ Γᵍ} : schoice npargS Γᵘ → nProp nL (Γᵘ;ᵞ Γᵍ)
+| n_varus {Γᵘ Γᵍ} (s : schoice npargS Γᵘ) : nProp nL (Γᵘ;ᵞ Γᵍ)
 (** Substituted [n_varus] *)
-| n_subus {Γᵘ Γᵍ} : nProp nS (;ᵞ) → nProp nL (Γᵘ;ᵞ Γᵍ).
+| n_subus {Γᵘ Γᵍ} (P : nProp nS (;ᵞ)) : nProp nL (Γᵘ;ᵞ Γᵍ).
 
 Notation nPropS := (nProp nS).
 Notation nPropL := (nProp nL).

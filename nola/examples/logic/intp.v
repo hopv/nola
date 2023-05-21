@@ -192,7 +192,7 @@ Section nintp_facts.
     case: P H=>/=; intros; case H=>/= he; f_equiv=> >; try apply FIX;
     try apply leibniz_equiv, eq_hacc;
     rewrite rew_eq_hwf; move: nsubst'_nheight=>/=; subst;
-    have EQ := (nsubst_nlarge (P:=n)); move: (nsubst (nlarge n)) EQ;
+    have EQ := nsubst_nlarge (P:=P); move: (nsubst (nlarge P)) EQ;
     move=> ?->?; apply FIX.
   Qed.
   (** Simplify [nintp] over [nlarge] *)
