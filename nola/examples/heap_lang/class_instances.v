@@ -79,6 +79,9 @@ Section atomic.
         * apply irreducible_resolve. by rewrite fill_app in Hs.
       + econstructor; try done. simpl. by rewrite fill_app.
   Qed.
+
+  Global Instance ndnat_atomic s : Atomic s Ndnat.
+  Proof. solve_atomic. Qed.
 End atomic.
 
 (** * Instances of the [PureExec] class *)

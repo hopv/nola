@@ -593,4 +593,20 @@ Proof.
     iMod "HΦ". iModIntro. by iApply "HΦ".
 Qed.
 
+Lemma twp_ndnat s E :
+  [[{ True }]] Ndnat @ s; E [[{ (n : nat), RET (LitV (LitInt n)); True }]].
+Proof.
+  iIntros (Φ) "_ HΦ". iApply twp_lift_atomic_head_step_no_fork; first done.
+  iIntros (σ1 ns κs nt) "(Hσ & Hκs & Hsteps) !>".
+  iSplit; [by auto with head_step|]. iIntros (κ v2 σ2 efs Hstep); inv_head_step.
+  iMod (steps_auth_update_S with "Hsteps") as "Hsteps".
+  iModIntro. do 2 (iSplit; [done|]). iFrame. by iApply "HΦ".
+Qed.
+Lemma wp_ndnat s E :
+  {{{ True }}} Ndnat @ s; E {{{ (n : nat), RET (LitV (LitInt n)); True }}}.
+Proof.
+  iIntros (Φ) "_ HΦ". iApply (twp_wp_step with "HΦ").
+  iApply twp_ndnat; [done|]. iIntros (n) "_ HΦ". by iApply "HΦ".
+Qed.
+
 End lifting.

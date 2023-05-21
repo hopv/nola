@@ -120,6 +120,8 @@ Inductive expr :=
   (* Prophecy *)
   | NewProph
   | Resolve (e0 : expr) (e1 : expr) (e2 : expr) (* wrapped expr, proph, val *)
+  (* Non-determinism *)
+  | Ndnat
 with val :=
   | LitV (l : base_lit)
   | RecV (f x : binder) (e : expr)
@@ -260,6 +262,7 @@ Proof.
      | NewProph, NewProph => left _
      | Resolve e0 e1 e2, Resolve e0' e1' e2' =>
         cast_if_and3 (decide (e0 = e0')) (decide (e1 = e1')) (decide (e2 = e2'))
+     | Ndnat, Ndnat => left _
      | _, _ => right _
      end
    with gov (v1 v2 : val) {struct v1} : Decision (v1 = v2) :=
@@ -341,6 +344,7 @@ Proof.
      | FAA e1 e2 => GenNode 19 [go e1; go e2]
      | NewProph => GenNode 20 []
      | Resolve e0 e1 e2 => GenNode 21 [go e0; go e1; go e2]
+     | Ndnat => GenNode 22 []
      end
    with gov v :=
      match v with
@@ -378,6 +382,7 @@ Proof.
      | GenNode 19 [e1; e2] => FAA (go e1) (go e2)
      | GenNode 20 [] => NewProph
      | GenNode 21 [e0; e1; e2] => Resolve (go e0) (go e1) (go e2)
+     | GenNode 22 [] => Ndnat
      | _ => Val $ LitV LitUnit (* dummy *)
      end
    with gov v :=
@@ -392,8 +397,8 @@ Proof.
    for go).
  refine (inj_countable' enc dec _).
  refine (fix go (e : expr) {struct e} := _ with gov (v : val) {struct v} := _ for go).
- - destruct e as [v| | | | | | | | | | | | | | | | | | | | | |]; simpl; f_equal;
-     [exact (gov v)|done..].
+ - destruct e as [v| | | | | | | | | | | | | | | | | | | | | | |]; simpl;
+     f_equal; [exact (gov v)|done..].
  - destruct v; by f_equal.
 Qed.
 Global Instance val_countable : Countable val.
@@ -508,6 +513,7 @@ Fixpoint subst (x : string) (v : val) (e : expr)  : expr :=
   | Fork e => Fork (subst x v e)
   | NewProph => NewProph
   | Resolve ex e1 e2 => Resolve (subst x v ex) (subst x v e1) (subst x v e2)
+  | Ndnat => Ndnat
   end.
 
 Definition subst' (mx : binder) (v : val) : expr → expr :=
@@ -718,7 +724,9 @@ Inductive head_step : expr → state → list observation → expr → state →
   | ResolveS p v e σ w σ' κs ts :
      head_step e σ κs (Val v) σ' ts →
      head_step (Resolve e (Val $ LitV $ LitProphecy p) (Val w)) σ
-               (κs ++ [(p, (v, w))]) (Val v) σ' ts.
+               (κs ++ [(p, (v, w))]) (Val v) σ' ts
+  | NdnatS (n : nat) σ :
+     head_step Ndnat σ [] (Val $ LitV $ LitInt n) σ [].
 
 (** Basic properties about the language *)
 Global Instance fill_item_inj Ki : Inj (=) (=) (fill_item Ki).

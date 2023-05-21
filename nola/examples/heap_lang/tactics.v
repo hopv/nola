@@ -80,3 +80,4 @@ Global Hint Extern 1 (head_step _ _ _ _ _ _) => econstructor : head_step.
 Global Hint Extern 0 (head_step (CmpXchg _ _ _) _ _ _ _ _) => eapply CmpXchgS : head_step.
 Global Hint Extern 0 (head_step (AllocN _ _) _ _ _ _ _) => apply alloc_fresh : head_step.
 Global Hint Extern 0 (head_step NewProph _ _ _ _ _) => apply new_proph_id_fresh : head_step.
+Global Hint Extern 0 (head_step Ndnat _ _ _ _ _) => apply (NdnatS 0) : head_step.

@@ -26,6 +26,7 @@ Fixpoint is_closed_expr (X : stringset) (e : expr) : bool :=
   | If e0 e1 e2 | Case e0 e1 e2 | CmpXchg e0 e1 e2 | Resolve e0 e1 e2 =>
      is_closed_expr X e0 && is_closed_expr X e1 && is_closed_expr X e2
   | NewProph => true
+  | Ndnat => true
   end
 with is_closed_val (v : val) : bool :=
   match v with
@@ -61,6 +62,7 @@ Fixpoint subst_map (vs : gmap string val) (e : expr) : expr :=
   | FAA e1 e2 => FAA (subst_map vs e1) (subst_map vs e2)
   | NewProph => NewProph
   | Resolve e0 e1 e2 => Resolve (subst_map vs e0) (subst_map vs e1) (subst_map vs e2)
+  | Ndnat => Ndnat
   end.
 
 (* Properties *)
