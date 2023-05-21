@@ -183,53 +183,53 @@ Section bi.
     move=> ?. apply n_bysem=>/= >. f_equiv. rewrite !nintp_fp_nintp.
     by apply nin_sem.
   Qed.
-  Lemma n_later_intro {d i} {P : nPropL (;ᵞ)} : P ⊢{δ d, i} ▷{nil} P.
+  Lemma n_later_intro {d i} {P : _ (;ᵞ)} : P ⊢{δ d, i} ▷{nil} P.
   Proof.
     apply n_bysem=>/= >. rewrite nintp_fp_nintp. apply bi.later_intro.
   Qed.
-  Lemma n_later_forall_2 {d i A} {Φ : A → nPropL (;ᵞ)} :
+  Lemma n_later_forall_2 {d i A} {Φ : A → _ (;ᵞ)} :
     (∀ a, ▷{nil} Φ a) ⊢{δ d, i} ▷{nil} ∀' Φ.
   Proof.
     apply n_bysem=>/= >. setoid_rewrite nintp_fp_nintp=>/=.
     apply bi.later_forall_2.
   Qed.
-  Lemma n_later_exist_except_0 {d i A} {Φ : A → nPropL (;ᵞ)} :
+  Lemma n_later_exist_except_0 {d i A} {Φ : A → _ (;ᵞ)} :
     ▷{nil} (∃ a, Φ a) ⊢{δ d, i} ◇ (∃ a, ▷{nil} Φ a).
   Proof.
     apply n_bysem=>/= >. setoid_rewrite nintp_fp_nintp=>/=.
     apply bi.later_exist_false.
   Qed.
-  Lemma n_later_sep_1 {d i} {P Q : nPropL (;ᵞ)} :
+  Lemma n_later_sep_1 {d i} {P Q : _ (;ᵞ)} :
     ▷{nil} (P ∗ Q) ⊢{δ d, i} ▷{nil} P ∗ ▷{nil} Q.
   Proof.
     apply n_bysem=>/= >. rewrite !nintp_fp_nintp/=. apply bi.later_sep_1.
   Qed.
-  Lemma n_later_sep_2 {d i} {P Q : nPropL (;ᵞ)} :
+  Lemma n_later_sep_2 {d i} {P Q : _ (;ᵞ)} :
     ▷{nil} P ∗ ▷{nil} Q ⊢{δ d, i} ▷{nil} (P ∗ Q).
   Proof.
     apply n_bysem=>/= >. rewrite !nintp_fp_nintp/=. apply bi.later_sep_2.
   Qed.
-  Lemma n_later_false_em {d i} {P : nPropL (;ᵞ)} :
+  Lemma n_later_false_em {d i} {P : _ (;ᵞ)} :
     ▷{nil} P ⊢{δ d, i} ◇ (▷ False → P).
   Proof.
     apply n_bysem=>/= >. rewrite !nintp_fp_nintp/=. apply bi.later_false_em.
   Qed.
-  Lemma n_later_persistently_1 {d i} {P : nPropL (;ᵞ)} :
+  Lemma n_later_persistently_1 {d i} {P : _ (;ᵞ)} :
     ▷{nil} □ P ⊢{δ d, i} □ ▷{nil} P.
   Proof.
     apply n_bysem=>/= >. rewrite !nintp_fp_nintp/=. iIntros "#? !#". by iNext.
   Qed.
-  Lemma n_later_persistently_2 {d i} {P : nPropL (;ᵞ)} :
+  Lemma n_later_persistently_2 {d i} {P : _ (;ᵞ)} :
     □ ▷{nil} P ⊢{δ d, i} ▷{nil} □ P.
   Proof.
     apply n_bysem=>/= >. rewrite !nintp_fp_nintp/=. iIntros. by iNext.
   Qed.
-  Lemma n_later_plainly_1 {d i} {P : nPropL (;ᵞ)} :
+  Lemma n_later_plainly_1 {d i} {P : _ (;ᵞ)} :
     ▷{nil} ■ P ⊢{δ d, i} ■ ▷{nil} P.
   Proof.
     apply n_bysem=>/= >. rewrite !nintp_fp_nintp/=. iIntros "#? !#". by iNext.
   Qed.
-  Lemma n_later_plainly_2 {d i} {P : nPropL (;ᵞ)} :
+  Lemma n_later_plainly_2 {d i} {P : _ (;ᵞ)} :
     ■ ▷{nil} P ⊢{δ d, i} ▷{nil} ■ P.
   Proof.
     apply n_bysem=>/= >. rewrite !nintp_fp_nintp/=. iIntros. by iNext.
@@ -294,14 +294,13 @@ Section nola.
   Lemma n_deriv_intro {d i j P Q R} :
     P ⊢{δ $∨ⁿᵈ d, j} Q → R ⊢{δ d, i} (P ⊢{j}{nil} Q).
   Proof. move=> ?. apply n_bysem=>/= >. by apply bi.pure_intro, nin_turn. Qed.
-  Lemma n_deriv_elim_l_low {d i j} {P Q : nPropL (;ᵞ)} :
+  Lemma n_deriv_elim_l_low {d i j} {P Q : _ (;ᵞ)} :
     j < i → (P ⊢{j}{nil} Q) ∧ P ⊢{δ d, i} Q.
   Proof.
     move=> ji. apply n_bysem=>/= δ' ?. apply bi.pure_elim_l=> PQ.
     by apply (nin_semlow ji).
   Qed.
-  Lemma n_deriv_convert {d i j A f}
-    {Φ Ψ : A → nPropL (;ᵞ)} {P Q : nPropL (;ᵞ)} :
+  Lemma n_deriv_convert {d i j A f} {Φ Ψ : A → _ (;ᵞ)} {P Q : _ (;ᵞ)} :
     (∀ δ', nderivy Σ δ' → (∀ a, Φ a ⊢{δ' ⊥ⁿᵈ, f a} Ψ a) → P ⊢{δ' ⊥ⁿᵈ, j} Q) →
     (∀ a, Φ a ⊢{f a}{nil} Ψ a) ⊢{δ d, i} (P ⊢{j}{nil} Q).
   Proof.
