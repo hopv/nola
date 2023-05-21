@@ -5,13 +5,20 @@ From nola Require Export deriv.
 From iris.base_logic.lib Require Import iprop fancy_updates.
 Import EqNotations.
 
-(** Derivability *)
+(** Judgment *)
 #[projections(primitive)]
-Record nJudgT := njudg { nante : nPropL (;ᵞ); nsucc : nPropL (;ᵞ); }.
-Add Printing Constructor nJudgT.
-Notation nderiv_ty := (dwrap (nat → nJudgT → Prop)).
+Record nJudgTy := NJudg {
+  (** Antecedent *)
+  nante : nPropL (;ᵞ);
+  (** Succedent *)
+  nsucc : nPropL (;ᵞ);
+}.
+Add Printing Constructor nJudgTy.
+
+(** Derivability predicate *)
+Notation nderiv_ty := (dwrap (nat → nJudgTy → Prop)).
 Notation npderiv_ty := (nderiv_ty → nderiv_ty).
-Notation "P ⊢{ d , i } Q" := (dunwrap d i (njudg P Q))
+Notation "P ⊢{ d , i } Q" := (dunwrap d i (NJudg P Q))
   (at level 99, no associativity,
     format "'[' P  '/' ⊢{ d ,  i }  '/  ' Q ']'") : nola_scope.
 

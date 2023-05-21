@@ -10,7 +10,7 @@ Implicit Type (d : nderiv_ty) (δ : npderiv_ty) (i j : nat).
 
 (** [nJudg]: Judgment *)
 Definition nJudg Σ `{!nintpG Σ} : judg :=
-  Judg nat (λ _, nJudgT) (λ d _ '(njudg P Q), ⟦ P ⟧(d) ⊢ ⟦ Q ⟧(d)).
+  Judg nat (λ _, nJudgTy) (λ d _ '(NJudg P Q), ⟦ P ⟧(d) ⊢ ⟦ Q ⟧(d)).
 
 (** *[nderivy], [ninderivy], [nderiv]: Derivability *)
 Class nderivy Σ `{!nintpG Σ} δ := Nderivy {
@@ -26,7 +26,7 @@ Definition nderiv Σ `{!nintpG Σ} : npderiv_ty := deriv (nJudg Σ).
 Definition Falseⁿᵈ : nderiv_ty := Dwrap (λ _ _, False).
 Notation "⊥ⁿᵈ" := Falseⁿᵈ : nola_scope.
 Definition orⁿᵈ d d' : nderiv_ty :=
-  Dwrap (λ i '(njudg P Q), (P ⊢{d,i} Q) ∨ (P ⊢{d',i} Q)).
+  Dwrap (λ i '(NJudg P Q), (P ⊢{d,i} Q) ∨ (P ⊢{d',i} Q)).
 Infix "∨ⁿᵈ" := orⁿᵈ (at level 50, left associativity) : nola_scope.
 Definition apporⁿᵈ δ d : nderiv_ty := δ d ∨ⁿᵈ d.
 Infix "$∨ⁿᵈ" := apporⁿᵈ (at level 50, left associativity) : nola_scope.
