@@ -155,13 +155,13 @@ End neval.
 
 Notation nevalx' Σ d σ P H :=
   (@neval_gen Σ _ neval_fp d σ (;ᵞ) P H eq_refl eq_refl) (only parsing).
-Notation neval' Σ d σ P := (nevalx' Σ d σ P hwf).
+Notation neval' Σ d σ P := (nevalx' Σ d σ P hwf) (only parsing).
 Notation nevalx d P H := (nevalx' _ d _ P H).
 Notation neval d P := (nevalx d P hwf).
 Notation nevalSx' Σ d P H :=
   (@nevalS_gen Σ _ neval_fp d nS (;ᵞ) P H eq_refl eq_refl eq_refl)
   (only parsing).
-Notation nevalS' Σ d P := (nevalSx' Σ d P hwf).
+Notation nevalS' Σ d P := (nevalSx' Σ d P hwf) (only parsing).
 Notation nevalSx d P H := (nevalSx' _ d P H).
 Notation nevalS d P := (nevalSx d P hwf).
 
