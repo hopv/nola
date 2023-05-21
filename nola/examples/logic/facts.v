@@ -224,13 +224,11 @@ Section bi.
   Proof.
     apply n_bysem=>/= >. rewrite !nintp_fp_nintp/=. iIntros. by iNext.
   Qed.
-  Lemma n_later_plainly_1 {d i} {P : _ (;ᵞ)} :
-    ▷{nil} ■ P ⊢{δ d, i} ■ ▷{nil} P.
+  Lemma n_later_plainly_1 {d i} {P : _ (;ᵞ)} : ▷{nil} ■ P ⊢{δ d, i} ■ ▷{nil} P.
   Proof.
     apply n_bysem=>/= >. rewrite !nintp_fp_nintp/=. iIntros "#? !#". by iNext.
   Qed.
-  Lemma n_later_plainly_2 {d i} {P : _ (;ᵞ)} :
-    ■ ▷{nil} P ⊢{δ d, i} ▷{nil} ■ P.
+  Lemma n_later_plainly_2 {d i} {P : _ (;ᵞ)} : ■ ▷{nil} P ⊢{δ d, i} ▷{nil} ■ P.
   Proof.
     apply n_bysem=>/= >. rewrite !nintp_fp_nintp/=. iIntros. by iNext.
   Qed.
