@@ -24,21 +24,21 @@ with a non-constant step index function. We thus use the more general
 [wp_strong_adequacy] lemma. The proof below replicates part of the proof of
 [wp_adequacy], and it hence would make sense to see if we can prove a version
 of [wp_adequacy] for a non-constant step version. *)
-Definition heap_adequacy Σ `{!heapGpreS Σ} s e σ φ :
-  (∀ `{!heapGS Σ}, ⊢ inv_heap_inv -∗ WP e @ s; ⊤ {{ v, ⌜φ v⌝ }}) →
-  adequate s e σ (λ v _, φ v).
+Definition heap_adequacy Σ `{!heapGpreS Σ} X W s e σ φ :
+  (∀ `{!heapGS Σ X W}, ⊢ inv_heap_inv -∗ WP e @ s; ⊤ {{ v, ⌜φ v⌝ }}) →
+  (∀ `{!invGS Σ}, ⊢ |={⊤}=> ∃ x, W x) → adequate s e σ (λ v _, φ v).
 Proof.
-  intros Hwp.
+  intros Hwp Winit.
   apply adequate_alt; intros t2 σ2 [n [κs ?]]%erased_steps_nsteps.
   eapply (wp_strong_adequacy Σ _); [|done].
-  iIntros (Hinv).
+  iIntros (Hinv). iMod Winit as (x) "W".
   iMod (gen_heap_init σ.(heap)) as (?) "[Hh _]".
   iMod (inv_heap_init loc (option val)) as (?) ">Hi".
   iMod (proph_map_init κs σ.(used_proph_id)) as (?) "Hp".
   iMod (mono_nat_own_alloc) as (γ) "[Hsteps _]".
-  iDestruct (Hwp (HeapGS _ _ _ _ _ _ _ _) with "Hi") as "Hwp".
+  iDestruct (Hwp (HeapGS _ _ _ _ _ _ _ _ _ _ _) with "Hi") as "Hwp".
   iModIntro.
-  iExists (λ σ ns κs nt, (gen_heap_interp σ.(heap) ∗
+  iExists (λ σ ns κs nt, (W x ∗ gen_heap_interp σ.(heap) ∗
                           proph_map_interp κs σ.(used_proph_id) ∗
                           mono_nat_auth_own γ 1 ns))%I.
   iExists [(λ v, ⌜φ v⌝%I)], (λ _, True)%I, _ => /=.
