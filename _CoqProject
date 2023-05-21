@@ -11,6 +11,6 @@ nola/ctx.v
 nola/judg.v
 nola/examples/logic/prop.v
 nola/examples/logic/subst.v
-nola/examples/logic/eval.v
+nola/examples/logic/intp.v
 nola/examples/logic/deriv.v
 nola/examples/logic/facts.v

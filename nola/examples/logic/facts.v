@@ -7,7 +7,7 @@ Import EqNotations.
 
 (** ** Bi laws *)
 Section bi.
-  Context `{!nevalG Σ, !nderivy Σ δ}.
+  Context `{!nintpG Σ, !nderivy Σ δ}.
 
   (** [δ] is reflexive *)
   Lemma n_refl {d i P} : δ d i (P, P).
@@ -69,13 +69,13 @@ Section bi.
   Qed.
   Lemma n_forall_elim {d i A Φ} {a : A} : δ d i (∀' Φ, Φ a)%n.
   Proof.
-    apply n_bysem=>/= >. apply (bi.forall_elim (Ψ := λ _, neval _ _)).
+    apply n_bysem=>/= >. apply (bi.forall_elim (Ψ := λ _, nintp _ _)).
   Qed.
 
   (** Laws for [∃] *)
   Lemma n_exist_intro {d i A Φ} {a : A} : δ d i (Φ a, ∃' Φ)%n.
   Proof.
-    apply n_bysem=>/= >. apply (bi.exist_intro (Ψ := λ a, neval _ (Φ a))).
+    apply n_bysem=>/= >. apply (bi.exist_intro (Ψ := λ a, nintp _ (Φ a))).
   Qed.
   Lemma n_exist_elim {d i A Φ Q} :
     (∀ a : A, δ d i (Φ a, Q)%n) → δ d i (∃' Φ, Q)%n.
@@ -161,7 +161,7 @@ Section bi.
   Lemma n_except_0_fupd {d i E E' P} :
     δ d i (◇ (|={E,E'}=> P), |={E,E'}=> P)%n.
   Proof.
-    apply n_bysem=>/= >. rewrite neval_fp_neval/=. by iDestruct 1 as "[>?|?]".
+    apply n_bysem=>/= >. rewrite nintp_fp_nintp/=. by iDestruct 1 as "[>?|?]".
   Qed.
   Lemma n_fupd_mono {d i E E' P Q} :
     δ d i (P, Q) → δ d i (|={E,E'}=> P, |={E,E'}=> Q)%n.
@@ -181,62 +181,62 @@ Section bi.
   (** Laws for [▷] *)
   Lemma n_later_mono {d i P Q} : δ d i (P, Q) → δ d i (▷{nil} P, ▷{nil} Q)%n.
   Proof.
-    move=> ?. apply n_bysem=>/= >. f_equiv. rewrite !neval_fp_neval.
+    move=> ?. apply n_bysem=>/= >. f_equiv. rewrite !nintp_fp_nintp.
     by apply nin_sem.
   Qed.
   Lemma n_later_intro {d i} {P : nPropL (;ᵞ)} : δ d i (P, ▷{nil} P)%n.
   Proof.
-    apply n_bysem=>/= >. rewrite neval_fp_neval. apply bi.later_intro.
+    apply n_bysem=>/= >. rewrite nintp_fp_nintp. apply bi.later_intro.
   Qed.
   Lemma n_later_forall_2 {d i A} {Φ : A → nPropL (;ᵞ)} :
     δ d i (∀ a, ▷{nil} Φ a, ▷{nil} ∀' Φ)%n.
   Proof.
-    apply n_bysem=>/= >. setoid_rewrite neval_fp_neval=>/=.
+    apply n_bysem=>/= >. setoid_rewrite nintp_fp_nintp=>/=.
     apply bi.later_forall_2.
   Qed.
   Lemma n_later_exist_except_0 {d i A} {Φ : A → nPropL (;ᵞ)} :
     δ d i (▷{nil} ∃ a, Φ a, ◇ (∃ a, ▷{nil} Φ a))%n.
   Proof.
-    apply n_bysem=>/= >. setoid_rewrite neval_fp_neval=>/=.
+    apply n_bysem=>/= >. setoid_rewrite nintp_fp_nintp=>/=.
     apply bi.later_exist_false.
   Qed.
   Lemma n_later_sep_1 {d i} {P Q : nPropL (;ᵞ)} :
     δ d i (▷{nil} (P ∗ Q), ▷{nil} P ∗ ▷{nil} Q)%n.
   Proof.
-    apply n_bysem=>/= >. rewrite !neval_fp_neval/=. apply bi.later_sep_1.
+    apply n_bysem=>/= >. rewrite !nintp_fp_nintp/=. apply bi.later_sep_1.
   Qed.
   Lemma n_later_sep_2 {d i} {P Q : nPropL (;ᵞ)} :
     δ d i (▷{nil} P ∗ ▷{nil} Q, ▷{nil} (P ∗ Q))%n.
   Proof.
-    apply n_bysem=>/= >. rewrite !neval_fp_neval/=. apply bi.later_sep_2.
+    apply n_bysem=>/= >. rewrite !nintp_fp_nintp/=. apply bi.later_sep_2.
   Qed.
   Lemma n_later_false_em {d i} {P : nPropL (;ᵞ)} :
     δ d i (▷{nil} P, ◇ (▷ False → P))%n.
   Proof.
-    apply n_bysem=>/= >. rewrite !neval_fp_neval/=. apply bi.later_false_em.
+    apply n_bysem=>/= >. rewrite !nintp_fp_nintp/=. apply bi.later_false_em.
   Qed.
   Lemma n_later_persistently_1 {d i} {P : nPropL (;ᵞ)} :
     δ d i (▷{nil} □ P, □ ▷{nil} P)%n.
   Proof.
-    apply n_bysem=>/= >. rewrite !neval_fp_neval/=. iIntros "#? !#". by iNext.
+    apply n_bysem=>/= >. rewrite !nintp_fp_nintp/=. iIntros "#? !#". by iNext.
   Qed.
   Lemma n_later_persistently_2 {d i} {P : nPropL (;ᵞ)} :
     δ d i (□ ▷{nil} P, ▷{nil} □ P)%n.
   Proof.
-    apply n_bysem=>/= >. rewrite !neval_fp_neval/=. iIntros. by iNext.
+    apply n_bysem=>/= >. rewrite !nintp_fp_nintp/=. iIntros. by iNext.
   Qed.
   Lemma n_later_plainly_1 {d i} {P : nPropL (;ᵞ)} :
     δ d i (▷{nil} ■ P, ■ ▷{nil} P)%n.
   Proof.
-    apply n_bysem=>/= >. rewrite !neval_fp_neval/=. iIntros "#? !#". by iNext.
+    apply n_bysem=>/= >. rewrite !nintp_fp_nintp/=. iIntros "#? !#". by iNext.
   Qed.
   Lemma n_later_plainly_2 {d i} {P : nPropL (;ᵞ)} :
     δ d i (■ ▷{nil} P, ▷{nil} ■ P)%n.
   Proof.
-    apply n_bysem=>/= >. rewrite !neval_fp_neval/=. iIntros. by iNext.
+    apply n_bysem=>/= >. rewrite !nintp_fp_nintp/=. iIntros. by iNext.
   Qed.
   Lemma n_löb {d i P} : δ d i ((▷{nil} P → P), P)%n.
-  Proof. apply n_bysem=>/= >. rewrite neval_fp_neval/=. apply bi.löb. Qed.
+  Proof. apply n_bysem=>/= >. rewrite nintp_fp_nintp/=. apply bi.löb. Qed.
 
   (** Laws for [∀:] *)
   Lemma n_n_forall_intro {d i V P Q} :
@@ -255,7 +255,7 @@ Section bi.
   Lemma n_n_exist_intro {d i V P Φ} : δ d i (nsubst P Φ, ∃: V, P)%n.
   Proof.
     apply n_bysem=>/= >. setoid_rewrite (eq_hwf (rew _ in _)).
-    apply (bi.exist_intro (Ψ := λ Φ, neval _ (nsubst _ Φ))).
+    apply (bi.exist_intro (Ψ := λ Φ, nintp _ (nsubst _ Φ))).
   Qed.
   Lemma n_n_exist_elim {d i V P Q} :
     (∀ Φ, δ d i (nsubst P Φ, Q)) → δ d i (∃: V, P, Q)%n.
@@ -267,27 +267,27 @@ End bi.
 
 (** ** Nola-specific laws *)
 Section nola.
-  Context `{!nevalG Σ, !nderivy Σ δ}.
+  Context `{!nintpG Σ, !nderivy Σ δ}.
 
   (** Laws for [rec:ˢ] *)
   Lemma n_recs_unfold {d i A Φ} {a : A} :
     δ d i ((rec:ˢ' Φ) a, nlarge (nsubst (Φ a) (rec:ˢ' Φ)))%n.
-  Proof. apply n_bysem=>/= >. by rewrite nevalx_neval neval_nlarge. Qed.
+  Proof. apply n_bysem=>/= >. by rewrite nintpx_nintp nintp_nlarge. Qed.
   Lemma n_recs_fold {d i A Φ} {a : A} :
     δ d i (nlarge (nsubst (Φ a) (rec:ˢ' Φ)), (rec:ˢ' Φ) a)%n.
-  Proof. apply n_bysem=>/= >. by rewrite neval_nlarge nevalx_neval. Qed.
+  Proof. apply n_bysem=>/= >. by rewrite nintp_nlarge nintpx_nintp. Qed.
 
   (** Laws for [rec:ˡ] *)
   Lemma n_recl_unfold {d i A Φ} {a : A} :
     δ d i ((rec:ˡ' Φ) a, nsubst (Φ a) (rec:ˡ' Φ))%n.
-  Proof. apply n_bysem=>/= >. by rewrite nevalx_neval. Qed.
+  Proof. apply n_bysem=>/= >. by rewrite nintpx_nintp. Qed.
   Lemma n_recl_fold {d i A Φ} {a : A} :
     δ d i (nsubst (Φ a) (rec:ˡ' Φ), (rec:ˡ' Φ) a)%n.
   Proof. apply n_bysem=>/= >. by rewrite (eq_hwf (rew _ in _)). Qed.
 
   (** Laws for [!ᵘˢ] *)
   Lemma n_subus_unfold {d i P} : δ d i (!ᵘˢ P, nlarge P)%n.
-  Proof. apply n_bysem=>/= >. by rewrite nevalS_neval_nlarge. Qed.
+  Proof. apply n_bysem=>/= >. by rewrite nintpS_nintp_nlarge. Qed.
   Lemma n_subus_fold {d i P} : δ d i (nlarge P, !ᵘˢ P)%n.
-  Proof. apply n_bysem=>/= >. by rewrite nevalS_neval_nlarge. Qed.
+  Proof. apply n_bysem=>/= >. by rewrite nintpS_nintp_nlarge. Qed.
 End nola.
