@@ -125,12 +125,10 @@ Infix "∨" := n_or : nProp_scope.
 Notation "(∨)" := n_or (only parsing) : nProp_scope.
 Infix "→" := n_impl : nProp_scope.
 Notation "¬ P" := (n_impl P (n_pure False)) : nProp_scope.
-Notation "∀' Φ" := (n_forall Φ)
-  (at level 200, right associativity, only parsing) : nProp_scope.
+Notation "∀'" := n_forall (only parsing) : nProp_scope.
 Notation "∀ x .. z , P" :=
   (n_forall (λ x, .. (n_forall (λ z, P%n)) ..)) : nProp_scope.
-Notation "∃' Φ" := (n_exist Φ)
-  (at level 200, right associativity, only parsing) : nProp_scope.
+Notation "∃'" := n_exist (only parsing) : nProp_scope.
 Notation "∃ x .. z , P" :=
   (n_exist (λ x, .. (n_exist (λ z, P%n)) ..)) : nProp_scope.
 
@@ -158,13 +156,11 @@ Notation "∀: V , P" := (n_n_forall V P)
 Notation "∃: V , P" := (n_n_exist V P)
   (at level 200, right associativity,
     format "'[' '[' ∃:  V ']' ,  '/' P ']'") : nProp_scope.
-Notation "rec:ˢ' Φ" := (n_recs Φ)
-  (at level 200, right associativity, only parsing) : nProp_scope.
+Notation "rec:ˢ'" := n_recs (only parsing) : nProp_scope.
 Notation "rec:ˢ x , P" := (n_recs (λ x, P))
   (at level 200, right associativity,
     format "'[' '[' rec:ˢ  x ,  '/' P ']' ']'") : nProp_scope.
-Notation "rec:ˡ' Φ" := (n_recl Φ)
-  (at level 200, right associativity, only parsing) : nProp_scope.
+Notation "rec:ˡ'" := n_recl (only parsing) : nProp_scope.
 Notation "rec:ˡ x , P" := (n_recl (λ x, P))
   (at level 200, right associativity,
     format "'[' '[' rec:ˡ  x ,  '/' P ']' ']'") : nProp_scope.
@@ -189,8 +185,8 @@ Fixpoint nlarge {σ Γ} (P : nProp σ Γ) : nPropL Γ :=
   | P → Q => nlarge P → nlarge Q
   | P ∗ Q => nlarge P ∗ nlarge Q
   | P -∗ Q => nlarge P -∗ nlarge Q
-  | ∀' Φ => ∀' nlarge ∘ Φ
-  | ∃' Φ => ∃' nlarge ∘ Φ
+  | ∀' Φ => ∀' (nlarge ∘ Φ)
+  | ∃' Φ => ∃' (nlarge ∘ Φ)
   | □ P => □ nlarge P
   | ■ P => ■ nlarge P
   | |==> P => |==> nlarge P
@@ -199,8 +195,8 @@ Fixpoint nlarge {σ Γ} (P : nProp σ Γ) : nPropL Γ :=
   | P ⊢{i} Q => P ⊢{i} Q
   | ∀: V, P => ∀: V, nlarge P
   | ∃: V, P => ∃: V, nlarge P
-  | (rec:ˢ' Φ) a => (rec:ˢ' Φ) a
-  | (rec:ˡ' Φ) a => (rec:ˡ' Φ) a
+  | rec:ˢ' Φ a => rec:ˢ' Φ a
+  | rec:ˡ' Φ a => rec:ˡ' Φ a
   | %ᵍˢ s => %ᵍˢ s
   | %ᵍˡ s => %ᵍˡ s
   | %ᵘˢ s => %ᵘˢ s
