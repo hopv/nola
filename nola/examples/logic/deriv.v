@@ -16,9 +16,12 @@ Definition nJudg Σ `{!nintpG Σ} : judg :=
 Class nderivy Σ `{!nintpG Σ} δ := Nderivy {
   nderivy_derivy :: derivy (nJudg Σ) δ;
 }.
-Class ninderivy Σ `{!nintpG Σ} δ δ' d i := Ninderivy {
-  ninderivy_inderivy :: inderivy (nJudg Σ) δ δ' d i;
+Class ninderivy Σ `{!nintpG Σ} δ' δ d i := Ninderivy {
+  ninderivy_inderivy :: inderivy (nJudg Σ) δ' δ d i;
 }.
+#[export] Instance ninderivy_nderivy {Σ} `{!nintpG Σ, !ninderivy Σ δ' δ d i} :
+  nderivy Σ δ'.
+Proof. split. apply _. Qed.
 
 Definition nderiv Σ `{!nintpG Σ} : npderiv_ty := deriv (nJudg Σ).
 
