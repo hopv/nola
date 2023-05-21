@@ -11,7 +11,7 @@ Implicit Type (d : nderiv_ty) (δ : npderiv_ty) (i j : nat).
 (** [nJudg]: Judgment *)
 Definition nJudgTy i : Type := nPropL (;ᵞ) * nPropL (;ᵞ).
 Canonical nJudg Σ `{!nintpG Σ} := Judg nat nJudgTy
-  (λ d _ '(P, Q), nintp' _ d nL P ⊢ nintp d Q).
+  (λ d _ '(P, Q), ⟦ P ⟧(d) ⊢ ⟦ Q ⟧(d)).
 
 (** *[nderivy], [ninderivy], [nderiv]: Derivability *)
 Class nderivy Σ `{!nintpG Σ} δ := Nderivy {
@@ -52,14 +52,13 @@ Section basic.
 
   (** [δ] can be proved by its semantics *)
   Lemma n_bysem {d i P Q} :
-    (∀ δ' : npderiv_ty,
-      ninderivy Σ δ' δ d i → nintp (δ' ⊥ⁿᵈ) P ⊢ nintp' Σ (δ' ⊥ⁿᵈ) _ Q) →
+    (∀ δ', ninderivy Σ δ' δ d i → ⟦ P ⟧(δ' ⊥ⁿᵈ) ⊢ ⟦ Q ⟧(δ' ⊥ⁿᵈ)) →
     δ d i (P, Q).
   Proof. move=> H. apply (derivy_bysem (JU:=nJudg Σ))=> ??. by apply H. Qed.
 
   (** We can get [⊢] out of [δ] under [ninderivy Σ δ' δ] *)
   Lemma nin_sem {δ' : npderiv_ty} `{!ninderivy Σ δ' δ d i} {P Q} :
-    δ d i (P, Q) → nintp (δ' ⊥ⁿᵈ) P ⊢ nintp' Σ (δ' ⊥ⁿᵈ) _ Q.
+    δ d i (P, Q) → ⟦ P ⟧(δ' ⊥ⁿᵈ) ⊢ ⟦ Q ⟧(δ' ⊥ⁿᵈ).
   Proof. apply (inderivy_sem (JU:=nJudg Σ) (P, Q)). Qed.
 
   (** We can turn [δ $∨ⁿᵈ d] into [δ' ⊥ⁿᵈ] under [ninderivy] *)
@@ -68,7 +67,7 @@ Section basic.
 
   (** We can get [⊢] out of [δ' j] for [j < i] under [ninderivy Σ δ' δ d i] *)
   Lemma nin_semlow `{!ninderivy Σ δ' δ d i} {j P Q} :
-    j < i → δ' ⊥ⁿᵈ j (P, Q) → nintp (δ' ⊥ⁿᵈ) P ⊢ nintp' Σ (δ' ⊥ⁿᵈ) _ Q.
+    j < i → δ' ⊥ⁿᵈ j (P, Q) → ⟦ P ⟧(δ' ⊥ⁿᵈ) ⊢ ⟦ Q ⟧(δ' ⊥ⁿᵈ).
   Proof. move=> ji H. apply (inderivy_semlow (JU:=nJudg Σ) j ji (P, Q) H). Qed.
 
   (** Utility lemmas *)
@@ -77,13 +76,13 @@ Section basic.
   Lemma nin_turn_r `{!ninderivy Σ δ' δ d i} : d →ⁿᵈ δ' ⊥ⁿᵈ.
   Proof. apply (inderivy_turn_r (JU:=nJudg Σ)). Qed.
   Lemma nin_turn_semlow `{!ninderivy Σ δ' δ d i} {j P Q} :
-    j < i → (δ $∨ⁿᵈ d) j (P, Q) → nintp (δ' ⊥ⁿᵈ) P ⊢ nintp' Σ (δ' ⊥ⁿᵈ) _ Q.
+    j < i → (δ $∨ⁿᵈ d) j (P, Q) → ⟦ P ⟧(δ' ⊥ⁿᵈ) ⊢ ⟦ Q ⟧(δ' ⊥ⁿᵈ).
   Proof. move=> ji ?. by apply (nin_semlow ji), nin_turn. Qed.
   Lemma nin_turn_semlow_l `{!ninderivy Σ δ' δ d i} {j P Q} :
-    j < i → δ d j (P, Q) → nintp (δ' ⊥ⁿᵈ) P ⊢ nintp' Σ (δ' ⊥ⁿᵈ) _ Q.
+    j < i → δ d j (P, Q) → ⟦ P ⟧(δ' ⊥ⁿᵈ) ⊢ ⟦ Q ⟧(δ' ⊥ⁿᵈ).
   Proof. move=> ji ?. by apply (nin_semlow ji), nin_turn_l. Qed.
   Lemma nin_turn_semlow_r `{!ninderivy Σ δ' δ d i} {j P Q} :
-    j < i → d j (P, Q) → nintp (δ' ⊥ⁿᵈ) P ⊢ nintp' Σ (δ' ⊥ⁿᵈ) _ Q.
+    j < i → d j (P, Q) → ⟦ P ⟧(δ' ⊥ⁿᵈ) ⊢ ⟦ Q ⟧(δ' ⊥ⁿᵈ).
   Proof. move=> ji ?. by apply (nin_semlow ji), nin_turn_r. Qed.
 
   (** [δ] is monotone over the index *)
@@ -102,7 +101,7 @@ Section nderiv.
   #[export] Instance nderiv_nderivy : nderivy Σ (nderiv Σ) := _.
 
   (** [nderiv] is sound *)
-  Lemma nderiv_sound {i P Q} : nderiv Σ ⊥ⁿᵈ i (P, Q) →
-    nintp (nderiv Σ ⊥ⁿᵈ) P ⊢ nintp (nderiv Σ ⊥ⁿᵈ) Q.
+  Lemma nderiv_sound {i P Q} :
+    nderiv Σ ⊥ⁿᵈ i (P, Q) → ⟦ P ⟧(nderiv Σ ⊥ⁿᵈ) ⊢ ⟦ Q ⟧(nderiv Σ ⊥ⁿᵈ).
   Proof. exact (deriv_sound (JU:=nJudg Σ) i (P, Q)). Qed.
 End nderiv.

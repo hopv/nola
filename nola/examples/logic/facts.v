@@ -69,13 +69,13 @@ Section bi.
   Qed.
   Lemma n_forall_elim {d i A Φ} {a : A} : δ d i (∀' Φ, Φ a)%n.
   Proof.
-    apply n_bysem=>/= >. apply (bi.forall_elim (Ψ := λ _, nintp _ _)).
+    apply n_bysem=>/= >. apply (bi.forall_elim (Ψ := λ _, _)).
   Qed.
 
   (** Laws for [∃] *)
   Lemma n_exist_intro {d i A Φ} {a : A} : δ d i (Φ a, ∃' Φ)%n.
   Proof.
-    apply n_bysem=>/= >. apply (bi.exist_intro (Ψ := λ a, nintp _ (Φ a))).
+    apply n_bysem=>/= >. apply (bi.exist_intro (Ψ := λ a, ⟦ Φ a ⟧(_))).
   Qed.
   Lemma n_exist_elim {d i A Φ Q} :
     (∀ a : A, δ d i (Φ a, Q)%n) → δ d i (∃' Φ, Q)%n.
@@ -255,7 +255,7 @@ Section bi.
   Lemma n_n_exist_intro {d i V P Φ} : δ d i (nsubst P Φ, ∃: V, P)%n.
   Proof.
     apply n_bysem=>/= >. setoid_rewrite rew_eq_hwf.
-    apply (bi.exist_intro (Ψ := λ Φ, nintp _ (nsubst _ Φ))).
+    apply (bi.exist_intro (Ψ := λ Φ, ⟦ nsubst _ Φ ⟧(_))).
   Qed.
   Lemma n_n_exist_elim {d i V P Q} :
     (∀ Φ, δ d i (nsubst P Φ, Q)) → δ d i (∃: V, P, Q)%n.
