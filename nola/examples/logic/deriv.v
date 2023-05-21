@@ -16,9 +16,6 @@ Definition nJudg Σ `{!nintpG Σ} : judg :=
 Class nderivy Σ `{!nintpG Σ} δ := Nderivy {
   nderivy_derivy :: derivy (nJudg Σ) δ;
 }.
-#[export] Instance derivy_nderivy `{!nintpG Σ, !derivy (nJudg Σ) δ} :
-  nderivy Σ δ.
-Proof. split. apply _. Qed.
 Class ninderivy Σ `{!nintpG Σ} δ δ' d i := Ninderivy {
   ninderivy_inderivy :: inderivy (nJudg Σ) δ δ' d i;
 }.
@@ -103,7 +100,8 @@ Section nderiv.
   Context `{!nintpG Σ}.
 
   (** [nderiv] satisfies [nderivy] *)
-  #[export] Instance nderiv_nderivy : nderivy Σ (nderiv Σ) := _.
+  #[export] Instance nderiv_nderivy : nderivy Σ (nderiv Σ).
+  Proof. split. apply _. Qed.
 
   (** [nderiv] is sound *)
   Lemma nderiv_sound {i P Q} :
