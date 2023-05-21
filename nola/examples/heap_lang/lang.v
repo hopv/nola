@@ -404,11 +404,6 @@ Global Instance state_inhabited : Inhabited state :=
 Global Instance val_inhabited : Inhabited val := populate (LitV LitUnit).
 Global Instance expr_inhabited : Inhabited expr := populate (Val inhabitant).
 
-Canonical Structure stateO := leibnizO state.
-Canonical Structure locO := leibnizO loc.
-Canonical Structure valO := leibnizO val.
-Canonical Structure exprO := leibnizO expr.
-
 (** Evaluation contexts *)
 (** Note that [ResolveLCtx] is not by itself an evaluation context item: we do
 not reduce directly under Resolve's first argument. We only reduce things nested
@@ -773,8 +768,10 @@ End heap_lang.
 
 (** Language *)
 Canonical Structure heap_ectxi_lang := EctxiLanguage heap_lang.heap_lang_mixin.
+Local Set Warnings "-redundant-canonical-projection".
 Canonical Structure heap_ectx_lang := EctxLanguageOfEctxi heap_ectxi_lang.
 Canonical Structure heap_lang := LanguageOfEctx heap_ectx_lang.
+Local Set Warnings "redundant-canonical-projection".
 
 (* Prefer heap_lang names over ectx_language names. *)
 Export heap_lang.
