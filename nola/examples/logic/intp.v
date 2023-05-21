@@ -1,12 +1,19 @@
 (** * [nintp]: Interpretation of [nProp] as [iProp] *)
 
 From nola.examples.logic Require Export subst.
+From nola Require Export deriv.
 From iris.base_logic.lib Require Import iprop fancy_updates.
 Import EqNotations.
 
-(** Type of a derivability predicate *)
-Notation nderiv_ty := (nat → nPropL (;ᵞ) * nPropL (;ᵞ) → Prop).
+(** Derivability *)
+#[projections(primitive)]
+Record nJudgT := njudg { nante : nPropL (;ᵞ); nsucc : nPropL (;ᵞ); }.
+Add Printing Constructor nJudgT.
+Notation nderiv_ty := (dwrap (nat → nJudgT → Prop)).
 Notation npderiv_ty := (nderiv_ty → nderiv_ty).
+Notation "P ⊢{ d , i } Q" := (dunwrap d i (njudg P Q))
+  (at level 99, no associativity,
+    format "'[' P  '/' ⊢{ d ,  i }  '/  ' Q ']'") : nola_scope.
 
 (** Nola resources *)
 Class nintpG (Σ : gFunctors) := NintpG {
@@ -56,7 +63,7 @@ Section nintp_gen.
         |={E,E'}=> nintpS_gen P (H ‼ʰ ()) σS un gn
     | (▷ P)%n, _ => λ _ un gn, ▷ ni d _ (rew app_eq_nil_ug_g un gn in P)
     | (P ⊢{i} Q)%n, _ => λ _ un gn,
-        ⌜d i ((rew app_eq_nil_ug_g un gn in P), rew app_eq_nil_ug_g un gn in Q)⌝
+        ⌜rew app_eq_nil_ug_g un gn in P ⊢{d,i} rew app_eq_nil_ug_g un gn in Q⌝
     | (∀: V, P)%n, _ => λ σS un gn, ∀ Φ, nintpS_gen
         (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] ()) σS eq_refl eq_refl
     | (∃: V, P)%n, _ => λ σS un gn, ∃ Φ, nintpS_gen
@@ -94,7 +101,7 @@ Section nintp_gen.
     | (|={E,E'}=> P)%n, _ => λ un gn, |={E,E'}=> nintp_gen P (H ‼ʰ ()) un gn
     | (▷ P)%n, _ => λ un gn, ▷ ni d _ (rew app_eq_nil_ug_g un gn in P)
     | (P ⊢{i} Q)%n, _ => λ un gn,
-        ⌜d i ((rew app_eq_nil_ug_g un gn in P), rew app_eq_nil_ug_g un gn in Q)⌝
+        ⌜rew app_eq_nil_ug_g un gn in P ⊢{d,i} rew app_eq_nil_ug_g un gn in Q⌝
     | (∀: V, P)%n, _ => λ un gn, ∀ Φ,
         nintp_gen (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] ()) eq_refl eq_refl
     | (∃: V, P)%n, _ => λ un gn, ∃ Φ,
