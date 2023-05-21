@@ -289,4 +289,23 @@ Section nola.
   Proof. apply n_bysem=>/= >. by rewrite nintpS_nintp_nlarge. Qed.
   Lemma n_subus_fold {d i P} : nlarge P ⊢{δ d, i} !ᵘˢ P.
   Proof. apply n_bysem=>/= >. by rewrite nintpS_nintp_nlarge. Qed.
+
+  (** Laws for [⊢] *)
+  Lemma n_deriv_intro {d i j P Q R} :
+    P ⊢{δ $∨ⁿᵈ d, j} Q → R ⊢{δ d, i} (P ⊢{j}{nil} Q).
+  Proof. move=> ?. apply n_bysem=>/= >. by apply bi.pure_intro, nin_turn. Qed.
+  Lemma n_deriv_elim_l_low {d i j} {P Q : nPropL (;ᵞ)} :
+    j < i → (P ⊢{j}{nil} Q) ∧ P ⊢{δ d, i} Q.
+  Proof.
+    move=> ji. apply n_bysem=>/= δ' ?. apply bi.pure_elim_l=> PQ.
+    by apply (nin_semlow ji).
+  Qed.
+  Lemma n_deriv_convert {d i j A f}
+    {Φ Ψ : A → nPropL (;ᵞ)} {P Q : nPropL (;ᵞ)} :
+    (∀ δ', nderivy Σ δ' → (∀ a, Φ a ⊢{δ' ⊥ⁿᵈ, f a} Ψ a) → P ⊢{δ' ⊥ⁿᵈ, j} Q) →
+    (∀ a, Φ a ⊢{f a}{nil} Ψ a) ⊢{δ d, i} (P ⊢{j}{nil} Q).
+  Proof.
+    move=> H. apply n_bysem=>/= >. rewrite -bi.pure_forall.
+    apply bi.pure_mono, H. split. apply _.
+  Qed.
 End nola.
