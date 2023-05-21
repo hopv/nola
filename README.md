@@ -44,6 +44,30 @@ To generate and browse a document:
 make viewdoc
 ```
 
+## Architecture
+
+All the Coq code is in [`nola/`](nola/) and structured as follows:
+- [`prelude`](nola/prelude.v) : Prelude
+- [`util/`](nola/util/) : General-purpose utilities,
+  extending [`stdpp`](https://gitlab.mpi-sws.org/iris/stdpp)
+  + [`funext`](nola/util/funext.v) (Function extensionality),
+    [`pred`](nola/util/pred.v) (Predicates),
+    [`rel`](nola/util/rel.v) (Relations),
+    [`wft`](nola/util/wft.v) (Well-founded types),
+    [`list`](nola/util/list.v) (Lists)
+- [`hgt`](nola/hgt.v) (General height of a tree),
+  [`ctx`](nola/ctx.v) (Context with unguarded/guarded variables),
+  [`deriv`](nola/deriv.v) (Judgment derivability)
+- [`examples/`](nola/examples/) : Examples
+  + [`heap_lang/`](nola/examples/heap_lang/) : Variant of Iris HeapLang,
+    with `Ndnat` (terminating infinite non-determinism) added
+  + [`logic/`](nola/examples/logic/) : Nola Showcase Logic
+    - [`prop`](nola/examples/logic/prop.v) (Proposition),
+      [`subst`](nola/examples/logic/subst.v) (Substitution),
+      [`intp`](nola/examples/logic/logic.v) (Interpretation),
+      [`deriv`](nola/examples/logic/deriv.v) (Derivability),
+      [`facts`](nola/examples/logic/facts.v) (Facts)
+
 ## Story
 
 ### Semantic Sharing
