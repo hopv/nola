@@ -91,6 +91,13 @@ Section lemmas.
     iExists Φ. rewrite rew_eq_hwf. iApply "to". iApply "P".
   Qed.
 
+  (** Introduce [○(i)] *)
+  Lemma sintpy_indir_intro {i j s P} :
+    ⸨ P ⸩(σ $∨ˢ s, i) -∗ ⸨ ○{nil}(i) P ⸩(σ s, j).
+  Proof.
+    iIntros "P". iApply sintpy_byintp. iIntros (σ' _) "/= _ #toσ' _".
+    by iApply "toσ'".
+  Qed.
   (** Eliminate [○(i)] under a strong interpration of level [j > i] *)
   Lemma sintpy_indir_elim {i j s P} :
     i < j → ⸨ ○{nil}(i) P ⸩(σ s, j) -∗ ⸨ P ⸩(σ s, j).
