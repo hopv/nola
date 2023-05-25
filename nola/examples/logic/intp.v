@@ -170,6 +170,7 @@ Notation "⟦ P ⟧ ( s , H )" := ⟦ P ⟧{_,_}(s, H)
   (format "'[' ⟦  P  ⟧ '/  ' ( s ,  H ) ']'") : nola_scope.
 Notation "⟦ P ⟧ ( s )" := ⟦ P ⟧(s, hwf)
   (format "'[' ⟦  P  ⟧ '/  ' ( s ) ']'") : nola_scope.
+Notation nintp s P := ⟦ P ⟧(s) (only parsing).
 Notation "⟦ P ⟧ˢ{ Σ } ( s , H )" :=
   (@nintpS_gen Σ _ nintp_fp s nS (;ᵞ) P H eq_refl eq_refl eq_refl)
   (only parsing).
@@ -179,12 +180,13 @@ Notation "⟦ P ⟧ˢ ( s , H )" := ⟦ P ⟧ˢ{_}(s, H)
   (format "'[' ⟦  P  ⟧ˢ '/  ' ( s ,  H ) ']'") : nola_scope.
 Notation "⟦ P ⟧ˢ ( s )" := ⟦ P ⟧ˢ(s, hwf)
   (format "'[' ⟦  P  ⟧ˢ '/  ' ( s ) ']'") : nola_scope.
+Notation nintpS s P := ⟦ P ⟧ˢ(s) (only parsing).
 
-(** ** Facts on [⟦ _ ⟧] etc. *)
+(** ** Facts on [⟦ ⟧] etc. *)
 Section nintp_facts.
   Context (** Iris resources *) `{!nintpG Σ}.
 
-  (** [⟦ _ ⟧ᶠ] coincides with [⟦ _ ⟧] *)
+  (** [⟦ ⟧ᶠ] coincides with [⟦ ⟧] *)
   Lemma nintp_fp_nintp {s κ P} : ⟦ P ⟧ᶠ(s) ⊣⊢ ⟦ P ⟧{Σ, κ}(s).
   Proof. unfold nintp_fp. apply (fixpoint_unfold nintp_pre). Qed.
 
@@ -195,7 +197,7 @@ Section nintp_facts.
     move: κ Γ P H κS un gn. fix FIX 4=> κ Γ P H.
     case: P H; intros; case H=>//= ?; try f_equiv=> >; apply FIX.
   Qed.
-  (** [nintpS] coincides with [nintp] *)
+  (** [⟦ ⟧ˢ] coincides with [⟦ ⟧] *)
   Lemma nintpS_nintp {s P} : ⟦ P ⟧ˢ(s) ⊣⊢ ⟦ P ⟧(s).
   Proof. exact nintpS_gen_nintp_gen. Qed.
 
@@ -210,10 +212,10 @@ Section nintp_facts.
     have EQ := nsubst_nlarge (P:=P); move: (nsubst (nlarge P)) EQ;
     move=> ?->?; apply FIX.
   Qed.
-  (** Simplify [nintp] over [nlarge] *)
+  (** Simplify [⟦ ⟧] over [nlarge] *)
   Lemma nintp_nlarge {s κ P} : ⟦ nlarge P ⟧(s) ⊣⊢ ⟦ P ⟧{Σ, κ}(s).
   Proof. exact nintp_gen_nlarge. Qed.
-  (** [nintpS] coincides with [nintp] over [nlarge] *)
+  (** [⟦ ⟧ˢ] coincides with [⟦ ⟧] over [nlarge] *)
   Lemma nintpS_nintp_nlarge {s P} : ⟦ P ⟧ˢ(s) ⊣⊢ ⟦ nlarge P ⟧(s).
   Proof. by rewrite nintpS_nintp nintp_nlarge. Qed.
 End nintp_facts.
