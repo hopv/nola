@@ -163,6 +163,22 @@ Proof.
   by iApply "intp".
 Qed.
 
+(** Introduce [⸨ P ⸩(σ s, i)] *)
+Lemma sintpy_intro `{!sintpy ITI σ} {s i P} :
+  ⊢ (∀ σ', ⌜sintpy ITI σ'⌝ → ⟦ P ⟧(σ' ⊥ˢ, i)) -∗ ⸨ P ⸩(σ s, i).
+Proof.
+  iIntros "∀P". iApply sintpy_byintp. iIntros (??) "_ _ _". by iApply "∀P".
+Qed.
+
+(** Convert the data of [⸨ P ⸩(σ s, i)] *)
+Lemma sintpy_convert `{!sintpy ITI σ} {s i P Q} :
+  ⊢ (∀ σ', ⌜sintpy ITI σ'⌝ → ⟦ P ⟧(σ' ⊥ˢ, i) -∗ ⟦ Q ⟧(σ' ⊥ˢ, i))
+    -∗ ⸨ P ⸩(σ s, i) -∗ ⸨ Q ⸩(σ s, i).
+Proof.
+  iIntros "∀PQ P". iApply sintpy_byintp. iIntros (??) "#to _ _".
+  iApply "∀PQ"; [done|]. by iApply "to".
+Qed.
+
 (** ** [sintp]: Strong interpretation *)
 
 (** [sintp_gen_gen]: What becomes [sintp_gen] by taking [bi_least_fixpoint] *)
