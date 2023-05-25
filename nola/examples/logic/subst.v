@@ -23,7 +23,7 @@ Fixpoint nliftg {Δ κ Γ} (P : nProp κ Γ) : nProp κ (Γ.ᵞu;ᵞ Γ.ᵞg ++ 
   | |==> P => |==> nliftg P
   | |={E,E'}=> P => |={E,E'}=> nliftg P
   | ▷ P => ▷ rew app_assoc'_g in nliftg P
-  | P ⊢{i} Q => rew app_assoc'_g in nliftg P ⊢{i} rew app_assoc'_g in nliftg Q
+  | ○(i) P => ○(i) rew app_assoc'_g in nliftg P
   | ∀: V, P => ∀: V, nliftg P
   | ∃: V, P => ∃: V, nliftg P
   | rec:ˢ' Φ a => (rec:ˢ' (nliftg ∘ Φ)) a
@@ -60,9 +60,7 @@ Fixpoint nliftug {Δᵘ Δᵍ κ Γ} (P : nProp κ Γ)
   | |==> P => λ gn, |==> nliftug P gn
   | |={E,E'}=> P => λ gn, |={E,E'}=> nliftug P gn
   | ▷ P => λ gn, ▷ rew app_assoc_eq_nil_g gn in nliftg P
-  | P ⊢{i} Q => λ gn,
-      rew app_assoc_eq_nil_g gn in nliftg P ⊢{i}
-        rew app_assoc_eq_nil_g gn in nliftg P
+  | ○(i) P => λ gn, ○(i) rew app_assoc_eq_nil_g gn in nliftg P
   | ∀: V, P => λ gn, ∀: V, nliftug P gn
   | ∃: V, P => λ gn, ∃: V, nliftug P gn
   | rec:ˢ' Φ a => λ gn, (rec:ˢ b, nliftug (Φ b) gn) a
@@ -120,9 +118,8 @@ Fixpoint nsubstlg {κ Γ i} (P : nProp κ Γ)
   | |==> P => λ Φs, |==> nsubstlg P Φs
   | |={E,E'}=> P => λ Φs, |={E,E'}=> nsubstlg P Φs
   | ▷ P => λ Φs, ▷ rew take_add_app_g in nsubstlg P (rew drop_add_app'_d in Φs)
-  | P ⊢{j} Q => λ Φs,
-      rew take_add_app_g in nsubstlg P (rew drop_add_app'_d in Φs) ⊢{j}
-        rew take_add_app_g in nsubstlg Q (rew drop_add_app'_d in Φs)
+  | ○(i) P => λ Φs,
+      ○(i) rew take_add_app_g in nsubstlg P (rew drop_add_app'_d in Φs)
   | ∀: V, P => λ Φs, ∀: V, nsubstlg P Φs
   | ∃: V, P => λ Φs, ∃: V, nsubstlg P Φs
   | rec:ˢ' Φ a => λ Φs, (rec:ˢ b, nsubstlg (Φ b) Φs) a
@@ -166,9 +163,8 @@ Fixpoint nsubstlu {κ Γ i} (P : nProp κ Γ)
   | |={E,E'}=> P => λ Φs gn, |={E,E'}=> nsubstlu P Φs gn
   | ▷ P => λ Φs gn,
       ▷ rew f_app_eq_nil_out_g gn in nsubstlg P (rew f_app_eq_nil_d gn in Φs)
-  | P ⊢{j} Q => λ Φs gn,
-      rew f_app_eq_nil_out_g gn in nsubstlg P (rew f_app_eq_nil_d gn in Φs) ⊢{j}
-        rew f_app_eq_nil_out_g gn in nsubstlg Q (rew f_app_eq_nil_d gn in Φs)
+  | ○(i) P => λ Φs gn,
+      ○(i) rew f_app_eq_nil_out_g gn in nsubstlg P (rew f_app_eq_nil_d gn in Φs)
   | ∀: V, P => λ Φs gn, ∀: V, nsubstlu (i:=S i) P Φs gn
   | ∃: V, P => λ Φs gn, ∃: V, nsubstlu (i:=S i) P Φs gn
   | rec:ˢ' Φ a => λ Φs gn, (rec:ˢ b, nsubstlu (i:=S i) (Φ b) Φs gn) a
@@ -206,7 +202,7 @@ Fixpoint nheight {κ Γ} (P : nProp κ Γ) : hgt :=
   | □ P | ■ P | |==> P | |={_,_}=> P => hgt_1 (nheight P)
   | P ∧ Q | P ∨ Q | P → Q | P ∗ Q | P -∗ Q => hgt_2 (nheight P) (nheight Q)
   | ∀' Φ | ∃' Φ => hgt_all (nheight ∘ Φ)
-  | ▷ _ | _ ⊢{_} _ => hgt_0
+  | ▷ _ | ○(_) _ => hgt_0
   | ∀: _, P | ∃: _, P => hgt_1 (nheight P)
   | rec:ˢ' Φ a | rec:ˡ' Φ a => hgt_1 (nheight (Φ a))
   | %ᵍˢ _ | %ᵍˡ _ | %ᵘˢ _ | !ᵘˢ _ => hgt_0

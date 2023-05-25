@@ -1,31 +1,26 @@
 (** * [nintp]: Interpretation of [nProp] as [iProp] *)
 
 From nola.examples.logic Require Export subst.
-From nola Require Export deriv.
-From iris.base_logic.lib Require Import iprop fancy_updates.
+From nola Require Export sintp.
+From iris.base_logic.lib Require Import fancy_updates.
 Import EqNotations.
 
-(** Judgment *)
-#[projections(primitive)]
-Record nJudgTy := NJudg {
-  (** Antecedent *)
-  nante : nPropL (;ᵞ);
-  (** Succedent *)
-  nsucc : nPropL (;ᵞ);
-}.
-Add Printing Constructor nJudgTy.
+(** ** [nintpG]: Nola resources *)
 
-(** Derivability predicate *)
-Notation nderiv_ty := (dwrap (nat → nJudgTy → Prop)).
-Notation npderiv_ty := (nderiv_ty → nderiv_ty).
-Notation "P ⊢{ d , i } Q" := (dunwrap d i (NJudg P Q))
-  (at level 99, no associativity,
-    format "'[' P  '/' ⊢{ d ,  i }  '/  ' Q ']'") : nola_scope.
-
-(** Nola resources *)
 Class nintpG (Σ : gFunctors) := NintpG {
   nintpG_invG :: invGS_gen HasNoLc Σ;
 }.
+
+(** ** For strong interpretation *)
+
+(** [intps] for [nPropL] *)
+Definition nintps Σ : intps := Intps nat (λ _, nPropL (;ᵞ)) (iProp Σ).
+
+(** Notation for [nintps] *)
+Notation nsintp_ty Σ := (sintp_ty (nintps Σ)).
+Notation npsintp_ty Σ := (psintp_ty (nintps Σ)).
+Notation "⸨ P ⸩ ( s , i )" := (sunwrap s (Sarg i P%n))
+  (format "'[' ⸨  P  ⸩ '/  ' ( s ,  i ) ']'") : nola_scope.
 
 (** Modification of [nsubst] *)
 Definition nsubst' {κ Γᵘ Γᵍ V} (P : nProp κ (V :: Γᵘ;ᵞ Γᵍ))
@@ -43,8 +38,8 @@ Section nintp_gen.
   Context
     (** Iris resources *) `{!nintpG Σ}
     (** Interpretation used contractively *)
-    (ni : nderiv_ty → ∀ κ, nProp κ (;ᵞ) → iProp Σ)
-    (** Derivability predicate *) (d : nderiv_ty).
+    (ni : nsintp_ty Σ → ∀ κ, nProp κ (;ᵞ) → iProp Σ)
+    (** Strong interpretation *) (s : nsintp_ty Σ).
 
   (** [nintpS_gen P] : Evaluate small [P] *)
   Fixpoint nintpS_gen {κ Γ} (P : nProp κ Γ) (H : hAcc (nheight P))
@@ -68,9 +63,8 @@ Section nintp_gen.
     | (|==> P)%n, _ => λ κS un gn, |==> nintpS_gen P (H ‼ʰ ()) κS un gn
     | (|={E,E'}=> P)%n, _ => λ κS un gn,
         |={E,E'}=> nintpS_gen P (H ‼ʰ ()) κS un gn
-    | (▷ P)%n, _ => λ _ un gn, ▷ ni d _ (rew app_eq_nil_ug_g un gn in P)
-    | (P ⊢{i} Q)%n, _ => λ _ un gn,
-        ⌜rew app_eq_nil_ug_g un gn in P ⊢{d,i} rew app_eq_nil_ug_g un gn in Q⌝
+    | (▷ P)%n, _ => λ _ un gn, ▷ ni s _ (rew app_eq_nil_ug_g un gn in P)
+    | (○(i) P)%n, _ => λ _ un gn, ⸨ rew app_eq_nil_ug_g un gn in P ⸩(s,i)
     | (∀: V, P)%n, _ => λ κS un gn, ∀ Φ, nintpS_gen
         (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] ()) κS eq_refl eq_refl
     | (∃: V, P)%n, _ => λ κS un gn, ∃ Φ, nintpS_gen
@@ -106,9 +100,8 @@ Section nintp_gen.
     | (■ P)%n, _ => λ un gn, ■ nintp_gen P (H ‼ʰ ()) un gn
     | (|==> P)%n, _ => λ un gn, |==> nintp_gen P (H ‼ʰ ()) un gn
     | (|={E,E'}=> P)%n, _ => λ un gn, |={E,E'}=> nintp_gen P (H ‼ʰ ()) un gn
-    | (▷ P)%n, _ => λ un gn, ▷ ni d _ (rew app_eq_nil_ug_g un gn in P)
-    | (P ⊢{i} Q)%n, _ => λ un gn,
-        ⌜rew app_eq_nil_ug_g un gn in P ⊢{d,i} rew app_eq_nil_ug_g un gn in Q⌝
+    | (▷ P)%n, _ => λ un gn, ▷ ni s _ (rew app_eq_nil_ug_g un gn in P)
+    | (○(i) P)%n, _ => λ un gn, ⸨ rew app_eq_nil_ug_g un gn in P ⸩(s,i)
     | (∀: V, P)%n, _ => λ un gn, ∀ Φ,
         nintp_gen (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] ()) eq_refl eq_refl
     | (∃: V, P)%n, _ => λ un gn, ∃ Φ,
@@ -132,15 +125,15 @@ Section nintp.
   (** [nintpS_gen]/[nintp_gen] typed as a discrete function *)
   Definition nintpS_gen' : (_ -d> _ -d> _ -d> iProp Σ) ->
     _ -d> _ -d> _ -d> _ -d> _ -d> _ -d> _ -d> _ -d> iProp Σ :=
-    λ ni d κ Γ (P : nProp κ Γ), nintpS_gen ni d P.
+    λ ni s κ Γ (P : nProp κ Γ), nintpS_gen ni s P.
   Definition nintp_gen' : (_ -d> _ -d> _ -d> iProp Σ) ->
     _ -d> _ -d> _ -d> _ -d> _ -d> _ -d> _ -d> iProp Σ :=
-    λ ni d κ Γ (P : nProp κ Γ), nintp_gen ni d P.
+    λ ni s κ Γ (P : nProp κ Γ), nintp_gen ni s P.
 
   (** [nintpS_gen] is contractive *)
   #[export] Instance nintpS_gen_contractive : Contractive nintpS_gen'.
   Proof.
-    unfold nintpS_gen'=> i ni ni' nid d + + + + + + +. fix FIX 4=> κ Γ P H.
+    unfold nintpS_gen'=> i ni ni' nid s + + + + + + +. fix FIX 4=> κ Γ P H.
     case: P H=>/=; intros; case H=>//= ?;
     try (by f_equiv=> >; apply FIX); by f_contractive; apply nid.
   Qed.
@@ -148,7 +141,7 @@ Section nintp.
   (** [nintp_gen] is contractive *)
   #[export] Instance nintp_gen_contractive : Contractive nintp_gen'.
   Proof.
-    unfold nintp_gen'=> i ni ni' nid d + + + + + +. fix FIX 4=> κ Γ P H.
+    unfold nintp_gen'=> i ni ni' nid s + + + + + +. fix FIX 4=> κ Γ P H.
     case: P H=>/=; intros; case H=>//= ?; try (by f_equiv=> >; apply FIX);
     try (by f_contractive; apply nid); by apply nintpS_gen_contractive.
   Qed.
@@ -156,7 +149,7 @@ Section nintp.
   (** [nintp_pre]: Generator of [nintp_fp] *)
   Definition nintp_pre
     : (_ -d> _ -d> _ -d> iProp Σ) -> (_ -d> _ -d> _ -d> iProp Σ)
-    := λ ni d κ (P : nProp κ (;ᵞ)), nintp_gen' ni d _ _ P hwf eq_refl eq_refl.
+    := λ ni s κ (P : nProp κ (;ᵞ)), nintp_gen' ni s _ _ P hwf eq_refl eq_refl.
   #[export] Instance nintp_pre_contractive : Contractive nintp_pre.
   Proof. move=> ???????. by apply nintp_gen_contractive. Qed.
 
@@ -166,49 +159,49 @@ End nintp.
 
 (** Notations, which will be printed in (partial) interpretation, yay! *)
 
-Notation "⟦ P ⟧ᶠ ( d )" := (nintp_fp d _ P)
-  (format "'[' ⟦  P  ⟧ᶠ '/  ' ( d ) ']'") : nola_scope.
-Notation "⟦ P ⟧{ Σ , κ } ( d , H )" :=
-  (@nintp_gen Σ _ nintp_fp d κ (;ᵞ) P H eq_refl eq_refl) (only parsing)
+Notation "⟦ P ⟧ᶠ ( s )" := (nintp_fp s _ P)
+  (format "'[' ⟦  P  ⟧ᶠ '/  ' ( s ) ']'") : nola_scope.
+Notation "⟦ P ⟧{ Σ , κ } ( s , H )" :=
+  (@nintp_gen Σ _ nintp_fp s κ (;ᵞ) P H eq_refl eq_refl) (only parsing)
   : nola_scope.
-Notation "⟦ P ⟧{ Σ , κ } ( d )" := (⟦ P ⟧{Σ, κ}(d, hwf)) (only parsing)
+Notation "⟦ P ⟧{ Σ , κ } ( s )" := (⟦ P ⟧{Σ, κ}(s, hwf)) (only parsing)
   : nola_scope.
-Notation "⟦ P ⟧ ( d , H )" := ⟦ P ⟧{_,_}(d, H)
-  (format "'[' ⟦  P  ⟧ '/  ' ( d ,  H ) ']'") : nola_scope.
-Notation "⟦ P ⟧ ( d )" := ⟦ P ⟧(d, hwf)
-  (format "'[' ⟦  P  ⟧ '/  ' ( d ) ']'") : nola_scope.
-Notation "⟦ P ⟧ˢ{ Σ } ( d , H )" :=
-  (@nintpS_gen Σ _ nintp_fp d nS (;ᵞ) P H eq_refl eq_refl eq_refl)
+Notation "⟦ P ⟧ ( s , H )" := ⟦ P ⟧{_,_}(s, H)
+  (format "'[' ⟦  P  ⟧ '/  ' ( s ,  H ) ']'") : nola_scope.
+Notation "⟦ P ⟧ ( s )" := ⟦ P ⟧(s, hwf)
+  (format "'[' ⟦  P  ⟧ '/  ' ( s ) ']'") : nola_scope.
+Notation "⟦ P ⟧ˢ{ Σ } ( s , H )" :=
+  (@nintpS_gen Σ _ nintp_fp s nS (;ᵞ) P H eq_refl eq_refl eq_refl)
   (only parsing).
-Notation "⟦ P ⟧ˢ{ Σ } ( d )" := (⟦ P ⟧ˢ{Σ}(d, hwf)) (only parsing)
+Notation "⟦ P ⟧ˢ{ Σ } ( s )" := (⟦ P ⟧ˢ{Σ}(s, hwf)) (only parsing)
   : nola_scope.
-Notation "⟦ P ⟧ˢ ( d , H )" := ⟦ P ⟧ˢ{_}(d, H)
-  (format "'[' ⟦  P  ⟧ˢ '/  ' ( d ,  H ) ']'") : nola_scope.
-Notation "⟦ P ⟧ˢ ( d )" := ⟦ P ⟧ˢ(d, hwf)
-  (format "'[' ⟦  P  ⟧ˢ '/  ' ( d ) ']'") : nola_scope.
+Notation "⟦ P ⟧ˢ ( s , H )" := ⟦ P ⟧ˢ{_}(s, H)
+  (format "'[' ⟦  P  ⟧ˢ '/  ' ( s ,  H ) ']'") : nola_scope.
+Notation "⟦ P ⟧ˢ ( s )" := ⟦ P ⟧ˢ(s, hwf)
+  (format "'[' ⟦  P  ⟧ˢ '/  ' ( s ) ']'") : nola_scope.
 
 (** ** Facts on [⟦ _ ⟧] etc. *)
 Section nintp_facts.
   Context (** Iris resources *) `{!nintpG Σ}.
 
   (** [⟦ _ ⟧ᶠ] coincides with [⟦ _ ⟧] *)
-  Lemma nintp_fp_nintp {d κ P} : ⟦ P ⟧ᶠ(d) ⊣⊢ ⟦ P ⟧{Σ, κ}(d).
+  Lemma nintp_fp_nintp {s κ P} : ⟦ P ⟧ᶠ(s) ⊣⊢ ⟦ P ⟧{Σ, κ}(s).
   Proof. unfold nintp_fp. apply (fixpoint_unfold nintp_pre). Qed.
 
   (** [nintpS_gen] coincides with [nintp_gen] *)
-  Lemma nintpS_gen_nintp_gen {ni d κ Γ} {P : nProp κ Γ} {H κS un gn} :
-    nintpS_gen (Σ:=Σ) ni d P H κS un gn ⊣⊢ nintp_gen ni d P H un gn.
+  Lemma nintpS_gen_nintp_gen {ni s κ Γ} {P : nProp κ Γ} {H κS un gn} :
+    nintpS_gen (Σ:=Σ) ni s P H κS un gn ⊣⊢ nintp_gen ni s P H un gn.
   Proof.
     move: κ Γ P H κS un gn. fix FIX 4=> κ Γ P H.
     case: P H; intros; case H=>//= ?; try f_equiv=> >; apply FIX.
   Qed.
   (** [nintpS] coincides with [nintp] *)
-  Lemma nintpS_nintp {d P} : ⟦ P ⟧ˢ(d) ⊣⊢ ⟦ P ⟧(d).
+  Lemma nintpS_nintp {s P} : ⟦ P ⟧ˢ(s) ⊣⊢ ⟦ P ⟧(s).
   Proof. exact nintpS_gen_nintp_gen. Qed.
 
   (** Simplify [nintp_gen] over [nlarge] *)
-  Lemma nintp_gen_nlarge {ni d κ Γ} {P : nProp κ Γ} {H un gn} :
-    nintp_gen (Σ:=Σ) ni d (nlarge P) H un gn ⊣⊢ nintp_gen ni d P hwf un gn.
+  Lemma nintp_gen_nlarge {ni s κ Γ} {P : nProp κ Γ} {H un gn} :
+    nintp_gen (Σ:=Σ) ni s (nlarge P) H un gn ⊣⊢ nintp_gen ni s P hwf un gn.
   Proof.
     move: κ Γ P H un gn. fix FIX 4=> κ Γ P H.
     case: P H=>/=; intros; case H=>/= he; f_equiv=> >; try apply FIX;
@@ -218,9 +211,9 @@ Section nintp_facts.
     move=> ?->?; apply FIX.
   Qed.
   (** Simplify [nintp] over [nlarge] *)
-  Lemma nintp_nlarge {d κ P} : ⟦ nlarge P ⟧(d) ⊣⊢ ⟦ P ⟧{Σ, κ}(d).
+  Lemma nintp_nlarge {s κ P} : ⟦ nlarge P ⟧(s) ⊣⊢ ⟦ P ⟧{Σ, κ}(s).
   Proof. exact nintp_gen_nlarge. Qed.
   (** [nintpS] coincides with [nintp] over [nlarge] *)
-  Lemma nintpS_nintp_nlarge {d P} : ⟦ P ⟧ˢ(d) ⊣⊢ ⟦ nlarge P ⟧(d).
+  Lemma nintpS_nintp_nlarge {s P} : ⟦ P ⟧ˢ(s) ⊣⊢ ⟦ nlarge P ⟧(s).
   Proof. by rewrite nintpS_nintp nintp_nlarge. Qed.
 End nintp_facts.

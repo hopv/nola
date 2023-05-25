@@ -56,16 +56,16 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     [`wft`](nola/util/wft.v) (Well-founded types),
     [`list`](nola/util/list.v) (Lists)
 - [`hgt`](nola/hgt.v) (General height of a tree),
-  [`ctx`](nola/ctx.v) (Context with unguarded/guarded variables),
-  [`deriv`](nola/deriv.v) (Judgment derivability)
+  [`ctx`](nola/ctx.v) (Context with unguarded/guarded variables)
+- [`sintp`](nola/sintp.v) (Strong interpretation)
 - [`examples/`](nola/examples/) : Examples
   + [`heap_lang/`](nola/examples/heap_lang/) : Variant of Iris HeapLang,
     with `Ndnat` (terminating infinite non-determinism) added
   + [`logic/`](nola/examples/logic/) : Nola Showcase Logic
     - [`prop`](nola/examples/logic/prop.v) (Proposition),
       [`subst`](nola/examples/logic/subst.v) (Substitution),
-      [`intp`](nola/examples/logic/logic.v) (Interpretation),
-      [`deriv`](nola/examples/logic/deriv.v) (Derivability),
+      [`intp`](nola/examples/logic/intp.v) (Interpretation),
+      [`sintp`](nola/examples/logic/sintp.v) (Strong interpretation),
       [`facts`](nola/examples/logic/facts.v) (Facts)
 
 ## Story

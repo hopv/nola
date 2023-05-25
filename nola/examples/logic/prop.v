@@ -83,9 +83,8 @@ Inductive nProp : nkind → nctx → Type :=
 
 (** Later modality *)
 | n_later {κ} Γᵘ {Γᵍ} (P : nProp nL (;ᵞ Γᵘ ++ Γᵍ)) : nProp κ (Γᵘ;ᵞ Γᵍ)
-(** Judgment derivability *)
-| n_deriv {κ} Γᵘ {Γᵍ} (i : nat) (P Q : nProp nL (;ᵞ Γᵘ ++ Γᵍ)) :
-    nProp κ (Γᵘ;ᵞ Γᵍ)
+(** Indirection modality *)
+| n_indir {κ} Γᵘ {Γᵍ} (i : nat) (P : nProp nL (;ᵞ Γᵘ ++ Γᵍ)) : nProp κ (Γᵘ;ᵞ Γᵍ)
 
 (** Universal quantification over [A → nProp] *)
 | n_n_forall {κ Γᵘ Γᵍ} V (P : nProp κ (V :: Γᵘ;ᵞ Γᵍ)) : nProp κ (Γᵘ;ᵞ Γᵍ)
@@ -145,10 +144,10 @@ Notation "▷{ Γᵘ } P" := (n_later Γᵘ P)
 Notation "▷ P" := (n_later _ P) : nProp_scope.
 Definition n_except_0 {κ Γ} (P : nProp κ Γ) : nProp κ Γ := ▷ False ∨ P.
 Notation "◇ P" := (n_except_0 P) : nProp_scope.
-Notation "P ⊢{ i }{ Γᵘ } Q" := (n_deriv Γᵘ i P Q)
-  (at level 99, Q at level 200, only parsing) : nProp_scope.
-Notation "P ⊢{ i } Q" := (n_deriv _ i P Q)
-  (at level 99, Q at level 200, format "P  ⊢{ i }  Q") : nProp_scope.
+Notation "○{ Γᵘ } ( i ) P" := (n_indir Γᵘ i P)
+  (at level 20, right associativity, only parsing) : nProp_scope.
+Notation "○ ( i ) P" := (n_indir _ i P)
+  (at level 20, right associativity, format "○ ( i )  P") : nProp_scope.
 
 Notation "∀: V , P" := (n_n_forall V P)
   (at level 200, right associativity,
@@ -192,7 +191,7 @@ Fixpoint nlarge {κ Γ} (P : nProp κ Γ) : nPropL Γ :=
   | |==> P => |==> nlarge P
   | |={E,E'}=> P => |={E,E'}=> nlarge P
   | ▷ P => ▷ P
-  | P ⊢{i} Q => P ⊢{i} Q
+  | ○(i) P => ○(i) P
   | ∀: V, P => ∀: V, nlarge P
   | ∃: V, P => ∃: V, nlarge P
   | rec:ˢ' Φ a => rec:ˢ' Φ a
