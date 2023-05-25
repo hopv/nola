@@ -198,14 +198,14 @@ Proof. apply (nsubstlu_nlarge (Γ:=([_];ᵞ)) (i:=0)). Qed.
 
 Fixpoint nheight {κ Γ} (P : nProp κ Γ) : hgt :=
   match P with
-  | ⌜_⌝ => hgt_0
-  | □ P | ■ P | |==> P | |={_,_}=> P => hgt_1 (nheight P)
-  | P ∧ Q | P ∨ Q | P → Q | P ∗ Q | P -∗ Q => hgt_2 (nheight P) (nheight Q)
-  | ∀' Φ | ∃' Φ => hgt_all (nheight ∘ Φ)
-  | ▷ _ | ○(_) _ => hgt_0
-  | ∀: _, P | ∃: _, P => hgt_1 (nheight P)
-  | rec:ˢ' Φ a | rec:ˡ' Φ a => hgt_1 (nheight (Φ a))
-  | %ᵍˢ _ | %ᵍˡ _ | %ᵘˢ _ | !ᵘˢ _ => hgt_0
+  | ⌜_⌝ => Hgt₀
+  | □ P | ■ P | |==> P | |={_,_}=> P => Hgt₁ (nheight P)
+  | P ∧ Q | P ∨ Q | P → Q | P ∗ Q | P -∗ Q => Hgt₂ (nheight P) (nheight Q)
+  | ∀' Φ | ∃' Φ => Hgtᶠ (nheight ∘ Φ)
+  | ▷ _ | ○(_) _ => Hgt₀
+  | ∀: _, P | ∃: _, P => Hgt₁ (nheight P)
+  | rec:ˢ' Φ a | rec:ˡ' Φ a => Hgt₁ (nheight (Φ a))
+  | %ᵍˢ _ | %ᵍˡ _ | %ᵘˢ _ | !ᵘˢ _ => Hgt₀
   end%n.
 
 (** [nsubstlu] preserves [nheight] *)

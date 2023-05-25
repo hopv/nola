@@ -47,17 +47,17 @@ Section nintp_gen.
     match P, H with
     | ⌜φ⌝%n, _ => λ _ _ _, ⌜φ⌝
     | (P ∧ Q)%n, _ => λ κS un gn,
-        nintpS_gen P (H ‼ʰ true) κS un gn ∧ nintpS_gen Q (H ‼ʰ false) κS un gn
+        nintpS_gen P (H ‼ʰ 0₂) κS un gn ∧ nintpS_gen Q (H ‼ʰ 1₂) κS un gn
     | (P ∨ Q)%n, _ => λ κS un gn,
-        nintpS_gen P (H ‼ʰ true) κS un gn ∨ nintpS_gen Q (H ‼ʰ false) κS un gn
+        nintpS_gen P (H ‼ʰ 0₂) κS un gn ∨ nintpS_gen Q (H ‼ʰ 1₂) κS un gn
     | (P → Q)%n, _ => λ κS un gn,
-        nintpS_gen P (H ‼ʰ true) κS un gn → nintpS_gen Q (H ‼ʰ false) κS un gn
+        nintpS_gen P (H ‼ʰ 0₂) κS un gn → nintpS_gen Q (H ‼ʰ 1₂) κS un gn
     | (∀' Φ)%n, _ => λ κS un gn, ∀ a, nintpS_gen (Φ a) (H ‼ʰ a) κS un gn
     | (∃' Φ)%n, _ => λ κS un gn, ∃ a, nintpS_gen (Φ a) (H ‼ʰ a) κS un gn
     | (P ∗ Q)%n, _ => λ κS un gn,
-        nintpS_gen P (H ‼ʰ true) κS un gn ∗ nintpS_gen Q (H ‼ʰ false) κS un gn
+        nintpS_gen P (H ‼ʰ 0₂) κS un gn ∗ nintpS_gen Q (H ‼ʰ 1₂) κS un gn
     | (P -∗ Q)%n, _ => λ κS un gn,
-        nintpS_gen P (H ‼ʰ true) κS un gn -∗ nintpS_gen Q (H ‼ʰ false) κS un gn
+        nintpS_gen P (H ‼ʰ 0₂) κS un gn -∗ nintpS_gen Q (H ‼ʰ 1₂) κS un gn
     | (□ P)%n, _ => λ κS un gn, □ nintpS_gen P (H ‼ʰ ()) κS un gn
     | (■ P)%n, _ => λ κS un gn, ■ nintpS_gen P (H ‼ʰ ()) κS un gn
     | (|==> P)%n, _ => λ κS un gn, |==> nintpS_gen P (H ‼ʰ ()) κS un gn
@@ -85,17 +85,17 @@ Section nintp_gen.
     match P, H with
     | ⌜φ⌝%n, _ => λ _ _, ⌜φ⌝
     | (P ∧ Q)%n, _ => λ un gn,
-        nintp_gen P (H ‼ʰ true) un gn ∧ nintp_gen Q (H ‼ʰ false) un gn
+        nintp_gen P (H ‼ʰ 0₂) un gn ∧ nintp_gen Q (H ‼ʰ 1₂) un gn
     | (P ∨ Q)%n, _ => λ un gn,
-        nintp_gen P (H ‼ʰ true) un gn ∨ nintp_gen Q (H ‼ʰ false) un gn
+        nintp_gen P (H ‼ʰ 0₂) un gn ∨ nintp_gen Q (H ‼ʰ 1₂) un gn
     | (P → Q)%n, _ => λ un gn,
-        nintp_gen P (H ‼ʰ true) un gn → nintp_gen Q (H ‼ʰ false) un gn
+        nintp_gen P (H ‼ʰ 0₂) un gn → nintp_gen Q (H ‼ʰ 1₂) un gn
     | (∀' Φ)%n, _ => λ un gn, ∀ a, nintp_gen (Φ a) (H ‼ʰ a) un gn
     | (∃' Φ)%n, _ => λ un gn, ∃ a, nintp_gen (Φ a) (H ‼ʰ a) un gn
     | (P ∗ Q)%n, _ => λ un gn,
-        nintp_gen P (H ‼ʰ true) un gn ∗ nintp_gen Q (H ‼ʰ false) un gn
+        nintp_gen P (H ‼ʰ 0₂) un gn ∗ nintp_gen Q (H ‼ʰ 1₂) un gn
     | (P -∗ Q)%n, _ => λ un gn,
-        nintp_gen P (H ‼ʰ true) un gn -∗ nintp_gen Q (H ‼ʰ false) un gn
+        nintp_gen P (H ‼ʰ 0₂) un gn -∗ nintp_gen Q (H ‼ʰ 1₂) un gn
     | (□ P)%n, _ => λ un gn, □ nintp_gen P (H ‼ʰ ()) un gn
     | (■ P)%n, _ => λ un gn, ■ nintp_gen P (H ‼ʰ ()) un gn
     | (|==> P)%n, _ => λ un gn, |==> nintp_gen P (H ‼ʰ ()) un gn

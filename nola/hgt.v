@@ -4,17 +4,21 @@ From nola Require Export prelude.
 Import EqNotations.
 
 (** [hgt]: General height of a tree *)
-Inductive hgt : Type := hgt_all {
+Inductive hgt : Type := Hgtᶠ {
   hgt_dom : Type;
   hgt_kids :> hgt_dom → hgt;
 }.
-Arguments hgt_all {A} hs : rename.
+Arguments Hgtᶠ {A} hs : rename.
 Add Printing Constructor hgt.
 
-Definition hgt_0 : hgt := hgt_all (λ e : Empty_set, match e with end).
-Definition hgt_1 (h : hgt) : hgt := hgt_all (λ _ : unit, h).
-Definition hgt_2 (h h' : hgt) : hgt :=
-  hgt_all (λ b : bool, if b then h else h').
+Definition Hgt₀ : hgt := Hgtᶠ (λ e : Empty_set, match e with end).
+Definition Hgt₁ (h : hgt) : hgt := Hgtᶠ (λ _ : unit, h).
+Definition Hgt₂ (h h' : hgt) : hgt :=
+  Hgtᶠ (λ b : bool, if b then h else h').
+Notation "0₂" := true (only parsing) : nola_scope.
+Notation "1₂" := false (only parsing) : nola_scope.
+
+(** [hgt] is a set *)
 
 (** [hAcc]: Accessibility on [hgt] *)
 Inductive hAcc (h : hgt) : Prop := HAcc {
