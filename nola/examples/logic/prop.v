@@ -7,35 +7,35 @@ Import EqNotations.
 
 (** ** Preliminaries for [nProp] *)
 
-(** [nsort]: Sort of [nProp], [nS] or [nL] *)
-Variant nsort : Set := (* small *) nS | (* large *) nL.
+(** [nkind]: Kind of of [nProp], [nS] or [nL] *)
+Variant nkind : Set := (* small *) nS | (* large *) nL.
 
-(** Equality on [nsort] is decidable *)
-#[export] Instance nsort_eq_dec : EqDecision nsort.
+(** Equality on [nkind] is decidable *)
+#[export] Instance nkind_eq_dec : EqDecision nkind.
 Proof. case; case; try (by left); by right. Defined.
 
 (** [npvar]: Predicate variable *)
 #[projections(primitive)]
 Record npvar := Npvar {
   npvar_argty : Type;
-  npvar_sort : nsort;
+  npvar_sort : nkind;
 }.
 
 (** Notations for [npvar] *)
-Notation "A →nP σ" := (Npvar A σ) (at level 1, no associativity) : nola_scope.
+Notation "A →nP κ" := (Npvar A κ) (at level 1, no associativity) : nola_scope.
 Notation "A →nPS" := (A →nP nS) (at level 1) : nola_scope.
 Notation "A →nPL" := (A →nP nL) (at level 1) : nola_scope.
-Notation nP σ := (unit →nP σ).
+Notation nP κ := (unit →nP κ).
 Notation nPS := (unit →nPS).
 Notation nPL := (unit →nPL).
 
 (** [nctx]: Context of [nProp] *)
 Notation nctx := (ctx npvar).
 
-(** [nparg]: Argument to [npvar], with [nsort] specified *)
-Variant nparg {σ : nsort} : npvar → Type :=
-| Nparg {A} : A → nparg (A →nP σ).
-Arguments nparg σ V : clear implicits.
+(** [nparg]: Argument to [npvar], with [nkind] specified *)
+Variant nparg {κ : nkind} : npvar → Type :=
+| Nparg {A} : A → nparg (A →nP κ).
+Arguments nparg κ V : clear implicits.
 Notation npargS := (nparg nS).
 Notation npargL := (nparg nL).
 Notation "@! a" := (Nparg a) (at level 20, right associativity) : nola_scope.
@@ -53,53 +53,53 @@ Notation "@! a" := (Nparg a) (at level 20, right associativity) : nola_scope.
   for connectives with such arguments we make [Γᵘ] explicit for the users
   to aid type inference around [++] *)
 
-Inductive nProp : nsort → nctx → Type :=
+Inductive nProp : nkind → nctx → Type :=
 
 (** Pure proposition *)
-| n_pure {σ Γ} (φ : Prop) : nProp σ Γ
+| n_pure {κ Γ} (φ : Prop) : nProp κ Γ
 (** Conjunction *)
-| n_and {σ Γ} (P Q : nProp σ Γ) : nProp σ Γ
+| n_and {κ Γ} (P Q : nProp κ Γ) : nProp κ Γ
 (** Disjunction *)
-| n_or {σ Γ} (P Q : nProp σ Γ) : nProp σ Γ
+| n_or {κ Γ} (P Q : nProp κ Γ) : nProp κ Γ
 (** Implication *)
-| n_impl {σ Γ} (P Q : nProp σ Γ) : nProp σ Γ
+| n_impl {κ Γ} (P Q : nProp κ Γ) : nProp κ Γ
 (** Universal quantification *)
-| n_forall {σ Γ} {A : Type} (Φ : A → nProp σ Γ) : nProp σ Γ
+| n_forall {κ Γ} {A : Type} (Φ : A → nProp κ Γ) : nProp κ Γ
 (** Existential quantification *)
-| n_exist {σ Γ} {A : Type} (Φ : A → nProp σ Γ) : nProp σ Γ
+| n_exist {κ Γ} {A : Type} (Φ : A → nProp κ Γ) : nProp κ Γ
 
 (** Separating conjunction *)
-| n_sep {σ Γ} (P Q : nProp σ Γ) : nProp σ Γ
+| n_sep {κ Γ} (P Q : nProp κ Γ) : nProp κ Γ
 (** Magic wand *)
-| n_wand {σ Γ} (P Q : nProp σ Γ) : nProp σ Γ
+| n_wand {κ Γ} (P Q : nProp κ Γ) : nProp κ Γ
 (** Persistence modality *)
-| n_persistently {σ Γ} (P : nProp σ Γ) : nProp σ Γ
+| n_persistently {κ Γ} (P : nProp κ Γ) : nProp κ Γ
 (** Plainly modality *)
-| n_plainly {σ Γ} (P : nProp σ Γ) : nProp σ Γ
+| n_plainly {κ Γ} (P : nProp κ Γ) : nProp κ Γ
 (** Basic update modality *)
-| n_bupd {σ Γ} (P : nProp σ Γ) : nProp σ Γ
+| n_bupd {κ Γ} (P : nProp κ Γ) : nProp κ Γ
 (** Fancy update modality *)
-| n_fupd {σ Γ} (E E' : coPset) (P : nProp σ Γ) : nProp σ Γ
+| n_fupd {κ Γ} (E E' : coPset) (P : nProp κ Γ) : nProp κ Γ
 
 (** Later modality *)
-| n_later {σ} Γᵘ {Γᵍ} (P : nProp nL (;ᵞ Γᵘ ++ Γᵍ)) : nProp σ (Γᵘ;ᵞ Γᵍ)
+| n_later {κ} Γᵘ {Γᵍ} (P : nProp nL (;ᵞ Γᵘ ++ Γᵍ)) : nProp κ (Γᵘ;ᵞ Γᵍ)
 (** Judgment derivability *)
-| n_deriv {σ} Γᵘ {Γᵍ} (i : nat) (P Q : nProp nL (;ᵞ Γᵘ ++ Γᵍ)) :
-    nProp σ (Γᵘ;ᵞ Γᵍ)
+| n_deriv {κ} Γᵘ {Γᵍ} (i : nat) (P Q : nProp nL (;ᵞ Γᵘ ++ Γᵍ)) :
+    nProp κ (Γᵘ;ᵞ Γᵍ)
 
 (** Universal quantification over [A → nProp] *)
-| n_n_forall {σ Γᵘ Γᵍ} V (P : nProp σ (V :: Γᵘ;ᵞ Γᵍ)) : nProp σ (Γᵘ;ᵞ Γᵍ)
+| n_n_forall {κ Γᵘ Γᵍ} V (P : nProp κ (V :: Γᵘ;ᵞ Γᵍ)) : nProp κ (Γᵘ;ᵞ Γᵍ)
 (** Existential quantification over [A → nProp] *)
-| n_n_exist {σ Γᵘ Γᵍ} V (P : nProp σ (V :: Γᵘ;ᵞ Γᵍ)) : nProp σ (Γᵘ;ᵞ Γᵍ)
+| n_n_exist {κ Γᵘ Γᵍ} V (P : nProp κ (V :: Γᵘ;ᵞ Γᵍ)) : nProp κ (Γᵘ;ᵞ Γᵍ)
 (** Recursive small proposition *)
-| n_recs {σ Γᵘ Γᵍ} {A : Type} (Φ : A → nProp nS (A →nPS :: Γᵘ;ᵞ Γᵍ)) (a : A) :
-    nProp σ (Γᵘ;ᵞ Γᵍ)
+| n_recs {κ Γᵘ Γᵍ} {A : Type} (Φ : A → nProp nS (A →nPS :: Γᵘ;ᵞ Γᵍ)) (a : A) :
+    nProp κ (Γᵘ;ᵞ Γᵍ)
 (** Recursive large proposition *)
 | n_recl {Γᵘ Γᵍ} {A : Type} (Φ : A → nProp nL (A →nPL :: Γᵘ;ᵞ Γᵍ)) (a : A) :
     nProp nL (Γᵘ;ᵞ Γᵍ)
 
 (** Guarded small variable *)
-| n_vargs {σ Γᵘ Γᵍ} (s : schoice npargS Γᵍ) : nProp σ (Γᵘ;ᵞ Γᵍ)
+| n_vargs {κ Γᵘ Γᵍ} (s : schoice npargS Γᵍ) : nProp κ (Γᵘ;ᵞ Γᵍ)
 (** Guarded large variable, [nPropL] only *)
 | n_vargl {Γᵘ Γᵍ} (s : schoice npargL Γᵍ) : nProp nL (Γᵘ;ᵞ Γᵍ)
 (** Unguarded small variable, [nPropL] only *)
@@ -143,7 +143,7 @@ Notation "|={ E , E' }=> P" := (n_fupd E E' P) : nProp_scope.
 Notation "▷{ Γᵘ } P" := (n_later Γᵘ P)
   (at level 20, right associativity, only parsing) : nProp_scope.
 Notation "▷ P" := (n_later _ P) : nProp_scope.
-Definition n_except_0 {σ Γ} (P : nProp σ Γ) : nProp σ Γ := ▷ False ∨ P.
+Definition n_except_0 {κ Γ} (P : nProp κ Γ) : nProp κ Γ := ▷ False ∨ P.
 Notation "◇ P" := (n_except_0 P) : nProp_scope.
 Notation "P ⊢{ i }{ Γᵘ } Q" := (n_deriv Γᵘ i P Q)
   (at level 99, Q at level 200, only parsing) : nProp_scope.
@@ -174,10 +174,10 @@ Notation "%ᵘˢ s" := (n_varus s) (at level 20, right associativity)
 Notation "!ᵘˢ P" := (n_subus P) (at level 20, right associativity)
   : nProp_scope.
 
-(** ** [nlarge]: Turn [nProp σ Γ] into [nPropL Γ]
-  Although the main interest is the case [σ = nS],
-  we keep the function polymorphic over [σ] for ease of definition *)
-Fixpoint nlarge {σ Γ} (P : nProp σ Γ) : nPropL Γ :=
+(** ** [nlarge]: Turn [nProp κ Γ] into [nPropL Γ]
+  Although the main interest is the case [κ = nS],
+  we keep the function polymorphic over [κ] for ease of definition *)
+Fixpoint nlarge {κ Γ} (P : nProp κ Γ) : nPropL Γ :=
   match P with
   | ⌜φ⌝ => ⌜φ⌝
   | P ∧ Q => nlarge P ∧ nlarge Q
@@ -203,15 +203,15 @@ Fixpoint nlarge {σ Γ} (P : nProp σ Γ) : nPropL Γ :=
   | !ᵘˢ P => !ᵘˢ P
   end%n.
 
-(** [nunsmall]: Turn [nPropS Γ] into [nProp σ Γ] *)
-Definition nunsmall {σ Γ} (P : nPropS Γ) : nProp σ Γ :=
-  match σ with nS => P | nL => nlarge P end.
+(** [nunsmall]: Turn [nPropS Γ] into [nProp κ Γ] *)
+Definition nunsmall {κ Γ} (P : nPropS Γ) : nProp κ Γ :=
+  match κ with nS => P | nL => nlarge P end.
 
 (** [nlarge] is identity for [nPropL] *)
-Lemma nlarge_id' {σ Γ} {P : nProp σ Γ} (eq : σ = nL) :
-  nlarge P = rew[λ σ, nProp σ Γ] eq in P.
+Lemma nlarge_id' {κ Γ} {P : nProp κ Γ} (eq : κ = nL) :
+  nlarge P = rew[λ κ, nProp κ Γ] eq in P.
 Proof.
-  move: σ Γ P eq. fix FIX 3=> σ Γ.
+  move: κ Γ P eq. fix FIX 3=> κ Γ.
   case=>/=; intros; subst=>//=; f_equal; try exact (FIX _ _ _ eq_refl);
   try (funext=> ?; exact (FIX _ _ _ eq_refl)); by rewrite (eq_dec_refl eq).
 Qed.
@@ -219,6 +219,6 @@ Lemma nlarge_id {Γ} {P : nPropL Γ} : nlarge P = P.
 Proof. exact (nlarge_id' eq_refl). Qed.
 
 (** [nlarge] over [nunsmall] *)
-Lemma nlarge_nunsmall {Γ σ} {P : nPropS Γ} :
-  nlarge (σ:=σ) (nunsmall P) = nlarge P.
-Proof. case σ=>//=. exact nlarge_id. Qed.
+Lemma nlarge_nunsmall {Γ κ} {P : nPropS Γ} :
+  nlarge (κ:=κ) (nunsmall P) = nlarge P.
+Proof. case κ=>//=. exact nlarge_id. Qed.
