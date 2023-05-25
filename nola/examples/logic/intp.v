@@ -161,22 +161,17 @@ End nintp.
 
 Notation "⟦ P ⟧ᶠ ( s )" := (nintp_fp s _ P)
   (format "'[' ⟦  P  ⟧ᶠ '/  ' ( s ) ']'") : nola_scope.
-Notation "⟦ P ⟧{ Σ , κ } ( s , H )" :=
-  (@nintp_gen Σ _ nintp_fp s κ (;ᵞ) P H eq_refl eq_refl) (only parsing)
+Notation "⟦ P ⟧{ κ } ( s , H )" :=
+  (@nintp_gen _ _ nintp_fp s κ (;ᵞ) P H eq_refl eq_refl) (only parsing)
   : nola_scope.
-Notation "⟦ P ⟧{ Σ , κ } ( s )" := (⟦ P ⟧{Σ, κ}(s, hwf)) (only parsing)
-  : nola_scope.
-Notation "⟦ P ⟧ ( s , H )" := ⟦ P ⟧{_,_}(s, H)
+Notation "⟦ P ⟧{ κ } ( s )" := (⟦ P ⟧{κ}(s, hwf)) (only parsing) : nola_scope.
+Notation "⟦ P ⟧ ( s , H )" := ⟦ P ⟧{_}(s, H)
   (format "'[' ⟦  P  ⟧ '/  ' ( s ,  H ) ']'") : nola_scope.
 Notation "⟦ P ⟧ ( s )" := ⟦ P ⟧(s, hwf)
   (format "'[' ⟦  P  ⟧ '/  ' ( s ) ']'") : nola_scope.
 Notation nintp s P := ⟦ P ⟧(s) (only parsing).
-Notation "⟦ P ⟧ˢ{ Σ } ( s , H )" :=
-  (@nintpS_gen Σ _ nintp_fp s nS (;ᵞ) P H eq_refl eq_refl eq_refl)
-  (only parsing).
-Notation "⟦ P ⟧ˢ{ Σ } ( s )" := (⟦ P ⟧ˢ{Σ}(s, hwf)) (only parsing)
-  : nola_scope.
-Notation "⟦ P ⟧ˢ ( s , H )" := ⟦ P ⟧ˢ{_}(s, H)
+Notation "⟦ P ⟧ˢ ( s , H )" :=
+  (@nintpS_gen _ _ nintp_fp s nS (;ᵞ) P H eq_refl eq_refl eq_refl)
   (format "'[' ⟦  P  ⟧ˢ '/  ' ( s ,  H ) ']'") : nola_scope.
 Notation "⟦ P ⟧ˢ ( s )" := ⟦ P ⟧ˢ(s, hwf)
   (format "'[' ⟦  P  ⟧ˢ '/  ' ( s ) ']'") : nola_scope.
@@ -187,12 +182,12 @@ Section nintp_facts.
   Context (** Iris resources *) `{!nintpG Σ}.
 
   (** [⟦ ⟧ᶠ] coincides with [⟦ ⟧] *)
-  Lemma nintp_fp_nintp {s κ P} : ⟦ P ⟧ᶠ(s) ⊣⊢ ⟦ P ⟧{Σ, κ}(s).
+  Lemma nintp_fp_nintp {s κ P} : ⟦ P ⟧ᶠ(s) ⊣⊢ ⟦ P ⟧{κ}(s).
   Proof. unfold nintp_fp. apply (fixpoint_unfold nintp_pre). Qed.
 
   (** [nintpS_gen] coincides with [nintp_gen] *)
   Lemma nintpS_gen_nintp_gen {ni s κ Γ} {P : nProp κ Γ} {H κS un gn} :
-    nintpS_gen (Σ:=Σ) ni s P H κS un gn ⊣⊢ nintp_gen ni s P H un gn.
+    nintpS_gen ni s P H κS un gn ⊣⊢ nintp_gen ni s P H un gn.
   Proof.
     move: κ Γ P H κS un gn. fix FIX 4=> κ Γ P H.
     case: P H; intros; case H=>//= ?; try f_equiv=> >; apply FIX.
@@ -203,7 +198,7 @@ Section nintp_facts.
 
   (** Simplify [nintp_gen] over [nlarge] *)
   Lemma nintp_gen_nlarge {ni s κ Γ} {P : nProp κ Γ} {H un gn} :
-    nintp_gen (Σ:=Σ) ni s (nlarge P) H un gn ⊣⊢ nintp_gen ni s P hwf un gn.
+    nintp_gen ni s (nlarge P) H un gn ⊣⊢ nintp_gen ni s P hwf un gn.
   Proof.
     move: κ Γ P H un gn. fix FIX 4=> κ Γ P H.
     case: P H=>/=; intros; case H=>/= he; f_equiv=> >; try apply FIX;
@@ -213,7 +208,7 @@ Section nintp_facts.
     move=> ?->?; apply FIX.
   Qed.
   (** Simplify [⟦ ⟧] over [nlarge] *)
-  Lemma nintp_nlarge {s κ P} : ⟦ nlarge P ⟧(s) ⊣⊢ ⟦ P ⟧{Σ, κ}(s).
+  Lemma nintp_nlarge {s κ P} : ⟦ nlarge P ⟧(s) ⊣⊢ ⟦ P ⟧{κ}(s).
   Proof. exact nintp_gen_nlarge. Qed.
   (** [⟦ ⟧ˢ] coincides with [⟦ ⟧] over [nlarge] *)
   Lemma nintpS_nintp_nlarge {s P} : ⟦ P ⟧ˢ(s) ⊣⊢ ⟦ nlarge P ⟧(s).
