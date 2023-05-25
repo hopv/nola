@@ -91,9 +91,9 @@ Section lemmas.
     iExists Φ. rewrite rew_eq_hwf. iApply "to". iApply "P".
   Qed.
 
-  (** Eliminate [○(i)] under a strong interpration of level [j ≻ i] *)
+  (** Eliminate [○(i)] under a strong interpration of level [j > i] *)
   Lemma sintpy_indir_elim {i j s P} :
-    i ≺ j → ⸨ ○{nil}(i) P ⸩(σ s, j) -∗ ⸨ P ⸩(σ s, j).
+    i < j → ⸨ ○{nil}(i) P ⸩(σ s, j) -∗ ⸨ P ⸩(σ s, j).
   Proof.
     move=> ij. iIntros "○P". iApply sintpy_byintp.
     iIntros (σ' _) "/= #to #toσ' #σ'to". iDestruct ("to" with "○P") as "/= ○P".
