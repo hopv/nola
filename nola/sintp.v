@@ -133,8 +133,8 @@ Inductive sintpy ITI (σ : psintp_ty ITI) : Prop := {
   sintpy_mono {s s' : sintp_ty ITI} : □ (s -∗ˢ s') -∗ σ s -∗ˢ σ s';
   (** [σ] can accumulate coinductive hypotheses *)
   sintpy_acc {s} (r : sintp_ty ITI) : □ (r -∗ˢ σ (s ∨ˢ r)) -∗ r -∗ˢ σ s;
-  (** For [sintpy_bysem] *)
-  sintpy_bysem' {s} :
+  (** For [sintpy_intp] *)
+  sintpy_byintp' {s} :
     (* Parameterization by [sintpy'] is for strict positivity *)
     ∃ sintpy' : _ → Prop, (∀ σ', sintpy' σ' → sintpy ITI σ') ∧
     ⊢ ∀ iP, let i := iP.(sarg_idx) in
@@ -145,19 +145,25 @@ Inductive sintpy ITI (σ : psintp_ty ITI) : Prop := {
 }.
 Existing Class sintpy.
 
-(** Get [⸨ P ⸩(σ s, i)] by semantics *)
-Lemma sintpy_bysem `{!sintpy ITI σ} {s i P} :
-  ⊢ (∀ σ', ⌜sintpy ITI σ'⌝ →
-      □ (∀ P, ⸨ P ⸩(σ s, i) -∗ ⟦ P ⟧(σ' ⊥ˢ, i)) -∗ □ (σ $∨ˢ s -∗ˢ σ' ⊥ˢ) -∗
+(** Get the strong interpretation [⸨ P ⸩(σ s, i)] by the interpretaion *)
+Lemma sintpy_byintp `{!sintpy ITI σ} {s i P} :
+  ⊢ (∀ σ', ⌜sintpy ITI σ'⌝ → (* Take any strong interpretation [σ'] *)
+      (* Turn the strong interpration at level [i] into the interpretation *)
+      □ (∀ P, ⸨ P ⸩(σ s, i) -∗ ⟦ P ⟧(σ' ⊥ˢ, i)) -∗
+      (* Turn the coinductive strong interpretation into
+        the given strong interpretation *)
+      □ (σ $∨ˢ s -∗ˢ σ' ⊥ˢ) -∗
+      (* Turn the given strong interpretation at a level lower than [i]
+        into the interpretation *)
       □ (σ' ⊥ˢ -∗ˢ[≺ i] ⟦σ' ⊥ˢ⟧ˢ) -∗ ⟦ P ⟧(σ' ⊥ˢ, i))
     -∗ ⸨ P ⸩(σ s, i).
 Proof.
-  have X := (@sintpy_bysem' _ σ _ s). move: X=> [sy'[sy'to sem']].
-  iIntros "sem". iApply sem'. iIntros (σ' syσ'). apply sy'to in syσ'.
-  by iApply "sem".
+  have X := (@sintpy_byintp' _ σ _ s). move: X=> [sy'[sy'to byintp]].
+  iIntros "intp". iApply byintp. iIntros (σ' syσ'). apply sy'to in syσ'.
+  by iApply "intp".
 Qed.
 
-(** [sintp_ty]: Strong interpretation *)
+(** ** [sintp]: Strong interpretation *)
 
 (** [sintp_gen_gen]: What becomes [sintp_gen] by taking [bi_least_fixpoint] *)
 Definition sintp_gen_gen ITI (self' self : sintp_ty' ITI)
@@ -218,8 +224,8 @@ Proof. split.
       by rewrite /sintp' greatest_fixpoint_unfold.
 Qed.
 
-(** Soundness of [sintp] *)
-Lemma sintp_sound {ITI} : ⊢ sintp ITI ⊥ˢ -∗ˢ ⟦sintp ITI ⊥ˢ⟧ˢ.
+(** [sintp] is an underapproximation of the interpretation under [sintp] *)
+Lemma sintp_intp {ITI} : ⊢ sintp ITI ⊥ˢ -∗ˢ ⟦sintp ITI ⊥ˢ⟧ˢ.
 Proof.
   iIntros ([i P]) "?". iStopProof. move: P. elim: {i}(wft_lt_wf i)=>/= i _ IH P.
   iIntros "X". rewrite /sintp' greatest_fixpoint_unfold.
