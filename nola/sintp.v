@@ -129,6 +129,8 @@ Qed.
 (** ** [sintpy] : Characterization of the strong interpretation *)
 
 Inductive sintpy ITI (σ : psintp_ty ITI) : Prop := {
+  (** [σ] is non-expansive *)
+  sintpy_nonex :: NonExpansive σ;
   (** [σ] is monotone over the coinductive hypothesis *)
   sintpy_mono {s s' : sintp_ty ITI} : □ (s -∗ˢ s') -∗ σ s -∗ˢ σ s';
   (** [σ] can accumulate coinductive hypotheses *)
@@ -223,6 +225,10 @@ Definition sintp ITI (s : sintp_ty ITI) : sintp_ty ITI :=
 (** [sintp] satisfies [sintpy] *)
 #[export] Instance sintp_sintpy {ITI} : sintpy ITI (sintp ITI).
 Proof. split.
+  - move=> ? s s' ss'. unfold sintp, sintp'. f_equiv=> ?.
+    apply greatest_fixpoint_ne; [|done]=> ??.
+    unfold sintp_gen', sintp_gen. apply least_fixpoint_ne; [|done]=> ??.
+    unfold sintp_gen_gen. (do 8 f_equiv)=> ?. f_equiv. apply ss'.
   - move=> [s] [s']. iIntros "#ss'". iApply greatest_fixpoint_strong_mono.
     clear. iIntros "!#" (?). iApply (bi_mono_pred (F:=sintp_gen _)).
     iIntros "!#" (iP) "[?|?]"; [by iLeft|]. iRight. by iApply "ss'".
