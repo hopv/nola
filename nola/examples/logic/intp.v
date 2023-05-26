@@ -1,26 +1,7 @@
 (** * [nintp]: Interpretation of [nProp] as [iProp] *)
 
-From nola.examples.logic Require Export subst.
-From nola Require Export sintp.
-From iris.base_logic.lib Require Import fancy_updates.
+From nola.examples.logic Require Export subst iris.
 Import EqNotations.
-
-(** ** [nintpGS]: Nola resources *)
-
-Class nintpGS (Σ : gFunctors) := NintpG {
-  nintpG_invGS :: invGS_gen HasNoLc Σ;
-}.
-
-(** ** For strong interpretation *)
-
-(** [intps] for [nPropL] *)
-Definition nintps Σ : intps := Intps nat (λ _, nPropL (;ᵞ)) (iProp Σ).
-
-(** Notation for [nintps] *)
-Notation nsintp_ty Σ := (sintp_ty (nintps Σ)).
-Notation npsintp_ty Σ := (psintp_ty (nintps Σ)).
-Notation "⸨ P ⸩ ( s , i )" := (sunwrap s (Sarg i P%n))
-  (format "'[' ⸨  P  ⸩ '/  ' ( s ,  i ) ']'") : nola_scope.
 
 (** Modification of [nsubst] *)
 Definition nsubst' {κ Γᵘ Γᵍ V} (P : nProp κ (V :: Γᵘ;ᵞ Γᵍ))
@@ -41,6 +22,8 @@ Section ncintp.
   (** Interpret basic connectives *)
   Definition ncintp0 (c : ncon0) : iProp Σ :=
     match c with ⟨⌜φ⌝⟩%nc => ⌜φ⌝ end.
+  Definition ncintpl0 (c : nconl0) (niS : nPropS (;ᵞ) → iProp Σ) : iProp Σ :=
+    match c with nc_inv_wsat => ninv_wsat niS end.
   Definition ncintp1 (c : ncon1) (P : iProp Σ) : iProp Σ :=
     match c with
     | ⟨□⟩%nc => □ P | ⟨■⟩%nc => ■ P
@@ -57,6 +40,7 @@ Section ncintp.
     match c with
     | ⟨▷⟩%nc => ▷ ni s _ P
     | ⟨○(i)⟩%nc => ⸨ P ⸩(s,i)
+    | nc_inv i N => nsinv s i N P
     end.
 
   (** [ncintp] is non-expansive *)
@@ -98,9 +82,9 @@ Section nintp_gen.
     | (rec:ˢ' Φ a)%n, _ => λ _ un gn, nintpS_gen
         (nsubst' (Φ a) un gn (rew[λ _,_] ctxeq_ug un gn in rec:ˢ' Φ)%n)
         (H ‼ʰ[nsubst'_nheight] 0) eq_refl eq_refl eq_refl
-    | (rec:ˡ' Φ a)%n, _ => λ κS, match κS with end
     | (%ᵍˢ s)%n, _ => λ _ _, seqnil s
-    | (%ᵍˡ _)%n, _ | (%ᵘˢ _)%n, _ | (!ᵘˢ _)%n, _ => λ κS, match κS with end
+    | n_l0 _, _ | (rec:ˡ' _ _)%n, _ | (%ᵍˡ _)%n, _ | (%ᵘˢ _)%n, _ | (!ᵘˢ _)%n, _
+      => λ κS, match κS with end
     end%I.
 
   (** [nintp_gen P] : Evaluate [P] *)
@@ -108,6 +92,8 @@ Section nintp_gen.
     : Γ.ᵞu = [] → Γ.ᵞg = [] → iProp Σ :=
     match P, H with
     | n_0 c, _ => λ _ _, ncintp0 c
+    | n_l0 c, _ => λ _ _, ncintpl0 c
+        (λ P, nintpS_gen P hwf eq_refl eq_refl eq_refl)
     | n_1 c P, _ => λ un gn, ncintp1 c (nintp_gen P (H ‼ʰ 0) un gn)
     | n_2 c P Q, _ => λ un gn, ncintp2 c
         (nintp_gen P (H ‼ʰ 0) un gn) (nintp_gen Q (H ‼ʰ 1) un gn)
@@ -154,7 +140,7 @@ Section nintp.
     unfold nintp_gen'=> i ni ni' nid s + + + + + +. fix FIX 4=> κ Γ P H.
     case: P H=>/=; intros; case H=>//= ?; try (by f_equiv=> >; apply FIX);
     try (case c=>//=; by f_contractive; apply nid);
-    by apply nintpS_gen_contractive.
+    try (case c=>/=; f_equiv=> ?); by apply nintpS_gen_contractive.
   Qed.
 
   (** [nintp_pre]: Generator of [nintp_fp] *)

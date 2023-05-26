@@ -1,7 +1,7 @@
 (** * [nProp]: Syntactic proposition *)
 
 From nola Require Export util.funext util.rel ctx.
-From stdpp Require Export coPset.
+From stdpp Require Export coPset namespaces.
 From iris.bi Require Import notation.
 Import EqNotations.
 
@@ -47,6 +47,9 @@ Notation "@! a" := (Nparg a) (at level 20, right associativity) : nola_scope.
 (** Nullary *)
 Variant ncon0 : Type :=
 | (** Pure proposition *) nc_pure (φ : Prop) : ncon0.
+(** Nullary, large *)
+Variant nconl0 : Type :=
+| (** Invariant world satisfaction *) nc_inv_wsat : nconl0.
 (** Unary *)
 Variant ncon1 : Type :=
 | (** Persistence modality *) nc_persistently : ncon1
@@ -63,7 +66,8 @@ Variant ncon2 : Type :=
 (** Unary, guarding *)
 Variant ncong1 : Type :=
 | (** Later modality *) nc_later : ncong1
-| (** Indirection modality *) nc_indir (i : nat) : ncong1.
+| (** Indirection modality *) nc_indir (i : nat) : ncong1
+| (** Invariant *) nc_inv (i : nat) (N : namespace).
 
 (** Notation for [ncon] *)
 Declare Scope ncon_scope.
@@ -95,6 +99,7 @@ Inductive nProp : nkind → nctx → Type :=
 
 (** Basic connective *)
 | n_0 {κ Γ} (c : ncon0) : nProp κ Γ
+| n_l0 {Γ} (c : nconl0) : nProp nL Γ
 | n_1 {κ Γ} (c : ncon1) (P : nProp κ Γ) : nProp κ Γ
 | n_2 {κ Γ} (c : ncon2) (P Q : nProp κ Γ) : nProp κ Γ
 | n_g1 {κ Γᵘ Γᵍ} (c : ncong1) (P : nProp nL (;ᵞ Γᵘ ++ Γᵍ)) : nProp κ (Γᵘ;ᵞ Γᵍ)
@@ -136,6 +141,7 @@ Bind Scope nProp_scope with nProp.
 Notation "'⌜' φ '⌝'" := (n_0 ⟨⌜φ⌝⟩) : nProp_scope.
 Notation "'True'" := (n_0 ⟨⌜True⌝⟩) : nProp_scope.
 Notation "'False'" := (n_0 ⟨⌜False⌝⟩) : nProp_scope.
+Notation n_inv_wsat := (n_l0 nc_inv_wsat).
 Notation "□ P" := (n_1 ⟨□⟩ P) : nProp_scope.
 Notation "■ P" := (n_1 ⟨■⟩ P) : nProp_scope.
 Notation "|==> P" := (n_1 ⟨|==>⟩ P) : nProp_scope.
@@ -159,6 +165,7 @@ Notation "○{ Γᵘ } ( i ) P" := (n_g1 (Γᵘ:=Γᵘ) ⟨○(i)⟩ P)
   (at level 20, right associativity, only parsing) : nProp_scope.
 Notation "○ ( i ) P" := (n_g1 ⟨○(i)⟩ P)
   (at level 20, right associativity, format "○ ( i )  P") : nProp_scope.
+Notation n_inv i N P := (n_g1 (nc_inv i N) P).
 
 Notation "∀: V , P" := (n_n_forall V P)
   (at level 200, right associativity,
@@ -196,7 +203,7 @@ Notation "P ={ E , E' }=∗ Q" := (P -∗ |={E,E'}=> Q)%n : nProp_scope.
   we keep the function polymorphic over [κ] for ease of definition *)
 Fixpoint nlarge {κ Γ} (P : nProp κ Γ) : nPropL Γ :=
   match P with
-  | n_0 c => n_0 c | n_1 c P => n_1 c (nlarge P)
+  | n_0 c => n_0 c | n_l0 c => n_l0 c | n_1 c P => n_1 c (nlarge P)
   | n_2 c P Q => n_2 c (nlarge P) (nlarge Q) | n_g1 c P => n_g1 c P
   | ∀' Φ => ∀' (nlarge ∘ Φ) | ∃' Φ => ∃' (nlarge ∘ Φ)
   | ∀: V, P => ∀: V, nlarge P | ∃: V, P => ∃: V, nlarge P
