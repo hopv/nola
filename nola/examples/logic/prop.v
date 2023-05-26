@@ -144,7 +144,6 @@ Infix "∨" := (n_2 ⟨∨⟩) : nProp_scope.
 Infix "→" := (n_2 ⟨→⟩) : nProp_scope.
 Infix "∗" := (n_2 ⟨∗⟩) : nProp_scope.
 Infix "-∗" := (n_2 ⟨-∗⟩) : nProp_scope.
-Notation "¬ P" := (n_2 ⟨→⟩ P (n_0 ⟨⌜False⌝⟩)) : nProp_scope.
 Notation "∀'" := n_forall (only parsing) : nProp_scope.
 Notation "∀ x .. z , P" :=
   (n_forall (λ x, .. (n_forall (λ z, P%n)) ..)) : nProp_scope.
@@ -155,8 +154,6 @@ Notation "∃ x .. z , P" :=
 Notation "▷{ Γᵘ } P" := (n_later Γᵘ P)
   (at level 20, right associativity, only parsing) : nProp_scope.
 Notation "▷ P" := (n_later _ P) : nProp_scope.
-Definition n_except_0 {κ Γ} (P : nProp κ Γ) : nProp κ Γ := ▷ False ∨ P.
-Notation "◇ P" := (n_except_0 P) : nProp_scope.
 Notation "○{ Γᵘ } ( i ) P" := (n_indir Γᵘ i P)
   (at level 20, right associativity, only parsing) : nProp_scope.
 Notation "○ ( i ) P" := (n_indir _ i P)
@@ -185,6 +182,13 @@ Notation "%ᵘˢ s" := (n_varus s) (at level 20, right associativity)
   : nProp_scope.
 Notation "!ᵘˢ P" := (n_subus P) (at level 20, right associativity)
   : nProp_scope.
+
+Notation "¬ P" := (P → False)%n : nProp_scope.
+Notation "◇ P" := (▷ False ∨ P)%n : nProp_scope.
+Notation "P ==∗ Q" := (P -∗ |==> Q)%n : nProp_scope.
+Notation "|={ E }=> P" := (|={E,E}=> P)%n : nProp_scope.
+Notation "P ={ E }=∗ Q" := (P -∗ |={E}=> Q)%n : nProp_scope.
+Notation "P ={ E , E' }=∗ Q" := (P -∗ |={E,E'}=> Q)%n : nProp_scope.
 
 (** ** [nlarge]: Turn [nProp κ Γ] into [nPropL Γ]
   Although the main interest is the case [κ = nS],
