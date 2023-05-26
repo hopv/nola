@@ -159,3 +159,13 @@ Section ninv.
     ninv_wsat intp -∗ intp P ==∗ ninv_wsat intp ∗ ninv N P.
   Proof. iIntros "W P". iApply (ninv_alloc_rec with "W"). by iIntros. Qed.
 End ninv.
+
+(** Allocate [∀ intp, ninv_wsat intp] *)
+Lemma ninv_wsat_alloc `{!invGS_gen hlc Σ, !ninvGpreS PROP Σ} :
+  ⊢ |==> ∃ _ : ninvGS PROP Σ, ∀ intp, ninv_wsat intp.
+Proof.
+  iMod (own_alloc (gmap_view_auth (DfracOwn 1) ∅)) as (γ) "a∅";
+    [by apply gmap_view_auth_valid|].
+  iModIntro. iExists (NinvGS _ _ _ γ). rewrite ninv_wsat_unseal. iIntros (?).
+  iExists ∅. rewrite big_opM_empty. iFrame.
+Qed.
