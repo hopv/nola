@@ -12,11 +12,11 @@ Arguments Hgtᶠ {A} hs : rename.
 Add Printing Constructor hgt.
 
 Definition Hgt₀ : hgt := Hgtᶠ (λ e : Empty_set, match e with end).
-Definition Hgt₁ (h : hgt) : hgt := Hgtᶠ (λ _ : unit, h).
-Definition Hgt₂ (h h' : hgt) : hgt :=
-  Hgtᶠ (λ b : bool, if b then h else h').
-Notation "0₂" := true (only parsing) : nola_scope.
-Notation "1₂" := false (only parsing) : nola_scope.
+Definition Hgt₁ (h : hgt) : hgt := Hgtᶠ (λ _ : nat, h).
+Definition Hgt₂ (h₀ h₁ : hgt) : hgt :=
+  Hgtᶠ (λ n, match n with 0 => h₀ | _ => h₁ end).
+Definition Hgt₃ (h₀ h₁ h₂ : hgt) : hgt :=
+  Hgtᶠ (λ n, match n with 0 => h₀ | 1 => h₁ | _ => h₂ end).
 
 (** [hgt] is a set *)
 
