@@ -95,7 +95,7 @@ Section ninv.
     iLeft. iFrame.
   Qed.
 
-  (** Create [ownNi] *)
+  (** Allocate [ownNi] *)
   Lemma ownNi_alloc_rec {intp P} φ :
     (∀ E : gset positive, ∃ i, i ∉ E ∧ φ i) →
     ninv_wsat intp -∗ (∀ i, ⌜φ i⌝ → ownNi i P -∗ intp P) ==∗
@@ -141,7 +141,7 @@ Section ninv.
     iApply "Nto". iFrame.
   Qed.
 
-  (** Create [ninv] *)
+  (** Allocate [ninv] *)
   Lemma ninv_alloc_rec {intp N P} :
     ninv_wsat intp -∗ (ninv N P -∗ intp P) ==∗ ninv_wsat intp ∗ ninv N P.
   Proof.
