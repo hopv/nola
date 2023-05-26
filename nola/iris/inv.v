@@ -42,17 +42,21 @@ End ninv.
 (** [ninv_wsat]: Invariant world satisfaction *)
 
 Section ninv_wsat.
-  Context `{!invGS_gen hlc Σ, !ninvGS PROP Σ} (intp : PROP → iProp Σ).
+  Context `{!invGS_gen hlc Σ, !ninvGS PROP Σ}.
 
   Definition authNi (Ps : gmap positive (leibnizO PROP)) :=
     own ninv_name (gmap_view_auth (DfracOwn 1) Ps).
 
-  Definition ninv_wsat_def : iProp Σ :=
+  Definition ninv_wsat_def (intp : PROP -d> iProp Σ) : iProp Σ :=
     ∃ Ps, authNi Ps ∗ [∗ map] i ↦ P ∈ Ps, intp P ∗ ownD {[i]} ∨ ownE {[i]}.
   Definition ninv_wsat_aux : seal ninv_wsat_def. Proof. by eexists. Qed.
   Definition ninv_wsat := ninv_wsat_aux.(unseal).
   Lemma ninv_wsat_unseal : ninv_wsat = ninv_wsat_def.
   Proof. exact ninv_wsat_aux.(seal_eq). Qed.
+  #[export] Instance ninv_wsat_nonex : NonExpansive ninv_wsat.
+  Proof. rewrite ninv_wsat_unseal. solve_proper. Qed.
+  #[export] Instance ninv_wsat_proper : Proper ((≡) ==> (≡)) ninv_wsat.
+  Proof. apply ne_proper, _. Qed.
 
   Lemma authNi_lookup {Ps i P} :
     authNi Ps -∗ ownNi i P -∗ ⌜Ps !! i = Some P⌝.
@@ -63,8 +67,9 @@ Section ninv_wsat.
   Qed.
 
   (** Open and close by [ownNi] *)
-  Lemma ownNi_open {i P} :
-    ninv_wsat -∗ ownNi i P -∗ ownE {[i]} -∗ ninv_wsat ∗ intp P ∗ ownD {[i]}.
+  Lemma ownNi_open {intp i P} :
+    ninv_wsat intp -∗ ownNi i P -∗ ownE {[i]} -∗
+      ninv_wsat intp ∗ intp P ∗ ownD {[i]}.
   Proof.
     rewrite ninv_wsat_unseal. iIntros "(%Ps & aPs & W) iP Ei".
     iDestruct (authNi_lookup with "aPs iP") as %eqP.
@@ -72,8 +77,9 @@ Section ninv_wsat.
       [done| |iDestruct (ownE_singleton_twice with "[$]") as "[]"].
     iExists _. iFrame "aPs". iApply big_sepM_delete; [done|]. iFrame.
   Qed.
-  Lemma ownNi_close {i P} :
-    ninv_wsat -∗ ownNi i P -∗ intp P -∗ ownD {[i]} -∗ ninv_wsat ∗ ownE {[i]}.
+  Lemma ownNi_close {intp i P} :
+    ninv_wsat intp -∗ ownNi i P -∗ intp P -∗ ownD {[i]} -∗
+      ninv_wsat intp ∗ ownE {[i]}.
   Proof.
     rewrite ninv_wsat_unseal. iIntros "(%Ps & aPs & W) iP P Di".
     iDestruct (authNi_lookup with "aPs iP") as %eqP.
@@ -84,10 +90,10 @@ Section ninv_wsat.
   Qed.
 
   (** Create [ownNi] *)
-  Lemma ownNi_alloc_rec φ P :
+  Lemma ownNi_alloc_rec {intp P} φ :
     (∀ E : gset positive, ∃ i, i ∉ E ∧ φ i) →
-    ninv_wsat -∗ (∀ i, ⌜φ i⌝ → ownNi i P -∗ intp P) ==∗
-      ∃ i, ⌜φ i⌝ ∗ ninv_wsat ∗ ownNi i P.
+    ninv_wsat intp -∗ (∀ i, ⌜φ i⌝ → ownNi i P -∗ intp P) ==∗
+      ∃ i, ⌜φ i⌝ ∗ ninv_wsat intp ∗ ownNi i P.
   Proof.
     rewrite ninv_wsat_unseal. iIntros (fresh) "(%Ps & aPs & W) toP".
     iMod (own_unit (gset_disjUR positive) disabled_name) as "?".
@@ -115,9 +121,10 @@ Section ninv_wsat.
   Qed.
 
   (** Access [ninv] *)
-  Lemma ninv_acc {N E P} :
-    ↑N ⊆ E → ninv_wsat -∗ ninv N P ={E,E∖↑N}=∗
-      ninv_wsat ∗ intp P ∗ (ninv_wsat -∗ intp P ={E∖↑N,E}=∗ ninv_wsat).
+  Lemma ninv_acc {intp N E P} :
+    ↑N ⊆ E → ninv_wsat intp -∗ ninv N P ={E,E∖↑N}=∗
+      ninv_wsat intp ∗ intp P ∗
+      (ninv_wsat intp -∗ intp P ={E∖↑N,E}=∗ ninv_wsat intp).
   Proof.
     move=> ?. rewrite ninv_unseal. iIntros "W (%i & %iN & #iP)".
     iMod fupd_accE as "[N Nto]"; [done|].
@@ -129,8 +136,8 @@ Section ninv_wsat.
   Qed.
 
   (** Create [ninv] *)
-  Lemma ninv_alloc_rec {N P} :
-    ninv_wsat -∗ (ninv N P -∗ intp P) ==∗ ninv_wsat ∗ ninv N P.
+  Lemma ninv_alloc_rec {intp N P} :
+    ninv_wsat intp -∗ (ninv N P -∗ intp P) ==∗ ninv_wsat intp ∗ ninv N P.
   Proof.
     iIntros "W toP". rewrite ninv_unseal.
     iMod (ownNi_alloc_rec (.∈ ↑N) with "W [toP]") as (i) "(%iN & W & iP)".
@@ -138,6 +145,7 @@ Section ninv_wsat.
     - iIntros (? iN) "iP". iApply "toP". iExists _. by iFrame.
     - iModIntro. iFrame "W". iExists _. by iFrame.
   Qed.
-  Lemma ninv_alloc {N P} : ninv_wsat -∗ intp P ==∗ ninv_wsat ∗ ninv N P.
+  Lemma ninv_alloc {intp N P} :
+    ninv_wsat intp -∗ intp P ==∗ ninv_wsat intp ∗ ninv N P.
   Proof. iIntros "W P". iApply (ninv_alloc_rec with "W"). by iIntros. Qed.
 End ninv_wsat.
