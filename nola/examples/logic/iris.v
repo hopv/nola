@@ -2,13 +2,17 @@
 
 From nola.examples.logic Require Export prop.
 From nola Require Export sintp iris.inv.
+From nola.examples.heap_lang Require Export proofmode.
 
 (** ** [nintpGS]: Iris resources *)
 
 Class nintpGS (Σ : gFunctors) := NintpG {
-  nintpGS_invG :: invGS_gen HasNoLc Σ;
+  nintpGS_heapGS :: heapGS_gen HasNoLc Σ;
   nintpGS_ninvGS :: ninvGS (nPropS (;ᵞ)) Σ;
 }.
+#[export] Instance nintpGS_invGS `{!nintpGS Σ} : invGS_gen HasNoLc Σ := _.
+
+(** ** [nintpΣ]: Iris signature *)
 
 (** ** For strong interpretation *)
 

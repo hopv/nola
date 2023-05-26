@@ -3,6 +3,7 @@
 From nola Require Export util.funext util.rel ctx.
 From stdpp Require Export coPset namespaces.
 From iris.bi Require Import notation.
+From nola.examples.heap_lang Require Import proofmode.
 Import EqNotations.
 
 (** ** Preliminaries for [nProp] *)
@@ -46,7 +47,13 @@ Notation "@! a" := (Nparg a) (at level 20, right associativity) : nola_scope.
 
 (** Nullary *)
 Variant ncon0 : Type :=
-| (** Pure proposition *) nc_pure (φ : Prop) : ncon0.
+| (** Pure proposition *) nc_pure (φ : Prop) : ncon0
+| (** Points-to token *) nc_mapsto (l : loc) (dq : dfrac) (v : val) : ncon0
+| (** Owning invariant points-to token *) nc_inv_mapsto_own
+    (l : loc) (v : val) (I : val → Prop) : ncon0
+| (** Invariant points-to token *) nc_inv_mapsto
+    (l : loc) (I : val → Prop) : ncon0
+| (** Meta token *) nc_meta_token (l : loc) (E : coPset) : ncon0.
 (** Nullary, large *)
 Variant nconl0 : Type :=
 | (** Invariant world satisfaction *) nc_inv_wsat : nconl0.
@@ -75,6 +82,12 @@ Delimit Scope ncon_scope with nc.
 Bind Scope ncon_scope with ncon0 ncon1 ncon2 ncong1.
 Notation "⟨⌜ φ ⌝⟩" := (nc_pure φ%type%stdpp%nola) (format "⟨⌜ φ ⌝⟩")
   : ncon_scope.
+Notation "⟨↦ dq | l , v ⟩" := (nc_mapsto l dq v)
+  (dq custom dfrac, format "⟨↦ dq | l , v ⟩") : ncon_scope.
+Notation "⟨↦_ I | l , v ⟩" := (nc_inv_mapsto_own l v I%stdpp%type)
+  (format "⟨↦_ I | l , v ⟩") : ncon_scope.
+Notation "⟨↦□_ I | l ⟩" := (nc_inv_mapsto l I%stdpp%type)
+  (format "⟨↦□_ I | l ⟩") : ncon_scope.
 Notation "⟨□⟩" := nc_persistently : ncon_scope.
 Notation "⟨■⟩" := nc_plainly : ncon_scope.
 Notation "⟨|==>⟩" := nc_bupd : ncon_scope.
@@ -141,6 +154,10 @@ Bind Scope nProp_scope with nProp.
 Notation "'⌜' φ '⌝'" := (n_0 ⟨⌜φ⌝⟩) : nProp_scope.
 Notation "'True'" := (n_0 ⟨⌜True⌝⟩) : nProp_scope.
 Notation "'False'" := (n_0 ⟨⌜False⌝⟩) : nProp_scope.
+Notation "l ↦ dq v" := (n_0 ⟨↦{dq}|l,v⟩) : nProp_scope.
+Notation "l ↦_ I v" := (n_0 ⟨↦_I|l,v⟩) : nProp_scope.
+Notation "l ↦_ I □" := (n_0 ⟨↦□_I|l⟩) : nProp_scope.
+Notation n_meta_token l E := (n_0 (nc_meta_token l E)).
 Notation n_inv_wsat := (n_l0 nc_inv_wsat).
 Notation "□ P" := (n_1 ⟨□⟩ P) : nProp_scope.
 Notation "■ P" := (n_1 ⟨■⟩ P) : nProp_scope.
