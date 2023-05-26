@@ -182,6 +182,8 @@ Notation "⟦ P ⟧ˢ ( s , H )" :=
 Notation "⟦ P ⟧ˢ ( s )" := ⟦ P ⟧ˢ(s, hwf)
   (format "'[' ⟦  P  ⟧ˢ '/  ' ( s ) ']'") : nola_scope.
 Notation nintpS s P := ⟦ P ⟧ˢ(s) (only parsing).
+Notation "⟦ s ⟧ˢ" := (Swrap (λ iP, ⟦ sarg_data iP ⟧(s))) (format "⟦ s ⟧ˢ ")
+  : nola_scope.
 
 (** ** Facts on [⟦ ⟧] etc. *)
 Section nintp_facts.

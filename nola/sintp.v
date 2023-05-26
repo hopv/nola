@@ -90,7 +90,7 @@ Module IntpNotation.
     (format "'[' ⟦  iP  ⟧ '/  ' ( s ) ']'") : nola_scope.
   Notation "⟦ P ⟧ ( s , i )" := (intpsi_intp s (Sarg i P))
     (format "'[' ⟦  P  ⟧ '/  ' ( s ,  i ) ']'") : nola_scope.
-  Notation "⟦ s ⟧ˢ" := (intpsi_intp' s) (format "⟦ '[' s ']' ⟧ˢ ") : nola_scope.
+  Notation "⟦ s ⟧ˢ" := (intpsi_intp' s) (format "⟦ s ⟧ˢ ") : nola_scope.
 End IntpNotation.
 Import IntpNotation.
 
