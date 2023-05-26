@@ -11,22 +11,27 @@ From nola.examples.heap_lang Require Export class_instances.
 From nola.examples.heap_lang Require Import tactics notation.
 From iris.prelude Require Import options.
 
-(** We introduce the world parameter [W] *)
-Class heapGS_gen hlc Σ (X : Type) (W : X → iProp Σ) := HeapGS {
-  heapGS_invGS : invGS_gen hlc Σ;
+Class heapGS_gen hlc Σ := HeapGS {
+  heapGS_invGS :: invGS_gen hlc Σ;
   heapGS_gen_heapGS :: gen_heapGS loc (option val) Σ;
   heapGS_inv_heapGS :: inv_heapGS loc (option val) Σ;
   heapGS_proph_mapGS :: proph_mapGS proph_id (val * val) Σ;
   heapGS_step_name : gname;
-  heapGS_step_cnt : mono_natG Σ;
-  heapGS_wolrd_arg : X;
+  heapGS_step_cnt :: mono_natG Σ;
 }.
 Local Existing Instance heapGS_step_cnt.
-
+Arguments HeapGS {_ _} _ _ _ _ _ _.
 Notation heapGS := (heapGS_gen HasLc).
 
+(* [heapWGS_gen]: [heapGS_gen] with an extra world satisfaction *)
+Class heapWGS_gen hlc Σ := HeapWGS {
+  heapWGS_heapGS :: heapGS_gen hlc Σ;
+  heapWGS_wsat : iProp Σ;
+}.
+Arguments HeapWGS {_ _} _ _.
+
 Section steps.
-  Context `{!heapGS_gen hlc Σ X W}.
+  Context `{!heapGS_gen hlc Σ}.
 
   Local Definition steps_auth (n : nat) : iProp Σ :=
     mono_nat_auth_own heapGS_step_name 1 n.
@@ -62,16 +67,16 @@ Section steps.
 
 End steps.
 
-Global Program Instance heapGS_irisGS `{!heapGS_gen hlc Σ X W} : irisGS_gen hlc heap_ectxi_lang Σ := {
+Global Program Instance heapWGS_irisGS `{!heapWGS_gen hlc Σ} : irisGS_gen hlc heap_ectxi_lang Σ := {
   iris_invGS := heapGS_invGS;
   state_interp σ step_cnt κs _ :=
-    (W heapGS_wolrd_arg ∗ gen_heap_interp σ.(heap) ∗ proph_map_interp κs σ.(used_proph_id) ∗
-     steps_auth step_cnt)%I;
+    (heapWGS_wsat ∗ gen_heap_interp σ.(heap) ∗
+      proph_map_interp κs σ.(used_proph_id) ∗ steps_auth step_cnt)%I;
   fork_post _ := True%I;
   num_laters_per_step n := n;
 }.
 Next Obligation.
-  iIntros (????? σ ns κs nt) "/= ($ & $ & $ & H)".
+  iIntros (??? σ ns κs nt) "/= ($ & $ & $ & H)".
   by iMod (steps_auth_update_S with "H") as "$".
 Qed.
 
@@ -84,7 +89,7 @@ Notation "l ↦ dq v" := (mapsto (L:=loc) (V:=option val) l dq (Some v%V))
 make setoid rewriting in the predicate [I] work we need actual definitions
 here. *)
 Section definitions.
-  Context `{!heapGS_gen hlc Σ X W}.
+  Context `{!heapGS_gen hlc Σ}.
   Definition inv_mapsto_own (l : loc) (v : val) (I : val → Prop) : iProp Σ :=
     inv_mapsto_own l (Some v) (from_option I False).
   Definition inv_mapsto (l : loc) (I : val → Prop) : iProp Σ :=
@@ -101,7 +106,7 @@ Notation "l ↦_ I v" := (inv_mapsto_own l v I%stdpp%type)
   (at level 20, I at level 9, format "l  ↦_ I  v") : bi_scope.
 
 Section lifting.
-Context `{!heapGS_gen hlc Σ X W}.
+Context `{!heapWGS_gen hlc Σ}.
 Implicit Types P Q : iProp Σ.
 Implicit Types Φ Ψ : val → iProp Σ.
 Implicit Types efs : list expr.
