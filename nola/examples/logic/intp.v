@@ -40,7 +40,7 @@ Section ncintp.
     match c with
     | ⟨▷⟩%nc => ▷ ni s _ P
     | ⟨○(i)⟩%nc => ⸨ P ⸩(s,i)
-    | nc_inv i N => nsinv s i N P
+    | nc_inv i N => nninv s i N P
     end.
 
   (** [ncintp] is non-expansive *)
@@ -213,3 +213,6 @@ Section nintp_facts.
   Lemma nintpS_nintp_nlarge {s P} : ⟦ P ⟧ˢ(s) ⊣⊢ ⟦ nlarge P ⟧(s).
   Proof. by rewrite nintpS_nintp nintp_nlarge. Qed.
 End nintp_facts.
+
+(** Utility *)
+Notation nninv_wsat s := (ninv_wsat (λ P, ⟦ P ⟧ˢ(s))).

@@ -24,13 +24,13 @@ Notation "⸨ P ⸩ ( s , i )" := (sunwrap s (Sarg i P%n))
 Section iris.
   Context (* Iris resources *) `{!nintpGS Σ}.
 
-  (** ** [nsinv]: Invariant with the semantic agreement *)
-  Definition nsinv_def (s : nsintp_ty Σ)
+  (** ** [nninv]: [ninv] with a semantic agreement *)
+  Definition nninv_def (s : nsintp_ty Σ)
     (i : nat) (N : namespace) (P : nPropL (;ᵞ)) : iProp Σ :=
     ∃ Q, □ ⸨ nlarge Q ={∅}=∗ P ∗ (P ={∅}=∗ nlarge Q) ⸩(s, i) ∗ ninv N Q.
-  Definition nsinv_aux : seal nsinv_def. Proof. by eexists. Qed.
-  Definition nsinv := nsinv_aux.(unseal).
-  Lemma nsinv_unseal : nsinv = nsinv_def. Proof. exact nsinv_aux.(seal_eq). Qed.
-  #[export] Instance nsinv_persistent {s i N P} : Persistent (nsinv s i N P).
-  Proof. rewrite nsinv_unseal. apply _. Qed.
+  Definition nninv_aux : seal nninv_def. Proof. by eexists. Qed.
+  Definition nninv := nninv_aux.(unseal).
+  Lemma nninv_unseal : nninv = nninv_def. Proof. exact nninv_aux.(seal_eq). Qed.
+  #[export] Instance nninv_persistent {s i N P} : Persistent (nninv s i N P).
+  Proof. rewrite nninv_unseal. apply _. Qed.
 End iris.
