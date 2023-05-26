@@ -5,10 +5,10 @@ From nola Require Export sintp.
 From iris.base_logic.lib Require Import fancy_updates.
 Import EqNotations.
 
-(** ** [nintpG]: Nola resources *)
+(** ** [nintpGS]: Nola resources *)
 
-Class nintpG (Σ : gFunctors) := NintpG {
-  nintpG_invG :: invGS_gen HasNoLc Σ;
+Class nintpGS (Σ : gFunctors) := NintpG {
+  nintpG_invGS :: invGS_gen HasNoLc Σ;
 }.
 
 (** ** For strong interpretation *)
@@ -36,7 +36,7 @@ Proof. subst. apply nsubst_nheight. Qed.
 (** ** [nintp]: Interpretation of [nProp] as [iProp] *)
 
 Section ncintp.
-  Context (** Iris resources *) `{!nintpG Σ}.
+  Context (** Iris resources *) `{!nintpGS Σ}.
 
   (** Interpret basic connectives *)
   Definition ncintp0 (c : ncon0) : iProp Σ :=
@@ -68,7 +68,7 @@ End ncintp.
 
 Section nintp_gen.
   Context
-    (** Iris resources *) `{!nintpG Σ}
+    (** Iris resources *) `{!nintpGS Σ}
     (** Interpretation used contractively *)
     (ni : nsintp_ty Σ → ∀ κ, nProp κ (;ᵞ) → iProp Σ)
     (** Strong interpretation *) (s : nsintp_ty Σ).
@@ -126,7 +126,7 @@ Section nintp_gen.
 End nintp_gen.
 
 Section nintp.
-  Context (** Iris resources *) `{!nintpG Σ}.
+  Context (** Iris resources *) `{!nintpGS Σ}.
 
   (** [nintpS_gen]/[nintp_gen] typed as a discrete function *)
   Definition nintpS_gen' : (_ -d> _ -d> _ -d> iProp Σ) ->
@@ -187,7 +187,7 @@ Notation "⟦ s ⟧ˢ" := (Swrap (λ iP, ⟦ sarg_data iP ⟧(s))) (format "⟦ 
 
 (** ** Facts on [⟦ ⟧] etc. *)
 Section nintp_facts.
-  Context (** Iris resources *) `{!nintpG Σ}.
+  Context (** Iris resources *) `{!nintpGS Σ}.
 
   (** [⟦ ⟧ᶠ] coincides with [⟦ ⟧] *)
   Lemma nintp_fp_nintp {s κ P} : ⟦ P ⟧ᶠ(s) ⊣⊢ ⟦ P ⟧{κ}(s).

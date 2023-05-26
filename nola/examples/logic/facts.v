@@ -5,7 +5,7 @@ From iris.proofmode Require Import tactics.
 From iris.base_logic.lib Require Import iprop.
 
 Section facts.
-  Context `{!nintpG Σ}.
+  Context `{!nintpGS Σ}.
 
   (** ** Behavior of [nintp] for featured connectives *)
   Lemma nintp_later {κ s} {P : _ (;ᵞ)} : ⟦ ▷{nil} P ⟧{κ}(s) ⊣⊢ ▷ ⟦ P ⟧(s).

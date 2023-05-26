@@ -5,7 +5,7 @@ From nola Require Export util.wft.
 From iris.proofmode Require Import tactics.
 
 (** ** [nintpsi]: [inpsi] for [nPropL] *)
-Definition nintpsi Σ `{!nintpG Σ} : intpsi :=
+Definition nintpsi Σ `{!nintpGS Σ} : intpsi :=
   Intpsi (nintps Σ) (λ s '(Sarg i P), ⟦ P ⟧(s)).
 
 (** Notation for [nintpsi] *)
@@ -16,7 +16,7 @@ Implicit Type (i j : nat) (P Q : nPropL (;ᵞ)).
 
 (** ** Lemmas about [nsintpy] *)
 Section lemmas.
-  Context `{!nintpG Σ, !nsintpy Σ σ}.
+  Context `{!nintpGS Σ, !nsintpy Σ σ}.
 
   (** [σ s] is monotone over the index *)
   Lemma sintpy_up {i j s P} : i ≤ j → ⸨ P ⸩(σ s, i) -∗ ⸨ P ⸩(σ s, j).
