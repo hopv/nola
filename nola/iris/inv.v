@@ -6,21 +6,18 @@ From iris.base_logic.lib Require Export own wsat fancy_updates invariants.
 
 (** ** Resources *)
 
-Class ninvGpreS (PROP : Type) (Σ : gFunctors) : Set := NinvGpreS {
+Class ninvGpreS (PROP : Type) (Σ : gFunctors) := NinvGpreS {
   ninvGpreS_inv :: inG Σ (gmap_viewR positive (leibnizO PROP));
 }.
-
-Class ninvGS (PROP : Type) (Σ : gFunctors) : Set := NinvGS {
+Class ninvGS (PROP : Type) (Σ : gFunctors) := NinvGS {
   ninv_inG :: ninvGpreS PROP Σ;
   ninv_name : gname;
 }.
 
 Definition ninvΣ (PROP : Type) : gFunctors :=
   #[GFunctor (gmap_viewRF positive (leibnizO PROP))].
-
 #[export] Instance subG_ninvΣ {PROP Σ} : subG (ninvΣ PROP) Σ → ninvGpreS PROP Σ.
 Proof. solve_inG. Qed.
-
 
 Section ninv.
   Context `{!invGS_gen hlc Σ, !ninvGS PROP Σ}.
