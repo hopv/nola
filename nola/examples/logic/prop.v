@@ -42,25 +42,33 @@ Notation "@! a" := (Nparg a) (at level 20, right associativity) : nola_scope.
 
 (** ** [nProp]: Nola syntactic proposition *)
 
-(** [ncon0], [ncon1], [ncon2]: Basic connectives *)
+(** Basic connectives *)
+
+(** Nullary *)
 Variant ncon0 : Type :=
 | (** Pure proposition *) nc_pure (φ : Prop) : ncon0.
+(** Unary *)
 Variant ncon1 : Type :=
 | (** Persistence modality *) nc_persistently : ncon1
 | (** Plainly modality *) nc_plainly : ncon1
 | (** Basic update modality *) nc_bupd : ncon1
 | (** Fancy update modality *) nc_fupd (E E' : coPset) : ncon1.
+(** Binary *)
 Variant ncon2 : Type :=
 | (** Conjunction *) nc_and : ncon2
 | (** Disjunction *) nc_or : ncon2
 | (** Implication *) nc_impl : ncon2
 | (** Separating conjunction *) nc_sep : ncon2
 | (** Magic wand *) nc_wand : ncon2.
+(** Unary, guarding *)
+Variant ncong1 : Type :=
+| (** Later modality *) nc_later : ncong1
+| (** Indirection modality *) nc_indir (i : nat) : ncong1.
 
 (** Notation for [ncon] *)
 Declare Scope ncon_scope.
 Delimit Scope ncon_scope with nc.
-Bind Scope ncon_scope with ncon0 ncon1 ncon2.
+Bind Scope ncon_scope with ncon0 ncon1 ncon2 ncong1.
 Notation "⟨⌜ φ ⌝⟩" := (nc_pure φ%type%stdpp%nola) (format "⟨⌜ φ ⌝⟩")
   : ncon_scope.
 Notation "⟨□⟩" := nc_persistently : ncon_scope.
@@ -73,18 +81,15 @@ Notation "⟨∨⟩" := nc_or : ncon_scope.
 Notation "⟨→⟩" := nc_impl : ncon_scope.
 Notation "⟨∗⟩" := nc_sep : ncon_scope.
 Notation "⟨-∗⟩" := nc_wand : ncon_scope.
+Notation "⟨▷⟩" := nc_later : ncon_scope.
+Notation "⟨○( i )⟩" := (nc_indir i) (format "⟨○( i )⟩") : ncon_scope.
 
 (** [nProp]: Nola syntactic proposition
   Its universe level is strictly higher than those of [V : npvar]
   and the domain [A : Type] of [n_forall]/[n_exist].
 
   Connectives that operate on the context [Γ : nctx] take decomposed contexts
-  [Γᵘ, Γᵍ] for smooth type inference
-
-  In nominal proposition arguments (e.g., [n_deriv]'s arguments), unguarded
-  variables are flushed into guarded, with the context [(;ᵞ Γᵘ ++ Γᵍ)];
-  for connectives with such arguments we make [Γᵘ] explicit for the users
-  to aid type inference around [++] *)
+  [Γᵘ, Γᵍ] for smooth type inference *)
 
 Inductive nProp : nkind → nctx → Type :=
 
@@ -92,16 +97,12 @@ Inductive nProp : nkind → nctx → Type :=
 | n_0 {κ Γ} (c : ncon0) : nProp κ Γ
 | n_1 {κ Γ} (c : ncon1) (P : nProp κ Γ) : nProp κ Γ
 | n_2 {κ Γ} (c : ncon2) (P Q : nProp κ Γ) : nProp κ Γ
+| n_g1 {κ Γᵘ Γᵍ} (c : ncong1) (P : nProp nL (;ᵞ Γᵘ ++ Γᵍ)) : nProp κ (Γᵘ;ᵞ Γᵍ)
 
 (** Universal quantification *)
 | n_forall {κ Γ} {A : Type} (Φ : A → nProp κ Γ) : nProp κ Γ
 (** Existential quantification *)
 | n_exist {κ Γ} {A : Type} (Φ : A → nProp κ Γ) : nProp κ Γ
-
-(** Later modality *)
-| n_later {κ} Γᵘ {Γᵍ} (P : nProp nL (;ᵞ Γᵘ ++ Γᵍ)) : nProp κ (Γᵘ;ᵞ Γᵍ)
-(** Indirection modality *)
-| n_indir {κ} Γᵘ {Γᵍ} (i : nat) (P : nProp nL (;ᵞ Γᵘ ++ Γᵍ)) : nProp κ (Γᵘ;ᵞ Γᵍ)
 
 (** Universal quantification over [A → nProp] *)
 | n_n_forall {κ Γᵘ Γᵍ} V (P : nProp κ (V :: Γᵘ;ᵞ Γᵍ)) : nProp κ (Γᵘ;ᵞ Γᵍ)
@@ -151,12 +152,12 @@ Notation "∃'" := n_exist (only parsing) : nProp_scope.
 Notation "∃ x .. z , P" :=
   (n_exist (λ x, .. (n_exist (λ z, P%n)) ..)) : nProp_scope.
 
-Notation "▷{ Γᵘ } P" := (n_later Γᵘ P)
+Notation "▷{ Γᵘ } P" := (n_g1 (Γᵘ:=Γᵘ) ⟨▷⟩ P)
   (at level 20, right associativity, only parsing) : nProp_scope.
-Notation "▷ P" := (n_later _ P) : nProp_scope.
-Notation "○{ Γᵘ } ( i ) P" := (n_indir Γᵘ i P)
+Notation "▷ P" := (n_g1 ⟨▷⟩ P) : nProp_scope.
+Notation "○{ Γᵘ } ( i ) P" := (n_g1 (Γᵘ:=Γᵘ) ⟨○(i)⟩ P)
   (at level 20, right associativity, only parsing) : nProp_scope.
-Notation "○ ( i ) P" := (n_indir _ i P)
+Notation "○ ( i ) P" := (n_g1 ⟨○(i)⟩ P)
   (at level 20, right associativity, format "○ ( i )  P") : nProp_scope.
 
 Notation "∀: V , P" := (n_n_forall V P)
@@ -196,9 +197,8 @@ Notation "P ={ E , E' }=∗ Q" := (P -∗ |={E,E'}=> Q)%n : nProp_scope.
 Fixpoint nlarge {κ Γ} (P : nProp κ Γ) : nPropL Γ :=
   match P with
   | n_0 c => n_0 c | n_1 c P => n_1 c (nlarge P)
-  | n_2 c P Q => n_2 c (nlarge P) (nlarge Q)
+  | n_2 c P Q => n_2 c (nlarge P) (nlarge Q) | n_g1 c P => n_g1 c P
   | ∀' Φ => ∀' (nlarge ∘ Φ) | ∃' Φ => ∃' (nlarge ∘ Φ)
-  | ▷ P => ▷ P | ○(i) P => ○(i) P
   | ∀: V, P => ∀: V, nlarge P | ∃: V, P => ∃: V, nlarge P
   | rec:ˢ' Φ a => rec:ˢ' Φ a | rec:ˡ' Φ a => rec:ˡ' Φ a
   | %ᵍˢ s => %ᵍˢ s | %ᵍˡ s => %ᵍˡ s | %ᵘˢ s => %ᵘˢ s | !ᵘˢ P => !ᵘˢ P

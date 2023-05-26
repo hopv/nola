@@ -51,6 +51,13 @@ Section ncintp.
     | ⟨∧⟩%nc => P ∧ Q | ⟨∨⟩%nc => P ∨ Q | ⟨→⟩%nc => P → Q
     | ⟨∗⟩%nc => P ∗ Q | ⟨-∗⟩%nc => P -∗ Q
     end.
+  Definition ncintpg1 (c : ncong1) (P : nPropL (;ᵞ))
+    (ni : nsintp_ty Σ → ∀ κ, nProp κ (;ᵞ) → iProp Σ) (s : nsintp_ty Σ)
+    : iProp Σ :=
+    match c with
+    | ⟨▷⟩%nc => ▷ ni s _ P
+    | ⟨○(i)⟩%nc => ⸨ P ⸩(s,i)
+    end.
 
   (** [ncintp] is non-expansive *)
   #[export] Instance ncintp1_nonex {c} : NonExpansive (ncintp1 c).
@@ -81,11 +88,9 @@ Section nintp_gen.
     | n_1 c P, _ => λ κS un gn, ncintp1 c (nintpS_gen P (H ‼ʰ 0) κS un gn)
     | n_2 c P Q, _ => λ κS un gn, ncintp2 c
         (nintpS_gen P (H ‼ʰ 0) κS un gn) (nintpS_gen Q (H ‼ʰ 1) κS un gn)
+    | n_g1 c P, _ => λ _ un gn, ncintpg1 c (rew app_eq_nil_ug_g un gn in P) ni s
     | (∀' Φ)%n, _ => λ κS un gn, ∀ a, nintpS_gen (Φ a) (H ‼ʰ a) κS un gn
     | (∃' Φ)%n, _ => λ κS un gn, ∃ a, nintpS_gen (Φ a) (H ‼ʰ a) κS un gn
-    | (▷ P)%n, _ => λ _ un gn, ▷ ni s _ (rew app_eq_nil_ug_g un gn in P)
-    | (○(i) P)%n, _ => λ _ un gn,
-        ⸨ rew[nPropL] app_eq_nil_ug_g un gn in P ⸩(s,i)
     | (∀: V, P)%n, _ => λ κS un gn, ∀ Φ, nintpS_gen
         (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] 0) κS eq_refl eq_refl
     | (∃: V, P)%n, _ => λ κS un gn, ∃ Φ, nintpS_gen
@@ -106,10 +111,9 @@ Section nintp_gen.
     | n_1 c P, _ => λ un gn, ncintp1 c (nintp_gen P (H ‼ʰ 0) un gn)
     | n_2 c P Q, _ => λ un gn, ncintp2 c
         (nintp_gen P (H ‼ʰ 0) un gn) (nintp_gen Q (H ‼ʰ 1) un gn)
+    | n_g1 c P, _ => λ un gn, ncintpg1 c (rew app_eq_nil_ug_g un gn in P) ni s
     | (∀' Φ)%n, _ => λ un gn, ∀ a, nintp_gen (Φ a) (H ‼ʰ a) un gn
     | (∃' Φ)%n, _ => λ un gn, ∃ a, nintp_gen (Φ a) (H ‼ʰ a) un gn
-    | (▷ P)%n, _ => λ un gn, ▷ ni s _ (rew app_eq_nil_ug_g un gn in P)
-    | (○(i) P)%n, _ => λ un gn, ⸨ rew[nPropL] app_eq_nil_ug_g un gn in P ⸩(s,i)
     | (∀: V, P)%n, _ => λ un gn, ∀ Φ,
         nintp_gen (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] 0) eq_refl eq_refl
     | (∃: V, P)%n, _ => λ un gn, ∃ Φ,
@@ -141,7 +145,7 @@ Section nintp.
   Proof.
     unfold nintpS_gen'=> i ni ni' nid s + + + + + + +. fix FIX 4=> κ Γ P H.
     case: P H=>/=; intros; case H=>//= ?;
-    try (by f_equiv=> >; apply FIX); by f_contractive; apply nid.
+    try (by f_equiv=> >; apply FIX); case c=>//=; by f_contractive; apply nid.
   Qed.
 
   (** [nintp_gen] is contractive *)
@@ -149,7 +153,8 @@ Section nintp.
   Proof.
     unfold nintp_gen'=> i ni ni' nid s + + + + + +. fix FIX 4=> κ Γ P H.
     case: P H=>/=; intros; case H=>//= ?; try (by f_equiv=> >; apply FIX);
-    try (by f_contractive; apply nid); by apply nintpS_gen_contractive.
+    try (case c=>//=; by f_contractive; apply nid);
+    by apply nintpS_gen_contractive.
   Qed.
 
   (** [nintp_pre]: Generator of [nintp_fp] *)
