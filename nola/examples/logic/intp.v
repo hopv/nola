@@ -34,6 +34,38 @@ Lemma nsubst'_nheight {κ Γᵘ Γᵍ V} {P : nProp κ (V :: Γᵘ;ᵞ Γᵍ)} {
 Proof. subst. apply nsubst_nheight. Qed.
 
 (** ** [nintp]: Interpretation of [nProp] as [iProp] *)
+
+Section ncintp.
+  Context (** Iris resources *) `{!nintpG Σ}.
+
+  (** Interpret basic connectives *)
+  Definition ncintp0 (c : ncon0) : iProp Σ :=
+    match c with ⟨⌜φ⌝⟩%nc => ⌜φ⌝ end.
+  Definition ncintp1 (c : ncon1) (P : iProp Σ) : iProp Σ :=
+    match c with
+    | ⟨□⟩%nc => □ P | ⟨■⟩%nc => ■ P
+    | ⟨|==>⟩%nc => |==> P | ⟨|={E,E'}=>⟩%nc => |={E,E'}=> P
+    end.
+  Definition ncintp2 (c : ncon2) (P Q : iProp Σ) : iProp Σ :=
+    match c with
+    | ⟨∧⟩%nc => P ∧ Q | ⟨∨⟩%nc => P ∨ Q | ⟨→⟩%nc => P → Q
+    | ⟨∗⟩%nc => P ∗ Q | ⟨-∗⟩%nc => P -∗ Q
+    end.
+
+  (** [ncintp] is non-expansive *)
+  #[export] Instance ncintp1_nonex {c} : NonExpansive (ncintp1 c).
+  Proof. solve_proper. Qed.
+  #[export] Instance ncintp2_nonex {c} : NonExpansive2 (ncintp2 c).
+  Proof. solve_proper. Qed.
+
+  (** [ncintp] is proper *)
+  #[export] Instance ncintp1_proper : Proper ((=) ==> (≡) ==> (≡)) ncintp1.
+  Proof. solve_proper. Qed.
+  #[export] Instance ncintp2_proper :
+    Proper ((=) ==> (≡) ==> (≡) ==> (≡)) ncintp2.
+  Proof. solve_proper. Qed.
+End ncintp.
+
 Section nintp_gen.
   Context
     (** Iris resources *) `{!nintpG Σ}
@@ -45,26 +77,15 @@ Section nintp_gen.
   Fixpoint nintpS_gen {κ Γ} (P : nProp κ Γ) (H : hAcc (nheight P))
     : κ = nS → Γ.ᵞu = [] → Γ.ᵞg = [] → iProp Σ :=
     match P, H with
-    | ⌜φ⌝%n, _ => λ _ _ _, ⌜φ⌝
-    | (P ∧ Q)%n, _ => λ κS un gn,
-        nintpS_gen P (H ‼ʰ 0₂) κS un gn ∧ nintpS_gen Q (H ‼ʰ 1₂) κS un gn
-    | (P ∨ Q)%n, _ => λ κS un gn,
-        nintpS_gen P (H ‼ʰ 0₂) κS un gn ∨ nintpS_gen Q (H ‼ʰ 1₂) κS un gn
-    | (P → Q)%n, _ => λ κS un gn,
-        nintpS_gen P (H ‼ʰ 0₂) κS un gn → nintpS_gen Q (H ‼ʰ 1₂) κS un gn
+    | n_0 c, _ => λ _ _ _, ncintp0 c
+    | n_1 c P, _ => λ κS un gn, ncintp1 c (nintpS_gen P (H ‼ʰ ()) κS un gn)
+    | n_2 c P Q, _ => λ κS un gn, ncintp2 c
+        (nintpS_gen P (H ‼ʰ 0₂) κS un gn) (nintpS_gen Q (H ‼ʰ 1₂) κS un gn)
     | (∀' Φ)%n, _ => λ κS un gn, ∀ a, nintpS_gen (Φ a) (H ‼ʰ a) κS un gn
     | (∃' Φ)%n, _ => λ κS un gn, ∃ a, nintpS_gen (Φ a) (H ‼ʰ a) κS un gn
-    | (P ∗ Q)%n, _ => λ κS un gn,
-        nintpS_gen P (H ‼ʰ 0₂) κS un gn ∗ nintpS_gen Q (H ‼ʰ 1₂) κS un gn
-    | (P -∗ Q)%n, _ => λ κS un gn,
-        nintpS_gen P (H ‼ʰ 0₂) κS un gn -∗ nintpS_gen Q (H ‼ʰ 1₂) κS un gn
-    | (□ P)%n, _ => λ κS un gn, □ nintpS_gen P (H ‼ʰ ()) κS un gn
-    | (■ P)%n, _ => λ κS un gn, ■ nintpS_gen P (H ‼ʰ ()) κS un gn
-    | (|==> P)%n, _ => λ κS un gn, |==> nintpS_gen P (H ‼ʰ ()) κS un gn
-    | (|={E,E'}=> P)%n, _ => λ κS un gn,
-        |={E,E'}=> nintpS_gen P (H ‼ʰ ()) κS un gn
     | (▷ P)%n, _ => λ _ un gn, ▷ ni s _ (rew app_eq_nil_ug_g un gn in P)
-    | (○(i) P)%n, _ => λ _ un gn, ⸨ rew app_eq_nil_ug_g un gn in P ⸩(s,i)
+    | (○(i) P)%n, _ => λ _ un gn,
+        ⸨ rew[nPropL] app_eq_nil_ug_g un gn in P ⸩(s,i)
     | (∀: V, P)%n, _ => λ κS un gn, ∀ Φ, nintpS_gen
         (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] ()) κS eq_refl eq_refl
     | (∃: V, P)%n, _ => λ κS un gn, ∃ Φ, nintpS_gen
@@ -74,34 +95,21 @@ Section nintp_gen.
         (H ‼ʰ[nsubst'_nheight] ()) eq_refl eq_refl eq_refl
     | (rec:ˡ' Φ a)%n, _ => λ κS, match κS with end
     | (%ᵍˢ s)%n, _ => λ _ _, seqnil s
-    | (%ᵍˡ s)%n, _ => λ κS, match κS with end
-    | (%ᵘˢ s)%n, _ => λ κS, match κS with end
-    | (!ᵘˢ P)%n, _ => λ κS, match κS with end
+    | (%ᵍˡ _)%n, _ | (%ᵘˢ _)%n, _ | (!ᵘˢ _)%n, _ => λ κS, match κS with end
     end%I.
 
   (** [nintp_gen P] : Evaluate [P] *)
   Fixpoint nintp_gen {κ Γ} (P : nProp κ Γ) (H : hAcc (nheight P))
     : Γ.ᵞu = [] → Γ.ᵞg = [] → iProp Σ :=
     match P, H with
-    | ⌜φ⌝%n, _ => λ _ _, ⌜φ⌝
-    | (P ∧ Q)%n, _ => λ un gn,
-        nintp_gen P (H ‼ʰ 0₂) un gn ∧ nintp_gen Q (H ‼ʰ 1₂) un gn
-    | (P ∨ Q)%n, _ => λ un gn,
-        nintp_gen P (H ‼ʰ 0₂) un gn ∨ nintp_gen Q (H ‼ʰ 1₂) un gn
-    | (P → Q)%n, _ => λ un gn,
-        nintp_gen P (H ‼ʰ 0₂) un gn → nintp_gen Q (H ‼ʰ 1₂) un gn
+    | n_0 c, _ => λ _ _, ncintp0 c
+    | n_1 c P, _ => λ un gn, ncintp1 c (nintp_gen P (H ‼ʰ ()) un gn)
+    | n_2 c P Q, _ => λ un gn, ncintp2 c
+        (nintp_gen P (H ‼ʰ 0₂) un gn) (nintp_gen Q (H ‼ʰ 1₂) un gn)
     | (∀' Φ)%n, _ => λ un gn, ∀ a, nintp_gen (Φ a) (H ‼ʰ a) un gn
     | (∃' Φ)%n, _ => λ un gn, ∃ a, nintp_gen (Φ a) (H ‼ʰ a) un gn
-    | (P ∗ Q)%n, _ => λ un gn,
-        nintp_gen P (H ‼ʰ 0₂) un gn ∗ nintp_gen Q (H ‼ʰ 1₂) un gn
-    | (P -∗ Q)%n, _ => λ un gn,
-        nintp_gen P (H ‼ʰ 0₂) un gn -∗ nintp_gen Q (H ‼ʰ 1₂) un gn
-    | (□ P)%n, _ => λ un gn, □ nintp_gen P (H ‼ʰ ()) un gn
-    | (■ P)%n, _ => λ un gn, ■ nintp_gen P (H ‼ʰ ()) un gn
-    | (|==> P)%n, _ => λ un gn, |==> nintp_gen P (H ‼ʰ ()) un gn
-    | (|={E,E'}=> P)%n, _ => λ un gn, |={E,E'}=> nintp_gen P (H ‼ʰ ()) un gn
     | (▷ P)%n, _ => λ un gn, ▷ ni s _ (rew app_eq_nil_ug_g un gn in P)
-    | (○(i) P)%n, _ => λ un gn, ⸨ rew app_eq_nil_ug_g un gn in P ⸩(s,i)
+    | (○(i) P)%n, _ => λ un gn, ⸨ rew[nPropL] app_eq_nil_ug_g un gn in P ⸩(s,i)
     | (∀: V, P)%n, _ => λ un gn, ∀ Φ,
         nintp_gen (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] ()) eq_refl eq_refl
     | (∃: V, P)%n, _ => λ un gn, ∃ Φ,
@@ -112,9 +120,7 @@ Section nintp_gen.
     | (rec:ˡ' Φ a)%n, _ => λ un gn, nintp_gen
         (nsubst' (Φ a) un gn (rew[λ _,_] ctxeq_ug un gn in rec:ˡ' Φ)%n)
         (H ‼ʰ[nsubst'_nheight] ()) eq_refl eq_refl
-    | (%ᵍˢ s)%n, _ => λ _, seqnil s
-    | (%ᵍˡ s)%n, _ => λ _, seqnil s
-    | (%ᵘˢ s)%n, _ => seqnil s
+    | (%ᵍˢ s)%n, _ | (%ᵍˡ s)%n, _ => λ _, seqnil s | (%ᵘˢ s)%n, _ => seqnil s
     | (!ᵘˢ P)%n, _ => λ _ _, nintpS_gen P hwf eq_refl eq_refl eq_refl
     end%I.
 End nintp_gen.

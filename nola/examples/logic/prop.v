@@ -40,8 +40,41 @@ Notation npargS := (nparg nS).
 Notation npargL := (nparg nL).
 Notation "@! a" := (Nparg a) (at level 20, right associativity) : nola_scope.
 
-(** ** [nProp]: Nola syntactic proposition
+(** ** [nProp]: Nola syntactic proposition *)
 
+(** [ncon0], [ncon1], [ncon2]: Basic connectives *)
+Variant ncon0 : Type :=
+| (** Pure proposition *) nc_pure (φ : Prop) : ncon0.
+Variant ncon1 : Type :=
+| (** Persistence modality *) nc_persistently : ncon1
+| (** Plainly modality *) nc_plainly : ncon1
+| (** Basic update modality *) nc_bupd : ncon1
+| (** Fancy update modality *) nc_fupd (E E' : coPset) : ncon1.
+Variant ncon2 : Type :=
+| (** Conjunction *) nc_and : ncon2
+| (** Disjunction *) nc_or : ncon2
+| (** Implication *) nc_impl : ncon2
+| (** Separating conjunction *) nc_sep : ncon2
+| (** Magic wand *) nc_wand : ncon2.
+
+(** Notation for [ncon] *)
+Declare Scope ncon_scope.
+Delimit Scope ncon_scope with nc.
+Bind Scope ncon_scope with ncon0 ncon1 ncon2.
+Notation "⟨⌜ φ ⌝⟩" := (nc_pure φ%type%stdpp%nola) (format "⟨⌜ φ ⌝⟩")
+  : ncon_scope.
+Notation "⟨□⟩" := nc_persistently : ncon_scope.
+Notation "⟨■⟩" := nc_plainly : ncon_scope.
+Notation "⟨|==>⟩" := nc_bupd : ncon_scope.
+Notation "⟨|={ E , E' }=>⟩" := (nc_fupd E E')
+  (format "⟨|={ E , E' }=>⟩") : ncon_scope.
+Notation "⟨∧⟩" := nc_and : ncon_scope.
+Notation "⟨∨⟩" := nc_or : ncon_scope.
+Notation "⟨→⟩" := nc_impl : ncon_scope.
+Notation "⟨∗⟩" := nc_sep : ncon_scope.
+Notation "⟨-∗⟩" := nc_wand : ncon_scope.
+
+(** [nProp]: Nola syntactic proposition
   Its universe level is strictly higher than those of [V : npvar]
   and the domain [A : Type] of [n_forall]/[n_exist].
 
@@ -55,31 +88,15 @@ Notation "@! a" := (Nparg a) (at level 20, right associativity) : nola_scope.
 
 Inductive nProp : nkind → nctx → Type :=
 
-(** Pure proposition *)
-| n_pure {κ Γ} (φ : Prop) : nProp κ Γ
-(** Conjunction *)
-| n_and {κ Γ} (P Q : nProp κ Γ) : nProp κ Γ
-(** Disjunction *)
-| n_or {κ Γ} (P Q : nProp κ Γ) : nProp κ Γ
-(** Implication *)
-| n_impl {κ Γ} (P Q : nProp κ Γ) : nProp κ Γ
+(** Basic connective *)
+| n_0 {κ Γ} (c : ncon0) : nProp κ Γ
+| n_1 {κ Γ} (c : ncon1) (P : nProp κ Γ) : nProp κ Γ
+| n_2 {κ Γ} (c : ncon2) (P Q : nProp κ Γ) : nProp κ Γ
+
 (** Universal quantification *)
 | n_forall {κ Γ} {A : Type} (Φ : A → nProp κ Γ) : nProp κ Γ
 (** Existential quantification *)
 | n_exist {κ Γ} {A : Type} (Φ : A → nProp κ Γ) : nProp κ Γ
-
-(** Separating conjunction *)
-| n_sep {κ Γ} (P Q : nProp κ Γ) : nProp κ Γ
-(** Magic wand *)
-| n_wand {κ Γ} (P Q : nProp κ Γ) : nProp κ Γ
-(** Persistence modality *)
-| n_persistently {κ Γ} (P : nProp κ Γ) : nProp κ Γ
-(** Plainly modality *)
-| n_plainly {κ Γ} (P : nProp κ Γ) : nProp κ Γ
-(** Basic update modality *)
-| n_bupd {κ Γ} (P : nProp κ Γ) : nProp κ Γ
-(** Fancy update modality *)
-| n_fupd {κ Γ} (E E' : coPset) (P : nProp κ Γ) : nProp κ Γ
 
 (** Later modality *)
 | n_later {κ} Γᵘ {Γᵍ} (P : nProp nL (;ᵞ Γᵘ ++ Γᵍ)) : nProp κ (Γᵘ;ᵞ Γᵍ)
@@ -115,29 +132,25 @@ Declare Scope nProp_scope.
 Delimit Scope nProp_scope with n.
 Bind Scope nProp_scope with nProp.
 
-Notation "'⌜' φ '⌝'" := (n_pure φ%type%stdpp%nola) : nProp_scope.
-Notation "'True'" := (n_pure True) : nProp_scope.
-Notation "'False'" := (n_pure False) : nProp_scope.
-Infix "∧" := n_and : nProp_scope.
-Notation "(∧)" := n_and (only parsing) : nProp_scope.
-Infix "∨" := n_or : nProp_scope.
-Notation "(∨)" := n_or (only parsing) : nProp_scope.
-Infix "→" := n_impl : nProp_scope.
-Notation "¬ P" := (n_impl P (n_pure False)) : nProp_scope.
+Notation "'⌜' φ '⌝'" := (n_0 ⟨⌜φ⌝⟩) : nProp_scope.
+Notation "'True'" := (n_0 ⟨⌜True⌝⟩) : nProp_scope.
+Notation "'False'" := (n_0 ⟨⌜False⌝⟩) : nProp_scope.
+Notation "□ P" := (n_1 ⟨□⟩ P) : nProp_scope.
+Notation "■ P" := (n_1 ⟨■⟩ P) : nProp_scope.
+Notation "|==> P" := (n_1 ⟨|==>⟩ P) : nProp_scope.
+Notation "|={ E , E' }=> P" := (n_1 ⟨|={E,E'}=>⟩ P) : nProp_scope.
+Infix "∧" := (n_2 ⟨∧⟩) : nProp_scope.
+Infix "∨" := (n_2 ⟨∨⟩) : nProp_scope.
+Infix "→" := (n_2 ⟨→⟩) : nProp_scope.
+Infix "∗" := (n_2 ⟨∗⟩) : nProp_scope.
+Infix "-∗" := (n_2 ⟨-∗⟩) : nProp_scope.
+Notation "¬ P" := (n_2 ⟨∧⟩ P (n_0 ⟨⌜False⌝⟩)) : nProp_scope.
 Notation "∀'" := n_forall (only parsing) : nProp_scope.
 Notation "∀ x .. z , P" :=
   (n_forall (λ x, .. (n_forall (λ z, P%n)) ..)) : nProp_scope.
 Notation "∃'" := n_exist (only parsing) : nProp_scope.
 Notation "∃ x .. z , P" :=
   (n_exist (λ x, .. (n_exist (λ z, P%n)) ..)) : nProp_scope.
-
-Infix "∗" := n_sep : nProp_scope.
-Notation "(∗)" := n_sep (only parsing) : nProp_scope.
-Infix "-∗" := n_wand : nProp_scope.
-Notation "□ P" := (n_persistently P) : nProp_scope.
-Notation "■ P" := (n_plainly P) : nProp_scope.
-Notation "|==> P" := (n_bupd P) : nProp_scope.
-Notation "|={ E , E' }=> P" := (n_fupd E E' P) : nProp_scope.
 
 Notation "▷{ Γᵘ } P" := (n_later Γᵘ P)
   (at level 20, right associativity, only parsing) : nProp_scope.
@@ -178,28 +191,13 @@ Notation "!ᵘˢ P" := (n_subus P) (at level 20, right associativity)
   we keep the function polymorphic over [κ] for ease of definition *)
 Fixpoint nlarge {κ Γ} (P : nProp κ Γ) : nPropL Γ :=
   match P with
-  | ⌜φ⌝ => ⌜φ⌝
-  | P ∧ Q => nlarge P ∧ nlarge Q
-  | P ∨ Q => nlarge P ∨ nlarge Q
-  | P → Q => nlarge P → nlarge Q
-  | P ∗ Q => nlarge P ∗ nlarge Q
-  | P -∗ Q => nlarge P -∗ nlarge Q
-  | ∀' Φ => ∀' (nlarge ∘ Φ)
-  | ∃' Φ => ∃' (nlarge ∘ Φ)
-  | □ P => □ nlarge P
-  | ■ P => ■ nlarge P
-  | |==> P => |==> nlarge P
-  | |={E,E'}=> P => |={E,E'}=> nlarge P
-  | ▷ P => ▷ P
-  | ○(i) P => ○(i) P
-  | ∀: V, P => ∀: V, nlarge P
-  | ∃: V, P => ∃: V, nlarge P
-  | rec:ˢ' Φ a => rec:ˢ' Φ a
-  | rec:ˡ' Φ a => rec:ˡ' Φ a
-  | %ᵍˢ s => %ᵍˢ s
-  | %ᵍˡ s => %ᵍˡ s
-  | %ᵘˢ s => %ᵘˢ s
-  | !ᵘˢ P => !ᵘˢ P
+  | n_0 c => n_0 c | n_1 c P => n_1 c (nlarge P)
+  | n_2 c P Q => n_2 c (nlarge P) (nlarge Q)
+  | ∀' Φ => ∀' (nlarge ∘ Φ) | ∃' Φ => ∃' (nlarge ∘ Φ)
+  | ▷ P => ▷ P | ○(i) P => ○(i) P
+  | ∀: V, P => ∀: V, nlarge P | ∃: V, P => ∃: V, nlarge P
+  | rec:ˢ' Φ a => rec:ˢ' Φ a | rec:ˡ' Φ a => rec:ˡ' Φ a
+  | %ᵍˢ s => %ᵍˢ s | %ᵍˡ s => %ᵍˡ s | %ᵘˢ s => %ᵘˢ s | !ᵘˢ P => !ᵘˢ P
   end%n.
 
 (** [nunsmall]: Turn [nPropS Γ] into [nProp κ Γ] *)
