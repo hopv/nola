@@ -141,15 +141,19 @@ Section ninv.
     iApply "Nto". iFrame.
   Qed.
 
+  (** Turn [ownNi] to [ninv] *)
+  Lemma ownNi_ninv {i N P} : i ∈ (↑N:coPset) → ownNi i P -∗ ninv N P.
+  Proof. rewrite ninv_unseal. iIntros. iExists _. by iSplit. Qed.
+
   (** Allocate [ninv] *)
   Lemma ninv_alloc_rec {intp N P} :
     ninv_wsat intp -∗ (ninv N P -∗ intp P) ==∗ ninv_wsat intp ∗ ninv N P.
   Proof.
-    iIntros "W toP". rewrite ninv_unseal.
+    iIntros "W toP".
     iMod (ownNi_alloc_rec (.∈ ↑N) with "W [toP]") as (i) "(%iN & W & iP)".
     - move=> ?. apply fresh_inv_name.
-    - iIntros (? iN) "iP". iApply "toP". iExists _. by iFrame.
-    - iModIntro. iFrame "W". iExists _. by iFrame.
+    - iIntros (? iN) "iP". iApply "toP". by iApply ownNi_ninv.
+    - iModIntro. iFrame "W". by iApply ownNi_ninv.
   Qed.
   Lemma ninv_alloc {intp N P} :
     ninv_wsat intp -∗ intp P ==∗ ninv_wsat intp ∗ ninv N P.
