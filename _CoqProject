@@ -8,6 +8,7 @@ nola/util/list.v
 nola/hgt.v
 nola/ctx.v
 nola/sintp.v
+nola/iris/inv.v
 
 nola/examples/heap_lang/locations.v
 nola/examples/heap_lang/lang.v
