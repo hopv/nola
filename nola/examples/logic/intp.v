@@ -86,14 +86,14 @@ Section nintp_gen.
     | n_l0 _, _ | (rec:ˡ' _ _)%n, _ | (%ᵍˡ _)%n, _ | (%ᵘˢ _)%n, _ | (!ᵘˢ _)%n, _
       => λ κS, match κS with end
     end%I.
+  Local Notation nintpS P := (nintpS_gen P hwf eq_refl eq_refl eq_refl).
 
   (** [nintp_gen P] : Evaluate [P] *)
   Fixpoint nintp_gen {κ Γ} (P : nProp κ Γ) (H : hAcc (nheight P))
     : Γ.ᵞu = [] → Γ.ᵞg = [] → iProp Σ :=
     match P, H with
     | n_0 c, _ => λ _ _, ncintp0 c
-    | n_l0 c, _ => λ _ _, ncintpl0 c
-        (λ P, nintpS_gen P hwf eq_refl eq_refl eq_refl)
+    | n_l0 c, _ => λ _ _, ncintpl0 c (λ P, nintpS P)
     | n_1 c P, _ => λ un gn, ncintp1 c (nintp_gen P (H ‼ʰ 0) un gn)
     | n_2 c P Q, _ => λ un gn, ncintp2 c
         (nintp_gen P (H ‼ʰ 0) un gn) (nintp_gen Q (H ‼ʰ 1) un gn)
@@ -111,7 +111,7 @@ Section nintp_gen.
         (nsubst' (Φ a) un gn (rew[λ _,_] ctxeq_ug un gn in rec:ˡ' Φ)%n)
         (H ‼ʰ[nsubst'_nheight] 0) eq_refl eq_refl
     | (%ᵍˢ s)%n, _ | (%ᵍˡ s)%n, _ => λ _, seqnil s | (%ᵘˢ s)%n, _ => seqnil s
-    | (!ᵘˢ P)%n, _ => λ _ _, nintpS_gen P hwf eq_refl eq_refl eq_refl
+    | (!ᵘˢ P)%n, _ => λ _ _, nintpS P
     end%I.
 End nintp_gen.
 
