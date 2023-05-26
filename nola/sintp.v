@@ -147,6 +147,10 @@ Inductive sintpy ITI (σ : psintp_ty ITI) : Prop := {
 }.
 Existing Class sintpy.
 
+(** [σ] is proper *)
+#[export] Instance sintpy_proper `{!sintpy ITI σ} : Proper ((≡) ==> (≡)) σ.
+Proof. apply ne_proper, _. Qed.
+
 (** Get the strong interpretation [⸨ P ⸩(σ s, i)] by the interpretaion *)
 Lemma sintpy_byintp `{!sintpy ITI σ} {s i P} :
   ⊢ (∀ σ', ⌜sintpy ITI σ'⌝ → (* Take any strong interpretation [σ'] *)
