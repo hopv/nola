@@ -7,7 +7,7 @@ From nola Require Export sintp iris.inv.
 
 Class nintpGS (Σ : gFunctors) := NintpG {
   nintpGS_invG :: invGS_gen HasNoLc Σ;
-  ninppGS_ninvGS :: ninvGS (nPropS (;ᵞ)) Σ;
+  nintpGS_ninvGS :: ninvGS (nPropS (;ᵞ)) Σ;
 }.
 
 (** ** For strong interpretation *)
