@@ -144,7 +144,7 @@ Infix "∨" := (n_2 ⟨∨⟩) : nProp_scope.
 Infix "→" := (n_2 ⟨→⟩) : nProp_scope.
 Infix "∗" := (n_2 ⟨∗⟩) : nProp_scope.
 Infix "-∗" := (n_2 ⟨-∗⟩) : nProp_scope.
-Notation "¬ P" := (n_2 ⟨∧⟩ P (n_0 ⟨⌜False⌝⟩)) : nProp_scope.
+Notation "¬ P" := (n_2 ⟨→⟩ P (n_0 ⟨⌜False⌝⟩)) : nProp_scope.
 Notation "∀'" := n_forall (only parsing) : nProp_scope.
 Notation "∀ x .. z , P" :=
   (n_forall (λ x, .. (n_forall (λ z, P%n)) ..)) : nProp_scope.
