@@ -1,10 +1,10 @@
-(** Nola later-free invariant *)
+(** * Nola later-free invariant *)
 
 From iris.algebra Require Import gmap_view gset coPset.
 From iris.proofmode Require Import proofmode.
 From iris.base_logic.lib Require Export own wsat fancy_updates invariants.
 
-(** Resources *)
+(** ** Resources *)
 
 Class ninvGpreS (PROP : Type) (Σ : gFunctors) : Set := NinvGpreS {
   ninvGpreS_inv :: inG Σ (gmap_viewR positive (leibnizO PROP));
@@ -21,32 +21,36 @@ Definition ninvΣ (PROP : Type) : gFunctors :=
 #[export] Instance subG_ninvΣ {PROP Σ} : subG (ninvΣ PROP) Σ → ninvGpreS PROP Σ.
 Proof. solve_inG. Qed.
 
-(** [ownNi], [ninv] Invariant token *)
 
 Section ninv.
-  Context `{!invGS Σ, !ninvGS PROP Σ}.
+  Context `{!invGS_gen hlc Σ, !ninvGS PROP Σ}.
+
+  (** ** Propositions *)
+
+  (** [ownNi]: Basic invariant token *)
 
   Definition ownNi (i : positive) (P : PROP) : iProp Σ :=
     own ninv_name (gmap_view_frag i DfracDiscarded (P : leibnizO _)).
   #[export] Typeclasses Opaque ownNi.
+  #[export] Instance ownNi_timeless {i P} : Timeless (ownNi i P).
+  Proof. unfold ownNi. apply _. Qed.
   #[export] Instance ownNi_persistent {i P} : Persistent (ownNi i P).
-  Proof. rewrite /ownNi. apply _. Qed.
+  Proof. unfold ownNi. apply _. Qed.
 
+  (** [ninv]: Invariant token *)
   Definition ninv_def (N : namespace) (P : PROP) : iProp Σ :=
     ∃ i, ⌜i ∈ (↑N:coPset)⌝ ∧ ownNi i P.
   Definition ninv_aux : seal ninv_def. Proof. by eexists. Qed.
   Definition ninv := ninv_aux.(unseal).
   Lemma ninv_unseal : ninv = ninv_def. Proof. exact ninv_aux.(seal_eq). Qed.
-End ninv.
+  #[export] Instance ninv_timeless {N P} : Timeless (ninv N P).
+  Proof. rewrite ninv_unseal. apply _. Qed.
+  #[export] Instance ninv_persistent {N P} : Persistent (ninv N P).
+  Proof. rewrite ninv_unseal. apply _. Qed.
 
-(** [ninv_wsat]: Invariant world satisfaction *)
-
-Section ninv_wsat.
-  Context `{!invGS_gen hlc Σ, !ninvGS PROP Σ}.
-
+  (** [ninv_wsat]: Invariant world satisfaction *)
   Definition authNi (Ps : gmap positive (leibnizO PROP)) :=
     own ninv_name (gmap_view_auth (DfracOwn 1) Ps).
-
   Definition ninv_wsat_def (intp : PROP -d> iProp Σ) : iProp Σ :=
     ∃ Ps, authNi Ps ∗ [∗ map] i ↦ P ∈ Ps, intp P ∗ ownD {[i]} ∨ ownE {[i]}.
   Definition ninv_wsat_aux : seal ninv_wsat_def. Proof. by eexists. Qed.
@@ -58,10 +62,12 @@ Section ninv_wsat.
   #[export] Instance ninv_wsat_proper : Proper ((≡) ==> (≡)) ninv_wsat.
   Proof. apply ne_proper, _. Qed.
 
-  Lemma authNi_lookup {Ps i P} :
-    authNi Ps -∗ ownNi i P -∗ ⌜Ps !! i = Some P⌝.
+  (** ** Lemmas *)
+
+  (** ** Lookup in [authNi] *)
+  Lemma authNi_lookup {Ps i P} : authNi Ps -∗ ownNi i P -∗ ⌜Ps !! i = Some P⌝.
   Proof.
-    iIntros "aPs iP". rewrite /authNi /ownNi. iCombine "aPs iP" as "eq".
+    iIntros "aPs iP". unfold authNi, ownNi. iCombine "aPs iP" as "eq".
     rewrite own_valid gmap_view_both_validI bi.and_elim_r.
     iDestruct "eq" as %eq. by apply leibniz_equiv in eq.
   Qed.
@@ -148,4 +154,4 @@ Section ninv_wsat.
   Lemma ninv_alloc {intp N P} :
     ninv_wsat intp -∗ intp P ==∗ ninv_wsat intp ∗ ninv N P.
   Proof. iIntros "W P". iApply (ninv_alloc_rec with "W"). by iIntros. Qed.
-End ninv_wsat.
+End ninv.
