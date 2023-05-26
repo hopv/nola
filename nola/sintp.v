@@ -174,8 +174,8 @@ Qed.
 
 (** Convert the data of [⸨ P ⸩(σ s, i)] *)
 Lemma sintpy_convert `{!sintpy ITI σ} {s i P Q} :
-  ⊢ (∀ σ', ⌜sintpy ITI σ'⌝ → ⟦ P ⟧(σ' ⊥ˢ, i) -∗ ⟦ Q ⟧(σ' ⊥ˢ, i))
-    -∗ ⸨ P ⸩(σ s, i) -∗ ⸨ Q ⸩(σ s, i).
+  ⊢ (∀ σ', ⌜sintpy ITI σ'⌝ → ⟦ P ⟧(σ' ⊥ˢ, i) -∗ ⟦ Q ⟧(σ' ⊥ˢ, i)) -∗
+    ⸨ P ⸩(σ s, i) -∗ ⸨ Q ⸩(σ s, i).
 Proof.
   iIntros "∀PQ P". iApply sintpy_byintp. iIntros (??) "#to _ _".
   iApply "∀PQ"; [done|]. by iApply "to".
