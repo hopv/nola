@@ -36,7 +36,7 @@ Proof. subst. apply nsubst_nheight. Qed.
 (** ** [nintp]: Interpretation of [nProp] as [iProp] *)
 
 Section ncintp.
-  Context (** Iris resources *) `{!nintpGS Σ}.
+  Context (* Iris resources *) `{!nintpGS Σ}.
 
   (** Interpret basic connectives *)
   Definition ncintp0 (c : ncon0) : iProp Σ :=
@@ -68,10 +68,10 @@ End ncintp.
 
 Section nintp_gen.
   Context
-    (** Iris resources *) `{!nintpGS Σ}
-    (** Interpretation used contractively *)
+    (* Iris resources *) `{!nintpGS Σ}
+    (* Interpretation used contractively *)
     (ni : nsintp_ty Σ → ∀ κ, nProp κ (;ᵞ) → iProp Σ)
-    (** Strong interpretation *) (s : nsintp_ty Σ).
+    (* Strong interpretation *) (s : nsintp_ty Σ).
 
   (** [nintpS_gen P] : Evaluate small [P] *)
   Fixpoint nintpS_gen {κ Γ} (P : nProp κ Γ) (H : hAcc (nheight P))
@@ -126,7 +126,7 @@ Section nintp_gen.
 End nintp_gen.
 
 Section nintp.
-  Context (** Iris resources *) `{!nintpGS Σ}.
+  Context (* Iris resources *) `{!nintpGS Σ}.
 
   (** [nintpS_gen]/[nintp_gen] typed as a discrete function *)
   Definition nintpS_gen' : (_ -d> _ -d> _ -d> iProp Σ) ->
@@ -187,7 +187,7 @@ Notation "⟦ s ⟧ˢ" := (Swrap (λ iP, ⟦ sarg_data iP ⟧(s))) (format "⟦ 
 
 (** ** Facts on [⟦ ⟧] etc. *)
 Section nintp_facts.
-  Context (** Iris resources *) `{!nintpGS Σ}.
+  Context (* Iris resources *) `{!nintpGS Σ}.
 
   (** [⟦ ⟧ᶠ] coincides with [⟦ ⟧] *)
   Lemma nintp_fp_nintp {s κ P} : ⟦ P ⟧ᶠ(s) ⊣⊢ ⟦ P ⟧{κ}(s).
