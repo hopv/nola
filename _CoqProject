@@ -28,4 +28,5 @@ nola/examples/logic/subst.v
 nola/examples/logic/iris.v
 nola/examples/logic/intp.v
 nola/examples/logic/sintp.v
+nola/examples/logic/inv.v
 nola/examples/logic/facts.v
