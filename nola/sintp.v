@@ -113,13 +113,13 @@ Proof.
   unfold wandˢ=> ??? seq ?? s'eq. do 3 f_equiv; [apply seq|apply s'eq].
 Qed.
 
-(** Propositions for turning a strong interpretation into an interpretation *)
-Definition lev_sintp_intp' {ITI} (s s' : sintp_ty ITI) i : ITI.(intps_bi) :=
+(** Propositions for soundness of a strong interpretation *)
+Definition ssound' {ITI} (s s' : sintp_ty ITI) i : ITI.(intps_bi) :=
   ∀ P, ⸨ P ⸩(s, i) -∗ ⟦ P ⟧(s', i).
-Definition lev_sintp_intp {ITI} (s : sintp_ty ITI) i : ITI.(intps_bi) :=
-  lev_sintp_intp' s s i.
-Definition low_lev_sintp_intp {ITI} (s : sintp_ty ITI) i : ITI.(intps_bi) :=
-  ∀ j, ⌜j ≺ i⌝ → lev_sintp_intp s j.
+Definition ssound {ITI} (s : sintp_ty ITI) i : ITI.(intps_bi) :=
+  ssound' s s i.
+Definition low_ssound {ITI} (s : sintp_ty ITI) i : ITI.(intps_bi) :=
+  ∀ j, ⌜j ≺ i⌝ → ssound s j.
 
 (** ** [sintpy] : Characterization of the strong interpretation *)
 
@@ -135,8 +135,8 @@ Inductive sintpy ITI (σ : psintp_ty ITI) : Prop := {
     (* Parameterization by [sintpy'] is for strict positivity *)
     ∃ sintpy' : _ → Prop, (∀ σ', sintpy' σ' → sintpy ITI σ') ∧
     ∀ iP, let i := iP.(sarg_idx) in
-    (∀ σ', ⌜sintpy' σ'⌝ → □ lev_sintp_intp' (σ s) (σ' ⊥ˢ) i -∗
-      □ (σ $∨ˢ s -∗ˢ σ' ⊥ˢ) -∗ □ low_lev_sintp_intp (σ' ⊥ˢ) i -∗ ⟦ iP ⟧(σ' ⊥ˢ))
+    (∀ σ', ⌜sintpy' σ'⌝ → □ ssound' (σ s) (σ' ⊥ˢ) i -∗
+      □ (σ $∨ˢ s -∗ˢ σ' ⊥ˢ) -∗ □ low_ssound (σ' ⊥ˢ) i -∗ ⟦ iP ⟧(σ' ⊥ˢ))
     -∗ ⸨ iP ⸩(σ s)
 }.
 Existing Class sintpy.
@@ -149,13 +149,13 @@ Proof. apply ne_proper, _. Qed.
 Lemma sintpy_byintp `{!sintpy ITI σ} {s i P} :
   (∀ σ', ⌜sintpy ITI σ'⌝ → (* Take any strong interpretation [σ'] *)
     (* Turn the strong interpration at level [i] into the interpretation *)
-    □ lev_sintp_intp' (σ s) (σ' ⊥ˢ) i -∗
+    □ ssound' (σ s) (σ' ⊥ˢ) i -∗
     (* Turn the coinductive strong interpretation into
       the given strong interpretation *)
     □ (σ $∨ˢ s -∗ˢ σ' ⊥ˢ) -∗
     (* Turn the given strong interpretation at a level lower than [i]
       into the interpretation *)
-    □ low_lev_sintp_intp (σ' ⊥ˢ) i -∗
+    □ low_ssound (σ' ⊥ˢ) i -∗
     ⟦ P ⟧(σ' ⊥ˢ, i))
   -∗ ⸨ P ⸩(σ s, i).
 Proof.
@@ -208,8 +208,8 @@ Qed.
 (** [sintp_gen_gen]: What becomes [sintp_gen] by taking [bi_least_fixpoint] *)
 Definition sintp_gen_gen ITI (self' self : sintp_ty' ITI)
   : sintp_ty' ITI := λ iP, let i := iP.(sarg_idx) in
-  (∀ σ', ⌜sintpy ITI σ'⌝ →  □ lev_sintp_intp' (Swrap self) (σ' ⊥ˢ) i -∗
-    □ (Swrap self' -∗ˢ σ' ⊥ˢ) -∗ □ low_lev_sintp_intp (σ' ⊥ˢ) i -∗
+  (∀ σ', ⌜sintpy ITI σ'⌝ → □ ssound' (Swrap self) (σ' ⊥ˢ) i -∗
+    □ (Swrap self' -∗ˢ σ' ⊥ˢ) -∗ □ low_ssound (σ' ⊥ˢ) i -∗
     ⟦ iP ⟧(σ' ⊥ˢ))%I.
 #[export] Instance sintp_gen_gen_mono {ITI self'} :
   BiMonoPred (sintp_gen_gen ITI self').
@@ -268,8 +268,8 @@ Proof. split.
       by rewrite /sintp' greatest_fixpoint_unfold.
 Qed.
 
-(** [sintp] is an underapproximation of the interpretation under [sintp] *)
-Lemma sintp_intp {ITI i P} : ⸨ P ⸩(sintp ITI ⊥ˢ, i) -∗ ⟦ P ⟧(sintp ITI ⊥ˢ, i).
+(** [sintp] is sound w.r.t. the interpretation under [sintp] *)
+Lemma sintp_sound {ITI i P} : ⸨ P ⸩(sintp ITI ⊥ˢ, i) -∗ ⟦ P ⟧(sintp ITI ⊥ˢ, i).
 Proof.
   move: P. elim: {i}(wft_lt_wf i)=>/= i _ IH P. iIntros "X".
   rewrite /sintp' greatest_fixpoint_unfold.

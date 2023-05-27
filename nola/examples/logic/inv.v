@@ -11,8 +11,7 @@ Section lemmas.
 
   (** Access [nninv] *)
   Lemma nninv_acc {s i N P E} : ↑N ⊆ E →
-    lev_sintp_intp (ITI:=nintpsi _) s i -∗
-    nninv s i N P =[nninv_wsat s]{E,E∖↑N}=∗
+    ssound (ITI:=nintpsi _) s i -∗ nninv s i N P =[nninv_wsat s]{E,E∖↑N}=∗
       ⟦ P ⟧(s) ∗ (⟦ P ⟧(s) =[nninv_wsat s]{E∖↑N,E}=∗ True).
   Proof.
     rewrite nninv_unseal. iIntros (NE) "to (%Q & #QPQ & NQ) W".
