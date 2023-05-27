@@ -169,20 +169,36 @@ Proof.
   by iApply "intp".
 Qed.
 
-(** Introduce [⸨ P ⸩(σ s, i)] *)
+(** Introduce a strong interpretation *)
 Lemma sintpy_intro `{!sintpy ITI σ} {s i P} :
   ⊢ (∀ σ', ⌜sintpy ITI σ'⌝ → ⟦ P ⟧(σ' ⊥ˢ, i)) -∗ ⸨ P ⸩(σ s, i).
 Proof.
   iIntros "∀P". iApply sintpy_byintp. iIntros (??) "_ _ _". by iApply "∀P".
 Qed.
 
-(** Convert the data of [⸨ P ⸩(σ s, i)] *)
-Lemma sintpy_convert `{!sintpy ITI σ} {s i P Q} :
+(** Update strong interpretations *)
+Lemma sintpy_map `{!sintpy ITI σ} {s i P Q} :
   ⊢ (∀ σ', ⌜sintpy ITI σ'⌝ → ⟦ P ⟧(σ' ⊥ˢ, i) -∗ ⟦ Q ⟧(σ' ⊥ˢ, i)) -∗
     ⸨ P ⸩(σ s, i) -∗ ⸨ Q ⸩(σ s, i).
 Proof.
-  iIntros "∀PQ P". iApply sintpy_byintp. iIntros (??) "#to _ _".
-  iApply "∀PQ"; [done|]. by iApply "to".
+  iIntros "∀PQ P". iApply sintpy_byintp. iIntros (? syσ') "#to _ _".
+  iApply ("∀PQ" $! _ syσ'). by iApply "to".
+Qed.
+Lemma sintpy_map2 `{!sintpy ITI σ} {s i P Q R} :
+  ⊢ (∀ σ', ⌜sintpy ITI σ'⌝ → ⟦ P ⟧(σ' ⊥ˢ, i) -∗ ⟦ Q ⟧(σ' ⊥ˢ, i) -∗
+      ⟦ R ⟧(σ' ⊥ˢ, i)) -∗
+    ⸨ P ⸩(σ s, i) -∗ ⸨ Q ⸩(σ s, i) -∗ ⸨ R ⸩(σ s, i).
+Proof.
+  iIntros "∀PQ P Q". iApply sintpy_byintp. iIntros (? syσ') "#to _ _".
+  iApply ("∀PQ" $! _ syσ' with "[P]"); by iApply "to".
+Qed.
+Lemma sintpy_map3 `{!sintpy ITI σ} {s i P Q R S} :
+  ⊢ (∀ σ', ⌜sintpy ITI σ'⌝ → ⟦ P ⟧(σ' ⊥ˢ, i) -∗ ⟦ Q ⟧(σ' ⊥ˢ, i) -∗
+      ⟦ R ⟧(σ' ⊥ˢ, i) -∗ ⟦ S ⟧(σ' ⊥ˢ, i)) -∗
+    ⸨ P ⸩(σ s, i) -∗ ⸨ Q ⸩(σ s, i) -∗ ⸨ R ⸩(σ s, i) -∗ ⸨ S ⸩(σ s, i).
+Proof.
+  iIntros "∀PQ P Q R". iApply sintpy_byintp. iIntros (? syσ') "#to _ _".
+  iApply ("∀PQ" $! _ syσ' with "[P] [Q]"); by iApply "to".
 Qed.
 
 (** ** [sintp]: Strong interpretation *)
