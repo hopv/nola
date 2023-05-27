@@ -138,11 +138,11 @@ Inductive sintpy ITI (σ : psintp_ty ITI) : Prop := {
   sintpy_byintp' {s} :
     (* Parameterization by [sintpy'] is for strict positivity *)
     ∃ sintpy' : _ → Prop, (∀ σ', sintpy' σ' → sintpy ITI σ') ∧
-    ⊢ ∀ iP, let i := iP.(sarg_idx) in
-      (∀ σ', ⌜sintpy' σ'⌝ → □ (∀ P, ⸨ P ⸩(σ s, i) -∗ ⟦ P ⟧(σ' ⊥ˢ, i)) -∗
-        □ (σ $∨ˢ s -∗ˢ σ' ⊥ˢ) -∗ □ (σ' ⊥ˢ -∗ˢ[≺ i] ⟦σ' ⊥ˢ⟧ˢ) -∗
-        ⟦ iP ⟧(σ' ⊥ˢ))
-      -∗ ⸨ iP ⸩(σ s)
+    ∀ iP, let i := iP.(sarg_idx) in
+    (∀ σ', ⌜sintpy' σ'⌝ → □ (∀ P, ⸨ P ⸩(σ s, i) -∗ ⟦ P ⟧(σ' ⊥ˢ, i)) -∗
+      □ (σ $∨ˢ s -∗ˢ σ' ⊥ˢ) -∗ □ (σ' ⊥ˢ -∗ˢ[≺ i] ⟦σ' ⊥ˢ⟧ˢ) -∗
+      ⟦ iP ⟧(σ' ⊥ˢ))
+    -∗ ⸨ iP ⸩(σ s)
 }.
 Existing Class sintpy.
 
@@ -152,16 +152,16 @@ Proof. apply ne_proper, _. Qed.
 
 (** Get the strong interpretation [⸨ P ⸩(σ s, i)] by the interpretaion *)
 Lemma sintpy_byintp `{!sintpy ITI σ} {s i P} :
-  ⊢ (∀ σ', ⌜sintpy ITI σ'⌝ → (* Take any strong interpretation [σ'] *)
-      (* Turn the strong interpration at level [i] into the interpretation *)
-      □ (∀ P, ⸨ P ⸩(σ s, i) -∗ ⟦ P ⟧(σ' ⊥ˢ, i)) -∗
-      (* Turn the coinductive strong interpretation into
-        the given strong interpretation *)
-      □ (σ $∨ˢ s -∗ˢ σ' ⊥ˢ) -∗
-      (* Turn the given strong interpretation at a level lower than [i]
-        into the interpretation *)
-      □ (σ' ⊥ˢ -∗ˢ[≺ i] ⟦σ' ⊥ˢ⟧ˢ) -∗ ⟦ P ⟧(σ' ⊥ˢ, i))
-    -∗ ⸨ P ⸩(σ s, i).
+  (∀ σ', ⌜sintpy ITI σ'⌝ → (* Take any strong interpretation [σ'] *)
+    (* Turn the strong interpration at level [i] into the interpretation *)
+    □ (∀ P, ⸨ P ⸩(σ s, i) -∗ ⟦ P ⟧(σ' ⊥ˢ, i)) -∗
+    (* Turn the coinductive strong interpretation into
+      the given strong interpretation *)
+    □ (σ $∨ˢ s -∗ˢ σ' ⊥ˢ) -∗
+    (* Turn the given strong interpretation at a level lower than [i]
+      into the interpretation *)
+    □ (σ' ⊥ˢ -∗ˢ[≺ i] ⟦σ' ⊥ˢ⟧ˢ) -∗ ⟦ P ⟧(σ' ⊥ˢ, i))
+  -∗ ⸨ P ⸩(σ s, i).
 Proof.
   have X := (@sintpy_byintp' _ σ _ s). move: X=> [sy'[sy'to byintp]].
   iIntros "intp". iApply byintp. iIntros (σ' syσ'). apply sy'to in syσ'.
@@ -170,34 +170,41 @@ Qed.
 
 (** Introduce a strong interpretation *)
 Lemma sintpy_intro `{!sintpy ITI σ} {s i P} :
-  ⊢ (∀ σ', ⌜sintpy ITI σ'⌝ → ⟦ P ⟧(σ' ⊥ˢ, i)) -∗ ⸨ P ⸩(σ s, i).
+  (∀ σ', ⌜sintpy ITI σ'⌝ → ⟦ P ⟧(σ' ⊥ˢ, i)) -∗ ⸨ P ⸩(σ s, i).
 Proof.
   iIntros "∀P". iApply sintpy_byintp. iIntros (??) "_ _ _". by iApply "∀P".
 Qed.
 
 (** Update strong interpretations *)
 Lemma sintpy_map `{!sintpy ITI σ} {s i P Q} :
-  ⊢ (∀ σ', ⌜sintpy ITI σ'⌝ → ⟦ P ⟧(σ' ⊥ˢ, i) -∗ ⟦ Q ⟧(σ' ⊥ˢ, i)) -∗
-    ⸨ P ⸩(σ s, i) -∗ ⸨ Q ⸩(σ s, i).
+  (∀ σ', ⌜sintpy ITI σ'⌝ → ⟦ P ⟧(σ' ⊥ˢ, i) -∗ ⟦ Q ⟧(σ' ⊥ˢ, i)) -∗
+  ⸨ P ⸩(σ s, i) -∗ ⸨ Q ⸩(σ s, i).
 Proof.
   iIntros "∀PQ P". iApply sintpy_byintp. iIntros (? syσ') "#to _ _".
   iApply ("∀PQ" $! _ syσ'). by iApply "to".
 Qed.
 Lemma sintpy_map2 `{!sintpy ITI σ} {s i P Q R} :
-  ⊢ (∀ σ', ⌜sintpy ITI σ'⌝ → ⟦ P ⟧(σ' ⊥ˢ, i) -∗ ⟦ Q ⟧(σ' ⊥ˢ, i) -∗
-      ⟦ R ⟧(σ' ⊥ˢ, i)) -∗
-    ⸨ P ⸩(σ s, i) -∗ ⸨ Q ⸩(σ s, i) -∗ ⸨ R ⸩(σ s, i).
+  (∀ σ', ⌜sintpy ITI σ'⌝ → ⟦ P ⟧(σ' ⊥ˢ, i) -∗ ⟦ Q ⟧(σ' ⊥ˢ, i) -∗
+    ⟦ R ⟧(σ' ⊥ˢ, i)) -∗
+  ⸨ P ⸩(σ s, i) -∗ ⸨ Q ⸩(σ s, i) -∗ ⸨ R ⸩(σ s, i).
 Proof.
   iIntros "∀PQ P Q". iApply sintpy_byintp. iIntros (? syσ') "#to _ _".
   iApply ("∀PQ" $! _ syσ' with "[P]"); by iApply "to".
 Qed.
 Lemma sintpy_map3 `{!sintpy ITI σ} {s i P Q R S} :
-  ⊢ (∀ σ', ⌜sintpy ITI σ'⌝ → ⟦ P ⟧(σ' ⊥ˢ, i) -∗ ⟦ Q ⟧(σ' ⊥ˢ, i) -∗
-      ⟦ R ⟧(σ' ⊥ˢ, i) -∗ ⟦ S ⟧(σ' ⊥ˢ, i)) -∗
-    ⸨ P ⸩(σ s, i) -∗ ⸨ Q ⸩(σ s, i) -∗ ⸨ R ⸩(σ s, i) -∗ ⸨ S ⸩(σ s, i).
+  (∀ σ', ⌜sintpy ITI σ'⌝ → ⟦ P ⟧(σ' ⊥ˢ, i) -∗ ⟦ Q ⟧(σ' ⊥ˢ, i) -∗
+    ⟦ R ⟧(σ' ⊥ˢ, i) -∗ ⟦ S ⟧(σ' ⊥ˢ, i)) -∗
+  ⸨ P ⸩(σ s, i) -∗ ⸨ Q ⸩(σ s, i) -∗ ⸨ R ⸩(σ s, i) -∗ ⸨ S ⸩(σ s, i).
 Proof.
   iIntros "∀PQ P Q R". iApply sintpy_byintp. iIntros (? syσ') "#to _ _".
   iApply ("∀PQ" $! _ syσ' with "[P] [Q]"); by iApply "to".
+Qed.
+Lemma sintpy_map_lev `{!sintpy ITI σ} {s i j P Q} :
+  i ≺ j → (∀ σ', ⌜sintpy ITI σ'⌝ → ⟦ P ⟧(σ' ⊥ˢ, i) -∗ ⟦ Q ⟧(σ' ⊥ˢ, j)) -∗
+  ⸨ P ⸩(σ $∨ˢ s, i) -∗ ⸨ Q ⸩(σ s, j).
+Proof.
+  iIntros (ij) "∀PQ P". iApply sintpy_byintp. iIntros (σ' syσ') "_ #toσ' #σ'to".
+  iApply ("∀PQ" $! _ syσ'). iApply "σ'to"; [done|]. by iApply "toσ'".
 Qed.
 
 (** ** [sintp]: Strong interpretation *)

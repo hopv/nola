@@ -18,12 +18,11 @@ Implicit Type (i j : nat) (P Q : nPropL (;ᵞ)).
 Section lemmas.
   Context `{!nintpGS Σ, !nsintpy Σ σ}.
 
-  (** [σ s] is monotone over the index *)
-  Lemma sintpy_up {i j s P} : i ≤ j → ⸨ P ⸩(σ s, i) -∗ ⸨ P ⸩(σ s, j).
+  (** [σ s] is monotone over the level *)
+  Lemma sintpy_mono_lev {i j s P} : i ≤ j → ⸨ P ⸩(σ s, i) -∗ ⸨ P ⸩(σ s, j).
   Proof.
-    move/Nat.lt_eq_cases=> [|<-]; [|by iIntros]=> ij. iIntros "Pi".
-    iApply sintpy_byintp. iIntros (? _) "_ #toσ' #σ'to".
-    iApply ("σ'to" $! i ij). iApply "toσ'". by iLeft.
+    move/Nat.lt_eq_cases=> [ij|<-]; [|by iIntros]. iIntros "Pi".
+    iApply sintpy_map_lev; by [|iIntros|iLeft].
   Qed.
 
   (** Make connectives go inside the strong interpretation *)
