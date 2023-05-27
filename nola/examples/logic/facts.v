@@ -26,10 +26,10 @@ Section facts.
     ⟦ ∃: V, P ⟧{κ}(s) ⊣⊢ ∃ Φ, ⟦ P /: Φ ⟧(s).
   Proof. simpl. f_equiv=> ?. by rewrite rew_eq_hwf. Qed.
   Lemma nintp_n_recs {κ s A Φ} {a : A} :
-    ⟦ rec:ˢ' Φ a ⟧{κ}(s) ⊣⊢ ⟦ nsubst (Φ a) (rec:ˢ' Φ) ⟧(s).
+    ⟦ rec:ˢ' Φ a ⟧{κ}(s) ⊣⊢ ⟦ Φ a /: rec:ˢ' Φ ⟧(s).
   Proof. by rewrite/= rew_eq_hwf. Qed.
   Lemma nintp_n_recl {s A Φ} {a : A} :
-    ⟦ rec:ˡ' Φ a ⟧(s) ⊣⊢ ⟦ nsubst (Φ a) (rec:ˡ' Φ) ⟧(s).
+    ⟦ rec:ˡ' Φ a ⟧(s) ⊣⊢ ⟦ Φ a /: rec:ˡ' Φ ⟧(s).
   Proof. by rewrite/= rew_eq_hwf. Qed.
   Lemma nintp_subus {s P} : ⟦ !ᵘˢ P ⟧(s) ⊣⊢ ⟦ ↑ˡ P ⟧(s).
   Proof. by rewrite/= nintpS_nintp_nlarge. Qed.
