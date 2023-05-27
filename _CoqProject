@@ -23,6 +23,7 @@ nola/examples/heap_lang/notation.v
 nola/examples/heap_lang/proofmode.v
 nola/examples/heap_lang/adequacy.v
 nola/examples/heap_lang/total_adequacy.v
+nola/examples/heap_lang/proph_erasure.v
 
 nola/examples/logic/prop.v
 nola/examples/logic/subst.v
