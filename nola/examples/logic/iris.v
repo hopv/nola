@@ -10,7 +10,6 @@ Class nintpGS (Σ : gFunctors) := NintpG {
   nintpGS_heapGS :: heapGS_gen HasNoLc Σ;
   nintpGS_ninvGS :: ninvGS (nPropS (;ᵞ)) Σ;
 }.
-#[export] Instance nintpGS_invGS `{!nintpGS Σ} : invGS_gen HasNoLc Σ := _.
 
 (** ** [nintpΣ]: Iris signature *)
 

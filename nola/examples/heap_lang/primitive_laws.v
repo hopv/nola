@@ -19,7 +19,6 @@ Class heapGS_gen hlc Σ := HeapGS {
   heapGS_step_name : gname;
   heapGS_step_cnt :: mono_natG Σ;
 }.
-Local Existing Instance heapGS_step_cnt.
 Arguments HeapGS {_ _} _ _ _ _ _ _.
 Notation heapGS := (heapGS_gen HasLc).
 
