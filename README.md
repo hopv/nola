@@ -60,6 +60,7 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
 - [`sintp`](nola/sintp.v) (Strong interpretation)
 - [`iris/`](nola/iris) : Iris libraries
   + [`inv`](nola/iris/inv.v) (Invariant)
+  + [`wp`](nola/iris/wp.v) (Weakest precondition)
 - [`examples/`](nola/examples/) : Examples
   + [`heap_lang/`](nola/examples/heap_lang/) : Variant of Iris HeapLang,
     with `Ndnat` (terminating infinite non-determinism) added
