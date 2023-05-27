@@ -1,12 +1,12 @@
 (** This file proves the basic laws of the HeapLang program logic by applying
 the Iris lifting lemmas. *)
-
 From iris.proofmode Require Import proofmode.
 From iris.bi.lib Require Import fractional.
 From iris.base_logic.lib Require Import mono_nat.
 From iris.base_logic.lib Require Export gen_heap proph_map gen_inv_heap.
 From iris.program_logic Require Export weakestpre total_weakestpre.
 From iris.program_logic Require Import ectx_lifting total_ectx_lifting.
+From nola Require Import wp.
 From nola.examples.heap_lang Require Export class_instances.
 From nola.examples.heap_lang Require Import tactics notation.
 From iris.prelude Require Import options.
@@ -79,6 +79,28 @@ Next Obligation.
   iIntros (??? σ ns κs nt) "/= ($ & $ & $ & H)".
   by iMod (steps_auth_update_S with "H") as "$".
 Qed.
+
+Section wpw.
+  Context `{!heapGS_gen hlc Σ}.
+
+  (** ** [wpw]/[twpw]: [wp]/[twp] with the world satisfaction *)
+  Definition wpw (W : iProp Σ) := let _ := HeapWGS _ W in wp'.
+  Definition twpw (W : iProp Σ) := let _ := HeapWGS _ W in twp'.
+
+  (** [wpw]/[twpw] is non-expansive *)
+  Lemma wpw_ne {n W W' st E e Φ Ψ} :
+    W ≡{n}≡ W' → (Φ : _ -d> _) ≡{n}≡ Ψ → wpw W st E e Φ ≡{n}≡ wpw W' st E e Ψ.
+  Proof.
+    move=> ? ΦΨ. etrans; [by apply wp_ne, ΦΨ|]. apply wp_ne_interp=>/= ????.
+    by f_equiv.
+  Qed.
+  Lemma twpw_ne {n W W' st E e Φ Ψ} :
+    W ≡{n}≡ W' → (Φ : _ -d> _) ≡{n}≡ Ψ → twpw W st E e Φ ≡{n}≡ twpw W' st E e Ψ.
+  Proof.
+    move=> ? ΦΨ. etrans; [by apply twp_ne, ΦΨ|]. apply twp_ne_interp=>/= ????.
+    by f_equiv.
+  Qed.
+End wpw.
 
 (** Since we use an [option val] instance of [gen_heap], we need to overwrite
 the notations.  That also helps for scopes and coercions. *)
