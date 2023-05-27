@@ -53,7 +53,10 @@ Variant ncon0 : Type :=
     (l : loc) (v : val) (I : val → Prop) : ncon0
 | (** Invariant points-to token *) nc_inv_mapsto
     (l : loc) (I : val → Prop) : ncon0
-| (** Meta token *) nc_meta_token (l : loc) (E : coPset) : ncon0.
+| (** Meta token *) nc_meta_token (l : loc) (E : coPset) : ncon0
+| (** Step number token *) nc_steps_lb (n : nat) : ncon0
+| (** Prophecy token *) nc_proph
+    (p : proph_id) (pvs : list (val * val)) : ncon0.
 (** Nullary, large *)
 Variant nconl0 : Type :=
 | (** Invariant world satisfaction *) nc_inv_wsat : nconl0.
@@ -164,6 +167,8 @@ Notation "l ↦ dq v" := (n_0 ⟨↦{dq}|l,v⟩) : nProp_scope.
 Notation "l ↦_ I v" := (n_0 ⟨↦_I|l,v⟩) : nProp_scope.
 Notation "l ↦_ I □" := (n_0 ⟨↦□_I|l⟩) : nProp_scope.
 Notation n_meta_token l E := (n_0 (nc_meta_token l E)).
+Notation n_steps_lb n := (n_0 (nc_steps_lb n)).
+Notation n_proph p pvs := (n_0 (nc_proph p pvs)).
 Notation n_inv_wsat := (n_l0 nc_inv_wsat).
 Notation "□ P" := (n_1 ⟨□⟩ P) : nProp_scope.
 Notation "■ P" := (n_1 ⟨■⟩ P) : nProp_scope.

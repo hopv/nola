@@ -27,6 +27,8 @@ Section ncintp.
     | ⟨↦_J|l,v⟩%nc => l ↦_J v
     | ⟨↦□_J|l⟩%nc => l ↦_J □
     | nc_meta_token l E => meta_token l E
+    | nc_steps_lb n => steps_lb n
+    | nc_proph p pvs => proph p pvs
     end.
   Definition ncintpl0 (c : nconl0) (niS : nPropS (;ᵞ) → iProp Σ) : iProp Σ :=
     match c with nc_inv_wsat => ninv_wsat niS end.
