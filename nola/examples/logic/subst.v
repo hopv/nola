@@ -67,7 +67,7 @@ Lemma nlift_nlarge {κ Γ} {P : nProp κ (;ᵞ)} :
   nlift (Γ:=Γ) (↑ˡ P) = ↑ˡ (nlift P).
 Proof. apply (nliftug_nlarge (Γ:=(;ᵞ))). Qed.
 
-(** ** [nsubst P Φ]: Substitute [Φ] for the only unguarded variable of [P] *)
+(** ** [P /: Φ]: Substitute [Φ] for the only unguarded variable of [P] *)
 
 (** [nPred V]: Type of an instantiation of [V : npvar] *)
 Definition nPred : npvar → Type := λ '(A →nP κ), A → nProp κ (;ᵞ).
@@ -149,13 +149,14 @@ Proof.
   by case (stakedrop i s).
 Qed.
 
-(** [nsubst P Φ]: Substitute [Φ] for the only unguarded variable of [P] *)
+(** [P /: Φ]: Substitute [Φ] for the only unguarded variable of [P] *)
 Definition nsubst {κ V} (P : nProp κ ([V];ᵞ )) (Φ : nPred V) : nProp κ (;ᵞ) :=
   nsubstlu (i:=0) P -[Φ] eq_refl.
+Infix "/:" := nsubst (at level 25, no associativity).
 
-(** [nsubst] commutes with [↑ˡ] *)
+(** [/:=] commutes with [↑ˡ] *)
 Lemma nsubst_nlarge {κ V} {P : nProp κ ([V];ᵞ )} {Φ} :
-  nsubst (↑ˡ P) Φ = ↑ˡ (nsubst P Φ).
+  ↑ˡ P /: Φ = ↑ˡ (P /: Φ).
 Proof. apply (nsubstlu_nlarge (Γ:=([_];ᵞ)) (i:=0)). Qed.
 
 (** ** [nheight P]: Height of [P] *)
@@ -179,6 +180,7 @@ Proof.
     try (by move: gn; case s); try (by case (stakedrop _ s)).
 Qed.
 
-(** [nsubst] preserves [nheight] *)
-Lemma nsubst_nheight {κ V P Φ} : nheight (nsubst (κ:=κ) (V:=V) P Φ) = nheight P.
+(** [/:=] preserves [nheight] *)
+Lemma nsubst_nheight {κ V} {P : nProp κ ([V];ᵞ )} {Φ} :
+  nheight (P /: Φ) = nheight P.
 Proof. exact (nsubstlu_nheight (Γ:=([_];ᵞ)) (i:=0)). Qed.

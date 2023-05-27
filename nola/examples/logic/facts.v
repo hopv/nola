@@ -20,10 +20,10 @@ Section facts.
     ⟦ n_twp st E e Φ ⟧(s) ⊣⊢ twpw (nninv_wsat s) st E e (λ v, ⟦ Φ v ⟧(s)).
   Proof. done. Qed.
   Lemma nintp_n_forall {κ s V P} :
-    ⟦ ∀: V, P ⟧{κ}(s) ⊣⊢ ∀ Φ, ⟦ nsubst P Φ ⟧(s).
+    ⟦ ∀: V, P ⟧{κ}(s) ⊣⊢ ∀ Φ, ⟦ P /: Φ ⟧(s).
   Proof. simpl. f_equiv=> ?. by rewrite rew_eq_hwf. Qed.
   Lemma nintp_n_exist {κ s V P} :
-    ⟦ ∃: V, P ⟧{κ}(s) ⊣⊢ ∃ Φ, ⟦ nsubst P Φ ⟧(s).
+    ⟦ ∃: V, P ⟧{κ}(s) ⊣⊢ ∃ Φ, ⟦ P /: Φ ⟧(s).
   Proof. simpl. f_equiv=> ?. by rewrite rew_eq_hwf. Qed.
   Lemma nintp_n_recs {κ s A Φ} {a : A} :
     ⟦ rec:ˢ' Φ a ⟧{κ}(s) ⊣⊢ ⟦ nsubst (Φ a) (rec:ˢ' Φ) ⟧(s).

@@ -78,13 +78,13 @@ Section lemmas.
     rewrite nintp_fp_nintp. by iApply "to".
   Qed.
   Lemma sintpy_n_forall {i s V} {P : nPropL ([V];ᵞ )} :
-    (∀ Φ, ⸨ nsubst P Φ ⸩(σ s, i)) -∗ ⸨ ∀: V, P ⸩(σ s, i).
+    (∀ Φ, ⸨ P /: Φ ⸩(σ s, i)) -∗ ⸨ ∀: V, P ⸩(σ s, i).
   Proof.
     iIntros "P". iApply sintpy_byintp. iIntros (? _) "/= #to _ _". iIntros (Ψ).
     rewrite rew_eq_hwf. iApply "to". iApply "P".
   Qed.
   Lemma sintpy_n_exist {i s V} {P : nPropL ([V];ᵞ )} :
-    (∃ Φ, ⸨ nsubst P Φ ⸩(σ s, i)) -∗ ⸨ ∃: V, P ⸩(σ s, i).
+    (∃ Φ, ⸨ P /: Φ ⸩(σ s, i)) -∗ ⸨ ∃: V, P ⸩(σ s, i).
   Proof.
     iDestruct 1 as (Φ) "P". iApply sintpy_byintp. iIntros (? _) "/= #to _ _".
     iExists Φ. rewrite rew_eq_hwf. iApply "to". iApply "P".
