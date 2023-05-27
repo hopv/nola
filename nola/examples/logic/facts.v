@@ -13,6 +13,12 @@ Section facts.
   Lemma nintp_indir {κ s i} {P : _ (;ᵞ)} :
     ⟦ ○{nil}(i) P ⟧{κ}(s) ⊣⊢ ⸨ P ⸩(s,i).
   Proof. done. Qed.
+  Lemma nintp_wp {s st E e Φ} :
+    ⟦ n_wp st E e Φ ⟧(s) ⊣⊢ wpw (nninv_wsat s) st E e (λ v, ⟦ Φ v ⟧(s)).
+  Proof. done. Qed.
+  Lemma nintp_twp {s st E e Φ} :
+    ⟦ n_twp st E e Φ ⟧(s) ⊣⊢ twpw (nninv_wsat s) st E e (λ v, ⟦ Φ v ⟧(s)).
+  Proof. done. Qed.
   Lemma nintp_n_forall {κ s V P} :
     ⟦ ∀: V, P ⟧{κ}(s) ⊣⊢ ∀ Φ, ⟦ nsubst P Φ ⟧(s).
   Proof. simpl. f_equiv=> ?. by rewrite rew_eq_hwf. Qed.

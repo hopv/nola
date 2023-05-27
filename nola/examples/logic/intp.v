@@ -89,7 +89,8 @@ Section nintp_gen.
         (nsubst' (Φ a) un gn (rew[λ _,_] ctxeq_ug un gn in rec:ˢ' Φ)%n)
         (H ‼ʰ[nsubst'_nheight] 0) eq_refl eq_refl eq_refl
     | (%ᵍˢ s)%n, _ => λ _ _, seqnil s
-    | n_l0 _, _ | (rec:ˡ' _ _)%n, _ | (%ᵍˡ _)%n, _ | (%ᵘˢ _)%n, _ | (!ᵘˢ _)%n, _
+    | n_l0 _, _ | n_wp _ _ _ _, _ | n_twp _ _ _ _, _ | (rec:ˡ' _ _)%n, _
+    | (%ᵍˡ _)%n, _ | (%ᵘˢ _)%n, _ | (!ᵘˢ _)%n, _
       => λ κS, match κS with end
     end%I.
   Local Notation nintpS P := (nintpS_gen P hwf eq_refl eq_refl eq_refl).
@@ -106,6 +107,10 @@ Section nintp_gen.
     | n_g1 c P, _ => λ un gn, ncintpg1 c (rew app_eq_nil_ug_g un gn in P) ni s
     | (∀' Φ)%n, _ => λ un gn, ∀ a, nintp_gen (Φ a) (H ‼ʰ a) un gn
     | (∃' Φ)%n, _ => λ un gn, ∃ a, nintp_gen (Φ a) (H ‼ʰ a) un gn
+    | n_wp s E e Φ, _ => λ un gn, wpw (ninv_wsat (λ P, nintpS P))
+        s E e (λ v, nintp_gen (Φ v) (H ‼ʰ v) un gn)
+    | n_twp s E e Φ, _ => λ un gn, twpw (ninv_wsat (λ P, nintpS P))
+        s E e (λ v, nintp_gen (Φ v) (H ‼ʰ v) un gn)
     | (∀: V, P)%n, _ => λ un gn, ∀ Φ,
         nintp_gen (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] 0) eq_refl eq_refl
     | (∃: V, P)%n, _ => λ un gn, ∃ Φ,
@@ -145,8 +150,10 @@ Section nintp.
   Proof.
     unfold nintp_gen'=> i ni ni' nid s + + + + + +. fix FIX 4=> κ Γ P H.
     case: P H=>/=; intros; case H=>//= ?; try (by f_equiv=> >; apply FIX);
-    try (case c=>//=; by f_contractive; apply nid);
-    try (case c=>/=; f_equiv=> ?); by apply nintpS_gen_contractive.
+      try (case c=>//=; by f_contractive; apply nid);
+      try (try (case c=>/=; f_equiv=> ?); by apply nintpS_gen_contractive);
+      [apply wpw_ne=> >; [|by apply FIX]|apply twpw_ne=> >; [|by apply FIX]];
+      f_equiv=> ?; by apply nintpS_gen_contractive.
   Qed.
 
   (** [nintp_pre]: Generator of [nintp_fp] *)

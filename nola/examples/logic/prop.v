@@ -121,6 +121,12 @@ Inductive nProp : nkind → nctx → Type :=
 | n_forall {κ Γ} {A : Type} (Φ : A → nProp κ Γ) : nProp κ Γ
 (** Existential quantification *)
 | n_exist {κ Γ} {A : Type} (Φ : A → nProp κ Γ) : nProp κ Γ
+(** Weakest precondition *)
+| n_wp {Γ} (s : stuckness) (E : coPset) (e : expr) (Φ : val → nProp nL Γ) :
+    nProp nL Γ
+(** Total weakest precondition *)
+| n_twp {Γ} (s : stuckness) (E : coPset) (e : expr) (Φ : val → nProp nL Γ) :
+    nProp nL Γ
 
 (** Universal quantification over [A → nProp] *)
 | n_n_forall {κ Γᵘ Γᵍ} V (P : nProp κ (V :: Γᵘ;ᵞ Γᵍ)) : nProp κ (Γᵘ;ᵞ Γᵍ)
@@ -224,6 +230,8 @@ Fixpoint nlarge {κ Γ} (P : nProp κ Γ) : nPropL Γ :=
   | n_0 c => n_0 c | n_l0 c => n_l0 c | n_1 c P => n_1 c (nlarge P)
   | n_2 c P Q => n_2 c (nlarge P) (nlarge Q) | n_g1 c P => n_g1 c P
   | ∀' Φ => ∀' (nlarge ∘ Φ) | ∃' Φ => ∃' (nlarge ∘ Φ)
+  | n_wp s E e Φ => n_wp s E e (nlarge ∘ Φ)
+  | n_twp s E e Φ => n_twp s E e (nlarge ∘ Φ)
   | ∀: V, P => ∀: V, nlarge P | ∃: V, P => ∃: V, nlarge P
   | rec:ˢ' Φ a => rec:ˢ' Φ a | rec:ˡ' Φ a => rec:ˡ' Φ a
   | %ᵍˢ s => %ᵍˢ s | %ᵍˡ s => %ᵍˡ s | %ᵘˢ s => %ᵘˢ s | !ᵘˢ P => !ᵘˢ P
@@ -238,8 +246,8 @@ Lemma nlarge_id' {κ Γ} {P : nProp κ Γ} (eq : κ = nL) :
   nlarge P = rew[λ κ, nProp κ Γ] eq in P.
 Proof.
   move: κ Γ P eq. fix FIX 3=> κ Γ.
-  case=>/=; intros; subst=>//=; f_equal; try exact (FIX _ _ _ eq_refl);
-  try (funext=> ?; exact (FIX _ _ _ eq_refl)); by rewrite (eq_dec_refl eq).
+  case=>/=; intros; subst=>//=; try rewrite (eq_dec_refl eq)/=; f_equal;
+    try exact (FIX _ _ _ eq_refl); funext=> ?; exact (FIX _ _ _ eq_refl).
 Qed.
 Lemma nlarge_id {Γ} {P : nPropL Γ} : nlarge P = P.
 Proof. exact (nlarge_id' eq_refl). Qed.
