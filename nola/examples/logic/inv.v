@@ -7,7 +7,25 @@ From nola Require Import fupd.
 Implicit Type (i : nat) (P Q : nPropL (;ᵞ)).
 
 Section lemmas.
-  Context `{!nintpGS Σ, !nsintpy Σ σ}.
+  Context `{!nintpGS Σ}.
+
+  (** Access [nninv] *)
+  Lemma nninv_acc {s i N P E} : ↑N ⊆ E →
+    lev_sintp_intp (ITI:=nintpsi _) s i -∗
+    nninv s i N P =[nninv_wsat s]{E,E∖↑N}=∗
+      ⟦ P ⟧(s) ∗ (⟦ P ⟧(s) =[nninv_wsat s]{E∖↑N,E}=∗ True).
+  Proof.
+    rewrite nninv_unseal. iIntros (NE) "to (%Q & #QPQ & NQ) W".
+    iMod (ninv_acc with "NQ W") as "(W & Q & toW)"; [done|].
+    rewrite nintpS_nintp_nlarge. iDestruct ("to" with "QPQ") as "/={QPQ}QPQ".
+    iMod (fupd_mask_subseteq ∅) as "∅to"; [set_solver|].
+    iMod ("QPQ" with "Q W") as "($&$& PQ)". iMod "∅to" as "_". iIntros "!> P W".
+    iMod (fupd_mask_subseteq ∅) as "∅to"; [set_solver|].
+    iMod ("PQ" with "P W") as "[W Q]". iMod "∅to" as "_".
+    iApply ("toW" with "Q W").
+  Qed.
+
+  Context `{!nsintpy Σ σ}.
 
   (** Access [n_inv] *)
   Lemma n_inv_acc {s i j N P E} : ↑N ⊆ E → i < j → ⊢
@@ -15,15 +33,7 @@ Section lemmas.
         P ∗ (P =[n_inv_wsat]{E∖↑N,E}=∗ True) ⸩(σ s, j).
   Proof.
     move=> NE ij. iApply sintpy_byintp. iIntros (??) "/= _ _ #to".
-    rewrite nninv_unseal. iIntros "(%Q & #QPQ & NQ) W".
-    iMod (ninv_acc with "NQ W") as "(W & Q & toW)"; [done|].
-    iDestruct ("to" $! _ ij with "QPQ") as "/={QPQ}QPQ".
-    rewrite nintpS_nintp_nlarge.
-    iMod (fupd_mask_subseteq ∅) as "∅to"; [set_solver|].
-    iMod ("QPQ" with "Q W") as "($&$& PQ)". iMod "∅to" as "_". iIntros "!> P W".
-    iMod (fupd_mask_subseteq ∅) as "∅to"; [set_solver|].
-    iMod ("PQ" with "P W") as "[W Q]". iMod "∅to" as "_".
-    iApply ("toW" with "Q W").
+    iApply (nninv_acc with "[to]"); [done|]. by iApply "to".
   Qed.
 
   (** Turn [ninv] into [nninv] *)
