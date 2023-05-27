@@ -14,6 +14,7 @@ Section fupd.
   Context `{!BiFUpd PROP}.
   Open Scope bi_scope.
 
+  (** [step_fupdN] is non-expansive *)
   Lemma step_fupdN_ne {n Eo Ei k} {P Q : PROP} :
     P ≡{n}≡ Q → (|={Eo}[Ei]▷=>^k P) ≡{n}≡ (|={Eo}[Ei]▷=>^k Q).
   Proof. move=> PQ. by elim k; [done|]=>/= ? ->. Qed.
@@ -23,10 +24,12 @@ Section wp.
   Context `{!invGS_gen hlc Σ} {Λ : language}
     {fp : val Λ → iProp Σ} {nl : nat → nat}.
 
+  (** Make the state interpretation explicit in [wp]/[twp] *)
   Local Notation IrG Φ monoΦ := (IrisG _ Φ fp nl monoΦ).
   Local Notation wpx Φ monoΦ := (@wp' _ _ _ (IrG Φ monoΦ)).
   Local Notation twpx Φ monoΦ := (@twp' _ _ _ (IrG Φ monoΦ)).
 
+  (** [wp] is non-expansive over the state interpretation *)
   Lemma wp_ne_interp {Φ Ψ : _ -d> _ -d> _ -d> _ -d> _} {n monoΦ monoΨ} :
     Φ ≡{n}≡ Ψ → (wpx Φ monoΦ : _ -d> _ -d> _ -d> _ -d> _) ≡{n}≡ wpx Ψ monoΨ.
   Proof.
@@ -38,6 +41,7 @@ Section wp.
     Φ ≡ Ψ → (wpx Φ monoΦ : _ -d> _ -d> _ -d> _ -d> _) ≡ wpx Ψ monoΨ.
   Proof. rewrite !equiv_dist=> ??. by apply wp_ne_interp. Qed.
 
+  (** [twp] is non-expansive over the state interpretation *)
   Lemma twp_ne_interp {Φ Ψ : _ -d> _ -d> _ -d> _ -d> _} {n monoΦ monoΨ} :
     Φ ≡{n}≡ Ψ → (twpx Φ monoΦ : _ -d> _ -d> _ -d> _ -d> _) ≡{n}≡ twpx Ψ monoΨ.
   Proof.
