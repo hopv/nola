@@ -182,7 +182,8 @@ Notation "○{ Γᵘ } ( i ) P" := (n_g1 (Γᵘ:=Γᵘ) ⟨○(i)⟩ P)
   (at level 20, right associativity, only parsing) : nProp_scope.
 Notation "○ ( i ) P" := (n_g1 ⟨○(i)⟩ P)
   (at level 20, right associativity, format "○ ( i )  P") : nProp_scope.
-Notation n_inv i N P := (n_g1 (nc_inv i N) P).
+Notation n_inv' Γᵘ i N P := (n_g1 (Γᵘ:=Γᵘ) (nc_inv i N) P) (only parsing).
+Notation n_inv i N P := (n_inv' _ i N P).
 
 Notation "∀: V , P" := (n_n_forall V P)
   (at level 200, right associativity,
