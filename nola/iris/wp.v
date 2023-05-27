@@ -3,21 +3,13 @@
 From iris.program_logic Require Export weakestpre total_weakestpre.
 From iris.bi Require Import fixpoint.
 From iris.proofmode Require Import tactics.
+From nola Require Import fupd.
 
 Local Transparent iris_invGS.
 Local Notation wp_unseal := iris.program_logic.weakestpre.wp_aux.(seal_eq).
 Local Notation twp_unseal :=
   iris.program_logic.total_weakestpre.twp_aux.(seal_eq).
 Local Notation twp_pre' := iris.program_logic.total_weakestpre.twp_pre'.
-
-Section fupd.
-  Context `{!BiFUpd PROP}.
-
-  (** [step_fupdN] is non-expansive *)
-  Lemma step_fupdN_ne {n Eo Ei k} {P Q : PROP} :
-    P ≡{n}≡ Q → (|={Eo}[Ei]▷=>^k P)%I ≡{n}≡ (|={Eo}[Ei]▷=>^k Q)%I.
-  Proof. move=> PQ. by elim k; [done|]=>/= ? ->. Qed.
-End fupd.
 
 Section wp.
   Context `{!invGS_gen hlc Σ} {Λ : language}

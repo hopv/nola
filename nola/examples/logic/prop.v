@@ -4,6 +4,7 @@ From nola Require Export util.funext util.rel ctx.
 From stdpp Require Export coPset namespaces.
 From iris.bi Require Import notation.
 From nola.examples.heap_lang Require Import primitive_laws.
+From nola Require Import fupd.
 Import EqNotations.
 
 (** ** Preliminaries for [nProp] *)
@@ -226,6 +227,13 @@ Notation "P ==∗ Q" := (P -∗ |==> Q)%n : nProp_scope.
 Notation "|={ E }=> P" := (|={E,E}=> P)%n : nProp_scope.
 Notation "P ={ E , E' }=∗ Q" := (P -∗ |={E,E'}=> Q)%n : nProp_scope.
 Notation "P ={ E }=∗ Q" := (P ={E,E}=∗ Q)%n : nProp_scope.
+
+Notation "|=[ W ] => P" := (W ==∗ W ∗ P)%n : nProp_scope.
+Notation "P =[ W ]=∗ Q" := (P -∗ |=[W]=> Q)%n : nProp_scope.
+Notation "|=[ W ] { E , E' }=> P" := (W ={E,E'}=∗ W ∗ P)%n : nProp_scope.
+Notation "|=[ W ] { E }=> P" := (W ={E}=∗ W ∗ P)%n : nProp_scope.
+Notation "P =[ W ] { E , E' }=∗ Q" := (P -∗ |=[W]{E,E'}=> Q)%n : nProp_scope.
+Notation "P =[ W ] { E }=∗ Q" := (P -∗ |=[W]{E}=> Q)%n : nProp_scope.
 
 (** ** [nlarge]: Turn [nProp κ Γ] into [nPropL Γ]
   Although the main interest is the case [κ = nS],
