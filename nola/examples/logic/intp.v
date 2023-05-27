@@ -50,9 +50,9 @@ Section ncintp.
     end.
 
   (** [ncintp] is non-expansive *)
-  #[export] Instance ncintp1_nonex {c} : NonExpansive (ncintp1 c).
+  #[export] Instance ncintp1_ne {c} : NonExpansive (ncintp1 c).
   Proof. solve_proper. Qed.
-  #[export] Instance ncintp2_nonex {c} : NonExpansive2 (ncintp2 c).
+  #[export] Instance ncintp2_ne {c} : NonExpansive2 (ncintp2 c).
   Proof. solve_proper. Qed.
 
   (** [ncintp] is proper *)

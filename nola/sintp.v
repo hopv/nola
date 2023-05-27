@@ -52,7 +52,7 @@ Proof.
   - move=> ??[?][?]. apply dist_lt.
 Qed.
 Canonical swrap_ofe (A : ofe) := Ofe (swrap A) (swrap_ofe_mixin A).
-#[export] Instance Swrap_nonex `{A : ofe} : NonExpansive (Swrap (A:=A)).
+#[export] Instance Swrap_ne `{A : ofe} : NonExpansive (Swrap (A:=A)).
 Proof. solve_proper. Qed.
 
 (** [intps]: Interpretation structure *)
@@ -110,7 +110,7 @@ Infix "$∨ˢ" := apporˢ (at level 50, left associativity) : nola_scope.
 Definition wandˢ {IT} (s s' : sintp_ty IT) : IT.(intps_bi) :=
   ∀ iP, ⸨ iP ⸩(s) -∗ ⸨ iP ⸩(s').
 Infix "-∗ˢ" := wandˢ (at level 99, right associativity) : nola_scope.
-#[export] Instance wandˢ_nonex {IT} : NonExpansive2 (wandˢ (IT:=IT)).
+#[export] Instance wandˢ_ne {IT} : NonExpansive2 (wandˢ (IT:=IT)).
 Proof.
   unfold wandˢ=> ??? seq ?? s'eq. do 3 f_equiv; [apply seq|apply s'eq].
 Qed.
@@ -120,8 +120,7 @@ Definition wandˢ_low {IT} (i : IT.(intps_idx)) (s s' : sintp_ty IT)
 Notation "s -∗ˢ[≺ i ] s'" := (wandˢ_low i s s')
   (at level 99, right associativity, format "'[' s  -∗ˢ[≺ i ]  '/' s' ']'")
   : nola_scope.
-#[export] Instance wandˢ_low_nonex {IT} i :
-  NonExpansive2 (wandˢ_low (IT:=IT) i).
+#[export] Instance wandˢ_low_ne {IT} i : NonExpansive2 (wandˢ_low (IT:=IT) i).
 Proof.
   unfold wandˢ_low=> ??? seq ?? s'eq. do 6 f_equiv; [apply seq|apply s'eq].
 Qed.
@@ -130,7 +129,7 @@ Qed.
 
 Inductive sintpy ITI (σ : psintp_ty ITI) : Prop := {
   (** [σ] is non-expansive *)
-  sintpy_nonex :: NonExpansive σ;
+  sintpy_ne :: NonExpansive σ;
   (** [σ] is monotone over the coinductive hypothesis *)
   sintpy_mono {s s' : sintp_ty ITI} : □ (s -∗ˢ s') -∗ σ s -∗ˢ σ s';
   (** [σ] can accumulate coinductive hypotheses *)

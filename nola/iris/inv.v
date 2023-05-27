@@ -54,7 +54,7 @@ Section ninv.
   Definition ninv_wsat := ninv_wsat_aux.(unseal).
   Lemma ninv_wsat_unseal : ninv_wsat = ninv_wsat_def.
   Proof. exact ninv_wsat_aux.(seal_eq). Qed.
-  #[export] Instance ninv_wsat_nonex : NonExpansive ninv_wsat.
+  #[export] Instance ninv_wsat_ne : NonExpansive ninv_wsat.
   Proof. rewrite ninv_wsat_unseal. solve_proper. Qed.
   #[export] Instance ninv_wsat_proper : Proper ((≡) ==> (≡)) ninv_wsat.
   Proof. apply ne_proper, _. Qed.
