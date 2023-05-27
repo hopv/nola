@@ -224,8 +224,8 @@ Notation "¬ P" := (P → False)%n : nProp_scope.
 Notation "◇ P" := (▷ False ∨ P)%n : nProp_scope.
 Notation "P ==∗ Q" := (P -∗ |==> Q)%n : nProp_scope.
 Notation "|={ E }=> P" := (|={E,E}=> P)%n : nProp_scope.
-Notation "P ={ E }=∗ Q" := (P -∗ |={E}=> Q)%n : nProp_scope.
 Notation "P ={ E , E' }=∗ Q" := (P -∗ |={E,E'}=> Q)%n : nProp_scope.
+Notation "P ={ E }=∗ Q" := (P ={E,E}=∗ Q)%n : nProp_scope.
 
 (** ** [nlarge]: Turn [nProp κ Γ] into [nPropL Γ]
   Although the main interest is the case [κ = nS],
