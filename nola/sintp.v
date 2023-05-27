@@ -89,7 +89,6 @@ Module IntpNotation.
     (format "'[' ⟦  iP  ⟧ '/  ' ( s ) ']'") : nola_scope.
   Notation "⟦ P ⟧ ( s , i )" := (intpsi_intp s (Sarg i P))
     (format "'[' ⟦  P  ⟧ '/  ' ( s ,  i ) ']'") : nola_scope.
-  Notation "⟦ s ⟧ˢ" := (intpsi_intp' s) (format "⟦ s ⟧ˢ ") : nola_scope.
 End IntpNotation.
 Import IntpNotation.
 
@@ -114,15 +113,13 @@ Proof.
   unfold wandˢ=> ??? seq ?? s'eq. do 3 f_equiv; [apply seq|apply s'eq].
 Qed.
 
-Definition wandˢ_low {IT} (i : IT.(intps_idx)) (s s' : sintp_ty IT)
-  : IT.(intps_bi) := ∀ j, ⌜j ≺ i⌝ → ∀ P, ⸨ P ⸩(s,j) -∗ ⸨ P ⸩(s',j).
-Notation "s -∗ˢ[≺ i ] s'" := (wandˢ_low i s s')
-  (at level 99, right associativity, format "'[' s  -∗ˢ[≺ i ]  '/' s' ']'")
-  : nola_scope.
-#[export] Instance wandˢ_low_ne {IT} i : NonExpansive2 (wandˢ_low (IT:=IT) i).
-Proof.
-  unfold wandˢ_low=> ??? seq ?? s'eq. do 6 f_equiv; [apply seq|apply s'eq].
-Qed.
+(** Propositions for turning a strong interpretation into an interpretation *)
+Definition lev_sintp_intp' {ITI} (s s' : sintp_ty ITI) i : ITI.(intps_bi) :=
+  ∀ P, ⸨ P ⸩(s, i) -∗ ⟦ P ⟧(s', i).
+Definition lev_sintp_intp {ITI} (s : sintp_ty ITI) i : ITI.(intps_bi) :=
+  lev_sintp_intp' s s i.
+Definition low_lev_sintp_intp {ITI} (s : sintp_ty ITI) i : ITI.(intps_bi) :=
+  ∀ j, ⌜j ≺ i⌝ → lev_sintp_intp s j.
 
 (** ** [sintpy] : Characterization of the strong interpretation *)
 
@@ -138,9 +135,8 @@ Inductive sintpy ITI (σ : psintp_ty ITI) : Prop := {
     (* Parameterization by [sintpy'] is for strict positivity *)
     ∃ sintpy' : _ → Prop, (∀ σ', sintpy' σ' → sintpy ITI σ') ∧
     ∀ iP, let i := iP.(sarg_idx) in
-    (∀ σ', ⌜sintpy' σ'⌝ → □ (∀ P, ⸨ P ⸩(σ s, i) -∗ ⟦ P ⟧(σ' ⊥ˢ, i)) -∗
-      □ (σ $∨ˢ s -∗ˢ σ' ⊥ˢ) -∗ □ (σ' ⊥ˢ -∗ˢ[≺ i] ⟦σ' ⊥ˢ⟧ˢ) -∗
-      ⟦ iP ⟧(σ' ⊥ˢ))
+    (∀ σ', ⌜sintpy' σ'⌝ → □ lev_sintp_intp' (σ s) (σ' ⊥ˢ) i -∗
+      □ (σ $∨ˢ s -∗ˢ σ' ⊥ˢ) -∗ □ low_lev_sintp_intp (σ' ⊥ˢ) i -∗ ⟦ iP ⟧(σ' ⊥ˢ))
     -∗ ⸨ iP ⸩(σ s)
 }.
 Existing Class sintpy.
@@ -153,13 +149,14 @@ Proof. apply ne_proper, _. Qed.
 Lemma sintpy_byintp `{!sintpy ITI σ} {s i P} :
   (∀ σ', ⌜sintpy ITI σ'⌝ → (* Take any strong interpretation [σ'] *)
     (* Turn the strong interpration at level [i] into the interpretation *)
-    □ (∀ P, ⸨ P ⸩(σ s, i) -∗ ⟦ P ⟧(σ' ⊥ˢ, i)) -∗
+    □ lev_sintp_intp' (σ s) (σ' ⊥ˢ) i -∗
     (* Turn the coinductive strong interpretation into
       the given strong interpretation *)
     □ (σ $∨ˢ s -∗ˢ σ' ⊥ˢ) -∗
     (* Turn the given strong interpretation at a level lower than [i]
       into the interpretation *)
-    □ (σ' ⊥ˢ -∗ˢ[≺ i] ⟦σ' ⊥ˢ⟧ˢ) -∗ ⟦ P ⟧(σ' ⊥ˢ, i))
+    □ low_lev_sintp_intp (σ' ⊥ˢ) i -∗
+    ⟦ P ⟧(σ' ⊥ˢ, i))
   -∗ ⸨ P ⸩(σ s, i).
 Proof.
   have X := (@sintpy_byintp' _ σ _ s). move: X=> [sy'[sy'to byintp]].
@@ -211,8 +208,8 @@ Qed.
 (** [sintp_gen_gen]: What becomes [sintp_gen] by taking [bi_least_fixpoint] *)
 Definition sintp_gen_gen ITI (self' self : sintp_ty' ITI)
   : sintp_ty' ITI := λ iP, let i := iP.(sarg_idx) in
-  (∀ σ', ⌜sintpy ITI σ'⌝ →  □ (∀ P, ⸨ P ⸩(Swrap self, i) -∗ ⟦ P ⟧(σ' ⊥ˢ, i)) -∗
-    □ (Swrap self' -∗ˢ σ' ⊥ˢ) -∗ □ (σ' ⊥ˢ -∗ˢ[≺ i] ⟦σ' ⊥ˢ⟧ˢ) -∗
+  (∀ σ', ⌜sintpy ITI σ'⌝ →  □ lev_sintp_intp' (Swrap self) (σ' ⊥ˢ) i -∗
+    □ (Swrap self' -∗ˢ σ' ⊥ˢ) -∗ □ low_lev_sintp_intp (σ' ⊥ˢ) i -∗
     ⟦ iP ⟧(σ' ⊥ˢ))%I.
 #[export] Instance sintp_gen_gen_mono {ITI self'} :
   BiMonoPred (sintp_gen_gen ITI self').
@@ -272,15 +269,15 @@ Proof. split.
 Qed.
 
 (** [sintp] is an underapproximation of the interpretation under [sintp] *)
-Lemma sintp_intp {ITI} : ⊢ sintp ITI ⊥ˢ -∗ˢ ⟦sintp ITI ⊥ˢ⟧ˢ.
+Lemma sintp_intp {ITI i P} : ⸨ P ⸩(sintp ITI ⊥ˢ, i) -∗ ⟦ P ⟧(sintp ITI ⊥ˢ, i).
 Proof.
-  iIntros ([i P]) "?". iStopProof. move: P. elim: {i}(wft_lt_wf i)=>/= i _ IH P.
-  iIntros "X". rewrite /sintp' greatest_fixpoint_unfold.
+  move: P. elim: {i}(wft_lt_wf i)=>/= i _ IH P. iIntros "X".
+  rewrite /sintp' greatest_fixpoint_unfold.
   have: (Sarg i P).(sarg_idx) = i by done.
   move: {P}(Sarg i P : sintp_aty _)=> iP eq. iRevert (eq). iRevert (iP) "X".
   iApply least_fixpoint_ind. iIntros "!#" ([? P]) "/= X ->".
   iApply ("X" $! _ sintp_sintpy); iIntros "!#" (?) "/=".
   - iIntros "[X _]". by iApply "X".
   - by iIntros "[?|[]]".
-  - iIntros. iStopProof. by apply IH.
+  - iIntros (??) "?". by iApply IH.
 Qed.
