@@ -12,11 +12,10 @@ Local Notation twp_pre' := iris.program_logic.total_weakestpre.twp_pre'.
 
 Section fupd.
   Context `{!BiFUpd PROP}.
-  Open Scope bi_scope.
 
   (** [step_fupdN] is non-expansive *)
   Lemma step_fupdN_ne {n Eo Ei k} {P Q : PROP} :
-    P ≡{n}≡ Q → (|={Eo}[Ei]▷=>^k P) ≡{n}≡ (|={Eo}[Ei]▷=>^k Q).
+    P ≡{n}≡ Q → (|={Eo}[Ei]▷=>^k P)%I ≡{n}≡ (|={Eo}[Ei]▷=>^k Q)%I.
   Proof. move=> PQ. by elim k; [done|]=>/= ? ->. Qed.
 End fupd.
 

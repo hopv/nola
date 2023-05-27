@@ -3,7 +3,6 @@
 From nola Require Export util.pred util.wft.
 From iris.bi Require Import lib.fixpoint.
 From iris.proofmode Require Import tactics.
-Local Delimit Scope bi_scope with bi.
 
 (** ** Preliminaries *)
 
@@ -96,11 +95,11 @@ Import IntpNotation.
 
 (** Operations on strong interpretations *)
 
-Definition Falseˢ {IT} : sintp_ty IT := Swrap (λ _, False)%bi.
+Definition Falseˢ {IT} : sintp_ty IT := Swrap (λ _, False)%I.
 Notation "⊥ˢ" := Falseˢ : nola_scope.
 
 Definition orˢ {IT} (s s' : sintp_ty IT) : sintp_ty IT :=
-  Swrap (λ iP, ⸨ iP ⸩(s) ∨ ⸨ iP ⸩(s'))%bi.
+  Swrap (λ iP, ⸨ iP ⸩(s) ∨ ⸨ iP ⸩(s'))%I.
 Infix "∨ˢ" := orˢ (at level 50, left associativity) : nola_scope.
 
 Definition apporˢ {IT} (σ : psintp_ty IT) (s : sintp_ty IT) : sintp_ty IT :=
@@ -214,7 +213,7 @@ Definition sintp_gen_gen ITI (self' self : sintp_ty' ITI)
   : sintp_ty' ITI := λ iP, let i := iP.(sarg_idx) in
   (∀ σ', ⌜sintpy ITI σ'⌝ →  □ (∀ P, ⸨ P ⸩(Swrap self, i) -∗ ⟦ P ⟧(σ' ⊥ˢ, i)) -∗
     □ (Swrap self' -∗ˢ σ' ⊥ˢ) -∗ □ (σ' ⊥ˢ -∗ˢ[≺ i] ⟦σ' ⊥ˢ⟧ˢ) -∗
-    ⟦ iP ⟧(σ' ⊥ˢ))%bi.
+    ⟦ iP ⟧(σ' ⊥ˢ))%I.
 #[export] Instance sintp_gen_gen_mono {ITI self'} :
   BiMonoPred (sintp_gen_gen ITI self').
 Proof.
@@ -237,7 +236,7 @@ Qed.
 
 (** [sintp]: Strong interpretation *)
 Definition sintp_gen' ITI (s self : sintp_ty' ITI) : sintp_ty' ITI :=
-  sintp_gen ITI (λ iP, self iP ∨ s iP)%bi.
+  sintp_gen ITI (λ iP, self iP ∨ s iP)%I.
 #[export] Instance sintp_gen'_mono {ITI s} : BiMonoPred (sintp_gen' ITI s).
 Proof.
   split; [|solve_proper]=> Φ Ψ ??. iIntros "#ΦΨ". iApply bi_mono_pred.
