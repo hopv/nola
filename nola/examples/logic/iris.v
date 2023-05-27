@@ -11,8 +11,6 @@ Class nintpGS (Σ : gFunctors) := NintpG {
   nintpGS_ninvGS :: ninvGS (nPropS (;ᵞ)) Σ;
 }.
 
-(** ** [nintpΣ]: Iris signature *)
-
 (** ** For strong interpretation *)
 
 (** [intps] for [nPropL] *)
