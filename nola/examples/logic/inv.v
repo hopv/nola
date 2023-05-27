@@ -27,7 +27,7 @@ Section lemmas.
 
   (** Turn [ninv] into [nninv] *)
   Lemma ninv_nninv {s i N} {P : nPropS _} :
-    ninv N P -∗ nninv (Σ:=Σ) (σ s) i N (nlarge P).
+    ninv N P -∗ nninv (Σ:=Σ) (σ s) i N (↑ˡ P).
   Proof.
     rewrite nninv_unseal. iIntros "NP". iExists P. iFrame "NP". iModIntro.
     iApply (sintpy_intro (σ:=σ)). by iIntros (??) "/= $ !> $".
@@ -35,15 +35,15 @@ Section lemmas.
 
   (** Allocate [nninv] *)
   Lemma nninv_alloc_rec {s i N} {P : nPropS (;ᵞ)} :
-    (nninv (σ s) i N (nlarge P) -∗ ⟦ P ⟧(σ s)) =[nninv_wsat (σ s)]=∗
-      nninv (σ s) i N (nlarge P).
+    (nninv (σ s) i N (↑ˡ P) -∗ ⟦ P ⟧(σ s)) =[nninv_wsat (σ s)]=∗
+      nninv (σ s) i N (↑ˡ P).
   Proof.
     iIntros "toP W". iMod (ninv_alloc_rec with "[toP] W") as "[$ NP]".
     - iIntros "NP". rewrite nintpS_nintp. iApply "toP". by iApply ninv_nninv.
     - iModIntro. by iApply ninv_nninv.
   Qed.
   Lemma nninv_alloc {s i N} {P : nPropS (;ᵞ)} :
-    ⟦ P ⟧(σ s) =[nninv_wsat (σ s)]=∗ nninv (σ s) i N (nlarge P).
+    ⟦ P ⟧(σ s) =[nninv_wsat (σ s)]=∗ nninv (σ s) i N (↑ˡ P).
   Proof. iIntros "P W". iApply (nninv_alloc_rec with "[P] W"). by iIntros. Qed.
 
   (** Transform [nninv] *)

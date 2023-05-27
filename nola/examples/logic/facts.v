@@ -31,6 +31,6 @@ Section facts.
   Lemma nintp_n_recl {s A Φ} {a : A} :
     ⟦ rec:ˡ' Φ a ⟧(s) ⊣⊢ ⟦ nsubst (Φ a) (rec:ˡ' Φ) ⟧(s).
   Proof. by rewrite/= rew_eq_hwf. Qed.
-  Lemma nintp_subus {s P} : ⟦ !ᵘˢ P ⟧(s) ⊣⊢ ⟦ nlarge P ⟧(s).
+  Lemma nintp_subus {s P} : ⟦ !ᵘˢ P ⟧(s) ⊣⊢ ⟦ ↑ˡ P ⟧(s).
   Proof. by rewrite/= nintpS_nintp_nlarge. Qed.
 End facts.

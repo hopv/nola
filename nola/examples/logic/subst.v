@@ -23,9 +23,9 @@ Fixpoint nliftg {Δ κ Γ} (P : nProp κ Γ) : nProp κ (Γ.ᵞu;ᵞ Γ.ᵞg ++ 
   | !ᵘˢ P => !ᵘˢ P
   end%n.
 
-(** [nliftg] commutes with [nlarge] *)
+(** [nliftg] commutes with [↑ˡ] *)
 Lemma nliftg_nlarge {κ Γ Δ} {P : nProp κ Γ} :
-  nliftg (Δ:=Δ) (nlarge P) = nlarge (nliftg P).
+  nliftg (Δ:=Δ) (↑ˡ P) = ↑ˡ (nliftg P).
 Proof.
   move: κ Γ P. fix FIX 3=> κ Γ.
   case=>//= *; f_equal; try apply FIX; try (funext=> ?; apply FIX);
@@ -50,9 +50,9 @@ Fixpoint nliftug {Δᵘ Δᵍ κ Γ} (P : nProp κ Γ)
   | !ᵘˢ P => λ _, !ᵘˢ P
   end%n.
 
-(** [nliftug] commutes with [nlarge] *)
+(** [nliftug] commutes with [↑ˡ] *)
 Lemma nliftug_nlarge {κ Γ Δᵘ Δᵍ} {P : nProp κ Γ} {gn} :
-  nliftug (Δᵘ:=Δᵘ) (Δᵍ:=Δᵍ) (nlarge P) gn = nlarge (nliftug P gn).
+  nliftug (Δᵘ:=Δᵘ) (Δᵍ:=Δᵍ) (↑ˡ P) gn = ↑ˡ (nliftug P gn).
 Proof.
   move: κ Γ P gn. fix FIX 3=> κ Γ.
   case=>//=; intros; f_equal; try apply FIX; try (funext=> ?; apply FIX);
@@ -62,9 +62,9 @@ Qed.
 (** [nlift]: Turn [nProp κ (;ᵞ)] into [nProp κ Γ] *)
 Definition nlift {κ Γ} (P : nProp κ (;ᵞ)) : nProp κ Γ := nliftug P eq_refl.
 
-(** [nlift] commutes with [nlarge] *)
+(** [nlift] commutes with [↑ˡ] *)
 Lemma nlift_nlarge {κ Γ} {P : nProp κ (;ᵞ)} :
-  nlift (Γ:=Γ) (nlarge P) = nlarge (nlift P).
+  nlift (Γ:=Γ) (↑ˡ P) = ↑ˡ (nlift P).
 Proof. apply (nliftug_nlarge (Γ:=(;ᵞ))). Qed.
 
 (** ** [nsubst P Φ]: Substitute [Φ] for the only unguarded variable of [P] *)
@@ -103,15 +103,15 @@ Fixpoint nsubstlg {κ Γ i} (P : nProp κ Γ)
   | %ᵘˢ s => λ _, %ᵘˢ s | !ᵘˢ P => λ _, !ᵘˢ P
   end%n.
 
-(** [nsubstlg] commutes with [nlarge] *)
+(** [nsubstlg] commutes with [↑ˡ] *)
 Lemma nsubstlg_nlarge {κ Γ i} {P : nProp κ Γ} {Φs} :
-  nsubstlg (i:=i) (nlarge P) Φs = nlarge (nsubstlg P Φs).
+  nsubstlg (i:=i) (↑ˡ P) Φs = ↑ˡ (nsubstlg P Φs).
 Proof.
   move: κ Γ i P Φs. fix FIX 4=> κ Γ i.
   case=>//=; intros; try (f_equal;
     apply (FIX _ (_;ᵞ_)) || (funext=>/= ?; apply FIX));
   case (stakedrop i s)=>//= ?; rewrite -nlift_nlarge; f_equal;
-  rewrite (spapply_in nlarge); f_equal; do 3 funext=> ?; symmetry;
+  rewrite (spapply_in (↑ˡ)); f_equal; do 3 funext=> ?; symmetry;
   [apply nlarge_nunsmall|apply nlarge_id].
 Qed.
 
@@ -139,9 +139,9 @@ Fixpoint nsubstlu {κ Γ i} (P : nProp κ Γ)
   | !ᵘˢ P => λ _ _, !ᵘˢ P
   end%n.
 
-(** [nsubstlu] commutes with [nlarge] *)
+(** [nsubstlu] commutes with [↑ˡ] *)
 Lemma nsubstlu_nlarge {κ Γ i} {P : nProp κ Γ} {Φs gn} :
-  nsubstlu (i:=i) (nlarge P) Φs gn = nlarge (nsubstlu P Φs gn).
+  nsubstlu (i:=i) (↑ˡ P) Φs gn = ↑ˡ (nsubstlu P Φs gn).
 Proof.
   move: κ Γ i P Φs gn. fix FIX 4=> κ Γ i.
   case=>//=; intros; f_equal; try apply FIX; try (funext=>/= ?; apply FIX);
@@ -153,9 +153,9 @@ Qed.
 Definition nsubst {κ V} (P : nProp κ ([V];ᵞ )) (Φ : nPred V) : nProp κ (;ᵞ) :=
   nsubstlu (i:=0) P -[Φ] eq_refl.
 
-(** [nsubst] commutes with [nlarge] *)
+(** [nsubst] commutes with [↑ˡ] *)
 Lemma nsubst_nlarge {κ V} {P : nProp κ ([V];ᵞ )} {Φ} :
-  nsubst (nlarge P) Φ = nlarge (nsubst P Φ).
+  nsubst (↑ˡ P) Φ = ↑ˡ (nsubst P Φ).
 Proof. apply (nsubstlu_nlarge (Γ:=([_];ᵞ)) (i:=0)). Qed.
 
 (** ** [nheight P]: Height of [P] *)

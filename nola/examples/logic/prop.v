@@ -235,37 +235,44 @@ Notation "|=[ W ] { E }=> P" := (W ={E}=∗ W ∗ P)%n : nProp_scope.
 Notation "P =[ W ] { E , E' }=∗ Q" := (P -∗ |=[W]{E,E'}=> Q)%n : nProp_scope.
 Notation "P =[ W ] { E }=∗ Q" := (P -∗ |=[W]{E}=> Q)%n : nProp_scope.
 
-(** ** [nlarge]: Turn [nProp κ Γ] into [nPropL Γ]
+(** ** [↑ˡ P]: Turn [P : nProp κ Γ] into [nPropL Γ]
   Although the main interest is the case [κ = nS],
   we keep the function polymorphic over [κ] for ease of definition *)
+Reserved Notation "(↑ˡ)".
+Reserved Notation "↑ˡ P" (at level 20, right associativity).
 Fixpoint nlarge {κ Γ} (P : nProp κ Γ) : nPropL Γ :=
   match P with
-  | n_0 c => n_0 c | n_l0 c => n_l0 c | n_1 c P => n_1 c (nlarge P)
-  | n_2 c P Q => n_2 c (nlarge P) (nlarge Q) | n_g1 c P => n_g1 c P
-  | ∀' Φ => ∀' (nlarge ∘ Φ) | ∃' Φ => ∃' (nlarge ∘ Φ)
-  | n_wp s E e Φ => n_wp s E e (nlarge ∘ Φ)
-  | n_twp s E e Φ => n_twp s E e (nlarge ∘ Φ)
-  | ∀: V, P => ∀: V, nlarge P | ∃: V, P => ∃: V, nlarge P
+  | n_0 c => n_0 c | n_l0 c => n_l0 c | n_1 c P => n_1 c (↑ˡ P)
+  | n_2 c P Q => n_2 c (↑ˡ P) (↑ˡ Q) | n_g1 c P => n_g1 c P
+  | ∀' Φ => ∀' ((↑ˡ) ∘ Φ) | ∃' Φ => ∃' ((↑ˡ) ∘ Φ)
+  | n_wp s E e Φ => n_wp s E e ((↑ˡ) ∘ Φ)
+  | n_twp s E e Φ => n_twp s E e ((↑ˡ) ∘ Φ)
+  | ∀: V, P => ∀: V, ↑ˡ P | ∃: V, P => ∃: V, ↑ˡ P
   | rec:ˢ' Φ a => rec:ˢ' Φ a | rec:ˡ' Φ a => rec:ˡ' Φ a
   | %ᵍˢ s => %ᵍˢ s | %ᵍˡ s => %ᵍˡ s | %ᵘˢ s => %ᵘˢ s | !ᵘˢ P => !ᵘˢ P
-  end%n.
+  end%n
+where
+  "(↑ˡ)" := nlarge : nola_scope and
+  "↑ˡ P" := (nlarge P) : nola_scope.
+
+(** [nsmall]: Turn [nProp κ Γ] into [nPropS Γ] *)
 
 (** [nunsmall]: Turn [nPropS Γ] into [nProp κ Γ] *)
 Definition nunsmall {κ Γ} (P : nPropS Γ) : nProp κ Γ :=
-  match κ with nS => P | nL => nlarge P end.
+  match κ with nS => P | nL => ↑ˡ P end.
 
-(** [nlarge] is identity for [nPropL] *)
+(** [↑ˡ] is identity for [nPropL] *)
 Lemma nlarge_id' {κ Γ} {P : nProp κ Γ} (eq : κ = nL) :
-  nlarge P = rew[λ κ, nProp κ Γ] eq in P.
+  ↑ˡ P = rew[λ κ, nProp κ Γ] eq in P.
 Proof.
   move: κ Γ P eq. fix FIX 3=> κ Γ.
   case=>/=; intros; subst=>//=; try rewrite (eq_dec_refl eq)/=; f_equal;
     try exact (FIX _ _ _ eq_refl); funext=> ?; exact (FIX _ _ _ eq_refl).
 Qed.
-Lemma nlarge_id {Γ} {P : nPropL Γ} : nlarge P = P.
+Lemma nlarge_id {Γ} {P : nPropL Γ} : ↑ˡ P = P.
 Proof. exact (nlarge_id' eq_refl). Qed.
 
-(** [nlarge] over [nunsmall] *)
+(** [↑ˡ] over [nunsmall] *)
 Lemma nlarge_nunsmall {Γ κ} {P : nPropS Γ} :
-  nlarge (κ:=κ) (nunsmall P) = nlarge P.
+  ↑ˡ (nunsmall (κ:=κ) P) = ↑ˡ P.
 Proof. case κ=>//=. exact nlarge_id. Qed.

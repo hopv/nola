@@ -28,7 +28,7 @@ Section iris.
   (** ** [nninv]: [ninv] with a semantic agreement *)
   Definition nninv_def (s : nsintp_ty Σ)
     (i : nat) (N : namespace) (P : nPropL (;ᵞ)) : iProp Σ :=
-    ∃ Q, □ ⸨ nlarge Q ={∅}=∗ P ∗ (P ={∅}=∗ nlarge Q) ⸩(s, i) ∗ ninv N Q.
+    ∃ Q, □ ⸨ ↑ˡ Q ={∅}=∗ P ∗ (P ={∅}=∗ ↑ˡ Q) ⸩(s, i) ∗ ninv N Q.
   Definition nninv_aux : seal nninv_def. Proof. by eexists. Qed.
   Definition nninv := nninv_aux.(unseal).
   Lemma nninv_unseal : nninv = nninv_def. Proof. exact nninv_aux.(seal_eq). Qed.

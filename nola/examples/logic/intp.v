@@ -208,22 +208,22 @@ Section nintp_facts.
   Lemma nintpS_nintp {s P} : ⟦ P ⟧ˢ(s) ⊣⊢ ⟦ P ⟧(s).
   Proof. exact nintpS_gen_nintp_gen. Qed.
 
-  (** Simplify [nintp_gen] over [nlarge] *)
+  (** Simplify [nintp_gen] over [↑ˡ] *)
   Lemma nintp_gen_nlarge {ni s κ Γ} {P : nProp κ Γ} {H un gn} :
-    nintp_gen ni s (nlarge P) H un gn ⊣⊢ nintp_gen ni s P hwf un gn.
+    nintp_gen ni s (↑ˡ P) H un gn ⊣⊢ nintp_gen ni s P hwf un gn.
   Proof.
     move: κ Γ P H un gn. fix FIX 4=> κ Γ P H.
     case: P H=>/=; intros; case H=>/= he; f_equiv=> >; try apply FIX;
     try apply leibniz_equiv, eq_hacc;
     rewrite rew_eq_hwf; move: nsubst'_nheight=>/=; subst;
-    have EQ := nsubst_nlarge (P:=P); move: (nsubst (nlarge P)) EQ;
+    have EQ := nsubst_nlarge (P:=P); move: (nsubst (↑ˡ P)) EQ;
     move=> ?->?; apply FIX.
   Qed.
-  (** Simplify [⟦ ⟧] over [nlarge] *)
-  Lemma nintp_nlarge {s κ P} : ⟦ nlarge P ⟧(s) ⊣⊢ ⟦ P ⟧{κ}(s).
+  (** Simplify [⟦ ⟧] over [↑ˡ] *)
+  Lemma nintp_nlarge {s κ P} : ⟦ ↑ˡ P ⟧(s) ⊣⊢ ⟦ P ⟧{κ}(s).
   Proof. exact nintp_gen_nlarge. Qed.
-  (** [⟦ ⟧ˢ] coincides with [⟦ ⟧] over [nlarge] *)
-  Lemma nintpS_nintp_nlarge {s P} : ⟦ P ⟧ˢ(s) ⊣⊢ ⟦ nlarge P ⟧(s).
+  (** [⟦ ⟧ˢ] coincides with [⟦ ⟧] over [↑ˡ] *)
+  Lemma nintpS_nintp_nlarge {s P} : ⟦ P ⟧ˢ(s) ⊣⊢ ⟦ ↑ˡ P ⟧(s).
   Proof. by rewrite nintpS_nintp nintp_nlarge. Qed.
 End nintp_facts.
 
