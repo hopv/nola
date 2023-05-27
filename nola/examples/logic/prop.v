@@ -3,7 +3,7 @@
 From nola Require Export util.funext util.rel ctx.
 From stdpp Require Export coPset namespaces.
 From iris.bi Require Import notation.
-From nola.examples.heap_lang Require Import proofmode.
+From nola.examples.heap_lang Require Import primitive_laws.
 Import EqNotations.
 
 (** ** Preliminaries for [nProp] *)

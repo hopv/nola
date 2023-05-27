@@ -2,7 +2,7 @@
 
 From nola.examples.logic Require Export prop.
 From nola Require Export sintp iris.inv iris.wp.
-From nola.examples.heap_lang Require Export proofmode.
+From nola.examples.heap_lang Require Export primitive_laws.
 
 (** ** [nintpGS]: Iris resources *)
 
