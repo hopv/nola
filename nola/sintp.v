@@ -117,7 +117,7 @@ Qed.
 Definition ssound' {ITI} (s s' : sintp_ty ITI) i : ITI.(intps_bi) :=
   ∀ P, ⸨ P ⸩(s, i) -∗ ⟦ P ⟧(s', i).
 Definition ssound {ITI} (s : sintp_ty ITI) i : ITI.(intps_bi) :=
-  ssound' s s i.
+  ∀ P, ⸨ P ⸩(s, i) -∗ ⟦ P ⟧(s, i).
 Definition low_ssound {ITI} (s : sintp_ty ITI) i : ITI.(intps_bi) :=
   ∀ j, ⌜j ≺ i⌝ → ssound s j.
 
@@ -206,59 +206,60 @@ Qed.
 (** ** [sintp]: Strong interpretation *)
 
 (** [sintp_gen_gen]: What becomes [sintp_gen] by taking [bi_least_fixpoint] *)
-Definition sintp_gen_gen ITI (self' self : sintp_ty' ITI)
+Definition sintp_gen_gen {ITI} (self' self : sintp_ty' ITI)
   : sintp_ty' ITI := λ iP, let i := iP.(sarg_idx) in
   (∀ σ', ⌜sintpy ITI σ'⌝ → □ ssound' (Swrap self) (σ' ⊥ˢ) i -∗
     □ (Swrap self' -∗ˢ σ' ⊥ˢ) -∗ □ low_ssound (σ' ⊥ˢ) i -∗
     ⟦ iP ⟧(σ' ⊥ˢ))%I.
 #[export] Instance sintp_gen_gen_mono {ITI self'} :
-  BiMonoPred (sintp_gen_gen ITI self').
+  BiMonoPred (sintp_gen_gen (ITI:=ITI) self').
 Proof.
   split; [|solve_proper]=> Φ Ψ ??. iIntros "#ΦΨ" ((f, s)) "big".
-  iIntros (??) "#Ψfto". iApply "big"; [done|]. iIntros "!#" (iP) "Φsf'".
+  iIntros (??) "#Ψfto". iApply "big"; [done|]. iIntros "!#" (P) "Φsf'".
   iApply "Ψfto". by iApply "ΦΨ".
 Qed.
 
 (** [sintp_gen]: What becomes [sintp] by taking [bi_greatest_fixpoint] *)
-Definition sintp_gen ITI (self : sintp_ty' ITI) : sintp_ty' ITI :=
-  bi_least_fixpoint (sintp_gen_gen ITI self).
-#[export] Instance sintp_gen_mono {ITI} : BiMonoPred (sintp_gen ITI).
+Definition sintp_gen {ITI} (self : sintp_ty' ITI) : sintp_ty' ITI :=
+  bi_least_fixpoint (sintp_gen_gen self).
+#[export] Instance sintp_gen_mono {ITI} : BiMonoPred (sintp_gen (ITI:=ITI)).
 Proof.
   split; [|solve_proper]=> Φ Ψ ??. iIntros "#ΦΨ". iApply least_fixpoint_ind.
   iIntros "!#" (?) "big". rewrite /sintp_gen least_fixpoint_unfold.
   iIntros (σ' ?) "#genΨto #Ψto". iApply "big"; [done| |]; iModIntro; clear.
-  - iIntros (iP) "/= [big _]". iApply "genΨto"=>/=. iApply "big".
+  - iIntros (P) "/= [big _]". iApply "genΨto"=>/=. iApply "big".
   - iIntros (iP) "/= Φ". iApply "Ψto". by iApply "ΦΨ".
 Qed.
 
 (** [sintp]: Strong interpretation *)
-Definition sintp_gen' ITI (s self : sintp_ty' ITI) : sintp_ty' ITI :=
-  sintp_gen ITI (λ iP, self iP ∨ s iP)%I.
-#[export] Instance sintp_gen'_mono {ITI s} : BiMonoPred (sintp_gen' ITI s).
+Definition sintp_gen' {ITI} (s self : sintp_ty' ITI) : sintp_ty' ITI :=
+  sintp_gen (λ iP, self iP ∨ s iP)%I.
+#[export] Instance sintp_gen'_mono {ITI s} :
+  BiMonoPred (sintp_gen' (ITI:=ITI) s).
 Proof.
   split; [|solve_proper]=> Φ Ψ ??. iIntros "#ΦΨ". iApply bi_mono_pred.
   iIntros "!#" (?) "[?|?]"; [|by iRight]. iLeft. by iApply "ΦΨ".
 Qed.
-Definition sintp' ITI (s : sintp_ty' ITI) : sintp_ty' ITI :=
-  bi_greatest_fixpoint (sintp_gen' ITI s).
-Definition sintp ITI (s : sintp_ty ITI) : sintp_ty ITI :=
-  Swrap (sintp' ITI (sunwrap s)).
+Definition sintp' {ITI} (s : sintp_ty' ITI) : sintp_ty' ITI :=
+  bi_greatest_fixpoint (sintp_gen' s).
+Definition sintp {ITI} (s : sintp_ty ITI) : sintp_ty ITI :=
+  Swrap (sintp' (sunwrap s)).
 
 (** [sintp] satisfies [sintpy] *)
-#[export] Instance sintp_sintpy {ITI} : sintpy ITI (sintp ITI).
+#[export] Instance sintp_sintpy {ITI} : sintpy ITI sintp.
 Proof. split.
   - move=> ? s s' ss'. unfold sintp, sintp'. f_equiv=> ?.
     apply greatest_fixpoint_ne; [|done]=> ??.
     unfold sintp_gen', sintp_gen. apply least_fixpoint_ne; [|done]=> ??.
     unfold sintp_gen_gen. (do 8 f_equiv)=> ?. f_equiv. apply ss'.
   - move=> [s] [s']. iIntros "#ss'". iApply greatest_fixpoint_strong_mono.
-    clear. iIntros "!#" (?). iApply (bi_mono_pred (F:=sintp_gen _)).
+    clear. iIntros "!#" (?). iApply (bi_mono_pred (F:=sintp_gen)).
     iIntros "!#" (iP) "[?|?]"; [by iLeft|]. iRight. by iApply "ss'".
   - move=> [s] [r]. iIntros "#rto" (iP) "r".
     iDestruct ("rto" with "r") as "Xsr"=>/=. iRevert (iP) "Xsr".
     iApply greatest_fixpoint_coind. iIntros "!#" (iP).
     rewrite /sintp' greatest_fixpoint_unfold. iRevert (iP).
-    iApply (bi_mono_pred (F:=sintp_gen _)).
+    iApply (bi_mono_pred (F:=sintp_gen)).
     iIntros "!#" (iP) "[?|[?|?]]"; [|by iRight|]; do 2 iLeft;
       by [iApply "rto"|done].
   - move=>/= ?. exists (sintpy _). split; [done|]. iIntros (?) "big".
@@ -269,9 +270,9 @@ Proof. split.
 Qed.
 
 (** [sintp] is sound w.r.t. the interpretation under [sintp] *)
-Lemma sintp_sound {ITI i P} : ⸨ P ⸩(sintp ITI ⊥ˢ, i) -∗ ⟦ P ⟧(sintp ITI ⊥ˢ, i).
+Lemma sintp_sound {ITI i} : ⊢ ssound (sintp (ITI:=ITI) ⊥ˢ) i.
 Proof.
-  move: P. elim: {i}(wft_lt_wf i)=>/= i _ IH P. iIntros "X".
+  elim: {i}(wft_lt_wf i)=> i _ IH. iIntros (P) "/= X".
   rewrite /sintp' greatest_fixpoint_unfold.
   have: (Sarg i P).(sarg_idx) = i by done.
   move: {P}(Sarg i P : sintp_aty _)=> iP eq. iRevert (eq). iRevert (iP) "X".
