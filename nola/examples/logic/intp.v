@@ -78,7 +78,7 @@ Section nintp_gen.
     | n_1 c P, _ => λ κS un gn, ncintp1 c (nintpS_gen P (H ‼ʰ 0) κS un gn)
     | n_2 c P Q, _ => λ κS un gn, ncintp2 c
         (nintpS_gen P (H ‼ʰ 0) κS un gn) (nintpS_gen Q (H ‼ʰ 1) κS un gn)
-    | n_g1 c P, _ => λ _ un gn, ncintpg1 c (rew app_eq_nil_ug_g un gn in P) ni s
+    | n_g1 c P, _ => λ _ un gn, ncintpg1 c (rew eq_nil_ug_g un gn in P) ni s
     | (∀' Φ)%n, _ => λ κS un gn, ∀ a, nintpS_gen (Φ a) (H ‼ʰ a) κS un gn
     | (∃' Φ)%n, _ => λ κS un gn, ∃ a, nintpS_gen (Φ a) (H ‼ʰ a) κS un gn
     | (∀: V, P)%n, _ => λ κS un gn, ∀ Φ, nintpS_gen
@@ -104,7 +104,7 @@ Section nintp_gen.
     | n_1 c P, _ => λ un gn, ncintp1 c (nintp_gen P (H ‼ʰ 0) un gn)
     | n_2 c P Q, _ => λ un gn, ncintp2 c
         (nintp_gen P (H ‼ʰ 0) un gn) (nintp_gen Q (H ‼ʰ 1) un gn)
-    | n_g1 c P, _ => λ un gn, ncintpg1 c (rew app_eq_nil_ug_g un gn in P) ni s
+    | n_g1 c P, _ => λ un gn, ncintpg1 c (rew eq_nil_ug_g un gn in P) ni s
     | (∀' Φ)%n, _ => λ un gn, ∀ a, nintp_gen (Φ a) (H ‼ʰ a) un gn
     | (∃' Φ)%n, _ => λ un gn, ∃ a, nintp_gen (Φ a) (H ‼ʰ a) un gn
     | n_wp s E e Φ, _ => λ un gn, wpw (ninv_wsat (λ P, nintpS P))

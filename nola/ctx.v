@@ -31,24 +31,10 @@ Definition ctxeq_g {A} {Γᵘ Γᵍ Δᵍ : list A} (eg : Γᵍ = Δᵍ)
 Definition ctxeq_ug {A} {Γᵘ Δᵘ Γᵍ Δᵍ : list A} (eu : Γᵘ = Δᵘ) (eg : Γᵍ = Δᵍ)
   : (Γᵘ;ᵞ Γᵍ) = (Δᵘ;ᵞ Δᵍ) := match eu, eg with eq_refl, eq_refl => eq_refl end.
 
-Definition app_eq_nil_d {A} {Γᵘ Γᵍ : list A} (gn : Γᵍ = [])
-  : Γᵘ ++ Γᵍ = Γᵘ := eq_trans (f_equal _ gn) app_nil_d.
-Definition app_assoc'_g {A} {Γᵘ Γᵍ Δ : list A}
-  : (;ᵞ (Γᵘ ++ Γᵍ) ++ Δ) = (;ᵞ Γᵘ ++ (Γᵍ ++ Δ)) :=
-  ctxeq_g (eq_sym app_assoc_d).
 Definition app_assoc_eq_nil_g {A} {Γᵘ Γᵍ Δᵘ Δᵍ : list A} (gn : Γᵍ = [])
   : (;ᵞ (Γᵘ ++ Γᵍ) ++ Δᵘ ++ Δᵍ) = (;ᵞ (Γᵘ ++ Δᵘ) ++ Δᵍ) :=
   ctxeq_g (eq_trans (f_equal (.++ _) (app_eq_nil_d gn)) app_assoc_d).
-Definition take_add_app_g {A i} {Γᵘ Γᵍ : list A}
-  : (;ᵞ take (length Γᵘ + i) (Γᵘ ++ Γᵍ)) = (;ᵞ Γᵘ ++ take i Γᵍ) :=
-  ctxeq_g take_add_app_d.
-Definition drop_add_app'_d {A i} {Γᵘ Γᵍ : list A}
-  : drop i Γᵍ = drop (length Γᵘ + i) (Γᵘ ++ Γᵍ) := eq_sym drop_add_app_d.
-Definition f_app_eq_nil_out_g {A Γᵘ Γᵍ} {f : list A → list A} (gn : Γᵍ = [])
-  : (;ᵞ f (Γᵘ ++ Γᵍ)) = (;ᵞ f Γᵘ ++ []) :=
-  ctxeq_g (eq_trans (f_equal _ (app_eq_nil_d gn)) (eq_sym app_nil_d)).
-Definition f_app_eq_nil_d {A Γᵘ Γᵍ} {f : list A → list A} (gn : Γᵍ = [])
-  : f Γᵘ = f (Γᵘ ++ Γᵍ) :=
-  eq_sym (f_equal _ (app_eq_nil_d gn)).
-Definition app_eq_nil_ug_g {A} {Γᵘ Γᵍ : list A} (un : Γᵘ = []) (gn : Γᵍ = [])
+Definition eq_app_assoc_d {A} {Γᵍ' Γᵘ Γᵍ Γˣ : list A} (eq : Γᵍ' = Γᵍ ++ Γˣ)
+  : Γᵘ ++ Γᵍ' = (Γᵘ ++ Γᵍ) ++ Γˣ := eq_trans (f_equal (_ ++.) eq) app_assoc_d.
+Definition eq_nil_ug_g {A} {Γᵘ Γᵍ : list A} (un : Γᵘ = []) (gn : Γᵍ = [])
   : (;ᵞ Γᵘ ++ Γᵍ) = (;ᵞ) := ctxeq_g (eq_trans (f_equal (.++ _) un) gn).

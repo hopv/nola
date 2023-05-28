@@ -10,6 +10,9 @@ Fixpoint app_nil_d {A} {xs : list A} : xs ++ [] = xs :=
   | [] => eq_refl
   | _ :: _ => f_equal _ app_nil_d
   end.
+Definition app_nil'_d {A} {xs : list A} : xs = xs ++ [] := eq_sym app_nil_d.
+Definition app_eq_nil_d {A} {xs ys : list A} (eq : ys = []) : xs ++ ys = xs :=
+  eq_trans (f_equal (_ ++.) eq) app_nil_d.
 
 (** Associativity of [++] *)
 Fixpoint app_assoc_d {A} {xs ys zs : list A}
@@ -18,50 +21,8 @@ Fixpoint app_assoc_d {A} {xs ys zs : list A}
   | [] => eq_refl
   | _ :: _ => f_equal _ app_assoc_d
   end.
-
-(** [take (length xs ++ i)] over [xs ++ ys] *)
-Fixpoint take_add_app_d {A i} {xs ys : list A}
-  : take (length xs + i) (xs ++ ys) = xs ++ take i ys :=
-  match xs with
-  | [] => eq_refl
-  | _ :: _ => f_equal _ take_add_app_d
-  end.
-
-(** [drop (length xs ++ i)] over [xs ++ ys] *)
-Fixpoint drop_add_app_d {A i} {xs ys : list A}
-  : drop (length xs + i) (xs ++ ys) = drop i ys :=
-  match xs with
-  | [] => eq_refl
-  | _ :: xs => drop_add_app_d (xs:=xs)
-  end.
-
-(** ** [plist]: Product type calculated over elements of [list] *)
-
-(** Unit type for [tnil] *)
-Variant punit : Set := pnil.
-(** Product type for [tcons] *)
-#[projections(primitive)]
-Record pprod (A B : Type) : Type := pcons { phd : A; ptl : B }.
-Arguments pcons {_ _} _ _.
-Arguments phd {_ _} _.
-Arguments ptl {_ _} _.
-
-Notation "*[ ]" := punit (at level 1, format "*[ ]") : nola_scope.
-Infix "*::" := pprod (at level 60, right associativity) : nola_scope.
-Notation "*[ A ; .. ; Z ]" := (A *:: .. (Z *:: *[]) ..)
-  (at level 1, format "*[ A ;  .. ;  Z ]") : nola_scope.
-
-Notation "-[ ]" := pnil (at level 1, format "-[ ]") : nola_scope.
-Infix "-::" := pcons (at level 60, right associativity) : nola_scope.
-Notation "-[ x ; .. ; z ]" := (x -:: .. (z -:: -[]) ..)
-  (at level 1, format "-[ x ;  .. ;  z ]") : nola_scope.
-
-(** [plist]: Heterogeneous list type calculated from [list] *)
-Fixpoint plist {A} (F : A → Type) (xs : list A) : Type :=
-  match xs with
-  | [] => *[]
-  | x :: xs => F x *:: plist F xs
-  end.
+Definition app_assoc'_d {A} {xs ys zs : list A}
+  : (xs ++ ys) ++ zs = xs ++ (ys ++ zs) := eq_sym app_assoc_d.
 
 (** ** [schoice]: Variant choosing an element of [list] with a value *)
 
@@ -106,25 +67,22 @@ Fixpoint sbyrapp {A F} xs {ys : list A} (s : schoice F ys)
   | _ :: xs => +/ sbyrapp xs s
   end.
 
-(** Decompose [schoice] with [take]/[drop] *)
-Fixpoint stakedrop {A F} i {xs : list A} (s : schoice F xs)
-  : schoice F (take i xs) + schoice F (drop i xs) :=
-  match i, s with
-  | 0, _ => inr s
-  | S i, #0 v => inl (#0 v)
-  | S i, +/ s => match stakedrop i s with
-      inl s => inl (+/ s) | inr s => inr s end
-  end.
+(** Decompose [schoice F (x :: xs)] *)
+Definition suncons' {A F} {xs : list A} (s : schoice F xs) :
+  from_option F Empty_set (head xs) + schoice F (tail xs) :=
+  match s with #0 v => inl v | +/ s => inr s end.
+Definition suncons {A F x} {xs : list A} (s : schoice F (x :: xs)) :
+  F x + schoice F xs := suncons' s.
 
-(** Apply to a [schoice] a [plist] *)
-Fixpoint spapply {A F G B} {xs : list A}
-  (f : ∀ x, F x → G x → B) (s : schoice F xs) (vs : plist G xs) : B :=
-  match s, vs with
-  | #0 u, v -:: _ => f _ u v
-  | +/ s, _ -:: vs => spapply f s vs
-  end.
+(** Decompose [schoice F [x]] *)
+Definition sunsingl {A F} {x : A} (s : schoice F [x]) : F x :=
+  match suncons s with inl v => v | inr s => match s with end end.
 
-(** Let a function go inside [spapply] *)
-Lemma spapply_in {A F G B C xs} {f : ∀ x, F x → G x → B} (g : B → C) {s vs} :
-  g (spapply (A:=A) (xs:=xs) f s vs) = spapply (λ x u v, g (f x u v)) s vs.
-Proof. move: xs s vs. by fix FIX 2=> ?[?|?]/=. Qed.
+(** Decompose [schoice F (xs ++ ys)] *)
+Fixpoint sunapp {A F} {xs ys : list A}
+  : schoice F (xs ++ ys) → schoice F xs + schoice F ys :=
+  match xs with
+  | [] => λ s, inr s
+  | _ :: _ => λ s, match suncons s with inl v => inl (#0 v) | inr s =>
+      match sunapp s with inl s => inl (+/ s) | inr s => inr s end end
+  end.
