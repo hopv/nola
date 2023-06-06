@@ -14,13 +14,9 @@ Section lemmas.
     ssound (ITI:=nintpsi _) s i -∗ nninv s i N P =[nninv_wsat s]{E,E∖↑N}=∗
       ⟦ P ⟧(s) ∗ (⟦ P ⟧(s) =[nninv_wsat s]{E∖↑N,E}=∗ True).
   Proof.
-    rewrite nninv_unseal. iIntros (NE) "to (%Q & #QPQ & NQ) W".
-    iMod (ninv_acc with "NQ W") as "($& Q & toW)"; [done|].
-    rewrite nintpS_nintp_nlarge. iDestruct ("to" with "QPQ") as "/={QPQ}QPQ".
-    iMod (fupd_mask_subseteq ∅) as "∅to"; [set_solver|].
-    iMod ("QPQ" with "Q") as "($& PQ)". iMod "∅to" as "_". iIntros "!> P W".
-    iMod (fupd_mask_subseteq ∅) as "∅to"; [set_solver|].
-    iMod ("PQ" with "P") as "Q". iMod "∅to" as "_". by iApply ("toW" with "Q").
+    rewrite nninv_unseal. iIntros (NE) "to #accP W".
+    iDestruct ("to" with "accP") as "/={accP}accP".
+    iApply ("accP" $! _ NE with "W").
   Qed.
 
   Context `{!nsintpy Σ σ}.
@@ -38,8 +34,9 @@ Section lemmas.
   Lemma ninv_nninv {s i N} {P : nPropS _} :
     ninv N P -∗ nninv (Σ:=Σ) (σ s) i N (↑ˡ P).
   Proof.
-    rewrite nninv_unseal. iIntros "NP". iExists P. iFrame "NP". iModIntro.
-    iApply (sintpy_intro (σ:=σ)). by iIntros (??) "/= $ !> $".
+    rewrite nninv_unseal. iIntros "#NP !#". iApply (sintpy_intro (σ:=σ))=>/=.
+    iIntros (?? E NE) "W". rewrite -nintpS_nintp_nlarge.
+    iApply (ninv_acc NE with "NP W").
   Qed.
 
   (** Allocate [nninv] *)
@@ -60,11 +57,14 @@ Section lemmas.
     □ ⸨ P ={∅}=∗ Q ∗ (Q ={∅}=∗ P) ⸩(σ s, i) -∗ nninv (σ s) i N P -∗
     nninv (σ s) i N Q.
   Proof.
-    rewrite nninv_unseal. iIntros "#PQP (%R & #RPR & #NR)". iExists R.
-    iFrame "NR". iModIntro. iApply (sintpy_map2 with "[] PQP RPR").
-    iIntros (??) "/= {PQP}PQP {RPR}RPR R". iMod ("RPR" with "R") as "[P PR]".
-    iMod ("PQP" with "P") as "[$ QP]". iIntros "!> Q".
-    iMod ("QP" with "Q") as "P". by iApply "PR".
+    rewrite nninv_unseal. iIntros "#PQP #accP !>".
+    iApply (sintpy_map2 with "[] PQP accP")=>/=.
+    iIntros (??) "/= {PQP}PQP {accP}accP". iIntros (E NE) "W".
+    iMod ("accP" $! E NE with "W") as "($& P & Pto)".
+    iMod (fupd_mask_subseteq ∅) as "toE∖N"; [set_solver|].
+    iMod ("PQP" with "P") as "($& QP)". iMod "toE∖N" as "_". iIntros "!> Q W".
+    iMod (fupd_mask_subseteq ∅) as "toE∖N"; [set_solver|].
+    iMod ("QP" with "Q") as "P". iMod "toE∖N" as "_". iApply ("Pto" with "P W").
   Qed.
   Lemma nninv_split_l {s i N P Q} :
     nninv (σ s) i N (P ∗ Q) -∗ nninv (σ s) i N P.
@@ -94,5 +94,19 @@ Section lemmas.
   Proof.
     iIntros "#P". iApply nninv_convert. iModIntro.
     iApply (sintpy_map with "[] P"). by iIntros (??) "/=$$!>[_$]".
+  Qed.
+
+  (** Combine [nninv]s *)
+  Lemma nninv_combine {s i N N' N'' P Q} :
+    N ## N' → ↑N ∪ ↑N' ⊆@{coPset} ↑N'' →
+    nninv (σ s) i N P -∗ nninv (σ s) i N' Q -∗ nninv (σ s) i N'' (P ∗ Q).
+  Proof.
+    rewrite nninv_unseal. iIntros (??) "#NP #N'Q !>".
+    iApply (sintpy_map2 (σ:=σ) with "[] NP N'Q")=>/=.
+    iIntros (??) "{NP}NP {N'Q}N'Q". iIntros (E NE) "W".
+    iMod ("NP" $! _ with "[%] W") as "(W &$& Pto)"; [set_solver|].
+    iMod ("N'Q" $! _ with "[%] W") as "($&$& Qto)"; [set_solver|].
+    iApply fupd_mask_intro; [set_solver|]. iIntros "Cl [P Q] W". iMod "Cl".
+    iMod ("Qto" with "Q W") as "[W _]". iApply ("Pto" with "P W").
   Qed.
 End lemmas.

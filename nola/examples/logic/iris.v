@@ -25,11 +25,11 @@ Notation "⸨ P ⸩ ( s , i )" := (sunwrap s (Sarg i P%n))
 Section iris.
   Context (* Iris resources *) `{!nintpGS Σ}.
 
-  (** ** [nninv]: [ninv] with a semantic agreement *)
+  (** ** [nninv]: [ninv] in the accessor style *)
   Definition nninv_def (s : nsintp_ty Σ)
     (i : nat) (N : namespace) (P : nPropL (;ᵞ)) : iProp Σ :=
-    ∃ Q, □ ⸨ ↑ˡ Q ={∅}=∗ P ∗ (P ={∅}=∗ ↑ˡ Q) ⸩(s, i) ∗
-      ninv N Q.
+    □ ⸨ ∀ E, ⌜↑N ⊆ E⌝ → |=[n_inv_wsat]{E,E∖↑N}=>
+          P ∗ (P =[n_inv_wsat]{E∖↑N,E}=∗ True) ⸩(s, i).
   Definition nninv_aux : seal nninv_def. Proof. by eexists. Qed.
   Definition nninv := nninv_aux.(unseal).
   Lemma nninv_unseal : nninv = nninv_def. Proof. exact nninv_aux.(seal_eq). Qed.
