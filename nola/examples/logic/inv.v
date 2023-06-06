@@ -52,6 +52,13 @@ Section lemmas.
     ⟦ P ⟧(σ s) =[nninv_wsat (σ s)]=∗ nninv (σ s) i N (↑ˡ P).
   Proof. iIntros "P W". iApply (nninv_alloc_rec with "[P] W"). by iIntros. Qed.
 
+  (** [nninv] is monotone over the level *)
+  Lemma nninv_mono_lev {s i j N P} :
+    i ≤ j → nninv (σ s) i N P -∗ nninv (σ s) j N P.
+  Proof.
+    rewrite nninv_unseal. iIntros (ij) "#iP !#". by iApply sintpy_mono_lev.
+  Qed.
+
   (** Transform [nninv] *)
   Lemma nninv_convert {s i N P Q} :
     □ ⸨ P ={∅}=∗ Q ∗ (Q ={∅}=∗ P) ⸩(σ s, i) -∗ nninv (σ s) i N P -∗
