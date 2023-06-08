@@ -2,6 +2,7 @@
 
 From nola Require Export prelude.
 From Coq Require Export FunctionalExtensionality.
+From stdpp Require Import well_founded.
 
 (** ** Apply functional extensionality, without introducing a name *)
 Ltac funext :=
@@ -20,3 +21,9 @@ Proof. move=> f _ <- a _ /subR<-. by apply subR'. Qed.
 #[export] Instance pointwise_subrel_eq {A B} `{subR : subrelation B R (=)} :
   subrelation (pointwise_relation A R) (=).
 Proof. move=> f g Rfg. funext=> a. by apply subR. Qed.
+
+(** [Acc] is proof-irrelevant, assuming functional extensionality *)
+#[export] Instance Acc_pi {A R} {a : A} : ProofIrrel (Acc R a).
+Proof.
+  move=> x. move: a x. fix FIX 2=> ?[?][?]. f_equal. do 2 funext=> ?. apply FIX.
+Qed.
