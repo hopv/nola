@@ -7,13 +7,15 @@ From Coq Require Export FunctionalExtensionality.
 Ltac funext :=
   apply functional_extensionality || apply functional_extensionality_dep.
 
-(** ** Make [(=)] a subrelation of [==>] *)
+(** ** On [subrelation] *)
+
+(** Make [(=)] a subrelation of [==>] *)
 #[export] Instance eq_subrel_respect {A B}
   `{subR : subrelation A R (=)} `{subR' : subrelation B (=) R'} :
   subrelation (=) (R ==> R')%signature.
 Proof. move=> f _ <- a _ /subR<-. by apply subR'. Qed.
 
-(** ** Make [pointwise_relation] a subrelation of [(=)],
+(** Make [pointwise_relation] a subrelation of [(=)],
   using functional extensionality *)
 #[export] Instance pointwise_subrel_eq {A B} `{subR : subrelation B R (=)} :
   subrelation (pointwise_relation A R) (=).
