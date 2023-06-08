@@ -214,7 +214,7 @@ Section nintp_facts.
   Proof.
     move: κ Γ P H un gn. fix FIX 4=> κ Γ P H.
     case: P H=>/=; intros; case H=>/= he; f_equiv=> >; try apply FIX;
-    try apply leibniz_equiv, eq_hacc;
+    try apply leibniz_equiv, proof_irrel;
     rewrite rew_eq_hwf; move: nsubst'_nheight=>/=; subst;
     have EQ := nsubst_nlarge (P:=P); move: (nsubst (↑ˡ P)) EQ;
     move=> ?->?; apply FIX.

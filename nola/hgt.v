@@ -41,13 +41,11 @@ Fixpoint hwf {h} : hAcc h := HAcc (λ _ _ eq, rew eq_sym eq in hwf).
 Lemma rew_eq_hwf {h h'} (eq : h' = h) : rew[hAcc] eq_sym eq in hwf = hwf.
 Proof. by subst. Qed.
 
-(** Under functional extensionality *)
+(** Assuming functional extensionality *)
 From nola Require Import util.funext.
 
-(** The only value of [hAcc h] is [hwf] *)
-Lemma eq_hwf {h} (H : hAcc h) : H = hwf.
+(** [hAcc h] is proof-irrelevant *)
+#[export] Instance hAcc_pi {h} : ProofIrrel (hAcc h).
 Proof.
-  move: h H. fix FIX 1=> [[??]][?]/=. f_equal. do 3 funext=>/= ?. by subst.
+  move=> x. move: h x. fix FIX 2=> ?[?][?]. f_equal. do 3 funext=> ?. apply FIX.
 Qed.
-Lemma eq_hacc {h} (H H' : hAcc h) : H = H'.
-Proof. by rewrite (eq_hwf H) (eq_hwf H'). Qed.
