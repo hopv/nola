@@ -1,6 +1,6 @@
 (** * [sintp]: Strong interpretation *)
 
-From nola Require Export util.pred util.wft.
+From nola Require Export util.wft.
 From iris.bi Require Import lib.fixpoint.
 From iris.proofmode Require Import tactics.
 
