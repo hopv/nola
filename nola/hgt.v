@@ -31,7 +31,7 @@ Add Printing Constructor hAcc.
 (** Destruct [hAcc] *)
 Notation "H ‼ʰ[ eq ] a" := (H.(hateq) a eq) (at level 20, no associativity)
   : nola_scope.
-Notation hat H a := (H ‼ʰ[ eq_refl ] a).
+Notation hat H a := (H ‼ʰ[eq_refl] a).
 Infix "‼ʰ" := hat (at level 20, no associativity) : nola_scope.
 
 (** [hwf]: [hAcc h] for all [h : hgt] *)
