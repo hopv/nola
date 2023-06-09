@@ -11,6 +11,8 @@ Section fupd.
   Proof. move=> PQ. by elim k; [done|]=>/= ? ->. Qed.
 End fupd.
 
+(** ** Fancy update with a custom world satisfaction [W] *)
+
 Reserved Notation "|=[ W ] => P" (at level 99, W at level 50, P at level 200,
   format "'[  ' |=[ W ] =>  '/' P ']'").
 Reserved Notation "P =[ W ]=∗ Q" (at level 99, W at level 50, Q at level 200,
