@@ -1,7 +1,7 @@
 (** * Substitution for [nProp] *)
 
 From nola.examples.logic Require Export prop.
-From nola Require Export util.funext hgt.
+From nola.util Require Export funext hgt.
 Import EqNotations.
 
 (** ** [nlift]: Turn [nProp κ (;ᵞ)] into [nProp κ Γ] *)

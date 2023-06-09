@@ -1,6 +1,6 @@
 (** * [ctx]: Context with unguarded/guarded variables *)
 
-From nola Require Export util.list.
+From nola.util Require Export list.
 
 (** ** [ctx]: Context with unguarded/guarded variables *)
 #[projections(primitive)]

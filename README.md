@@ -50,18 +50,19 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
 - [`prelude`](nola/prelude.v) : Prelude
 - [`util/`](nola/util/) : General-purpose utilities,
   extending [`stdpp`](https://gitlab.mpi-sws.org/iris/stdpp)
-  + [`funext`](nola/util/funext.v) (Function extensionality),
-    [`pred`](nola/util/pred.v) (Predicates),
+  + [`funext`](nola/util/funext.v) (Function extensionality)
+  + [`pred`](nola/util/pred.v) (Predicates),
     [`rel`](nola/util/rel.v) (Relations),
     [`wft`](nola/util/wft.v) (Well-founded types),
     [`list`](nola/util/list.v) (Lists)
-- [`hgt`](nola/hgt.v) (General height of a tree),
-  [`ctx`](nola/ctx.v) (Context with unguarded/guarded variables)
-- [`sintp`](nola/sintp.v) (Strong interpretation)
+  + [`hgt`](nola/util/hgt.v) (General height of a tree),
+    [`ctx`](nola/util/ctx.v) (Context with unguarded/guarded variables)
 - [`iris/`](nola/iris) : Iris libraries
+  + [`sintp`](nola/iris/sintp.v) (Strong interpretation)
   + [`fupd`](nola/iris/fupd.v) (Fancy update),
     [`wp`](nola/iris/wp.v) (Weakest precondition)
-  + [`inv`](nola/iris/inv.v) (Invariant)
+  + [`inv`](nola/iris/inv.v) (Invariant),
+    [`na_inv`](nola/iris/na_inv.v) (Non-atomic invariant)
 - [`examples/`](nola/examples/) : Examples
   + [`heap_lang/`](nola/examples/heap_lang/) : Variant of Iris HeapLang,
     with `Ndnat` (terminating infinite non-determinism) added

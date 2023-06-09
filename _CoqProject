@@ -5,9 +5,9 @@ nola/util/funext.v
 nola/util/rel.v
 nola/util/wft.v
 nola/util/list.v
-nola/hgt.v
-nola/ctx.v
-nola/sintp.v
+nola/util/hgt.v
+nola/util/ctx.v
+nola/iris/sintp.v
 nola/iris/fupd.v
 nola/iris/wp.v
 nola/iris/inv.v

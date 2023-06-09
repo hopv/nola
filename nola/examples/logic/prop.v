@@ -1,6 +1,6 @@
 (** * [nProp]: Syntactic proposition *)
 
-From nola Require Export util.funext util.rel ctx.
+From nola.util Require Export funext rel ctx.
 From nola.iris Require Export fupd.
 From stdpp Require Export coPset namespaces.
 From iris.bi Require Import notation.

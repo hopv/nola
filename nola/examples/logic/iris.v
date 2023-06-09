@@ -1,8 +1,7 @@
 (** * Iris preliminaries *)
 
 From nola.examples.logic Require Export prop.
-From nola Require Export sintp.
-From nola.iris Require Export inv na_inv wp.
+From nola.iris Require Export sintp inv na_inv wp.
 From nola.examples.heap_lang Require Export primitive_laws.
 
 (** ** Iris resources *)

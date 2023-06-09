@@ -1,6 +1,6 @@
 (** * [wft]: Type with a well-founded relation *)
 
-From nola Require Export util.rel.
+From nola.util Require Export rel.
 Import EqNotations.
 
 (** ** [wft]: Type with a well-founded relation *)

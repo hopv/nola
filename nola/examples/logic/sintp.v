@@ -1,7 +1,7 @@
 (** * Strong interpretation of [nProp] *)
 
 From nola.examples.logic Require Export intp.
-From nola Require Export util.wft.
+From nola.util Require Export wft.
 From iris.proofmode Require Export proofmode.
 
 (** ** [nintpsi]: [inpsi] for [nPropL] *)
