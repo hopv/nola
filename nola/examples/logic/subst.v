@@ -14,8 +14,8 @@ Fixpoint nliftg {Δ κ Γ} (P : nProp κ Γ) : nProp κ (Γ.ᵞu;ᵞ Γ.ᵞg ++ 
   | n_2 c P Q => n_2 c (nliftg P) (nliftg Q)
   | n_g1 c P => n_g1 c (rew ctxeq_g app_assoc'_d in nliftg P)
   | ∀' Φ => ∀' (nliftg ∘ Φ) | ∃' Φ => ∃' (nliftg ∘ Φ)
-  | n_wp s E e Φ => n_wp s E e (nliftg ∘ Φ)
-  | n_twp s E e Φ => n_twp s E e (nliftg ∘ Φ)
+  | n_wpw W s E e Φ => n_wpw (nliftg W) s E e (nliftg ∘ Φ)
+  | n_twpw W s E e Φ => n_twpw (nliftg W) s E e (nliftg ∘ Φ)
   | ∀: V, P => ∀: V, nliftg P | ∃: V, P => ∃: V, nliftg P
   | rec:ˢ' Φ a => (rec:ˢ' (nliftg ∘ Φ)) a
   | rec:ˡ' Φ a => (rec:ˡ' (nliftg ∘ Φ)) a
@@ -41,8 +41,9 @@ Fixpoint nliftug {Δᵘ Δᵍ κ Γ} (P : nProp κ Γ)
   | n_2 c P Q => λ gn, n_2 c (nliftug P gn) (nliftug Q gn)
   | n_g1 c P => λ gn, n_g1 c (rew app_assoc_eq_nil_g gn in nliftg P)
   | ∀' Φ => λ gn, ∀ a, nliftug (Φ a) gn | ∃' Φ => λ gn, ∃ a, nliftug (Φ a) gn
-  | n_wp s E e Φ => λ gn, n_wp s E e (λ v, nliftug (Φ v) gn)
-  | n_twp s E e Φ => λ gn, n_twp s E e (λ v, nliftug (Φ v) gn)
+  | n_wpw W s E e Φ => λ gn, n_wpw (nliftug W gn) s E e (λ v, nliftug (Φ v) gn)
+  | n_twpw W s E e Φ => λ gn,
+      n_twpw (nliftug W gn) s E e (λ v, nliftug (Φ v) gn)
   | ∀: V, P => λ gn, ∀: V, nliftug P gn | ∃: V, P => λ gn, ∃: V, nliftug P gn
   | rec:ˢ' Φ a => λ gn, (rec:ˢ b, nliftug (Φ b) gn) a
   | rec:ˡ' Φ a => λ gn, (rec:ˡ b, nliftug (Φ b) gn) a
@@ -87,8 +88,10 @@ Fixpoint nsubstlg {κ Γ Γᵍ V} (P : nProp κ Γ) (Φ : nPred V)
   | n_g1 c P => λ eq, n_g1 c (nsubstlg P Φ (eq_app_assoc_d eq))
   | ∀' Ψ => λ eq, ∀ a, nsubstlg (Ψ a) Φ eq
   | ∃' Ψ => λ eq, ∃ a, nsubstlg (Ψ a) Φ eq
-  | n_wp s E e Ψ => λ eq, n_wp s E e (λ v, nsubstlg (Ψ v) Φ eq)
-  | n_twp s E e Ψ => λ eq, n_twp s E e (λ v, nsubstlg (Ψ v) Φ eq)
+  | n_wpw W s E e Ψ => λ eq,
+      n_wpw (nsubstlg W Φ eq) s E e (λ v, nsubstlg (Ψ v) Φ eq)
+  | n_twpw W s E e Ψ => λ eq,
+      n_twpw (nsubstlg W Φ eq) s E e (λ v, nsubstlg (Ψ v) Φ eq)
   | ∀: V, P => λ eq, ∀: V, nsubstlg P Φ eq
   | ∃: V, P => λ eq, ∃: V, nsubstlg P Φ eq
   | rec:ˢ' Ψ a => λ eq, (rec:ˢ b, nsubstlg (Ψ b) Φ eq) a
@@ -122,8 +125,10 @@ Fixpoint nsubstlu {κ Γ Γᵘ V} (P : nProp κ Γ) (Φ : nPred V)
       (rew ctxeq_g app_nil'_d in nsubstlg P Φ (eq_trans (app_eq_nil_d gn) eq))
   | ∀' Ψ => λ eq gn, ∀ a, nsubstlu (Ψ a) Φ eq gn
   | ∃' Ψ => λ eq gn, ∃ a, nsubstlu (Ψ a) Φ eq gn
-  | n_wp s E e Ψ => λ eq gn, n_wp s E e (λ v, nsubstlu (Ψ v) Φ eq gn)
-  | n_twp s E e Ψ => λ eq gn, n_twp s E e (λ v, nsubstlu (Ψ v) Φ eq gn)
+  | n_wpw W s E e Ψ => λ eq gn,
+      n_wpw (nsubstlu W Φ eq gn) s E e (λ v, nsubstlu (Ψ v) Φ eq gn)
+  | n_twpw W s E e Ψ => λ eq gn,
+      n_twpw (nsubstlu W Φ eq gn) s E e (λ v, nsubstlu (Ψ v) Φ eq gn)
   | ∀: V, P => λ eq gn, ∀: V, nsubstlu P Φ (f_equal _ eq) gn
   | ∃: V, P => λ eq gn, ∃: V, nsubstlu P Φ (f_equal _ eq) gn
   | rec:ˢ' Ψ a => λ eq gn, (rec:ˢ b, nsubstlu (Ψ b) Φ (f_equal _ eq) gn) a
@@ -160,7 +165,8 @@ Fixpoint nheight {κ Γ} (P : nProp κ Γ) : hgt :=
   | n_0 _ | n_l0 _ | n_g1 _ _ | %ᵍˢ _ | %ᵍˡ _ | %ᵘˢ _ | !ᵘˢ _ => Hgt₀
   | n_1 _ P | ∀: _, P | ∃: _, P => Hgt₁ (nheight P)
   | n_2 _ P Q => Hgt₂ (nheight P) (nheight Q)
-  | ∀' Φ | ∃' Φ | n_wp _ _ _ Φ | n_twp _ _ _ Φ => Hgtᶠ (nheight ∘ Φ)
+  | ∀' Φ | ∃' Φ => Hgtᶠ (nheight ∘ Φ)
+  | n_wpw W _ _ _ Φ | n_twpw W _ _ _ Φ => Hgt₂ (nheight W) (Hgtᶠ (nheight ∘ Φ))
   | rec:ˢ' Φ a | rec:ˡ' Φ a => Hgt₁ (nheight (Φ a))
   end%n.
 
@@ -170,7 +176,8 @@ Lemma nsubstlu_nheight {κ Γ Γᵘ V}
   nheight (nsubstlu P Φ eq gn) = nheight P.
 Proof.
   move: κ Γ Γᵘ P Φ eq gn. fix FIX 4=> ???.
-  case=>//=; intros; try (f_equal; (apply FIX || funext=>/= ?; apply FIX));
+  case=>//=; intros;
+    try (f_equal; (apply FIX || (try f_equal); funext=>/= ?; apply FIX));
     try (by case: s gn). subst=>/=. by case (sunapp s).
 Qed.
 

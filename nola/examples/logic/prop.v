@@ -131,11 +131,11 @@ Inductive nProp : nkind → nctx → Type :=
 (** Existential quantification *)
 | n_exist {κ Γ} {A : Type} (Φ : A → nProp κ Γ) : nProp κ Γ
 (** Weakest precondition *)
-| n_wp {Γ} (s : stuckness) (E : coPset) (e : expr) (Φ : val → nProp nL Γ) :
-    nProp nL Γ
+| n_wpw {κ Γ} (W : nProp κ Γ) (s : stuckness) (E : coPset) (e : expr)
+    (Φ : val → nProp κ Γ) : nProp κ Γ
 (** Total weakest precondition *)
-| n_twp {Γ} (s : stuckness) (E : coPset) (e : expr) (Φ : val → nProp nL Γ) :
-    nProp nL Γ
+| n_twpw {κ Γ} (W : nProp κ Γ) (s : stuckness) (E : coPset) (e : expr)
+    (Φ : val → nProp κ Γ) : nProp κ Γ
 
 (** Universal quantification over [A → nProp] *)
 | n_n_forall {κ Γᵘ Γᵍ} V (P : nProp κ (V :: Γᵘ;ᵞ Γᵍ)) : nProp κ (Γᵘ;ᵞ Γᵍ)
@@ -254,8 +254,8 @@ Fixpoint nlarge {κ Γ} (P : nProp κ Γ) : nPropL Γ :=
   | n_0 c => n_0 c | n_l0 c => n_l0 c | n_1 c P => n_1 c (↑ˡ P)
   | n_2 c P Q => n_2 c (↑ˡ P) (↑ˡ Q) | n_g1 c P => n_g1 c P
   | ∀' Φ => ∀' ((↑ˡ) ∘ Φ) | ∃' Φ => ∃' ((↑ˡ) ∘ Φ)
-  | n_wp s E e Φ => n_wp s E e ((↑ˡ) ∘ Φ)
-  | n_twp s E e Φ => n_twp s E e ((↑ˡ) ∘ Φ)
+  | n_wpw W s E e Φ => n_wpw (↑ˡ W) s E e ((↑ˡ) ∘ Φ)
+  | n_twpw W s E e Φ => n_twpw (↑ˡ W) s E e ((↑ˡ) ∘ Φ)
   | ∀: V, P => ∀: V, ↑ˡ P | ∃: V, P => ∃: V, ↑ˡ P
   | rec:ˢ' Φ a => rec:ˢ' Φ a | rec:ˡ' Φ a => rec:ˡ' Φ a
   | %ᵍˢ s => %ᵍˢ s | %ᵍˡ s => %ᵍˡ s | %ᵘˢ s => %ᵘˢ s | !ᵘˢ P => !ᵘˢ P

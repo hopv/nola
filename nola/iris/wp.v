@@ -64,7 +64,7 @@ Section wpw.
     apply least_fixpoint_ne; [|done]=> ?[[??]?]. rewrite /twp_pre'/twp_pre/=.
     do 11 f_equiv; [done|]. by do 14 f_equiv.
   Qed.
-  Lemma twp_proper {W W' s E e Φ Ψ} :
+  Lemma twpw_proper {W W' s E e Φ Ψ} :
     W ⊣⊢ W' → (Φ : _ -d> _) ≡ Ψ → twpw W s E e Φ ⊣⊢ twpw W' s E e Ψ.
   Proof. rewrite !equiv_dist=> ???. by apply twpw_ne. Qed.
 End wpw.
