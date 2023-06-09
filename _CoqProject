@@ -11,6 +11,7 @@ nola/sintp.v
 nola/iris/fupd.v
 nola/iris/wp.v
 nola/iris/inv.v
+nola/iris/na_inv.v
 
 nola/examples/heap_lang/locations.v
 nola/examples/heap_lang/lang.v
@@ -31,5 +32,6 @@ nola/examples/logic/subst.v
 nola/examples/logic/iris.v
 nola/examples/logic/intp.v
 nola/examples/logic/sintp.v
-nola/examples/logic/inv.v
 nola/examples/logic/facts.v
+nola/examples/logic/inv.v
+nola/examples/logic/na_inv.v

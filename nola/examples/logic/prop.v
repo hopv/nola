@@ -3,6 +3,7 @@
 From nola Require Export util.funext util.rel ctx.
 From stdpp Require Export coPset namespaces.
 From iris.bi Require Import notation.
+From iris.base_logic Require Export lib.na_invariants.
 From nola.examples.heap_lang Require Import primitive_laws.
 From nola Require Import fupd.
 Import EqNotations.
@@ -49,6 +50,8 @@ Notation "@! a" := (Nparg a) (at level 20, right associativity) : nola_scope.
 (** Nullary *)
 Variant ncon0 : Type :=
 | (** Pure proposition *) nc_pure (φ : Prop) : ncon0
+| (** Non-atomic invariant token *) nc_na_own
+    (p : na_inv_pool_name) (E : coPset) : ncon0
 | (** Points-to token *) nc_mapsto (l : loc) (dq : dfrac) (v : val) : ncon0
 | (** Owning invariant points-to token *) nc_inv_mapsto_own
     (l : loc) (v : val) (I : val → Prop) : ncon0
@@ -78,7 +81,9 @@ Variant ncon2 : Type :=
 Variant ncong1 : Type :=
 | (** Later modality *) nc_later : ncong1
 | (** Indirection modality *) nc_indir (i : nat) : ncong1
-| (** Invariant *) nc_inv (i : nat) (N : namespace).
+| (** Invariant *) nc_inv (i : nat) (N : namespace)
+| (** Non-atomic invariant *) nc_na_inv
+    (i : nat) (p : na_inv_pool_name) (N : namespace).
 
 (** Notation for [ncon] *)
 Declare Scope ncon_scope.
@@ -164,6 +169,7 @@ Bind Scope nProp_scope with nProp.
 Notation "'⌜' φ '⌝'" := (n_0 ⟨⌜φ⌝⟩) : nProp_scope.
 Notation "'True'" := (n_0 ⟨⌜True⌝⟩) : nProp_scope.
 Notation "'False'" := (n_0 ⟨⌜False⌝⟩) : nProp_scope.
+Notation n_na_own p E := (n_0 (nc_na_own p E)).
 Notation "l ↦ dq v" := (n_0 ⟨↦{dq}|l,v⟩) : nProp_scope.
 Notation "l ↦_ I v" := (n_0 ⟨↦_I|l,v⟩) : nProp_scope.
 Notation "l ↦_ I □" := (n_0 ⟨↦□_I|l⟩) : nProp_scope.
@@ -196,6 +202,9 @@ Notation "○ ( i ) P" := (n_g1 ⟨○(i)⟩ P)
   (at level 20, right associativity, format "○ ( i )  P") : nProp_scope.
 Notation n_inv' Γᵘ i N P := (n_g1 (Γᵘ:=Γᵘ) (nc_inv i N) P) (only parsing).
 Notation n_inv i N P := (n_inv' _ i N P).
+Notation n_na_inv' Γᵘ i p N P :=
+  (n_g1 (Γᵘ:=Γᵘ) (nc_na_inv i p N) P) (only parsing).
+Notation n_na_inv i p N P := (n_na_inv' _ i p N P).
 
 Notation "∀: V , P" := (n_n_forall V P)
   (at level 200, right associativity,

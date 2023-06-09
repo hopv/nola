@@ -23,13 +23,14 @@ Section ncintp.
   Definition ncintp0 (c : ncon0) : iProp Σ :=
     match c with
     | ⟨⌜φ⌝⟩%nc => ⌜φ⌝
+    | nc_na_own p E => na_own p E
     | ⟨↦{dq}|l,v⟩%nc => l ↦{dq} v
     | ⟨↦_J|l,v⟩%nc => l ↦_J v | ⟨↦□_J|l⟩%nc => l ↦_J □
     | nc_meta_token l E => meta_token l E
     | nc_steps_lb n => steps_lb n | nc_proph p pvs => proph p pvs
     end.
-  Definition ncintpl0 (c : nconl0) (niS : nPropS (;ᵞ) → iProp Σ) : iProp Σ :=
-    match c with nc_inv_wsat => ninv_wsat niS end.
+  Definition ncintpl0 (c : nconl0) (niS : nPropS (;ᵞ) -d> iProp Σ) : iProp Σ :=
+    match c with nc_inv_wsat => ninv_wsat' niS end.
   Definition ncintp1 (c : ncon1) (P : iProp Σ) : iProp Σ :=
     match c with
     | ⟨□⟩%nc => □ P | ⟨■⟩%nc => ■ P
@@ -47,6 +48,7 @@ Section ncintp.
     | ⟨▷⟩%nc => ▷ ni s _ P
     | ⟨○(i)⟩%nc => ⸨ P ⸩(s,i)
     | nc_inv i N => nninv s i N P
+    | nc_na_inv i p N => na_nninv s i p N P
     end.
 
   (** [ncintp] is non-expansive *)
@@ -107,9 +109,9 @@ Section nintp_gen.
     | n_g1 c P, _ => λ un gn, ncintpg1 c (rew eq_nil_ug_g un gn in P) ni s
     | (∀' Φ)%n, _ => λ un gn, ∀ a, nintp_gen (Φ a) (H ‼ʰ a) un gn
     | (∃' Φ)%n, _ => λ un gn, ∃ a, nintp_gen (Φ a) (H ‼ʰ a) un gn
-    | n_wp s E e Φ, _ => λ un gn, wpw (ninv_wsat (λ P, nintpS P))
+    | n_wp s E e Φ, _ => λ un gn, wpw (ninv_wsat' (λ P, nintpS P))
         s E e (λ v, nintp_gen (Φ v) (H ‼ʰ v) un gn)
-    | n_twp s E e Φ, _ => λ un gn, twpw (ninv_wsat (λ P, nintpS P))
+    | n_twp s E e Φ, _ => λ un gn, twpw (ninv_wsat' (λ P, nintpS P))
         s E e (λ v, nintp_gen (Φ v) (H ‼ʰ v) un gn)
     | (∀: V, P)%n, _ => λ un gn, ∀ Φ,
         nintp_gen (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] 0) eq_refl eq_refl
@@ -228,4 +230,4 @@ Section nintp_facts.
 End nintp_facts.
 
 (** Utility *)
-Notation nninv_wsat s := (ninv_wsat (λ P, ⟦ P ⟧ˢ(s))).
+Notation nninv_wsat s := (ninv_wsat' (λ P, ⟦ P ⟧ˢ(s))).
