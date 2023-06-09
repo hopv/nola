@@ -16,7 +16,7 @@ Class irisGS'_gen (hlc : has_lc) (Λ : language) (Σ : gFunctors) := IrisG' {
 }.
 
 (** [irisGS_gen] made from [irisGS'_gen] and an extra world satisfaction *)
-Program Definition iris_wsat `{!irisGS'_gen hlc Λ Σ}
+Program Definition IrisW `{!irisGS'_gen hlc Λ Σ}
   (W : iProp Σ) : irisGS_gen hlc Λ Σ := {|
   iris_invGS := iris'_invGS;
   state_interp σ ns ks nt := (W ∗ state_interp' σ ns ks nt)%I;
@@ -31,9 +31,9 @@ Local Notation twp_unseal :=
   iris.program_logic.total_weakestpre.twp_aux.(seal_eq).
 Local Notation twp_pre' := iris.program_logic.total_weakestpre.twp_pre'.
 
-(** ** [wpw]/[twpw]: [wp]/[twp] for [iris_wsat] *)
-Notation wpw W := (@wp _ _ _ _ (@wp' _ _ _ (iris_wsat W))).
-Notation twpw W := (@twp _ _ _ _ (@twp' _ _ _ (iris_wsat W))).
+(** ** [wpw]/[twpw]: [wp]/[twp] for [IrisW] *)
+Notation wpw W := (@wp _ _ _ _ (@wp' _ _ _ (IrisW W))).
+Notation twpw W := (@twp _ _ _ _ (@twp' _ _ _ (IrisW W))).
 
 Section wpw.
   Context `{!irisGS'_gen hlc Λ Σ}.
