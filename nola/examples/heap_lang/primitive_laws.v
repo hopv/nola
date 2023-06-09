@@ -20,7 +20,6 @@ Class heapGS_gen hlc Σ := HeapGS {
   heapGS_step_cnt :: mono_natG Σ;
 }.
 Arguments HeapGS {_ _} _ _ _ _ _ _.
-Notation heapGS := (heapGS_gen HasLc).
 
 (* [heapWGS_gen]: [heapGS_gen] with an extra world satisfaction *)
 Class heapWGS_gen hlc Σ := HeapWGS {
