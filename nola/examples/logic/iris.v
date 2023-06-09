@@ -30,13 +30,10 @@ Section nid_intp.
     end.
   #[export] Instance nid_intp_ne : NonExpansive nid_intp.
   Proof. solve_proper. Qed.
-
-  (** [ninv_wsat] for [nid] *)
-  Definition ninv_wsat' (intp : nPropS (;ᵞ) -d> iProp Σ) : iProp Σ :=
-    ninv_wsat (nid_intp intp).
-  #[export] Instance ninv_wsat'_ne : NonExpansive ninv_wsat'.
-  Proof. solve_proper. Qed.
 End nid_intp.
+
+(** [ninv_wsat] for [nid] *)
+Notation ninv_wsat' intp := (ninv_wsat (nid_intp intp)).
 
 (** ** For strong interpretation *)
 

@@ -42,20 +42,26 @@ Section ncintp.
     | ⟨∗⟩%nc => P ∗ Q | ⟨-∗⟩%nc => P -∗ Q
     end.
   Definition ncintpg1 (c : ncong1) (P : nPropL (;ᵞ))
-    (ni : nsintp_ty Σ → ∀ κ, nProp κ (;ᵞ) → iProp Σ) (s : nsintp_ty Σ)
-    : iProp Σ :=
-    match c with
+    (ni : nsintp_ty Σ -d> discrete_fun (λ κ, nProp κ (;ᵞ) -d> iProp Σ))
+    : nsintp_ty Σ -d> iProp Σ :=
+    λ s, match c with
     | ⟨▷⟩%nc => ▷ ni s _ P
     | ⟨○(i)⟩%nc => ⸨ P ⸩(s,i)
     | nc_inv i N => nninv s i N P
     | nc_na_inv i p N => na_nninv s i p N P
-    end.
+    end%I.
 
   (** [ncintp] is non-expansive *)
+  #[export] Instance ncintpl0_ne {c} : NonExpansive (ncintpl0 c).
+  Proof. solve_proper. Qed.
   #[export] Instance ncintp1_ne {c} : NonExpansive (ncintp1 c).
   Proof. solve_proper. Qed.
   #[export] Instance ncintp2_ne {c} : NonExpansive2 (ncintp2 c).
   Proof. solve_proper. Qed.
+
+  (** [ncintpg] is contractive *)
+  #[export] Instance ncintpg1_contr {c P} : Contractive (ncintpg1 c P).
+  Proof. case c=>//= ??? leq ?/=. f_contractive. apply leq. Qed.
 
   (** [ncintp] is proper *)
   #[export] Instance ncintp1_proper : Proper ((=) ==> (≡) ==> (≡)) ncintp1.
@@ -143,8 +149,8 @@ Section nintp.
   #[export] Instance nintpS_gen_contractive : Contractive nintpS_gen'.
   Proof.
     unfold nintpS_gen'=> i ni ni' nid s + + + + + + +. fix FIX 4=> κ Γ P H.
-    case: P H=>/=; intros; case H=>//= ?;
-    try (by f_equiv=> >; apply FIX); case c=>//=; by f_contractive; apply nid.
+    case: P H=>/=; intros; case H=>//= ?; try (by f_equiv=> >; apply FIX).
+    apply ncintpg1_contr. apply nid.
   Qed.
 
   (** [nintp_gen] is contractive *)
@@ -152,10 +158,10 @@ Section nintp.
   Proof.
     unfold nintp_gen'=> i ni ni' nid s + + + + + +. fix FIX 4=> κ Γ P H.
     case: P H=>/=; intros; case H=>//= ?; try (by f_equiv=> >; apply FIX);
-      try (case c=>//=; by f_contractive; apply nid);
-      try (try (case c=>/=; f_equiv=> ?); by apply nintpS_gen_contractive);
+      try (apply ncintpg1_contr; apply nid);
+      try (try (f_equiv=> ?); by apply nintpS_gen_contractive);
       [apply wpw_ne=> >; [|by apply FIX]|apply twpw_ne=> >; [|by apply FIX]];
-      f_equiv=> ?; by apply nintpS_gen_contractive.
+      (do 2 f_equiv)=> ?; by apply nintpS_gen_contractive.
   Qed.
 
   (** [nintp_pre]: Generator of [nintp_fp] *)
