@@ -1,5 +1,5 @@
 From iris.proofmode Require Import coq_tactics reduction spec_patterns.
-From iris.proofmode Require Export tactics.
+From iris.proofmode Require Export proofmode.
 From iris.program_logic Require Import atomic.
 From nola.examples.heap_lang Require Export tactics derived_laws.
 From nola.examples.heap_lang Require Import notation.

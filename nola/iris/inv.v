@@ -1,9 +1,9 @@
 (** * Nola later-free invariant *)
 
+From nola.iris Require Export fupd.
 From iris.algebra Require Import gmap_view gset coPset.
 From iris.proofmode Require Import proofmode.
 From iris.base_logic.lib Require Export own wsat fancy_updates invariants.
-From nola Require Import fupd.
 
 (** ** Resources *)
 

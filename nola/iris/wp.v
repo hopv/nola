@@ -1,9 +1,9 @@
 (** * Weakest precondition *)
 
+From nola.iris Require Export fupd.
 From iris.program_logic Require Export weakestpre total_weakestpre.
 From iris.bi Require Import fixpoint.
-From iris.proofmode Require Import tactics.
-From nola Require Import fupd.
+From iris.proofmode Require Import proofmode.
 
 (** ** What becomes [irisGS_gen] combined with an extra world satisfaction *)
 Class irisGS'_gen (hlc : has_lc) (Λ : language) (Σ : gFunctors) := IrisG' {

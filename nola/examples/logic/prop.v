@@ -1,11 +1,11 @@
 (** * [nProp]: Syntactic proposition *)
 
 From nola Require Export util.funext util.rel ctx.
+From nola.iris Require Export fupd.
 From stdpp Require Export coPset namespaces.
 From iris.bi Require Import notation.
 From iris.base_logic Require Export lib.na_invariants.
 From nola.examples.heap_lang Require Import primitive_laws.
-From nola Require Import fupd.
 Import EqNotations.
 
 (** ** Preliminaries for [nProp] *)

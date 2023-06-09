@@ -2,7 +2,7 @@
 
 From nola Require Export util.wft.
 From iris.bi Require Import lib.fixpoint.
-From iris.proofmode Require Import tactics.
+From iris.proofmode Require Import proofmode.
 
 (** ** Preliminaries *)
 

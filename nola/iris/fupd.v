@@ -1,5 +1,6 @@
 (** * On fancy updates *)
 
+From nola Require Export prelude.
 From iris.base_logic Require Import fancy_updates.
 
 Section fupd.

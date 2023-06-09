@@ -2,7 +2,7 @@
 
 From nola.examples.logic Require Export intp.
 From nola Require Export util.wft.
-From iris.proofmode Require Import tactics.
+From iris.proofmode Require Export proofmode.
 
 (** ** [nintpsi]: [inpsi] for [nPropL] *)
 Definition nintpsi Σ `{!nintpGS Σ} : intpsi :=

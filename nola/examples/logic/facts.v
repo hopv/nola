@@ -1,8 +1,6 @@
 (** * Facts *)
 
 From nola.examples.logic Require Export sintp.
-From iris.proofmode Require Import tactics.
-From iris.base_logic.lib Require Import iprop.
 
 Section facts.
   Context `{!nintpGS Σ}.

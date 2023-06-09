@@ -1,6 +1,6 @@
 (** * For non-atomic invariants *)
 
-From nola Require Export iris.inv.
+From nola.iris Require Export inv.
 From iris.base_logic Require Export lib.na_invariants.
 From iris.algebra Require Import gset coPset.
 From iris.proofmode Require Import proofmode.

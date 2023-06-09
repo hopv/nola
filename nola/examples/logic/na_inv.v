@@ -1,8 +1,6 @@
 (** * On the invariant *)
 
 From nola.examples.logic Require Export sintp.
-From iris.proofmode Require Import proofmode.
-From nola Require Import fupd.
 
 Implicit Type (i : nat) (P Q : nPropL (;ᵞ)).
 
