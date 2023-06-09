@@ -25,7 +25,7 @@ Notation "l ↦∗ dq vs" := (array l dq vs)
 lead to overlapping instances. *)
 
 Section lifting.
-Context `{!heapWGS_gen hlc Σ}.
+Context `{!heapGS_gen hlc Σ}.
 Implicit Types P Q : iProp Σ.
 Implicit Types Φ : val → iProp Σ.
 Implicit Types σ : state.
@@ -99,9 +99,9 @@ Proof.
   setoid_rewrite <-Loc.add_assoc. iApply "IH". done.
 Qed.
 
-Lemma twp_allocN s E v n :
+Lemma twp_allocN W s E v n :
   (0 < n)%Z →
-  [[{ True }]] AllocN (Val $ LitV $ LitInt $ n) (Val v) @ s; E
+  [[{ True }]][W] AllocN (Val $ LitV $ LitInt $ n) (Val v) @ s; E
   [[{ l, RET LitV (LitLoc l); l ↦∗ replicate (Z.to_nat n) v ∗
          [∗ list] i ∈ seq 0 (Z.to_nat n), meta_token (l +ₗ (i : nat)) ⊤ }]].
 Proof.
@@ -110,9 +110,9 @@ Proof.
   iDestruct (big_sepL_sep with "Hlm") as "[Hl $]".
   by iApply mapsto_seq_array.
 Qed.
-Lemma wp_allocN s E v n :
+Lemma wp_allocN W s E v n :
   (0 < n)%Z →
-  {{{ True }}} AllocN (Val $ LitV $ LitInt $ n) (Val v) @ s; E
+  {{{ True }}}[W] AllocN (Val $ LitV $ LitInt $ n) (Val v) @ s; E
   {{{ l, RET LitV (LitLoc l); l ↦∗ replicate (Z.to_nat n) v ∗
          [∗ list] i ∈ seq 0 (Z.to_nat n), meta_token (l +ₗ (i : nat)) ⊤ }}}.
 Proof.
@@ -120,9 +120,9 @@ Proof.
   iApply twp_allocN; [auto..|]; iIntros (l) "H HΦ". by iApply "HΦ".
 Qed.
 
-Lemma twp_allocN_vec s E v n :
+Lemma twp_allocN_vec W s E v n :
   (0 < n)%Z →
-  [[{ True }]]
+  [[{ True }]][W]
     AllocN #n v @ s ; E
   [[{ l, RET #l; l ↦∗ vreplicate (Z.to_nat n) v ∗
          [∗ list] i ∈ seq 0 (Z.to_nat n), meta_token (l +ₗ (i : nat)) ⊤ }]].
@@ -130,9 +130,9 @@ Proof.
   iIntros (Hzs Φ) "_ HΦ". iApply twp_allocN; [ lia | done | .. ].
   iIntros (l) "[Hl Hm]". iApply "HΦ". rewrite vec_to_list_replicate. iFrame.
 Qed.
-Lemma wp_allocN_vec s E v n :
+Lemma wp_allocN_vec W s E v n :
   (0 < n)%Z →
-  {{{ True }}}
+  {{{ True }}}[W]
     AllocN #n v @ s ; E
   {{{ l, RET #l; l ↦∗ vreplicate (Z.to_nat n) v ∗
          [∗ list] i ∈ seq 0 (Z.to_nat n), meta_token (l +ₗ (i : nat)) ⊤ }}}.
@@ -142,9 +142,9 @@ Proof.
 Qed.
 
 (** * Rules for accessing array elements *)
-Lemma twp_load_offset s E l dq off vs v :
+Lemma twp_load_offset W s E l dq off vs v :
   vs !! off = Some v →
-  [[{ l ↦∗{dq} vs }]] ! #(l +ₗ off) @ s; E [[{ RET v; l ↦∗{dq} vs }]].
+  [[{ l ↦∗{dq} vs }]][W] ! #(l +ₗ off) @ s; E [[{ RET v; l ↦∗{dq} vs }]].
 Proof.
   iIntros (Hlookup Φ) "Hl HΦ".
   iDestruct (update_array l _ _ _ _ Hlookup with "Hl") as "[Hl1 Hl2]".
@@ -152,91 +152,91 @@ Proof.
   iDestruct ("Hl2" $! v) as "Hl2". rewrite list_insert_id; last done.
   iApply "Hl2". iApply "Hl1".
 Qed.
-Lemma wp_load_offset s E l dq off vs v :
+Lemma wp_load_offset W s E l dq off vs v :
   vs !! off = Some v →
-  {{{ ▷ l ↦∗{dq} vs }}} ! #(l +ₗ off) @ s; E {{{ RET v; l ↦∗{dq} vs }}}.
+  {{{ ▷ l ↦∗{dq} vs }}}[W] ! #(l +ₗ off) @ s; E {{{ RET v; l ↦∗{dq} vs }}}.
 Proof.
   iIntros (? Φ) ">H HΦ". iApply (twp_wp_step with "HΦ").
   iApply (twp_load_offset with "H"); [by eauto..|]; iIntros "H HΦ".
   by iApply "HΦ".
 Qed.
 
-Lemma twp_load_offset_vec s E l dq sz (off : fin sz) (vs : vec val sz) :
-  [[{ l ↦∗{dq} vs }]] ! #(l +ₗ off) @ s; E [[{ RET vs !!! off; l ↦∗{dq} vs }]].
+Lemma twp_load_offset_vec W s E l dq sz (off : fin sz) (vs : vec val sz) :
+  [[{ l ↦∗{dq} vs }]][W] ! #(l +ₗ off) @ s; E [[{ RET vs !!! off; l ↦∗{dq} vs }]].
 Proof. apply twp_load_offset. by apply vlookup_lookup. Qed.
-Lemma wp_load_offset_vec s E l dq sz (off : fin sz) (vs : vec val sz) :
-  {{{ ▷ l ↦∗{dq} vs }}} ! #(l +ₗ off) @ s; E {{{ RET vs !!! off; l ↦∗{dq} vs }}}.
+Lemma wp_load_offset_vec W s E l dq sz (off : fin sz) (vs : vec val sz) :
+  {{{ ▷ l ↦∗{dq} vs }}}[W] ! #(l +ₗ off) @ s; E {{{ RET vs !!! off; l ↦∗{dq} vs }}}.
 Proof. apply wp_load_offset. by apply vlookup_lookup. Qed.
 
-Lemma twp_store_offset s E l off vs v :
+Lemma twp_store_offset W s E l off vs v :
   is_Some (vs !! off) →
-  [[{ l ↦∗ vs }]] #(l +ₗ off) <- v @ s; E [[{ RET #(); l ↦∗ <[off:=v]> vs }]].
+  [[{ l ↦∗ vs }]][W] #(l +ₗ off) <- v @ s; E [[{ RET #(); l ↦∗ <[off:=v]> vs }]].
 Proof.
   iIntros ([w Hlookup] Φ) "Hl HΦ".
   iDestruct (update_array l _ _ _ _ Hlookup with "Hl") as "[Hl1 Hl2]".
   iApply (twp_store with "Hl1"). iIntros "Hl1".
   iApply "HΦ". iApply "Hl2". iApply "Hl1".
 Qed.
-Lemma wp_store_offset s E l off vs v :
+Lemma wp_store_offset W s E l off vs v :
   is_Some (vs !! off) →
-  {{{ ▷ l ↦∗ vs }}} #(l +ₗ off) <- v @ s; E {{{ RET #(); l ↦∗ <[off:=v]> vs }}}.
+  {{{ ▷ l ↦∗ vs }}}[W] #(l +ₗ off) <- v @ s; E {{{ RET #(); l ↦∗ <[off:=v]> vs }}}.
 Proof.
   iIntros (? Φ) ">H HΦ". iApply (twp_wp_step with "HΦ").
   iApply (twp_store_offset with "H"); [by eauto..|]; iIntros "H HΦ".
   by iApply "HΦ".
 Qed.
 
-Lemma twp_store_offset_vec s E l sz (off : fin sz) (vs : vec val sz) v :
-  [[{ l ↦∗ vs }]] #(l +ₗ off) <- v @ s; E [[{ RET #(); l ↦∗ vinsert off v vs }]].
+Lemma twp_store_offset_vec W s E l sz (off : fin sz) (vs : vec val sz) v :
+  [[{ l ↦∗ vs }]][W] #(l +ₗ off) <- v @ s; E [[{ RET #(); l ↦∗ vinsert off v vs }]].
 Proof.
   setoid_rewrite vec_to_list_insert. apply twp_store_offset.
   eexists. by apply vlookup_lookup.
 Qed.
-Lemma wp_store_offset_vec s E l sz (off : fin sz) (vs : vec val sz) v :
-  {{{ ▷ l ↦∗ vs }}} #(l +ₗ off) <- v @ s; E {{{ RET #(); l ↦∗ vinsert off v vs }}}.
+Lemma wp_store_offset_vec W s E l sz (off : fin sz) (vs : vec val sz) v :
+  {{{ ▷ l ↦∗ vs }}}[W] #(l +ₗ off) <- v @ s; E {{{ RET #(); l ↦∗ vinsert off v vs }}}.
 Proof.
   iIntros (Φ) ">H HΦ". iApply (twp_wp_step with "HΦ").
   iApply (twp_store_offset_vec with "H"); [by eauto..|]; iIntros "H HΦ".
   by iApply "HΦ".
 Qed.
 
-Lemma twp_xchg_offset s E l off vs v v' :
+Lemma twp_xchg_offset W s E l off vs v v' :
   vs !! off = Some v →
-  [[{ l ↦∗ vs }]] Xchg #(l +ₗ off) v' @ s; E [[{ RET v; l ↦∗ <[off:=v']> vs }]].
+  [[{ l ↦∗ vs }]][W] Xchg #(l +ₗ off) v' @ s; E [[{ RET v; l ↦∗ <[off:=v']> vs }]].
 Proof.
   iIntros (Hlookup Φ) "Hl HΦ".
   iDestruct (update_array l _ _ _ _ Hlookup with "Hl") as "[Hl1 Hl2]".
   iApply (twp_xchg with "Hl1"). iIntros "Hl1".
   iApply "HΦ". iApply "Hl2". iApply "Hl1".
 Qed.
-Lemma wp_xchg_offset s E l off vs v v' :
+Lemma wp_xchg_offset W s E l off vs v v' :
   vs !! off = Some v →
-  {{{ ▷ l ↦∗ vs }}} Xchg #(l +ₗ off) v' @ s; E {{{ RET v; l ↦∗ <[off:=v']> vs }}}.
+  {{{ ▷ l ↦∗ vs }}}[W] Xchg #(l +ₗ off) v' @ s; E {{{ RET v; l ↦∗ <[off:=v']> vs }}}.
 Proof.
   iIntros (? Φ) ">H HΦ". iApply (twp_wp_step with "HΦ").
   iApply (twp_xchg_offset with "H"); [by eauto..|]; iIntros "H HΦ".
   by iApply "HΦ".
 Qed.
 
-Lemma twp_xchg_offset_vec s E l sz (off : fin sz) (vs : vec val sz) v :
-  [[{ l ↦∗ vs }]] Xchg #(l +ₗ off) v @ s; E [[{ RET (vs !!! off); l ↦∗ vinsert off v vs }]].
+Lemma twp_xchg_offset_vec W s E l sz (off : fin sz) (vs : vec val sz) v :
+  [[{ l ↦∗ vs }]][W] Xchg #(l +ₗ off) v @ s; E [[{ RET (vs !!! off); l ↦∗ vinsert off v vs }]].
 Proof.
   setoid_rewrite vec_to_list_insert. apply twp_xchg_offset.
   by apply vlookup_lookup.
 Qed.
-Lemma wp_xchg_offset_vec s E l sz (off : fin sz) (vs : vec val sz) v :
-   {{{ ▷ l ↦∗ vs }}} Xchg #(l +ₗ off) v @ s; E {{{ RET (vs !!! off); l ↦∗ vinsert off v vs }}}.
+Lemma wp_xchg_offset_vec W s E l sz (off : fin sz) (vs : vec val sz) v :
+   {{{ ▷ l ↦∗ vs }}}[W] Xchg #(l +ₗ off) v @ s; E {{{ RET (vs !!! off); l ↦∗ vinsert off v vs }}}.
 Proof.
   iIntros (Φ) ">H HΦ". iApply (twp_wp_step with "HΦ").
   iApply (twp_xchg_offset_vec with "H"); [by eauto..|]; iIntros "H HΦ".
   by iApply "HΦ".
 Qed.
 
-Lemma twp_cmpxchg_suc_offset s E l off vs v' v1 v2 :
+Lemma twp_cmpxchg_suc_offset W s E l off vs v' v1 v2 :
   vs !! off = Some v' →
   v' = v1 →
   vals_compare_safe v' v1 →
-  [[{ l ↦∗ vs }]]
+  [[{ l ↦∗ vs }]][W]
     CmpXchg #(l +ₗ off) v1 v2 @ s; E
   [[{ RET (v', #true); l ↦∗ <[off:=v2]> vs }]].
 Proof.
@@ -245,11 +245,11 @@ Proof.
   iApply (twp_cmpxchg_suc with "Hl1"); [done..|].
   iIntros "Hl1". iApply "HΦ". iApply "Hl2". iApply "Hl1".
 Qed.
-Lemma wp_cmpxchg_suc_offset s E l off vs v' v1 v2 :
+Lemma wp_cmpxchg_suc_offset W s E l off vs v' v1 v2 :
   vs !! off = Some v' →
   v' = v1 →
   vals_compare_safe v' v1 →
-  {{{ ▷ l ↦∗ vs }}}
+  {{{ ▷ l ↦∗ vs }}}[W]
     CmpXchg #(l +ₗ off) v1 v2 @ s; E
   {{{ RET (v', #true); l ↦∗ <[off:=v2]> vs }}}.
 Proof.
@@ -258,10 +258,10 @@ Proof.
   by iApply "HΦ".
 Qed.
 
-Lemma twp_cmpxchg_suc_offset_vec s E l sz (off : fin sz) (vs : vec val sz) v1 v2 :
+Lemma twp_cmpxchg_suc_offset_vec W s E l sz (off : fin sz) (vs : vec val sz) v1 v2 :
   vs !!! off = v1 →
   vals_compare_safe (vs !!! off) v1 →
-  [[{ l ↦∗ vs }]]
+  [[{ l ↦∗ vs }]][W]
     CmpXchg #(l +ₗ off) v1 v2 @ s; E
   [[{ RET (vs !!! off, #true); l ↦∗ vinsert off v2 vs }]].
 Proof.
@@ -269,10 +269,10 @@ Proof.
   apply twp_cmpxchg_suc_offset; [|done..].
   by apply vlookup_lookup.
 Qed.
-Lemma wp_cmpxchg_suc_offset_vec s E l sz (off : fin sz) (vs : vec val sz) v1 v2 :
+Lemma wp_cmpxchg_suc_offset_vec W s E l sz (off : fin sz) (vs : vec val sz) v1 v2 :
   vs !!! off = v1 →
   vals_compare_safe (vs !!! off) v1 →
-  {{{ ▷ l ↦∗ vs }}}
+  {{{ ▷ l ↦∗ vs }}}[W]
     CmpXchg #(l +ₗ off) v1 v2 @ s; E
   {{{ RET (vs !!! off, #true); l ↦∗ vinsert off v2 vs }}}.
 Proof.
@@ -281,11 +281,11 @@ Proof.
   by iApply "HΦ".
 Qed.
 
-Lemma twp_cmpxchg_fail_offset s E l dq off vs v0 v1 v2 :
+Lemma twp_cmpxchg_fail_offset W s E l dq off vs v0 v1 v2 :
   vs !! off = Some v0 →
   v0 ≠ v1 →
   vals_compare_safe v0 v1 →
-  [[{ l ↦∗{dq} vs }]]
+  [[{ l ↦∗{dq} vs }]][W]
     CmpXchg #(l +ₗ off) v1 v2 @ s; E
   [[{ RET (v0, #false); l ↦∗{dq} vs }]].
 Proof.
@@ -296,11 +296,11 @@ Proof.
   iIntros "Hl1". iApply "HΦ". iDestruct ("Hl2" $! v0) as "Hl2".
   rewrite list_insert_id; last done. iApply "Hl2". iApply "Hl1".
 Qed.
-Lemma wp_cmpxchg_fail_offset s E l dq off vs v0 v1 v2 :
+Lemma wp_cmpxchg_fail_offset W s E l dq off vs v0 v1 v2 :
   vs !! off = Some v0 →
   v0 ≠ v1 →
   vals_compare_safe v0 v1 →
-  {{{ ▷ l ↦∗{dq} vs }}}
+  {{{ ▷ l ↦∗{dq} vs }}}[W]
     CmpXchg #(l +ₗ off) v1 v2 @ s; E
   {{{ RET (v0, #false); l ↦∗{dq} vs }}}.
 Proof.
@@ -309,20 +309,20 @@ Proof.
   by iApply "HΦ".
 Qed.
 
-Lemma twp_cmpxchg_fail_offset_vec s E l dq sz (off : fin sz) (vs : vec val sz) v1 v2 :
+Lemma twp_cmpxchg_fail_offset_vec W s E l dq sz (off : fin sz) (vs : vec val sz) v1 v2 :
   vs !!! off ≠ v1 →
   vals_compare_safe (vs !!! off) v1 →
-  [[{ l ↦∗{dq} vs }]]
+  [[{ l ↦∗{dq} vs }]][W]
     CmpXchg #(l +ₗ off) v1 v2 @ s; E
   [[{ RET (vs !!! off, #false); l ↦∗{dq} vs }]].
 Proof.
   intros. apply twp_cmpxchg_fail_offset; [|done..].
   by apply vlookup_lookup.
 Qed.
-Lemma wp_cmpxchg_fail_offset_vec s E l dq sz (off : fin sz) (vs : vec val sz) v1 v2 :
+Lemma wp_cmpxchg_fail_offset_vec W s E l dq sz (off : fin sz) (vs : vec val sz) v1 v2 :
   vs !!! off ≠ v1 →
   vals_compare_safe (vs !!! off) v1 →
-  {{{ ▷ l ↦∗{dq} vs }}}
+  {{{ ▷ l ↦∗{dq} vs }}}[W]
     CmpXchg #(l +ₗ off) v1 v2 @ s; E
   {{{ RET (vs !!! off, #false); l ↦∗{dq} vs }}}.
 Proof.
@@ -330,9 +330,9 @@ Proof.
   by apply vlookup_lookup.
 Qed.
 
-Lemma twp_faa_offset s E l off vs (i1 i2 : Z) :
+Lemma twp_faa_offset W s E l off vs (i1 i2 : Z) :
   vs !! off = Some #i1 →
-  [[{ l ↦∗ vs }]] FAA #(l +ₗ off) #i2 @ s; E
+  [[{ l ↦∗ vs }]][W] FAA #(l +ₗ off) #i2 @ s; E
   [[{ RET LitV (LitInt i1); l ↦∗ <[off:=#(i1 + i2)]> vs }]].
 Proof.
   iIntros (Hlookup Φ) "Hl HΦ".
@@ -340,26 +340,26 @@ Proof.
   iApply (twp_faa with "Hl1").
   iIntros "Hl1". iApply "HΦ". iApply "Hl2". iApply "Hl1".
 Qed.
-Lemma wp_faa_offset s E l off vs (i1 i2 : Z) :
+Lemma wp_faa_offset W s E l off vs (i1 i2 : Z) :
   vs !! off = Some #i1 →
-  {{{ ▷ l ↦∗ vs }}} FAA #(l +ₗ off) #i2 @ s; E
+  {{{ ▷ l ↦∗ vs }}}[W] FAA #(l +ₗ off) #i2 @ s; E
   {{{ RET LitV (LitInt i1); l ↦∗ <[off:=#(i1 + i2)]> vs }}}.
 Proof.
   iIntros (? Φ) ">H HΦ". iApply (twp_wp_step with "HΦ").
   iApply (twp_faa_offset with "H"); [by eauto..|]; iIntros "H HΦ". by iApply "HΦ".
 Qed.
 
-Lemma twp_faa_offset_vec s E l sz (off : fin sz) (vs : vec val sz) (i1 i2 : Z) :
+Lemma twp_faa_offset_vec W s E l sz (off : fin sz) (vs : vec val sz) (i1 i2 : Z) :
   vs !!! off = #i1 →
-  [[{ l ↦∗ vs }]] FAA #(l +ₗ off) #i2 @ s; E
+  [[{ l ↦∗ vs }]][W] FAA #(l +ₗ off) #i2 @ s; E
   [[{ RET LitV (LitInt i1); l ↦∗ vinsert off #(i1 + i2) vs }]].
 Proof.
   intros. setoid_rewrite vec_to_list_insert. apply twp_faa_offset.
   by apply vlookup_lookup.
 Qed.
-Lemma wp_faa_offset_vec s E l sz (off : fin sz) (vs : vec val sz) (i1 i2 : Z) :
+Lemma wp_faa_offset_vec W s E l sz (off : fin sz) (vs : vec val sz) (i1 i2 : Z) :
   vs !!! off = #i1 →
-  {{{ ▷ l ↦∗ vs }}} FAA #(l +ₗ off) #i2 @ s; E
+  {{{ ▷ l ↦∗ vs }}}[W] FAA #(l +ₗ off) #i2 @ s; E
   {{{ RET LitV (LitInt i1); l ↦∗ vinsert off #(i1 + i2) vs }}}.
 Proof.
   iIntros (? Φ) ">H HΦ". iApply (twp_wp_step with "HΦ").
@@ -370,19 +370,19 @@ Qed.
 (** Derived prophecy laws *)
 
 (** Lemmas for some particular expression inside the [Resolve]. *)
-Lemma wp_resolve_proph s E (p : proph_id) (pvs : list (val * val)) v :
-  {{{ proph p pvs }}}
+Lemma wp_resolve_proph W s E (p : proph_id) (pvs : list (val * val)) v :
+  {{{ proph p pvs }}}[W]
     ResolveProph (Val $ LitV $ LitProphecy p) (Val v) @ s; E
   {{{ pvs', RET (LitV LitUnit); ⌜pvs = (LitV LitUnit, v)::pvs'⌝ ∗ proph p pvs' }}}.
 Proof.
   iIntros (Φ) "Hp HΦ". iApply (wp_resolve with "Hp"); first done.
-  iApply lifting.wp_pure_step_later; first done.
+  iApply @lifting.wp_pure_step_later; first done.
   iIntros "!> _". iApply wp_value. iIntros (vs') "HEq Hp". iApply "HΦ". iFrame.
 Qed.
 
-Lemma wp_resolve_cmpxchg_suc s E l (p : proph_id) (pvs : list (val * val)) v1 v2 v :
+Lemma wp_resolve_cmpxchg_suc W s E l (p : proph_id) (pvs : list (val * val)) v1 v2 v :
   vals_compare_safe v1 v1 →
-  {{{ proph p pvs ∗ ▷ l ↦ v1 }}}
+  {{{ proph p pvs ∗ ▷ l ↦ v1 }}}[W]
     Resolve (CmpXchg #l v1 v2) #p v @ s; E
   {{{ RET (v1, #true) ; ∃ pvs', ⌜pvs = ((v1, #true)%V, v)::pvs'⌝ ∗ proph p pvs' ∗ l ↦ v2 }}}.
 Proof.
@@ -393,9 +393,9 @@ Proof.
   iIntros (pvs' ->) "Hp". iApply "HΦ". eauto with iFrame.
 Qed.
 
-Lemma wp_resolve_cmpxchg_fail s E l (p : proph_id) (pvs : list (val * val)) dq v' v1 v2 v :
+Lemma wp_resolve_cmpxchg_fail W s E l (p : proph_id) (pvs : list (val * val)) dq v' v1 v2 v :
   v' ≠ v1 → vals_compare_safe v' v1 →
-  {{{ proph p pvs ∗ ▷ l ↦{dq} v' }}}
+  {{{ proph p pvs ∗ ▷ l ↦{dq} v' }}}[W]
     Resolve (CmpXchg #l v1 v2) #p v @ s; E
   {{{ RET (v', #false) ; ∃ pvs', ⌜pvs = ((v', #false)%V, v)::pvs'⌝ ∗ proph p pvs' ∗ l ↦{dq} v' }}}.
 Proof.
