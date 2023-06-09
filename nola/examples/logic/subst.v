@@ -158,22 +158,22 @@ Infix "/:" := nsubst (at level 25, no associativity).
 Lemma nsubst_nlarge {κ V} {P : nProp κ ([V];ᵞ )} {Φ} : ↑ˡ P /: Φ = ↑ˡ (P /: Φ).
 Proof. exact nsubstlu_nlarge. Qed.
 
-(** ** [nheight P]: Height of [P] *)
+(** ** [nhgt P]: Height of [P] *)
 
-Fixpoint nheight {κ Γ} (P : nProp κ Γ) : hgt :=
+Fixpoint nhgt {κ Γ} (P : nProp κ Γ) : hgt :=
   match P with
   | n_0 _ | n_l0 _ | n_g1 _ _ | %ᵍˢ _ | %ᵍˡ _ | %ᵘˢ _ | !ᵘˢ _ => Hgt₀
-  | n_1 _ P | ∀: _, P | ∃: _, P => Hgt₁ (nheight P)
-  | n_2 _ P Q => Hgt₂ (nheight P) (nheight Q)
-  | ∀' Φ | ∃' Φ => Hgtᶠ (nheight ∘ Φ)
-  | n_wpw W _ _ _ Φ | n_twpw W _ _ _ Φ => Hgt₂ (nheight W) (Hgtᶠ (nheight ∘ Φ))
-  | rec:ˢ' Φ a | rec:ˡ' Φ a => Hgt₁ (nheight (Φ a))
+  | n_1 _ P | ∀: _, P | ∃: _, P => Hgt₁ (nhgt P)
+  | n_2 _ P Q => Hgt₂ (nhgt P) (nhgt Q)
+  | ∀' Φ | ∃' Φ => Hgtᶠ (nhgt ∘ Φ)
+  | n_wpw W _ _ _ Φ | n_twpw W _ _ _ Φ => Hgt₂ (nhgt W) (Hgtᶠ (nhgt ∘ Φ))
+  | rec:ˢ' Φ a | rec:ˡ' Φ a => Hgt₁ (nhgt (Φ a))
   end%n.
 
-(** [nsubstlu] preserves [nheight] *)
-Lemma nsubstlu_nheight {κ Γ Γᵘ V}
+(** [nsubstlu] preserves [nhgt] *)
+Lemma nsubstlu_nhgt {κ Γ Γᵘ V}
   {P : nProp κ Γ} {Φ} {eq : Γ.ᵞu = Γᵘ ++ [V] } {gn} :
-  nheight (nsubstlu P Φ eq gn) = nheight P.
+  nhgt (nsubstlu P Φ eq gn) = nhgt P.
 Proof.
   move: κ Γ Γᵘ P Φ eq gn. fix FIX 4=> ???.
   case=>//=; intros;
@@ -181,7 +181,6 @@ Proof.
     try (by case: s gn). subst=>/=. by case (sunapp s).
 Qed.
 
-(** [/:=] preserves [nheight] *)
-Lemma nsubst_nheight {κ V} {P : nProp κ ([V];ᵞ )} {Φ} :
-  nheight (P /: Φ) = nheight P.
-Proof. exact nsubstlu_nheight. Qed.
+(** [/:=] preserves [nhgt] *)
+Lemma nsubst_nhgt {κ V} {P : nProp κ ([V];ᵞ )} {Φ} : nhgt (P /: Φ) = nhgt P.
+Proof. exact nsubstlu_nhgt. Qed.

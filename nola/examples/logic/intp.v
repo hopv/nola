@@ -9,10 +9,10 @@ Definition nsubst' {κ Γᵘ Γᵍ V} (P : nProp κ (V :: Γᵘ;ᵞ Γᵍ))
   nsubst (rew ctxeq_ug (f_equal (_ ::.) un) gn in P).
 Arguments nsubst' {_ _ _ _} _ _ _ /.
 
-(** [nsubst'] preserves [nheight] *)
-Lemma nsubst'_nheight {κ Γᵘ Γᵍ V} {P : nProp κ (V :: Γᵘ;ᵞ Γᵍ)} {un gn Φ} :
-  nheight (nsubst' P un gn Φ) = nheight P.
-Proof. subst. apply nsubst_nheight. Qed.
+(** [nsubst'] preserves [nhgt] *)
+Lemma nsubst'_nhgt {κ Γᵘ Γᵍ V} {P : nProp κ (V :: Γᵘ;ᵞ Γᵍ)} {un gn Φ} :
+  nhgt (nsubst' P un gn Φ) = nhgt P.
+Proof. subst. apply nsubst_nhgt. Qed.
 
 (** ** [nintp]: Interpretation of [nProp] as [iProp] *)
 
@@ -79,7 +79,7 @@ Section nintp_gen.
     (* Strong interpretation *) (s : nsintp_ty Σ).
 
   (** [nintpS_gen P] : Evaluate small [P] *)
-  Fixpoint nintpS_gen {κ Γ} (P : nProp κ Γ) (H : hAcc (nheight P))
+  Fixpoint nintpS_gen {κ Γ} (P : nProp κ Γ) (H : hAcc (nhgt P))
     : κ = nS → Γ.ᵞu = [] → Γ.ᵞg = [] → iProp Σ :=
     match P, H with
     | n_0 c, _ => λ _ _ _, ncintp0 c
@@ -94,12 +94,12 @@ Section nintp_gen.
     | n_twpw W s E e Φ, _ => λ κS un gn, twpw (nintpS_gen W (H ‼ʰ 0) κS un gn)
         s E e (λ v, nintpS_gen (Φ v) (H ‼ʰ 1 ‼ʰ v) κS un gn)
     | (∀: V, P)%n, _ => λ κS un gn, ∀ Φ, nintpS_gen
-        (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] 0) κS eq_refl eq_refl
+        (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nhgt] 0) κS eq_refl eq_refl
     | (∃: V, P)%n, _ => λ κS un gn, ∃ Φ, nintpS_gen
-        (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] 0) κS eq_refl eq_refl
+        (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nhgt] 0) κS eq_refl eq_refl
     | (rec:ˢ' Φ a)%n, _ => λ _ un gn, nintpS_gen
         (nsubst' (Φ a) un gn (rew[λ _,_] ctxeq_ug un gn in rec:ˢ' Φ)%n)
-        (H ‼ʰ[nsubst'_nheight] 0) eq_refl eq_refl eq_refl
+        (H ‼ʰ[nsubst'_nhgt] 0) eq_refl eq_refl eq_refl
     | (%ᵍˢ s)%n, _ => λ _ _, seqnil s
     | n_l0 _, _ | (rec:ˡ' _ _)%n, _ | (%ᵍˡ _)%n, _ | (%ᵘˢ _)%n, _ | (!ᵘˢ _)%n, _
       => λ κS, match κS with end
@@ -107,7 +107,7 @@ Section nintp_gen.
   Local Notation nintpS P := (nintpS_gen P hwf eq_refl eq_refl eq_refl).
 
   (** [nintp_gen P] : Evaluate [P] *)
-  Fixpoint nintp_gen {κ Γ} (P : nProp κ Γ) (H : hAcc (nheight P))
+  Fixpoint nintp_gen {κ Γ} (P : nProp κ Γ) (H : hAcc (nhgt P))
     : Γ.ᵞu = [] → Γ.ᵞg = [] → iProp Σ :=
     match P, H with
     | n_0 c, _ => λ _ _, ncintp0 c
@@ -123,15 +123,15 @@ Section nintp_gen.
     | n_twpw W s E e Φ, _ => λ un gn, twpw (nintp_gen W (H ‼ʰ 0) un gn)
         s E e (λ v, nintp_gen (Φ v) (H ‼ʰ 1 ‼ʰ v) un gn)
     | (∀: V, P)%n, _ => λ un gn, ∀ Φ,
-        nintp_gen (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] 0) eq_refl eq_refl
+        nintp_gen (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nhgt] 0) eq_refl eq_refl
     | (∃: V, P)%n, _ => λ un gn, ∃ Φ,
-        nintp_gen (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nheight] 0) eq_refl eq_refl
+        nintp_gen (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nhgt] 0) eq_refl eq_refl
     | (rec:ˢ' Φ a)%n, _ => λ un gn, nintp_gen
         (nsubst' (Φ a) un gn (rew[λ _,_] ctxeq_ug un gn in rec:ˢ' Φ)%n)
-        (H ‼ʰ[nsubst'_nheight] 0) eq_refl eq_refl
+        (H ‼ʰ[nsubst'_nhgt] 0) eq_refl eq_refl
     | (rec:ˡ' Φ a)%n, _ => λ un gn, nintp_gen
         (nsubst' (Φ a) un gn (rew[λ _,_] ctxeq_ug un gn in rec:ˡ' Φ)%n)
-        (H ‼ʰ[nsubst'_nheight] 0) eq_refl eq_refl
+        (H ‼ʰ[nsubst'_nhgt] 0) eq_refl eq_refl
     | (%ᵍˢ s)%n, _ | (%ᵍˡ s)%n, _ => λ _, seqnil s | (%ᵘˢ s)%n, _ => seqnil s
     | (!ᵘˢ P)%n, _ => λ _ _, nintpS P
     end%I.
@@ -228,7 +228,7 @@ Section nintp_facts.
     case: P H=>/=; intros; case H=>/= he; try apply wpw_proper=> >;
       try apply twpw_proper=> >; try f_equiv=> >; try apply FIX;
       try apply leibniz_equiv, proof_irrel;
-      rewrite rew_eq_hwf; move: nsubst'_nheight=>/=; subst;
+      rewrite rew_eq_hwf; move: nsubst'_nhgt=>/=; subst;
       have EQ := nsubst_nlarge (P:=P); move: (nsubst (↑ˡ P)) EQ;
       move=> ?->?; apply FIX.
   Qed.
