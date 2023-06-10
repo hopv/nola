@@ -67,6 +67,55 @@ Section wpw.
   Lemma twpw_proper {W W' s E e Φ Ψ} :
     W ⊣⊢ W' → (Φ : _ -d> _) ≡ Ψ → twpw W s E e Φ ⊣⊢ twpw W' s E e Ψ.
   Proof. rewrite !equiv_dist=> ???. by apply twpw_ne. Qed.
+
+  (** Expand the world satisfaction of [wpw] *)
+  Lemma wpw_expand_fupd {W W' s E F e Φ} :
+    E ⊆ F → □ (W' ={E}=∗ W ∗ (W ={E}=∗ W')) -∗ wpw W s F e Φ -∗ wpw W' s F e Φ.
+  Proof.
+    iIntros (EF) "#W'W wpW". iLöb as "IH" forall (F e Φ EF).
+    rewrite !wp_unfold /wp_pre/=. case (to_val e); [done|].
+    iIntros (?????) "[W' X]".
+    iMod (fupd_mask_subseteq E) as "Cl"; [done|].
+    iMod ("W'W" with "W'") as "[W Wto]". iMod "Cl" as "_".
+    iMod ("wpW" with "[$W $X]") as "[% big]". iModIntro. iSplit; [done|].
+    iIntros (????) "£". iMod ("big" with "[%//] £") as "big". iModIntro. iNext.
+    iApply (step_fupdN_wand with "big"). iIntros ">[[W $] [wpW wpWs]]".
+    iMod (fupd_mask_subseteq E) as "Cl"; [done|].
+    iMod ("Wto" with "W") as "$". iMod "Cl" as "_". iModIntro.
+    iSplitL "wpW"; [by iApply "IH"|]. iApply (big_sepL_impl with "wpWs").
+    iIntros "!#" (???). by iApply "IH".
+  Qed.
+  Lemma wpw_expand {W W' s E e Φ} :
+    □ (W' -∗ W ∗ (W -∗ W')) -∗ wpw W s E e Φ -∗ wpw W' s E e Φ.
+  Proof.
+    iIntros "#W'W". iApply (wpw_expand_fupd (E:=E)); [done|]. iIntros "!> W'".
+    iDestruct ("W'W" with "W'") as "[$ WW']". iIntros "!>?!>". by iApply "WW'".
+  Qed.
+
+  (** Expand the world satisfaction of [twpw] *)
+  Lemma twpw_expand_fupd {W W' s E F e Φ} : E ⊆ F →
+    □ (W' ={E}=∗ W ∗ (W ={E}=∗ W')) -∗ twpw W s F e Φ -∗ twpw W' s F e Φ.
+  Proof.
+    iIntros (EF) "#W'W twpW". iRevert (EF). iRevert (e F Φ) "twpW".
+    iApply twp_ind; [solve_proper|]. iIntros "!#" (e F Φ) "twpW %".
+    rewrite twp_unfold /twp_pre/=. case (to_val e); [done|].
+    iIntros (????) "[W' X]". iMod (fupd_mask_subseteq E) as "Cl"; [done|].
+    iMod ("W'W" with "W'") as "[W Wto]". iMod "Cl" as "_".
+    iMod ("twpW" with "[$W $X]") as "[% big]". iModIntro. iSplit; [done|].
+    iIntros (?????).
+    iMod ("big" with "[%//]") as (?) "[[W $] [[twpW' _] twpW's]]".
+    iDestruct ("twpW'" with "[%//]") as "$".
+    iMod (fupd_mask_subseteq E) as "Cl"; [done|]. iMod ("Wto" with "W") as "$".
+    iMod "Cl" as "_". iModIntro. iSplit; [done|].
+    iApply (big_sepL_impl with "twpW's"). iIntros "!#" (???) "[to _]".
+    by iApply "to".
+  Qed.
+  Lemma twpw_expand {W W' s E e Φ} :
+    □ (W' -∗ W ∗ (W -∗ W')) -∗ twpw W s E e Φ -∗ twpw W' s E e Φ.
+  Proof.
+    iIntros "#W'W". iApply (twpw_expand_fupd (E:=E)); [done|]. iIntros "!> W'".
+    iDestruct ("W'W" with "W'") as "[$ WW']". iIntros "!>?!>". by iApply "WW'".
+  Qed.
 End wpw.
 
 (** Notation for [wpw]/[twpw] *)
