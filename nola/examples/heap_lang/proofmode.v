@@ -251,12 +251,12 @@ Qed.
 Ltac wp_bind_core K :=
   lazymatch eval hnf in K with
   | [] => idtac
-  | _ => eapply (tac_wp_bind K); [simpl; reflexivity|reduction.pm_prettify]
+  | _ => eapply (tac_wp_bind _ K); [simpl; reflexivity|reduction.pm_prettify]
   end.
 Ltac twp_bind_core K :=
   lazymatch eval hnf in K with
   | [] => idtac
-  | _ => eapply (tac_twp_bind K); [simpl; reflexivity|reduction.pm_prettify]
+  | _ => eapply (tac_twp_bind _ K); [simpl; reflexivity|reduction.pm_prettify]
   end.
 
 Tactic Notation "wp_bind" open_constr(efoc) :=
