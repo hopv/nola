@@ -240,9 +240,9 @@ Notation "P ={ E }=∗ Q" := (P ={E,E}=∗ Q)%n : nProp_scope.
 Notation "|=[ W ] => P" := (W ==∗ W ∗ P)%n : nProp_scope.
 Notation "P =[ W ]=∗ Q" := (P -∗ |=[W]=> Q)%n : nProp_scope.
 Notation "|=[ W ] { E , E' }=> P" := (W ={E,E'}=∗ W ∗ P)%n : nProp_scope.
-Notation "|=[ W ] { E }=> P" := (W ={E}=∗ W ∗ P)%n : nProp_scope.
+Notation "|=[ W ] { E }=> P" := (|=[W]{E,E}=> P)%n : nProp_scope.
 Notation "P =[ W ] { E , E' }=∗ Q" := (P -∗ |=[W]{E,E'}=> Q)%n : nProp_scope.
-Notation "P =[ W ] { E }=∗ Q" := (P -∗ |=[W]{E}=> Q)%n : nProp_scope.
+Notation "P =[ W ] { E }=∗ Q" := (P =[W]{E,E}=∗ Q)%n : nProp_scope.
 
 (** ** [↑ˡ P]: Turn [P : nProp κ Γ] into [nPropL Γ]
   Although the main interest is the case [κ = nS],
