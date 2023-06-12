@@ -15,12 +15,11 @@ Proof.
   iMod (inv_heap_init loc (option val)) as (?) ">Hi".
   iMod (proph_map_init [] σ.(used_proph_id)) as (?) "Hp".
   iMod (mono_nat_own_alloc 0) as (γ) "[Hsteps _]".
-  iMod (Hwp (HeapGS _ _ _ _ _ _)) as (W) "[W Hwp]".
-  iDestruct ("Hwp" with "Hi") as "Hwp".
-  iMod (twpw_twpw' with "Hwp W") as "[W Hwp]". iModIntro.
+  iMod (Hwp (HeapGS _ _ _ _ _ _)) as (W) "[W Hwp]". iModIntro.
   iExists
     (λ σ ns κs _, (W ∗ gen_heap_interp σ.(heap) ∗
                    proph_map_interp κs σ.(used_proph_id) ∗
                    mono_nat_auth_own γ 1 ns)%I),
     id, (λ _, True%I), _; iFrame.
+  by iApply "Hwp".
 Qed.

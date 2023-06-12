@@ -64,6 +64,7 @@ Global Program Instance heapGS_irisGS' `{!heapGS_gen hlc Σ} :
   state_interp' σ step_cnt κs _ :=
     (gen_heap_interp σ.(heap) ∗ proph_map_interp κs σ.(used_proph_id) ∗
      steps_auth step_cnt)%I;
+  fork_post' _ := True%I;
   num_laters_per_step' n := n;
 }.
 Next Obligation.
@@ -139,8 +140,7 @@ Proof.
   iDestruct (steps_lb_get with "Hsteps") as "#HlbS".
   iDestruct (steps_lb_le _ (S n) with "HlbS") as "#HlbS'"; [lia|].
   iModIntro. iFrame "Hsteps".
-  iApply (wp_wand with "Hwp"). iIntros (v) "HΦ W".
-  iMod ("HΦ" with "W") as "[$ toΦ]". by iApply "toΦ".
+  iApply (wp_wand with "Hwp"). iIntros (v) "HΦ". by iApply "HΦ".
 Qed.
 
 Lemma wp_step_fupdN_lb W s n E1 E2 e P Φ :
@@ -153,10 +153,7 @@ Lemma wp_step_fupdN_lb W s n E1 E2 e P Φ :
 Proof.
   iIntros (He HE) "Hlb HP Hwp".
   iApply wp_step_fupdN; [done|].
-  iSplit; last first.
-  { iFrame "HP". iApply (wp_wand with "Hwp"). iIntros (v) "toΦ P !> W".
-    iMod (fupd_mask_subseteq E2) as "Cl"; [done|].
-    iMod ("toΦ" with "W") as "[$ toΦ]". iMod "Cl". by iApply "toΦ". }
+  iSplit; [|by iFrame].
   iIntros (σ ns κs nt) "(? & ? & ? & Hsteps)".
   iDestruct (steps_lb_valid with "Hsteps Hlb") as %Hle.
   iApply fupd_mask_intro; [set_solver|].
@@ -184,9 +181,8 @@ Proof.
   iIntros "He HΦ". iApply wp_lift_atomic_head_step; [done|].
   iIntros (σ1 ns κ κs nt) "(?&?&?&Hsteps) !>"; iSplit; first by eauto with head_step.
   iIntros "!>" (v2 σ2 efs Hstep) "_"; inv_head_step.
-  iMod (steps_auth_update_S with "Hsteps") as "Hsteps". iFrame. iModIntro.
-  iSplitR; [by iIntros|]. iSplit; [|done]. iApply (wp_wand with "He").
-  by iIntros.
+  iMod (steps_auth_update_S with "Hsteps") as "Hsteps".
+  by iFrame.
 Qed.
 
 Lemma twp_fork W s E e Φ :
@@ -195,9 +191,8 @@ Proof.
   iIntros "He HΦ". iApply twp_lift_atomic_head_step; [done|].
   iIntros (σ1 ns κs nt) "(?&?&?&Hsteps) !>"; iSplit; first by eauto with head_step.
   iIntros (κ v2 σ2 efs Hstep); inv_head_step.
-  iMod (steps_auth_update_S with "Hsteps") as "Hsteps". iFrame. iModIntro.
-  do 2 (iSplitR; [by iIntros|]). iSplit; [|done]. iApply (twp_wand with "He").
-  by iIntros.
+  iMod (steps_auth_update_S with "Hsteps") as "Hsteps".
+  by iFrame.
 Qed.
 
 (** Heap *)
@@ -338,8 +333,8 @@ Proof.
   { apply heap_array_map_disjoint.
     rewrite replicate_length Z2Nat.id; auto with lia. }
   iMod (steps_auth_update_S with "Hsteps") as "Hsteps".
-  iModIntro; do 2 (iSplit; first done). iFrame "W Hσ Hκs Hsteps". iIntros "$".
-  iApply "HΦ". iApply big_sepL_sep. iSplitL "Hl".
+  iModIntro; do 2 (iSplit; first done). iFrame "W Hσ Hκs Hsteps". iApply "HΦ".
+  iApply big_sepL_sep. iSplitL "Hl".
   - by iApply heap_array_to_seq_mapsto.
   - iApply (heap_array_to_seq_meta with "Hm"). by rewrite replicate_length.
 Qed.
@@ -349,7 +344,7 @@ Lemma wp_allocN_seq W s E v n :
   {{{ l, RET LitV (LitLoc l); [∗ list] i ∈ seq 0 (Z.to_nat n),
       (l +ₗ (i : nat)) ↦ v ∗ meta_token (l +ₗ (i : nat)) ⊤ }}}.
 Proof.
-  iIntros (Hn Φ) "_ HΦ". iApply (twpw_wpw_step with "HΦ").
+  iIntros (Hn Φ) "_ HΦ". iApply (twp_wp_step with "HΦ").
   iApply twp_allocN_seq; [by auto..|]; iIntros (l) "H HΦ". by iApply "HΦ".
 Qed.
 
@@ -362,7 +357,7 @@ Qed.
 Lemma wp_alloc W s E v :
   {{{ True }}}[W] Alloc (Val v) @ s; E {{{ l, RET LitV (LitLoc l); l ↦ v ∗ meta_token l ⊤ }}}.
 Proof.
-  iIntros (Φ) "_ HΦ". iApply (twpw_wpw_step with "HΦ").
+  iIntros (Φ) "_ HΦ". iApply (twp_wp_step with "HΦ").
   iApply twp_alloc; [by auto..|]; iIntros (l) "H HΦ". by iApply "HΦ".
 Qed.
 
@@ -376,14 +371,13 @@ Proof.
   iIntros (κ v2 σ2 efs Hstep); inv_head_step.
   iMod (gen_heap_update with "Hσ Hl") as "[$ Hl]".
   iMod (steps_auth_update_S with "Hsteps") as "Hsteps".
-  iModIntro. iSplit; first done. iSplit; first done. iFrame. iIntros "$".
-  by iApply "HΦ".
+  iModIntro. iSplit; first done. iSplit; first done. iFrame. by iApply "HΦ".
 Qed.
 Lemma wp_free W s E l v :
   {{{ ▷ l ↦ v }}}[W] Free (Val $ LitV (LitLoc l)) @ s; E
   {{{ RET LitV LitUnit; True }}}.
 Proof.
-  iIntros (Φ) ">H HΦ". iApply (twpw_wpw_step with "HΦ").
+  iIntros (Φ) ">H HΦ". iApply (twp_wp_step with "HΦ").
   iApply (twp_free with "H"); [by auto..|]; iIntros "H HΦ". by iApply "HΦ".
 Qed.
 
@@ -395,13 +389,13 @@ Proof.
   iSplit; first by eauto with head_step.
   iIntros (κ v2 σ2 efs Hstep); inv_head_step.
   iMod (steps_auth_update_S with "Hsteps") as "Hsteps".
-  iModIntro. iSplit; [done|]. iSplit; [done|]. iFrame. iIntros "$".
+  iModIntro. iSplit; [done|]. iSplit; [done|]. iFrame.
   by iApply "HΦ".
 Qed.
 Lemma wp_load W s E l dq v :
   {{{ ▷ l ↦{dq} v }}}[W] Load (Val $ LitV $ LitLoc l) @ s; E {{{ RET v; l ↦{dq} v }}}.
 Proof.
-  iIntros (Φ) ">H HΦ". iApply (twpw_wpw_step with "HΦ").
+  iIntros (Φ) ">H HΦ". iApply (twp_wp_step with "HΦ").
   iApply (twp_load with "H"). iIntros "H HΦ". by iApply "HΦ".
 Qed.
 
@@ -415,14 +409,13 @@ Proof.
   iIntros (κ v2 σ2 efs Hstep); inv_head_step.
   iMod (steps_auth_update_S with "Hsteps") as "Hsteps".
   iMod (gen_heap_update with "Hσ Hl") as "[$ Hl]".
-  iModIntro. iSplit; first done. iSplit; first done. iFrame. iIntros "$".
-  by iApply "HΦ".
+  iModIntro. iSplit; first done. iSplit; first done. iFrame. by iApply "HΦ".
 Qed.
 Lemma wp_store W s E l v' v :
   {{{ ▷ l ↦ v' }}}[W] Store (Val $ LitV (LitLoc l)) (Val v) @ s; E
   {{{ RET LitV LitUnit; l ↦ v }}}.
 Proof.
-  iIntros (Φ) ">H HΦ". iApply (twpw_wpw_step with "HΦ").
+  iIntros (Φ) ">H HΦ". iApply (twp_wp_step with "HΦ").
   iApply (twp_store with "H"); [by auto..|]; iIntros "H HΦ". by iApply "HΦ".
 Qed.
 
@@ -436,14 +429,13 @@ Proof.
   iIntros (κ v2 σ2 efs Hstep); inv_head_step.
   iMod (steps_auth_update_S with "Hsteps") as "Hsteps".
   iMod (gen_heap_update with "Hσ Hl") as "[$ Hl]".
-  iModIntro. iSplit; first done. iSplit; first done. iFrame. iIntros "$".
-  by iApply "HΦ".
+  iModIntro. iSplit; first done. iSplit; first done. iFrame. by iApply "HΦ".
 Qed.
 Lemma wp_xchg W s E l v' v :
   {{{ ▷ l ↦ v' }}}[W] Xchg (Val $ LitV (LitLoc l)) (Val v) @ s; E
   {{{ RET v'; l ↦ v }}}.
 Proof.
-  iIntros (Φ) ">H HΦ". iApply (twpw_wpw_step with "HΦ").
+  iIntros (Φ) ">H HΦ". iApply (twp_wp_step with "HΦ").
   iApply (twp_xchg with "H"); [by auto..|]. iIntros "H HΦ". by iApply "HΦ".
 Qed.
 
@@ -458,15 +450,14 @@ Proof.
   iIntros (κ v2' σ2 efs Hstep); inv_head_step.
   rewrite bool_decide_false //.
   iMod (steps_auth_update_S with "Hsteps") as "Hsteps".
-  iModIntro; iSplit; first done. iSplit; first done. iFrame. iIntros "$".
-  by iApply "HΦ".
+  iModIntro; iSplit; first done. iSplit; first done. iFrame. by iApply "HΦ".
 Qed.
 Lemma wp_cmpxchg_fail W s E l dq v' v1 v2 :
   v' ≠ v1 → vals_compare_safe v' v1 →
   {{{ ▷ l ↦{dq} v' }}}[W] CmpXchg (Val $ LitV $ LitLoc l) (Val v1) (Val v2) @ s; E
   {{{ RET PairV v' (LitV $ LitBool false); l ↦{dq} v' }}}.
 Proof.
-  iIntros (?? Φ) ">H HΦ". iApply (twpw_wpw_step with "HΦ").
+  iIntros (?? Φ) ">H HΦ". iApply (twp_wp_step with "HΦ").
   iApply (twp_cmpxchg_fail with "H"); [by auto..|]; iIntros "H HΦ". by iApply "HΦ".
 Qed.
 
@@ -482,15 +473,14 @@ Proof.
   rewrite bool_decide_true //.
   iMod (gen_heap_update with "Hσ Hl") as "[$ Hl]".
   iMod (steps_auth_update_S with "Hsteps") as "Hsteps".
-  iModIntro. iSplit; first done. iSplit; first done. iFrame. iIntros "$".
-  by iApply "HΦ".
+  iModIntro. iSplit; first done. iSplit; first done. iFrame. by iApply "HΦ".
 Qed.
 Lemma wp_cmpxchg_suc W s E l v1 v2 v' :
   v' = v1 → vals_compare_safe v' v1 →
   {{{ ▷ l ↦ v' }}}[W] CmpXchg (Val $ LitV $ LitLoc l) (Val v1) (Val v2) @ s; E
   {{{ RET PairV v' (LitV $ LitBool true); l ↦ v2 }}}.
 Proof.
-  iIntros (?? Φ) ">H HΦ". iApply (twpw_wpw_step with "HΦ").
+  iIntros (?? Φ) ">H HΦ". iApply (twp_wp_step with "HΦ").
   iApply (twp_cmpxchg_suc with "H"); [by auto..|]; iIntros "H HΦ". by iApply "HΦ".
 Qed.
 
@@ -504,13 +494,13 @@ Proof.
   iIntros (κ e2 σ2 efs Hstep); inv_head_step.
   iMod (gen_heap_update with "Hσ Hl") as "[$ Hl]".
   iMod (steps_auth_update_S with "Hsteps") as "Hsteps".
-  iModIntro. do 2 (iSplit; first done). iFrame. iIntros "$". by iApply "HΦ".
+  iModIntro. do 2 (iSplit; first done). iFrame. by iApply "HΦ".
 Qed.
 Lemma wp_faa W s E l i1 i2 :
   {{{ ▷ l ↦ LitV (LitInt i1) }}}[W] FAA (Val $ LitV $ LitLoc l) (Val $ LitV $ LitInt i2) @ s; E
   {{{ RET LitV (LitInt i1); l ↦ LitV (LitInt (i1 + i2)) }}}.
 Proof.
-  iIntros (Φ) ">H HΦ". iApply (twpw_wpw_step with "HΦ").
+  iIntros (Φ) ">H HΦ". iApply (twp_wp_step with "HΦ").
   iApply (twp_faa with "H"); [by auto..|]; iIntros "H HΦ". by iApply "HΦ".
 Qed.
 
@@ -525,7 +515,7 @@ Proof.
   rename select proph_id into p.
   iMod (steps_auth_update_S with "Hsteps") as "Hsteps".
   iMod (proph_map_new_proph p with "HR") as "[HR Hp]"; first done.
-  iModIntro; iSplit; first done. iFrame. iIntros "$". by iApply "HΦ".
+  iModIntro; iSplit; first done. iFrame. by iApply "HΦ".
 Qed.
 
 (* In the following, strong atomicity is required due to the fact that [e] must
@@ -598,7 +588,7 @@ Proof.
     iApply (step_fupdN_wand with "WPe"); iIntros "> [($ & $ & Hκ & $) WPe]".
     iMod (proph_map_resolve_proph p' (w',v') κs with "[$Hκ $Hp]") as (vs' ->) "[$ HPost]".
     iModIntro. rewrite !wp_unfold /wp_pre /=. iDestruct "WPe" as "[HΦ $]".
-    iIntros "!> W". iMod ("HΦ" with "W") as ">[$ HΦ]". by iApply "HΦ".
+    iMod "HΦ". iModIntro. by iApply "HΦ".
 Qed.
 
 Lemma twp_ndnat W s E :
@@ -608,12 +598,12 @@ Proof.
   iIntros (σ1 ns κs nt) "(W & Hσ & Hκs & Hsteps) !>".
   iSplit; [by auto with head_step|]. iIntros (κ v2 σ2 efs Hstep); inv_head_step.
   iMod (steps_auth_update_S with "Hsteps") as "Hsteps".
-  iModIntro. do 2 (iSplit; [done|]). iFrame. iIntros "$". by iApply "HΦ".
+  iModIntro. do 2 (iSplit; [done|]). iFrame. by iApply "HΦ".
 Qed.
 Lemma wp_ndnat W s E :
   {{{ True }}}[W] Ndnat @ s; E {{{ (n : nat), RET (LitV (LitInt n)); True }}}.
 Proof.
-  iIntros (Φ) "_ HΦ". iApply (twpw_wpw_step with "HΦ").
+  iIntros (Φ) "_ HΦ". iApply (twp_wp_step with "HΦ").
   iApply twp_ndnat; [done|]. iIntros (n) "_ HΦ". by iApply "HΦ".
 Qed.
 

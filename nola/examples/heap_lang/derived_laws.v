@@ -116,7 +116,7 @@ Lemma wp_allocN W s E v n :
   {{{ l, RET LitV (LitLoc l); l ↦∗ replicate (Z.to_nat n) v ∗
          [∗ list] i ∈ seq 0 (Z.to_nat n), meta_token (l +ₗ (i : nat)) ⊤ }}}.
 Proof.
-  iIntros (? Φ) "_ HΦ". iApply (twpw_wpw_step with "HΦ").
+  iIntros (? Φ) "_ HΦ". iApply (twp_wp_step with "HΦ").
   iApply twp_allocN; [auto..|]; iIntros (l) "H HΦ". by iApply "HΦ".
 Qed.
 
@@ -137,7 +137,7 @@ Lemma wp_allocN_vec W s E v n :
   {{{ l, RET #l; l ↦∗ vreplicate (Z.to_nat n) v ∗
          [∗ list] i ∈ seq 0 (Z.to_nat n), meta_token (l +ₗ (i : nat)) ⊤ }}}.
 Proof.
-  iIntros (? Φ) "_ HΦ". iApply (twpw_wpw_step with "HΦ").
+  iIntros (? Φ) "_ HΦ". iApply (twp_wp_step with "HΦ").
   iApply twp_allocN_vec; [auto..|]; iIntros (l) "H HΦ". by iApply "HΦ".
 Qed.
 
@@ -156,7 +156,7 @@ Lemma wp_load_offset W s E l dq off vs v :
   vs !! off = Some v →
   {{{ ▷ l ↦∗{dq} vs }}}[W] ! #(l +ₗ off) @ s; E {{{ RET v; l ↦∗{dq} vs }}}.
 Proof.
-  iIntros (? Φ) ">H HΦ". iApply (twpw_wpw_step with "HΦ").
+  iIntros (? Φ) ">H HΦ". iApply (twp_wp_step with "HΦ").
   iApply (twp_load_offset with "H"); [by eauto..|]; iIntros "H HΦ".
   by iApply "HΦ".
 Qed.
@@ -181,7 +181,7 @@ Lemma wp_store_offset W s E l off vs v :
   is_Some (vs !! off) →
   {{{ ▷ l ↦∗ vs }}}[W] #(l +ₗ off) <- v @ s; E {{{ RET #(); l ↦∗ <[off:=v]> vs }}}.
 Proof.
-  iIntros (? Φ) ">H HΦ". iApply (twpw_wpw_step with "HΦ").
+  iIntros (? Φ) ">H HΦ". iApply (twp_wp_step with "HΦ").
   iApply (twp_store_offset with "H"); [by eauto..|]; iIntros "H HΦ".
   by iApply "HΦ".
 Qed.
@@ -195,7 +195,7 @@ Qed.
 Lemma wp_store_offset_vec W s E l sz (off : fin sz) (vs : vec val sz) v :
   {{{ ▷ l ↦∗ vs }}}[W] #(l +ₗ off) <- v @ s; E {{{ RET #(); l ↦∗ vinsert off v vs }}}.
 Proof.
-  iIntros (Φ) ">H HΦ". iApply (twpw_wpw_step with "HΦ").
+  iIntros (Φ) ">H HΦ". iApply (twp_wp_step with "HΦ").
   iApply (twp_store_offset_vec with "H"); [by eauto..|]; iIntros "H HΦ".
   by iApply "HΦ".
 Qed.
@@ -213,7 +213,7 @@ Lemma wp_xchg_offset W s E l off vs v v' :
   vs !! off = Some v →
   {{{ ▷ l ↦∗ vs }}}[W] Xchg #(l +ₗ off) v' @ s; E {{{ RET v; l ↦∗ <[off:=v']> vs }}}.
 Proof.
-  iIntros (? Φ) ">H HΦ". iApply (twpw_wpw_step with "HΦ").
+  iIntros (? Φ) ">H HΦ". iApply (twp_wp_step with "HΦ").
   iApply (twp_xchg_offset with "H"); [by eauto..|]; iIntros "H HΦ".
   by iApply "HΦ".
 Qed.
@@ -227,7 +227,7 @@ Qed.
 Lemma wp_xchg_offset_vec W s E l sz (off : fin sz) (vs : vec val sz) v :
    {{{ ▷ l ↦∗ vs }}}[W] Xchg #(l +ₗ off) v @ s; E {{{ RET (vs !!! off); l ↦∗ vinsert off v vs }}}.
 Proof.
-  iIntros (Φ) ">H HΦ". iApply (twpw_wpw_step with "HΦ").
+  iIntros (Φ) ">H HΦ". iApply (twp_wp_step with "HΦ").
   iApply (twp_xchg_offset_vec with "H"); [by eauto..|]; iIntros "H HΦ".
   by iApply "HΦ".
 Qed.
@@ -253,7 +253,7 @@ Lemma wp_cmpxchg_suc_offset W s E l off vs v' v1 v2 :
     CmpXchg #(l +ₗ off) v1 v2 @ s; E
   {{{ RET (v', #true); l ↦∗ <[off:=v2]> vs }}}.
 Proof.
-  iIntros (??? Φ) ">H HΦ". iApply (twpw_wpw_step with "HΦ").
+  iIntros (??? Φ) ">H HΦ". iApply (twp_wp_step with "HΦ").
   iApply (twp_cmpxchg_suc_offset with "H"); [by eauto..|]; iIntros "H HΦ".
   by iApply "HΦ".
 Qed.
@@ -276,7 +276,7 @@ Lemma wp_cmpxchg_suc_offset_vec W s E l sz (off : fin sz) (vs : vec val sz) v1 v
     CmpXchg #(l +ₗ off) v1 v2 @ s; E
   {{{ RET (vs !!! off, #true); l ↦∗ vinsert off v2 vs }}}.
 Proof.
-  iIntros (?? Φ) ">H HΦ". iApply (twpw_wpw_step with "HΦ").
+  iIntros (?? Φ) ">H HΦ". iApply (twp_wp_step with "HΦ").
   iApply (twp_cmpxchg_suc_offset_vec with "H"); [by eauto..|]; iIntros "H HΦ".
   by iApply "HΦ".
 Qed.
@@ -304,7 +304,7 @@ Lemma wp_cmpxchg_fail_offset W s E l dq off vs v0 v1 v2 :
     CmpXchg #(l +ₗ off) v1 v2 @ s; E
   {{{ RET (v0, #false); l ↦∗{dq} vs }}}.
 Proof.
-  iIntros (??? Φ) ">H HΦ". iApply (twpw_wpw_step with "HΦ").
+  iIntros (??? Φ) ">H HΦ". iApply (twp_wp_step with "HΦ").
   iApply (twp_cmpxchg_fail_offset with "H"); [by eauto..|]; iIntros "H HΦ".
   by iApply "HΦ".
 Qed.
@@ -345,7 +345,7 @@ Lemma wp_faa_offset W s E l off vs (i1 i2 : Z) :
   {{{ ▷ l ↦∗ vs }}}[W] FAA #(l +ₗ off) #i2 @ s; E
   {{{ RET LitV (LitInt i1); l ↦∗ <[off:=#(i1 + i2)]> vs }}}.
 Proof.
-  iIntros (? Φ) ">H HΦ". iApply (twpw_wpw_step with "HΦ").
+  iIntros (? Φ) ">H HΦ". iApply (twp_wp_step with "HΦ").
   iApply (twp_faa_offset with "H"); [by eauto..|]; iIntros "H HΦ". by iApply "HΦ".
 Qed.
 
@@ -362,7 +362,7 @@ Lemma wp_faa_offset_vec W s E l sz (off : fin sz) (vs : vec val sz) (i1 i2 : Z) 
   {{{ ▷ l ↦∗ vs }}}[W] FAA #(l +ₗ off) #i2 @ s; E
   {{{ RET LitV (LitInt i1); l ↦∗ vinsert off #(i1 + i2) vs }}}.
 Proof.
-  iIntros (? Φ) ">H HΦ". iApply (twpw_wpw_step with "HΦ").
+  iIntros (? Φ) ">H HΦ". iApply (twp_wp_step with "HΦ").
   iApply (twp_faa_offset_vec with "H"); [by eauto..|]; iIntros "H HΦ".
   by iApply "HΦ".
 Qed.
@@ -377,8 +377,7 @@ Lemma wp_resolve_proph W s E (p : proph_id) (pvs : list (val * val)) v :
 Proof.
   iIntros (Φ) "Hp HΦ". iApply (wp_resolve with "Hp"); first done.
   iApply @lifting.wp_pure_step_later; first done.
-  iIntros "!> _". iApply wp_value. iIntros "$ !>" (vs') "HEq Hp". iApply "HΦ".
-  iFrame.
+  iIntros "!> _". iApply wp_value. iIntros (vs') "HEq Hp". iApply "HΦ". iFrame.
 Qed.
 
 Lemma wp_resolve_cmpxchg_suc W s E l (p : proph_id) (pvs : list (val * val)) v1 v2 v :

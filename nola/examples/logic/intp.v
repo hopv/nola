@@ -152,11 +152,9 @@ Section nintp.
   #[export] Instance nintpS_gen_contractive : Contractive nintpS_gen'.
   Proof.
     unfold nintpS_gen'=> i ni ni' nid s + + + + + + +. fix FIX 4=> κ Γ P H.
-    case: P H=>/=; intros; case H=>//= H'; try (by f_equiv=> >; apply FIX);
-      try (by apply ncintpg1_contr; apply nid);
-      (* TODO: Use wpw/twpw_ne *)
-      [apply wpw'_ne; [apply FIX|]|apply twpw'_ne; [apply FIX|]]=> ?;
-      apply fupdpw_ne; apply FIX.
+    case: P H=>/=; intros; case H=>//= ?; try (by f_equiv=> >; apply FIX);
+    try (by apply ncintpg1_contr; apply nid);
+    [apply wpw_ne=> >|apply twpw_ne=> >]; by apply FIX.
   Qed.
 
   (** [nintp_gen] is contractive *)
@@ -166,9 +164,7 @@ Section nintp.
     case: P H=>/=; intros; case H=>//= ?; try (by f_equiv=> >; apply FIX);
       try (by apply ncintpg1_contr; apply nid);
       try (by try (f_equiv=> ?); apply nintpS_gen_contractive);
-      (* TODO: Use wpw/twpw_ne *)
-      [apply wpw'_ne; [apply FIX|]|apply twpw'_ne; [apply FIX|]]=> ?;
-      apply fupdpw_ne; apply FIX.
+      [apply wpw_ne=> >|apply twpw_ne=> >]; by apply FIX.
   Qed.
 
   (** [nintp_pre]: Generator of [nintp_fp] *)
@@ -217,11 +213,8 @@ Section nintp_facts.
     nintpS_gen ni s P H κS un gn ⊣⊢ nintp_gen ni s P H un gn.
   Proof.
     move: κ Γ P H κS un gn. fix FIX 4=> κ Γ P H.
-    case: P H; intros; case H=>//= ?;
-      (* TODO: wpw/twpw_proper *)
-      try (apply wpw'_proper=> >; [|apply fupdpw_proper]);
-      try (apply twpw'_proper=> >; [|apply fupdpw_proper]);
-      try f_equiv=> >; apply FIX.
+    case: P H; intros; case H=>//= ?; try apply wpw_proper=> >;
+      try apply twpw_proper=> >; try f_equiv=> >; apply FIX.
   Qed.
   (** [⟦ ⟧ˢ] coincides with [⟦ ⟧] *)
   Lemma nintpS_nintp {s P} : ⟦ P ⟧ˢ(s) ⊣⊢ ⟦ P ⟧(s).
@@ -232,11 +225,9 @@ Section nintp_facts.
     nintp_gen ni s (↑ˡ P) H un gn ⊣⊢ nintp_gen ni s P hwf un gn.
   Proof.
     move: κ Γ P H un gn. fix FIX 4=> κ Γ P H.
-    case: P H=>/=; intros; case H=>/= he;
-      (* TODO: Use wpw/twpw_proper *)
-      try (apply wpw'_proper=> >; [|apply fupdpw_proper]);
-      try (apply twpw'_proper=> >; [|apply fupdpw_proper]);
-      try f_equiv=> >; try apply FIX; try apply leibniz_equiv, proof_irrel;
+    case: P H=>/=; intros; case H=>/= he; try apply wpw_proper=> >;
+      try apply twpw_proper=> >; try f_equiv=> >; try apply FIX;
+      try apply leibniz_equiv, proof_irrel;
       rewrite rew_eq_hwf; move: nsubst'_nhgt=>/=; subst;
       have EQ := nsubst_nlarge (P:=P); move: (nsubst (↑ˡ P)) EQ;
       move=> ?->?; apply FIX.

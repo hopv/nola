@@ -37,8 +37,7 @@ Proof.
   iMod (proph_map_init κs σ.(used_proph_id)) as (?) "Hp".
   iMod (mono_nat_own_alloc) as (γ) "[Hsteps _]".
   iMod (Hwp (HeapGS _ _ _ _ _ _)) as (W) "[W Hwp]".
-  iDestruct ("Hwp" with "Hi") as "Hwp".
-  iMod (wpw_wpw' with "Hwp W") as "[W Hwp]". iModIntro.
+  iDestruct ("Hwp" with "Hi") as "Hwp". iModIntro.
   iExists (λ σ ns κs nt, (W ∗ gen_heap_interp σ.(heap) ∗
                           proph_map_interp κs σ.(used_proph_id) ∗
                           mono_nat_auth_own γ 1 ns))%I.
