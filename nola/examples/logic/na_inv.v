@@ -117,7 +117,7 @@ Section lemmas.
     iApply fupd_mask_intro; [set_solver|].
     iDestruct (na_own_acc (F ∖ ↑N'') with "F∖NN'") as "[$ F∖N''to]";
       [set_solver|].
-    iIntros "Cl [P Q] F∖N'' W". iMod "Cl".
+    iIntros "cl [P Q] F∖N'' W". iMod "cl".
     iDestruct ("F∖N''to" with "F∖N''") as "F∖NN'".
     iMod ("Qto" with "Q F∖NN' W") as "[W F∖N]". iApply ("Pto" with "P F∖N W").
   Qed.

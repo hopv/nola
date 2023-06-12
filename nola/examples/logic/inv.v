@@ -101,7 +101,7 @@ Section lemmas.
     iIntros (??) "{NP}NP {N'Q}N'Q". iIntros (E NE) "W".
     iMod ("NP" with "[%] W") as "(W &$& Pto)"; [set_solver|].
     iMod ("N'Q" with "[%] W") as "($&$& Qto)"; [set_solver|].
-    iApply fupd_mask_intro; [set_solver|]. iIntros "Cl [P Q] W". iMod "Cl".
+    iApply fupd_mask_intro; [set_solver|]. iIntros "cl [P Q] W". iMod "cl".
     iMod ("Qto" with "Q W") as "[W _]". iApply ("Pto" with "P W").
   Qed.
 End lemmas.

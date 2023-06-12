@@ -75,13 +75,13 @@ Section wpw.
     iIntros (EF) "#W'W wpW". iLöb as "IH" forall (F e Φ EF).
     rewrite !wp_unfold /wp_pre/=. case (to_val e); [done|].
     iIntros (?????) "[W' X]".
-    iMod (fupd_mask_subseteq E) as "Cl"; [done|].
-    iMod ("W'W" with "W'") as "[W Wto]". iMod "Cl" as "_".
+    iMod (fupd_mask_subseteq E) as "cl"; [done|].
+    iMod ("W'W" with "W'") as "[W Wto]". iMod "cl" as "_".
     iMod ("wpW" with "[$W $X]") as "[% big]". iModIntro. iSplit; [done|].
     iIntros (????) "£". iMod ("big" with "[%//] £") as "big". iModIntro. iNext.
     iApply (step_fupdN_wand with "big"). iIntros ">[[W $] [wpW wpWs]]".
-    iMod (fupd_mask_subseteq E) as "Cl"; [done|].
-    iMod ("Wto" with "W") as "$". iMod "Cl" as "_". iModIntro.
+    iMod (fupd_mask_subseteq E) as "cl"; [done|].
+    iMod ("Wto" with "W") as "$". iMod "cl" as "_". iModIntro.
     iSplitL "wpW"; [by iApply "IH"|]. iApply (big_sepL_impl with "wpWs").
     iIntros "!#" (???). by iApply "IH".
   Qed.
@@ -99,14 +99,14 @@ Section wpw.
     iIntros (EF) "#W'W twpW". iRevert (EF). iRevert (e F Φ) "twpW".
     iApply twp_ind; [solve_proper|]. iIntros "!#" (e F Φ) "twpW %".
     rewrite twp_unfold /twp_pre/=. case (to_val e); [done|].
-    iIntros (????) "[W' X]". iMod (fupd_mask_subseteq E) as "Cl"; [done|].
-    iMod ("W'W" with "W'") as "[W Wto]". iMod "Cl" as "_".
+    iIntros (????) "[W' X]". iMod (fupd_mask_subseteq E) as "cl"; [done|].
+    iMod ("W'W" with "W'") as "[W Wto]". iMod "cl" as "_".
     iMod ("twpW" with "[$W $X]") as "[% big]". iModIntro. iSplit; [done|].
     iIntros (?????).
     iMod ("big" with "[%//]") as (?) "[[W $] [[twpW' _] twpW's]]".
     iDestruct ("twpW'" with "[%//]") as "$".
-    iMod (fupd_mask_subseteq E) as "Cl"; [done|]. iMod ("Wto" with "W") as "$".
-    iMod "Cl" as "_". iModIntro. iSplit; [done|].
+    iMod (fupd_mask_subseteq E) as "cl"; [done|]. iMod ("Wto" with "W") as "$".
+    iMod "cl" as "_". iModIntro. iSplit; [done|].
     iApply (big_sepL_impl with "twpW's"). iIntros "!#" (???) "[to _]".
     by iApply "to".
   Qed.
