@@ -4,25 +4,25 @@ From nola.examples.logic Require Export inv.
 From nola.examples.heap_lang Require Export proofmode notation.
 
 (** Stream whose elements are multiples of [d] *)
-Definition mul_strm (N : namespace) (d : nat) : loc → nPropS (;ᵞ) :=
-  (rec:ˢ l, n_inv' [_] 0 N (∃ (l' : loc) (k : nat),
-    l ↦ # l' ∗ (l +ₗ 1) ↦ # (k * d)%nat ∗ %ᵍˢ #!0 @! l'))%n.
+Definition mul_strm (N : namespace) (d : Z) : loc → nPropS (;ᵞ) :=
+  (rec:ˢ l, n_inv' [_] 0 N (∃ (l' : loc) (k : Z),
+    l ↦ # l' ∗ (l +ₗ 1) ↦ #(k * d) ∗ %ᵍˢ #!0 @! l'))%n.
 
 (** Atomically increases the first [c] elements of the stream by [d] *)
-Definition iter_inc (d : nat) : val :=
+Definition iter_inc (d : Z) : val :=
   rec: "self" "c" "l" :=
     if: "c" = #0 then #() else FAA ("l" +ₗ #1) #d;; "self" ("c" - #1) (! "l").
 
 (** Calls [iter_inc] with a non-deterministic [c] *)
-Definition iter_inc_nd (d : nat) : val := λ: "l", iter_inc d Ndnat "l".
+Definition iter_inc_nd d : val := λ: "l", iter_inc d Ndnat "l".
 
 (** Forks [c] threads executing [iter_inc_nd] *)
-Definition iter_inc_nd_forks (d : nat) : val :=
+Definition iter_inc_nd_forks d : val :=
   rec: "self" "c" "l" :=
     if: "c" = #0 then #() else Fork (iter_inc_nd d "l");; "self" ("c" - #1) "l".
 
 (** Calls [iter_inc_nd_forks] with a non-deterministic [c] *)
-Definition iter_inc_nd_forks_nd (d : nat) : val :=
+Definition iter_inc_nd_forks_nd d : val :=
   λ: "l", iter_inc_nd_forks d Ndnat "l".
 
 Section verify.
@@ -41,7 +41,7 @@ Section verify.
       as "/=[big cl]"; [done|]. iModIntro.
     iDestruct "big" as (? k) "(l↦ & l+1↦ & inv')".
     wp_faa. iModIntro. iMod ("cl" with "[l↦ l+1↦ inv']") as "_".
-    { iExists _, _. have ->: ((k * d)%nat + d)%Z = (S k) * d by lia. iFrame. }
+    { iExists _, _. have ->: ((k * d) + d = (k + 1) * d)%Z by lia. iFrame. }
     iModIntro. wp_pures. wp_bind (! _)%E.
     iApply @twpw_atomic; [done|]. (* TODO: Omit this *)
     iMod (nninv_acc (nintpGS0:=nintpGS0) with "[//] [//]")
