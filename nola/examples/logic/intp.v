@@ -33,7 +33,7 @@ Section ncintp.
     match c with nc_inv_wsat => ninv_wsat' niS end.
   Definition ncintp1 (c : ncon1) (P : iProp Σ) : iProp Σ :=
     match c with
-    | ⟨□⟩%nc => □ P | ⟨■⟩%nc => ■ P
+    | ⟨◇⟩%nc => ◇ P | ⟨□⟩%nc => □ P | ⟨■⟩%nc => ■ P
     | ⟨|==>⟩%nc => |==> P | ⟨|={E,E'}=>⟩%nc => |={E,E'}=> P
     end.
   Definition ncintp2 (c : ncon2) (P Q : iProp Σ) : iProp Σ :=

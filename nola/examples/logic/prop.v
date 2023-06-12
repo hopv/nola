@@ -66,6 +66,7 @@ Variant nconl0 : Type :=
 | (** Invariant world satisfaction *) nc_inv_wsat : nconl0.
 (** Unary *)
 Variant ncon1 : Type :=
+| (** Except-0 modality *) nc_except_0 : ncon1
 | (** Persistence modality *) nc_persistently : ncon1
 | (** Plainly modality *) nc_plainly : ncon1
 | (** Basic update modality *) nc_bupd : ncon1
@@ -97,6 +98,7 @@ Notation "⟨↦_ I | l , v ⟩" := (nc_inv_mapsto_own l v I%stdpp%type)
   (format "⟨↦_ I | l , v ⟩") : ncon_scope.
 Notation "⟨↦□_ I | l ⟩" := (nc_inv_mapsto l I%stdpp%type)
   (format "⟨↦□_ I | l ⟩") : ncon_scope.
+Notation "⟨◇⟩" := nc_except_0 : ncon_scope.
 Notation "⟨□⟩" := nc_persistently : ncon_scope.
 Notation "⟨■⟩" := nc_plainly : ncon_scope.
 Notation "⟨|==>⟩" := nc_bupd : ncon_scope.
@@ -177,6 +179,7 @@ Notation n_meta_token l E := (n_0 (nc_meta_token l E)).
 Notation n_steps_lb n := (n_0 (nc_steps_lb n)).
 Notation n_proph p pvs := (n_0 (nc_proph p pvs)).
 Notation n_inv_wsat := (n_l0 nc_inv_wsat).
+Notation "◇ P" := (n_1 ⟨◇⟩ P) : nProp_scope.
 Notation "□ P" := (n_1 ⟨□⟩ P) : nProp_scope.
 Notation "■ P" := (n_1 ⟨■⟩ P) : nProp_scope.
 Notation "|==> P" := (n_1 ⟨|==>⟩ P) : nProp_scope.
@@ -231,7 +234,6 @@ Notation "!ᵘˢ P" := (n_subus P) (at level 20, right associativity)
   : nProp_scope.
 
 Notation "¬ P" := (P → False)%n : nProp_scope.
-Notation "◇ P" := (▷ False ∨ P)%n : nProp_scope.
 Notation "P ==∗ Q" := (P -∗ |==> Q)%n : nProp_scope.
 Notation "|={ E }=> P" := (|={E,E}=> P)%n : nProp_scope.
 Notation "P ={ E , E' }=∗ Q" := (P -∗ |={E,E'}=> Q)%n : nProp_scope.
