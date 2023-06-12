@@ -35,3 +35,4 @@ nola/examples/logic/sintp.v
 nola/examples/logic/facts.v
 nola/examples/logic/inv.v
 nola/examples/logic/na_inv.v
+nola/examples/logic/verify/strm.v
