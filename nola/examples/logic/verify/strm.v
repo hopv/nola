@@ -1,6 +1,7 @@
 (** * Verification on shared mutable singly linked streams *)
 
 From nola.examples.logic Require Export inv.
+From nola.iris Require Export wp.
 From nola.examples.heap_lang Require Export proofmode notation.
 
 (** Stream whose elements are multiples of [d] *)
@@ -36,16 +37,14 @@ Section verify.
     rewrite/= rew_eq_hwf /=. iIntros (?) "#? #inv !>". iIntros (?) "_ Φ".
     iInduction c as [|c] "IH" forall (l) "inv"; wp_rec; wp_pures;
       [by iApply "Φ"|].
-    wp_bind (FAA _ _). iApply @twpw_atomic; [done|]. (* TODO: Omit this *)
-    iMod (nninv_acc (nintpGS0:=nintpGS0) with "[//] [//]")
-      as "/=[big cl]"; [done|]. iModIntro.
+    wp_bind (FAA _ _). iMod (nninv_acc (nintpGS0:=nintpGS0) with "[//] [//]")
+      as "/=[big cl]"; [done|].
     iDestruct "big" as (? k) "(l↦ & l+1↦ & inv')".
     wp_faa. iModIntro. iMod ("cl" with "[l↦ l+1↦ inv']") as "_".
     { iExists _, _. have ->: ((k * d) + d = (k + 1) * d)%Z by lia. iFrame. }
     iModIntro. wp_pures. wp_bind (! _)%E.
-    iApply @twpw_atomic; [done|]. (* TODO: Omit this *)
     iMod (nninv_acc (nintpGS0:=nintpGS0) with "[//] [//]")
-      as "/=[big cl]"; [done|]. iModIntro.
+      as "/=[big cl]"; [done|].
     iDestruct "big" as (??) "(l↦ & l+1↦ & inv')". rewrite rew_eq_hwf /=.
     iDestruct "inv'" as "#inv'". wp_load. iModIntro.
     iMod ("cl" with "[l↦ l+1↦]") as "_".
