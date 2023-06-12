@@ -1,7 +1,7 @@
 (** * [nProp]: Syntactic proposition *)
 
 From nola.util Require Export funext rel ctx.
-From nola.iris Require Export fupd.
+From nola.iris Require Export upd.
 From stdpp Require Export coPset namespaces.
 From iris.bi Require Import notation.
 From iris.base_logic Require Export lib.na_invariants.
@@ -77,7 +77,10 @@ Variant ncon2 : Type :=
 | (** Disjunction *) nc_or : ncon2
 | (** Implication *) nc_impl : ncon2
 | (** Separating conjunction *) nc_sep : ncon2
-| (** Magic wand *) nc_wand : ncon2.
+| (** Magic wand *) nc_wand : ncon2
+| (** Basic update modality with the world satisfaction *) nc_bupdw : ncon2
+| (** Fasic update modality with the world satisfaction *)
+    nc_fupdw (E E' : coPset) : ncon2.
 (** Unary, guarding *)
 Variant ncong1 : Type :=
 | (** Later modality *) nc_later : ncong1
@@ -109,6 +112,9 @@ Notation "⟨∨⟩" := nc_or : ncon_scope.
 Notation "⟨→⟩" := nc_impl : ncon_scope.
 Notation "⟨∗⟩" := nc_sep : ncon_scope.
 Notation "⟨-∗⟩" := nc_wand : ncon_scope.
+Notation "⟨|=[ ] =>⟩" := nc_bupdw (format "⟨|=[ ] =>⟩") : ncon_scope.
+Notation "⟨|=[ ] { E , E' }=>⟩" := (nc_fupdw E E')
+  (format "⟨|=[ ] { E , E' }=>⟩") : ncon_scope.
 Notation "⟨▷⟩" := nc_later : ncon_scope.
 Notation "⟨○( i )⟩" := (nc_indir i) (format "⟨○( i )⟩") : ncon_scope.
 
@@ -184,11 +190,22 @@ Notation "□ P" := (n_1 ⟨□⟩ P) : nProp_scope.
 Notation "■ P" := (n_1 ⟨■⟩ P) : nProp_scope.
 Notation "|==> P" := (n_1 ⟨|==>⟩ P) : nProp_scope.
 Notation "|={ E , E' }=> P" := (n_1 ⟨|={E,E'}=>⟩ P) : nProp_scope.
+Notation "|={ E }=> P" := (n_1 ⟨|={E,E}=>⟩ P) : nProp_scope.
 Infix "∧" := (n_2 ⟨∧⟩) : nProp_scope.
 Infix "∨" := (n_2 ⟨∨⟩) : nProp_scope.
 Infix "→" := (n_2 ⟨→⟩) : nProp_scope.
+Notation "¬ P" := (P → False)%n : nProp_scope.
 Infix "∗" := (n_2 ⟨∗⟩) : nProp_scope.
 Infix "-∗" := (n_2 ⟨-∗⟩) : nProp_scope.
+Notation "P ==∗ Q" := (P -∗ |==> Q)%n : nProp_scope.
+Notation "P ={ E , E' }=∗ Q" := (P -∗ |={E,E'}=> Q)%n : nProp_scope.
+Notation "P ={ E }=∗ Q" := (P -∗ |={E}=> Q)%n : nProp_scope.
+Notation "|=[ W ] => P" := (n_2 ⟨|=[]=>⟩ W P) : nProp_scope.
+Notation "P =[ W ]=∗ Q" := (P -∗ |=[W]=> Q)%n : nProp_scope.
+Notation "|=[ W ] { E , E' }=> P" := (n_2 ⟨|=[]{E,E'}=>⟩ W P) : nProp_scope.
+Notation "|=[ W ] { E }=> P" := (n_2 ⟨|=[]{E,E}=>⟩ W P) : nProp_scope.
+Notation "P =[ W ] { E , E' }=∗ Q" := (P -∗ |=[W]{E,E'}=> Q)%n : nProp_scope.
+Notation "P =[ W ] { E }=∗ Q" := (P =[W]{E,E}=∗ Q)%n : nProp_scope.
 Notation "∀'" := n_forall (only parsing) : nProp_scope.
 Notation "∀ x .. z , P" :=
   (n_forall (λ x, .. (n_forall (λ z, P%n)) ..)) : nProp_scope.
@@ -232,19 +249,6 @@ Notation "%ᵘˢ s" := (n_varus s) (at level 20, right associativity)
   : nProp_scope.
 Notation "!ᵘˢ P" := (n_subus P) (at level 20, right associativity)
   : nProp_scope.
-
-Notation "¬ P" := (P → False)%n : nProp_scope.
-Notation "P ==∗ Q" := (P -∗ |==> Q)%n : nProp_scope.
-Notation "|={ E }=> P" := (|={E,E}=> P)%n : nProp_scope.
-Notation "P ={ E , E' }=∗ Q" := (P -∗ |={E,E'}=> Q)%n : nProp_scope.
-Notation "P ={ E }=∗ Q" := (P ={E,E}=∗ Q)%n : nProp_scope.
-
-Notation "|=[ W ] => P" := (W ==∗ W ∗ P)%n : nProp_scope.
-Notation "P =[ W ]=∗ Q" := (P -∗ |=[W]=> Q)%n : nProp_scope.
-Notation "|=[ W ] { E , E' }=> P" := (W ={E,E'}=∗ W ∗ P)%n : nProp_scope.
-Notation "|=[ W ] { E }=> P" := (|=[W]{E,E}=> P)%n : nProp_scope.
-Notation "P =[ W ] { E , E' }=∗ Q" := (P -∗ |=[W]{E,E'}=> Q)%n : nProp_scope.
-Notation "P =[ W ] { E }=∗ Q" := (P =[W]{E,E}=∗ Q)%n : nProp_scope.
 
 (** ** [↑ˡ P]: Turn [P : nProp κ Γ] into [nPropL Γ]
   Although the main interest is the case [κ = nS],

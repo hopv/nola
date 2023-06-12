@@ -59,7 +59,7 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     [`ctx`](nola/util/ctx.v) (Context with unguarded/guarded variables)
 - [`iris/`](nola/iris) : Iris libraries
   + [`sintp`](nola/iris/sintp.v) (Strong interpretation)
-  + [`fupd`](nola/iris/fupd.v) (Fancy update),
+  + [`upd`](nola/iris/upd.v) (Update),
     [`wp`](nola/iris/wp.v) (Weakest precondition)
   + [`inv`](nola/iris/inv.v) (Invariant),
     [`na_inv`](nola/iris/na_inv.v) (Non-atomic invariant)

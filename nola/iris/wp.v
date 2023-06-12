@@ -1,6 +1,6 @@
 (** * Weakest precondition *)
 
-From nola.iris Require Export fupd.
+From nola.iris Require Export upd.
 From iris.program_logic Require Export weakestpre total_weakestpre.
 From iris.bi Require Import fixpoint.
 From iris.proofmode Require Import proofmode.

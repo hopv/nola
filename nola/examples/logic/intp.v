@@ -40,6 +40,7 @@ Section ncintp.
     match c with
     | ⟨∧⟩%nc => P ∧ Q | ⟨∨⟩%nc => P ∨ Q | ⟨→⟩%nc => P → Q
     | ⟨∗⟩%nc => P ∗ Q | ⟨-∗⟩%nc => P -∗ Q
+    | ⟨|=[]=>⟩%nc => |=[P]=> Q | ⟨|=[]{E,E'}=>⟩%nc => |=[P]{E,E'}=> Q
     end.
   Definition ncintpg1 (c : ncong1) (P : nPropL (;ᵞ))
     (ni : nsintp_ty Σ -d> discrete_fun (λ κ, nProp κ (;ᵞ) -d> iProp Σ))
