@@ -295,7 +295,7 @@ Section wpw.
   Qed.
   Lemma fupdw_wpw_fupdw {e s E W Φ} :
     (|=[W]{E}=> WP[W] e @ s; E {{ Φ }}) ⊢
-    WP[W] e @ s; E {{ v, |=[W]{E}=> Φ v }}.
+      WP[W] e @ s; E {{ v, |=[W]{E}=> Φ v }}.
   Proof.
     case eq: (to_val e)=>/=.
     - rewrite !wp_unfold /wp_pre eq. iIntros "Φ !>". by iMod "Φ" as ">$".
@@ -303,7 +303,7 @@ Section wpw.
   Qed.
   Lemma fupdw_wpw_fupdw' {e s E W Φ} :
     (|=[W]{E}=> WP[W] e @ s; E {{ v, |=[W]{E}=> Φ v }}) ⊢
-    WP[W] e @ s; E {{ v, |=[W]{E}=> Φ v }}.
+      WP[W] e @ s; E {{ v, |=[W]{E}=> Φ v }}.
   Proof. rewrite fupdw_wpw_fupdw. apply wp_mono. iIntros (?) ">$". Qed.
   #[export] Instance elim_modal_fupdw_wpw_nonval {p e s E W P Φ} :
     ElimModal (to_val e = None) p false (|=[W]{E}=> P) P
@@ -322,7 +322,7 @@ Section wpw.
   Qed.
   Lemma fupdw_twpw_fupdw {e s E W Φ} :
     (|=[W]{E}=> WP[W] e @ s; E [{ Φ }]) ⊢
-    WP[W] e @ s; E [{ v, |=[W]{E}=> Φ v }].
+      WP[W] e @ s; E [{ v, |=[W]{E}=> Φ v }].
   Proof.
     case eq: (to_val e)=>/=.
     - rewrite !twp_unfold /twp_pre eq. iIntros "Φ !>". by iMod "Φ" as ">$".
@@ -330,7 +330,7 @@ Section wpw.
   Qed.
   Lemma fupdw_twpw_fupdw' {e s E W Φ} :
     (|=[W]{E}=> WP[W] e @ s; E [{ v, |=[W]{E}=> Φ v }]) ⊢
-    WP[W] e @ s; E [{ v, |=[W]{E}=> Φ v }].
+      WP[W] e @ s; E [{ v, |=[W]{E}=> Φ v }].
   Proof. rewrite fupdw_twpw_fupdw. apply twp_mono. iIntros (?) ">$". Qed.
   #[export] Instance elim_modal_fupdw_twpw_nonval {p e s E W P Φ} :
     ElimModal (to_val e = None) p false (|=[W]{E}=> P) P
@@ -344,7 +344,7 @@ Section wpw.
   Lemma wpw_atomic {e s E E' W Φ} `{!Atomic (stuckness_to_atomicity s) e} :
     to_val e = None →
     (|=[W]{E,E'}=> WP[W] e @ s; E' {{ v, |=[W]{E',E}=> Φ v }}) ⊢
-    WP[W] e @ s; E {{ Φ }}.
+      WP[W] e @ s; E {{ Φ }}.
   Proof.
     iIntros (nv) "wp". rewrite !wp_unfold /wp_pre nv /=.
     iIntros (?????) "[W st]". iMod ("wp" with "W") as "[W big]".
@@ -373,7 +373,7 @@ Section wpw.
   Lemma twpw_atomic {e E E' W Φ} `{!Atomic (stuckness_to_atomicity s) e} :
     to_val e = None →
     (|=[W]{E,E'}=> WP[W] e @ s; E' [{ v, |=[W]{E',E}=> Φ v }]) ⊢
-    WP[W] e @ s; E [{ Φ }].
+      WP[W] e @ s; E [{ Φ }].
   Proof.
     iIntros (nv) "wp". rewrite !twp_unfold /twp_pre nv /=.
     iIntros (????) "[W st]". iMod ("wp" with "W") as "[W big]".
@@ -399,7 +399,7 @@ Section wpw.
   (** Eliminate [fupdw] in [wpw] *)
   Lemma wpw_fupdw_fupdw {e s E W Φ} :
     WP[W] e @ s; E {{ v, |=[W]{E}=> Φ v }} ⊢
-    (|=[W]{E}=> WP[W] e @ s; E {{ Φ }}).
+      (|=[W]{E}=> WP[W] e @ s; E {{ Φ }}).
   Proof.
     iIntros "wp W". iLöb as "IH" forall (e E Φ).
     rewrite !wp_unfold /wp_pre/=. case (to_val e)=>/= >.
@@ -417,7 +417,7 @@ Section wpw.
   (** Eliminate [fupdw] in [twpw] *)
   Lemma twpw_fupdw_fupdw {e s E W Φ} :
     WP[W] e @ s; E [{ v, |=[W]{E}=> Φ v }] ⊢
-    (|=[W]{E}=> WP[W] e @ s; E [{ Φ }]).
+      (|=[W]{E}=> WP[W] e @ s; E [{ Φ }]).
   Proof.
     enough (go : ∀ Ψ, WP[W] e @ s; E [{ Ψ }] -∗
       ∀ Φ, □ (∀ v, Ψ v =[W]{E}=∗ Φ v) =[W]{E}=∗ WP[W] e @ s; E [{ Φ }]).

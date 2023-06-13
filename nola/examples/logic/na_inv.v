@@ -66,8 +66,8 @@ Section lemmas.
 
   (** Transform [na_nninv] *)
   Lemma na_nninv_convert {s i p N P Q} :
-    □ ⸨ P ={∅}=∗ Q ∗ (Q ={∅}=∗ P) ⸩(σ s, i) -∗ na_nninv (σ s) i p N P -∗
-    na_nninv (σ s) i p N Q.
+    □ ⸨ P ={∅}=∗ Q ∗ (Q ={∅}=∗ P) ⸩(σ s, i) -∗
+      na_nninv (σ s) i p N P -∗ na_nninv (σ s) i p N Q.
   Proof.
     rewrite na_nninv_unseal. iIntros "#PQP #accP !>".
     iApply (sintpy_map2 with "[] PQP accP")=>/=.
@@ -79,8 +79,8 @@ Section lemmas.
     iMod ("QP" with "Q") as "P". iMod "toE∖N" as "_". iApply ("Pto" with "P").
   Qed.
   Lemma na_nninv_split {s i p N P Q} :
-    na_nninv (σ s) i p N (P ∗ Q) -∗
-    na_nninv (σ s) i p N P ∗ na_nninv (σ s) i p N Q.
+    na_nninv (σ s) i p N (P ∗ Q) ⊢
+      na_nninv (σ s) i p N P ∗ na_nninv (σ s) i p N Q.
   Proof.
     iIntros "#NPQ". iSplit; iApply (na_nninv_convert with "[] NPQ"); iModIntro;
     iApply (sintpy_intro (σ:=σ)); by iIntros (??) "/=[$$]!>$".

@@ -17,7 +17,7 @@ Section lemmas.
   Qed.
   Lemma nninvs_acc {i N P E} : ↑N ⊆ E →
     nninvs i N P =[nninv_wsats]{E,E∖↑N}=∗
-    ⟦ P ⟧ ∗ (⟦ P ⟧ =[nninv_wsats]{E∖↑N,E}=∗ True).
+      ⟦ P ⟧ ∗ (⟦ P ⟧ =[nninv_wsats]{E∖↑N,E}=∗ True).
   Proof. move=> ?. iApply nninv_acc; [done|iApply nsintp_sound]. Qed.
 
   Context `{!nsintpy Σ σ}.
@@ -54,8 +54,8 @@ Section lemmas.
 
   (** Transform [nninv] *)
   Lemma nninv_convert {s i N P Q} :
-    □ ⸨ P ={∅}=∗ Q ∗ (Q ={∅}=∗ P) ⸩(σ s, i) -∗ nninv (σ s) i N P -∗
-    nninv (σ s) i N Q.
+    □ ⸨ P ={∅}=∗ Q ∗ (Q ={∅}=∗ P) ⸩(σ s, i) -∗
+      nninv (σ s) i N P -∗ nninv (σ s) i N Q.
   Proof.
     rewrite nninv_unseal. iIntros "#PQP #accP !>".
     iApply (sintpy_map2 with "[] PQP accP")=>/=.
@@ -67,7 +67,7 @@ Section lemmas.
     iMod ("QP" with "Q") as "P". iMod "toE∖N" as "_". iApply ("Pto" with "P").
   Qed.
   Lemma nninv_split {s i N P Q} :
-    nninv (σ s) i N (P ∗ Q) -∗ nninv (σ s) i N P ∗ nninv (σ s) i N Q.
+    nninv (σ s) i N (P ∗ Q) ⊢ nninv (σ s) i N P ∗ nninv (σ s) i N Q.
   Proof.
     iIntros "#NPQ". iSplit; iApply (nninv_convert with "[] NPQ"); iModIntro;
     iApply (sintpy_intro (σ:=σ)); by iIntros (??) "/=[$$]!>$".
