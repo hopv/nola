@@ -125,6 +125,12 @@ Section lemmas.
   #[export] Instance from_pure_fupdw `{!BiFUpd PROP} {a E W P φ} :
     FromPure a P φ → FromPure a (|=[W]{E}=> P) φ.
   Proof. rewrite /FromPure=> <-. apply fupdw_intro. Qed.
+  Lemma fupdw_mask_intro `{!BiFUpd PROP} {E E' W P} : E' ⊆ E →
+    ((|={E',E}=> emp) -∗ P) ⊢ |=[W]{E,E'}=> P.
+  Proof.
+    iIntros (?) "toP $". iApply fupd_mask_intro; [done|].
+    iIntros "cl". iApply "toP". by iMod "cl".
+  Qed.
 
   (** Frame on [bupdw] *)
   Lemma bupdw_frame_r `{!BiBUpd PROP} {W P Q} : (|=[W]=> P) ∗ Q ⊢ |=[W]=> P ∗ Q.
