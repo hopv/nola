@@ -259,9 +259,9 @@ Fixpoint nlarge {κ Γ} (P : nProp κ Γ) : nPropL Γ :=
   match P with
   | n_0 c => n_0 c | n_l0 c => n_l0 c | n_1 c P => n_1 c (↑ˡ P)
   | n_2 c P Q => n_2 c (↑ˡ P) (↑ˡ Q) | n_g1 c P => n_g1 c P
-  | ∀' Φ => ∀' ((↑ˡ) ∘ Φ) | ∃' Φ => ∃' ((↑ˡ) ∘ Φ)
-  | n_wpw W s E e Φ => n_wpw (↑ˡ W) s E e ((↑ˡ) ∘ Φ)
-  | n_twpw W s E e Φ => n_twpw (↑ˡ W) s E e ((↑ˡ) ∘ Φ)
+  | ∀' Φ => ∀ a, ↑ˡ Φ a | ∃' Φ => ∃ a, ↑ˡ Φ a
+  | n_wpw W s E e Φ => n_wpw (↑ˡ W) s E e (λ v, ↑ˡ Φ v)
+  | n_twpw W s E e Φ => n_twpw (↑ˡ W) s E e (λ v, ↑ˡ Φ v)
   | ∀: V, P => ∀: V, ↑ˡ P | ∃: V, P => ∃: V, ↑ˡ P
   | rec:ˢ' Φ a => rec:ˢ' Φ a | rec:ˡ' Φ a => rec:ˡ' Φ a
   | %ᵍˢ s => %ᵍˢ s | %ᵍˡ s => %ᵍˡ s | %ᵘˢ s => %ᵘˢ s | !ᵘˢ P => !ᵘˢ P

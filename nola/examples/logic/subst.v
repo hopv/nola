@@ -13,12 +13,12 @@ Fixpoint nliftg {Δ κ Γ} (P : nProp κ Γ) : nProp κ (Γ.ᵞu;ᵞ Γ.ᵞg ++ 
   | n_0 c => n_0 c | n_l0 c => n_l0 c | n_1 c P => n_1 c (nliftg P)
   | n_2 c P Q => n_2 c (nliftg P) (nliftg Q)
   | n_g1 c P => n_g1 c (rew ctxeq_g app_assoc'_d in nliftg P)
-  | ∀' Φ => ∀' (nliftg ∘ Φ) | ∃' Φ => ∃' (nliftg ∘ Φ)
-  | n_wpw W s E e Φ => n_wpw (nliftg W) s E e (nliftg ∘ Φ)
-  | n_twpw W s E e Φ => n_twpw (nliftg W) s E e (nliftg ∘ Φ)
+  | ∀' Φ => ∀ a, nliftg (Φ a) | ∃' Φ => ∃ a, nliftg (Φ a)
+  | n_wpw W s E e Φ => n_wpw (nliftg W) s E e (λ v, nliftg (Φ v))
+  | n_twpw W s E e Φ => n_twpw (nliftg W) s E e (λ v, nliftg (Φ v))
   | ∀: V, P => ∀: V, nliftg P | ∃: V, P => ∃: V, nliftg P
-  | rec:ˢ' Φ a => (rec:ˢ' (nliftg ∘ Φ)) a
-  | rec:ˡ' Φ a => (rec:ˡ' (nliftg ∘ Φ)) a
+  | rec:ˢ' Φ a => (rec:ˢ b, nliftg (Φ b)) a
+  | rec:ˡ' Φ a => (rec:ˡ b, nliftg (Φ b)) a
   | %ᵍˢ s => %ᵍˢ sbylapp s _ | %ᵍˡ s => %ᵍˡ sbylapp s _ | %ᵘˢ s => %ᵘˢ s
   | !ᵘˢ P => !ᵘˢ P
   end%n.
@@ -62,6 +62,7 @@ Qed.
 
 (** [nlift]: Turn [nProp κ (;ᵞ)] into [nProp κ Γ] *)
 Definition nlift {κ Γ} (P : nProp κ (;ᵞ)) : nProp κ Γ := nliftug P eq_refl.
+Arguments nlift {_ _} _ /.
 
 (** [nlift] commutes with [↑ˡ] *)
 Lemma nlift_nlarge {κ Γ} {P : nProp κ (;ᵞ)} :
@@ -110,7 +111,7 @@ Proof.
   move: κ Γ P Φ eq. fix FIX 3=> κ Γ.
   case=>//=; intros;
     try (f_equal; apply (FIX _ (_;ᵞ_)) || (funext=>/= ?; apply FIX));
-    subst=>/=; case (sunapp s)=>//= ?; rewrite -nlift_nlarge; f_equal;
+    subst=>/=; case (sunapp s)=>//= ?; rewrite -nlift_nlarge /=; f_equal;
     symmetry; [apply nlarge_nunsmall|apply nlarge_id].
 Qed.
 
@@ -165,8 +166,9 @@ Fixpoint nhgt {κ Γ} (P : nProp κ Γ) : hgt :=
   | n_0 _ | n_l0 _ | n_g1 _ _ | %ᵍˢ _ | %ᵍˡ _ | %ᵘˢ _ | !ᵘˢ _ => Hgt₀
   | n_1 _ P | ∀: _, P | ∃: _, P => Hgt₁ (nhgt P)
   | n_2 _ P Q => Hgt₂ (nhgt P) (nhgt Q)
-  | ∀' Φ | ∃' Φ => Hgtᶠ (nhgt ∘ Φ)
-  | n_wpw W _ _ _ Φ | n_twpw W _ _ _ Φ => Hgt₂ (nhgt W) (Hgtᶠ (nhgt ∘ Φ))
+  | ∀' Φ | ∃' Φ => Hgtᶠ (λ a, nhgt (Φ a))
+  | n_wpw W _ _ _ Φ | n_twpw W _ _ _ Φ =>
+      Hgt₂ (nhgt W) (Hgtᶠ (λ a, nhgt (Φ a)))
   | rec:ˢ' Φ a | rec:ˡ' Φ a => Hgt₁ (nhgt (Φ a))
   end%n.
 
