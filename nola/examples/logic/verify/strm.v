@@ -30,21 +30,20 @@ Section verify.
   Context `{!nintpGS Σ}.
 
   (** [iter_inc] terminates *)
-  Lemma twp_iter_inc {s N E d} {c : nat} {l : loc} :
-    ↑N ⊆ E → □ ssound (ITI:=nintpsi _) s 0 -∗ ⟦ mul_strm N d l ⟧(s) -∗
-    [[{ True }]][nninv_wsat s] iter_inc d #c #l @ E [[{ RET #(); True }]].
+  Lemma twp_iter_inc {N E d} {c : nat} {l : loc} : ↑N ⊆ E →
+    [[{ ⟦ mul_strm N d l ⟧ }]][nninv_wsats]
+      iter_inc d #c #l @ E
+    [[{ RET #(); True }]].
   Proof.
-    rewrite/= rew_eq_hwf /=. iIntros (?) "#? #inv !>". iIntros (?) "_ Φ".
+    rewrite/= rew_eq_hwf /=. iIntros (??) "#inv Φ".
     iInduction c as [|c] "IH" forall (l) "inv"; wp_rec; wp_pures;
       [by iApply "Φ"|].
-    wp_bind (FAA _ _). iMod (nninv_acc (nintpGS0:=nintpGS0) with "[//] [//]")
-      as "/=[big cl]"; [done|].
+    wp_bind (FAA _ _). iMod (nninvs_acc with "[//]") as "/=[big cl]"; [done|].
     iDestruct "big" as (? k) "(l↦ & l+1↦ & inv')".
     wp_faa. iModIntro. iMod ("cl" with "[l↦ l+1↦ inv']") as "_".
     { iExists _, _. have ->: ((k * d) + d = (k + 1) * d)%Z by lia. iFrame. }
     iModIntro. wp_pures. wp_bind (! _)%E.
-    iMod (nninv_acc (nintpGS0:=nintpGS0) with "[//] [//]")
-      as "/=[big cl]"; [done|].
+    iMod (nninvs_acc with "[//]") as "/=[big cl]"; [done|].
     iDestruct "big" as (??) "(l↦ & l+1↦ & inv')". rewrite rew_eq_hwf /=.
     iDestruct "inv'" as "#inv'". wp_load. iModIntro.
     iMod ("cl" with "[l↦ l+1↦]") as "_".
@@ -54,38 +53,37 @@ Section verify.
   Qed.
 
   (** [iter_inc_nd] terminates *)
-  Lemma twp_iter_inc_nd {s N E d} {l : loc} :
-    ↑N ⊆ E → □ ssound (ITI:=nintpsi _) s 0 -∗ ⟦ mul_strm N d l ⟧(s) -∗
-    [[{ True }]][nninv_wsat s] iter_inc_nd d #l @ E [[{ RET #(); True }]].
+  Lemma twp_iter_inc_nd {N E d} {l : loc} : ↑N ⊆ E →
+    [[{ ⟦ mul_strm N d l ⟧ }]][nninv_wsats]
+      iter_inc_nd d #l @ E
+    [[{ RET #(); True }]].
   Proof.
-    rewrite/= rew_eq_hwf /=. iIntros (?) "#? #? !>". iIntros (?) "_ Φ". wp_lam.
-    wp_pures. wp_apply twp_ndnat; [done|]. iIntros (?) "_".
-    wp_apply (twp_iter_inc with "[//] [] [//]"); by [|rewrite/= rew_eq_hwf /=|].
+    rewrite/= rew_eq_hwf /=. iIntros (??) "#? Φ". wp_lam. wp_pures.
+    wp_apply twp_ndnat; [done|]. iIntros (?) "_".
+    wp_apply (twp_iter_inc with "[]"); by [|rewrite/= rew_eq_hwf /=|].
   Qed.
 
   (** [iter_inc_nd_forks] terminates *)
-  Lemma twp_iter_inc_nd_forks {s N E d} {c : nat} {l : loc} :
-    ↑N ⊆ E → □ ssound (ITI:=nintpsi _) s 0 -∗ ⟦ mul_strm N d l ⟧(s) -∗
-    [[{ True }]][nninv_wsat s]
-      iter_inc_nd_forks d #c #l @ E [[{ RET #(); True }]].
+  Lemma twp_iter_inc_nd_forks {N E d} {c : nat} {l : loc} : ↑N ⊆ E →
+    [[{ ⟦ mul_strm N d l ⟧ }]][nninv_wsats]
+      iter_inc_nd_forks d #c #l @ E
+    [[{ RET #(); True }]].
   Proof.
-    rewrite/= rew_eq_hwf /=. iIntros (?) "#? #? !>". iIntros (?) "_ Φ".
+    rewrite/= rew_eq_hwf /=. iIntros (??) "#? Φ".
     iInduction c as [|c] "IH"; wp_lam; wp_pures; [by iApply "Φ"|].
     wp_apply twp_fork.
-    - wp_apply (twp_iter_inc_nd with "[//] [] [//]");
-        by [|rewrite/= rew_eq_hwf /=|].
+    - wp_apply (twp_iter_inc_nd with "[]"); by [|rewrite/= rew_eq_hwf /=|].
     - wp_pures. have ->: (S c - 1)%Z = c by lia. by iApply "IH".
   Qed.
 
   (** [iter_inc_nd_forks_nd] terminates *)
-  Lemma twp_iter_inc_nd_forks_nd {s N E d} {l : loc} :
-    ↑N ⊆ E → □ ssound (ITI:=nintpsi _) s 0 -∗ ⟦ mul_strm N d l ⟧(s) -∗
-    [[{ True }]][nninv_wsat s]
-      iter_inc_nd_forks_nd d #l @ E [[{ RET #(); True }]].
+  Lemma twp_iter_inc_nd_forks_nd {N E d} {l : loc} : ↑N ⊆ E →
+    [[{ ⟦ mul_strm N d l ⟧ }]][nninv_wsats]
+      iter_inc_nd_forks_nd d #l @ E
+    [[{ RET #(); True }]].
   Proof.
-    rewrite/= rew_eq_hwf /=. iIntros (?) "#? #? !>". iIntros (?) "_ Φ". wp_lam.
-    wp_pures. wp_apply twp_ndnat; [done|]. iIntros (?) "_".
-    wp_apply (twp_iter_inc_nd_forks with "[//] [] [//]");
-      by [|rewrite/= rew_eq_hwf /=|].
+    rewrite/= rew_eq_hwf /=. iIntros (??) "#? Φ". wp_lam. wp_pures.
+    wp_apply twp_ndnat; [done|]. iIntros (?) "_".
+    wp_apply (twp_iter_inc_nd_forks with "[]"); by [|rewrite/= rew_eq_hwf /=|].
   Qed.
 End verify.

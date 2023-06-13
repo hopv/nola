@@ -9,8 +9,7 @@ Section lemmas.
 
   (** Access [na_nninv] *)
   Lemma na_nninv_acc {s i p N P E F} : ↑N ⊆ E → ↑N ⊆ F →
-    ssound (ITI:=nintpsi _) s i -∗
-    na_nninv s i p N P -∗ na_own p F =[nninv_wsat s]{E,E∖↑N}=∗
+    nssound s i -∗ na_nninv s i p N P -∗ na_own p F =[nninv_wsat s]{E,E∖↑N}=∗
       ⟦ P ⟧(s) ∗ na_own p (F∖↑N) ∗
       (⟦ P ⟧(s) -∗ na_own p (F∖↑N) =[nninv_wsat s]{E∖↑N,E}=∗ na_own p F).
   Proof.
@@ -18,6 +17,11 @@ Section lemmas.
     iDestruct ("to" with "accP") as "/={accP}accP".
     iApply ("accP" $! _ _ NE NF with "F W").
   Qed.
+  Lemma na_nninvs_acc {i p N P E F} : ↑N ⊆ E → ↑N ⊆ F →
+    na_nninvs i p N P -∗ na_own p F =[nninv_wsats]{E,E∖↑N}=∗
+      ⟦ P ⟧ ∗ na_own p (F∖↑N) ∗
+      (⟦ P ⟧ -∗ na_own p (F∖↑N) =[nninv_wsats]{E∖↑N,E}=∗ na_own p F).
+  Proof. move=> ??. iApply na_nninv_acc; [done..|iApply nsintp_sound]. Qed.
 
   Context `{!nsintpy Σ σ}.
 

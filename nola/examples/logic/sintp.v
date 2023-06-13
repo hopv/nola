@@ -10,7 +10,17 @@ Definition nintpsi Σ `{!nintpGS Σ} : intpsi :=
 
 (** Notation for [nintpsi] *)
 Notation nsintpy Σ := (sintpy (nintpsi Σ)).
-Notation nsintp Σ := (sintp (nintpsi Σ)).
+Notation nsintp := (sintp (ITI:=nintpsi _)).
+Notation nsintpb := (nsintp ⊥ˢ).
+Notation nssound := (ssound (ITI:=nintpsi _)).
+Notation nsintp_sound := (sintp_sound (ITI:=nintpsi _)).
+
+(** Utility for [nsintp] *)
+Notation nninvs := (nninv nsintpb).
+Notation na_nninvs := (na_nninv nsintpb).
+Notation "⟦ P ⟧" := ⟦ P ⟧(nsintpb) : nola_scope.
+Notation "⟦ P ⟧ˢ" := ⟦ P ⟧ˢ(nsintpb) : nola_scope.
+Notation nninv_wsats := (nninv_wsat nsintpb).
 
 Implicit Type P : nPropL (;ᵞ).
 

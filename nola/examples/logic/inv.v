@@ -9,13 +9,17 @@ Section lemmas.
 
   (** Access [nninv] *)
   Lemma nninv_acc {s i N P E} : ↑N ⊆ E →
-    ssound (ITI:=nintpsi _) s i -∗ nninv s i N P =[nninv_wsat s]{E,E∖↑N}=∗
+    nssound s i -∗ nninv s i N P =[nninv_wsat s]{E,E∖↑N}=∗
       ⟦ P ⟧(s) ∗ (⟦ P ⟧(s) =[nninv_wsat s]{E∖↑N,E}=∗ True).
   Proof.
     rewrite nninv_unseal. iIntros (NE) "to #accP W".
     iDestruct ("to" with "accP") as "/={accP}accP".
     iApply ("accP" $! _ NE with "W").
   Qed.
+  Lemma nninvs_acc {i N P E} : ↑N ⊆ E →
+    nninvs i N P =[nninv_wsats]{E,E∖↑N}=∗
+    ⟦ P ⟧ ∗ (⟦ P ⟧ =[nninv_wsats]{E∖↑N,E}=∗ True).
+  Proof. move=> ?. iApply nninv_acc; [done|iApply nsintp_sound]. Qed.
 
   Context `{!nsintpy Σ σ}.
 

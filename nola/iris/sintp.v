@@ -245,6 +245,8 @@ Definition sintp' {ITI} (s : sintp_ty' ITI) : sintp_ty' ITI :=
 Definition sintp {ITI} (s : sintp_ty ITI) : sintp_ty ITI :=
   Swrap (sintp' (sunwrap s)).
 
+Notation sintpb := (sintp ⊥ˢ).
+
 (** [sintp] satisfies [sintpy] *)
 #[export] Instance sintp_sintpy {ITI} : sintpy ITI sintp.
 Proof. split.
@@ -269,8 +271,8 @@ Proof. split.
       by rewrite /sintp' greatest_fixpoint_unfold.
 Qed.
 
-(** [sintp] is sound w.r.t. the interpretation under [sintp] *)
-Lemma sintp_sound {ITI i} : ⊢ ssound (sintp (ITI:=ITI) ⊥ˢ) i.
+(** [sintpb] is sound w.r.t. the interpretation under [sintpb] *)
+Lemma sintp_sound {ITI i} : ⊢ ssound (ITI:=ITI) sintpb i.
 Proof.
   elim: {i}(wft_lt_wf i)=> i _ IH. iIntros (P) "/= X".
   rewrite /sintp' greatest_fixpoint_unfold.
