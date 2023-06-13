@@ -113,11 +113,11 @@ Section lemmas.
   #[export] Instance from_modal_fupdw `{!BiFUpd PROP} {E W P} :
     FromModal True modality_id (|=[W]{E}=> P) (|=[W]{E}=> P) P.
   Proof. by rewrite /FromModal /= -fupdw_intro. Qed.
-  Lemma bupdw_fupdw `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {E W P} :
+  Lemma bupdw_fupdw `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} E {W P} :
     (|=[W]=> P) ⊢ |=[W]{E}=> P.
-  Proof. iIntros "WP W". iApply ("WP" with "W"). Qed.
+  Proof. apply bi.wand_mono; by [|rewrite bupd_fupd]. Qed.
   #[export] Instance from_assumption_fupdw
-      `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {E p W P Q} :
+    `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {E p W P Q} :
     FromAssumption p P (|=[W]=> Q) → KnownRFromAssumption p P (|=[W]{E}=> Q).
   Proof.
     rewrite /KnownRFromAssumption /FromAssumption=>->. apply bupdw_fupdw.
@@ -127,30 +127,22 @@ Section lemmas.
   Proof. rewrite /FromPure=> <-. apply fupdw_intro. Qed.
   Lemma fupdw_mask_intro `{!BiFUpd PROP} {E E' W P} : E' ⊆ E →
     ((|={E',E}=> emp) -∗ P) ⊢ |=[W]{E,E'}=> P.
-  Proof.
-    iIntros (?) "toP $". iApply fupd_mask_intro; [done|].
-    iIntros "cl". iApply "toP". by iMod "cl".
-  Qed.
+  Proof. iIntros (?) "? $". by iApply fupd_mask_intro. Qed.
 
   (** Frame on [bupdw] *)
-  Lemma bupdw_frame_r `{!BiBUpd PROP} {W P Q} : (|=[W]=> P) ∗ Q ⊢ |=[W]=> P ∗ Q.
-  Proof. iIntros "[WP $] W". iApply ("WP" with "W"). Qed.
-  Lemma bupdw_frame_l `{!BiBUpd PROP} {W P Q} : P ∗ (|=[W]=> Q) ⊢ |=[W]=> P ∗ Q.
-  Proof. by rewrite comm bupdw_frame_r comm. Qed.
   #[export] Instance frame_bupdw `{!BiBUpd PROP} {p R P Q W} :
     Frame p R P Q → Frame p R (|=[W]=> P) (|=[W]=> Q) | 2.
-  Proof. rewrite /Frame=><-. by rewrite bupdw_frame_l. Qed.
+  Proof. apply _. Qed.
+  Lemma bupdw_frame_r `{!BiBUpd PROP} {W P Q} : (|=[W]=> P) ∗ Q ⊢ |=[W]=> P ∗ Q.
+  Proof. by iIntros "[? $]". Qed.
 
   (** Frame on [fupdw] *)
-  Lemma fupdw_frame_r `{!BiFUpd PROP} {E E' W P Q} :
-    (|=[W]{E,E'}=> P) ∗ Q ⊢ |=[W]{E,E'}=> P ∗ Q.
-  Proof. iIntros "[WP $] W". iApply ("WP" with "W"). Qed.
-  Lemma fupdw_frame_l `{!BiFUpd PROP} {E E' W P Q} :
-    P ∗ (|=[W]{E,E'}=> Q) ⊢ |=[W]{E,E'}=> P ∗ Q.
-  Proof. by rewrite comm fupdw_frame_r comm. Qed.
   #[export] Instance frame_fupdw `{!BiFUpd PROP} {p R P Q E E' W} :
     Frame p R P Q → Frame p R (|=[W]{E,E'}=> P) (|=[W]{E,E'}=> Q) | 2.
-  Proof. rewrite /Frame=><-. by rewrite fupdw_frame_l. Qed.
+  Proof. apply _. Qed.
+  Lemma fupdw_frame_r `{!BiFUpd PROP} {E E' W P Q} :
+    (|=[W]{E,E'}=> P) ∗ Q ⊢ |=[W]{E,E'}=> P ∗ Q.
+  Proof. by iIntros "[? $]". Qed.
 
   (** Eliminate [bupdw] *)
   Lemma bupdw_trans `{!BiBUpd PROP} {W P} : (|=[W]=> |=[W]=> P) ⊢ |=[W]=> P.
@@ -187,18 +179,14 @@ Section lemmas.
     `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {p E E' W P Q} :
     ElimModal True p false (|=[W]=> P) P (|=[W]{E,E'}=> Q) (|=[W]{E,E'}=> Q)
     | 10.
-  Proof.
-    by rewrite /ElimModal bi.intuitionistically_if_elim (bupdw_fupdw (E:=E))
-      fupdw_frame_r bi.wand_elim_r fupdw_trans.
-  Qed.
+  Proof. move=> ?. by rewrite (bupdw_fupdw E) elim_modal_fupdw_fupdw. Qed.
   #[export] Instance elim_modal_fupd_fupdw `{!BiFUpd PROP} {p E E' E'' W P Q} :
     ElimModal True p false (|={E,E'}=> P) P
       (|=[W]{E,E''}=> Q) (|=[W]{E',E''}=> Q).
   Proof. apply _. Qed.
   #[export] Instance elim_modal_bupd_fupdw
     `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {p E E' W P Q} :
-    ElimModal True p false (|==> P) P
-      (|=[W]{E,E'}=> Q) (|=[W]{E,E'}=> Q) | 10.
+    ElimModal True p false (|==> P) P (|=[W]{E,E'}=> Q) (|=[W]{E,E'}=> Q) | 10.
   Proof. apply _. Qed.
   #[export] Instance add_modal_fupdw `{!BiFUpd PROP} {E E' W P Q} :
     AddModal (|=[W]{E}=> P) P (|=[W]{E,E'}=> Q).

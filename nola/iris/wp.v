@@ -312,6 +312,10 @@ Section wpw.
     move=> ?. by rewrite /ElimModal bi.intuitionistically_if_elim fupdw_frame_r
       bi.wand_elim_r fupdw_wpw_nonval.
   Qed.
+  #[export] Instance elim_modal_bupdw_wpw_nonval {p e s E W P Φ} :
+    ElimModal (to_val e = None) p false (|=[W]=> P) P
+      (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E {{ Φ }}).
+  Proof. move=> ?. by rewrite (bupdw_fupdw E) elim_modal_fupdw_wpw_nonval. Qed.
 
   (** Eliminate [fupdw] on [twpw] *)
   Lemma fupdw_twpw_nonval {e s E W Φ} : to_val e = None →
@@ -339,6 +343,10 @@ Section wpw.
     move=> ?. by rewrite /ElimModal bi.intuitionistically_if_elim fupdw_frame_r
       bi.wand_elim_r fupdw_twpw_nonval.
   Qed.
+  #[export] Instance elim_modal_bupdw_twpw_nonval {p e s E W P Φ} :
+    ElimModal (to_val e = None) p false (|=[W]=> P) P
+      (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E [{ Φ }]).
+  Proof. move=> ?. by rewrite (bupdw_fupdw E) elim_modal_fupdw_twpw_nonval. Qed.
 
   (** Mask-changing [fupdw] on atomic [wpw] *)
   Lemma wpw_atomic {e s E E' W Φ} `{!Atomic (stuckness_to_atomicity s) e} :
