@@ -62,9 +62,9 @@ Section iris.
   (** ** [na_nninv]: Non-atomic [ninv] in the accessor style *)
   Definition na_nninv_def (s : nsintp_ty Σ) (i : nat)
     (p : na_inv_pool_name) (N : namespace) (P : nPropL (;ᵞ)) : iProp Σ :=
-    □ ⸨ ∀ E F, ⌜↑N ⊆ E⌝ → ⌜↑N ⊆ F⌝ → n_na_own p F =[n_inv_wsat]{E,E∖↑N}=∗
+    □ ⸨ ∀ E F, ⌜↑N ⊆ E⌝ → ⌜↑N ⊆ F⌝ → n_na_own p F =[n_inv_wsat]{E}=∗
           P ∗ n_na_own p (F∖↑N) ∗
-          (P -∗ n_na_own p (F∖↑N) =[n_inv_wsat]{E∖↑N,E}=∗ n_na_own p F) ⸩(s, i).
+          (P -∗ n_na_own p (F∖↑N) =[n_inv_wsat]{E}=∗ n_na_own p F) ⸩(s, i).
   Definition na_nninv_aux : seal na_nninv_def. Proof. by eexists. Qed.
   Definition na_nninv := na_nninv_aux.(unseal).
   Lemma na_nninv_unseal : na_nninv = na_nninv_def.

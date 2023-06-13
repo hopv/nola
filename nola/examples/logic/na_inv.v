@@ -9,18 +9,18 @@ Section lemmas.
 
   (** Access [na_nninv] *)
   Lemma na_nninv_acc {s i p N P E F} : ↑N ⊆ E → ↑N ⊆ F →
-    nssound s i -∗ na_nninv s i p N P -∗ na_own p F =[nninv_wsat s]{E,E∖↑N}=∗
+    nssound s i -∗ na_nninv s i p N P -∗ na_own p F =[nninv_wsat s]{E}=∗
       ⟦ P ⟧(s) ∗ na_own p (F∖↑N) ∗
-      (⟦ P ⟧(s) -∗ na_own p (F∖↑N) =[nninv_wsat s]{E∖↑N,E}=∗ na_own p F).
+      (⟦ P ⟧(s) -∗ na_own p (F∖↑N) =[nninv_wsat s]{E}=∗ na_own p F).
   Proof.
     rewrite na_nninv_unseal. iIntros (NE NF) "to #accP F".
     iDestruct ("to" with "accP") as "/={accP}accP".
     iApply ("accP" $! _ _ NE NF with "F").
   Qed.
   Lemma na_nninvs_acc {i p N P E F} : ↑N ⊆ E → ↑N ⊆ F →
-    na_nninvs i p N P -∗ na_own p F =[nninv_wsats]{E,E∖↑N}=∗
+    na_nninvs i p N P -∗ na_own p F =[nninv_wsats]{E}=∗
       ⟦ P ⟧ ∗ na_own p (F∖↑N) ∗
-      (⟦ P ⟧ -∗ na_own p (F∖↑N) =[nninv_wsats]{E∖↑N,E}=∗ na_own p F).
+      (⟦ P ⟧ -∗ na_own p (F∖↑N) =[nninv_wsats]{E}=∗ na_own p F).
   Proof. move=> ??. iApply na_nninv_acc; [done..|iApply nsintp_sound]. Qed.
 
   Context `{!nsintpy Σ σ}.
@@ -32,10 +32,12 @@ Section lemmas.
     rewrite na_nninv_unseal. iIntros (jN) "#NP !#".
     iApply (sintpy_intro (σ:=σ))=>/=.
     iIntros (?? E F NE NF) "F". rewrite -nintpS_nintp_nlarge.
-    iMod (ninv_acc NE with "NP") as "/=[nP nPto]".
-    iDestruct (na_body_acc with "nP F") as "($&$& Pto)"; [done..|].
-    iIntros "!> P F∖N". iDestruct ("Pto" with "P F∖N") as "[nP $]".
-    by iMod ("nPto" with "nP").
+    iMod (ninv_acc NE with "NP") as "/=[bd bdto]".
+    iDestruct (na_body_acc with "bd F") as "(bd &$&$& Pto)"; [done..|].
+    iMod ("bdto" with "bd") as "_". iIntros "!> P F∖N".
+    iMod (ninv_acc NE with "NP") as "/=[bd bdto]".
+    iDestruct ("Pto" with "bd P F∖N") as "[bd $]".
+    by iMod ("bdto" with "bd") as "_".
   Qed.
 
   (** Allocate [na_nninv] *)

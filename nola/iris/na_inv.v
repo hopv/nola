@@ -34,17 +34,18 @@ Section na_ninv.
   Qed.
 
   (** Access [P] from [na_body] *)
-  Lemma na_body_acc {p i N E P} :
-    i ∈ (↑N:coPset) → ↑N ⊆ E →
-    na_body p i P -∗ na_own p E -∗ P ∗ na_own p (E∖↑N) ∗
-      (P -∗ na_own p (E∖↑N) -∗ na_body p i P ∗ na_own p E).
+  Lemma na_body_acc {p i N E P} : i ∈ (↑N:coPset) → ↑N ⊆ E →
+    na_body p i P -∗ na_own p E -∗
+      na_body p i P ∗ P ∗ na_own p (E∖↑N) ∗
+      (na_body p i P -∗ P -∗ na_own p (E∖↑N) -∗ na_body p i P ∗ na_own p E).
   Proof.
     iIntros (??) "[[$ lock]|i] E"; last first.
     { iDestruct (na_own_disjoint with "i E") as %?. set_solver. }
     rewrite [E as X in na_own p X](union_difference_L (↑N) E); [|done].
     rewrite [X in (X ∪ _)](union_difference_L {[i]} (↑N)) ?na_own_union;
       [|set_solver..].
-    iDestruct "E" as "[[i $] $]". iIntros "P $". iSplitR "i"; [|done].
-    iLeft. iFrame.
+    iDestruct "E" as "[[$$] $]". iIntros "[[_ lock']|i] P $".
+    - iCombine "lock lock'" gives %[_ Hval%gset_disj_valid_op]. set_solver.
+    - iSplitR "i"; [|done]. iLeft. iFrame.
   Qed.
 End na_ninv.
