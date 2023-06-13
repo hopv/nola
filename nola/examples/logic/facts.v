@@ -36,10 +36,12 @@ Section facts.
   Lemma nintp_indir {κ s i} {P : _ (;ᵞ)} : ⟦ ○{nil}(i) P ⟧{κ}(s) ⊣⊢ ⸨ P ⸩(s,i).
   Proof. done. Qed.
   Lemma nintp_wpw {κ W s st E e Φ} :
-    ⟦ n_wpw W st E e Φ ⟧{κ}(s) ⊣⊢ wpw ⟦ W ⟧(s) st E e (λ v, ⟦ Φ v ⟧(s)).
+    ⟦ WP[W] e @ st ; E {{ Φ }} ⟧{κ}(s) ⊣⊢
+      WP[⟦ W ⟧(s)] e @ st ; E {{ v, ⟦ Φ v ⟧(s) }}.
   Proof. done. Qed.
   Lemma nintp_twpw {κ W s st E e Φ} :
-    ⟦ n_twpw W st E e Φ ⟧{κ}(s) ⊣⊢ twpw ⟦ W ⟧(s) st E e (λ v, ⟦ Φ v ⟧(s)).
+    ⟦ WP[W] e @ st ; E [{ Φ }] ⟧{κ}(s) ⊣⊢
+      WP[⟦ W ⟧(s)] e @ st ; E [{ v, ⟦ Φ v ⟧(s) }].
   Proof. done. Qed.
   Lemma nintp_n_forall {κ s V P} : ⟦ ∀: V, P ⟧{κ}(s) ⊣⊢ ∀ Φ, ⟦ P /: Φ ⟧(s).
   Proof. simpl. f_equiv=> ?. by rewrite rew_eq_hwf. Qed.

@@ -225,6 +225,14 @@ Notation n_inv i N P := (n_inv' _ i N P).
 Notation n_na_inv' Γᵘ i p N P :=
   (n_g1 (Γᵘ:=Γᵘ) (nc_na_inv i p N) P) (only parsing).
 Notation n_na_inv i p N P := (n_na_inv' _ i p N P).
+Notation "WP[ W ] e @ s ; E {{ Φ } }" := (n_wpw W s E e Φ) (only parsing)
+  : nProp_scope.
+Notation "WP[ W ] e @ s ; E {{ v , P } }" := (n_wpw W s E e (λ v, P))
+  : nProp_scope.
+Notation "WP[ W ] e @ s ; E [{ Φ } ]" := (n_twpw W s E e Φ) (only parsing)
+  : nProp_scope.
+Notation "WP[ W ] e @ s ; E [{ v , P } ]" := (n_twpw W s E e (λ v, P))
+  : nProp_scope.
 
 Notation "∀: V , P" := (n_n_forall V P)
   (at level 200, right associativity,
