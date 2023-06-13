@@ -21,16 +21,6 @@ Section lemmas.
 
   Context `{!nsintpy Σ σ}.
 
-  (** Access [n_na_inv] *)
-  Lemma n_na_inv_acc {s i j p N P E F} : ↑N ⊆ E → ↑N ⊆ F → i < j → ⊢
-    ⸨ n_na_inv' [] i p N P -∗ n_na_own p F =[n_inv_wsat]{E,E∖↑N}=∗
-        P ∗ n_na_own p (F∖↑N) ∗
-        (P -∗ n_na_own p (F∖↑N) =[n_inv_wsat]{E∖↑N,E}=∗ n_na_own p F) ⸩(σ s, j).
-  Proof.
-    move=> NE NF ij. iApply sintpy_byintp. iIntros (??) "/= _ _ #to".
-    iApply (na_nninv_acc NE NF). by iApply "to".
-  Qed.
-
   (** Turn [na_ninv] into [na_nninv] *)
   Lemma na_ninv_nninv {s i j p N} {P : nPropS _} : j ∈ (↑N:coPset) →
     ninv N (nid_na p j P) -∗ na_nninv (Σ:=Σ) (σ s) i p N (↑ˡ P).

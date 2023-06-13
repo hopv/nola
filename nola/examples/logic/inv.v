@@ -19,15 +19,6 @@ Section lemmas.
 
   Context `{!nsintpy Σ σ}.
 
-  (** Access [n_inv] *)
-  Lemma n_inv_acc {s i j N P E} : ↑N ⊆ E → i < j → ⊢
-    ⸨ n_inv' [] i N P =[n_inv_wsat]{E,E∖↑N}=∗
-        P ∗ (P =[n_inv_wsat]{E∖↑N,E}=∗ True) ⸩(σ s, j).
-  Proof.
-    move=> NE ij. iApply sintpy_byintp. iIntros (??) "/= _ _ #to".
-    iApply (nninv_acc NE). by iApply "to".
-  Qed.
-
   (** Turn [ninv] into [nninv] *)
   Lemma ninv_nninv {s i N} {P : nPropS _} :
     ninv N (nid_u P) -∗ nninv (Σ:=Σ) (σ s) i N (↑ˡ P).
