@@ -34,6 +34,12 @@ Definition iter_inc_nd_forks_nd d : val :=
 Section verify.
   Context `{!nintpGS Σ}.
 
+  (** Interpretation of [strm] *)
+  Fact strm_intp {κ N Φ l s} :
+    ⟦ strm N Φ l ⟧{κ}(s) ⊣⊢
+      nninv s 0 N (∃ l' : loc, l ↦ # l' ∗ Φ (l +ₗ 1) ∗ strm N Φ l').
+  Proof. by rewrite/= rew_eq_hwf /=. Qed.
+
   (** [iter_inc] terminates *)
   Lemma twp_iter_inc {N E d l} {c : nat} : ↑N ⊆ E →
     [[{ ⟦ mul_strm N d l ⟧{nL} }]][nninv_wsats]
