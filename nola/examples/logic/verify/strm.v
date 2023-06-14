@@ -8,7 +8,7 @@ From nola.examples.heap_lang Require Export proofmode notation.
 Definition strm {κ Γᵘ Γᵍ} (N : namespace) (Φ : loc → nPropL (;ᵞ Γᵘ ++ Γᵍ))
   : loc → nProp κ (Γᵘ;ᵞ Γᵍ) :=
   (rec:ˢ l, n_inv' (_::_) 0 N (∃ l' : loc,
-    l ↦ # l' ∗ ¢ᵍ Φ (l +ₗ 1) ∗ %ᵍˢ #!0 @! l'))%n.
+    l ↦ # l' ∗ ¢ᵍ Φ (l +ₗ 1) ∗ %ᵍˢ 0@ l'))%n.
 
 (** Stream whose elements are multiples of [d] *)
 Definition mul_strm {κ Γ} (N : namespace) (d : Z) : loc → nProp κ Γ :=

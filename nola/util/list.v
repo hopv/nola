@@ -32,22 +32,22 @@ Inductive schoice {A} {F : A → Type} : list A → Type :=
 Arguments schoice {A} F xs.
 
 (** Utility patterns for [schoice] *)
-Notation "#!0 v" := (sbyhd v _) (at level 20, right associativity) : nola_scope.
+Notation "!0 v" := (sbyhd v _) (at level 20, right associativity) : nola_scope.
 Notation "+! s" := (sbytl _ s) (at level 20, right associativity) : nola_scope.
-Notation "#!1 v" := (+! #!0 v) (at level 20, right associativity) : nola_scope.
-Notation "#!2 v" := (+! #!1 v) (at level 20, right associativity) : nola_scope.
-Notation "#!3 v" := (+! #!2 v) (at level 20, right associativity) : nola_scope.
-Notation "#!4 v" := (+! #!3 v) (at level 20, right associativity) : nola_scope.
-Notation "#!5 v" := (+! #!4 v) (at level 20, right associativity) : nola_scope.
-Notation "#!6 v" := (+! #!5 v) (at level 20, right associativity) : nola_scope.
-Notation "#!7 v" := (+! #!6 v) (at level 20, right associativity) : nola_scope.
-Notation "#!8 v" := (+! #!7 v) (at level 20, right associativity) : nola_scope.
-Notation "#!9 v" := (+! #!8 v) (at level 20, right associativity) : nola_scope.
+Notation "!1 v" := (+! !0 v) (at level 20, right associativity) : nola_scope.
+Notation "!2 v" := (+! !1 v) (at level 20, right associativity) : nola_scope.
+Notation "!3 v" := (+! !2 v) (at level 20, right associativity) : nola_scope.
+Notation "!4 v" := (+! !3 v) (at level 20, right associativity) : nola_scope.
+Notation "!5 v" := (+! !4 v) (at level 20, right associativity) : nola_scope.
+Notation "!6 v" := (+! !5 v) (at level 20, right associativity) : nola_scope.
+Notation "!7 v" := (+! !6 v) (at level 20, right associativity) : nola_scope.
+Notation "!8 v" := (+! !7 v) (at level 20, right associativity) : nola_scope.
+Notation "!9 v" := (+! !8 v) (at level 20, right associativity) : nola_scope.
 
 (** Destruct [schoice F xs] with [xs = []] *)
 Definition seqnil {A F R} {xs : list A} (s : schoice F xs) : xs = [] → R :=
   match s with
-  | #!0 _ => λ eq, match eq with end
+  | !0 _ => λ eq, match eq with end
   | +! _ => λ eq, match eq with end
   end.
 
@@ -55,7 +55,7 @@ Definition seqnil {A F R} {xs : list A} (s : schoice F xs) : xs = [] → R :=
 Fixpoint sbylapp {A F} {xs : list A} (s : schoice F xs) ys
   : schoice F (xs ++ ys) :=
   match s with
-  | #!0 v => #!0 v
+  | !0 v => !0 v
   | +! s => +! sbylapp s ys
   end.
 
@@ -70,7 +70,7 @@ Fixpoint sbyrapp {A F} xs {ys : list A} (s : schoice F ys)
 (** Decompose [schoice F (x :: xs)] *)
 Definition suncons' {A F} {xs : list A} (s : schoice F xs) :
   from_option F Empty_set (head xs) + schoice F (tail xs) :=
-  match s with #!0 v => inl v | +! s => inr s end.
+  match s with !0 v => inl v | +! s => inr s end.
 Definition suncons {A F x} {xs : list A} (s : schoice F (x :: xs)) :
   F x + schoice F xs := suncons' s.
 
@@ -83,6 +83,6 @@ Fixpoint sunapp {A F} {xs ys : list A}
   : schoice F (xs ++ ys) → schoice F xs + schoice F ys :=
   match xs with
   | [] => λ s, inr s
-  | _ :: _ => λ s, match suncons s with inl v => inl (#!0 v) | inr s =>
+  | _ :: _ => λ s, match suncons s with inl v => inl (!0 v) | inr s =>
       match sunapp s with inl s => inl (+! s) | inr s => inr s end end
   end.

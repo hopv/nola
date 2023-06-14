@@ -42,6 +42,16 @@ Arguments nparg κ V : clear implicits.
 Notation npargS := (nparg nS).
 Notation npargL := (nparg nL).
 Notation "@! a" := (Nparg a) (at level 20, right associativity) : nola_scope.
+Notation "0@ a" := (!0 @! a) (at level 20, right associativity) : nola_scope.
+Notation "1@ a" := (!1 @! a) (at level 20, right associativity) : nola_scope.
+Notation "2@ a" := (!2 @! a) (at level 20, right associativity) : nola_scope.
+Notation "3@ a" := (!3 @! a) (at level 20, right associativity) : nola_scope.
+Notation "4@ a" := (!4 @! a) (at level 20, right associativity) : nola_scope.
+Notation "5@ a" := (!5 @! a) (at level 20, right associativity) : nola_scope.
+Notation "6@ a" := (!6 @! a) (at level 20, right associativity) : nola_scope.
+Notation "7@ a" := (!7 @! a) (at level 20, right associativity) : nola_scope.
+Notation "8@ a" := (!8 @! a) (at level 20, right associativity) : nola_scope.
+Notation "9@ a" := (!9 @! a) (at level 20, right associativity) : nola_scope.
 
 (** ** [nProp]: Nola syntactic proposition *)
 
