@@ -155,7 +155,7 @@ Definition nsubst {κ V} (P : nProp κ ([V];ᵞ )) (Φ : nPred V) : nProp κ (;�
   nsubstlu (Γᵘ:=[]) P Φ eq_refl eq_refl.
 Infix "/:" := nsubst (at level 25, no associativity).
 
-(** [/:=] commutes with [↑ˡ] *)
+(** [/:] commutes with [↑ˡ] *)
 Lemma nsubst_nlarge {κ V} {P : nProp κ ([V];ᵞ )} {Φ} : ↑ˡ P /: Φ = ↑ˡ (P /: Φ).
 Proof. exact nsubstlu_nlarge. Qed.
 
@@ -183,6 +183,6 @@ Proof.
     try (by case: s gn). subst=>/=. by case (sunapp s).
 Qed.
 
-(** [/:=] preserves [nhgt] *)
+(** [/:] preserves [nhgt] *)
 Lemma nsubst_nhgt {κ V} {P : nProp κ ([V];ᵞ )} {Φ} : nhgt (P /: Φ) = nhgt P.
 Proof. exact nsubstlu_nhgt. Qed.
