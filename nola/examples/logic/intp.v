@@ -22,10 +22,10 @@ Section ncintp.
   (** Interpret basic connectives *)
   Definition ncintp0 (c : ncon0) : iProp Σ :=
     match c with
-    | ⟨⌜φ⌝⟩%nc => ⌜φ⌝
+    | ⟨⌜φ⌝⟩ => ⌜φ⌝
     | nc_na_own p E => na_own p E
-    | ⟨↦{dq}|l,v⟩%nc => l ↦{dq} v
-    | ⟨↦_J|l,v⟩%nc => l ↦_J v | ⟨↦□_J|l⟩%nc => l ↦_J □
+    | ⟨↦{dq}|l,v⟩ => l ↦{dq} v
+    | ⟨↦_J|l,v⟩ => l ↦_J v | ⟨↦□_J|l⟩ => l ↦_J □
     | nc_meta_token l E => meta_token l E
     | nc_steps_lb n => steps_lb n | nc_proph p pvs => proph p pvs
     end.
@@ -33,21 +33,21 @@ Section ncintp.
     match c with nc_inv_wsat => ninv_wsat' niS end.
   Definition ncintp1 (c : ncon1) (P : iProp Σ) : iProp Σ :=
     match c with
-    | ⟨◇⟩%nc => ◇ P | ⟨□⟩%nc => □ P | ⟨■⟩%nc => ■ P
-    | ⟨|==>⟩%nc => |==> P | ⟨|={E,E'}=>⟩%nc => |={E,E'}=> P
+    | ⟨◇⟩ => ◇ P | ⟨□⟩ => □ P | ⟨■⟩ => ■ P
+    | ⟨|==>⟩ => |==> P | ⟨|={E,E'}=>⟩ => |={E,E'}=> P
     end.
   Definition ncintp2 (c : ncon2) (P Q : iProp Σ) : iProp Σ :=
     match c with
-    | ⟨∧⟩%nc => P ∧ Q | ⟨∨⟩%nc => P ∨ Q | ⟨→⟩%nc => P → Q
-    | ⟨∗⟩%nc => P ∗ Q | ⟨-∗⟩%nc => P -∗ Q
-    | ⟨|=[]=>⟩%nc => |=[P]=> Q | ⟨|=[]{E,E'}=>⟩%nc => |=[P]{E,E'}=> Q
+    | ⟨∧⟩ => P ∧ Q | ⟨∨⟩ => P ∨ Q | ⟨→⟩ => P → Q
+    | ⟨∗⟩ => P ∗ Q | ⟨-∗⟩ => P -∗ Q
+    | ⟨|=[]=>⟩ => |=[P]=> Q | ⟨|=[]{E,E'}=>⟩ => |=[P]{E,E'}=> Q
     end.
   Definition ncintpg1 (c : ncong1) (P : nPropL (;ᵞ))
     (ni : nsintp_ty Σ -d> discrete_fun (λ κ, nProp κ (;ᵞ) -d> iProp Σ))
     : nsintp_ty Σ -d> iProp Σ :=
     λ s, match c with
-    | ⟨▷⟩%nc => ▷ ni s _ P
-    | ⟨○(i)⟩%nc => ⸨ P ⸩(s,i)
+    | ⟨▷⟩ => ▷ ni s _ P
+    | ⟨○(i)⟩ => ⸨ P ⸩(s,i)
     | nc_inv i N => nninv s i N P
     | nc_na_inv i p N => na_nninv s i p N P
     end%I.

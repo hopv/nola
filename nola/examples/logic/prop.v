@@ -100,33 +100,30 @@ Variant ncong1 : Type :=
     (i : nat) (p : na_inv_pool_name) (N : namespace).
 
 (** Notation for [ncon] *)
-Declare Scope ncon_scope.
-Delimit Scope ncon_scope with nc.
-Bind Scope ncon_scope with ncon0 ncon1 ncon2 ncong1.
 Notation "⟨⌜ φ ⌝⟩" := (nc_pure φ%type%stdpp%nola) (format "⟨⌜ φ ⌝⟩")
-  : ncon_scope.
+  : nola_scope.
 Notation "⟨↦ dq | l , v ⟩" := (nc_mapsto l dq v)
-  (dq custom dfrac, format "⟨↦ dq | l , v ⟩") : ncon_scope.
+  (dq custom dfrac, format "⟨↦ dq | l , v ⟩") : nola_scope.
 Notation "⟨↦_ I | l , v ⟩" := (nc_inv_mapsto_own l v I%stdpp%type)
-  (format "⟨↦_ I | l , v ⟩") : ncon_scope.
+  (format "⟨↦_ I | l , v ⟩") : nola_scope.
 Notation "⟨↦□_ I | l ⟩" := (nc_inv_mapsto l I%stdpp%type)
-  (format "⟨↦□_ I | l ⟩") : ncon_scope.
-Notation "⟨◇⟩" := nc_except_0 : ncon_scope.
-Notation "⟨□⟩" := nc_persistently : ncon_scope.
-Notation "⟨■⟩" := nc_plainly : ncon_scope.
-Notation "⟨|==>⟩" := nc_bupd : ncon_scope.
+  (format "⟨↦□_ I | l ⟩") : nola_scope.
+Notation "⟨◇⟩" := nc_except_0 : nola_scope.
+Notation "⟨□⟩" := nc_persistently : nola_scope.
+Notation "⟨■⟩" := nc_plainly : nola_scope.
+Notation "⟨|==>⟩" := nc_bupd : nola_scope.
 Notation "⟨|={ E , E' }=>⟩" := (nc_fupd E E')
-  (format "⟨|={ E , E' }=>⟩") : ncon_scope.
-Notation "⟨∧⟩" := nc_and : ncon_scope.
-Notation "⟨∨⟩" := nc_or : ncon_scope.
-Notation "⟨→⟩" := nc_impl : ncon_scope.
-Notation "⟨∗⟩" := nc_sep : ncon_scope.
-Notation "⟨-∗⟩" := nc_wand : ncon_scope.
-Notation "⟨|=[ ] =>⟩" := nc_bupdw (format "⟨|=[ ] =>⟩") : ncon_scope.
+  (format "⟨|={ E , E' }=>⟩") : nola_scope.
+Notation "⟨∧⟩" := nc_and : nola_scope.
+Notation "⟨∨⟩" := nc_or : nola_scope.
+Notation "⟨→⟩" := nc_impl : nola_scope.
+Notation "⟨∗⟩" := nc_sep : nola_scope.
+Notation "⟨-∗⟩" := nc_wand : nola_scope.
+Notation "⟨|=[ ] =>⟩" := nc_bupdw (format "⟨|=[ ] =>⟩") : nola_scope.
 Notation "⟨|=[ ] { E , E' }=>⟩" := (nc_fupdw E E')
-  (format "⟨|=[ ] { E , E' }=>⟩") : ncon_scope.
-Notation "⟨▷⟩" := nc_later : ncon_scope.
-Notation "⟨○( i )⟩" := (nc_indir i) (format "⟨○( i )⟩") : ncon_scope.
+  (format "⟨|=[ ] { E , E' }=>⟩") : nola_scope.
+Notation "⟨▷⟩" := nc_later : nola_scope.
+Notation "⟨○( i )⟩" := (nc_indir i) (format "⟨○( i )⟩") : nola_scope.
 
 (** [nProp]: Nola syntactic proposition
   Its universe level is strictly higher than those of [V : npvar]
@@ -186,6 +183,7 @@ Notation nPropL := (nProp nL).
 Declare Scope nProp_scope.
 Delimit Scope nProp_scope with n.
 Bind Scope nProp_scope with nProp.
+Local Open Scope nProp_scope.
 
 Notation "'⌜' φ '⌝'" := (n_0 ⟨⌜φ⌝⟩) : nProp_scope.
 Notation "'True'" := (n_0 ⟨⌜True⌝⟩) : nProp_scope.
@@ -207,18 +205,18 @@ Notation "|={ E }=> P" := (n_1 ⟨|={E,E}=>⟩ P) : nProp_scope.
 Infix "∧" := (n_2 ⟨∧⟩) : nProp_scope.
 Infix "∨" := (n_2 ⟨∨⟩) : nProp_scope.
 Infix "→" := (n_2 ⟨→⟩) : nProp_scope.
-Notation "¬ P" := (P → False)%n : nProp_scope.
+Notation "¬ P" := (P → False) : nProp_scope.
 Infix "∗" := (n_2 ⟨∗⟩) : nProp_scope.
 Infix "-∗" := (n_2 ⟨-∗⟩) : nProp_scope.
-Notation "P ==∗ Q" := (P -∗ |==> Q)%n : nProp_scope.
-Notation "P ={ E , E' }=∗ Q" := (P -∗ |={E,E'}=> Q)%n : nProp_scope.
-Notation "P ={ E }=∗ Q" := (P -∗ |={E}=> Q)%n : nProp_scope.
+Notation "P ==∗ Q" := (P -∗ |==> Q) : nProp_scope.
+Notation "P ={ E , E' }=∗ Q" := (P -∗ |={E,E'}=> Q) : nProp_scope.
+Notation "P ={ E }=∗ Q" := (P -∗ |={E}=> Q) : nProp_scope.
 Notation "|=[ W ] => P" := (n_2 ⟨|=[]=>⟩ W P) : nProp_scope.
-Notation "P =[ W ]=∗ Q" := (P -∗ |=[W]=> Q)%n : nProp_scope.
+Notation "P =[ W ]=∗ Q" := (P -∗ |=[W]=> Q) : nProp_scope.
 Notation "|=[ W ] { E , E' }=> P" := (n_2 ⟨|=[]{E,E'}=>⟩ W P) : nProp_scope.
 Notation "|=[ W ] { E }=> P" := (n_2 ⟨|=[]{E,E}=>⟩ W P) : nProp_scope.
-Notation "P =[ W ] { E , E' }=∗ Q" := (P -∗ |=[W]{E,E'}=> Q)%n : nProp_scope.
-Notation "P =[ W ] { E }=∗ Q" := (P =[W]{E,E}=∗ Q)%n : nProp_scope.
+Notation "P =[ W ] { E , E' }=∗ Q" := (P -∗ |=[W]{E,E'}=> Q) : nProp_scope.
+Notation "P =[ W ] { E }=∗ Q" := (P =[W]{E,E}=∗ Q) : nProp_scope.
 Notation "∀'" := n_forall (only parsing) : nProp_scope.
 Notation "∀ x .. z , P" :=
   (n_forall (λ x, .. (n_forall (λ z, P%n)) ..)) : nProp_scope.
@@ -295,7 +293,7 @@ Fixpoint nlarge {κ Γ} (P : nProp κ Γ) : nPropL Γ :=
   | rec:ˢ' Φ a => rec:ˢ' Φ a | rec:ˡ' Φ a => rec:ˡ' Φ a
   | ¢ᵘ P => ¢ᵘ ↑ˡ P | ¢ᵍ P => ¢ᵍ ↑ˡ P
   | %ᵍˢ s => %ᵍˢ s | %ᵍˡ s => %ᵍˡ s | %ᵘˢ s => %ᵘˢ s | !ᵘˢ P => !ᵘˢ P
-  end%n
+  end
 where
   "(↑ˡ)" := nlarge : nola_scope and
   "↑ˡ P" := (nlarge P) : nola_scope.
