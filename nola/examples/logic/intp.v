@@ -102,6 +102,8 @@ Section nintp_gen.
         (nsubst' (Φ a) un gn (rew[λ _,_] ctxeq_ug un gn in rec:ˢ' Φ)%n)
         (H ‼ʰ[nsubst'_nhgt] 0) eq_refl eq_refl eq_refl
     | (%ᵍˢ s)%n, _ => λ _ _, seqnil s
+    | (¢ᵘ _)%n, _ => λ _ (un : _::_ = _), match un with end
+    | (¢ᵍ _)%n, _ => λ _ _ (gn : _::_ = _), match gn with end
     | n_l0 _, _ | (rec:ˡ' _ _)%n, _ | (%ᵍˡ _)%n, _ | (%ᵘˢ _)%n, _ | (!ᵘˢ _)%n, _
       => λ κS, match κS with end
     end%I.
@@ -133,6 +135,8 @@ Section nintp_gen.
     | (rec:ˡ' Φ a)%n, _ => λ un gn, nintp_gen
         (nsubst' (Φ a) un gn (rew[λ _,_] ctxeq_ug un gn in rec:ˡ' Φ)%n)
         (H ‼ʰ[nsubst'_nhgt] 0) eq_refl eq_refl
+    | (¢ᵘ _)%n, _ => λ un : _::_ = _, match un with end
+    | (¢ᵍ _)%n, _ => λ _ (gn : _::_ = _), match gn with end
     | (%ᵍˢ s)%n, _ | (%ᵍˡ s)%n, _ => λ _, seqnil s | (%ᵘˢ s)%n, _ => seqnil s
     | (!ᵘˢ P)%n, _ => λ _ _, nintpS P
     end%I.
@@ -225,7 +229,7 @@ Section nintp_facts.
     nintp_gen ni s (↑ˡ P) H un gn ⊣⊢ nintp_gen ni s P hwf un gn.
   Proof.
     move: κ Γ P H un gn. fix FIX 4=> κ Γ P H.
-    case: P H=>/=; intros; case H=>/= he; try apply wpw_proper=> >;
+    case: P H=>//=; intros; case H=>/= he; try apply wpw_proper=> >;
       try apply twpw_proper=> >; try f_equiv=> >; try apply FIX;
       try apply leibniz_equiv, proof_irrel;
       rewrite rew_eq_hwf; move: nsubst'_nhgt=>/=; subst;

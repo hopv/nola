@@ -19,6 +19,7 @@ Fixpoint nliftg {Δ κ Γ} (P : nProp κ Γ) : nProp κ (Γ.ᵞu;ᵞ Γ.ᵞg ++ 
   | ∀: V, P => ∀: V, nliftg P | ∃: V, P => ∃: V, nliftg P
   | rec:ˢ' Φ a => (rec:ˢ b, nliftg (Φ b)) a
   | rec:ˡ' Φ a => (rec:ˡ b, nliftg (Φ b)) a
+  | ¢ᵘ P => ¢ᵘ (nliftg P) | ¢ᵍ P => ¢ᵍ (nliftg P)
   | %ᵍˢ s => %ᵍˢ sbylapp s _ | %ᵍˡ s => %ᵍˡ sbylapp s _ | %ᵘˢ s => %ᵘˢ s
   | !ᵘˢ P => !ᵘˢ P
   end%n.
@@ -28,8 +29,7 @@ Lemma nliftg_nlarge {κ Γ Δ} {P : nProp κ Γ} :
   nliftg (Δ:=Δ) (↑ˡ P) = ↑ˡ (nliftg P).
 Proof.
   move: κ Γ P. fix FIX 3=> κ Γ.
-  case=>//= *; f_equal; try apply FIX; try (funext=> ?; apply FIX);
-    apply (FIX _ (_::_;ᵞ_)).
+  case=>//= *; f_equal; try (funext=> ?); apply (FIX _ (_;ᵞ_)).
 Qed.
 
 (** [nliftug]: Add unguarded and guarded variables at the bottom *)
@@ -47,6 +47,8 @@ Fixpoint nliftug {Δᵘ Δᵍ κ Γ} (P : nProp κ Γ)
   | ∀: V, P => λ gn, ∀: V, nliftug P gn | ∃: V, P => λ gn, ∃: V, nliftug P gn
   | rec:ˢ' Φ a => λ gn, (rec:ˢ b, nliftug (Φ b) gn) a
   | rec:ˡ' Φ a => λ gn, (rec:ˡ b, nliftug (Φ b) gn) a
+  | ¢ᵘ P => λ gn, ¢ᵘ (nliftug P gn)
+  | ¢ᵍ P => λ gn : _::_ = _, match gn with end
   | %ᵍˢ s | %ᵍˡ s => seqnil s | %ᵘˢ s => λ _, %ᵘˢ sbylapp s _
   | !ᵘˢ P => λ _, !ᵘˢ P
   end%n.
@@ -56,8 +58,8 @@ Lemma nliftug_nlarge {κ Γ Δᵘ Δᵍ} {P : nProp κ Γ} {gn} :
   nliftug (Δᵘ:=Δᵘ) (Δᵍ:=Δᵍ) (↑ˡ P) gn = ↑ˡ (nliftug P gn).
 Proof.
   move: κ Γ P gn. fix FIX 3=> κ Γ.
-  case=>//=; intros; f_equal; try apply FIX; try (funext=> ?; apply FIX);
-  try apply (FIX _ (_::_;ᵞ_)); by case: s gn.
+  case=>//=; intros; f_equal; try (funext=> ?); try apply (FIX _ (_;ᵞ_));
+    try apply (FIX _ (_::_;ᵞ_)); by case: s gn.
 Qed.
 
 (** [nlift]: Turn [nProp κ (;ᵞ)] into [nProp κ Γ] *)
@@ -97,6 +99,11 @@ Fixpoint nsubstlg {κ Γ Γᵍ V} (P : nProp κ Γ) (Φ : nPred V)
   | ∃: V, P => λ eq, ∃: V, nsubstlg P Φ eq
   | rec:ˢ' Ψ a => λ eq, (rec:ˢ b, nsubstlg (Ψ b) Φ eq) a
   | rec:ˡ' Ψ a => λ eq, (rec:ˡ b, nsubstlg (Ψ b) Φ eq) a
+  | ¢ᵘ P => λ eq, ¢ᵘ (nsubstlg P Φ eq)
+  | ¢ᵍ{Δᵍ} P => match Γᵍ with
+    | _::_ => λ eq, ¢ᵍ (nsubstlg P Φ (f_equal tail eq))
+    | [] => match Δᵍ, P with [], _ => λ _, P
+      | _::_, _ => λ eq : _::_ = _, match eq with end end end
   | %ᵍˢ s => λ eq, match sunapp (rew eq in s) with
       inl s => %ᵍˢ s | inr s => nlift (nunsmall (napply (sunsingl s) Φ)) end
   | %ᵍˡ s => λ eq, match sunapp (rew eq in s) with
@@ -104,15 +111,21 @@ Fixpoint nsubstlg {κ Γ Γᵍ V} (P : nProp κ Γ) (Φ : nPred V)
   | %ᵘˢ s => λ _, %ᵘˢ s | !ᵘˢ P => λ _, !ᵘˢ P
   end%n.
 
+(** [nsubstlg] on [¢ᵍ P] for [P : nProp κ (;ᵞ)] *)
+Fact nsubstlg_n_constg {κ V} {P : nProp κ (;ᵞ)} {Φ : nPred V} {eq : [V] = _} :
+  nsubstlg (¢ᵍ P) Φ eq = P.
+Proof. done. Qed.
+
 (** [nsubstlg] commutes with [↑ˡ] *)
 Lemma nsubstlg_nlarge {κ Γ V Γᵍ} {P : nProp κ Γ} {Φ} {eq : Γ.ᵞg = Γᵍ ++ [V] } :
   nsubstlg (↑ˡ P) Φ eq = ↑ˡ (nsubstlg P Φ eq).
 Proof.
-  move: κ Γ P Φ eq. fix FIX 3=> κ Γ.
+  move: κ Γ Γᵍ P Φ eq. fix FIX 4=> κ Γ Γᵍ.
   case=>//=; intros;
-    try (f_equal; apply (FIX _ (_;ᵞ_)) || (funext=>/= ?; apply FIX));
+    try (f_equal; try (funext=> ?); apply (FIX _ (_;ᵞ_)));
+    try (destruct Γᵍ=>/=; [by destruct Γᵍ0|f_equal; apply (FIX _ (;ᵞ_))]);
     subst=>/=; case (sunapp s)=>//= ?; rewrite -nlift_nlarge /=; f_equal;
-    symmetry; [apply nlarge_nunsmall|apply nlarge_id].
+      symmetry; [apply nlarge_nunsmall|apply nlarge_id].
 Qed.
 
 (** [nsubstlu i P Φ]: Substitute [Φ] for [P]'s last unguarded variable *)
@@ -134,6 +147,11 @@ Fixpoint nsubstlu {κ Γ Γᵘ V} (P : nProp κ Γ) (Φ : nPred V)
   | ∃: V, P => λ eq gn, ∃: V, nsubstlu P Φ (f_equal _ eq) gn
   | rec:ˢ' Ψ a => λ eq gn, (rec:ˢ b, nsubstlu (Ψ b) Φ (f_equal _ eq) gn) a
   | rec:ˡ' Ψ a => λ eq gn, (rec:ˡ b, nsubstlu (Ψ b) Φ (f_equal _ eq) gn) a
+  | ¢ᵘ{Δᵘ} P => match Γᵘ with
+    | _::_ => λ eq gn, ¢ᵘ (nsubstlu P Φ (f_equal tail eq) gn)
+    | [] => match Δᵘ, P with [], _ => λ _ gn, rew ctxeq_g gn in P
+      | _::_, _ => λ eq : _::_ = _, match eq with end end end
+  | ¢ᵍ P => λ _ (gn : _::_ = _), match gn with end
   | %ᵍˢ s | %ᵍˡ s => λ _, seqnil s
   | %ᵘˢ s => λ eq _, match sunapp (rew eq in s) with
       inl s => %ᵘˢ s | inr s => !ᵘˢ (napply (sunsingl s) Φ) end
@@ -147,13 +165,18 @@ Lemma nsubstlu_nlarge {κ Γ Γᵘ V}
 Proof.
   move: κ Γ Γᵘ P Φ eq gn. fix FIX 4=> κ Γ Γᵘ.
   case=>//=; intros; f_equal; try apply FIX; try (funext=>/= ?; apply FIX);
-    try (by case: s gn). subst=>/=. by case (sunapp s).
+    try (by case: s gn); subst=>/=; try by case (sunapp s).
+  destruct Γᵘ=>/=; [by destruct Γᵘ0|f_equal; apply FIX].
 Qed.
 
 (** [P /: Φ]: Substitute [Φ] for [P]'s only unguarded variable *)
 Definition nsubst {κ V} (P : nProp κ ([V];ᵞ )) (Φ : nPred V) : nProp κ (;ᵞ) :=
   nsubstlu (Γᵘ:=[]) P Φ eq_refl eq_refl.
 Infix "/:" := nsubst (at level 25, no associativity).
+
+(** [/:] on [¢ᵘ] *)
+Fact nsubst_n_constu {κ V} {P : nProp κ _} {Φ : nPred V} : ¢ᵘ P /: Φ = P.
+Proof. done. Qed.
 
 (** [/:] commutes with [↑ˡ] *)
 Lemma nsubst_nlarge {κ V} {P : nProp κ ([V];ᵞ )} {Φ} : ↑ˡ P /: Φ = ↑ˡ (P /: Φ).
@@ -163,7 +186,8 @@ Proof. exact nsubstlu_nlarge. Qed.
 
 Fixpoint nhgt {κ Γ} (P : nProp κ Γ) : hgt :=
   match P with
-  | n_0 _ | n_l0 _ | n_g1 _ _ | %ᵍˢ _ | %ᵍˡ _ | %ᵘˢ _ | !ᵘˢ _ => Hgt₀
+  | n_0 _ | n_l0 _ | n_g1 _ _ | ¢ᵍ _ | %ᵍˢ _ | %ᵍˡ _ | %ᵘˢ _ | !ᵘˢ _ => Hgt₀
+  | ¢ᵘ P => nhgt P
   | n_1 _ P | ∀: _, P | ∃: _, P => Hgt₁ (nhgt P)
   | n_2 _ P Q => Hgt₂ (nhgt P) (nhgt Q)
   | ∀' Φ | ∃' Φ => Hgtᶠ (λ a, nhgt (Φ a))
@@ -177,10 +201,11 @@ Lemma nsubstlu_nhgt {κ Γ Γᵘ V}
   {P : nProp κ Γ} {Φ} {eq : Γ.ᵞu = Γᵘ ++ [V] } {gn} :
   nhgt (nsubstlu P Φ eq gn) = nhgt P.
 Proof.
-  move: κ Γ Γᵘ P Φ eq gn. fix FIX 4=> ???.
+  move: κ Γ Γᵘ P Φ eq gn. fix FIX 4=> ?? Γᵘ.
   case=>//=; intros;
-    try (f_equal; (apply FIX || (try f_equal); funext=>/= ?; apply FIX));
-    try (by case: s gn). subst=>/=. by case (sunapp s).
+    try (f_equal; try f_equal; try (funext=> ?); apply FIX);
+    try (by case: s gn); subst=>/=; try by case (sunapp s).
+  destruct Γᵘ=>/=; [by destruct Γᵘ0=>/=|f_equal; apply FIX].
 Qed.
 
 (** [/:] preserves [nhgt] *)

@@ -156,6 +156,9 @@ Inductive nProp : nkind → nctx → Type :=
 | n_recl {Γᵘ Γᵍ} {A : Type} (Φ : A → nProp nL (A →nPL :: Γᵘ;ᵞ Γᵍ)) (a : A) :
     nProp nL (Γᵘ;ᵞ Γᵍ)
 
+(** Constant proposition, ignoring the first unguarded/guarded variable *)
+| n_constu {κ V Γᵘ Γᵍ} (P : nProp κ (Γᵘ;ᵞ Γᵍ)) : nProp κ (V :: Γᵘ;ᵞ Γᵍ)
+| n_constg {κ V Γᵍ} (P : nProp κ (;ᵞ Γᵍ)) : nProp κ (;ᵞ V :: Γᵍ)
 (** Guarded small variable *)
 | n_vargs {κ Γᵘ Γᵍ} (s : schoice npargS Γᵍ) : nProp κ (Γᵘ;ᵞ Γᵍ)
 (** Guarded large variable, [nPropL] only *)
@@ -249,6 +252,14 @@ Notation "rec:ˡ x , P" := (n_recl (λ x, P))
   (at level 200, right associativity,
     format "'[' '[' rec:ˡ  x ,  '/' P ']' ']'") : nProp_scope.
 
+Notation "¢ᵘ{ Γᵘ } P" := (n_constu (Γᵘ:=Γᵘ) P)
+  (at level 20, right associativity, only parsing) : nProp_scope.
+Notation "¢ᵘ P" := (n_constu P) (at level 20, right associativity)
+  : nProp_scope.
+Notation "¢ᵍ{ Γᵍ } P" := (n_constg (Γᵍ:=Γᵍ) P)
+  (at level 20, right associativity, only parsing) : nProp_scope.
+Notation "¢ᵍ P" := (n_constg P) (at level 20, right associativity)
+  : nProp_scope.
 Notation "%ᵍˢ s" := (n_vargs s) (at level 20, right associativity)
   : nProp_scope.
 Notation "%ᵍˡ s" := (n_vargl s) (at level 20, right associativity)
@@ -272,6 +283,7 @@ Fixpoint nlarge {κ Γ} (P : nProp κ Γ) : nPropL Γ :=
   | n_twpw W s E e Φ => n_twpw (↑ˡ W) s E e (λ v, ↑ˡ Φ v)
   | ∀: V, P => ∀: V, ↑ˡ P | ∃: V, P => ∃: V, ↑ˡ P
   | rec:ˢ' Φ a => rec:ˢ' Φ a | rec:ˡ' Φ a => rec:ˡ' Φ a
+  | ¢ᵘ P => ¢ᵘ ↑ˡ P | ¢ᵍ P => ¢ᵍ ↑ˡ P
   | %ᵍˢ s => %ᵍˢ s | %ᵍˡ s => %ᵍˡ s | %ᵘˢ s => %ᵘˢ s | !ᵘˢ P => !ᵘˢ P
   end%n
 where
