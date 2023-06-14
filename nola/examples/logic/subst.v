@@ -119,9 +119,8 @@ Fixpoint nsubstlu {κ Γ Γᵘ V} (P : nProp κ Γ) (Φ : nPred V)
   end%n.
 
 (** [nsubstlu] commutes with [↑ˡ] *)
-Lemma nsubstlu_nlarge {κ Γ Γᵘ V}
-  {P : nProp κ Γ} {Φ} {eq : Γ.ᵞu = Γᵘ ++ [V] } {gn} :
-  nsubstlu (↑ˡ P) Φ eq gn = ↑ˡ (nsubstlu P Φ eq gn).
+Lemma nsubstlu_nlarge {κ Γ Γᵘ V P Φ eq gn} :
+  nsubstlu (↑ˡ P) Φ eq gn = ↑ˡ (@nsubstlu κ Γ Γᵘ V P Φ eq gn).
 Proof.
   move: κ Γ Γᵘ P Φ eq gn. fix FIX 4=> κ Γ Γᵘ.
   case=>//=; intros; f_equal; try apply FIX; try (funext=>/= ?; apply FIX);
@@ -147,19 +146,15 @@ Proof. exact nsubstlu_nlarge. Qed.
 Fixpoint nhgt {κ Γ} (P : nProp κ Γ) : hgt :=
   match P with
   | n_0 _ | n_l0 _ | n_g1 _ _ | ¢ᵍ _ | %ᵍˢ _ | %ᵍˡ _ | %ᵘˢ _ | !ᵘˢ _ => Hgt₀
-  | ¢ᵘ P => nhgt P
-  | n_1 _ P | ∀: _, P | ∃: _, P => Hgt₁ (nhgt P)
-  | n_2 _ P Q => Hgt₂ (nhgt P) (nhgt Q)
-  | ∀' Φ | ∃' Φ => Hgtᶠ (λ a, nhgt (Φ a))
-  | n_wpw W _ _ _ Φ | n_twpw W _ _ _ Φ =>
-      Hgt₂ (nhgt W) (Hgtᶠ (λ a, nhgt (Φ a)))
+  | ¢ᵘ P => nhgt P | n_1 _ P | ∀: _, P | ∃: _, P => Hgt₁ (nhgt P)
+  | n_2 _ P Q => Hgt₂ (nhgt P) (nhgt Q) | ∀' Φ | ∃' Φ => Hgtᶠ (λ a, nhgt (Φ a))
+  | n_wpw W _ _ _ Φ | n_twpw W _ _ _ Φ => Hgt₂ (nhgt W) (Hgtᶠ (λ a, nhgt (Φ a)))
   | rec:ˢ' Φ a | rec:ˡ' Φ a => Hgt₁ (nhgt (Φ a))
   end%n.
 
 (** [nsubstlu] preserves [nhgt] *)
-Lemma nsubstlu_nhgt {κ Γ Γᵘ V}
-  {P : nProp κ Γ} {Φ} {eq : Γ.ᵞu = Γᵘ ++ [V] } {gn} :
-  nhgt (nsubstlu P Φ eq gn) = nhgt P.
+Lemma nsubstlu_nhgt {κ Γ Γᵘ V P Φ eq gn} :
+  nhgt (@nsubstlu κ Γ Γᵘ V P Φ eq gn) = nhgt P.
 Proof.
   move: κ Γ Γᵘ P Φ eq gn. fix FIX 4=> ?? Γᵘ.
   case=>//=; intros;
