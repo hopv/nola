@@ -4,10 +4,15 @@ From nola.examples.logic Require Export inv.
 From nola.iris Require Export wp.
 From nola.examples.heap_lang Require Export proofmode notation.
 
+(** Stream whose elements satisfy the condition [Φ] *)
+Definition strm {κ Γᵘ Γᵍ} (N : namespace) (Φ : loc → nPropL (;ᵞ Γᵘ ++ Γᵍ))
+  : loc → nProp κ (Γᵘ;ᵞ Γᵍ) :=
+  (rec:ˢ l, n_inv' (_::_) 0 N (∃ l' : loc,
+    l ↦ # l' ∗ ¢ᵍ Φ (l +ₗ 1) ∗ %ᵍˢ #!0 @! l'))%n.
+
 (** Stream whose elements are multiples of [d] *)
-Definition mul_strm (N : namespace) (d : Z) : loc → nPropS (;ᵞ) :=
-  (rec:ˢ l, n_inv' [_] 0 N (∃ (l' : loc) (k : Z),
-    l ↦ # l' ∗ (l +ₗ 1) ↦ #(k * d) ∗ %ᵍˢ #!0 @! l'))%n.
+Definition mul_strm {κ Γ} (N : namespace) (d : Z) : loc → nProp κ Γ :=
+  strm N (λ l, ∃ k, l ↦ #(k * d))%n.
 
 (** Atomically increases the first [c] elements of the stream by [d] *)
 Definition iter_inc (d : Z) : val :=
@@ -30,8 +35,8 @@ Section verify.
   Context `{!nintpGS Σ}.
 
   (** [iter_inc] terminates *)
-  Lemma twp_iter_inc {N E d} {c : nat} {l : loc} : ↑N ⊆ E →
-    [[{ ⟦ mul_strm N d l ⟧ }]][nninv_wsats]
+  Lemma twp_iter_inc {N E d l} {c : nat} : ↑N ⊆ E →
+    [[{ ⟦ mul_strm N d l ⟧{nL} }]][nninv_wsats]
       iter_inc d #c #l @ E
     [[{ RET #(); True }]].
   Proof.
@@ -39,33 +44,33 @@ Section verify.
     iInduction c as [|c] "IH" forall (l) "inv"; wp_rec; wp_pures;
       [by iApply "Φ"|].
     wp_bind (FAA _ _). iMod (nninvs_acc with "[//]") as "/=[big cl]"; [done|].
-    iDestruct "big" as (? k) "(l↦ & l+1↦ & inv')".
+    iDestruct "big" as (?) "(l↦ & (%k & l+1↦) & inv')".
     wp_faa. iModIntro. iMod ("cl" with "[l↦ l+1↦ inv']") as "_".
-    { iExists _, _. have ->: ((k * d) + d = (k + 1) * d)%Z by lia. iFrame. }
+    { iExists _. iFrame "l↦ inv'". iExists _.
+      have ->: ((k * d) + d = (k + 1) * d)%Z by lia. iFrame. }
     iModIntro. wp_pures. wp_bind (! _)%E.
     iMod (nninvs_acc with "[//]") as "/=[big cl]"; [done|].
-    iDestruct "big" as (??) "(l↦ & l+1↦ & inv')". rewrite rew_eq_hwf /=.
+    iDestruct "big" as (?) "(l↦ & l+1↦ & inv')". rewrite rew_eq_hwf /=.
     iDestruct "inv'" as "#inv'". wp_load. iModIntro.
-    iMod ("cl" with "[l↦ l+1↦]") as "_".
-    { iExists _, _. rewrite/= rew_eq_hwf. by iFrame. }
-    iModIntro. wp_pures. have ->: (S c - 1)%Z = c by lia.
-    by iApply ("IH" with "Φ").
+    iMod ("cl" with "[l↦ l+1↦]") as "_"; [|iModIntro].
+    { iExists _. rewrite/= rew_eq_hwf. by iFrame. }
+    wp_pures. have ->: (S c - 1)%Z = c by lia. by iApply ("IH" with "Φ").
   Qed.
 
   (** [iter_inc_nd] terminates *)
-  Lemma twp_iter_inc_nd {N E d} {l : loc} : ↑N ⊆ E →
-    [[{ ⟦ mul_strm N d l ⟧ }]][nninv_wsats]
+  Lemma twp_iter_inc_nd {N E d l} : ↑N ⊆ E →
+    [[{ ⟦ mul_strm N d l ⟧{nL} }]][nninv_wsats]
       iter_inc_nd d #l @ E
     [[{ RET #(); True }]].
   Proof.
     rewrite/= rew_eq_hwf /=. iIntros (??) "#? Φ". wp_lam. wp_pures.
     wp_apply twp_ndnat; [done|]. iIntros (?) "_".
-    wp_apply (twp_iter_inc with "[]"); by [|rewrite/= rew_eq_hwf /=|].
+    wp_apply (twp_iter_inc with "[]"); by [|rewrite/= rew_eq_hwf /=|]. Unshelve.
   Qed.
 
   (** [iter_inc_nd_forks] terminates *)
-  Lemma twp_iter_inc_nd_forks {N E d} {c : nat} {l : loc} : ↑N ⊆ E →
-    [[{ ⟦ mul_strm N d l ⟧ }]][nninv_wsats]
+  Lemma twp_iter_inc_nd_forks {N E d l} {c : nat} : ↑N ⊆ E →
+    [[{ ⟦ mul_strm N d l ⟧{nL} }]][nninv_wsats]
       iter_inc_nd_forks d #c #l @ E
     [[{ RET #(); True }]].
   Proof.
@@ -77,8 +82,8 @@ Section verify.
   Qed.
 
   (** [iter_inc_nd_forks_nd] terminates *)
-  Lemma twp_iter_inc_nd_forks_nd {N E d} {l : loc} : ↑N ⊆ E →
-    [[{ ⟦ mul_strm N d l ⟧ }]][nninv_wsats]
+  Lemma twp_iter_inc_nd_forks_nd {N E d l} : ↑N ⊆ E →
+    [[{ ⟦ mul_strm N d l ⟧{nL} }]][nninv_wsats]
       iter_inc_nd_forks_nd d #l @ E
     [[{ RET #(); True }]].
   Proof.
