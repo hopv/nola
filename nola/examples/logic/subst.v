@@ -6,70 +6,30 @@ Import EqNotations.
 
 (** ** [nlift]: Turn [nProp κ (;ᵞ)] into [nProp κ Γ] *)
 
-(** [nliftg]: Add guarded variables at the bottom *)
-
-Fixpoint nliftg {Δ κ Γ} (P : nProp κ Γ) : nProp κ (Γ.ᵞu;ᵞ Γ.ᵞg ++ Δ) :=
-  match P with
-  | n_0 c => n_0 c | n_l0 c => n_l0 c | n_1 c P => n_1 c (nliftg P)
-  | n_2 c P Q => n_2 c (nliftg P) (nliftg Q)
-  | n_g1 c P => n_g1 c (rew ctxeq_g app_assoc'_d in nliftg P)
-  | ∀' Φ => ∀ a, nliftg (Φ a) | ∃' Φ => ∃ a, nliftg (Φ a)
-  | n_wpw W s E e Φ => n_wpw (nliftg W) s E e (λ v, nliftg (Φ v))
-  | n_twpw W s E e Φ => n_twpw (nliftg W) s E e (λ v, nliftg (Φ v))
-  | ∀: V, P => ∀: V, nliftg P | ∃: V, P => ∃: V, nliftg P
-  | rec:ˢ' Φ a => (rec:ˢ b, nliftg (Φ b)) a
-  | rec:ˡ' Φ a => (rec:ˡ b, nliftg (Φ b)) a
-  | ¢ᵘ P => ¢ᵘ (nliftg P) | ¢ᵍ P => ¢ᵍ (nliftg P)
-  | %ᵍˢ s => %ᵍˢ sbylapp s _ | %ᵍˡ s => %ᵍˡ sbylapp s _ | %ᵘˢ s => %ᵘˢ s
-  | !ᵘˢ P => !ᵘˢ P
-  end%n.
+(** [nliftg]: Turn [nProp κ (;ᵞ)] into [nProp κ (;ᵞ Γᵍ)] *)
+Fixpoint nliftg {κ Γᵍ} (P : nProp κ (;ᵞ)) : nProp κ (;ᵞ Γᵍ) :=
+  match Γᵍ with [] => P | _ :: _ => ¢ᵍ (nliftg P) end.
 
 (** [nliftg] commutes with [↑ˡ] *)
-Lemma nliftg_nlarge {κ Γ Δ} {P : nProp κ Γ} :
-  nliftg (Δ:=Δ) (↑ˡ P) = ↑ˡ (nliftg P).
-Proof.
-  move: κ Γ P. fix FIX 3=> κ Γ.
-  case=>//= *; f_equal; try (funext=> ?); apply (FIX _ (_;ᵞ_)).
-Qed.
+Lemma nliftg_nlarge {κ Γᵍ P} : nliftg (Γᵍ:=Γᵍ) (↑ˡ P) = ↑ˡ (nliftg (κ:=κ) P).
+Proof. by elim Γᵍ; [done|]=>/= ??->. Qed.
 
-(** [nliftug]: Add unguarded and guarded variables at the bottom *)
-Fixpoint nliftug {Δᵘ Δᵍ κ Γ} (P : nProp κ Γ)
-  : Γ.ᵞg = [] → nProp κ (Γ.ᵞu ++ Δᵘ;ᵞ Δᵍ) :=
-  match P with
-  | n_0 c => λ _, n_0 c | n_l0 c => λ _, n_l0 c
-  | n_1 c P => λ gn, n_1 c (nliftug P gn)
-  | n_2 c P Q => λ gn, n_2 c (nliftug P gn) (nliftug Q gn)
-  | n_g1 c P => λ gn, n_g1 c (rew app_assoc_eq_nil_g gn in nliftg P)
-  | ∀' Φ => λ gn, ∀ a, nliftug (Φ a) gn | ∃' Φ => λ gn, ∃ a, nliftug (Φ a) gn
-  | n_wpw W s E e Φ => λ gn, n_wpw (nliftug W gn) s E e (λ v, nliftug (Φ v) gn)
-  | n_twpw W s E e Φ => λ gn,
-      n_twpw (nliftug W gn) s E e (λ v, nliftug (Φ v) gn)
-  | ∀: V, P => λ gn, ∀: V, nliftug P gn | ∃: V, P => λ gn, ∃: V, nliftug P gn
-  | rec:ˢ' Φ a => λ gn, (rec:ˢ b, nliftug (Φ b) gn) a
-  | rec:ˡ' Φ a => λ gn, (rec:ˡ b, nliftug (Φ b) gn) a
-  | ¢ᵘ P => λ gn, ¢ᵘ (nliftug P gn)
-  | ¢ᵍ P => λ gn : _::_ = _, match gn with end
-  | %ᵍˢ s | %ᵍˡ s => seqnil s | %ᵘˢ s => λ _, %ᵘˢ sbylapp s _
-  | !ᵘˢ P => λ _, !ᵘˢ P
-  end%n.
+(** [nliftu]: Turn [nProp κ (;ᵞ Γᵍ)] into [nProp κ (Γᵘ;ᵞ Γᵍ)] *)
+Fixpoint nliftu {κ Γᵘ Γᵍ} (P : nProp κ (;ᵞ Γᵍ)) : nProp κ (Γᵘ;ᵞ Γᵍ) :=
+  match Γᵘ with [] => P | _ :: _ => ¢ᵘ (nliftu P) end.
 
-(** [nliftug] commutes with [↑ˡ] *)
-Lemma nliftug_nlarge {κ Γ Δᵘ Δᵍ} {P : nProp κ Γ} {gn} :
-  nliftug (Δᵘ:=Δᵘ) (Δᵍ:=Δᵍ) (↑ˡ P) gn = ↑ˡ (nliftug P gn).
-Proof.
-  move: κ Γ P gn. fix FIX 3=> κ Γ.
-  case=>//=; intros; f_equal; try (funext=> ?); try apply (FIX _ (_;ᵞ_));
-    try apply (FIX _ (_::_;ᵞ_)); by case: s gn.
-Qed.
+(** [nliftu] commutes with [↑ˡ] *)
+Lemma nliftu_nlarge {κ Γᵘ Γᵍ P} :
+  nliftu (Γᵘ:=Γᵘ) (Γᵍ:=Γᵍ) (↑ˡ P) = ↑ˡ (nliftu (κ:=κ) P).
+Proof. by elim Γᵘ; [done|]=>/= ??->. Qed.
 
-(** [nlift]: Turn [nProp κ (;ᵞ)] into [nProp κ Γ] *)
-Definition nlift {κ Γ} (P : nProp κ (;ᵞ)) : nProp κ Γ := nliftug P eq_refl.
-Arguments nlift {_ _} _ /.
+(** [nlift]: Turn [nProp κ (;ᵞ)] into [nProp κ Γᵘ] *)
+Definition nlift {κ Γ} (P : nProp κ (;ᵞ)) : nProp κ Γ := nliftu (nliftg P).
+Arguments nlift {κ Γ} P /.
 
 (** [nlift] commutes with [↑ˡ] *)
-Lemma nlift_nlarge {κ Γ} {P : nProp κ (;ᵞ)} :
-  nlift (Γ:=Γ) (↑ˡ P) = ↑ˡ (nlift P).
-Proof. apply (nliftug_nlarge (Γ:=(;ᵞ))). Qed.
+Lemma nlift_nlarge {κ Γ P} : nlift (Γ:=Γ) (↑ˡ P) = ↑ˡ (nlift (κ:=κ) P).
+Proof. by rewrite/= nliftg_nlarge nliftu_nlarge. Qed.
 
 (** ** [P /: Φ]: Substitute [Φ] for [P]'s only unguarded variable *)
 
@@ -124,8 +84,8 @@ Proof.
   case=>//=; intros;
     try (f_equal; try (funext=> ?); apply (FIX _ (_;ᵞ_)));
     try (destruct Γᵍ=>/=; [by destruct Γᵍ0|f_equal; apply (FIX _ (;ᵞ_))]);
-    subst=>/=; case (sunapp s)=>//= ?; rewrite -nlift_nlarge /=; f_equal;
-      symmetry; [apply nlarge_nunsmall|apply nlarge_id].
+    subst=>/=; case (sunapp s)=>//= ?; rewrite -nliftu_nlarge -nliftg_nlarge;
+    do 2 f_equal; symmetry; [apply nlarge_nunsmall|apply nlarge_id].
 Qed.
 
 (** [nsubstlu i P Φ]: Substitute [Φ] for [P]'s last unguarded variable *)

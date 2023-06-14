@@ -21,8 +21,6 @@ Fixpoint app_assoc_d {A} {xs ys zs : list A}
   | [] => eq_refl
   | _ :: _ => f_equal _ app_assoc_d
   end.
-Definition app_assoc'_d {A} {xs ys zs : list A}
-  : (xs ++ ys) ++ zs = xs ++ (ys ++ zs) := eq_sym app_assoc_d.
 
 (** ** [schoice]: Variant choosing an element of [list] with a value *)
 
