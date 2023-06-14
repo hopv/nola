@@ -191,7 +191,6 @@ Notation "⟦ P ⟧{ κ } ( s , H )" :=
   (@nintp_gen _ _ nintp_fp s κ (;ᵞ) P H eq_refl eq_refl) (only parsing)
   : nola_scope.
 Notation "⟦ P ⟧{ κ } ( s )" := (⟦ P ⟧{κ}(s, hwf)) (only parsing) : nola_scope.
-Notation "⟦ P ⟧{ κ }" := (⟦ P ⟧{κ}(sintpb)) (only parsing) : nola_scope.
 Notation "⟦ P ⟧ ( s , H )" := ⟦ P ⟧{_}(s, H)
   (format "'[' ⟦  P  ⟧ '/  ' ( s ,  H ) ']'") : nola_scope.
 Notation "⟦ P ⟧ ( s )" := ⟦ P ⟧(s, hwf)

@@ -18,6 +18,7 @@ Notation nsintp_sound := (sintp_sound (ITI:=nintpsi _)).
 (** Utility for [nsintp] *)
 Notation nninvs := (nninv nsintpb).
 Notation na_nninvs := (na_nninv nsintpb).
+Notation "⟦ P ⟧{ κ }" := ⟦ P ⟧{κ}(nsintpb) (only parsing) : nola_scope.
 Notation "⟦ P ⟧" := ⟦ P ⟧(nsintpb) : nola_scope.
 Notation "⟦ P ⟧ˢ" := ⟦ P ⟧ˢ(nsintpb) : nola_scope.
 Notation nninv_wsats := (nninv_wsat nsintpb).
