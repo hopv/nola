@@ -302,7 +302,7 @@ Lemma nlarge_id' {κ Γ} {P : nProp κ Γ} (eq : κ = nL) :
 Proof.
   move: κ Γ P eq. fix FIX 3=> κ Γ.
   case=>/=; intros; subst=>//=; try rewrite (eq_dec_refl eq)/=; f_equal;
-    try exact (FIX _ _ _ eq_refl); funext=> ?; exact (FIX _ _ _ eq_refl).
+    try funext=> ?; exact (FIX _ _ _ eq_refl).
 Qed.
 Lemma nlarge_id {Γ} {P : nPropL Γ} : ↑ˡ P = P.
 Proof. exact (nlarge_id' eq_refl). Qed.
