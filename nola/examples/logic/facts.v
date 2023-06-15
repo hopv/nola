@@ -56,71 +56,71 @@ Section facts.
   Fact nintp_subus {s P} : ⟦ !ᵘˢ P ⟧(s) ⊣⊢ ⟦ ↑ˡ P ⟧(s).
   Proof. by rewrite/= nintpS_nintp_nlarge. Qed.
 
-  Context `{!nsintpy Σ s}.
+  Context `{!nsintpy Σ ih s}.
   Implicit Type (i j : nat) (P Q : nPropL (;ᵞ)).
 
   (** Make connectives go inside the strong interpretation *)
   Fact sintpy_and {i P Q} :
     ⸨ P ⸩(s, i) ∧ ⸨ Q ⸩(s, i) -∗ ⸨ P ∧ Q ⸩(s, i).
   Proof.
-    iIntros "PQ". iApply sintpy_byintp. iIntros (? _) "/= #to _ _".
+    iIntros "PQ". iApply sintpy_byintp. iIntros (?? _) "/= #to _ _".
     iSplit; iApply "to"; [iDestruct "PQ" as "[$_]"|iDestruct "PQ" as "[_$]"].
   Qed.
   Fact sintpy_or {i P Q} :
     ⸨ P ⸩(s, i) ∨ ⸨ Q ⸩(s, i) -∗ ⸨ P ∨ Q ⸩(s, i).
   Proof.
-    iIntros "[?|?]"; iApply sintpy_byintp; iIntros (? _) "/= #to _ _";
+    iIntros "[?|?]"; iApply sintpy_byintp; iIntros (?? _) "/= #to _ _";
       [iLeft|iRight]; by iApply "to".
   Qed.
   Fact sintpy_forall {i A} {Φ : A → nPropL (;ᵞ)} :
     (∀ a, ⸨ Φ a ⸩(s, i)) -∗ ⸨ ∀' Φ ⸩(s, i).
   Proof.
-    iIntros "Φ". iApply sintpy_byintp. iIntros (? _) "/= #to _ _". iIntros (a).
+    iIntros "Φ". iApply sintpy_byintp. iIntros (?? _) "/= #to _ _ %".
     iApply "to". iApply "Φ".
   Qed.
   Fact sintpy_exist {i A} {Φ : A → nPropL (;ᵞ)} :
     (∃ a, ⸨ Φ a ⸩(s, i)) -∗ ⸨ ∃' Φ ⸩(s, i).
   Proof.
-    iDestruct 1 as (a) "Φ". iApply sintpy_byintp. iIntros (? _) "/= #to _ _".
+    iDestruct 1 as (a) "Φ". iApply sintpy_byintp. iIntros (?? _) "/= #to _ _".
     iExists a. iApply "to". iApply "Φ".
   Qed.
   Fact sintpy_sep {i P Q} :
     ⸨ P ⸩(s, i) ∗ ⸨ Q ⸩(s, i) -∗ ⸨ P ∗ Q ⸩(s, i).
   Proof.
-    iIntros "[P Q]". iApply sintpy_byintp. iIntros (? _) "/= #to _ _".
+    iIntros "[P Q]". iApply sintpy_byintp. iIntros (?? _) "/= #to _ _".
     iSplitL "P"; by iApply "to".
   Qed.
   Fact sintpy_persistently {i P} : □ ⸨ P ⸩(s, i) -∗ ⸨ □ P ⸩(s, i).
   Proof.
-    iIntros "#P". iApply sintpy_byintp. iIntros (? _) "/= #to _ _ !>".
+    iIntros "#P". iApply sintpy_byintp. iIntros (?? _) "/= #to _ _ !>".
     by iApply "to".
   Qed.
   Fact sintpy_bupd {i P} : (|==> ⸨ P ⸩(s, i)) -∗ ⸨ |==> P ⸩(s, i).
   Proof.
-    iIntros "P". iApply sintpy_byintp. iIntros (? _) "/= #to _ _".
+    iIntros "P". iApply sintpy_byintp. iIntros (?? _) "/= #to _ _".
     by iApply "to".
   Qed.
   Fact sintpy_fupd {i E E' P} :
     (|={E,E'}=> ⸨ P ⸩(s, i)) -∗ ⸨ |={E,E'}=> P ⸩(s, i).
   Proof.
-    iIntros "P". iApply sintpy_byintp. iIntros (? _) "/= #to _ _".
+    iIntros "P". iApply sintpy_byintp. iIntros (?? _) "/= #to _ _".
     by iApply "to".
   Qed.
   Fact sintpy_later {i P} : ▷ ⸨ P ⸩(s, i) -∗ ⸨ ▷{nil} P ⸩(s, i).
   Proof.
-    iIntros "P". iApply sintpy_byintp. iIntros (? _) "/= #to _ _".
+    iIntros "P". iApply sintpy_byintp. iIntros (?? _) "/= #to _ _".
     rewrite nintp_fp_nintp. by iApply "to".
   Qed.
   Fact sintpy_n_forall {i V} {P : nPropL ([V];ᵞ )} :
     (∀ Φ, ⸨ P /: Φ ⸩(s, i)) -∗ ⸨ ∀: V, P ⸩(s, i).
   Proof.
-    iIntros "P". iApply sintpy_byintp. iIntros (? _) "/= #to _ _". iIntros (Ψ).
+    iIntros "P". iApply sintpy_byintp. iIntros (?? _) "/= #to _ _ %".
     rewrite rew_eq_hwf. iApply "to". iApply "P".
   Qed.
   Fact sintpy_n_exist {i V} {P : nPropL ([V];ᵞ )} :
     (∃ Φ, ⸨ P /: Φ ⸩(s, i)) -∗ ⸨ ∃: V, P ⸩(s, i).
   Proof.
-    iDestruct 1 as (Φ) "P". iApply sintpy_byintp. iIntros (? _) "/= #to _ _".
+    iDestruct 1 as (Φ) "P". iApply sintpy_byintp. iIntros (?? _) "/= #to _ _".
     iExists Φ. rewrite rew_eq_hwf. iApply "to". iApply "P".
   Qed.
 
@@ -128,7 +128,7 @@ Section facts.
   Fact sintpy_indir_intro {i j P} :
     ⸨ P ⸩(s, i) -∗ ⸨ ○{nil}(i) P ⸩(s, j).
   Proof.
-    iIntros "P". iApply sintpy_byintp. iIntros (s' _) "/= _ #tos' _".
+    iIntros "P". iApply sintpy_byintp. iIntros (s' _ _) "/= _ #tos' _".
     by iApply "tos'".
   Qed.
   (** Eliminate [○(i)] under a strong interpration of level [j > i] *)
@@ -136,7 +136,7 @@ Section facts.
     i < j → ⸨ ○{nil}(i) P ⸩(s, j) -∗ ⸨ P ⸩(s, j).
   Proof.
     move=> ij. iIntros "○P". iApply sintpy_byintp.
-    iIntros (s' _) "/= #to _ #s'to". iDestruct ("to" with "○P") as "/= ○P".
+    iIntros (s' _ _) "/= #to _ #s'to". iDestruct ("to" with "○P") as "/= ○P".
     by iApply "s'to".
   Qed.
 End facts.

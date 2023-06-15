@@ -26,7 +26,7 @@ Implicit Type P : nPropL (;ᵞ).
 
 (** ** On [nsintpy] *)
 Section nsintpy.
-  Context `{!nintpGS Σ, !nsintpy Σ s}.
+  Context `{!nintpGS Σ, !nsintpy Σ ih s}.
 
   (** [s] is monotone over the level *)
   Lemma sintpy_mono_lev {i j P} : i ≤ j → ⸨ P ⸩(s, i) -∗ ⸨ P ⸩(s, j).

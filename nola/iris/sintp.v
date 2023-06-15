@@ -1,6 +1,6 @@
 (** * [sintp]: Strong interpretation *)
 
-From nola.util Require Export wft.
+From nola.util Require Export pred wft.
 From iris.bi Require Import lib.fixpoint.
 From iris.proofmode Require Import proofmode.
 
@@ -110,21 +110,25 @@ Definition low_ssound {ITI} (s : sintp_ty ITI) i : ITI.(intps_bi) :=
 
 (** ** [sintpy] : Characterization of the strong interpretation *)
 
-Inductive sintpy ITI (s : sintp_ty ITI) : Prop := {
+Inductive sintpy ITI (ih : sintp_ty ITI → Prop) (s : sintp_ty ITI) : Prop := {
   (** For [sintpy_intp] *)
   sintpy_byintp' :
     (* Parameterization by [sintpy'] is for strict positivity *)
-    ∃ sintpy' : _ → Prop, (∀ s', sintpy' s' → sintpy ITI s') ∧
+    ∃ sintpy' : _ → Prop, (∀ s', sintpy' s' → sintpy ITI ih s') ∧
     ∀ iP, let i := iP.(sarg_idx) in
-    (∀ s', ⌜sintpy' s'⌝ → □ ssound' s s' i -∗
+    (∀ s', ⌜sintpy' s'⌝ → ⌜ih s'⌝ → □ ssound' s s' i -∗
       □ (s -∗ˢ s') -∗ □ low_ssound s' i -∗ ⟦ iP ⟧(s'))
     -∗ ⸨ iP ⸩(s)
 }.
 Existing Class sintpy.
 
 (** Get the strong interpretation [⸨ P ⸩(s, i)] by the interpretaion *)
-Lemma sintpy_byintp `{!sintpy ITI s} {i P} :
-  (∀ s', ⌜sintpy ITI s'⌝ → (* Take any strong interpretation [s'] *)
+Lemma sintpy_byintp `{!sintpy ITI ih s} {i P} :
+  (∀ s',
+    (* Take any strong interpretation [s'] *)
+    ⌜sintpy ITI ih s'⌝ →
+    (* Inductive hypothesis *)
+    ⌜ih s'⌝ →
     (* Turn the strong interpration at level [i] into the interpretation *)
     □ ssound' s s' i -∗
     (* Turn the coinductive strong interpretation into
@@ -136,48 +140,68 @@ Lemma sintpy_byintp `{!sintpy ITI s} {i P} :
     ⟦ P ⟧(s', i))
   -∗ ⸨ P ⸩(s, i).
 Proof.
-  have X := (@sintpy_byintp' _ s). move: X=> [sy'[sy'to byintp]].
-  iIntros "intp". iApply byintp. iIntros (s' sys'). apply sy'to in sys'.
+  have X := (@sintpy_byintp' _ ih s). move: X=> [sy[syto byintp]].
+  iIntros "intp". iApply byintp. iIntros (s' sys'). apply syto in sys'.
   by iApply "intp".
 Qed.
 
-(** Introduce a strong interpretation *)
-Lemma sintpy_intro `{!sintpy ITI s} {i P} :
-  (∀ s', ⌜sintpy ITI s'⌝ → ⟦ P ⟧(s', i)) -∗ ⸨ P ⸩(s, i).
+(** [sintpy] is monotone over the inductive hypothesis *)
+Lemma sintpy_mono `{!sintpy ITI ih s} {ih' : _ → Prop} :
+  (∀ s', ih s' → ih' s') → sintpy ITI ih' s.
 Proof.
-  iIntros "∀P". iApply sintpy_byintp. iIntros (??) "_ _ _". by iApply "∀P".
+  move=> ihto. move: s sintpy0. fix FIX 2=> s [[sy[syto byintp]]]. split.
+  exists (sintpy _ ih'). split; [done|]=>/= ?. iIntros "big". iApply byintp.
+  iIntros (???). iApply "big"; iPureIntro; by [apply FIX, syto|apply ihto].
+Qed.
+
+(** [sintpy] can accumulate the inductive hypothesis *)
+Lemma sintpy_acc {ITI ih} res :
+  (∀ s, sintpy ITI (res ∧₁ ih) s → res s) →
+  (∀ s, sintpy ITI ih s → res s).
+Proof.
+  move=> to s sys. apply to. move: s sys. fix FIX 2=> s [[sy[syto byintp]]].
+  split. exists (sintpy _ (res ∧₁ ih)). split; [done|]=>/= ?. iIntros "big".
+  iApply byintp. iIntros (? sys' ?). move: sys'=>/syto/FIX ?.
+  iApply "big"; iPureIntro; [done|]. split; [|done]. by apply to.
+Qed.
+
+(** Introduce a strong interpretation *)
+Lemma sintpy_intro `{!sintpy ITI ih s} {i P} :
+  (∀ s', ⌜sintpy ITI ih s'⌝ → ⌜ih s'⌝ → ⟦ P ⟧(s', i)) -∗ ⸨ P ⸩(s, i).
+Proof.
+  iIntros "∀P". iApply sintpy_byintp. iIntros (???) "_ _ _". by iApply "∀P".
 Qed.
 
 (** Update strong interpretations *)
-Lemma sintpy_map `{!sintpy ITI s} {i P Q} :
-  (∀ s', ⌜sintpy ITI s'⌝ → ⟦ P ⟧(s', i) -∗ ⟦ Q ⟧(s', i)) -∗
+Lemma sintpy_map `{!sintpy ITI ih s} {i P Q} :
+  (∀ s', ⌜sintpy ITI ih s'⌝ → ⌜ih s'⌝ → ⟦ P ⟧(s', i) -∗ ⟦ Q ⟧(s', i)) -∗
   ⸨ P ⸩(s, i) -∗ ⸨ Q ⸩(s, i).
 Proof.
-  iIntros "∀PQ P". iApply sintpy_byintp. iIntros (? sys') "#to _ _".
-  iApply ("∀PQ" $! _ sys'). by iApply "to".
+  iIntros "∀PQ P". iApply sintpy_byintp. iIntros (???) "#to _ _".
+  iApply "∀PQ"; by [| |iApply "to"].
 Qed.
-Lemma sintpy_map2 `{!sintpy ITI s} {i P Q R} :
-  (∀ s', ⌜sintpy ITI s'⌝ → ⟦ P ⟧(s', i) -∗ ⟦ Q ⟧(s', i) -∗
+Lemma sintpy_map2 `{!sintpy ITI ih s} {i P Q R} :
+  (∀ s', ⌜sintpy ITI ih s'⌝ → ⌜ih s'⌝ → ⟦ P ⟧(s', i) -∗ ⟦ Q ⟧(s', i) -∗
     ⟦ R ⟧(s', i)) -∗
   ⸨ P ⸩(s, i) -∗ ⸨ Q ⸩(s, i) -∗ ⸨ R ⸩(s, i).
 Proof.
-  iIntros "∀PQ P Q". iApply sintpy_byintp. iIntros (? sys') "#to _ _".
-  iApply ("∀PQ" $! _ sys' with "[P]"); by iApply "to".
+  iIntros "∀PQ P Q". iApply sintpy_byintp. iIntros (???) "#to _ _".
+  iApply ("∀PQ" with "[//] [//] [P]"); by iApply "to".
 Qed.
-Lemma sintpy_map3 `{!sintpy ITI s} {i P Q R S} :
-  (∀ s', ⌜sintpy ITI s'⌝ → ⟦ P ⟧(s', i) -∗ ⟦ Q ⟧(s', i) -∗
+Lemma sintpy_map3 `{!sintpy ITI ih s} {i P Q R S} :
+  (∀ s', ⌜sintpy ITI ih s'⌝ → ⌜ih s'⌝ → ⟦ P ⟧(s', i) -∗ ⟦ Q ⟧(s', i) -∗
     ⟦ R ⟧(s', i) -∗ ⟦ S ⟧(s', i)) -∗
   ⸨ P ⸩(s, i) -∗ ⸨ Q ⸩(s, i) -∗ ⸨ R ⸩(s, i) -∗ ⸨ S ⸩(s, i).
 Proof.
-  iIntros "∀PQ P Q R". iApply sintpy_byintp. iIntros (? sys') "#to _ _".
-  iApply ("∀PQ" $! _ sys' with "[P] [Q]"); by iApply "to".
+  iIntros "∀PQ P Q R". iApply sintpy_byintp. iIntros (???) "#to _ _".
+  iApply ("∀PQ" with "[//] [//] [P] [Q]"); by iApply "to".
 Qed.
-Lemma sintpy_map_lev `{!sintpy ITI s} {i j P Q} :
-  i ≺ j → (∀ s', ⌜sintpy ITI s'⌝ → ⟦ P ⟧(s', i) -∗ ⟦ Q ⟧(s', j)) -∗
+Lemma sintpy_map_lev `{!sintpy ITI ih s} {i j P Q} :
+  i ≺ j → (∀ s', ⌜sintpy ITI ih s'⌝ → ⌜ih s'⌝ → ⟦ P ⟧(s', i) -∗ ⟦ Q ⟧(s', j)) -∗
   ⸨ P ⸩(s, i) -∗ ⸨ Q ⸩(s, j).
 Proof.
-  iIntros (ij) "∀PQ P". iApply sintpy_byintp. iIntros (s' sys') "_ #tos' #s'to".
-  iApply ("∀PQ" $! _ sys'). iApply "s'to"; [done|]. by iApply "tos'".
+  iIntros (ij) "∀PQ P". iApply sintpy_byintp. iIntros (???) "_ #tos' #s'to".
+  iApply "∀PQ"; [done..|]. iApply "s'to"; [done|]. by iApply "tos'".
 Qed.
 
 (** ** [sintp]: Strong interpretation *)
@@ -185,7 +209,7 @@ Qed.
 (** [sintp_gen]: What becomes [sintp] by taking [bi_least_fixpoint] *)
 Definition sintp_gen {ITI} (self : sintp_ty' ITI)
   : sintp_ty' ITI := λ iP, let i := iP.(sarg_idx) in
-  (∀ s', ⌜sintpy ITI s'⌝ → □ ssound' (Swrap self) s' i -∗
+  (∀ s', ⌜sintpy ITI True₁ s'⌝ → □ ssound' (Swrap self) s' i -∗
     □ (Swrap self -∗ˢ s') -∗ □ low_ssound s' i -∗
     ⟦ iP ⟧(s'))%I.
 #[export] Instance sintp_gen_mono {ITI} : BiMonoPred (sintp_gen (ITI:=ITI)).
@@ -200,11 +224,11 @@ Qed.
 Definition sintp {ITI} : sintp_ty ITI := Swrap (bi_least_fixpoint sintp_gen).
 
 (** [sintp] satisfies [sintpy] *)
-#[export] Instance sintp_sintpy {ITI} : sintpy ITI sintp.
+#[export] Instance sintp_sintpy {ITI} : sintpy ITI True₁ sintp.
 Proof. split.
-  exists (sintpy _). split; [done|]=>/=. iIntros (?) "big".
-  rewrite least_fixpoint_unfold. iIntros (s sys) "#A #B".
-  iApply ("big" $! s sys); iIntros "!> % ?/="; by [iApply "A"|iApply "B"].
+  eexists _. split; [done|]=>/=. iIntros (?) "big".
+  rewrite least_fixpoint_unfold. iIntros (??) "#A #B".
+  iApply "big"; [done..| |]; iIntros "!> % ?/="; by [iApply "A"|iApply "B"].
 Qed.
 
 (** [sintp] is sound w.r.t. the interpretation under [sintp] *)
