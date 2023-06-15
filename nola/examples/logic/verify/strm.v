@@ -10,9 +10,15 @@ Definition strm {κ Γᵘ Γᵍ} (N : namespace) (Φ : loc → nPropL (;ᵞ Γ�
   (rec:ˢ l, n_inv' (_::_) 0 N (∃ l' : loc,
     l ↦ # l' ∗ ¢ᵍ Φ (l +ₗ 1) ∗ %ᵍˢ 0@ l'))%n.
 
+(** Interpreted [strm] *)
+Definition strmi `{!nintpGS Σ} s N Φ l : iProp Σ :=
+  nninv s 0 N (∃ l' : loc, l ↦ # l' ∗ Φ (l +ₗ 1) ∗ strm N Φ l').
+Notation strmis := (strmi nsintp).
+
 (** Stream whose elements are multiples of [d] *)
-Definition mul_strm {κ Γ} (N : namespace) (d : Z) : loc → nProp κ Γ :=
-  strm N (λ l, ∃ k, l ↦ #(k * d))%n.
+Definition mul_strmi `{!nintpGS Σ} s N (d : Z) l : iProp Σ :=
+  strmi s N (λ l, ∃ k, l ↦ #(k * d))%n l.
+Notation mul_strmis := (mul_strmi nsintp).
 
 (** Atomically increases the first [c] elements of the stream by [d] *)
 Definition iter_inc (d : Z) : val :=
@@ -34,19 +40,15 @@ Definition iter_inc_nd_forks_nd d : val :=
 Section verify.
   Context `{!nintpGS Σ}.
 
-  (** Interpreted [strm] *)
-  Definition strm' s N Φ l : iProp Σ :=
-    nninv s 0 N (∃ l' : loc, l ↦ # l' ∗ Φ (l +ₗ 1) ∗ strm N Φ l').
-
-  (** [strm] is interpreted into [strm'] *)
-  Fact strm_strm' {κ N Φ l s} :
-    ⟦ strm N Φ l ⟧{κ}(s) ⊣⊢ strm' s N Φ l.
+  (** [strm] is interpreted into [strmi] *)
+  Fact strm_strmi {κ N Φ l s} :
+    ⟦ strm N Φ l ⟧{κ}(s) ⊣⊢ strmi s N Φ l.
   Proof. by rewrite/= rew_eq_hwf /=. Qed.
 
-  (** Convert the predicate of [strm'] *)
-  Lemma strm'_convert `{!nsintpy Σ ih s} {N Φ Ψ l} :
+  (** Convert the predicate of [strmi] *)
+  Lemma strmi_convert `{!nsintpy Σ ih s} {N Φ Ψ l} :
     □ ⸨ ∀ l, (Φ l ={∅}=∗ Ψ l) ∗ (Ψ l ={∅}=∗ Φ l) ⸩(s, 0) -∗
-    strm' s N Φ l -∗ strm' s N Ψ l.
+    strmi s N Φ l -∗ strmi s N Ψ l.
   Proof.
     move: s nsintpy0 Φ Ψ l. apply (sintpy_acc (λ _, ∀ Φ Ψ l, _ -∗ _)).
     move=> s ? Φ Ψ l. iIntros "#sΦ↔Ψ". iApply nninv_convert. iModIntro.
@@ -67,11 +69,11 @@ Section verify.
 
   (** [iter_inc] terminates *)
   Lemma twp_iter_inc {N E d l} {c : nat} : ↑N ⊆ E →
-    [[{ ⟦ mul_strm N d l ⟧{nL} }]][nninv_wsats]
+    [[{ mul_strmis N d l }]][nninv_wsats]
       iter_inc d #c #l @ E
     [[{ RET #(); True }]].
   Proof.
-    rewrite/= rew_eq_hwf /=. iIntros (??) "#inv Φ".
+    iIntros (??) "#inv Φ".
     iInduction c as [|c] "IH" forall (l) "inv"; wp_rec; wp_pures;
       [by iApply "Φ"|].
     wp_bind (FAA _ _). iMod (nninvs_acc with "[//]") as "/=[big cl]"; [done|].
@@ -90,36 +92,33 @@ Section verify.
 
   (** [iter_inc_nd] terminates *)
   Lemma twp_iter_inc_nd {N E d l} : ↑N ⊆ E →
-    [[{ ⟦ mul_strm N d l ⟧{nL} }]][nninv_wsats]
+    [[{ mul_strmis N d l }]][nninv_wsats]
       iter_inc_nd d #l @ E
     [[{ RET #(); True }]].
   Proof.
-    rewrite/= rew_eq_hwf /=. iIntros (??) "#? Φ". wp_lam. wp_pures.
-    wp_apply twp_ndnat; [done|]. iIntros (?) "_".
-    wp_apply (twp_iter_inc with "[]"); by [|rewrite/= rew_eq_hwf /=|]. Unshelve.
+    iIntros (??) "#? ?". wp_lam. wp_apply twp_ndnat; [done|]. iIntros (?) "_".
+    by wp_apply twp_iter_inc.
   Qed.
 
   (** [iter_inc_nd_forks] terminates *)
   Lemma twp_iter_inc_nd_forks {N E d l} {c : nat} : ↑N ⊆ E →
-    [[{ ⟦ mul_strm N d l ⟧{nL} }]][nninv_wsats]
+    [[{ mul_strmis N d l }]][nninv_wsats]
       iter_inc_nd_forks d #c #l @ E
     [[{ RET #(); True }]].
   Proof.
-    rewrite/= rew_eq_hwf /=. iIntros (??) "#? Φ".
+    iIntros (??) "#? Φ".
     iInduction c as [|c] "IH"; wp_lam; wp_pures; [by iApply "Φ"|].
-    wp_apply twp_fork.
-    - wp_apply (twp_iter_inc_nd with "[]"); by [|rewrite/= rew_eq_hwf /=|].
-    - wp_pures. have ->: (S c - 1)%Z = c by lia. by iApply "IH".
+    wp_apply twp_fork; [by wp_apply twp_iter_inc_nd|]. wp_pures.
+    have ->: (S c - 1)%Z = c by lia. by iApply "IH".
   Qed.
 
   (** [iter_inc_nd_forks_nd] terminates *)
   Lemma twp_iter_inc_nd_forks_nd {N E d l} : ↑N ⊆ E →
-    [[{ ⟦ mul_strm N d l ⟧{nL} }]][nninv_wsats]
+    [[{ mul_strmis N d l }]][nninv_wsats]
       iter_inc_nd_forks_nd d #l @ E
     [[{ RET #(); True }]].
   Proof.
-    rewrite/= rew_eq_hwf /=. iIntros (??) "#? Φ". wp_lam. wp_pures.
-    wp_apply twp_ndnat; [done|]. iIntros (?) "_".
-    wp_apply (twp_iter_inc_nd_forks with "[]"); by [|rewrite/= rew_eq_hwf /=|].
+    iIntros (??) "#? ?". wp_lam. wp_apply twp_ndnat; [done|]. iIntros (?) "_".
+    by wp_apply twp_iter_inc_nd_forks.
   Qed.
 End verify.
