@@ -92,7 +92,7 @@ Section facts.
   Qed.
   Fact sintpy_persistently {i s P} : □ ⸨ P ⸩(σ s, i) -∗ ⸨ □ P ⸩(σ s, i).
   Proof.
-    iIntros "#P". iApply sintpy_byintp. iIntros (? _) "/= #to _ _ !#".
+    iIntros "#P". iApply sintpy_byintp. iIntros (? _) "/= #to _ _ !>".
     by iApply "to".
   Qed.
   Fact sintpy_bupd {i s P} : (|==> ⸨ P ⸩(σ s, i)) -∗ ⸨ |==> P ⸩(σ s, i).

@@ -215,7 +215,7 @@ Definition sintp_gen_gen {ITI} (self' self : sintp_ty' ITI)
   BiMonoPred (sintp_gen_gen (ITI:=ITI) self').
 Proof.
   split; [|solve_proper]=> Φ Ψ ??. iIntros "#ΦΨ" ((f, s)) "big".
-  iIntros (??) "#Ψfto". iApply "big"; [done|]. iIntros "!#" (P) "Φsf'".
+  iIntros (??) "#Ψfto". iApply "big"; [done|]. iIntros "!>" (P) "Φsf'".
   iApply "Ψfto". by iApply "ΦΨ".
 Qed.
 
@@ -225,7 +225,7 @@ Definition sintp_gen {ITI} (self : sintp_ty' ITI) : sintp_ty' ITI :=
 #[export] Instance sintp_gen_mono {ITI} : BiMonoPred (sintp_gen (ITI:=ITI)).
 Proof.
   split; [|solve_proper]=> Φ Ψ ??. iIntros "#ΦΨ". iApply least_fixpoint_ind.
-  iIntros "!#" (?) "big". rewrite /sintp_gen least_fixpoint_unfold.
+  iIntros "!>" (?) "big". rewrite /sintp_gen least_fixpoint_unfold.
   iIntros (σ' ?) "#genΨto #Ψto". iApply "big"; [done| |]; iModIntro; clear.
   - iIntros (P) "/= [big _]". iApply "genΨto"=>/=. iApply "big".
   - iIntros (iP) "/= Φ". iApply "Ψto". by iApply "ΦΨ".
@@ -238,7 +238,7 @@ Definition sintp_gen' {ITI} (s self : sintp_ty' ITI) : sintp_ty' ITI :=
   BiMonoPred (sintp_gen' (ITI:=ITI) s).
 Proof.
   split; [|solve_proper]=> Φ Ψ ??. iIntros "#ΦΨ". iApply bi_mono_pred.
-  iIntros "!#" (?) "[?|?]"; [|by iRight]. iLeft. by iApply "ΦΨ".
+  iIntros "!>" (?) "[?|?]"; [|by iRight]. iLeft. by iApply "ΦΨ".
 Qed.
 Definition sintp' {ITI} (s : sintp_ty' ITI) : sintp_ty' ITI :=
   bi_greatest_fixpoint (sintp_gen' s).
@@ -255,19 +255,19 @@ Proof. split.
     unfold sintp_gen', sintp_gen. apply least_fixpoint_ne; [|done]=> ??.
     unfold sintp_gen_gen. (do 8 f_equiv)=> ?. f_equiv. apply ss'.
   - move=> [s] [s']. iIntros "#ss'". iApply greatest_fixpoint_strong_mono.
-    clear. iIntros "!#" (?). iApply (bi_mono_pred (F:=sintp_gen)).
-    iIntros "!#" (iP) "[?|?]"; [by iLeft|]. iRight. by iApply "ss'".
+    clear. iIntros "!>" (?). iApply (bi_mono_pred (F:=sintp_gen)).
+    iIntros "!>" (iP) "[?|?]"; [by iLeft|]. iRight. by iApply "ss'".
   - move=> [s] [r]. iIntros "#rto" (iP) "r".
     iDestruct ("rto" with "r") as "Xsr"=>/=. iRevert (iP) "Xsr".
-    iApply greatest_fixpoint_coind. iIntros "!#" (iP).
+    iApply greatest_fixpoint_coind. iIntros "!>" (iP).
     rewrite /sintp' greatest_fixpoint_unfold. iRevert (iP).
     iApply (bi_mono_pred (F:=sintp_gen)).
-    iIntros "!#" (iP) "[?|[?|?]]"; [|by iRight|]; do 2 iLeft;
+    iIntros "!>" (iP) "[?|[?|?]]"; [|by iRight|]; do 2 iLeft;
       by [iApply "rto"|done].
   - move=>/= ?. exists (sintpy _). split; [done|]. iIntros (?) "big".
     rewrite /sintp' greatest_fixpoint_unfold /sintp_gen'/sintp_gen
       least_fixpoint_unfold /=/curry. iIntros (σ syσ) "#A #B".
-    iApply ("big" $! σ syσ); iIntros "!#" (?) "?"; [iApply "A"|iApply "B"]=>/=;
+    iApply ("big" $! σ syσ); iIntros "!>" (?) "?"; [iApply "A"|iApply "B"]=>/=;
       by rewrite /sintp' greatest_fixpoint_unfold.
 Qed.
 
@@ -278,8 +278,8 @@ Proof.
   rewrite /sintp' greatest_fixpoint_unfold.
   have: (Sarg i P).(sarg_idx) = i by done.
   move: {P}(Sarg i P : sintp_aty _)=> iP eq. iRevert (eq). iRevert (iP) "X".
-  iApply least_fixpoint_ind. iIntros "!#" ([? P]) "/= X ->".
-  iApply ("X" $! _ sintp_sintpy); iIntros "!#" (?) "/=".
+  iApply least_fixpoint_ind. iIntros "!>" ([? P]) "/= X ->".
+  iApply ("X" $! _ sintp_sintpy); iIntros "!>" (?) "/=".
   - iIntros "[X _]". by iApply "X".
   - by iIntros "[?|[]]".
   - iIntros (??) "?". by iApply IH.

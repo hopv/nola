@@ -29,7 +29,7 @@ Section lemmas.
   Lemma na_ninv_nninv {s i j p N} {P : nPropS _} : j ∈ (↑N:coPset) →
     ninv N (nid_na p j P) -∗ na_nninv (Σ:=Σ) (σ s) i p N (↑ˡ P).
   Proof.
-    rewrite na_nninv_unseal. iIntros (jN) "#NP !#".
+    rewrite na_nninv_unseal. iIntros (jN) "#NP !>".
     iApply (sintpy_intro (σ:=σ))=>/=.
     iIntros (?? E F NE NF) "F". rewrite -nintpS_nintp_nlarge.
     iMod (ninv_acc NE with "NP") as "/=[bd bdto]".
@@ -61,7 +61,7 @@ Section lemmas.
   Lemma na_nninv_mono_lev {s i j p N P} :
     i ≤ j → na_nninv (σ s) i p N P -∗ na_nninv (σ s) j p N P.
   Proof.
-    rewrite na_nninv_unseal. iIntros (ij) "#iP !#". by iApply sintpy_mono_lev.
+    rewrite na_nninv_unseal. iIntros (ij) "#iP !>". by iApply sintpy_mono_lev.
   Qed.
 
   (** Transform [na_nninv] *)

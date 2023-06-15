@@ -459,7 +459,7 @@ Section wpw.
     iMod (fupd_mask_subseteq E) as "cl"; [done|].
     iMod ("Wto" with "W") as "$". iMod "cl" as "_". iModIntro.
     iSplitL "wpW"; [by iApply "IH"|]. iApply (big_sepL_impl with "wpWs").
-    iIntros "!#" (???). by iApply "IH".
+    iIntros "!>" (???). by iApply "IH".
   Qed.
   Lemma wpw_expand {e s E W W' Φ} :
     □ (W' -∗ W ∗ (W -∗ W')) -∗
@@ -475,7 +475,7 @@ Section wpw.
     WP[W] e @ s; F [{ Φ }] -∗ WP[W'] e @ s; F [{ Φ }].
   Proof.
     iIntros (EF) "#W'W twpW". iRevert (EF). iRevert (e F Φ) "twpW".
-    iApply twp_ind; [solve_proper|]. iIntros "!#" (e F Φ) "twpW %".
+    iApply twp_ind; [solve_proper|]. iIntros "!>" (e F Φ) "twpW %".
     rewrite twp_unfold /twp_pre/=. case (to_val e); [done|].
     iIntros (????) "[W' X]". iMod (fupd_mask_subseteq E) as "cl"; [done|].
     iMod ("W'W" with "W'") as "[W Wto]". iMod "cl" as "_".
@@ -485,7 +485,7 @@ Section wpw.
     iDestruct ("twpW'" with "[%//]") as "$".
     iMod (fupd_mask_subseteq E) as "cl"; [done|]. iMod ("Wto" with "W") as "$".
     iMod "cl" as "_". iModIntro. iSplit; [done|].
-    iApply (big_sepL_impl with "twpW's"). iIntros "!#" (???) "[to _]".
+    iApply (big_sepL_impl with "twpW's"). iIntros "!>" (???) "[to _]".
     by iApply "to".
   Qed.
   Lemma twpw_expand {e s E W W' Φ} :
