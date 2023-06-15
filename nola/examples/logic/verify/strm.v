@@ -34,11 +34,36 @@ Definition iter_inc_nd_forks_nd d : val :=
 Section verify.
   Context `{!nintpGS Σ}.
 
-  (** Interpretation of [strm] *)
-  Fact strm_intp {κ N Φ l s} :
-    ⟦ strm N Φ l ⟧{κ}(s) ⊣⊢
-      nninv s 0 N (∃ l' : loc, l ↦ # l' ∗ Φ (l +ₗ 1) ∗ strm N Φ l').
+  (** Interpreted [strm] *)
+  Definition strm' s N Φ l : iProp Σ :=
+    nninv s 0 N (∃ l' : loc, l ↦ # l' ∗ Φ (l +ₗ 1) ∗ strm N Φ l').
+
+  (** [strm] is interpreted into [strm'] *)
+  Fact strm_strm' {κ N Φ l s} :
+    ⟦ strm N Φ l ⟧{κ}(s) ⊣⊢ strm' s N Φ l.
   Proof. by rewrite/= rew_eq_hwf /=. Qed.
+
+  (** Convert the predicate of [strm'] *)
+  Lemma strm'_convert `{!nsintpy Σ ih s} {N Φ Ψ l} :
+    □ ⸨ ∀ l, (Φ l ={∅}=∗ Ψ l) ∗ (Ψ l ={∅}=∗ Φ l) ⸩(s, 0) -∗
+    strm' s N Φ l -∗ strm' s N Ψ l.
+  Proof.
+    move: s nsintpy0 Φ Ψ l. apply (sintpy_acc (λ _, ∀ Φ Ψ l, _ -∗ _)).
+    move=> s ? Φ Ψ l. iIntros "#sΦ↔Ψ". iApply nninv_convert. iModIntro.
+    iApply sintpy_byintp=>/=.
+    iIntros (s' sys' [IH _]) "#to #tos' _ (%l' & l↦ & Φ & inv)".
+    rewrite rew_eq_hwf /=. iDestruct "inv" as "#inv".
+    iDestruct ("to" with "sΦ↔Ψ") as "/=Φ↔Ψ".
+    iDestruct ("tos'" with "sΦ↔Ψ") as "s'Φ↔Ψ".
+    iDestruct ("Φ↔Ψ" $! _) as "[ΦΨ ΨΦ]". iMod ("ΦΨ" with "Φ") as "Ψ". iModIntro.
+    iSplitL "l↦ Ψ". { iExists _. rewrite rew_eq_hwf /=. iFrame "l↦ Ψ".
+      iApply (IH with "[//] inv"). }
+    iIntros "(%l'' & l↦ & Ψ & inv')". iMod ("ΨΦ" with "Ψ") as "Φ". iModIntro.
+    iExists _. iFrame "l↦ Φ". rewrite !rew_eq_hwf /=.
+    iDestruct "inv'" as "#inv'". iApply (IH with "[]"); [|done]. iModIntro.
+    iApply (sintpy_map (sintpy0:=sys') with "[] s'Φ↔Ψ")=>/=. iClear "#".
+    iIntros (? _ _) "Φ↔Ψ %". iApply bi.sep_comm. iApply "Φ↔Ψ".
+  Qed.
 
   (** [iter_inc] terminates *)
   Lemma twp_iter_inc {N E d l} {c : nat} : ↑N ⊆ E →
