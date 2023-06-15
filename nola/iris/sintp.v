@@ -127,7 +127,7 @@ Lemma sintpy_byintp `{!sintpy ITI ih s} {i P} :
   (∀ s',
     (* Take any strong interpretation [s'] *)
     ⌜sintpy ITI ih s'⌝ →
-    (* Inductive hypothesis *)
+    (* Get access to the inductive hypothesis *)
     ⌜ih s'⌝ →
     (* Turn the strong interpration at level [i] into the interpretation *)
     □ ssound' s s' i -∗
@@ -146,7 +146,7 @@ Proof.
 Qed.
 
 (** [sintpy] is monotone over the inductive hypothesis *)
-Lemma sintpy_mono `{!sintpy ITI ih s} {ih' : _ → Prop} :
+Lemma sintpy_mono `{!sintpy ITI ih s} (ih' : _ → Prop) :
   (∀ s', ih s' → ih' s') → sintpy ITI ih' s.
 Proof.
   move=> ihto. move: s sintpy0. fix FIX 2=> s [[sy[syto byintp]]]. split.
@@ -156,13 +156,12 @@ Qed.
 
 (** [sintpy] can accumulate the inductive hypothesis *)
 Lemma sintpy_acc {ITI ih} res :
-  (∀ s, sintpy ITI (res ∧₁ ih) s → res s) →
-  (∀ s, sintpy ITI ih s → res s).
+  (∀ s, sintpy ITI (res ∧₁ ih) s → res s) → ∀ s, sintpy ITI ih s → res s.
 Proof.
   move=> to s sys. apply to. move: s sys. fix FIX 2=> s [[sy[syto byintp]]].
   split. exists (sintpy _ (res ∧₁ ih)). split; [done|]=>/= ?. iIntros "big".
   iApply byintp. iIntros (? sys' ?). move: sys'=>/syto/FIX ?.
-  iApply "big"; iPureIntro; [done|]. split; [|done]. by apply to.
+  iApply "big"; iPureIntro; [done|]. split; by [apply to|].
 Qed.
 
 (** Introduce a strong interpretation *)
