@@ -11,26 +11,25 @@ Definition nintpsi Σ `{!nintpGS Σ} : intpsi :=
 (** Notation for [nintpsi] *)
 Notation nsintpy Σ := (sintpy (nintpsi Σ)).
 Notation nsintp := (sintp (ITI:=nintpsi _)).
-Notation nsintpb := (nsintp ⊥ˢ).
 Notation nssound := (ssound (ITI:=nintpsi _)).
 Notation nsintp_sound := (sintp_sound (ITI:=nintpsi _)).
 
 (** Utility for [nsintp] *)
-Notation nninvs := (nninv nsintpb).
-Notation na_nninvs := (na_nninv nsintpb).
-Notation "⟦ P ⟧{ κ }" := ⟦ P ⟧{κ}(nsintpb) (only parsing) : nola_scope.
-Notation "⟦ P ⟧" := ⟦ P ⟧(nsintpb) : nola_scope.
-Notation "⟦ P ⟧ˢ" := ⟦ P ⟧ˢ(nsintpb) : nola_scope.
-Notation nninv_wsats := (nninv_wsat nsintpb).
+Notation nninvs := (nninv nsintp).
+Notation na_nninvs := (na_nninv nsintp).
+Notation "⟦ P ⟧{ κ }" := ⟦ P ⟧{κ}(nsintp) (only parsing) : nola_scope.
+Notation "⟦ P ⟧" := ⟦ P ⟧(nsintp) : nola_scope.
+Notation "⟦ P ⟧ˢ" := ⟦ P ⟧ˢ(nsintp) : nola_scope.
+Notation nninv_wsats := (nninv_wsat nsintp).
 
 Implicit Type P : nPropL (;ᵞ).
 
 (** ** On [nsintpy] *)
 Section nsintpy.
-  Context `{!nintpGS Σ, !nsintpy Σ σ}.
+  Context `{!nintpGS Σ, !nsintpy Σ s}.
 
-  (** [σ s] is monotone over the level *)
-  Lemma sintpy_mono_lev {i j s P} : i ≤ j → ⸨ P ⸩(σ s, i) -∗ ⸨ P ⸩(σ s, j).
+  (** [s] is monotone over the level *)
+  Lemma sintpy_mono_lev {i j P} : i ≤ j → ⸨ P ⸩(s, i) -∗ ⸨ P ⸩(s, j).
   Proof.
     move/Nat.lt_eq_cases=> [ij|<-]; [|by iIntros]. iIntros "Pi".
     iApply sintpy_map_lev; by [|iIntros|iLeft].

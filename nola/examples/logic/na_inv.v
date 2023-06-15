@@ -23,14 +23,14 @@ Section lemmas.
       (⟦ P ⟧ -∗ na_own p (F∖↑N) =[nninv_wsats]{E}=∗ na_own p F).
   Proof. move=> ??. iApply na_nninv_acc; [done..|iApply nsintp_sound]. Qed.
 
-  Context `{!nsintpy Σ σ}.
+  Context `{!nsintpy Σ s}.
 
   (** Turn [na_ninv] into [na_nninv] *)
-  Lemma na_ninv_nninv {s i j p N} {P : nPropS _} : j ∈ (↑N:coPset) →
-    ninv N (nid_na p j P) -∗ na_nninv (Σ:=Σ) (σ s) i p N (↑ˡ P).
+  Lemma na_ninv_nninv {i j p N} {P : nPropS _} : j ∈ (↑N:coPset) →
+    ninv N (nid_na p j P) -∗ na_nninv (Σ:=Σ) s i p N (↑ˡ P).
   Proof.
     rewrite na_nninv_unseal. iIntros (jN) "#NP !>".
-    iApply (sintpy_intro (σ:=σ))=>/=.
+    iApply (sintpy_intro (s:=s))=>/=.
     iIntros (?? E F NE NF) "F". rewrite -nintpS_nintp_nlarge.
     iMod (ninv_acc NE with "NP") as "/=[bd bdto]".
     iDestruct (na_body_acc with "bd F") as "(bd &$&$& Pto)"; [done..|].
@@ -41,9 +41,9 @@ Section lemmas.
   Qed.
 
   (** Allocate [na_nninv] *)
-  Lemma na_nninv_alloc_rec {s i p N} {P : nPropS (;ᵞ)} :
-    (na_nninv (σ s) i p N (↑ˡ P) -∗ ⟦ P ⟧(σ s)) =[nninv_wsat (σ s)]=∗
-      na_nninv (σ s) i p N (↑ˡ P).
+  Lemma na_nninv_alloc_rec {i p N} {P : nPropS (;ᵞ)} :
+    (na_nninv s i p N (↑ˡ P) -∗ ⟦ P ⟧(s)) =[nninv_wsat s]=∗
+      na_nninv s i p N (↑ˡ P).
   Proof.
     iIntros "toP". iMod na_lock_alloc as (j) "[% lock]".
     iMod (ninv_alloc_rec (P:=nid_na p j P) with "[toP lock]") as "NP".
@@ -51,23 +51,23 @@ Section lemmas.
       iApply "toP". by iApply na_ninv_nninv.
     - iModIntro. by iApply na_ninv_nninv.
   Qed.
-  Lemma nninv_alloc {s i p N} {P : nPropS (;ᵞ)} :
-    ⟦ P ⟧(σ s) =[nninv_wsat (σ s)]=∗ na_nninv (σ s) i p N (↑ˡ P).
+  Lemma nninv_alloc {i p N} {P : nPropS (;ᵞ)} :
+    ⟦ P ⟧(s) =[nninv_wsat s]=∗ na_nninv s i p N (↑ˡ P).
   Proof.
     iIntros "P". iApply (na_nninv_alloc_rec with "[P]"). by iIntros.
   Qed.
 
   (** [na_nninv] is monotone over the level *)
-  Lemma na_nninv_mono_lev {s i j p N P} :
-    i ≤ j → na_nninv (σ s) i p N P -∗ na_nninv (σ s) j p N P.
+  Lemma na_nninv_mono_lev {i j p N P} :
+    i ≤ j → na_nninv s i p N P -∗ na_nninv s j p N P.
   Proof.
     rewrite na_nninv_unseal. iIntros (ij) "#iP !>". by iApply sintpy_mono_lev.
   Qed.
 
   (** Transform [na_nninv] *)
-  Lemma na_nninv_convert {s i p N P Q} :
-    □ ⸨ P ={∅}=∗ Q ∗ (Q ={∅}=∗ P) ⸩(σ s, i) -∗
-      na_nninv (σ s) i p N P -∗ na_nninv (σ s) i p N Q.
+  Lemma na_nninv_convert {i p N P Q} :
+    □ ⸨ P ={∅}=∗ Q ∗ (Q ={∅}=∗ P) ⸩(s, i) -∗
+      na_nninv s i p N P -∗ na_nninv s i p N Q.
   Proof.
     rewrite na_nninv_unseal. iIntros "#PQP #accP !>".
     iApply (sintpy_map2 with "[] PQP accP")=>/=.
@@ -78,35 +78,35 @@ Section lemmas.
     iMod (fupd_mask_subseteq ∅) as "toE∖N"; [set_solver|].
     iMod ("QP" with "Q") as "P". iMod "toE∖N" as "_". iApply ("Pto" with "P").
   Qed.
-  Lemma na_nninv_split {s i p N P Q} :
-    na_nninv (σ s) i p N (P ∗ Q) ⊢
-      na_nninv (σ s) i p N P ∗ na_nninv (σ s) i p N Q.
+  Lemma na_nninv_split {i p N P Q} :
+    na_nninv s i p N (P ∗ Q) ⊢
+      na_nninv s i p N P ∗ na_nninv s i p N Q.
   Proof.
     iIntros "#NPQ". iSplit; iApply (na_nninv_convert with "[] NPQ"); iModIntro;
-    iApply (sintpy_intro (σ:=σ)); by iIntros (??) "/=[$$]!>$".
+    iApply (sintpy_intro (s:=s)); by iIntros (??) "/=[$$]!>$".
   Qed.
-  Lemma na_nninv_fupd {s i p N P} :
-    na_nninv (σ s) i p N (|={∅}=> P) ⊣⊢ na_nninv (σ s) i p N P.
+  Lemma na_nninv_fupd {i p N P} :
+    na_nninv s i p N (|={∅}=> P) ⊣⊢ na_nninv s i p N P.
   Proof.
     iSplit; iApply na_nninv_convert; iModIntro;
-      iApply (sintpy_intro (σ:=σ))=>/=; iIntros (??);
+      iApply (sintpy_intro (s:=s))=>/=; iIntros (??);
       by [iIntros ">$!>$"|iIntros "$!>"; iSplitR; iIntros].
   Qed.
-  Lemma na_nninv_add {s i p N P Q} :
-    □ ⸨ P ⸩(σ s, i) -∗ na_nninv (σ s) i p N Q -∗ na_nninv (σ s) i p N (P ∗ Q).
+  Lemma na_nninv_add {i p N P Q} :
+    □ ⸨ P ⸩(s, i) -∗ na_nninv s i p N Q -∗ na_nninv s i p N (P ∗ Q).
   Proof.
     iIntros "#P". iApply na_nninv_convert. iModIntro.
     iApply (sintpy_map with "[] P"). by iIntros (??) "/=$$!>[_$]".
   Qed.
 
   (** Combine [na_nninv]s *)
-  Lemma nninv_combine {s i p N N' N'' P Q} :
+  Lemma nninv_combine {i p N N' N'' P Q} :
     N ## N' → ↑N ∪ ↑N' ⊆@{coPset} ↑N'' →
-    na_nninv (σ s) i p N P -∗ na_nninv (σ s) i p N' Q -∗
-    na_nninv (σ s) i p N'' (P ∗ Q).
+    na_nninv s i p N P -∗ na_nninv s i p N' Q -∗
+    na_nninv s i p N'' (P ∗ Q).
   Proof.
     rewrite na_nninv_unseal. iIntros (??) "#NP #N'Q !>".
-    iApply (sintpy_map2 (σ:=σ) with "[] NP N'Q")=>/=.
+    iApply (sintpy_map2 (s:=s) with "[] NP N'Q")=>/=.
     iIntros (??) "{NP}NP {N'Q}N'Q". iIntros (? F ??) "F".
     iMod ("NP" with "[%] [%] F") as "($& F∖N & Pto)"; [set_solver..|].
     iMod ("N'Q" with "[%] [%] F∖N") as "($& F∖NN' & Qto)"; [set_solver..|].

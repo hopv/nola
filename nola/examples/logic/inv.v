@@ -20,42 +20,42 @@ Section lemmas.
       ⟦ P ⟧ ∗ (⟦ P ⟧ =[nninv_wsats]{E∖↑N,E}=∗ True).
   Proof. move=> ?. iApply nninv_acc; [done|iApply nsintp_sound]. Qed.
 
-  Context `{!nsintpy Σ σ}.
+  Context `{!nsintpy Σ s}.
 
   (** Turn [ninv] into [nninv] *)
-  Lemma ninv_nninv {s i N} {P : nPropS _} :
-    ninv N (nid_u P) -∗ nninv (Σ:=Σ) (σ s) i N (↑ˡ P).
+  Lemma ninv_nninv {i N} {P : nPropS _} :
+    ninv N (nid_u P) -∗ nninv (Σ:=Σ) s i N (↑ˡ P).
   Proof.
-    rewrite nninv_unseal. iIntros "#NP !>". iApply (sintpy_intro (σ:=σ))=>/=.
+    rewrite nninv_unseal. iIntros "#NP !>". iApply (sintpy_intro (s:=s))=>/=.
     iIntros (????). rewrite -nintpS_nintp_nlarge.
     by iApply (ninv_acc with "NP").
   Qed.
 
   (** Allocate [nninv] *)
-  Lemma nninv_alloc_rec {s i N} {P : nPropS (;ᵞ)} :
-    (nninv (σ s) i N (↑ˡ P) -∗ ⟦ P ⟧(σ s)) =[nninv_wsat (σ s)]=∗
-      nninv (σ s) i N (↑ˡ P).
+  Lemma nninv_alloc_rec {i N} {P : nPropS (;ᵞ)} :
+    (nninv s i N (↑ˡ P) -∗ ⟦ P ⟧(s)) =[nninv_wsat s]=∗
+      nninv s i N (↑ˡ P).
   Proof.
     iIntros "toP".
     iMod (ninv_alloc_rec (P:=nid_u P) with "[toP]") as "NP".
     - iIntros "/=NP". rewrite nintpS_nintp. iApply "toP". by iApply ninv_nninv.
     - iModIntro. by iApply ninv_nninv.
   Qed.
-  Lemma nninv_alloc {s i N} {P : nPropS (;ᵞ)} :
-    ⟦ P ⟧(σ s) =[nninv_wsat (σ s)]=∗ nninv (σ s) i N (↑ˡ P).
+  Lemma nninv_alloc {i N} {P : nPropS (;ᵞ)} :
+    ⟦ P ⟧(s) =[nninv_wsat s]=∗ nninv s i N (↑ˡ P).
   Proof. iIntros "P". iApply (nninv_alloc_rec with "[P]"). by iIntros. Qed.
 
   (** [nninv] is monotone over the level *)
-  Lemma nninv_mono_lev {s i j N P} :
-    i ≤ j → nninv (σ s) i N P -∗ nninv (σ s) j N P.
+  Lemma nninv_mono_lev {i j N P} :
+    i ≤ j → nninv s i N P -∗ nninv s j N P.
   Proof.
     rewrite nninv_unseal. iIntros (ij) "#iP !>". by iApply sintpy_mono_lev.
   Qed.
 
   (** Transform [nninv] *)
-  Lemma nninv_convert {s i N P Q} :
-    □ ⸨ P ={∅}=∗ Q ∗ (Q ={∅}=∗ P) ⸩(σ s, i) -∗
-      nninv (σ s) i N P -∗ nninv (σ s) i N Q.
+  Lemma nninv_convert {i N P Q} :
+    □ ⸨ P ={∅}=∗ Q ∗ (Q ={∅}=∗ P) ⸩(s, i) -∗
+      nninv s i N P -∗ nninv s i N Q.
   Proof.
     rewrite nninv_unseal. iIntros "#PQP #accP !>".
     iApply (sintpy_map2 with "[] PQP accP")=>/=.
@@ -66,32 +66,32 @@ Section lemmas.
     iMod (fupd_mask_subseteq ∅) as "toE∖N"; [set_solver|].
     iMod ("QP" with "Q") as "P". iMod "toE∖N" as "_". iApply ("Pto" with "P").
   Qed.
-  Lemma nninv_split {s i N P Q} :
-    nninv (σ s) i N (P ∗ Q) ⊢ nninv (σ s) i N P ∗ nninv (σ s) i N Q.
+  Lemma nninv_split {i N P Q} :
+    nninv s i N (P ∗ Q) ⊢ nninv s i N P ∗ nninv s i N Q.
   Proof.
     iIntros "#NPQ". iSplit; iApply (nninv_convert with "[] NPQ"); iModIntro;
-    iApply (sintpy_intro (σ:=σ)); by iIntros (??) "/=[$$]!>$".
+    iApply (sintpy_intro (s:=s)); by iIntros (??) "/=[$$]!>$".
   Qed.
-  Lemma nninv_fupd {s i N P} :
-    nninv (σ s) i N (|={∅}=> P) ⊣⊢ nninv (σ s) i N P.
+  Lemma nninv_fupd {i N P} :
+    nninv s i N (|={∅}=> P) ⊣⊢ nninv s i N P.
   Proof.
-    iSplit; iApply nninv_convert; iModIntro; iApply (sintpy_intro (σ:=σ))=>/=;
+    iSplit; iApply nninv_convert; iModIntro; iApply (sintpy_intro (s:=s))=>/=;
       iIntros (??); by [iIntros ">$!>$"|iIntros "$!>"; iSplitR; iIntros].
   Qed.
-  Lemma nninv_add {s i N P Q} :
-    □ ⸨ P ⸩(σ s, i) -∗ nninv (σ s) i N Q -∗ nninv (σ s) i N (P ∗ Q).
+  Lemma nninv_add {i N P Q} :
+    □ ⸨ P ⸩(s, i) -∗ nninv s i N Q -∗ nninv s i N (P ∗ Q).
   Proof.
     iIntros "#P". iApply nninv_convert. iModIntro.
     iApply (sintpy_map with "[] P"). by iIntros (??) "/=$$!>[_$]".
   Qed.
 
   (** Combine [nninv]s *)
-  Lemma nninv_combine {s i N N' N'' P Q} :
+  Lemma nninv_combine {i N N' N'' P Q} :
     N ## N' → ↑N ∪ ↑N' ⊆@{coPset} ↑N'' →
-    nninv (σ s) i N P -∗ nninv (σ s) i N' Q -∗ nninv (σ s) i N'' (P ∗ Q).
+    nninv s i N P -∗ nninv s i N' Q -∗ nninv s i N'' (P ∗ Q).
   Proof.
     rewrite nninv_unseal. iIntros (??) "#NP #N'Q !>".
-    iApply (sintpy_map2 (σ:=σ) with "[] NP N'Q")=>/=.
+    iApply (sintpy_map2 (s:=s) with "[] NP N'Q")=>/=.
     iIntros (??) "{NP}NP {N'Q}N'Q". iIntros (??).
     iMod ("NP" with "[%]") as "[$ Pto]"; [set_solver|].
     iMod ("N'Q" with "[%]") as "[$ Qto]"; [set_solver|].
