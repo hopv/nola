@@ -79,8 +79,7 @@ Section lemmas.
     iMod ("QP" with "Q") as "P". iMod "toE∖N" as "_". iApply ("Pto" with "P").
   Qed.
   Lemma na_nninv_split {i p N P Q} :
-    na_nninv s i p N (P ∗ Q) ⊢
-      na_nninv s i p N P ∗ na_nninv s i p N Q.
+    na_nninv s i p N (P ∗ Q) ⊢ na_nninv s i p N P ∗ na_nninv s i p N Q.
   Proof.
     iIntros "#NPQ". iSplit; iApply (na_nninv_convert with "[] NPQ"); iModIntro;
     iApply (sintpy_intro (s:=s)); by iIntros (???) "/=[$$]!>$".
@@ -100,10 +99,8 @@ Section lemmas.
   Qed.
 
   (** Combine [na_nninv]s *)
-  Lemma nninv_combine {i p N N' N'' P Q} :
-    N ## N' → ↑N ∪ ↑N' ⊆@{coPset} ↑N'' →
-    na_nninv s i p N P -∗ na_nninv s i p N' Q -∗
-    na_nninv s i p N'' (P ∗ Q).
+  Lemma nninv_combine {i p N N' N'' P Q} : N ## N' → ↑N ∪ ↑N' ⊆@{coPset} ↑N'' →
+    na_nninv s i p N P -∗ na_nninv s i p N' Q -∗ na_nninv s i p N'' (P ∗ Q).
   Proof.
     rewrite na_nninv_unseal. iIntros (??) "#NP #N'Q !>".
     iApply (sintpy_map2 (s:=s) with "[] NP N'Q")=>/=.

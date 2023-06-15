@@ -54,8 +54,7 @@ Section lemmas.
 
   (** Transform [nninv] *)
   Lemma nninv_convert {i N P Q} :
-    □ ⸨ P ={∅}=∗ Q ∗ (Q ={∅}=∗ P) ⸩(s, i) -∗
-      nninv s i N P -∗ nninv s i N Q.
+    □ ⸨ P ={∅}=∗ Q ∗ (Q ={∅}=∗ P) ⸩(s, i) -∗ nninv s i N P -∗ nninv s i N Q.
   Proof.
     rewrite nninv_unseal. iIntros "#PQP #accP !>".
     iApply (sintpy_map2 with "[] PQP accP")=>/=.
@@ -86,8 +85,7 @@ Section lemmas.
   Qed.
 
   (** Combine [nninv]s *)
-  Lemma nninv_combine {i N N' N'' P Q} :
-    N ## N' → ↑N ∪ ↑N' ⊆@{coPset} ↑N'' →
+  Lemma nninv_combine {i N N' N'' P Q} : N ## N' → ↑N ∪ ↑N' ⊆@{coPset} ↑N'' →
     nninv s i N P -∗ nninv s i N' Q -∗ nninv s i N'' (P ∗ Q).
   Proof.
     rewrite nninv_unseal. iIntros (??) "#NP #N'Q !>".
