@@ -10,6 +10,12 @@ Definition na_strm {κ Γᵘ Γᵍ} (p : na_inv_pool_name) (N : namespace)
   (rec:ˢ l, n_na_inv' (_::_) 0 p N
     (¢ᵍ Φ l ∗ ∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ %ᵍˢ 0@ l'))%n.
 
+(** Substitution over [na_strm] *)
+Fact na_strm_nsubst {κ p N V Φ Ψ l} :
+  na_strm (κ:=κ) (Γᵘ:=[V]) p N Φ l /: Ψ =
+    na_strm (Γᵘ:=[]) p N (λ l, Φ l /:ᵍ Ψ) l.
+Proof. done. Qed.
+
 (** Interpreted [strm] *)
 Definition na_strmi `{!nintpGS Σ} s p N Φ l : iProp Σ :=
   na_nninv s 0 p N (Φ l ∗ ∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ na_strm p N Φ l').

@@ -10,6 +10,11 @@ Definition strm {κ Γᵘ Γᵍ} (N : namespace) (Φ : loc → nPropL (;ᵞ Γ�
   (rec:ˢ l, n_inv' (_::_) 0 N
     (¢ᵍ Φ l ∗ ∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ %ᵍˢ 0@ l'))%n.
 
+(** Substitution over [strm] *)
+Fact strm_nsubst {κ N V Φ Ψ l} :
+  strm (κ:=κ) (Γᵘ:=[V]) N Φ l /: Ψ = strm (Γᵘ:=[]) N (λ l, Φ l /:ᵍ Ψ) l.
+Proof. done. Qed.
+
 (** Interpreted [strm] *)
 Definition strmi `{!nintpGS Σ} s N Φ l : iProp Σ :=
   nninv s 0 N (Φ l ∗ ∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ strm N Φ l').
