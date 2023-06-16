@@ -232,8 +232,7 @@ Section nintp_facts.
       try apply twpw_proper=> >; try f_equiv=> >; try apply FIX;
       try apply leibniz_equiv, proof_irrel;
       rewrite rew_eq_hwf; move: nsubst'_nhgt=>/=; subst;
-      have EQ := nsubst_nlarge (P:=P); move: (nsubst (↑ˡ P)) EQ;
-      move=> ?->?; apply FIX.
+      rewrite (nsubstlu_nlarge (P:=P))=> ?; apply FIX.
   Qed.
   (** Simplify [⟦ ⟧] over [↑ˡ] *)
   Lemma nintp_nlarge {s κ P} : ⟦ ↑ˡ P ⟧(s) ⊣⊢ ⟦ P ⟧{κ}(s).

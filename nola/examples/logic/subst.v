@@ -71,6 +71,12 @@ Fixpoint nsubstlg {κ Γ Γᵍ V} (P : nProp κ Γ) (Φ : nPred V)
   | %ᵘˢ s => λ _, %ᵘˢ s | !ᵘˢ P => λ _, !ᵘˢ P
   end%n.
 
+(** [P /:ᵍ Φ]: Substitute [Φ] for [P]'s only unguarded variable *)
+Definition nsubstg {κ V} (P : nProp κ (;ᵞ [V])) (Φ : nPred V) : nProp κ (;ᵞ) :=
+  nsubstlg (Γᵍ:=[]) P Φ eq_refl.
+Arguments nsubstg {_ _} _ _ /.
+Infix "/:ᵍ" := nsubstg (at level 25, no associativity).
+
 (** [nsubstlg] on [¢ᵍ P] for [P : nProp κ (;ᵞ)] *)
 Fact nsubstlg_n_constg {κ V} {P : nProp κ (;ᵞ)} {Φ : nPred V} {eq : [V] = _} :
   nsubstlg (¢ᵍ P) Φ eq = P.
@@ -131,6 +137,7 @@ Qed.
 (** [P /: Φ]: Substitute [Φ] for [P]'s only unguarded variable *)
 Definition nsubst {κ V} (P : nProp κ ([V];ᵞ )) (Φ : nPred V) : nProp κ (;ᵞ) :=
   nsubstlu (Γᵘ:=[]) P Φ eq_refl eq_refl.
+Arguments nsubst {_ _} _ _ /.
 Infix "/:" := nsubst (at level 25, no associativity).
 
 (** [/:] on [¢ᵘ] *)
