@@ -7,12 +7,12 @@ From nola.examples.heap_lang Require Export proofmode notation.
 (** Stream whose elements satisfy the condition [Φ] *)
 Definition strm {κ Γᵘ Γᵍ} (N : namespace) (Φ : loc → nPropL (;ᵞ Γᵘ ++ Γᵍ))
   : loc → nProp κ (Γᵘ;ᵞ Γᵍ) :=
-  (rec:ˢ l, n_inv' (_::_) 0 N (∃ l' : loc,
-    l ↦ # l' ∗ ¢ᵍ Φ (l +ₗ 1) ∗ %ᵍˢ 0@ l'))%n.
+  (rec:ˢ l, n_inv' (_::_) 0 N
+    (¢ᵍ Φ l ∗ ∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ %ᵍˢ 0@ l'))%n.
 
 (** Interpreted [strm] *)
 Definition strmi `{!nintpGS Σ} s N Φ l : iProp Σ :=
-  nninv s 0 N (∃ l' : loc, l ↦ # l' ∗ Φ (l +ₗ 1) ∗ strm N Φ l').
+  nninv s 0 N (Φ l ∗ ∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ strm N Φ l').
 Notation strmis := (strmi nsintp).
 
 (** Stream whose elements are multiples of [d] *)
@@ -23,7 +23,7 @@ Notation mul_strmis := (mul_strmi nsintp).
 (** Atomically increases the first [c] elements of the stream by [d] *)
 Definition iter_inc (d : Z) : val :=
   rec: "self" "c" "l" :=
-    if: "c" = #0 then #() else FAA ("l" +ₗ #1) #d;; "self" ("c" - #1) (! "l").
+    if: "c" = #0 then #() else FAA "l" #d;; "self" ("c" - #1) (! ("l" +ₗ #1)).
 
 (** Calls [iter_inc] with a non-deterministic [c] *)
 Definition iter_inc_nd d : val := λ: "l", iter_inc d Ndnat "l".
@@ -53,16 +53,16 @@ Section verify.
     move: s nsintpy0 Φ Ψ l. apply (sintpy_acc (λ _, ∀ Φ Ψ l, _ -∗ _)).
     move=> s ? Φ Ψ l. iIntros "#sΦ↔Ψ". iApply nninv_convert. iModIntro.
     iApply sintpy_byintp=>/=.
-    iIntros (s' sys' [IH _]) "#to #tos' _ (%l' & l↦ & Φ & inv)".
+    iIntros (s' sys' [IH _]) "#to #tos' _ (Φ & %l' & ↦ & inv)".
     rewrite rew_eq_hwf /=. iDestruct "inv" as "#inv".
     iDestruct ("to" with "sΦ↔Ψ") as "/=Φ↔Ψ".
     iDestruct ("tos'" with "sΦ↔Ψ") as "s'Φ↔Ψ".
-    iDestruct ("Φ↔Ψ" $! _) as "[ΦΨ ΨΦ]". iMod ("ΦΨ" with "Φ") as "Ψ". iModIntro.
-    iSplitL "l↦ Ψ". { iExists _. rewrite rew_eq_hwf /=. iFrame "l↦ Ψ".
+    iDestruct ("Φ↔Ψ" $! _) as "[ΦΨ ΨΦ]". iMod ("ΦΨ" with "Φ") as "$". iModIntro.
+    iSplitL "↦". { iExists _. iFrame "↦". rewrite rew_eq_hwf /=.
       iApply (IH with "[//] inv"). }
-    iIntros "(%l'' & l↦ & Ψ & inv')". iMod ("ΨΦ" with "Ψ") as "Φ". iModIntro.
-    iExists _. iFrame "l↦ Φ". rewrite !rew_eq_hwf /=.
-    iDestruct "inv'" as "#inv'". iApply (IH with "[]"); [|done]. iModIntro.
+    iIntros "(Ψ & %l'' & ↦ & inv')". iMod ("ΨΦ" with "Ψ") as "$". iModIntro.
+    iExists _. iFrame "↦". rewrite !rew_eq_hwf /=. iDestruct "inv'" as "#inv'".
+    iApply (IH with "[]"); [|done]. iModIntro.
     iApply (sintpy_map (sintpy0:=sys') with "[] s'Φ↔Ψ")=>/=. iClear "#".
     iIntros (? _ _) "Φ↔Ψ %". iApply bi.sep_comm. iApply "Φ↔Ψ".
   Qed.
@@ -76,16 +76,14 @@ Section verify.
     iIntros (??) "#inv Φ".
     iInduction c as [|c] "IH" forall (l) "inv"; wp_rec; wp_pures;
       [by iApply "Φ"|].
-    wp_bind (FAA _ _). iMod (nninvs_acc with "[//]") as "/=[big cl]"; [done|].
-    iDestruct "big" as (?) "(l↦ & (%k & l+1↦) & inv')".
-    wp_faa. iModIntro. iMod ("cl" with "[l↦ l+1↦ inv']") as "_".
-    { iExists _. iFrame "l↦ inv'". iExists _.
-      have ->: ((k * d) + d = (k + 1) * d)%Z by lia. iFrame. }
+    wp_bind (FAA _ _). iDestruct (nninv_split with "inv") as "[ihd itl]".
+    iMod (nninvs_acc with "ihd") as "/=[[%k ↦] cl]"; [done|]. wp_faa.
+    iModIntro. iMod ("cl" with "[↦]") as "_".
+    { iExists _. have ->: ((k * d) + d = (k + 1) * d)%Z by lia. iFrame. }
     iModIntro. wp_pures. wp_bind (! _)%E.
-    iMod (nninvs_acc with "[//]") as "/=[big cl]"; [done|].
-    iDestruct "big" as (?) "(l↦ & l+1↦ & inv')". rewrite rew_eq_hwf /=.
-    iDestruct "inv'" as "#inv'". wp_load. iModIntro.
-    iMod ("cl" with "[l↦ l+1↦]") as "_"; [|iModIntro].
+    iMod (nninvs_acc with "itl") as "/=[(%& ↦ & inv') cl]"; [done|].
+    rewrite rew_eq_hwf /=. iDestruct "inv'" as "#inv'". wp_load. iModIntro.
+    iMod ("cl" with "[↦]") as "_"; [|iModIntro].
     { iExists _. rewrite/= rew_eq_hwf. by iFrame. }
     wp_pures. have ->: (S c - 1)%Z = c by lia. by iApply ("IH" with "Φ").
   Qed.
