@@ -21,21 +21,23 @@ Definition mul_strmi `{!nintpGS Σ} s N (d : Z) l : iProp Σ :=
 Notation mul_strmis := (mul_strmi nsintp).
 
 (** Atomically increases the first [c] elements of the stream by [d] *)
-Definition iter_inc (d : Z) : val :=
-  rec: "self" "c" "l" :=
-    if: "c" = #0 then #() else FAA "l" #d;; "self" ("c" - #1) (! ("l" +ₗ #1)).
+Definition iter_inc : val :=
+  rec: "self" "d" "c" "l" :=
+    if: "c" = #0 then #() else
+      FAA "l" "d";; "self" "d" ("c" - #1) (! ("l" +ₗ #1)).
 
 (** Calls [iter_inc] with a non-deterministic [c] *)
-Definition iter_inc_nd d : val := λ: "l", iter_inc d Ndnat "l".
+Definition iter_inc_nd : val := λ: "d" "l", iter_inc "d" Ndnat "l".
 
 (** Forks [c] threads executing [iter_inc_nd] *)
-Definition iter_inc_nd_forks d : val :=
-  rec: "self" "c" "l" :=
-    if: "c" = #0 then #() else Fork (iter_inc_nd d "l");; "self" ("c" - #1) "l".
+Definition iter_inc_nd_forks : val :=
+  rec: "self" "d" "c" "l" :=
+    if: "c" = #0 then #() else
+      Fork (iter_inc_nd "d" "l");; "self" "d" ("c" - #1) "l".
 
 (** Calls [iter_inc_nd_forks] with a non-deterministic [c] *)
-Definition iter_inc_nd_forks_nd d : val :=
-  λ: "l", iter_inc_nd_forks d Ndnat "l".
+Definition iter_inc_nd_forks_nd : val :=
+  λ: "d" "l", iter_inc_nd_forks "d" Ndnat "l".
 
 Section verify.
   Context `{!nintpGS Σ}.
@@ -70,7 +72,7 @@ Section verify.
   (** [iter_inc] terminates *)
   Lemma twp_iter_inc {N E d l} {c : nat} : ↑N ⊆ E →
     [[{ mul_strmis N d l }]][nninv_wsats]
-      iter_inc d #c #l @ E
+      iter_inc #d #c #l @ E
     [[{ RET #(); True }]].
   Proof.
     iIntros (??) "#inv Φ".
@@ -84,24 +86,24 @@ Section verify.
     iMod (nninvs_acc with "itl") as "/=[(%& ↦ & inv') cl]"; [done|].
     rewrite rew_eq_hwf /=. iDestruct "inv'" as "#inv'". wp_load. iModIntro.
     iMod ("cl" with "[↦]") as "_"; [|iModIntro].
-    { iExists _. rewrite/= rew_eq_hwf. by iFrame. }
+    { iExists _. rewrite/= rew_eq_hwf /=. by iFrame. }
     wp_pures. have ->: (S c - 1)%Z = c by lia. by iApply ("IH" with "Φ").
   Qed.
 
   (** [iter_inc_nd] terminates *)
   Lemma twp_iter_inc_nd {N E d l} : ↑N ⊆ E →
     [[{ mul_strmis N d l }]][nninv_wsats]
-      iter_inc_nd d #l @ E
+      iter_inc_nd #d #l @ E
     [[{ RET #(); True }]].
   Proof.
-    iIntros (??) "#? ?". wp_lam. wp_apply twp_ndnat; [done|]. iIntros (?) "_".
-    by wp_apply twp_iter_inc.
+    iIntros (??) "#? ?". wp_lam. wp_pures. wp_apply twp_ndnat; [done|].
+    iIntros (?) "_". by wp_apply twp_iter_inc.
   Qed.
 
   (** [iter_inc_nd_forks] terminates *)
   Lemma twp_iter_inc_nd_forks {N E d l} {c : nat} : ↑N ⊆ E →
     [[{ mul_strmis N d l }]][nninv_wsats]
-      iter_inc_nd_forks d #c #l @ E
+      iter_inc_nd_forks #d #c #l @ E
     [[{ RET #(); True }]].
   Proof.
     iIntros (??) "#? Φ".
@@ -113,10 +115,10 @@ Section verify.
   (** [iter_inc_nd_forks_nd] terminates *)
   Lemma twp_iter_inc_nd_forks_nd {N E d l} : ↑N ⊆ E →
     [[{ mul_strmis N d l }]][nninv_wsats]
-      iter_inc_nd_forks_nd d #l @ E
+      iter_inc_nd_forks_nd #d #l @ E
     [[{ RET #(); True }]].
   Proof.
-    iIntros (??) "#? ?". wp_lam. wp_apply twp_ndnat; [done|]. iIntros (?) "_".
-    by wp_apply twp_iter_inc_nd_forks.
+    iIntros (??) "#? ?". wp_lam. wp_pures. wp_apply twp_ndnat; [done|].
+    iIntros (?) "_". by wp_apply twp_iter_inc_nd_forks.
   Qed.
 End verify.
