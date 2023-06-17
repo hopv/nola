@@ -137,33 +137,33 @@ Section verify.
   Qed.
 
   (** [may_incr_cas] on [nninvs] over [has_mult] *)
-  Lemma twp_may_incr_cas' {N E d l} {c : nat} : ↑N ⊆ E → d ≠ 0 →
+  Lemma twp_may_incr_cas' {N E d l} {c : nat} : ↑N ⊆ E →
     [[{ nninvs 0 N (has_mult d l) }]][nninv_wsats]
       may_incr_cas' d #c #l @ E
     [[{ RET #(); True }]].
   Proof.
-    iIntros (???) "#? Φ".
+    iIntros (??) "#? Φ".
     iInduction c as [|c] "IH"; wp_lam; wp_pures; [by iApply "Φ"|].
     wp_bind (! _)%E. iMod (nninvs_acc with "[//]") as "/= [[%k ↦] cl]"; [done|].
     wp_load. iModIntro. iMod ("cl" with "[↦]") as "_"; [by iExists _|].
     iModIntro. wp_pures. wp_bind (CmpXchg _ _ _).
     iMod (nninvs_acc with "[//]") as "/= [[%k' ↦] cl]"; [done|].
-    case (decide (k' = k))=> [->|neq].
+    case (decide (k' * d = k * d)%Z)=> [->|?].
     - wp_apply (twp_cmpxchg_suc with "↦")=>//; [solve_vals_compare_safe|].
       iIntros "↦". iMod ("cl" with "[↦]") as "_".
       { iExists _. by have ->: (k * d + d = (k + 1) * d)%Z by lia. }
       iModIntro. wp_pures. by iApply "Φ".
-    - wp_apply (twp_cmpxchg_fail with "↦")=>//.
-      { move=> [/Z.mul_reg_r]. lia. } { solve_vals_compare_safe. }
+    - wp_apply (twp_cmpxchg_fail with "↦")=>//;
+        [by case|solve_vals_compare_safe|].
       iIntros "↦". iMod ("cl" with "[↦]") as "_"; [by iExists _|]. iModIntro.
       wp_pures. have ->: (S c - 1)%Z = c by lia. by iApply "IH".
   Qed.
-  Lemma twp_may_incr_cas {N E d l} : ↑N ⊆ E → d ≠ 0 →
+  Lemma twp_may_incr_cas {N E d l} : ↑N ⊆ E →
     [[{ nninvs 0 N (has_mult d l) }]][nninv_wsats]
       may_incr_cas d #l @ E
     [[{ RET #(); True }]].
   Proof.
-    iIntros (???) "#? Φ". wp_lam. wp_apply twp_ndnat; [done|].
+    iIntros (??) "#? Φ". wp_lam. wp_apply twp_ndnat; [done|].
     iIntros (?) "_". by wp_apply twp_may_incr_cas'.
   Qed.
 End verify.
