@@ -76,7 +76,9 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
       [`na_inv`](nola/examples/logic/na_inv.v) (Non-atomic invariant),
       [`facts`](nola/examples/logic/facts.v) (Facts)
     - [`verify/`](nola/examples/logic/verify/) (Verification examples)
-      * [`strm`](nola/examples/logic/verify/strm.v) (Shared mutable stream)
+      * [`strm_base`](nola/examples/logic/verify/strm_base.v),
+        [`strm`](nola/examples/logic/verify/strm.v),
+        [`na_strm`](nola/examples/logic/verify/strm.v) (Shared mutable stream)
 
 ## Story
 
