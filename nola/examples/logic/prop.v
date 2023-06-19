@@ -280,7 +280,6 @@ Notation "!ᵘˢ P" := (n_subus P) (at level 20, right associativity)
 (** ** [↑ˡ P]: Turn [P : nProp κ Γ] into [nPropL Γ]
   Although the main interest is the case [κ = nS],
   we keep the function polymorphic over [κ] for ease of definition *)
-Reserved Notation "(↑ˡ)".
 Reserved Notation "↑ˡ P" (at level 20, right associativity).
 Fixpoint nlarge {κ Γ} (P : nProp κ Γ) : nPropL Γ :=
   match P with
@@ -294,11 +293,7 @@ Fixpoint nlarge {κ Γ} (P : nProp κ Γ) : nPropL Γ :=
   | ¢ᵘ P => ¢ᵘ ↑ˡ P | ¢ᵍ P => ¢ᵍ ↑ˡ P
   | %ᵍˢ s => %ᵍˢ s | %ᵍˡ s => %ᵍˡ s | %ᵘˢ s => %ᵘˢ s | !ᵘˢ P => !ᵘˢ P
   end
-where
-  "(↑ˡ)" := nlarge : nola_scope and
-  "↑ˡ P" := (nlarge P) : nola_scope.
-
-(** [nsmall]: Turn [nProp κ Γ] into [nPropS Γ] *)
+where "↑ˡ P" := (nlarge P) : nola_scope.
 
 (** [nunsmall]: Turn [nPropS Γ] into [nProp κ Γ] *)
 Definition nunsmall {κ Γ} (P : nPropS Γ) : nProp κ Γ :=
