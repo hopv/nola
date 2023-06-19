@@ -17,9 +17,10 @@ Fact na_strm_nsubst {κ p N N' V Φ Ψ l} :
 Proof. done. Qed.
 
 (** Interpreted [strm] *)
+Definition na_strmtl {κ} p N N' (Φ : _ → _ (;ᵞ)) l : nProp κ (;ᵞ) :=
+  ∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ na_strm (Γᵘ:=[]) p N N' Φ l'.
 Definition na_strmi `{!nintpGS Σ} s p N N' Φ l : iProp Σ :=
-  na_nninv s 0 p N (Φ l) ∗ na_nninv s 0 p N'
-    (∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ na_strm (Γᵘ:=[]) p N N' Φ l').
+  na_nninv s 0 p N (Φ l) ∗ na_nninv s 0 p N' (na_strmtl p N N' Φ l).
 Notation na_strmis := (na_strmi nsintp).
 
 Section verify.
@@ -49,6 +50,40 @@ Section verify.
     rewrite !rew_eq_hwf /=. iApply IH; [|done]. iModIntro.
     iApply (sintpy_map (sintpy0:=sys')); [|done]=>/=.
     iIntros (? _ _) "Φ↔'Ψ %". iApply bi.sep_comm. iApply "Φ↔'Ψ".
+  Qed.
+
+  (** [na_strmi] by cons *)
+  Lemma na_strmi_cons `{!nsintpy Σ ih s} {p N N' Φ l l'} :
+    na_nninv s 0 p N (Φ l) -∗ na_strmi s p N N' Φ l' -∗ (l +ₗ 1) ↦ #l'
+      =[nninv_wsat s]=∗ na_strmi s p N N' Φ l.
+  Proof.
+    iIntros "$ #st ↦".
+    iMod (na_nninv_alloc (na_strmtl _ _ _ _ _) with "[↦]") as "$"; [|done].
+    simpl. iExists _. iFrame "↦". by rewrite rew_eq_hwf /=.
+  Qed.
+
+  (** [na_strmi] from a one-node loop *)
+  Lemma na_strmi_loop_1 `{!nsintpy Σ ih s} {p N N' Φ l} :
+    na_nninv s 0 p N (Φ l) -∗ (l +ₗ 1) ↦ #l =[nninv_wsat s]=∗
+      na_strmi s p N N' Φ l.
+  Proof.
+    iIntros "#Φ ↦". iFrame "Φ".
+    iMod (na_nninv_alloc_rec (na_strmtl _ _ _ _ _) with "[↦]") as "$"; [|done].
+    iIntros "/= #?". iExists _. rewrite rew_eq_hwf /=. by iFrame "↦ Φ".
+  Qed.
+
+  (** [na_strmi] from a two-node loop *)
+  Lemma na_strmi_loop_2 `{!nsintpy Σ ih s} {p N N' Φ l l'} :
+    na_nninv s 0 p N (Φ l) -∗ na_nninv s 0 p N (Φ l') -∗
+    (l +ₗ 1) ↦ #l' -∗ (l' +ₗ 1) ↦ #l =[nninv_wsat s]=∗
+      na_strmi s p N N' Φ l ∗ na_strmi s p N N' Φ l'.
+  Proof.
+    iIntros "#Φ #Φ' ↦ ↦'". iFrame "Φ Φ'".
+    iMod (na_nninv_alloc_rec (na_strmtl _ _ _ _ _ ∗ na_strmtl _ _ _ _ _)
+      with "[↦ ↦']") as "inv"; last first.
+    { simpl. by iDestruct (na_nninv_split with "inv") as "[$ $]". }
+    iIntros "/= itls". iDestruct (na_nninv_split with "itls") as "[#? #?]".
+    iSplitL "↦"; iExists _; rewrite rew_eq_hwf /=; iFrame; by iSplit.
   Qed.
 
   (** [siter] terminates under [na_strmis] *)

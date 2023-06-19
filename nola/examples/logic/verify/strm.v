@@ -16,9 +16,10 @@ Fact strm_nsubst {κ N N' V Φ Ψ l} :
 Proof. done. Qed.
 
 (** Interpreted [strm] *)
+Definition strmtl {κ} N N' (Φ : _ → _ (;ᵞ)) l : nProp κ (;ᵞ) :=
+  ∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ strm (Γᵘ:=[]) N N' Φ l'.
 Definition strmi `{!nintpGS Σ} s N N' Φ l : iProp Σ :=
-  nninv s 0 N (Φ l) ∗
-    nninv s 0 N' (∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ strm (Γᵘ:=[]) N N' Φ l').
+  nninv s 0 N (Φ l) ∗ nninv s 0 N' (strmtl N N' Φ l).
 Notation strmis := (strmi nsintp).
 
 (** A has_multiplier of [d] is stored at [l] *)
@@ -63,6 +64,40 @@ Section verify.
     rewrite !rew_eq_hwf /=. iApply IH; [|done]. iModIntro.
     iApply (sintpy_map (sintpy0:=sys')); [|done]=>/=.
     iIntros (? _ _) "Φ↔'Ψ %". iApply bi.sep_comm. iApply "Φ↔'Ψ".
+  Qed.
+
+  (** [strmi] by cons *)
+  Lemma strmi_cons `{!nsintpy Σ ih s} {N N' Φ l l'} :
+    nninv s 0 N (Φ l) -∗ strmi s N N' Φ l' -∗ (l +ₗ 1) ↦ #l' =[nninv_wsat s]=∗
+      strmi s N N' Φ l.
+  Proof.
+    iIntros "$ #st ↦".
+    iMod (nninv_alloc (strmtl _ _ _ _) with "[↦]") as "$"; [|done].
+    simpl. iExists _. iFrame "↦". by rewrite rew_eq_hwf /=.
+  Qed.
+
+  (** [strmi] from a one-node loop *)
+  Lemma strmi_loop_1 `{!nsintpy Σ ih s} {N N' Φ l} :
+    nninv s 0 N (Φ l) -∗ (l +ₗ 1) ↦ #l =[nninv_wsat s]=∗
+      strmi s N N' Φ l.
+  Proof.
+    iIntros "#Φ ↦". iFrame "Φ".
+    iMod (nninv_alloc_rec (strmtl _ _ _ _) with "[↦]") as "$"; [|done].
+    iIntros "/= #?". iExists _. rewrite rew_eq_hwf /=. by iFrame "↦ Φ".
+  Qed.
+
+  (** [strmi] from a two-node loop *)
+  Lemma strmi_loop_2 `{!nsintpy Σ ih s} {N N' Φ l l'} :
+    nninv s 0 N (Φ l) -∗ nninv s 0 N (Φ l') -∗
+    (l +ₗ 1) ↦ #l' -∗ (l' +ₗ 1) ↦ #l =[nninv_wsat s]=∗
+      strmi s N N' Φ l ∗ strmi s N N' Φ l'.
+  Proof.
+    iIntros "#Φ #Φ' ↦ ↦'". iFrame "Φ Φ'".
+    iMod (nninv_alloc_rec (strmtl _ _ _ _ ∗ strmtl _ _ _ _) with "[↦ ↦']")
+      as "inv"; last first.
+    { simpl. by iDestruct (nninv_split with "inv") as "[$ $]". }
+    iIntros "/= itls". iDestruct (nninv_split with "itls") as "[#? #?]".
+    iSplitL "↦"; iExists _; rewrite rew_eq_hwf /=; iFrame; by iSplit.
   Qed.
 
   (** [siter] terminates under [strmis] *)
