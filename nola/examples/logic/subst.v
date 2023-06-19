@@ -77,9 +77,8 @@ Definition nsubstg {κ V} (P : nProp κ (;ᵞ [V])) (Φ : nPred V) : nProp κ (;
 Arguments nsubstg {_ _} _ _ /.
 Infix "/:ᵍ" := nsubstg (at level 25, no associativity).
 
-(** [nsubstlg] on [¢ᵍ P] for [P : nProp κ (;ᵞ)] *)
-Fact nsubstlg_n_constg {κ V} {P : nProp κ (;ᵞ)} {Φ : nPred V} {eq : [V] = _} :
-  nsubstlg (¢ᵍ P) Φ eq = P.
+(** [/:ᵍ] on [¢ᵍ P] *)
+Fact nsubstg_n_constg {κ V} {P : nProp κ (;ᵞ)} {Φ : nPred V} : ¢ᵍ P /:ᵍ Φ = P.
 Proof. done. Qed.
 
 (** [nsubstlg] commutes with [↑ˡ] *)
