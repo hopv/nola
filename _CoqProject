@@ -6,6 +6,7 @@ nola/util/pred.v
 nola/util/rel.v
 nola/util/wft.v
 nola/util/list.v
+nola/util/nat.v
 nola/util/hgt.v
 nola/util/ctx.v
 nola/iris/sintp.v
@@ -39,3 +40,6 @@ nola/examples/logic/na_inv.v
 nola/examples/logic/verify/strm_base.v
 nola/examples/logic/verify/strm.v
 nola/examples/logic/verify/na_strm.v
+
+nola/examples/type/type.v
+nola/examples/type/subst.v
