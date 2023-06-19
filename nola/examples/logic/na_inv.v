@@ -26,7 +26,7 @@ Section lemmas.
   Context `{!nsintpy Σ ih s}.
 
   (** Turn [na_ninv] into [na_nninv] *)
-  Lemma na_ninv_nninv {i j p N} {P : nPropS _} : j ∈ (↑N:coPset) →
+  Lemma na_ninv_nninv (P : nPropS _) {i j p N} : j ∈ (↑N:coPset) →
     ninv N (nid_na p j P) -∗ na_nninv (Σ:=Σ) s i p N (↑ˡ P).
   Proof.
     rewrite na_nninv_unseal. iIntros (jN) "#NP !>".
@@ -41,7 +41,7 @@ Section lemmas.
   Qed.
 
   (** Allocate [na_nninv] *)
-  Lemma na_nninv_alloc_rec {i p N} {P : nPropS (;ᵞ)} :
+  Lemma na_nninv_alloc_rec (P : nPropS _) {i p N} :
     (na_nninv s i p N (↑ˡ P) -∗ ⟦ P ⟧(s)) =[nninv_wsat s]=∗
       na_nninv s i p N (↑ˡ P).
   Proof.
@@ -51,7 +51,7 @@ Section lemmas.
       iApply "toP". by iApply na_ninv_nninv.
     - iModIntro. by iApply na_ninv_nninv.
   Qed.
-  Lemma nninv_alloc {i p N} {P : nPropS (;ᵞ)} :
+  Lemma na_nninv_alloc (P : nPropS _) {i p N} :
     ⟦ P ⟧(s) =[nninv_wsat s]=∗ na_nninv s i p N (↑ˡ P).
   Proof.
     iIntros "P". iApply (na_nninv_alloc_rec with "[P]"). by iIntros.

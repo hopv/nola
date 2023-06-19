@@ -23,7 +23,7 @@ Section lemmas.
   Context `{!nsintpy Σ ih s}.
 
   (** Turn [ninv] into [nninv] *)
-  Lemma ninv_nninv {i N} {P : nPropS _} :
+  Lemma ninv_nninv (P : nPropS _) {i N} :
     ninv N (nid_u P) -∗ nninv (Σ:=Σ) s i N (↑ˡ P).
   Proof.
     rewrite nninv_unseal. iIntros "#NP !>". iApply (sintpy_intro (s:=s))=>/=.
@@ -32,7 +32,7 @@ Section lemmas.
   Qed.
 
   (** Allocate [nninv] *)
-  Lemma nninv_alloc_rec {i N} {P : nPropS (;ᵞ)} :
+  Lemma nninv_alloc_rec (P : nPropS _) {i N} :
     (nninv s i N (↑ˡ P) -∗ ⟦ P ⟧(s)) =[nninv_wsat s]=∗
       nninv s i N (↑ˡ P).
   Proof.
@@ -41,7 +41,7 @@ Section lemmas.
     - iIntros "/=NP". rewrite nintpS_nintp. iApply "toP". by iApply ninv_nninv.
     - iModIntro. by iApply ninv_nninv.
   Qed.
-  Lemma nninv_alloc {i N} {P : nPropS (;ᵞ)} :
+  Lemma nninv_alloc (P : nPropS _) {i N} :
     ⟦ P ⟧(s) =[nninv_wsat s]=∗ nninv s i N (↑ˡ P).
   Proof. iIntros "P". iApply (nninv_alloc_rec with "[P]"). by iIntros. Qed.
 
