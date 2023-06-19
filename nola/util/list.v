@@ -42,6 +42,21 @@ Notation "!7 v" := (+! !6 v) (at level 20, right associativity) : nola_scope.
 Notation "!8 v" := (+! !7 v) (at level 20, right associativity) : nola_scope.
 Notation "!9 v" := (+! !8 v) (at level 20, right associativity) : nola_scope.
 
+(** Turn the type function of [schoice] *)
+Fixpoint strans {A F G} (f : ∀ x, F x → G x)
+  {xs : list A} (s : schoice F xs) : schoice G xs :=
+  match s with !0 v => !0 f _ v | +! s => +! strans f s end.
+
+(** Congruence of [strans] *)
+Lemma strans_cong {A F G} {f g : ∀ x, F x → G x} {xs : list A} {s : _ xs} :
+  (∀ x a, f x a = g x a) → strans f s = strans g s.
+Proof. move=> eq. elim s=>/= >; [f_equal; apply eq|move=> <-//]. Qed.
+
+(** [strans] composes *)
+Lemma strans_strans {A F G H f g} {xs : list A} {s : _ xs} :
+  strans (G:=H) g (strans (F:=F) (G:=G) f s) = strans (λ x, g x ∘ f x) s.
+Proof. by elim s; [done|]=>/= ???->. Qed.
+
 (** Destruct [schoice F xs] with [xs = []] *)
 Definition seqnil {A F R} {xs : list A} (s : schoice F xs) : xs = [] → R :=
   match s with
@@ -65,12 +80,27 @@ Fixpoint sbyrapp {A F} xs {ys : list A} (s : schoice F ys)
   | _ :: xs => +! sbyrapp xs s
   end.
 
+(** Type function for [option] *)
+Definition tf_option {A} (F : A → Type) (o : option A) : Type :=
+  from_option F Empty_set o.
+Definition tf_option_map {A F G} (f : ∀ x, F x → G x)
+  {o : option A} : tf_option F o → tf_option G o
+  := match o with Some _ => f _ | None => id end.
+
 (** Decompose [schoice F (x :: xs)] *)
 Definition suncons' {A F} {xs : list A} (s : schoice F xs) :
-  from_option F Empty_set (head xs) + schoice F (tail xs) :=
+  tf_option F (head xs) + schoice F (tail xs) :=
   match s with !0 v => inl v | +! s => inr s end.
 Definition suncons {A F x} {xs : list A} (s : schoice F (x :: xs)) :
   F x + schoice F xs := suncons' s.
+
+(** [suncons] commutes with [strans] *)
+Lemma suncons'_strans {A F G xs} {f : ∀ x : A, F x → G x} {s : _ xs} :
+  suncons' (strans f s) = sum_map (tf_option_map f) (strans f) (suncons' s).
+Proof. by case s. Qed.
+Lemma suncons_strans {A F G x xs} {f : ∀ x : A, F x → G x} {s : _ (x :: xs)} :
+  suncons (strans f s) = sum_map (f x) (strans f) (suncons s).
+Proof. exact (suncons'_strans (xs:=_::_)). Qed.
 
 (** Decompose [schoice F [x]] *)
 Definition sunsingl {A F} {x : A} (s : schoice F [x]) : F x :=
@@ -84,3 +114,11 @@ Fixpoint sunapp {A F} {xs ys : list A}
   | _ :: _ => λ s, match suncons s with inl v => inl (!0 v) | inr s =>
       match sunapp s with inl s => inl (+! s) | inr s => inr s end end
   end.
+
+(** [strans] commutes with [strans] *)
+Lemma sunapp_strans {A F G xs ys} {f : ∀ x : A, F x → G x} {s : _ (xs ++ ys)} :
+  sunapp (strans f s) = sum_map (strans f) (strans f) (sunapp s).
+Proof.
+  elim: xs s=>//= x xs IH s. rewrite suncons_strans. case: (suncons s)=>//= s'.
+  rewrite IH. by case (sunapp s').
+Qed.
