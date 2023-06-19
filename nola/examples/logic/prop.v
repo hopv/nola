@@ -173,7 +173,7 @@ Inductive nProp : nkind → nctx → Type :=
 (** Unguarded small variable, [nPropL] only *)
 | n_varus {Γᵘ Γᵍ} (s : schoice npargS Γᵘ) : nProp nL (Γᵘ;ᵞ Γᵍ)
 (** Substituted [n_varus] *)
-| n_subus {Γᵘ Γᵍ} (P : nProp nS (;ᵞ)) : nProp nL (Γᵘ;ᵞ Γᵍ).
+| n_subus {Γ} (P : nProp nS (;ᵞ)) : nProp nL Γ.
 
 Notation nPropS := (nProp nS).
 Notation nPropL := (nProp nL).
