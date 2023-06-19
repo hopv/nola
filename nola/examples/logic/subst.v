@@ -41,27 +41,27 @@ Bind Scope nProp_scope with nPred.
 Definition napply {κ V} : nparg κ V → nPred V → nProp κ (;ᵞ) :=
   λ '(@! a) Φ, Φ a.
 
-(** [nsubstlg P Φ]: Substitute [Φ] for [P]'s last guarded variable *)
-Fixpoint nsubstlg {κ Γ Γᵍ V} (P : nProp κ Γ) (Φ : nPred V)
+(** [nsubstlg Φ P]: Substitute [Φ] for [P]'s last guarded variable *)
+Fixpoint nsubstlg {κ Γ Γᵍ V} (Φ : nPred V) (P : nProp κ Γ)
   : Γ.ᵞg = Γᵍ ++ [V] → nProp κ (Γ.ᵞu;ᵞ Γᵍ) :=
   match P with
   | n_0 c => λ _, n_0 c | n_l0 c => λ _, n_l0 c
-  | n_1 c P => λ eq, n_1 c (nsubstlg P Φ eq)
-  | n_2 c P Q => λ eq, n_2 c (nsubstlg P Φ eq) (nsubstlg Q Φ eq)
-  | n_g1 c P => λ eq, n_g1 c (nsubstlg P Φ (eq_app_assoc_d eq))
-  | ∀' Ψ => λ eq, ∀ a, nsubstlg (Ψ a) Φ eq
-  | ∃' Ψ => λ eq, ∃ a, nsubstlg (Ψ a) Φ eq
+  | n_1 c P => λ eq, n_1 c (nsubstlg Φ P eq)
+  | n_2 c P Q => λ eq, n_2 c (nsubstlg Φ P eq) (nsubstlg Φ Q eq)
+  | n_g1 c P => λ eq, n_g1 c (nsubstlg Φ P (eq_app_assoc_d eq))
+  | ∀' Ψ => λ eq, ∀ a, nsubstlg Φ (Ψ a) eq
+  | ∃' Ψ => λ eq, ∃ a, nsubstlg Φ (Ψ a) eq
   | n_wpw W s E e Ψ => λ eq,
-      n_wpw (nsubstlg W Φ eq) s E e (λ v, nsubstlg (Ψ v) Φ eq)
+      n_wpw (nsubstlg Φ W eq) s E e (λ v, nsubstlg Φ (Ψ v) eq)
   | n_twpw W s E e Ψ => λ eq,
-      n_twpw (nsubstlg W Φ eq) s E e (λ v, nsubstlg (Ψ v) Φ eq)
-  | ∀: V, P => λ eq, ∀: V, nsubstlg P Φ eq
-  | ∃: V, P => λ eq, ∃: V, nsubstlg P Φ eq
-  | rec:ˢ' Ψ a => λ eq, (rec:ˢ b, nsubstlg (Ψ b) Φ eq) a
-  | rec:ˡ' Ψ a => λ eq, (rec:ˡ b, nsubstlg (Ψ b) Φ eq) a
-  | ¢ᵘ P => λ eq, ¢ᵘ (nsubstlg P Φ eq)
+      n_twpw (nsubstlg Φ W eq) s E e (λ v, nsubstlg Φ (Ψ v) eq)
+  | ∀: V, P => λ eq, ∀: V, nsubstlg Φ P eq
+  | ∃: V, P => λ eq, ∃: V, nsubstlg Φ P eq
+  | rec:ˢ' Ψ a => λ eq, (rec:ˢ b, nsubstlg Φ (Ψ b) eq) a
+  | rec:ˡ' Ψ a => λ eq, (rec:ˡ b, nsubstlg Φ (Ψ b) eq) a
+  | ¢ᵘ P => λ eq, ¢ᵘ (nsubstlg Φ P eq)
   | ¢ᵍ{Δᵍ} P => match Γᵍ with
-    | _::_ => λ eq, ¢ᵍ (nsubstlg P Φ (f_equal tail eq))
+    | _::_ => λ eq, ¢ᵍ (nsubstlg Φ P (f_equal tail eq))
     | [] => match Δᵍ, P with [], _ => λ _, P
       | _::_, _ => λ eq : _::_ = _, match eq with end end end
   | %ᵍˢ s => λ eq, match sunapp (rew eq in s) with
@@ -73,19 +73,19 @@ Fixpoint nsubstlg {κ Γ Γᵍ V} (P : nProp κ Γ) (Φ : nPred V)
 
 (** [P /:ᵍ Φ]: Substitute [Φ] for [P]'s only unguarded variable *)
 Definition nsubstg {κ V} (P : nProp κ (;ᵞ [V])) (Φ : nPred V) : nProp κ (;ᵞ) :=
-  nsubstlg (Γᵍ:=[]) P Φ eq_refl.
+  nsubstlg (Γᵍ:=[]) Φ P eq_refl.
 Arguments nsubstg {_ _} _ _ /.
 Infix "/:ᵍ" := nsubstg (at level 25, no associativity).
 
 (** [/:ᵍ] on [¢ᵍ P] *)
-Fact nsubstg_n_constg {κ V} {P : nProp κ (;ᵞ)} {Φ : nPred V} : ¢ᵍ P /:ᵍ Φ = P.
+Fact nsubstg_n_constg {κ V} {Φ : _ V} {P : nProp κ (;ᵞ)} : ¢ᵍ P /:ᵍ Φ = P.
 Proof. done. Qed.
 
 (** [nsubstlg] commutes with [↑ˡ] *)
-Lemma nsubstlg_nlarge {κ Γ V Γᵍ} {P : nProp κ Γ} {Φ} {eq : Γ.ᵞg = Γᵍ ++ [V] } :
-  nsubstlg (↑ˡ P) Φ eq = ↑ˡ (nsubstlg P Φ eq).
+Lemma nsubstlg_nlarge {κ Γ V Γᵍ Φ} {P : nProp κ Γ} {eq : Γ.ᵞg = Γᵍ ++ [V] } :
+  nsubstlg Φ (↑ˡ P) eq = ↑ˡ (nsubstlg Φ P eq).
 Proof.
-  move: κ Γ Γᵍ P Φ eq. fix FIX 4=> κ Γ Γᵍ.
+  move: κ Γ Γᵍ P eq. fix FIX 4=> κ Γ Γᵍ.
   case=>//=; intros;
     try (f_equal; try (funext=> ?); apply (FIX _ (_;ᵞ_)));
     try (destruct Γᵍ=>/=; [by destruct Γᵍ0|f_equal; apply (FIX _ (;ᵞ_))]);
@@ -93,27 +93,27 @@ Proof.
     do 2 f_equal; symmetry; [apply nlarge_nunsmall|apply nlarge_id].
 Qed.
 
-(** [nsubstlu i P Φ]: Substitute [Φ] for [P]'s last unguarded variable *)
-Fixpoint nsubstlu {κ Γ Γᵘ V} (P : nProp κ Γ) (Φ : nPred V)
+(** [nsubstlu Φ P]: Substitute [Φ] for [P]'s last unguarded variable *)
+Fixpoint nsubstlu {κ Γ Γᵘ V} (Φ : nPred V) (P : nProp κ Γ)
   : Γ.ᵞu = Γᵘ ++ [V] → Γ.ᵞg = [] → nProp κ (Γᵘ;ᵞ ) :=
   match P with
   | n_0 c => λ _ _, n_0 c | n_l0 c => λ _ _, n_l0 c
-  | n_1 c P => λ eq gn, n_1 c (nsubstlu P Φ eq gn)
-  | n_2 c P Q => λ eq gn, n_2 c (nsubstlu P Φ eq gn) (nsubstlu Q Φ eq gn)
+  | n_1 c P => λ eq gn, n_1 c (nsubstlu Φ P eq gn)
+  | n_2 c P Q => λ eq gn, n_2 c (nsubstlu Φ P eq gn) (nsubstlu Φ Q eq gn)
   | n_g1 c P => λ eq gn, n_g1 c
-      (rew ctxeq_g app_nil'_d in nsubstlg P Φ (eq_trans (app_eq_nil_d gn) eq))
-  | ∀' Ψ => λ eq gn, ∀ a, nsubstlu (Ψ a) Φ eq gn
-  | ∃' Ψ => λ eq gn, ∃ a, nsubstlu (Ψ a) Φ eq gn
+      (rew ctxeq_g app_nil'_d in nsubstlg Φ P (eq_trans (app_eq_nil_d gn) eq))
+  | ∀' Ψ => λ eq gn, ∀ a, nsubstlu Φ (Ψ a) eq gn
+  | ∃' Ψ => λ eq gn, ∃ a, nsubstlu Φ (Ψ a) eq gn
   | n_wpw W s E e Ψ => λ eq gn,
-      n_wpw (nsubstlu W Φ eq gn) s E e (λ v, nsubstlu (Ψ v) Φ eq gn)
+      n_wpw (nsubstlu Φ W eq gn) s E e (λ v, nsubstlu Φ (Ψ v) eq gn)
   | n_twpw W s E e Ψ => λ eq gn,
-      n_twpw (nsubstlu W Φ eq gn) s E e (λ v, nsubstlu (Ψ v) Φ eq gn)
-  | ∀: V, P => λ eq gn, ∀: V, nsubstlu P Φ (f_equal _ eq) gn
-  | ∃: V, P => λ eq gn, ∃: V, nsubstlu P Φ (f_equal _ eq) gn
-  | rec:ˢ' Ψ a => λ eq gn, (rec:ˢ b, nsubstlu (Ψ b) Φ (f_equal _ eq) gn) a
-  | rec:ˡ' Ψ a => λ eq gn, (rec:ˡ b, nsubstlu (Ψ b) Φ (f_equal _ eq) gn) a
+      n_twpw (nsubstlu Φ W eq gn) s E e (λ v, nsubstlu Φ (Ψ v) eq gn)
+  | ∀: V, P => λ eq gn, ∀: V, nsubstlu Φ P (f_equal _ eq) gn
+  | ∃: V, P => λ eq gn, ∃: V, nsubstlu Φ P (f_equal _ eq) gn
+  | rec:ˢ' Ψ a => λ eq gn, (rec:ˢ b, nsubstlu Φ (Ψ b) (f_equal _ eq) gn) a
+  | rec:ˡ' Ψ a => λ eq gn, (rec:ˡ b, nsubstlu Φ (Ψ b) (f_equal _ eq) gn) a
   | ¢ᵘ{Δᵘ} P => match Γᵘ with
-    | _::_ => λ eq gn, ¢ᵘ (nsubstlu P Φ (f_equal tail eq) gn)
+    | _::_ => λ eq gn, ¢ᵘ (nsubstlu Φ P (f_equal tail eq) gn)
     | [] => match Δᵘ, P with [], _ => λ _ gn, rew ctxeq_g gn in P
       | _::_, _ => λ eq : _::_ = _, match eq with end end end
   | ¢ᵍ P => λ _ (gn : _::_ = _), match gn with end
@@ -124,10 +124,10 @@ Fixpoint nsubstlu {κ Γ Γᵘ V} (P : nProp κ Γ) (Φ : nPred V)
   end%n.
 
 (** [nsubstlu] commutes with [↑ˡ] *)
-Lemma nsubstlu_nlarge {κ Γ Γᵘ V P Φ eq gn} :
-  nsubstlu (↑ˡ P) Φ eq gn = ↑ˡ (@nsubstlu κ Γ Γᵘ V P Φ eq gn).
+Lemma nsubstlu_nlarge {κ Γ Γᵘ V Φ P eq gn} :
+  nsubstlu Φ (↑ˡ P) eq gn = ↑ˡ (@nsubstlu κ Γ Γᵘ V Φ P eq gn).
 Proof.
-  move: κ Γ Γᵘ P Φ eq gn. fix FIX 4=> κ Γ Γᵘ.
+  move: κ Γ Γᵘ P eq gn. fix FIX 4=> κ Γ Γᵘ.
   case=>//=; intros; f_equal; try apply FIX; try (funext=>/= ?; apply FIX);
     try (by case: s gn); subst=>/=; try by case (sunapp s).
   destruct Γᵘ=>/=; [by destruct Γᵘ0|f_equal; apply FIX].
@@ -135,16 +135,16 @@ Qed.
 
 (** [P /: Φ]: Substitute [Φ] for [P]'s only unguarded variable *)
 Definition nsubst {κ V} (P : nProp κ ([V];ᵞ )) (Φ : nPred V) : nProp κ (;ᵞ) :=
-  nsubstlu (Γᵘ:=[]) P Φ eq_refl eq_refl.
+  nsubstlu (Γᵘ:=[]) Φ P eq_refl eq_refl.
 Arguments nsubst {_ _} _ _ /.
 Infix "/:" := nsubst (at level 25, no associativity).
 
 (** [/:] on [¢ᵘ] *)
-Fact nsubst_n_constu {κ V} {P : nProp κ _} {Φ : nPred V} : ¢ᵘ P /: Φ = P.
+Fact nsubst_n_constu {κ V} {Φ : _ V} {P : nProp κ (;ᵞ)} : ¢ᵘ P /: Φ = P.
 Proof. done. Qed.
 
 (** [/:] commutes with [↑ˡ] *)
-Lemma nsubst_nlarge {κ V} {P : nProp κ ([V];ᵞ )} {Φ} : ↑ˡ P /: Φ = ↑ˡ (P /: Φ).
+Lemma nsubst_nlarge {κ V Φ} {P : nProp κ ([V];ᵞ )} : ↑ˡ P /: Φ = ↑ˡ (P /: Φ).
 Proof. exact nsubstlu_nlarge. Qed.
 
 (** ** [nhgt P]: Height of [P] *)
@@ -159,10 +159,10 @@ Fixpoint nhgt {κ Γ} (P : nProp κ Γ) : hgt :=
   end%n.
 
 (** [nsubstlu] preserves [nhgt] *)
-Lemma nsubstlu_nhgt {κ Γ Γᵘ V P Φ eq gn} :
-  nhgt (@nsubstlu κ Γ Γᵘ V P Φ eq gn) = nhgt P.
+Lemma nsubstlu_nhgt {κ Γ Γᵘ V Φ P eq gn} :
+  nhgt (@nsubstlu κ Γ Γᵘ V Φ P eq gn) = nhgt P.
 Proof.
-  move: κ Γ Γᵘ P Φ eq gn. fix FIX 4=> ?? Γᵘ.
+  move: κ Γ Γᵘ P eq gn. fix FIX 4=> ?? Γᵘ.
   case=>//=; intros;
     try (f_equal; try f_equal; try (funext=> ?); apply FIX);
     try (by case: s gn); subst=>/=; try by case (sunapp s).
