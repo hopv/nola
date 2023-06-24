@@ -68,9 +68,8 @@ Fact tsubstg_t_constg {i k} {T : type i (;ᵞ)} {V : type k (;ᵞ)} :
 Proof. done. Qed.
 
 (** [tsubstlg] commutes with [↑ˡ] *)
-Lemma tsubstlg_tbump {k V i j Γ Γᵍ} {T : type i Γ}
-  {H : i ≤ⁿ j} {eq : Γ.ᵞg = Γᵍ ++ [k] } :
-  tsubstlg V (↑ˡ{H} T : type j _) eq = ↑ˡ{H} (tsubstlg V T eq).
+Lemma tsubstlg_tbump `{H : i ≤ⁿ j} {k V Γ Γᵍ T eq} :
+  tsubstlg V (↑ˡ T) eq = ↑ˡ{H} (@tsubstlg i Γ Γᵍ k V T eq).
 Proof.
   move: i j Γ Γᵍ T H eq. fix FIX 5=> i j Γ Γᵍ.
   case=>//=; intros; try (f_equal; apply (FIX _ _ (_;ᵞ_))).
@@ -104,10 +103,10 @@ Fixpoint tsubstlu {i Γ Γᵘ k} (V : type k (;ᵞ)) (T : type i Γ)
   end.
 
 (** [tsubstlu] commutes with [↑ˡ] *)
-Lemma tsubstlu_tbump {i Γ Γᵘ k V T eq gn} :
-  tsubstlu V (↑ˡ T) eq gn = ↑ˡ (@tsubstlu i Γ Γᵘ k V T eq gn).
+Lemma tsubstlu_tbump `{H : i ≤ⁿ j} {k V Γ Γᵘ T eq gn} :
+  tsubstlu V (↑ˡ T) eq gn = ↑ˡ{H} (@tsubstlu i Γ Γᵘ k V T eq gn).
 Proof.
-  move: i Γ Γᵘ T eq gn. fix FIX 4=> i Γ Γᵘ.
+  move: i j Γ Γᵘ T H eq gn. fix FIX 5=> i j Γ Γᵘ.
   case=>//=; intros; f_equal; try apply FIX; try apply FIX; try (by case: s gn);
     subst=>/=.
   - destruct Γᵘ=>/=; [by destruct Γᵘ0|]. f_equal. apply FIX.
@@ -125,7 +124,8 @@ Fact tsubst_n_constu {i k} {V : type k (;ᵞ)} {T : type i (;ᵞ)} : ¢ᵘ T /: 
 Proof. done. Qed.
 
 (** [/:] commutes with [↑ˡ] *)
-Lemma tsubst_tbump {i k V} {T : type i ([k];ᵞ )} : ↑ˡ T /: V = ↑ˡ (T /: V).
+Lemma tsubst_tbump `{H : i ≤ⁿ j} {k V} {T : type i ([k];ᵞ )} :
+  ↑ˡ{H} T /: V = ↑ˡ (T /: V).
 Proof. exact tsubstlu_tbump. Qed.
 
 (** ** [thgt T]: Height of [T] *)
