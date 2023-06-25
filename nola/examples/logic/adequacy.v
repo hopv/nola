@@ -3,6 +3,7 @@
 From nola.examples.logic Require Export sintp.
 From nola.examples.heap_lang Require Export adequacy total_adequacy.
 
+(** Precursor of [nintpGS] *)
 Class nintpGpreS (Σ : gFunctors) := NintpGpreS {
   nintpGpreS_ninvGpreS :: ninvGpreS nid Σ;
   nintpGpreS_na_invG :: na_invG Σ;
@@ -10,9 +11,14 @@ Class nintpGpreS (Σ : gFunctors) := NintpGpreS {
   nintpGpreS_heapGpreS :: heapGpreS Σ;
 }.
 
+(** [gFunctors] for [nintpGpreS] *)
+Definition nintpΣ : gFunctors := #[ninvΣ nid; na_invΣ; cinvΣ; heapΣ].
+Global Instance subG_nintpGpreS {Σ} : subG nintpΣ Σ → nintpGpreS Σ.
+Proof. solve_inG. Qed.
+
 (** Adequacy of [wp] over [nninv_wsats] *)
-Lemma wp_n_adequacy `{!nintpGpreS Σ} s e σ φ :
-  (∀ `{!nintpGS Σ}, ⊢ inv_heap_inv -∗ WP[nninv_wsats] e @ s; ⊤ {{ v, ⌜φ v⌝ }}) →
+Lemma wp_n_adequacy `{!nintpGpreS Σ} {s e σ φ} :
+  (∀ `{!nintpGS Σ}, inv_heap_inv -∗ WP[nninv_wsats] e @ s; ⊤ {{ v, ⌜φ v⌝ }}) →
   adequate s e σ (λ v _, φ v).
 Proof.
   move=> towp. apply (heap_adequacy Σ HasNoLc)=> ?.
@@ -21,8 +27,8 @@ Proof.
 Qed.
 
 (** Adequacy of [twp] over [nninv_wsats] *)
-Lemma twp_n_adequacy Σ `{!nintpGpreS Σ} s e σ φ :
-  (∀ `{!nintpGS Σ}, ⊢ inv_heap_inv -∗ WP[nninv_wsats] e @ s; ⊤ [{ v, ⌜φ v⌝ }]) →
+Lemma twp_n_adequacy `{!nintpGpreS Σ} {s e σ φ} :
+  (∀ `{!nintpGS Σ}, inv_heap_inv -∗ WP[nninv_wsats] e @ s; ⊤ [{ v, ⌜φ v⌝ }]) →
   sn erased_step ([e], σ).
 Proof.
   move=> totwp. apply (heap_total Σ s _ _ φ)=> ?.
