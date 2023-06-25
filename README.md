@@ -73,9 +73,10 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
       [`iris`](nola/examples/logic/iris.v) (Iris preliminaries),
       [`intp`](nola/examples/logic/intp.v) (Interpretation),
       [`sintp`](nola/examples/logic/sintp.v) (Strong interpretation)
-    - [`inv`](nola/examples/logic/inv.v) (Invariant),
-      [`na_inv`](nola/examples/logic/na_inv.v) (Non-atomic invariant),
-      [`facts`](nola/examples/logic/facts.v) (Facts)
+    - [`facts`](nola/examples/logic/facts.v) (Facts),
+      [`adequacy`](nola/examples/logic/adequacy.v) (Adequacy),
+      [`inv`](nola/examples/logic/inv.v) (Invariant),
+      [`na_inv`](nola/examples/logic/na_inv.v) (Non-atomic invariant)
     - [`verify/`](nola/examples/logic/verify/) (Verification examples)
       * [`strm_base`](nola/examples/logic/verify/strm_base.v),
         [`strm`](nola/examples/logic/verify/strm.v),
