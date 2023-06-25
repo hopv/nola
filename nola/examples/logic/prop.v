@@ -62,6 +62,7 @@ Variant ncon0 : Type :=
 | (** Pure proposition *) nc_pure (φ : Prop) : ncon0
 | (** Non-atomic invariant token *) nc_na_own
     (p : na_inv_pool_name) (E : coPset) : ncon0
+| (** Cancelable invariant token *) nc_cinv_own (γ : gname) (q : frac) : ncon0
 | (** Points-to token *) nc_mapsto (l : loc) (dq : dfrac) (v : val) : ncon0
 | (** Owning invariant points-to token *) nc_inv_mapsto_own
     (l : loc) (v : val) (I : val → Prop) : ncon0
@@ -189,6 +190,7 @@ Notation "'⌜' φ '⌝'" := (n_0 ⟨⌜φ⌝⟩) : nProp_scope.
 Notation "'True'" := (n_0 ⟨⌜True⌝⟩) : nProp_scope.
 Notation "'False'" := (n_0 ⟨⌜False⌝⟩) : nProp_scope.
 Notation n_na_own p E := (n_0 (nc_na_own p E)).
+Notation n_cinv_own γ q := (n_0 (nc_cinv_own γ q)).
 Notation "l ↦ dq v" := (n_0 ⟨↦{dq}|l,v⟩) : nProp_scope.
 Notation "l ↦_ I v" := (n_0 ⟨↦_I|l,v⟩) : nProp_scope.
 Notation "l ↦_ I □" := (n_0 ⟨↦□_I|l⟩) : nProp_scope.

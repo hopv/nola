@@ -2,6 +2,7 @@
 
 From nola.examples.logic Require Export prop.
 From nola.iris Require Export sintp inv na_inv wp.
+From iris.base_logic.lib Require Export cancelable_invariants.
 From nola.examples.heap_lang Require Export primitive_laws.
 
 (** ** Iris resources *)
@@ -15,9 +16,10 @@ Variant nid : Type :=
 Class nintpGS (Σ : gFunctors) := NintpGS {
   nintpGS_ninvGS :: ninvGS nid Σ;
   nintpGS_na_invG :: na_invG Σ;
+  nintpGS_cinvG :: cinvG Σ;
   nintpGS_heapGS :: heapGS_gen HasNoLc Σ;
 }.
-Arguments NintpGS {_} _ _ _.
+Arguments NintpGS {_} _ _ _ _.
 
 Section nid_intp.
   Context `{!nintpGS Σ}.

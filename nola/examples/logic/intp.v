@@ -23,7 +23,7 @@ Section ncintp.
   Definition ncintp0 (c : ncon0) : iProp Σ :=
     match c with
     | ⟨⌜φ⌝⟩ => ⌜φ⌝
-    | nc_na_own p E => na_own p E
+    | nc_na_own p E => na_own p E  | nc_cinv_own γ q => cinv_own γ q
     | ⟨↦{dq}|l,v⟩ => l ↦{dq} v
     | ⟨↦_J|l,v⟩ => l ↦_J v | ⟨↦□_J|l⟩ => l ↦_J □
     | nc_meta_token l E => meta_token l E
