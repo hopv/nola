@@ -12,11 +12,12 @@ Variant nid : Type :=
 | (* non-atomic *) nid_na : na_inv_pool_name → positive → nPropS (;ᵞ) → nid.
 
 (** [nintpGS]: Iris resource *)
-Class nintpGS (Σ : gFunctors) := NintpG {
-  nintpGS_heapGS :: heapGS_gen HasNoLc Σ;
+Class nintpGS (Σ : gFunctors) := NintpGS {
   nintpGS_ninvGS :: ninvGS nid Σ;
   nintpGS_na_invG :: na_invG Σ;
+  nintpGS_heapGS :: heapGS_gen HasNoLc Σ;
 }.
+Arguments NintpGS {_} _ _ _.
 
 Section nid_intp.
   Context `{!nintpGS Σ}.
