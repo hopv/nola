@@ -8,34 +8,34 @@ From nola.examples.heap_lang Require Export primitive_laws.
 (** ** Iris resources *)
 
 (** Data for invariant *)
-Variant nid : Type :=
-| (* usual *) nid_u : nPropS (;ᵞ) → nid
-| (* non-atomic *) nid_na : na_inv_pool_name → positive → nPropS (;ᵞ) → nid.
+Variant nInvd : Type :=
+| (* usual *) nInvd_u : nPropS (;ᵞ) → nInvd
+| (* non-atomic *) nInvd_na : na_inv_pool_name → positive → nPropS (;ᵞ) → nInvd.
 
 (** [nintpGS]: Iris resource *)
 Class nintpGS (Σ : gFunctors) := NintpGS {
-  nintpGS_ninvGS :: ninvGS nid Σ;
+  nintpGS_ninvGS :: ninvGS nInvd Σ;
   nintpGS_na_invG :: na_invG Σ;
   nintpGS_cinvG :: cinvG Σ;
   nintpGS_heapGS :: heapGS_gen HasNoLc Σ;
 }.
 Arguments NintpGS {_} _ _ _ _.
 
-Section nid_intp.
+Section nInvd_intp.
   Context `{!nintpGS Σ}.
 
-  (** Interpret [nid] *)
-  Definition nid_intp (intp : nPropS (;ᵞ) -d> iProp Σ) : nid -d> iProp Σ :=
+  (** Interpret [nInvd] *)
+  Definition nInvd_intp (intp : nPropS (;ᵞ) -d> iProp Σ) : nInvd -d> iProp Σ :=
     λ Px, match Px with
-    | nid_u P => intp P
-    | nid_na p i P => na_body p i (intp P)
+    | nInvd_u P => intp P
+    | nInvd_na p i P => na_body p i (intp P)
     end.
-  #[export] Instance nid_intp_ne : NonExpansive nid_intp.
+  #[export] Instance nInvd_intp_ne : NonExpansive nInvd_intp.
   Proof. solve_proper. Qed.
-End nid_intp.
+End nInvd_intp.
 
-(** [ninv_wsat] for [nid] *)
-Notation ninv_wsat' intp := (ninv_wsat (nid_intp intp)).
+(** [ninv_wsat] for [nInvd] *)
+Notation ninv_wsat' intp := (ninv_wsat (nInvd_intp intp)).
 
 (** ** For strong interpretation *)
 

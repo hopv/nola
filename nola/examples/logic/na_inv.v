@@ -27,7 +27,7 @@ Section lemmas.
 
   (** Turn [na_ninv] into [na_nninv] *)
   Lemma na_ninv_nninv (P : nPropS _) {i j p N} : j ∈ (↑N:coPset) →
-    ninv N (nid_na p j P) -∗ na_nninv (Σ:=Σ) s i p N (↑ˡ P).
+    ninv N (nInvd_na p j P) -∗ na_nninv (Σ:=Σ) s i p N (↑ˡ P).
   Proof.
     rewrite na_nninv_unseal. iIntros (jN) "#NP !>".
     iApply (sintpy_intro (s:=s))=>/=.
@@ -46,7 +46,7 @@ Section lemmas.
       na_nninv s i p N (↑ˡ P).
   Proof.
     iIntros "toP". iMod na_lock_alloc as (j) "[% lock]".
-    iMod (ninv_alloc_rec (P:=nid_na p j P) with "[toP lock]") as "NP".
+    iMod (ninv_alloc_rec (P:=nInvd_na p j P) with "[toP lock]") as "NP".
     - iIntros "/=NP". iLeft. iFrame "lock". rewrite nintpS_nintp.
       iApply "toP". by iApply na_ninv_nninv.
     - iModIntro. by iApply na_ninv_nninv.

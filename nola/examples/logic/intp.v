@@ -156,18 +156,18 @@ Section nintp.
   (** [nintpS_gen] is contractive *)
   #[export] Instance nintpS_gen_contractive : Contractive nintpS_gen'.
   Proof.
-    unfold nintpS_gen'=> i ni ni' nid s + + + + + + +. fix FIX 4=> κ Γ P H.
+    unfold nintpS_gen'=> i ni ni' nInvd s + + + + + + +. fix FIX 4=> κ Γ P H.
     case: P H=>/=; intros; case H=>//= ?; try (by f_equiv=> >; apply FIX);
-    try (by apply ncintpg1_contr; apply nid);
+    try (by apply ncintpg1_contr; apply nInvd);
     [apply wpw_ne=> >|apply twpw_ne=> >]; by apply FIX.
   Qed.
 
   (** [nintp_gen] is contractive *)
   #[export] Instance nintp_gen_contractive : Contractive nintp_gen'.
   Proof.
-    unfold nintp_gen'=> i ni ni' nid s + + + + + +. fix FIX 4=> κ Γ P H.
+    unfold nintp_gen'=> i ni ni' nInvd s + + + + + +. fix FIX 4=> κ Γ P H.
     case: P H=>/=; intros; case H=>//= ?; try (by f_equiv=> >; apply FIX);
-      try (by apply ncintpg1_contr; apply nid);
+      try (by apply ncintpg1_contr; apply nInvd);
       try (by try (f_equiv=> ?); apply nintpS_gen_contractive);
       [apply wpw_ne=> >|apply twpw_ne=> >]; by apply FIX.
   Qed.

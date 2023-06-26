@@ -24,7 +24,7 @@ Section lemmas.
 
   (** Turn [ninv] into [nninv] *)
   Lemma ninv_nninv (P : nPropS _) {i N} :
-    ninv N (nid_u P) -∗ nninv (Σ:=Σ) s i N (↑ˡ P).
+    ninv N (nInvd_u P) -∗ nninv (Σ:=Σ) s i N (↑ˡ P).
   Proof.
     rewrite nninv_unseal. iIntros "#NP !>". iApply (sintpy_intro (s:=s))=>/=.
     iIntros (?????). rewrite -nintpS_nintp_nlarge.
@@ -37,7 +37,7 @@ Section lemmas.
       nninv s i N (↑ˡ P).
   Proof.
     iIntros "toP".
-    iMod (ninv_alloc_rec (P:=nid_u P) with "[toP]") as "NP".
+    iMod (ninv_alloc_rec (P:=nInvd_u P) with "[toP]") as "NP".
     - iIntros "/=NP". rewrite nintpS_nintp. iApply "toP". by iApply ninv_nninv.
     - iModIntro. by iApply ninv_nninv.
   Qed.

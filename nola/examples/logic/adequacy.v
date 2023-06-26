@@ -5,14 +5,14 @@ From nola.examples.heap_lang Require Export adequacy total_adequacy.
 
 (** Precursor of [nintpGS] *)
 Class nintpGpreS (Σ : gFunctors) := NintpGpreS {
-  nintpGpreS_ninvGpreS :: ninvGpreS nid Σ;
+  nintpGpreS_ninvGpreS :: ninvGpreS nInvd Σ;
   nintpGpreS_na_invG :: na_invG Σ;
   nintpGpreS_cinvG :: cinvG Σ;
   nintpGpreS_heapGpreS :: heapGpreS Σ;
 }.
 
 (** [gFunctors] for [nintpGpreS] *)
-Definition nintpΣ : gFunctors := #[ninvΣ nid; na_invΣ; cinvΣ; heapΣ].
+Definition nintpΣ : gFunctors := #[ninvΣ nInvd; na_invΣ; cinvΣ; heapΣ].
 Global Instance subG_nintpGpreS {Σ} : subG nintpΣ Σ → nintpGpreS Σ.
 Proof. solve_inG. Qed.
 
