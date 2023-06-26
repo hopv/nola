@@ -18,6 +18,7 @@ Fixpoint tinvGS' (L o : nat) Σ : Type :=
   | 0 => unit
   | S L => ninvGS (tinvd o) Σ *' tinvGS' L (S o) Σ
   end.
+Arguments tinvGS' : simpl never.
 Existing Class tinvGS'.
 Notation tinvGS L Σ := (tinvGS' L 0 Σ).
 #[export] Instance tinvGS'_S_ninvGS' {L o} `{tΣ : !tinvGS' (S L) o Σ}
@@ -33,11 +34,12 @@ Fixpoint tinvGS'_ninvGS {i L o Σ}
   | 0, S _ => λ _ _, _
   | S i, S L => λ _ iL, tinvGS'_ninvGS _ (nlt_unS iL)
   end.
+Arguments tinvGS'_ninvGS : simpl never.
 #[export] Existing Instance tinvGS'_ninvGS.
 Definition ninvGS_rew `{nΣ : ninvGS (tinvd i) Σ} {j} (eq : i = j)
   : ninvGS (tinvd j) Σ := rew[λ _, _] eq in nΣ.
 #[export] Instance tinvGS_ninvGS `{!tinvGS L Σ, ! i <ⁿ L}
-  : ninvGS (tinvd i) Σ := ninvGS_rew add'_0_r_d.
+  : ninvGS (tinvd i) Σ := ninvGS_rew add'_0_r.
 
 (** ** World satisfaction for invariant *)
 Section tinv_wsat'.
@@ -56,7 +58,7 @@ Section tinv_wsat'.
   Definition tinv_wsat' `{!tinvGS L Σ} (M : nat)
     (intp : discrete_fun (λ i, i <ⁿ M -d> type i (;ᵞ) -d> val -d> iProp Σ))
     : iProp Σ :=
-    tinv_wsat'' L M 0 _ (λ i _ T, intp i _ (rew[λ i, _ i _] add'_0_r_d in T)).
+    tinv_wsat'' L M 0 _ (λ i _ T, intp i _ (rew[λ i, _ i _] add'_0_r in T)).
 
   (** [tinv_wsat'] is non-expansive *)
   #[export] Instance tinv_wsat''_ne {L M o tΣ} :
@@ -124,6 +126,7 @@ Section tinv_wsat'.
       (tinv_wsat' M intp -∗ tinv_wsat' M' intp').
   Proof. move=> eq. iApply tinv_wsat''_expand; [|done]=> >. apply eq. Qed.
 End tinv_wsat'.
+Arguments tinv_wsat'' : simpl never.
 
 (** [tintpGS]: Iris resource *)
 Class tintpGS (L : nat) (Σ : gFunctors) := TintpGS {

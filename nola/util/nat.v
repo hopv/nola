@@ -9,22 +9,13 @@ Fixpoint add' (m n : nat) :=
   match m with 0 => n | S m => add' m (S n) end.
 Infix "+'" := add' (at level 50, left associativity) : nat_scope.
 
-(** ** Equalities for [nat], defined directly for computation *)
-
-(** Simplify [_ + 0] *)
-Fixpoint add_0_r_d {m} : m + 0 = m :=
-  match m with 0 => eq_refl | S m => f_equal S add_0_r_d end.
-
-(** Simplify [_ + S _] *)
-Fixpoint add_succ_r_d {m n} : m + S n = S (m + n) :=
-  match m with 0 => eq_refl | S m => f_equal S add_succ_r_d end.
-
 (** [+'] into [+] *)
-Fixpoint add'_add_d {m n} : m +' n = m + n :=
-  match m with 0 => eq_refl | S _ => eq_trans add'_add_d add_succ_r_d end.
+Lemma add'_add {m n} : m +' n = m + n.
+Proof. move: n. elim m; [done|]=>/= ? eq ?. rewrite eq. lia. Qed.
 
 (** Simplify [+' 0] *)
-Definition add'_0_r_d {n} : n +' 0 = n := eq_trans add'_add_d add_0_r_d.
+Lemma add'_0_r {n} : n +' 0 = n.
+Proof. rewrite add'_add. lia. Qed.
 
 (** ** [≤ⁿ], [<ⁿ]: [≤] and [<] over [nat] as a type class *)
 Definition nle := Nat.le. Definition nlt := Nat.lt.
