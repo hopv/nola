@@ -37,7 +37,7 @@ End nInvd_intp.
 (** [ninv_wsat] for [nInvd] *)
 Notation ninv_wsat' intp := (ninv_wsat (nInvd_intp intp)).
 
-(** ** For strong interpretation *)
+(** ** Strong interpretation structure *)
 
 (** [intps] for [nPropL] *)
 Definition nintps Σ : intps := Intps nat (λ _, nPropL (;ᵞ)) (iProp Σ).
@@ -48,9 +48,9 @@ Notation "⸨ P ⸩ ( s , i )" := (sunwrap s (Sarg i P%n))
   (format "'[' ⸨  P  ⸩ '/  ' ( s ,  i ) ']'") : nola_scope.
 
 Section iris.
-  Context (* Iris resources *) `{!nintpGS Σ}.
+  Context (* Iris resources *) {Σ : gFunctors}.
 
-  (** ** [nninv]: [ninv] in the accessor style *)
+  (** [nninv]: [ninv] in the accessor style *)
   Definition nninv_def (s : nsintp_ty Σ)
     (i : nat) (N : namespace) (P : nPropL (;ᵞ)) : iProp Σ :=
     □ ⸨ ∀ E, ⌜↑N ⊆ E⌝ → |=[n_inv_wsat]{E,E∖↑N}=>
@@ -61,7 +61,7 @@ Section iris.
   #[export] Instance nninv_persistent {s i N P} : Persistent (nninv s i N P).
   Proof. rewrite nninv_unseal. apply _. Qed.
 
-  (** ** [na_nninv]: Non-atomic [ninv] in the accessor style *)
+  (** [na_nninv]: [na_ninv] in the accessor style *)
   Definition na_nninv_def (s : nsintp_ty Σ) (i : nat)
     (p : na_inv_pool_name) (N : namespace) (P : nPropL (;ᵞ)) : iProp Σ :=
     □ ⸨ ∀ E F, ⌜↑N ⊆ E⌝ → ⌜↑N ⊆ F⌝ → n_na_own p F =[n_inv_wsat]{E}=∗
