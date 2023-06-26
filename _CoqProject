@@ -46,3 +46,4 @@ nola/examples/logic/verify/na_strm.v
 
 nola/examples/type/type.v
 nola/examples/type/subst.v
+nola/examples/type/iris.v
