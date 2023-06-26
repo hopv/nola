@@ -2,7 +2,7 @@
 
 From nola Require Export prelude.
 
-(** ** Lemmas for [list], defined directly for computation *)
+(** ** Equalities for [list], defined directly for computation *)
 
 (** Reduce [++ []] *)
 Fixpoint app_nil_d {A} {xs : list A} : xs ++ [] = xs :=
