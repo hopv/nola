@@ -55,7 +55,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     [`rel`](nola/util/rel.v) (Relations),
     [`wft`](nola/util/wft.v) (Well-founded types),
     [`list`](nola/util/list.v) (Lists),
-    [`nat`](nola/util/nat.v) (Natural numbers)
+    [`nat`](nola/util/nat.v) (Natural numbers),
+    [`prod`](nola/util/prod.v) (Modified product)
   + [`hgt`](nola/util/hgt.v) (General height of a tree),
     [`ctx`](nola/util/ctx.v) (Context with unguarded/guarded variables)
 - [`iris/`](nola/iris) : Iris libraries

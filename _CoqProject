@@ -7,6 +7,7 @@ nola/util/rel.v
 nola/util/wft.v
 nola/util/list.v
 nola/util/nat.v
+nola/util/prod.v
 nola/util/hgt.v
 nola/util/ctx.v
 nola/iris/sintp.v
