@@ -4,13 +4,13 @@ From nola.examples.logic Require Export subst iris.
 Import EqNotations.
 
 (** Modification of [nsubst] *)
-Definition nsubst' {κ Γᵘ Γᵍ V} (P : nProp κ (V :: Γᵘ;ᵞ Γᵍ))
+Definition nsubst' {κ V Γᵘ Γᵍ} (P : nProp κ (V :: Γᵘ;ᵞ Γᵍ))
   (un : Γᵘ = []) (gn : Γᵍ = []) : nPred V → nProp κ (;ᵞ) :=
   nsubst (rew ctxeq_ug (f_equal (_ ::.) un) gn in P).
 Arguments nsubst' {_ _ _ _} _ _ _ /.
 
 (** [nsubst'] preserves [nhgt] *)
-Lemma nsubst'_nhgt {κ Γᵘ Γᵍ V} {P : nProp κ (V :: Γᵘ;ᵞ Γᵍ)} {un gn Φ} :
+Lemma nsubst'_nhgt {κ V Γᵘ Γᵍ} {P : nProp κ (V :: Γᵘ;ᵞ Γᵍ)} {un gn Φ} :
   nhgt (nsubst' P un gn Φ) = nhgt P.
 Proof. subst. apply nsubst_nhgt. Qed.
 
