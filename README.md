@@ -87,7 +87,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`type/`](nola/examples/type/) : Nola Stratified Type System
     - [`type`](nola/examples/type/type.v) (Type),
       [`subst`](nola/examples/type/subst.v) (Substitution),
-      [`iris`](nola/examples/type/iris.v) (Iris preliminaries)
+      [`iris`](nola/examples/type/iris.v) (Iris preliminaries),
+      [`intp`](nola/examples/type/intp.v) (Interpretation)
 
 ## Story
 

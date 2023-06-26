@@ -150,3 +150,9 @@ Qed.
 (** [/:] preserves [thgt] *)
 Lemma tsubst_thgt {i k} {T : type i ([k];ᵞ )} {V} : thgt (T /: V) = thgt T.
 Proof. exact tsubstlu_thgt. Qed.
+
+(** [↑ˡ] preserves [thgt] *)
+Lemma tbump_thgt `{ij : ! i ≤ⁿ j} {Γ} {T : type i Γ} : thgt (↑ˡ{ij} T) = thgt T.
+Proof.
+  move: i Γ T ij. fix FIX 3=> i Γ T. case T=>//= >; f_equal; apply FIX.
+Qed.

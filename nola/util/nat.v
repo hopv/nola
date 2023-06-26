@@ -43,10 +43,14 @@ Notation "(.<ⁿ i )" := (nlt' i) (format "(.<ⁿ  i )") : nola_scope.
 Proof. unfold nle. lia. Qed.
 #[export] Instance nle_S `(mn : ! m ≤ⁿ n) : S m ≤ⁿ S n.
 Proof. move: mn. unfold nle. lia. Qed.
+#[export] Instance nle_refl {n} : n ≤ⁿ n | 3.
+Proof. unfold nle. lia. Qed.
 #[export] Instance nlt_0 {n} : 0 <ⁿ S n.
 Proof. unfold nlt. lia. Qed.
 #[export] Instance nlt_S `(mn : ! m <ⁿ n) : S m <ⁿ S n.
 Proof. move: mn. unfold nlt. lia. Qed.
+#[export] Instance nlt_refl {n} : n <ⁿ S n | 3.
+Proof. unfold nlt. lia. Qed.
 #[export] Instance nle'_nle `{! m ≤ⁿ n} : nle' n m.
 Proof. simpl. apply _. Qed.
 #[export] Instance nlt'_nlt `{! m <ⁿ n} : nlt' n m.
@@ -67,3 +71,5 @@ Lemma nlt_nle_trans {l m n} : l <ⁿ m → m ≤ⁿ n → l <ⁿ n.
 Proof. apply Nat.lt_le_trans. Qed.
 Lemma nle_nlt_trans {l m n} : l ≤ⁿ m → m <ⁿ n → l <ⁿ n.
 Proof. apply Nat.le_lt_trans. Qed.
+Lemma nlt_nlt_S_trans {l m n} : l <ⁿ m → m <ⁿ S n → l <ⁿ n.
+Proof. move=> lm mn. exact (nlt_nle_trans lm (nlt_S_nle mn)). Qed.
