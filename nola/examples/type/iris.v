@@ -14,9 +14,8 @@ Definition tinvd i : Type := loc *' type i (;ᵞ).
 
 (** [tinvGS']: Product of [ninvGS (tinvd ?) Σ] over [[o..o+i]] *)
 Fixpoint tinvGS' (L o : nat) Σ : Type :=
-  match L with
-  | 0 => unit
-  | S L => ninvGS (tinvd o) Σ *' tinvGS' L (S o) Σ
+  match L with 0 => unit | S L =>
+    ninvGS (tinvd o) Σ *' tinvGS' L (S o) Σ
   end.
 Arguments tinvGS' : simpl never.
 Existing Class tinvGS'.
@@ -27,12 +26,12 @@ Notation tinvGS L Σ := (tinvGS' L 0 Σ).
   : tinvGS' L (S o) Σ := tΣ.2'.
 
 (** Get [ninvGS] out of [tinvGS] *)
-Fixpoint tinvGS'_ninvGS {i L o Σ}
+Fixpoint tinvGS'_ninvGS {L i o Σ}
   : tinvGS' L o Σ → i <ⁿ L → ninvGS (tinvd (i +' o)) Σ :=
-  match i, L with
-  | _, 0 => λ _ _, nlt_no0
-  | 0, S _ => λ _ _, _
-  | S i, S L => λ _ iL, tinvGS'_ninvGS _ (nlt_unS iL)
+  match L with 0 => λ _ _, nlt_no0 | S _ =>
+    match i with 0 => λ _ _, _ | S _ =>
+      λ _ iL, tinvGS'_ninvGS _ (nlt_unS iL)
+    end
   end.
 Arguments tinvGS'_ninvGS : simpl never.
 #[export] Existing Instance tinvGS'_ninvGS.
@@ -48,12 +47,11 @@ Section tinv_wsat'.
   Fixpoint tinv_wsat'' (L M o : nat) : tinvGS' L o Σ →
     discrete_fun (λ i, i <ⁿ M -d> type (i +' o) (;ᵞ) -d> val -d> iProp Σ) →
     iProp Σ :=
-    match L, M with
-    | _, 0 => λ _ _, True
-    | 0, S _ => λ _ _, False
-    | S L, S M => λ _ intp,
+    match M with 0 => λ _ _, True | S M =>
+      match L with 0 => λ _ _, False | S L => λ _ intp,
         ninv_wsat (λ '(l, T)', ∃ v, l ↦ v ∗ intp 0 _ T v) ∗
         tinv_wsat'' L M (S o) _ (λ i _ T, intp (S i) _ T)
+      end
     end%I.
   Definition tinv_wsat' `{!tinvGS L Σ} (M : nat)
     (intp : discrete_fun (λ i, i <ⁿ M -d> type i (;ᵞ) -d> val -d> iProp Σ))

@@ -59,8 +59,7 @@ Notation "!ᵘ{ ji } T" := (t_subu (ji:=ji) T)
 Reserved Notation "↑ˡ T" (at level 20, right associativity).
 Fixpoint tbump {i j Γ} (T : type i Γ) : i ≤ⁿ j → type j Γ :=
   match T with
-  | t_nat => λ _, t_nat
-  | t_ref o j T => λ _, t_ref o j T
+  | t_nat => λ _, t_nat | t_ref o j T => λ _, t_ref o j T
   | T ∧ᵗ U => λ _, ↑ˡ T ∧ᵗ ↑ˡ U
   | T →(j) U => λ ij, let _ := nle_trans _ ij in ↑ˡ T →(j) ↑ˡ U
   | ∀: j, T => λ _, ∀: j, ↑ˡ T | ∃: j, T => λ _, ∃: j, ↑ˡ T
