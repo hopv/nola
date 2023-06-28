@@ -48,3 +48,4 @@ nola/examples/type/type.v
 nola/examples/type/subst.v
 nola/examples/type/iris.v
 nola/examples/type/intp.v
+nola/examples/type/sintp.v
