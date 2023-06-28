@@ -187,6 +187,7 @@ End nintp.
 
 Notation "⟦ P ⟧ᶠ ( s )" := (nintp_fp s _ P)
   (format "'[' ⟦  P  ⟧ᶠ '/  ' ( s ) ']'") : nola_scope.
+
 Notation "⟦ P ⟧{ κ } ( s , H )" :=
   (@nintp_gen _ _ nintp_fp s κ (;ᵞ) P H eq_refl eq_refl) (only parsing)
   : nola_scope.
@@ -196,12 +197,16 @@ Notation "⟦ P ⟧ ( s , H )" := ⟦ P ⟧{_}(s, H)
 Notation "⟦ P ⟧ ( s )" := ⟦ P ⟧(s, hwf)
   (format "'[' ⟦  P  ⟧ '/  ' ( s ) ']'") : nola_scope.
 Notation nintp s P := ⟦ P ⟧(s) (only parsing).
+
 Notation "⟦ P ⟧ˢ ( s , H )" :=
   (@nintpS_gen _ _ nintp_fp s nS (;ᵞ) P H eq_refl eq_refl eq_refl)
   (format "'[' ⟦  P  ⟧ˢ '/  ' ( s ,  H ) ']'") : nola_scope.
 Notation "⟦ P ⟧ˢ ( s )" := ⟦ P ⟧ˢ(s, hwf)
   (format "'[' ⟦  P  ⟧ˢ '/  ' ( s ) ']'") : nola_scope.
 Notation nintpS s P := ⟦ P ⟧ˢ(s) (only parsing).
+
+(** Utility *)
+Notation nninv_wsat s := (ninv_wsat' (λ P, ⟦ P ⟧ˢ(s))).
 
 (** ** Lemmas on [⟦ ⟧] etc. *)
 Section nintp.
@@ -241,6 +246,3 @@ Section nintp.
   Lemma nintpS_nintp_nlarge {s P} : ⟦ P ⟧ˢ(s) ⊣⊢ ⟦ ↑ˡ P ⟧(s).
   Proof. by rewrite nintpS_nintp nintp_nlarge. Qed.
 End nintp.
-
-(** Utility *)
-Notation nninv_wsat s := (ninv_wsat' (λ P, ⟦ P ⟧ˢ(s))).
