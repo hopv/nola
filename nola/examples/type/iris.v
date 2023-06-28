@@ -153,7 +153,7 @@ Class tintpGS (L : nat) (Σ : gFunctors) := TintpGS {
   tintpGS_tinvGS :: tinvGS L Σ;
   tintpGS_heapGS :: heapGS_gen HasNoLc Σ;
 }.
-Arguments TintpGS {_} _ _.
+Arguments TintpGS {_ _} _ _.
 
 (** ** Strong interpretation structure *)
 
