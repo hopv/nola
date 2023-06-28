@@ -50,4 +50,5 @@ nola/examples/type/iris.v
 nola/examples/type/intp.v
 nola/examples/type/sintp.v
 nola/examples/type/facts.v
+nola/examples/type/subeqv.v
 nola/examples/type/adequacy.v
