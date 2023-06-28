@@ -106,8 +106,7 @@ Section subeqv.
   Proof. iIntros (TU ?) "/= [% ?]". by rewrite rew_eq_hwf TU. Qed.
 
   (** On [recᵗ:] *)
-  Lemma teqv_rec `{! j ≤ⁿ i} {s T} :
-    (recᵗ: j, T) ≃{i,j}(s) T /: (recᵗ: j, T).
+  Lemma teqv_rec `{! j ≤ⁿ i} {s T} : (recᵗ: j, T) ≃{i,j}(s) T /: (recᵗ: j, T).
   Proof. move=> ? /=. by rewrite rew_eq_hwf tintp_tbump. Qed.
 
   (** On [!ᵘ] *)
