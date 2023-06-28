@@ -8,10 +8,11 @@ Section facts.
   (** ** Behavior of [tintp] *)
   Fact tintp_nat {s i v} : ⟦ ℕ ⟧{i}(s) v ⊣⊢ ∃ n : nat, ⌜v = # n⌝.
   Proof. done. Qed.
-  Fact tintp_ref {s i o j T v} :
+  Fact tintp_ref {s i o j v} {T : _ (;ᵞ)} :
     ⟦ ref[o] T ⟧{i}(s) v ⊣⊢ ∃ l : loc, ⌜v = # l⌝ ∗ tref (i:=j) s (l +ₗ o) T.
   Proof. done. Qed.
-  Fact tintp_guard {s i j T v} : ⟦ ▽ T ⟧{i}(s) v ⊣⊢ tguard (i:=j) s T v.
+  Fact tintp_guard {s i j v} {T : _ (;ᵞ)} :
+    ⟦ ▽{j,_} T ⟧{i}(s) v ⊣⊢ tguard (i:=j) s T v.
   Proof. done. Qed.
   Fact tintp_and {s i T U v} :
     ⟦ T ∧ᵗ U ⟧{i}(s) v ⊣⊢ ⟦ T ⟧{i}(s) v ∗ ⟦ U ⟧{i}(s) v.
