@@ -31,10 +31,17 @@ Inductive type : nat → ctx nat → Type :=
 | t_subu {i j Γ} `{ji : ! j <ⁿ i} (T : type j (;ᵞ)) : type i Γ.
 
 Notation ℕ := t_nat.
-Notation "ref[ o ] T" := (t_ref o T) (at level 20, right associativity)
+Notation "ref{ j , Γᵘ } [ o ] T" := (t_ref o (j:=j) (Γᵘ:=Γᵘ) T)
+  (at level 20, right associativity, only parsing) : nola_scope.
+Notation "ref[ o ] T" := (t_ref o T)
+  (at level 20, right associativity, format "ref[ o ]  T")
   : nola_scope.
+Notation "ref{ j , Γᵘ } : T" := (t_ref 0 (j:=j) (Γᵘ:=Γᵘ) T)
+  (at level 20, right associativity, only parsing) : nola_scope.
 Notation "ref: T" := (t_ref 0 T) (at level 20, right associativity)
   : nola_scope.
+Notation "▽{ j , Γᵘ } T" := (t_guard (j:=j) (Γᵘ:=Γᵘ) T)
+  (at level 20, right associativity, only parsing) : nola_scope.
 Notation "▽ T" := (t_guard T) (at level 20, right associativity) : nola_scope.
 Infix "∧ᵗ" := t_and (at level 80, right associativity) : nola_scope.
 Notation "T →( j ) U" := (t_fun j T U)
