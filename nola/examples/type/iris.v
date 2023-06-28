@@ -4,7 +4,7 @@ From nola.examples.type Require Export type.
 From nola.util Require Export prod.
 From nola.iris Require Export sintp inv wp.
 From nola.examples.heap_lang Require Export primitive_laws.
-From iris.proofmode Require Import proofmode.
+From iris.proofmode Require Export proofmode.
 Import EqNotations.
 
 (** ** Iris resources for invariant *)
@@ -90,6 +90,12 @@ Section tinv_wsat'.
   #[export] Instance tinv_wsat'_ne `{!tinvGS L Σ} {M} :
     NonExpansive (tinv_wsat' M).
   Proof. move=> ??? eq. apply tinv_wsat''_ne=> >. apply eq. Qed.
+  #[export] Instance tinv_wsat''_proper {L M o tΣ} :
+    Proper ((≡) ==> (≡)) (tinv_wsat'' L M o tΣ).
+  Proof. apply ne_proper, _. Qed.
+  #[export] Instance tinv_wsat'_proper `{!tinvGS L Σ} {M} :
+    Proper ((≡) ==> (≡)) (tinv_wsat' M).
+  Proof. apply ne_proper, _. Qed.
 
   (** Take out [ninv_wsat] out of [tinv_wsat'] *)
   Lemma tinv_wsat''_ninv_wsat
