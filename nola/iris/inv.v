@@ -17,7 +17,7 @@ Class ninvGS (PROP : Type) (Σ : gFunctors) := NinvGS {
 
 Definition ninvΣ (PROP : Type) : gFunctors :=
   #[GFunctor (gmap_viewRF positive (leibnizO PROP))].
-#[export] Instance subG_ninvΣ {PROP Σ} : subG (ninvΣ PROP) Σ → ninvGpreS PROP Σ.
+#[export] Instance subG_ninvΣ `{!subG (ninvΣ PROP) Σ} : ninvGpreS PROP Σ.
 Proof. solve_inG. Qed.
 
 Section ninv.

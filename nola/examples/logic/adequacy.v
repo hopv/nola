@@ -13,7 +13,7 @@ Class nintpGpreS (Σ : gFunctors) := NintpGpreS {
 
 (** [gFunctors] for [nintpGpreS] *)
 Definition nintpΣ : gFunctors := #[ninvΣ nInvd; na_invΣ; cinvΣ; heapΣ].
-Global Instance subG_nintpGpreS {Σ} : subG nintpΣ Σ → nintpGpreS Σ.
+#[export] Instance subG_nintpGpreS `{!subG nintpΣ Σ} : nintpGpreS Σ.
 Proof. solve_inG. Qed.
 
 (** Adequacy of [wp] over [nninv_wsats] *)
