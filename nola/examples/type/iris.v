@@ -10,7 +10,11 @@ Import EqNotations.
 (** ** Iris resources for invariant *)
 
 (** Data for invariant *)
-Definition tinvd i : Type := loc *' type i (;ᵞ).
+Variant tinvd i : Type :=
+| (** Reference **) tinvd_ref (l : loc) (T : type i (;ᵞ))
+| (** Guard **) tinvd_guard (T : type i (;ᵞ)) (v : val).
+Arguments tinvd_ref {_} _ _.
+Arguments tinvd_guard {_} _ _.
 
 (** [tinvGS']: Product of [ninvGS (tinvd ?) Σ] over [[o..o+i]] *)
 Fixpoint tinvGS' (L o : nat) Σ : Type :=
@@ -44,12 +48,29 @@ Definition ninvGS_rew `{nΣ : ninvGS (tinvd i) Σ} {j} (eq : i = j)
 Section tinv_wsat'.
   Context `{!heapGS_gen HasNoLc Σ}.
 
+  (** Interpretation of [tinvd] *)
+  Definition tinvd_intp {i} (intp : type i (;ᵞ) -d> val -d> iProp Σ)
+    : tinvd i -d> iProp Σ :=
+    λ Tx, match Tx with
+    | tinvd_ref l T => ∃ v, l ↦ v ∗ intp T v
+    | tinvd_guard T v => intp T v
+    end%I.
+
+  (** [tinvd_intp] is non-expansive *)
+  #[export] Instance tinvd_intp_ne {n i} :
+    Proper ((≡{n}≡) ==> (=) ==> (≡{n}≡)) (tinvd_intp (i:=i)).
+  Proof. solve_proper. Qed.
+  #[export] Instance tinvd_intp_proper {i} :
+    Proper ((≡) ==> (=) ==> (≡)) (tinvd_intp (i:=i)).
+  Proof. solve_proper. Qed.
+
+  (** [tinv_wsat']: World satisfaction for invariant *)
   Fixpoint tinv_wsat'' (L M o : nat) : tinvGS' L o Σ →
     discrete_fun (λ i, i <ⁿ M -d> type (i +' o) (;ᵞ) -d> val -d> iProp Σ) →
     iProp Σ :=
     match M with 0 => λ _ _, True | S M =>
       match L with 0 => λ _ _, False | S L => λ _ intp,
-        ninv_wsat (λ '(l, T)', ∃ v, l ↦ v ∗ intp 0 _ T v) ∗
+        ninv_wsat (tinvd_intp (intp 0 _)) ∗
         tinv_wsat'' L M (S o) _ (λ i _ T, intp (S i) _ T)
       end
     end%I.
@@ -64,7 +85,7 @@ Section tinv_wsat'.
   Proof.
     move: L M o tΣ. fix FIX 2=> L M.
     case: L M=> [|L][|M]//= ????? eq. do 2 f_equiv=> >; [|apply eq].
-    do 3 f_equiv. apply eq.
+    f_equiv=> >. apply eq.
   Qed.
   #[export] Instance tinv_wsat'_ne `{!tinvGS L Σ} {M} :
     NonExpansive (tinv_wsat' M).
@@ -73,10 +94,8 @@ Section tinv_wsat'.
   (** Take out [ninv_wsat] out of [tinv_wsat'] *)
   Lemma tinv_wsat''_ninv_wsat
     `{tΣ : !tinvGS' L o Σ, iM : ! i <ⁿ M, iL : ! i <ⁿ L} {intp} :
-    tinv_wsat'' L M o _ intp -∗
-      ninv_wsat (λ '(l, T)', ∃ v, l ↦ v ∗ intp i _ T v) ∗
-      (ninv_wsat (λ '(l, T)', ∃ v, l ↦ v ∗ intp i _ T v) -∗
-        tinv_wsat'' L M o _ intp).
+    tinv_wsat'' L M o _ intp -∗ ninv_wsat (tinvd_intp (intp i _)) ∗
+      (ninv_wsat (tinvd_intp (intp i _)) -∗ tinv_wsat'' L M o _ intp).
   Proof.
     move: L M i o tΣ iM iL intp. fix FIX 3=> L M i.
     case: L M i=> [|L][|M][|i]/=; try (unfold nlt; lia);
@@ -89,15 +108,12 @@ Section tinv_wsat'.
   (** Key equality hack for [tinv_wsat'_ninv_wsat] *)
   Local Lemma ninv_wsat_rew `{nΣ : !ninvGS (tinvd i) Σ, ! j <ⁿ M} (eq : i = j)
     {intp : ∀ k, k <ⁿ M → type k (;ᵞ) → val → iProp Σ} :
-    ninv_wsat (λ '(l, T)', ∃ v, l ↦ v ∗ intp j _ (rew[λ i, _ i _] eq in T) v) ⊣⊢
-      ninv_wsat (ninvGS0:=ninvGS_rew eq)
-        (λ '(l, T)', ∃ v, l ↦ v ∗ intp j _ T v).
+    ninv_wsat (tinvd_intp (λ T, intp j _ (rew[λ i, _ i _] eq in T))) ⊣⊢
+      ninv_wsat (ninvGS0:=ninvGS_rew eq) (tinvd_intp (intp j _)).
   Proof. by subst. Qed.
   Lemma tinv_wsat'_ninv_wsat `{!tinvGS L Σ, ! i <ⁿ M, ! i <ⁿ L} {intp} :
-    tinv_wsat' M intp -∗
-      ninv_wsat (λ '(l, T)', ∃ v, l ↦ v ∗ intp i _ T v) ∗
-      (ninv_wsat (λ '(l, T)', ∃ v, l ↦ v ∗ intp i _ T v) -∗
-        tinv_wsat' M intp).
+    tinv_wsat' M intp -∗ ninv_wsat (tinvd_intp (intp i _)) ∗
+      (ninv_wsat (tinvd_intp (intp i _)) -∗ tinv_wsat' M intp).
   Proof.
     iIntros "tw". iDestruct (tinv_wsat''_ninv_wsat with "tw") as "[??]".
     rewrite ninv_wsat_rew /=. iFrame.
@@ -114,9 +130,9 @@ Section tinv_wsat'.
     iIntros (???? eq ?) "[nw tw]".
     iDestruct (FIX with "tw") as "[$ cl]"; [by move=> *?; apply eq|lia|].
     iSplitL "nw".
-    { iStopProof. apply bi.equiv_entails. do 3 f_equiv=> >. apply eq. }
+    { iStopProof. apply bi.equiv_entails. do 2 f_equiv=> >. apply eq. }
     iFrame. iIntros "[nw ?]". iSplitL "nw"; [|by iApply "cl"]. iStopProof.
-    apply bi.equiv_entails. do 3 f_equiv=> >. symmetry. apply eq.
+    apply bi.equiv_entails. do 2 f_equiv=> >. symmetry. apply eq.
   Qed.
   Lemma tinv_wsat'_expand `{!tinvGS L Σ, ! M ≤ⁿ M'} {intp intp'} :
     (∀ i iM iM', intp i iM ≡ intp' i iM') →
@@ -135,16 +151,17 @@ Arguments TintpGS {_} _ _.
 
 (** ** Strong interpretation structure *)
 
-(** [intps] for [type]
-
-  Later we interpret [sigT tinvd] as an accessor *)
+(** [intps] for [type] *)
 Definition tintps Σ : intps := Intps unit (λ _, sigT tinvd) (iProp Σ).
 
 (** Notation for [tintps] *)
 Notation tsintp_ty Σ := (sintp_ty (tintps Σ)).
-Notation "⸨ Tx ⸩ ( s )" := (sunwrap s (Sarg () Tx))
+Notation "⸨ Tx ⸩ ( s )" := (sunwrap s (Sarg () (existT _ Tx)))
   (format "'[' ⸨  Tx  ⸩ '/  ' ( s ) ']'") : nola_scope.
 
-(** [tinv]: [ninv] in the accessor style *)
-Definition tinv {Σ i} (s : tsintp_ty Σ) (l : loc) (T : type i (;ᵞ))
-  : iProp Σ := □ ⸨ existT i (l, T)' ⸩(s).
+(** [tref]: Proposition for [t_ref] *)
+Definition tref {Σ i} (s : tsintp_ty Σ) (l : loc) (T : type i (;ᵞ))
+  : iProp Σ := □ ⸨ tinvd_ref l T ⸩(s).
+(** [tguard]: Proposition for [t_guard] *)
+Definition tguard {Σ i} (s : tsintp_ty Σ) (T : type i (;ᵞ)) (v : val)
+  : iProp Σ := □ ⸨ tinvd_guard T v ⸩(s).

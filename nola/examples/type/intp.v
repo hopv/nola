@@ -29,7 +29,8 @@ Section tintp.
     match T, H with
     | ℕ, _ => λ _ _ _ v, ∃ n : nat, ⌜v = # n⌝
     | ref[o] T, _ => λ _ un gn v, ∃ l,
-        tinv s (l +ₗ o) (rew eq_nil_ug_g un gn in T)
+        tref s (l +ₗ o) (rew eq_nil_ug_g un gn in T)
+    | ▽ T, _ => λ _ un gn v, tguard s (rew eq_nil_ug_g un gn in T) v
     | T ∧ᵗ U, _ => λ IH un gn v,
         tintp' T (H ‼ʰ 0) IH un gn v ∗ tintp' U (H ‼ʰ 1) IH un gn v
     | T →{ji}(j) U, _ => λ IH un gn v, □ ∀ u,

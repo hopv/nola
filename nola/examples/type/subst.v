@@ -41,6 +41,7 @@ Fixpoint tsubstlg {i Γ Γᵍ k} (V : type k (;ᵞ)) (T : type i Γ)
   match T with
   | ℕ => λ _, ℕ
   | ref[o] T => λ eq, ref[o] tsubstlg V T (eq_app_assoc_d eq)
+  | ▽ T => λ eq, ▽ tsubstlg V T (eq_app_assoc_d eq)
   | T ∧ᵗ U => λ eq, tsubstlg V T eq ∧ᵗ tsubstlg V U eq
   | T →(j) U => λ eq, tsubstlg V T eq →(j) tsubstlg V U eq
   | ∀: j, T => λ eq, ∀: j, tsubstlg V T eq
@@ -85,6 +86,8 @@ Fixpoint tsubstlu {i Γ Γᵘ k} (V : type k (;ᵞ)) (T : type i Γ)
   match T with
   | ℕ => λ _ _, ℕ
   | ref[o] T => λ eq gn, ref[o]
+      rew ctxeq_g app_nil'_d in tsubstlg V T (eq_trans (app_eq_nil_d gn) eq)
+  | ▽ T => λ eq gn, ▽
       rew ctxeq_g app_nil'_d in tsubstlg V T (eq_trans (app_eq_nil_d gn) eq)
   | T ∧ᵗ U => λ eq gn, tsubstlu V T eq gn ∧ᵗ tsubstlu V U eq gn
   | T →(j) U => λ eq gn, tsubstlu V T eq gn →(j) tsubstlu V U eq gn
@@ -132,7 +135,7 @@ Proof. exact tsubstlu_tbump. Qed.
 
 Fixpoint thgt {i Γ} (T : type i Γ) : hgt :=
   match T with
-  | ℕ | ref[_] _ | ¢ᵍ _ | %ᵍ _ | %ᵘ _ | !ᵘ _ => Hgt₀
+  | ℕ | ref[_] _ | ▽ _ | ¢ᵍ _ | %ᵍ _ | %ᵘ _ | !ᵘ _ => Hgt₀
   | ¢ᵘ T => thgt T | ∀: _, T | ∃: _, T | recᵗ: _, T => Hgt₁ (thgt T)
   | T ∧ᵗ U | T →(_) U => Hgt₂ (thgt T) (thgt U)
   end.
