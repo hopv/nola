@@ -1,7 +1,6 @@
-(** * Strong interpretation of [nProp] *)
+(** * Strong interpretation of [nPropL] *)
 
 From nola.examples.logic Require Export intp.
-From nola.util Require Export wft.
 From iris.proofmode Require Export proofmode.
 
 (** ** [nintpsi]: [inpsi] for [nPropL] *)
@@ -29,9 +28,8 @@ Section nsintpy.
   Context `{!nintpGS Σ, !nsintpy Σ ih s}.
 
   (** [s] is monotone over the level *)
-  Lemma sintpy_mono_lev {i j P} : i ≤ j → ⸨ P ⸩(s, i) -∗ ⸨ P ⸩(s, j).
+  Lemma sintpy_mono_lev {i j P} : i ≤ j → ⸨ P ⸩(s, i) ⊢ ⸨ P ⸩(s, j).
   Proof.
-    move/Nat.lt_eq_cases=> [ij|<-]; [|by iIntros]. iIntros "Pi".
-    iApply sintpy_map_lev; by [|iIntros|iLeft].
+    move/Nat.lt_eq_cases=> [?|<-//]. iApply sintpy_map_lev; by [|iIntros].
   Qed.
 End nsintpy.
