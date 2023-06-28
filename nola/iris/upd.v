@@ -201,10 +201,16 @@ Section lemmas.
   Qed.
 
   (** Expand the world satisfaction of [fupdw] *)
-  Lemma fupdw_expand `{!BiFUpd PROP} {W W' E E' P} :
+  Lemma fupdw_expand_fupd `{!BiFUpd PROP} {W W' E E' P} :
     (W' ={E}=∗ W ∗ (W ={E'}=∗ W')) -∗ (|=[W]{E,E'}=> P) =[W']{E,E'}=∗ P.
   Proof.
     iIntros "W'W WP W'". iMod ("W'W" with "W'") as "[W WW']".
-    iMod ("WP" with "W") as "[W $]". iApply ("WW'" with "W").
+    iMod ("WP" with "W") as "[W $]". by iApply "WW'".
+  Qed.
+  Lemma fupdw_expand `{!BiFUpd PROP} {W W' E E' P} :
+    (W' -∗ W ∗ (W -∗ W')) -∗ (|=[W]{E,E'}=> P) =[W']{E,E'}=∗ P.
+  Proof.
+    iIntros "W'W WP W'". iDestruct ("W'W" with "W'") as "[W WW']".
+    iMod ("WP" with "W") as "[W $]". iApply "WW'". by iModIntro.
   Qed.
 End lemmas.
