@@ -23,7 +23,7 @@ Section verify.
 
   #[export] Instance vlisti_pers {s N N' φ ns l} :
     Persistent (vlisti s N N' φ ns l).
-  Proof. case ns; apply _. Qed.
+  Proof. case ns; exact _. Qed.
 
   Lemma vlist_vlisti {κ N N' φ ns l s} :
     ⟦ vlist N N' φ ns l ⟧{κ}(s) ⊣⊢ vlisti s N N' φ ns l.

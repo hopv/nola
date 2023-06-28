@@ -31,9 +31,9 @@ Section ninv.
     own ninv_name (gmap_view_frag i DfracDiscarded (P : leibnizO _)).
   #[export] Typeclasses Opaque ownNi.
   #[export] Instance ownNi_timeless {i P} : Timeless (ownNi i P).
-  Proof. unfold ownNi. apply _. Qed.
+  Proof. unfold ownNi. exact _. Qed.
   #[export] Instance ownNi_persistent {i P} : Persistent (ownNi i P).
-  Proof. unfold ownNi. apply _. Qed.
+  Proof. unfold ownNi. exact _. Qed.
 
   (** [ninv]: Invariant token *)
   Definition ninv_def (N : namespace) (P : PROP) : iProp Σ :=
@@ -42,9 +42,9 @@ Section ninv.
   Definition ninv := ninv_aux.(unseal).
   Lemma ninv_unseal : ninv = ninv_def. Proof. exact ninv_aux.(seal_eq). Qed.
   #[export] Instance ninv_timeless {N P} : Timeless (ninv N P).
-  Proof. rewrite ninv_unseal. apply _. Qed.
+  Proof. rewrite ninv_unseal. exact _. Qed.
   #[export] Instance ninv_persistent {N P} : Persistent (ninv N P).
-  Proof. rewrite ninv_unseal. apply _. Qed.
+  Proof. rewrite ninv_unseal. exact _. Qed.
 
   (** [ninv_wsat]: Invariant world satisfaction *)
   Definition authNi (Ps : gmap positive (leibnizO PROP)) :=

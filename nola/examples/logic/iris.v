@@ -60,7 +60,7 @@ Section iris.
   Definition nninv := nninv_aux.(unseal).
   Lemma nninv_unseal : nninv = nninv_def. Proof. exact nninv_aux.(seal_eq). Qed.
   #[export] Instance nninv_persistent {s i N P} : Persistent (nninv s i N P).
-  Proof. rewrite nninv_unseal. apply _. Qed.
+  Proof. rewrite nninv_unseal. exact _. Qed.
 
   (** [na_nninv]: [na_ninv] in the accessor style *)
   Definition na_nninv_def (s : nsintp_ty Σ) (i : nat)
@@ -74,5 +74,5 @@ Section iris.
   Proof. exact na_nninv_aux.(seal_eq). Qed.
   #[export] Instance na_nninv_persistent {s i p N P} :
     Persistent (na_nninv s i p N P).
-  Proof. rewrite na_nninv_unseal. apply _. Qed.
+  Proof. rewrite na_nninv_unseal. exact _. Qed.
 End iris.

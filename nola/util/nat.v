@@ -43,9 +43,9 @@ Proof. move: mn. unfold nlt. lia. Qed.
 #[export] Instance nlt_refl {n} : n <ⁿ S n | 3.
 Proof. unfold nlt. lia. Qed.
 #[export] Instance nle'_nle `{! m ≤ⁿ n} : nle' n m.
-Proof. simpl. apply _. Qed.
+Proof. simpl. exact _. Qed.
 #[export] Instance nlt'_nlt `{! m <ⁿ n} : nlt' n m.
-Proof. simpl. apply _. Qed.
+Proof. simpl. exact _. Qed.
 Lemma nlt_no0 `{n0 : ! n <ⁿ 0} {A} : A.
 Proof. move: n0. unfold nlt. lia. Qed.
 Lemma nle_unS {m n} : S m ≤ⁿ S n → m ≤ⁿ n.
