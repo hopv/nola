@@ -28,7 +28,7 @@ Section tintp.
       Γ.ᵞu = [] → Γ.ᵞg = [] → val → iProp Σ :=
     match T, H with
     | ℕ, _ => λ _ _ _ v, ∃ n : nat, ⌜v = # n⌝
-    | ref[o] T, _ => λ _ un gn v, ∃ l,
+    | ref[o] T, _ => λ _ un gn v, ∃ l : loc, ⌜v = # l⌝ ∗
         tref s (l +ₗ o) (rew eq_nil_ug_g un gn in T)
     | ▽ T, _ => λ _ un gn v, tguard s (rew eq_nil_ug_g un gn in T) v
     | T ∧ᵗ U, _ => λ IH un gn v,
@@ -36,7 +36,7 @@ Section tintp.
     | T →{ji}(j) U, _ => λ IH un gn v, □ ∀ u,
         tintp' T (H ‼ʰ 0) IH un gn u -∗
           WP[tinv_wsat' j (λ k kj, IH k (nlt_nle_trans kj ji))]
-            v u [{ w, tintp' U (H ‼ʰ 1) IH un gn w }]
+            v u [{ tintp' U (H ‼ʰ 1) IH un gn }]
     | ∀: _, T, _ => λ IH un gn v, ∀ V,
         tintp' (tsubst' T un gn V) (H ‼ʰ[tsubst'_thgt] 0) IH eq_refl eq_refl v
     | ∃: _, T, _ => λ IH un gn v, ∃ V,
