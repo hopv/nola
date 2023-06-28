@@ -90,6 +90,7 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
       [`iris`](nola/examples/type/iris.v) (Iris preliminaries),
       [`intp`](nola/examples/type/intp.v) (Interpretation),
       [`sintp`](nola/examples/type/sintp.v) (Strong interpretation)
+    - [`facts`](nola/examples/type/facts.v) (Facts)
 
 ## Story
 
