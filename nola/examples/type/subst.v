@@ -1,7 +1,7 @@
 (** * Substitution for [type] *)
 
 From nola.examples.type Require Export type.
-From nola Require Export hgt.
+From nola.util Require Export hgt.
 Import EqNotations.
 
 (** ** [tlift]: Turn [type i (;ᵞ)] into [type i Γ] *)

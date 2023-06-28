@@ -42,7 +42,7 @@ Lemma rew_eq_hwf {h h'} (eq : h' = h) : rew[hAcc] eq_sym eq in hwf = hwf.
 Proof. by subst. Qed.
 
 (** Assuming functional extensionality *)
-From nola Require Import util.funext.
+From nola.util Require Import funext.
 
 (** [hAcc h] is proof-irrelevant *)
 #[export] Instance hAcc_pi {h} : ProofIrrel (hAcc h).
