@@ -37,7 +37,7 @@ Notation nctx := (ctx npvar).
 
 (** [nparg]: Argument to [npvar], with [nkind] specified *)
 Variant nparg {κ : nkind} : npvar → Type :=
-| Nparg {A} : A → nparg (A →nP κ).
+| Nparg {A} (a : A) : nparg (A →nP κ).
 Arguments nparg κ V : clear implicits.
 Notation npargS := (nparg nS).
 Notation npargL := (nparg nL).

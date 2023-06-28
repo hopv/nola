@@ -9,8 +9,9 @@ From nola.examples.heap_lang Require Export primitive_laws.
 
 (** Data for invariant *)
 Variant nInvd : Type :=
-| (* usual *) nInvd_u : nPropS (;ᵞ) → nInvd
-| (* non-atomic *) nInvd_na : na_inv_pool_name → positive → nPropS (;ᵞ) → nInvd.
+| (* usual *) nInvd_u (P : nPropS (;ᵞ)) : nInvd
+| (* non-atomic *) nInvd_na
+    (p : na_inv_pool_name) (i : positive) (P : nPropS (;ᵞ)) : nInvd.
 
 (** [nintpGS]: Iris resource *)
 Class nintpGS (Σ : gFunctors) := NintpGS {
