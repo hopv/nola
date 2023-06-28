@@ -39,6 +39,14 @@ Infix "⊑{ i , j } ( s )" := (tsub s (i:=i) (j:=j))
 Notation "T ⊑( s ) U" := (tsub s T U)
   (at level 99, no associativity, format "T  ⊑( s )  U") : nola_scope.
 
+(** Type equivalence *)
+Definition teqv `{!tintpGS L Σ} s {i j} (T : type i (;ᵞ)) (U : type j (;ᵞ))
+  : Prop := ∀ v, ⟦ T ⟧(s) v ⊣⊢ ⟦ U ⟧(s) v.
+Infix "≃{ i , j } ( s )" := (teqv s (i:=i) (j:=j))
+  (at level 99, no associativity, only parsing) : nola_scope.
+Notation "T ≃( s ) U" := (teqv s T U)
+  (at level 99, no associativity, format "T  ≃( s )  U") : nola_scope.
+
 (** Typed object *)
 Definition tobj `{!tintpGS L Σ} {i} (v : val) (T : type i (;ᵞ)) : iProp Σ :=
   ⟦ T ⟧ v.
