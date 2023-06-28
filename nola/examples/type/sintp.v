@@ -55,7 +55,7 @@ Infix ":ᵒ" := tobj (at level 50, no associativity) : nola_scope.
 
 (** Typed expression *)
 Definition texpr `{!tintpGS L Σ} (i : nat) {j} (e : expr) (T : type j (;ᵞ))
-  : iProp Σ := WP[tinv_wsats i] e [{ ⟦ T ⟧ }].
+  : iProp Σ := □ WP[tinv_wsats i] e [{ ⟦ T ⟧ }].
 Infix ":ᵉ{ j } ( i )" := (texpr i (j:=j)) (at level 50, no associativity) :
   nola_scope.
 Notation "e :ᵉ( i ) T" := (texpr i e T)
