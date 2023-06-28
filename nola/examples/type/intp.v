@@ -27,9 +27,9 @@ Section tintp.
     : (∀ k, k <ⁿ i → type k (;ᵞ) → val → iProp Σ) →
       Γ.ᵞu = [] → Γ.ᵞg = [] → val → iProp Σ :=
     match T, H with
-    | t_nat, _ => λ _ _ _ v, ∃ n : nat, ⌜v = # n⌝
-    | t_ref o j T, _ => λ _ un gn v, ∃ l,
-        tinv s j (l +ₗ o) (rew eq_nil_ug_g un gn in T)
+    | ℕ, _ => λ _ _ _ v, ∃ n : nat, ⌜v = # n⌝
+    | ref[o] T, _ => λ _ un gn v, ∃ l,
+        tinv s (l +ₗ o) (rew eq_nil_ug_g un gn in T)
     | T ∧ᵗ U, _ => λ IH un gn v,
         tintp' T (H ‼ʰ 0) IH un gn v ∗ tintp' U (H ‼ʰ 1) IH un gn v
     | T →{ji}(j) U, _ => λ IH un gn v, □ ∀ u,

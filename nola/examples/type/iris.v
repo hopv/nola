@@ -146,5 +146,5 @@ Notation "⸨ Tx ⸩ ( s )" := (sunwrap s (Sarg () Tx))
   (format "'[' ⸨  Tx  ⸩ '/  ' ( s ) ']'") : nola_scope.
 
 (** [tinv]: [ninv] in the accessor style *)
-Definition tinv {Σ} (s : tsintp_ty Σ) (i : nat) (l : loc) (T : type i (;ᵞ))
+Definition tinv {Σ i} (s : tsintp_ty Σ) (l : loc) (T : type i (;ᵞ))
   : iProp Σ := □ ⸨ existT i (l, T)' ⸩(s).

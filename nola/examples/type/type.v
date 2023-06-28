@@ -7,7 +7,7 @@ Inductive type : nat → ctx nat → Type :=
 (** Natural-number type *)
 | t_nat {i Γ} : type i Γ
 (** Reference type with an offset [o] *)
-| t_ref {i Γᵘ Γᵍ} (o : Z) j (T : type j (;ᵞ Γᵘ ++ Γᵍ)) : type i (Γᵘ;ᵞ Γᵍ)
+| t_ref {i j Γᵘ Γᵍ} (o : Z) (T : type j (;ᵞ Γᵘ ++ Γᵍ)) : type i (Γᵘ;ᵞ Γᵍ)
 (** Intersection type *)
 | t_and {i Γ} (T U : type i Γ) : type i Γ
 (** Terminating function type *)
@@ -28,6 +28,11 @@ Inductive type : nat → ctx nat → Type :=
 (** Substituted [t_varu] *)
 | t_subu {i j Γ} `{ji : ! j <ⁿ i} (T : type j (;ᵞ)) : type i Γ.
 
+Notation ℕ := t_nat.
+Notation "ref[ o ] T" := (t_ref o T) (at level 20, right associativity)
+  : nola_scope.
+Notation "ref: T" := (t_ref 0 T) (at level 20, right associativity)
+  : nola_scope.
 Infix "∧ᵗ" := t_and (at level 80, right associativity) : nola_scope.
 Notation "T →( j ) U" := (t_fun j T U)
   (at level 90, right associativity, format "T  →( j )  U") : nola_scope.
@@ -59,7 +64,7 @@ Notation "!ᵘ{ ji } T" := (t_subu (ji:=ji) T)
 Reserved Notation "↑ˡ T" (at level 20, right associativity).
 Fixpoint tbump {i j Γ} (T : type i Γ) : i ≤ⁿ j → type j Γ :=
   match T with
-  | t_nat => λ _, t_nat | t_ref o j T => λ _, t_ref o j T
+  | ℕ => λ _, ℕ | ref[o] T => λ _, ref[o] T
   | T ∧ᵗ U => λ _, ↑ˡ T ∧ᵗ ↑ˡ U
   | T →(j) U => λ ij, let _ := nle_trans _ ij in ↑ˡ T →(j) ↑ˡ U
   | ∀: j, T => λ _, ∀: j, ↑ˡ T | ∃: j, T => λ _, ∃: j, ↑ˡ T
