@@ -15,9 +15,9 @@ Qed.
 Lemma eq_dec_refl `{!EqDecision A} {a : A} (eq : a = a) : eq = eq_refl.
 Proof. apply proof_irrel. Qed.
 
-(** ** Transitive closure *)
+(** ** On transitive closure *)
 
-Section tc_facts.
+Section tc.
   Context {A : Type}.
   Implicit Type R : A → A → Prop.
 
@@ -48,10 +48,10 @@ Section tc_facts.
     case/tc_tc' {a b}; [by left|]=>/= b c a Rcb /tc_tc'/= tcRac. right.
     by exists c.
   Qed.
-End tc_facts.
+End tc.
 
-(** ** Facts about well-founded relations *)
-Section wf_facts.
+(** ** On well-founded relations *)
+Section wf.
   (** Take any well-founded relation [R] *)
   Context {A : Type} {R : A → A → Prop} (wfR : wf R).
 
@@ -71,7 +71,7 @@ Section wf_facts.
     move=> a. elim: {a}(wfR a)=> a _ IH. apply Acc_intro=> b /tc_inv_r.
     case; [by apply IH|]=> [[c [tcRbc /IH Accc]]]. exact (Acc_inv Accc tcRbc).
   Qed.
-End wf_facts.
+End wf.
 
 (** Empty relation is well-founded *)
 Lemma false_wf {A} : wf (λ _ _ : A, False).

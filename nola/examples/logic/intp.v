@@ -203,8 +203,8 @@ Notation "⟦ P ⟧ˢ ( s )" := ⟦ P ⟧ˢ(s, hwf)
   (format "'[' ⟦  P  ⟧ˢ '/  ' ( s ) ']'") : nola_scope.
 Notation nintpS s P := ⟦ P ⟧ˢ(s) (only parsing).
 
-(** ** Facts on [⟦ ⟧] etc. *)
-Section nintp_facts.
+(** ** Lemmas on [⟦ ⟧] etc. *)
+Section nintp.
   Context (* Iris resources *) `{!nintpGS Σ}.
 
   (** [⟦ ⟧ᶠ] coincides with [⟦ ⟧] *)
@@ -240,7 +240,7 @@ Section nintp_facts.
   (** [⟦ ⟧ˢ] coincides with [⟦ ⟧] over [↑ˡ] *)
   Lemma nintpS_nintp_nlarge {s P} : ⟦ P ⟧ˢ(s) ⊣⊢ ⟦ ↑ˡ P ⟧(s).
   Proof. by rewrite nintpS_nintp nintp_nlarge. Qed.
-End nintp_facts.
+End nintp.
 
 (** Utility *)
 Notation nninv_wsat s := (ninv_wsat' (λ P, ⟦ P ⟧ˢ(s))).
