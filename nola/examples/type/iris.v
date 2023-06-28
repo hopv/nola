@@ -24,9 +24,9 @@ Fixpoint tinvGS' (L o : nat) Σ : Type :=
 Arguments tinvGS' : simpl never.
 Existing Class tinvGS'.
 Notation tinvGS L Σ := (tinvGS' L 0 Σ).
-#[export] Instance tinvGS'_S_ninvGS' {L o} `{tΣ : !tinvGS' (S L) o Σ}
+#[export] Instance tinvGS'_S_ninvGS' `{tΣ : !tinvGS' (S L) o Σ}
   : ninvGS (tinvd o) Σ := tΣ.1'.
-#[export] Instance tinvGS'_S_tinvGS' {L o} `{tΣ : !tinvGS' (S L) o Σ}
+#[export] Instance tinvGS'_S_tinvGS' `{tΣ : !tinvGS' (S L) o Σ}
   : tinvGS' L (S o) Σ := tΣ.2'.
 
 (** Get [ninvGS] out of [tinvGS] *)

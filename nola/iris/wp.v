@@ -349,7 +349,7 @@ Section wpw.
   Proof. move=> ?. by rewrite (bupdw_fupdw E) elim_modal_fupdw_twpw_nonval. Qed.
 
   (** Mask-changing [fupdw] on atomic [wpw] *)
-  Lemma wpw_atomic {e s E E' W Φ} `{!Atomic (stuckness_to_atomicity s) e} :
+  Lemma wpw_atomic `{!Atomic (stuckness_to_atomicity s) e} {E E' W Φ} :
     to_val e = None →
     (|=[W]{E,E'}=> WP[W] e @ s; E' {{ v, |=[W]{E',E}=> Φ v }}) ⊢
       WP[W] e @ s; E {{ Φ }}.
@@ -367,8 +367,8 @@ Section wpw.
     - iFrame "st". destruct (atomic _ _ _ _ _ step) as [? <-%of_to_val].
       rewrite !wp_value_fupd'. by iMod ("wp" with "W") as ">[$$]".
   Qed.
-  #[export] Instance elim_modal_fupdw_wpw_atomic {p e s E E' W P Φ}
-    `{!Atomic (stuckness_to_atomicity s) e} :
+  #[export] Instance elim_modal_fupdw_wpw_atomic
+    `{!Atomic (stuckness_to_atomicity s) e} {p E E' W P Φ} :
     ElimModal (to_val e = None) p false (|=[W]{E,E'}=> P) P
       (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E' {{ v, |=[W]{E',E}=> Φ v }})%I
     | 100.
@@ -378,7 +378,7 @@ Section wpw.
   Qed.
 
   (** Mask-changing [fupdw] on atomic [twpw] *)
-  Lemma twpw_atomic {e E E' W Φ} `{!Atomic (stuckness_to_atomicity s) e} :
+  Lemma twpw_atomic `{!Atomic (stuckness_to_atomicity s) e} {E E' W Φ} :
     to_val e = None →
     (|=[W]{E,E'}=> WP[W] e @ s; E' [{ v, |=[W]{E',E}=> Φ v }]) ⊢
       WP[W] e @ s; E [{ Φ }].

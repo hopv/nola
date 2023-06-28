@@ -11,14 +11,14 @@ Ltac funext :=
 (** ** On [subrelation] *)
 
 (** Make [(=)] a subrelation of [==>] *)
-#[export] Instance eq_subrel_respect {A B}
+#[export] Instance eq_subrel_respect
   `{subR : subrelation A R (=)} `{subR' : subrelation B (=) R'} :
   subrelation (=) (R ==> R')%signature.
 Proof. move=> f _ <- a _ /subR<-. by apply subR'. Qed.
 
 (** Make [pointwise_relation] a subrelation of [(=)],
   using functional extensionality *)
-#[export] Instance pointwise_subrel_eq {A B} `{subR : subrelation B R (=)} :
+#[export] Instance pointwise_subrel_eq `{subR : subrelation B R (=)} {A} :
   subrelation (pointwise_relation A R) (=).
 Proof. move=> f g Rfg. funext=> a. by apply subR. Qed.
 
