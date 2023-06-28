@@ -92,28 +92,18 @@ Section subeqv.
   Qed.
 
   (** On [∀:] *)
-  Lemma tsub_forall {s i i' j T U} :
-    (∀ V, T /: V ⊑{i,i'}(s) U /: V) → (∀: j, T) ⊑{i,i'}(s) (∀: j, U).
-  Proof.
-    move=> TU ? /=. do 2 f_equiv. rewrite !rew_eq_hwf. apply TU.
-  Qed.
-  Lemma teqv_forall {s i i' j T U} :
-    (∀ V, T /: V ≃{i,i'}(s) U /: V) → (∀: j, T) ≃{i,i'}(s) (∀: j, U).
-  Proof.
-    move=> TU ? /=. do 2 f_equiv. rewrite !rew_eq_hwf. apply TU.
-  Qed.
+  Lemma tsub_forall_elim {s i j T V} : (∀: j, T) ⊑{i,i}(s) T /: V.
+  Proof. move=> ? /=. setoid_rewrite rew_eq_hwf. by iIntros. Qed.
+  Lemma tsub_forall_intro {s i i' j T U} :
+    (∀ V, U ⊑{i,i'}(s) T /: V) → U ⊑{i,i'}(s) (∀: j, T).
+  Proof. iIntros (UT ?) "/= ? %". by rewrite rew_eq_hwf -UT. Qed.
 
   (** On [∃:] *)
-  Lemma tsub_exist {s i i' j T U} :
-    (∀ V, T /: V ⊑{i,i'}(s) U /: V) → (∃: j, T) ⊑{i,i'}(s) (∃: j, U).
-  Proof.
-    move=> TU ? /=. do 2 f_equiv. rewrite !rew_eq_hwf. apply TU.
-  Qed.
-  Lemma teqv_exist {s i i' j T U} :
-    (∀ V, T /: V ≃{i,i'}(s) U /: V) → (∃: j, T) ≃{i,i'}(s) (∃: j, U).
-  Proof.
-    move=> TU ? /=. do 2 f_equiv. rewrite !rew_eq_hwf. apply TU.
-  Qed.
+  Lemma tsub_exist_intro {s i j T V} : T /: V ⊑{i,i}(s) (∃: j, T).
+  Proof. iIntros (?) "/= ?". iExists _. by rewrite rew_eq_hwf. Qed.
+  Lemma tsub_exist_elim {s i i' j T U} :
+    (∀ V, T /: V ⊑{i,i'}(s) U) → (∃: j, T) ⊑{i,i'}(s) U.
+  Proof. iIntros (TU ?) "/= [% ?]". by rewrite rew_eq_hwf TU. Qed.
 
   (** On [recᵗ:] *)
   Lemma teqv_rec `{! j ≤ⁿ i} {s T} :
