@@ -63,28 +63,28 @@ Notation "!ᵘ T" := (t_subu T) (at level 20, right associativity) : nola_scope.
 Notation "!ᵘ{ ji } T" := (t_subu (ji:=ji) T)
   (at level 20, right associativity, only parsing) : nola_scope.
 
-(** ** [↑ˡ T]: Bump the level [i] of a type [T] *)
-Reserved Notation "↑ˡ T" (at level 20, right associativity).
+(** ** [↑ᵗ T]: Bump the level [i] of a type [T] *)
+Reserved Notation "↑ᵗ T" (at level 20, right associativity).
 Fixpoint tbump {i j Γ} (T : type i Γ) : i ≤ⁿ j → type j Γ :=
   match T with
   | ℕ => λ _, ℕ | ref[o] T => λ _, ref[o] T | ▽ T => λ _, ▽ T
-  | T ∧ᵗ U => λ _, ↑ˡ T ∧ᵗ ↑ˡ U
-  | T →(j) U => λ ij, let _ := nle_trans _ ij in ↑ˡ T →(j) ↑ˡ U
-  | ∀: j, T => λ _, ∀: j, ↑ˡ T | ∃: j, T => λ _, ∃: j, ↑ˡ T
+  | T ∧ᵗ U => λ _, ↑ᵗ T ∧ᵗ ↑ᵗ U
+  | T →(j) U => λ ij, let _ := nle_trans _ ij in ↑ᵗ T →(j) ↑ᵗ U
+  | ∀: j, T => λ _, ∀: j, ↑ᵗ T | ∃: j, T => λ _, ∃: j, ↑ᵗ T
   | recᵗ: j, T => λ ij, recᵗ:{nle_trans _ ij} j, T
-  | ¢ᵘ T => λ _, ¢ᵘ ↑ˡ T | ¢ᵍ T => λ _, ¢ᵍ ↑ˡ T
+  | ¢ᵘ T => λ _, ¢ᵘ ↑ᵗ T | ¢ᵍ T => λ _, ¢ᵍ ↑ᵗ T
   | %ᵍ s => λ ij, %ᵍ (strans (λ _ ki, nle_trans ki ij) s)
   | %ᵘ s => λ ij, %ᵘ (strans (λ _ ki, nlt_nle_trans ki ij) s)
   | !ᵘ T => λ ij, !ᵘ{nlt_nle_trans _ ij} T
   end
-where "↑ˡ T" := (tbump T _) (format "↑ˡ  T") : nola_scope.
+where "↑ᵗ T" := (tbump T _) (format "↑ᵗ  T") : nola_scope.
 
-Notation "↑ˡ{ ij } T" := (tbump T ij)
+Notation "↑ᵗ{ ij } T" := (tbump T ij)
   (at level 20, right associativity, only parsing) : nola_scope.
 
-(** [↑ˡ] is idempotent *)
+(** [↑ᵗ] is idempotent *)
 Lemma tbump_tbump `{ij : ! i ≤ⁿ j, jk : ! j ≤ⁿ k, ik : ! i ≤ⁿ k}
-  {Γ} {T : type i Γ} : ↑ˡ{jk} ↑ˡ{ij} T = ↑ˡ{ik} T.
+  {Γ} {T : type i Γ} : ↑ᵗ{jk} ↑ᵗ{ij} T = ↑ᵗ{ik} T.
 Proof.
   move: i j k Γ T ij jk ik. fix FIX 5=> i j k Γ.
   case=>//=; intros; f_equal; try apply FIX;

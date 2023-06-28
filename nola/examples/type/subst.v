@@ -10,27 +10,27 @@ Import EqNotations.
 Fixpoint tliftg {i Γᵍ} (T : type i (;ᵞ)) : type i (;ᵞ Γᵍ) :=
   match Γᵍ with [] => T | _ :: _ => ¢ᵍ (tliftg T) end.
 
-(** [tliftg] commutes with [↑ˡ] *)
+(** [tliftg] commutes with [↑ᵗ] *)
 Lemma tliftg_tbump `{ij : ! i ≤ⁿ j} {Γᵍ T} :
-  tliftg (↑ˡ T) = ↑ˡ{ij} (tliftg (Γᵍ:=Γᵍ) T).
+  tliftg (↑ᵗ T) = ↑ᵗ{ij} (tliftg (Γᵍ:=Γᵍ) T).
 Proof. by elim Γᵍ; [done|]=>/= ??->. Qed.
 
 (** [tliftu]: Turn [type i (;ᵞ Γᵍ)] into [type i (Γᵘ;ᵞ Γᵍ)] *)
 Fixpoint tliftu {i Γᵘ Γᵍ} (T : type i (;ᵞ Γᵍ)) : type i (Γᵘ;ᵞ Γᵍ) :=
   match Γᵘ with [] => T | _ :: _ => ¢ᵘ (tliftu T) end.
 
-(** [tliftu] commutes with [↑ˡ] *)
+(** [tliftu] commutes with [↑ᵗ] *)
 Lemma tliftu_tbump `{ij : ! i ≤ⁿ j}  {Γᵘ Γᵍ T}:
-  tliftu (↑ˡ T) = ↑ˡ{ij} (tliftu (Γᵘ:=Γᵘ) (Γᵍ:=Γᵍ) T).
+  tliftu (↑ᵗ T) = ↑ᵗ{ij} (tliftu (Γᵘ:=Γᵘ) (Γᵍ:=Γᵍ) T).
 Proof. by elim Γᵘ; [done|]=>/= ??->. Qed.
 
 (** [tlift]: Turn [type i (;ᵞ)] into [type i Γᵘ] *)
 Definition tlift {i Γ} (T : type i (;ᵞ)) : type i Γ := tliftu (tliftg T).
 Arguments tlift {i Γ} T /.
 
-(** [tlift] commutes with [↑ˡ] *)
+(** [tlift] commutes with [↑ᵗ] *)
 Lemma tlift_tbump `{ij : ! i ≤ⁿ j} {Γ T} :
-  tlift (↑ˡ T) = ↑ˡ{ij} (tlift (Γ:=Γ) T).
+  tlift (↑ᵗ T) = ↑ᵗ{ij} (tlift (Γ:=Γ) T).
 Proof. by rewrite/= tliftg_tbump tliftu_tbump. Qed.
 
 (** ** [T /: U]: Substitute [U] for [T]'s only unguarded variable *)
@@ -53,7 +53,7 @@ Fixpoint tsubstlg {i Γ Γᵍ k} (V : type k (;ᵞ)) (T : type i Γ)
     | [] => match Δᵍ, T with [], _ => λ _, T
       | _::_, _ => λ eq : _::_ = _, match eq with end end end
   | %ᵍ s => λ eq, match sunapp (rew eq in s) with
-      inl s => %ᵍ s | inr s => tlift (↑ˡ{sunsingl s} V) end
+      inl s => %ᵍ s | inr s => tlift (↑ᵗ{sunsingl s} V) end
   | %ᵘ s => λ _, %ᵘ s | !ᵘ T => λ _, !ᵘ T
   end.
 
@@ -68,9 +68,9 @@ Fact tsubstg_t_constg {i k} {T : type i (;ᵞ)} {V : type k (;ᵞ)} :
   ¢ᵍ T /:ᵍ V = T.
 Proof. done. Qed.
 
-(** [tsubstlg] commutes with [↑ˡ] *)
+(** [tsubstlg] commutes with [↑ᵗ] *)
 Lemma tsubstlg_tbump `{ij : ! i ≤ⁿ j} {k V Γ Γᵍ T eq} :
-  tsubstlg V (↑ˡ T) eq = ↑ˡ{ij} (@tsubstlg i Γ Γᵍ k V T eq).
+  tsubstlg V (↑ᵗ T) eq = ↑ᵗ{ij} (@tsubstlg i Γ Γᵍ k V T eq).
 Proof.
   move: i j Γ Γᵍ T ij eq. fix FIX 5=> i j Γ Γᵍ.
   case=>//=; intros; try (f_equal; apply (FIX _ _ (_;ᵞ_))).
@@ -105,9 +105,9 @@ Fixpoint tsubstlu {i Γ Γᵘ k} (V : type k (;ᵞ)) (T : type i Γ)
   | !ᵘ T => λ _ _, !ᵘ T
   end.
 
-(** [tsubstlu] commutes with [↑ˡ] *)
+(** [tsubstlu] commutes with [↑ᵗ] *)
 Lemma tsubstlu_tbump `{ij : ! i ≤ⁿ j} {k V Γ Γᵘ T eq gn} :
-  tsubstlu V (↑ˡ T) eq gn = ↑ˡ{ij} (@tsubstlu i Γ Γᵘ k V T eq gn).
+  tsubstlu V (↑ᵗ T) eq gn = ↑ᵗ{ij} (@tsubstlu i Γ Γᵘ k V T eq gn).
 Proof.
   move: i j Γ Γᵘ T ij eq gn. fix FIX 5=> i j Γ Γᵘ.
   case=>//=; intros; f_equal; try apply FIX; try apply FIX; try (by case: s gn);
@@ -126,9 +126,9 @@ Infix "/:" := tsubst (at level 25, no associativity).
 Fact tsubst_n_constu {i k} {V : type k (;ᵞ)} {T : type i (;ᵞ)} : ¢ᵘ T /: V = T.
 Proof. done. Qed.
 
-(** [/:] commutes with [↑ˡ] *)
+(** [/:] commutes with [↑ᵗ] *)
 Lemma tsubst_tbump `{ij : ! i ≤ⁿ j} {k V} {T : type i ([k];ᵞ )} :
-  ↑ˡ T /: V = ↑ˡ{ij} (T /: V).
+  ↑ᵗ T /: V = ↑ᵗ{ij} (T /: V).
 Proof. exact tsubstlu_tbump. Qed.
 
 (** ** [thgt T]: Height of [T] *)
@@ -154,8 +154,8 @@ Qed.
 Lemma tsubst_thgt {i k} {T : type i ([k];ᵞ )} {V} : thgt (T /: V) = thgt T.
 Proof. exact tsubstlu_thgt. Qed.
 
-(** [↑ˡ] preserves [thgt] *)
-Lemma tbump_thgt `{ij : ! i ≤ⁿ j} {Γ} {T : type i Γ} : thgt (↑ˡ{ij} T) = thgt T.
+(** [↑ᵗ] preserves [thgt] *)
+Lemma tbump_thgt `{ij : ! i ≤ⁿ j} {Γ} {T : type i Γ} : thgt (↑ᵗ{ij} T) = thgt T.
 Proof.
   move: i Γ T ij. fix FIX 3=> i Γ T. case T=>//= >; f_equal; apply FIX.
 Qed.

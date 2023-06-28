@@ -42,7 +42,7 @@ Section tintp.
     | ∃: _, T, _ => λ IH un gn v, ∃ V,
         tintp' (tsubst' T un gn V) (H ‼ʰ[tsubst'_thgt] 0) IH eq_refl eq_refl v
     | recᵗ: j, T, _ => λ IH un gn, tintp'
-        (↑ˡ (tsubst' T un gn (rew ctxeq_ug un gn in recᵗ: j, T)))
+        (↑ᵗ tsubst' T un gn (rew ctxeq_ug un gn in recᵗ: j, T))
         (H ‼ʰ[eq_trans tbump_thgt tsubst'_thgt] 0) IH eq_refl eq_refl
     | ¢ᵘ _, _ => λ _ (un : _::_ = _), match un with end
     | ¢ᵍ _, _ => λ _ _ (gn : _::_ = _), match gn with end
