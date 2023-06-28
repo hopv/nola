@@ -160,8 +160,8 @@ Section tintp.
     tinv_wsat s M -∗ tninv_wsat s i ∗ (tninv_wsat s i -∗ tinv_wsat s M).
   Proof. iIntros "tw". iApply (tinv_wsat'_ninv_wsat with "tw"). Qed.
 
-  (** Expansion between [tinv_wsat] *)
-  Lemma tinv_wsat_expand `{! M ≤ⁿ M'} {s} :
+  (** Inclusion between [tinv_wsat]s *)
+  Lemma tinv_wsat_incl `{! M ≤ⁿ M'} {s} :
     tinv_wsat s M' -∗ tinv_wsat s M ∗ (tinv_wsat s M -∗ tinv_wsat s M').
-  Proof. by apply tinv_wsat'_expand. Qed.
+  Proof. by apply tinv_wsat'_incl. Qed.
 End tintp.

@@ -125,8 +125,8 @@ Section tinv_wsat'.
     rewrite ninv_wsat_rew /=. iFrame.
   Qed.
 
-  (** Expansion between [tinv_wsat']s *)
-  Lemma tinv_wsat''_expand {L M M' o tΣ intp intp'} :
+  (** Inclusion between [tinv_wsat']s *)
+  Lemma tinv_wsat''_incl {L M M' o tΣ intp intp'} :
     (∀ i iM iM', intp i iM ≡ intp' i iM') → M ≤ M' →
     tinv_wsat'' L M' o tΣ intp' -∗ tinv_wsat'' L M o tΣ intp ∗
       (tinv_wsat'' L M o tΣ intp -∗ tinv_wsat'' L M' o tΣ intp').
@@ -140,11 +140,11 @@ Section tinv_wsat'.
     iFrame. iIntros "[nw ?]". iSplitL "nw"; [|by iApply "cl"]. iStopProof.
     apply bi.equiv_entails. do 2 f_equiv=> >. symmetry. apply eq.
   Qed.
-  Lemma tinv_wsat'_expand `{!tinvGS L Σ, ! M ≤ⁿ M'} {intp intp'} :
+  Lemma tinv_wsat'_incl `{!tinvGS L Σ, ! M ≤ⁿ M'} {intp intp'} :
     (∀ i iM iM', intp i iM ≡ intp' i iM') →
     tinv_wsat' M' intp' -∗ tinv_wsat' M intp ∗
       (tinv_wsat' M intp -∗ tinv_wsat' M' intp').
-  Proof. move=> eq. iApply tinv_wsat''_expand; [|done]=> >. apply eq. Qed.
+  Proof. move=> eq. iApply tinv_wsat''_incl; [|done]=> >. apply eq. Qed.
 End tinv_wsat'.
 Arguments tinv_wsat'' : simpl never.
 
