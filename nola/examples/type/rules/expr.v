@@ -15,11 +15,11 @@ Section expr.
 
   (** [:ᵒ] is persistent *)
   #[export] Instance tobj_persistent {v i T} : Persistent (v :ᵒ{i} T).
-  Proof. exact _. Qed.
+  Proof. rewrite tobj_unseal. exact _. Qed.
 
   (** Modify [:ᵒ] with [⊑] *)
   Lemma tobj_tsub {v i T U} : T ⊑(tsintp) U → v :ᵒ{i} T ⊢ v :ᵒ{i} U.
-  Proof. move=> TU. apply TU. Qed.
+  Proof. move=> TU. rewrite tobj_unseal. apply TU. Qed.
 
   (** Modify [:ᵉ] with [==>] *)
   Lemma texpr_ttrans {e i j T k U} :
@@ -30,7 +30,7 @@ Section expr.
   Lemma texpr_tobj_ttrans {v e i j T k U l V} : T ==>{j,k}(i,tsintp) U →
     v :ᵒ T -∗ (v :ᵒ U -∗ e :ᵉ{l}(i) V) -∗ e :ᵉ(i) V.
   Proof.
-    iIntros (TU) "T Ue". iApply fupdw_twpw_fupdw.
+    iIntros (TU) "T Ue". iApply fupdw_twpw_fupdw. rewrite tobj_unseal.
     iMod (TU with "T") as "U"; [done|]. iApply twpw_fupdw_fupdw.
     iApply ("Ue" with "U").
   Qed.
@@ -45,11 +45,11 @@ Section expr.
 
   (** Introduce [:ᵒ ⊤ᵗ] *)
   Lemma tobj_any {v} : ⊢ v :ᵒ{0} ⊤ᵗ.
-  Proof. done. Qed.
+  Proof. by rewrite tobj_unseal. Qed.
 
   (** Value *)
   Lemma texpr_val {v i j T} : v :ᵒ T ⊢ v :ᵉ{j}(i) T.
-  Proof. iIntros "?". by iApply twp_value. Qed.
+  Proof. iIntros "?". rewrite tobj_unseal. by iApply twp_value. Qed.
 
   (** Let binding *)
   Lemma texpr_let {x e e' i j T k U} :
@@ -57,7 +57,7 @@ Section expr.
     (let: x := e in e') :ᵉ(i) U.
   Proof.
     iIntros "? e'". unfold texpr. wp_bind e. iApply (twp_wand with "[$]").
-    iIntros (?) ">?". wp_pures. by iApply "e'".
+    iIntros (?) ">?". wp_pures. rewrite tobj_unseal. by iApply "e'".
   Qed.
 
   (** Thread forking *)
@@ -106,7 +106,7 @@ Section expr.
   Proof.
     iIntros "#e". unfold texpr. wp_pure. do 2 iModIntro=>/=. iIntros "!> % ?".
     rewrite twpw_tinv_wsat_lt_tinv_wsat. iApply twpw_fupdw_nonval; [done|].
-    wp_pure. by iApply "e".
+    wp_pure. rewrite tobj_unseal. by iApply "e".
   Qed.
   Lemma texpr_fun_call `{! i ≤ⁿ j, ! i ≤ⁿ k} {e e' T U} :
     e :ᵉ{k}(j) T →(i) U -∗  e' :ᵉ(j) T -∗  e e' :ᵉ(j) U.

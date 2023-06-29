@@ -71,8 +71,11 @@ Notation "T <==>( i , s ) U" := (tbitrans s i T U)
   (at level 99, no associativity, format "T  <==>( i , s )  U") : nola_scope.
 
 (** Typed object *)
-Definition tobj `{!tintpGS L Σ} {i} (v : val) (T : type i (;ᵞ)) : iProp Σ :=
+Definition tobj_def `{!tintpGS L Σ} {i} (v : val) (T : type i (;ᵞ)) : iProp Σ :=
   ⟦ T ⟧ v.
+Definition tobj_aux : seal (@tobj_def). Proof. by eexists. Qed.
+Definition tobj `{!tintpGS L Σ} {i} := tobj_aux.(unseal) L Σ _ i.
+Lemma tobj_unseal : @tobj = @tobj_def. Proof. exact tobj_aux.(seal_eq). Qed.
 Infix ":ᵒ{ i }" := (tobj (i:=i)) (at level 70, no associativity) : nola_scope.
 Infix ":ᵒ" := tobj (at level 70, no associativity) : nola_scope.
 
