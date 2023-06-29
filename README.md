@@ -100,6 +100,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
         [`expr`](nola/examples/type/rules/expr.v) (Expression typing),
         [`ref`](nola/examples/type/rules/ref.v) (Expression typing for
           references)
+    * [`verify/`](nola/examples/type/verify/) (Verification examples)
+      - [`strm`](nola/examples/type/verify/strm.v) (Shared mutable stream)
 
 ## Story
 

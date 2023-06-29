@@ -54,3 +54,4 @@ nola/examples/type/adequacy.v
 nola/examples/type/rules/conv.v
 nola/examples/type/rules/expr.v
 nola/examples/type/rules/ref.v
+nola/examples/type/verify/strm.v
