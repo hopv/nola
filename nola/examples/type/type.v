@@ -51,13 +51,13 @@ Notation "𝟙" := (t_0 ⟨𝟙⟩) : nola_scope.
 Notation "⟨⊤ᵗ⟩" := tc_any : nola_scope.
 Notation "⊤ᵗ" :=  (t_0 ⟨⊤ᵗ⟩) : nola_scope.
 Notation "⟨∧ᵗ⟩" := tc_and : nola_scope.
-Infix "∧ᵗ" := (t_2 ⟨∧ᵗ⟩) (at level 80, right associativity) : nola_scope.
+Infix "∧ᵗ" := (t_2 ⟨∧ᵗ⟩) (at level 55, right associativity) : nola_scope.
 Notation "⟨×⟩" := tc_pair : nola_scope.
 Infix "×" := (t_2 ⟨×⟩) (at level 50, left associativity) : nola_scope.
 Notation "T →( j ) U" := (t_fun j T U)
-  (at level 90, right associativity, format "T  →( j )  U") : nola_scope.
+  (at level 55, right associativity, format "T  →( j )  U") : nola_scope.
 Notation "T →{ ji } ( j ) U" := (t_fun j (ji:=ji) T U)
-  (at level 90, right associativity, only parsing) : nola_scope.
+  (at level 55, right associativity, only parsing) : nola_scope.
 Notation "▽{ j , Γᵘ } T" := (t_guard (j:=j) (Γᵘ:=Γᵘ) T)
   (at level 20, right associativity, only parsing) : nola_scope.
 Notation "▽ T" := (t_guard T) (at level 20, right associativity) : nola_scope.

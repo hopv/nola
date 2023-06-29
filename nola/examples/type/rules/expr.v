@@ -4,7 +4,7 @@ From nola.examples.type Require Export sintp.
 From nola.examples.heap_lang Require Export proofmode.
 
 (** Function Iteration *)
-Definition iter : val := λ: "f",
+Definition fiter : val := λ: "f",
   rec: "self" "ix" :=
     let: "i" := Fst "ix" in let: "x" := Snd "ix" in
     if: "i" = # 0 then "x" else
@@ -102,14 +102,14 @@ Section expr.
 
   (** Function *)
   Lemma texpr_fun_intro `{! i ≤ⁿ j} {x e k T U} :
-    □ (∀ v, v :ᵒ T -∗ subst x v e :ᵉ(i) U) -∗ (λ: x, e) :ᵉ{j}(k) (T →(i) U).
+    □ (∀ v, v :ᵒ T -∗ subst x v e :ᵉ(i) U) -∗  (λ: x, e) :ᵉ{j}(k) T →(i) U.
   Proof.
     iIntros "#e". unfold texpr. wp_pure. do 2 iModIntro=>/=. iIntros "!> % ?".
     rewrite twpw_tinv_wsat_lt_tinv_wsat. iApply twpw_fupdw_nonval; [done|].
     wp_pure. by iApply "e".
   Qed.
   Lemma texpr_fun_call `{! i ≤ⁿ j, ! i ≤ⁿ k} {e e' T U} :
-    e :ᵉ{k}(j) (T →(i) U) -∗ e' :ᵉ(j) T -∗ e e' :ᵉ(j) U.
+    e :ᵉ{k}(j) T →(i) U -∗  e' :ᵉ(j) T -∗  e e' :ᵉ(j) U.
   Proof.
     iIntros "??". unfold texpr. wp_bind e'. iApply (twp_wand with "[$]").
     iIntros (?) ">?". wp_bind e. iApply (twp_wand with "[$]").
@@ -118,9 +118,9 @@ Section expr.
     iApply twpw_expand; [iApply (tinv_wsat_incl (M':=j))|]. by iApply "hor".
   Qed.
 
-  (** On [iter] *)
-  Lemma texpr_fun_iter `{! i ≤ⁿ j} {k e T} :
-    e :ᵉ{j}(k) (T →(i) T) -∗ iter e :ᵉ(k) (ℕ × T →(i) T).
+  (** On [fiter] *)
+  Lemma texpr_fun_fiter `{! i ≤ⁿ j} {k e T} :
+    e :ᵉ{j}(k) T →(i) T -∗  fiter e :ᵉ(k) ℕ × T →(i) T.
   Proof.
     iIntros "?". unfold texpr. wp_bind e. iApply (twp_wand with "[$]").
     iIntros (f) "/= >#f". wp_lam. wp_pures. do 3 iModIntro.
