@@ -71,6 +71,46 @@ Next Obligation.
   iIntros "* ($&$& H)". iApply (steps_auth_update_S with "H").
 Qed.
 
+(** ** Helper instances
+  TODO: Can we remove these? *)
+
+Section instances.
+  Context `{!heapGS_gen hlc Σ}.
+  Let iris := heapGS_irisGS'.
+
+  #[export] Instance elim_modal_fupdw_wpw_nonval {p e s E W P Φ} :
+    ElimModal (to_val e = None) p false (|=[W]{E}=> P) P
+      (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E {{ Φ }}).
+  Proof. apply (elim_modal_fupdw_wpw_nonval (irisGS'_gen0:=iris)). Qed.
+  #[export] Instance elim_modal_bupdw_wpw_nonval {p e s E W P Φ} :
+    ElimModal (to_val e = None) p false (|=[W]=> P) P
+      (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E {{ Φ }}).
+  Proof. apply (elim_modal_bupdw_wpw_nonval (irisGS'_gen0:=iris)). Qed.
+
+  #[export] Instance elim_modal_fupdw_twpw_nonval {p e s E W P Φ} :
+    ElimModal (to_val e = None) p false (|=[W]{E}=> P) P
+      (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E [{ Φ }]).
+  Proof. apply (elim_modal_fupdw_twpw_nonval (irisGS'_gen0:=iris)). Qed.
+  #[export] Instance elim_modal_bupdw_twpw_nonval {p e s E W P Φ} :
+    ElimModal (to_val e = None) p false (|=[W]=> P) P
+      (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E [{ Φ }]).
+  Proof. apply (elim_modal_bupdw_twpw_nonval (irisGS'_gen0:=iris)). Qed.
+
+  #[export] Instance elim_modal_fupdw_wpw_atomic {p e s E E' W P Φ}
+    `{!Atomic (stuckness_to_atomicity s) e} :
+    ElimModal (to_val e = None) p false (|=[W]{E,E'}=> P) P
+      (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E' {{ v, |=[W]{E',E}=> Φ v }})%I
+    | 100.
+  Proof. apply (elim_modal_fupdw_wpw_atomic (irisGS'_gen0:=iris)). Qed.
+
+  #[export] Instance elim_modal_fupdw_twpw_atomic {p e s E E' W P Φ}
+    `{!Atomic (stuckness_to_atomicity s) e} :
+    ElimModal (to_val e = None) p false (|=[W]{E,E'}=> P) P
+      (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E' [{ v, |=[W]{E',E}=> Φ v }])%I
+    | 100.
+  Proof. apply (elim_modal_fupdw_twpw_atomic (irisGS'_gen0:=iris)). Qed.
+End instances.
+
 (** Since we use an [option val] instance of [gen_heap], we need to overwrite
 the notations.  That also helps for scopes and coercions. *)
 Notation "l ↦ dq v" := (mapsto (L:=loc) (V:=option val) l dq (Some v%V))
