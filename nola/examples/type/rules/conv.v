@@ -54,6 +54,40 @@ Section conv.
   Lemma teqv_tbump `{! i ≤ⁿ j} {s T} : ↑ᵗ T ≃{j,i}(s) T.
   Proof. move=> ?. exact tintp_tbump. Qed.
 
+  (** On [∧ᵗ] *)
+  Lemma tsub_and_elim_l {s i T U} : T ∧ᵗ U ⊑{i,_}(s) T.
+  Proof. iIntros (?) "/=[$ _]". Qed.
+  Lemma tsub_and_elim_r {s i T U} : T ∧ᵗ U ⊑{i,_}(s) U.
+  Proof. iIntros (?) "/=[_ $]". Qed.
+  Lemma tsub_and_intro {s j V i T U} : V ⊑{j,i}(s) T → V ⊑(s) U → V ⊑(s) T ∧ᵗ U.
+  Proof.
+    iIntros (VT VU ?) "#V /=".
+    iDestruct (VT with "V") as "$". iDestruct (VU with "V") as "$".
+  Qed.
+  Lemma ttrans_and {s i j T U k T' U'} :
+    T ==>(i,s) T' →  U ==>(i,s) U' → T ∧ᵗ U ==>{j,k}(i,s) T' ∧ᵗ U'.
+  Proof.
+    iIntros (TT' UU' ???) "/=[T U]".
+    iMod (TT' with "T") as "$"; [done|]. by iMod (UU' with "U") as "$".
+  Qed.
+
+  (** On [→( )] *)
+  Lemma tsub_fun `{! j ≤ⁿ i, ! j' ≤ⁿ i', ! j ≤ⁿ j'} {s T U T' U'} :
+    T' ==>(j',s) T →  U ==>(j',s) U' →  T →(j) U ⊑{i,i'}(s) T' →(j') U'.
+  Proof.
+    move=> T'T UU' ? /=. do 3 f_equiv. iIntros "hor T'".
+    rewrite !twpw_tinv_wsat_lt_tinv_wsat. iMod (T'T with "T'") as "T"; [done|].
+    iDestruct ("hor" with "T") as "wp".
+    iDestruct (twpw_expand with "[] wp") as "?"; [iApply tinv_wsat_incl|].
+    iApply twpw_fupdw_nonval; [done|]. iStopProof. do 2 f_equiv. by iApply UU'.
+  Qed.
+  Lemma teqv_fun `{! j ≤ⁿ i, ! j ≤ⁿ i'} {s T U T' U'} :
+    T <==>(j,s) T' →  U <==>(j,s) U' →  T →(j) U ≃{i,i'}(s) T' →(j) U'.
+  Proof.
+    move=> TT' UU'.
+    apply teqv_tsub; split; apply tsub_fun=> *; try apply TT'; apply UU'.
+  Qed.
+
   (** On [ref[ ]] *)
   Lemma tsub_ref `{!tsintpy Σ ih s, ! j ≤ⁿ j'} {o i i' T U} :
     (∀ `{!tsintpy Σ ih s'}, ih s' → T <==>(S j',s') U) →
@@ -118,40 +152,6 @@ Section conv.
     ▽{j,nil} T ≃{i,i'}(s) ▽{j,nil} U.
   Proof.
     move=> TU. apply teqv_tsub; split; apply tsub_guard=> *; by apply TU.
-  Qed.
-
-  (** On [∧ᵗ] *)
-  Lemma tsub_and_elim_l {s i T U} : T ∧ᵗ U ⊑{i,_}(s) T.
-  Proof. iIntros (?) "/=[$ _]". Qed.
-  Lemma tsub_and_elim_r {s i T U} : T ∧ᵗ U ⊑{i,_}(s) U.
-  Proof. iIntros (?) "/=[_ $]". Qed.
-  Lemma tsub_and_intro {s j V i T U} : V ⊑{j,i}(s) T → V ⊑(s) U → V ⊑(s) T ∧ᵗ U.
-  Proof.
-    iIntros (VT VU ?) "#V /=".
-    iDestruct (VT with "V") as "$". iDestruct (VU with "V") as "$".
-  Qed.
-  Lemma ttrans_and {s i j T U k T' U'} :
-    T ==>(i,s) T' →  U ==>(i,s) U' → T ∧ᵗ U ==>{j,k}(i,s) T' ∧ᵗ U'.
-  Proof.
-    iIntros (TT' UU' ???) "/=[T U]".
-    iMod (TT' with "T") as "$"; [done|]. by iMod (UU' with "U") as "$".
-  Qed.
-
-  (** On [→( )] *)
-  Lemma tsub_fun `{! j ≤ⁿ i, ! j' ≤ⁿ i', ! j ≤ⁿ j'} {s T U T' U'} :
-    T' ==>(j',s) T →  U ==>(j',s) U' →  T →(j) U ⊑{i,i'}(s) T' →(j') U'.
-  Proof.
-    move=> T'T UU' ? /=. do 3 f_equiv. iIntros "hor T'".
-    rewrite !twpw_tinv_wsat_lt_tinv_wsat. iMod (T'T with "T'") as "T"; [done|].
-    iDestruct ("hor" with "T") as "wp".
-    iDestruct (twpw_expand with "[] wp") as "?"; [iApply tinv_wsat_incl|].
-    iApply twpw_fupdw_nonval; [done|]. iStopProof. do 2 f_equiv. by iApply UU'.
-  Qed.
-  Lemma teqv_fun `{! j ≤ⁿ i, ! j ≤ⁿ i'} {s T U T' U'} :
-    T <==>(j,s) T' →  U <==>(j,s) U' →  T →(j) U ≃{i,i'}(s) T' →(j) U'.
-  Proof.
-    move=> TT' UU'.
-    apply teqv_tsub; split; apply tsub_fun=> *; try apply TT'; apply UU'.
   Qed.
 
   (** On [∀:] *)

@@ -39,11 +39,10 @@ Proof. by rewrite/= tliftg_tbump tliftu_tbump. Qed.
 Fixpoint tsubstlg {i Γ Γᵍ k} (V : type k (;ᵞ)) (T : type i Γ)
   : Γ.ᵞg = Γᵍ ++ [k] → type i (Γ.ᵞu;ᵞ Γᵍ) :=
   match T with
-  | ℕ => λ _, ℕ
+  | ℕ => λ _, ℕ | T ∧ᵗ U => λ eq, tsubstlg V T eq ∧ᵗ tsubstlg V U eq
+  | T →(j) U => λ eq, tsubstlg V T eq →(j) tsubstlg V U eq
   | ref[o] T => λ eq, ref[o] tsubstlg V T (eq_app_assoc_d eq)
   | ▽ T => λ eq, ▽ tsubstlg V T (eq_app_assoc_d eq)
-  | T ∧ᵗ U => λ eq, tsubstlg V T eq ∧ᵗ tsubstlg V U eq
-  | T →(j) U => λ eq, tsubstlg V T eq →(j) tsubstlg V U eq
   | ∀: j, T => λ eq, ∀: j, tsubstlg V T eq
   | ∃: j, T => λ eq, ∃: j, tsubstlg V T eq
   | recᵗ: j, T => λ eq, recᵗ: j, tsubstlg V T eq
@@ -84,13 +83,12 @@ Qed.
 Fixpoint tsubstlu {i Γ Γᵘ k} (V : type k (;ᵞ)) (T : type i Γ)
   : Γ.ᵞu = Γᵘ ++ [k] → Γ.ᵞg = [] → type i (Γᵘ;ᵞ ) :=
   match T with
-  | ℕ => λ _ _, ℕ
+  | ℕ => λ _ _, ℕ | T ∧ᵗ U => λ eq gn, tsubstlu V T eq gn ∧ᵗ tsubstlu V U eq gn
+  | T →(j) U => λ eq gn, tsubstlu V T eq gn →(j) tsubstlu V U eq gn
   | ref[o] T => λ eq gn, ref[o]
       rew ctxeq_g app_nil'_d in tsubstlg V T (eq_trans (app_eq_nil_d gn) eq)
   | ▽ T => λ eq gn, ▽
       rew ctxeq_g app_nil'_d in tsubstlg V T (eq_trans (app_eq_nil_d gn) eq)
-  | T ∧ᵗ U => λ eq gn, tsubstlu V T eq gn ∧ᵗ tsubstlu V U eq gn
-  | T →(j) U => λ eq gn, tsubstlu V T eq gn →(j) tsubstlu V U eq gn
   | ∀: j, T => λ eq gn, ∀: j, tsubstlu V T (f_equal _ eq) gn
   | ∃: j, T => λ eq gn, ∃: j, tsubstlu V T (f_equal _ eq) gn
   | recᵗ: j, T => λ eq gn, recᵗ: j, tsubstlu V T (f_equal _ eq) gn

@@ -8,12 +8,6 @@ Section facts.
   (** ** Behavior of [tintp] *)
   Fact tintp_nat {s i v} : ⟦ ℕ ⟧{i}(s) v ⊣⊢ ∃ n : nat, ⌜v = # n⌝.
   Proof. done. Qed.
-  Fact tintp_ref {s i o j v} {T : _ (;ᵞ)} :
-    ⟦ ref[o] T ⟧{i}(s) v ⊣⊢ ∃ l : loc, ⌜v = # l⌝ ∗ tref (i:=j) s (l +ₗ o) T.
-  Proof. done. Qed.
-  Fact tintp_guard {s i j v} {T : _ (;ᵞ)} :
-    ⟦ ▽{j,_} T ⟧{i}(s) v ⊣⊢ tguard (i:=j) s T v.
-  Proof. done. Qed.
   Fact tintp_and {s i T U v} :
     ⟦ T ∧ᵗ U ⟧{i}(s) v ⊣⊢ ⟦ T ⟧{i}(s) v ∗ ⟦ U ⟧{i}(s) v.
   Proof. done. Qed.
@@ -21,6 +15,12 @@ Section facts.
     ⟦ T →(j) U ⟧{i}(s) v ⊣⊢ □ ∀ u,
       ⟦ T ⟧{i}(s) u -∗ WP[tinv_wsat s j] v u [{ ⟦ U ⟧{i}(s) }].
   Proof. simpl. do 4 f_equiv. exact twpw_tinv_wsat_lt_tinv_wsat. Qed.
+  Fact tintp_ref {s i o j v} {T : _ (;ᵞ)} :
+    ⟦ ref[o] T ⟧{i}(s) v ⊣⊢ ∃ l : loc, ⌜v = # l⌝ ∗ tref (i:=j) s (l +ₗ o) T.
+  Proof. done. Qed.
+  Fact tintp_guard {s i j v} {T : _ (;ᵞ)} :
+    ⟦ ▽{j,_} T ⟧{i}(s) v ⊣⊢ tguard (i:=j) s T v.
+  Proof. done. Qed.
   Fact tintp_forall {s i j T v} : ⟦ ∀: j, T ⟧{i}(s) v ⊣⊢ ∀ V, ⟦ T /: V ⟧(s) v.
   Proof. simpl. do 3 f_equiv. apply rew_eq_hwf. Qed.
   Fact tintp_exist {s i j T v} : ⟦ ∃: j, T ⟧{i}(s) v ⊣⊢ ∃ V, ⟦ T /: V ⟧(s) v.
