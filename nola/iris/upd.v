@@ -193,11 +193,17 @@ Section lemmas.
   Proof. by rewrite /AddModal fupdw_frame_r bi.wand_elim_r fupdw_trans. Qed.
 
   (** Expand the world satisfaction of [bupdw] *)
-  Lemma bupdw_expand `{!BiBUpd PROP} {W W' P} :
+  Lemma bupdw_expand_bupd `{!BiBUpd PROP} {W W' P} :
     (W' ==∗ W ∗ (W ==∗ W')) -∗ (|=[W]=> P) =[W']=∗ P.
   Proof.
     iIntros "W'W WP W'". iMod ("W'W" with "W'") as "[W WW']".
-    iMod ("WP" with "W") as "[W $]". iApply ("WW'" with "W").
+    iMod ("WP" with "W") as "[W $]". by iApply "WW'".
+  Qed.
+  Lemma bupdw_expand `{!BiBUpd PROP} {W W' P} :
+    (W' -∗ W ∗ (W -∗ W')) -∗ (|=[W]=> P) =[W']=∗ P.
+  Proof.
+    iIntros "W'W WP W'". iDestruct ("W'W" with "W'") as "[W WW']".
+    iMod ("WP" with "W") as "[W $]". by iApply "WW'".
   Qed.
 
   (** Expand the world satisfaction of [fupdw] *)
