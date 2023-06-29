@@ -6,14 +6,14 @@ Section conv.
   Context `{!tintpGS L Σ}.
 
   (** [⊑] is reflexive and transitive *)
-  Lemma tsub_refl {s i T} : T ⊑{i,_}(s) T.
+  #[export] Instance tsub_refl {s i} : Reflexive (tsub s (i:=i)).
   Proof. done. Qed.
   Lemma tsub_trans {s i T j U k V} :
     T ⊑{i,j}(s) U → U ⊑{_,k}(s) V → T ⊑(s) V.
   Proof. move=> TU UV ?. by rewrite TU UV. Qed.
 
   (** [≃] is reflexive, symmetric and transitive *)
-  Lemma teqv_refl {s i T} : T ≃{i,_}(s) T.
+  #[export] Instance teqv_refl {s i} : Reflexive (teqv s (i:=i)).
   Proof. done. Qed.
   Lemma teqv_symm {s i T j U} : T ≃{i,j}(s) U → U ≃(s) T.
   Proof. move=> TU ?. by rewrite TU. Qed.
@@ -27,10 +27,14 @@ Section conv.
     - move=> TU. split=> ?; by rewrite TU.
     - move=> [??] ?. by apply bi.equiv_entails.
   Qed.
+  Lemma teqv_fwd {s i T j U} : T ≃{i,j}(s) U → T ⊑(s) U.
+  Proof. apply teqv_tsub. Qed.
+  Lemma teqv_bwd {s i T j U} : T ≃{i,j}(s) U → U ⊑(s) T.
+  Proof. apply teqv_tsub. Qed.
 
   (** [==>] is reflexive, transitive, and monotone over the level *)
-  Lemma ttrans_refl {s i j T} : T ==>{j,_}(i,s) T.
-  Proof. by iIntros (???) "? !>". Qed.
+  #[export] Instance ttrans_refl {s i j} : Reflexive (ttrans s i (j:=j)).
+  Proof. by iIntros (????) "? !>". Qed.
   Lemma ttrans_trans {s i j T k U l V} :
     T ==>{j,k}(i,s) U → U ==>{_,l}(i,s) V → T ==>{_,l}(i,s) V.
   Proof.
@@ -149,6 +153,9 @@ Section conv.
   Proof.
     move=> TU. apply teqv_tsub; split; apply tsub_guard=> *; by apply TU.
   Qed.
+  Lemma tsub_guard_lev `{!tsintpy Σ ih s} {i i' j} {T : _ j (;ᵞ)} :
+    ▽ T ⊑{i,i'}(s) ▽ T.
+  Proof. done. Qed.
 
   (** On [ref[ ]] *)
   Lemma tsub_ref `{!tsintpy Σ ih s, ! j ≤ⁿ j'} {o i i' T U} :
@@ -171,6 +178,9 @@ Section conv.
   Proof.
     move=> TU. apply teqv_tsub; split; apply tsub_ref=> *; split; by apply TU.
   Qed.
+  Lemma tsub_ref_lev `{!tsintpy Σ ih s} {o i i' j} {T : _ j (;ᵞ)} :
+    ref[o] T ⊑{i,i'}(s) ref[o] T.
+  Proof. done. Qed.
 
   (** On [∀:] *)
   Lemma tsub_forall_elim {s i j T V} : (∀: j, T) ⊑{i,_}(s) T /: V.
@@ -192,8 +202,12 @@ Section conv.
   Qed.
 
   (** On [recᵗ:] *)
-  Lemma teqv_rec `{! j ≤ⁿ i} {s T} : (recᵗ: j, T) ≃{i,_}(s) T /: (recᵗ: j, T).
+  Lemma teqv_rec_expand `{! i ≤ⁿ j} {s T} :
+    (recᵗ: i, T) ≃{j,_}(s) T /: (recᵗ: i, T).
   Proof. move=> ? /=. by rewrite rew_eq_hwf tintp_tbump. Qed.
+  Lemma teqv_rec_lev `{! i ≤ⁿ j, ! i ≤ⁿ k} {s T} :
+    (recᵗ: i, T) ≃{j,k}(s) (recᵗ: i, T).
+  Proof. move=> ? /=. by rewrite !rew_eq_hwf !tintp_tbump. Qed.
 
   (** On [!ᵘ] *)
   Lemma teqv_subu `{! j <ⁿ i} {s T} : !ᵘ T ≃{i,j}(s) T.
