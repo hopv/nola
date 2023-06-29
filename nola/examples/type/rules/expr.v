@@ -7,8 +7,8 @@ From nola.examples.heap_lang Require Export proofmode.
 Definition iter : val := λ: "f",
   rec: "self" "ix" :=
     let: "i" := Fst "ix" in let: "x" := Snd "ix" in
-    if: "i" = # 0 then # () else
-      "f" "x";; "self" ("i" - # 1, "x").
+    if: "i" = # 0 then "x" else
+      "self" ("i" - # 1, "f" "x").
 
 Section expr.
   Context `{!tintpGS L Σ}.
@@ -116,15 +116,15 @@ Section expr.
   Qed.
 
   (** On [iter] *)
-  Lemma texpr_fun_iter `{! i ≤ⁿ j} {k e T U} :
-    e :ᵉ{j}(k) (T →(i) U) -∗ iter e :ᵉ(k) (ℕ × T →(i) 𝟙).
+  Lemma texpr_fun_iter `{! i ≤ⁿ j} {k e T} :
+    e :ᵉ{j}(k) (T →(i) T) -∗ iter e :ᵉ(k) (ℕ × T →(i) T).
   Proof.
     iIntros "?". wp_bind e. iApply (twp_wand with "[$]").
     iIntros (f) "/= >#f". wp_lam. wp_pures. do 3 iModIntro.
-    iIntros (?) "(%&%&->&[%n ->]& #?)".
+    iIntros (?) "(%&%w &->&[%n ->]& #T)".
     setoid_rewrite twpw_tinv_wsat_lt_tinv_wsat.
-    iInduction n as [|n] "IH"; wp_pures; [done|]. wp_bind (f _).
-    iApply (twp_wand with "[]"); [by iApply "f"|]. iIntros (?) "_".
-    do 4 wp_pure. have ->: (S n - 1)%Z = n by lia. iApply "IH".
+    iInduction n as [|n] "IH" forall (w) "T"; wp_pures; [done|]. wp_bind (f _).
+    iApply (twp_wand with "[]"); [by iApply "f"|]. iIntros (?) "#T'".
+    do 2 wp_pure. have ->: (S n - 1)%Z = n by lia. by iApply "IH".
   Qed.
 End expr.
