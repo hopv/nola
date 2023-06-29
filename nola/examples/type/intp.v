@@ -68,16 +68,16 @@ Notation "⟦ T ⟧ ( s , H ; IH )" := ⟦ T ⟧{_}(s, H; IH)
 Notation "⟦ T ⟧ ( s ; IH )" := ⟦ T ⟧(s, hwf; IH)
   (format "'[' ⟦  T  ⟧ '/  ' ( s ;  '/  ' IH ) ']'") : nola_scope.
 (** Interpretation for [T : type i (;ᵞ)] *)
-Notation tintp s i T := ⟦ T ⟧{i}(s, hwf;
-  λ k ki, tintp_lt s i (iM:=nlt_nlt_S_trans ki nlt_refl)) (only parsing).
+Notation tintp s i T := ⟦ T ⟧{i}(s, hwf; λ k ki, tintp_lt s i (iM:=ki))
+  (only parsing).
 Notation "⟦ T ⟧{ i } ( s )" := (tintp s i T) (only parsing) : nola_scope.
 Notation "⟦ T ⟧ ( s )" := ⟦ T ⟧{_}(s) (format "'[' ⟦  T  ⟧ '/  ' ( s ) ']'")
   : nola_scope.
 
 (** Utility *)
-Notation tinv_wsat_lt s M M' := (tinv_wsat' M (λ i iM, tintp_lt s M')).
 Notation tinv_wsat_lt_f s M M' f :=
-  (tinv_wsat' M (λ i iM, tintp_lt s M' (iM:=f i iM))).
+  (tinv_wsat' M (λ i iM, tintp_lt s M' (iM:=f i iM))) (only parsing).
+Notation tinv_wsat_lt s M M' := (tinv_wsat' M (λ i iM, tintp_lt s M')).
 Notation tinv_wsat s M := (tinv_wsat' M (λ i _ T, ⟦ T ⟧{i}(s))).
 Notation tninv_wsat s i := (ninv_wsat (tinvd_intp (λ T, ⟦ T ⟧{i}(s)))).
 
