@@ -52,3 +52,4 @@ nola/examples/type/sintp.v
 nola/examples/type/facts.v
 nola/examples/type/adequacy.v
 nola/examples/type/rules/conv.v
+nola/examples/type/rules/expr.v

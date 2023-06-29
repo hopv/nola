@@ -71,15 +71,14 @@ Notation "T <==>( i , s ) U" := (tbitrans s i T U)
   (at level 99, no associativity, format "T  <==>( i , s )  U") : nola_scope.
 
 (** Typed object *)
-Definition tobj `{!tintpGS L Σ} {i} (v : val) (T : type i (;ᵞ)) : iProp Σ :=
-  ⟦ T ⟧ v.
-Infix ":ᵒ{ i }" := (tobj (i:=i)) (at level 50, no associativity) : nola_scope.
-Infix ":ᵒ" := tobj (at level 50, no associativity) : nola_scope.
+Notation tobj i v T := (⟦ T ⟧{i} v).
+Infix ":ᵒ{ i }" := (tobj i) (at level 70, no associativity) : nola_scope.
+Infix ":ᵒ" := (tobj _) (at level 70, no associativity) : nola_scope.
 
 (** Typed expression *)
-Definition texpr `{!tintpGS L Σ} (i : nat) {j} (e : expr) (T : type j (;ᵞ))
-  : iProp Σ := □ WP[tinv_wsats i] e [{ ⟦ T ⟧ }].
-Infix ":ᵉ{ j } ( i )" := (texpr i (j:=j)) (at level 50, no associativity) :
-  nola_scope.
-Notation "e :ᵉ( i ) T" := (texpr i e T)
-  (at level 50, no associativity, format "e  :ᵉ( i )  T") : nola_scope.
+Notation texpr i j e T :=
+  (WP[tinv_wsats i] e [{ v, |=[tinv_wsats i]{⊤}=> ⟦ T ⟧{j} v }])%I.
+Infix ":ᵉ{ j } ( i )" := (texpr i j) (at level 70, no associativity)
+  : nola_scope.
+Notation "e :ᵉ( i ) T" := (texpr i _ e T)
+  (at level 70, no associativity, format "e  :ᵉ( i )  T") : nola_scope.
