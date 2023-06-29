@@ -145,6 +145,35 @@ Section tinv_wsat'.
     tinv_wsat' M' intp' -∗ tinv_wsat' M intp ∗
       (tinv_wsat' M intp -∗ tinv_wsat' M' intp').
   Proof. move=> eq. iApply tinv_wsat''_incl; [|done]=> >. apply eq. Qed.
+
+  (** Eliminate [tinv_wsat'] under [L <ⁿ M] *)
+  Lemma tinv_wsat''_over `{tΣ : !tinvGS' L o Σ, LM : ! L <ⁿ M} {intp} :
+    tinv_wsat'' L M o _ intp ⊢ False.
+  Proof.
+    move: L M o tΣ LM intp. fix FIX 2=> L M.
+    case: L M=> [|L][|M]//=; try (unfold nlt; lia). move=>/= o ???.
+    iIntros "[_ tw]". iDestruct (FIX with "tw") as "[]". by apply nlt_unS.
+  Qed.
+  Lemma tinv_wsat'_over `{!tinvGS L Σ, ! L <ⁿ M} {intp} :
+    tinv_wsat' M intp ⊢ False.
+  Proof. apply tinv_wsat''_over. Qed.
+
+  (** Get inequality out of [tinv_wsat'] *)
+  Lemma tinv_wsat'_le `{!tinvGS L Σ} {M intp} : tinv_wsat' M intp ⊢ ⌜M ≤ⁿ L⌝.
+  Proof.
+    case (nlt_or_nle (m:=L) (n:=M)); [|by iIntros]=> ?.
+    rewrite tinv_wsat'_over. by iIntros.
+  Qed.
+  Lemma tinv_wsat'_S_lt `{!tinvGS L Σ} {M intp} :
+    tinv_wsat' (S M) intp ⊢ ⌜M <ⁿ L⌝.
+  Proof. exact tinv_wsat'_le. Qed.
+  Lemma fupd_tinv_wsat'_S_lt `{!tinvGS L Σ} {M intp E E' P} :
+    (⌜M <ⁿ L⌝ =[tinv_wsat' (S M) intp]{E,E'}=∗ P)
+      =[tinv_wsat' (S M) intp]{E,E'}=∗ P.
+  Proof.
+    iIntros "toP". iApply fupdw_trans. iIntros "tw".
+    iDestruct (tinv_wsat'_S_lt with "tw") as %?. iFrame "tw". by iApply "toP".
+  Qed.
 End tinv_wsat'.
 Arguments tinv_wsat'' : simpl never.
 

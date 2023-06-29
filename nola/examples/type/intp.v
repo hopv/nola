@@ -164,4 +164,9 @@ Section tintp.
   Lemma tinv_wsat_incl `{! M ≤ⁿ M'} {s} :
     tinv_wsat s M' -∗ tinv_wsat s M ∗ (tinv_wsat s M -∗ tinv_wsat s M').
   Proof. by apply tinv_wsat'_incl. Qed.
+
+  (** Get inequality out of [tinv_wsat] *)
+  Lemma fupd_tinv_wsat_S_lt {s M E E' P} :
+    (⌜M <ⁿ L⌝ =[tinv_wsat s (S M)]{E,E'}=∗ P) =[tinv_wsat s (S M)]{E,E'}=∗ P.
+  Proof. exact fupd_tinv_wsat'_S_lt. Qed.
 End tintp.

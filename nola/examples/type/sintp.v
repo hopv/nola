@@ -2,13 +2,19 @@
 
 From nola.examples.type Require Export intp.
 
+(** Namespaces *)
+Definition trefN := nroot .@ "tref".
+Definition tguardN := nroot .@ "tguard".
+
 (** ** [tacc]: Accessor for [tinvd] *)
 Definition tacc `{!tintpGS L Σ} {i} (s : tsintp_ty Σ) (Tx : tinvd i)
   : iProp Σ :=
   match Tx with
-  | tinvd_ref l T => |=[tinv_wsat s i]{⊤,∅}=> ∃ v, l ↦ v ∗ ⟦ T ⟧(s) v ∗
-      (∀ w, l ↦ w ∗ ⟦ T ⟧(s) w =[tinv_wsat s i]{∅,⊤}=∗ True)
-  | tinvd_guard T v => |=[tinv_wsat s i]{⊤}=> ⟦ T ⟧(s) v
+  | tinvd_ref l T => |=[tinv_wsat s (S i)]{⊤,⊤∖↑trefN}=> ∃ v,
+      l ↦ v ∗ ⟦ T ⟧(s) v ∗
+      (∀ w, l ↦ w -∗ ⟦ T ⟧(s) w =[tinv_wsat s (S i)]{⊤∖↑trefN,⊤}=∗ True)
+  | tinvd_guard T v => ∀ E, ⌜↑tguardN ⊆ E⌝ →
+      |=[tinv_wsat s (S i)]{E}=> ⟦ T ⟧(s) v
   end%I.
 
 (** ** [tintpsi]: [inpsi] for [tinvd] *)
@@ -46,6 +52,23 @@ Infix "≃{ i , j } ( s )" := (teqv s (i:=i) (j:=j))
   (at level 99, no associativity, only parsing) : nola_scope.
 Notation "T ≃( s ) U" := (teqv s T U)
   (at level 99, no associativity, format "T  ≃( s )  U") : nola_scope.
+
+(** Type transmutation *)
+Definition ttrans `{!tintpGS L Σ} s (i : nat)
+  {j k} (T : type j (;ᵞ)) (U : type k (;ᵞ)) : Prop :=
+  ∀ E v, ↑tguardN ⊆ E → ⟦ T ⟧(s) v =[tinv_wsat s i]{E}=∗ ⟦ U ⟧(s) v.
+Infix "==>{ j , k } ( i , s )" := (ttrans s i (j:=j) (k:=k))
+  (at level 99, no associativity, only parsing) : nola_scope.
+Notation "T ==>( i , s ) U" := (ttrans s i T U)
+  (at level 99, no associativity, format "T  ==>( i , s )  U") : nola_scope.
+
+Definition tbitrans `{!tintpGS L Σ} s (i : nat)
+  {j k} (T : type j (;ᵞ)) (U : type k (;ᵞ)) : Prop :=
+  (T ==>(i,s) U) ∧ (U ==>(i,s) T).
+Infix "<==>{ j , k } ( i , s )" := (tbitrans s i (j:=j) (k:=k))
+  (at level 99, no associativity, only parsing) : nola_scope.
+Notation "T <==>( i , s ) U" := (tbitrans s i T U)
+  (at level 99, no associativity, format "T  <==>( i , s )  U") : nola_scope.
 
 (** Typed object *)
 Definition tobj `{!tintpGS L Σ} {i} (v : val) (T : type i (;ᵞ)) : iProp Σ :=

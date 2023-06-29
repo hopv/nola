@@ -28,46 +28,96 @@ Section conv.
     - move=> [??] ?. by apply bi.equiv_entails.
   Qed.
 
+  (** [==>] is reflexive, transitive, and monotone over the level *)
+  Lemma ttrans_refl {s i j T} : T ==>{j,_}(i,s) T.
+  Proof. by iIntros (???) "? !>". Qed.
+  Lemma ttrans_trans {s i j T k U l V} :
+    T ==>{j,k}(i,s) U → U ==>{_,l}(i,s) V → T ==>{_,l}(i,s) V.
+  Proof.
+    iIntros (TU UV ???) "T". iMod (TU with "T"); [done|]. by iApply UV.
+  Qed.
+  Lemma ttrans_mono_lev `{! i ≤ⁿ i'} {s j T k U} :
+    T ==>{j,k}(i,s) U → T ==>{j,k}(i',s) U.
+  Proof.
+    iIntros (TU ???) "T". iApply fupdw_expand; [|by iApply TU].
+    iApply tinv_wsat_incl.
+  Qed.
+
+  (** [⊑] into [==>] *)
+  Lemma tsub_ttrans {s i j T k U} : T ⊑{j,k}(s) U → T ==>(i,s) U.
+  Proof. iIntros (TU ???) "T !>". by rewrite TU. Qed.
+  (** [≃] into [<==>] *)
+  Lemma teqv_tbitrans {s i j T k U} : T ≃{j,k}(s) U → T <==>(i,s) U.
+  Proof. move=> /teqv_tsub[??]; split; by apply tsub_ttrans. Qed.
+
   (** On [↑ᵗ] *)
   Lemma teqv_tbump `{! i ≤ⁿ j} {s T} : ↑ᵗ T ≃{j,i}(s) T.
   Proof. move=> ?. exact tintp_tbump. Qed.
 
   (** On [ref[ ]] *)
   Lemma tsub_ref `{!tsintpy Σ ih s, ! j ≤ⁿ j'} {o i i' T U} :
-    (∀ `{!tsintpy Σ ih s'}, ih s' → T ≃{j,j'}(s') U) →
+    (∀ `{!tsintpy Σ ih s'}, ih s' → T <==>(S j',s') U) →
     ref{j,nil}[o] T ⊑{i,i'}(s) ref{j',nil}[o] U.
   Proof.
     move=> TU ? /=. unfold tref. do 4 f_equiv. iIntros "T".
-    iApply (sintpy_byintp (s:=s)). iIntros (???) "/= #to _ _".
+    iApply (sintpy_byintp (s:=s)). iIntros (?? IH) "/= #to _ _".
     iDestruct ("to" with "T") as "/= big". iClear "to".
-    iApply fupdw_expand; [iApply tinv_wsat_incl|]. iStopProof.
-    do 5 f_equiv; [by rewrite TU|].
-    do 3 f_equiv; [|iApply fupdw_expand; iApply tinv_wsat_incl].
-    f_equiv. by rewrite TU.
+    iApply fupdw_trans. assert (S j ≤ⁿ S j') by exact _.
+    iApply fupdw_expand; [iApply tinv_wsat_incl|].
+    iMod "big" as (?) "(↦ & T & cl)". iModIntro.
+    iMod (proj1 (TU _ _ IH) with "T") as "U"; [solve_ndisj|]. iModIntro.
+    iExists _. iFrame "↦ U". iIntros (?) "↦ U".
+    iMod (proj2 (TU _ _ IH) with "U") as "T"; [solve_ndisj|].
+    iApply fupdw_expand; [iApply tinv_wsat_incl|]. by iMod ("cl" with "↦ T").
   Qed.
   Lemma teqv_ref `{!tsintpy Σ ih s} {o i i' j T U} :
-    (∀ `{!tsintpy Σ ih s'}, ih s' → T ≃{j,j}(s') U) →
+    (∀ `{!tsintpy Σ ih s'}, ih s' → T <==>(S j,s') U) →
     ref{j,nil}[o] T ≃{i,i'}(s) ref{j,nil}[o] U.
   Proof.
-    move=> TU. apply teqv_tsub; split; apply tsub_ref=> *?; by rewrite TU.
+    move=> TU. apply teqv_tsub; split; apply tsub_ref=> *; split; by apply TU.
   Qed.
 
-  (** On [▽] *)
+  (** Introduce [▽] *)
+  Lemma ninv_tguard `{!tsintpy Σ ih s, ! i <ⁿ L} {T v} :
+    ninv tguardN (tinvd_guard T v) -∗ tguard s (i:=i) T v.
+  Proof.
+    iIntros "#inv !>". iApply (sintpy_intro (s:=s))=>/=. iIntros (?????).
+    iApply fupdw_expand; [iApply (tinv_wsat_tninv_wsat (M:=S i))|].
+    iMod (ninv_acc with "inv") as "/=[#$ cl]"; [done|]. by iApply "cl".
+  Qed.
+  Lemma ttrans_guard_intro `{!tsintpy Σ ih s} {i T j} :
+    T ==>{_,j}(S i,s) ▽{i,nil} T.
+  Proof.
+    iIntros (???) "/= #?". iApply fupd_tinv_wsat_S_lt. iIntros (?).
+    iApply fupdw_expand; [iApply (tinv_wsat_tninv_wsat (M:=S i))|].
+    iMod (ninv_alloc (P:=tinvd_guard T _) with "[]") as "inv"; [done|].
+    iApply (ninv_tguard with "inv").
+  Qed.
+
+  (** Eliminate [▽] *)
+  Lemma ttrans_guard_elim {i T j} : ▽{i,nil} T ==>{j,_}(S i,tsintp) T.
+  Proof.
+    iIntros (???) "/= #gT". iDestruct tsintp_sound as "to".
+    iDestruct ("to" with "gT") as "toT". by iApply "toT".
+  Qed.
+
+  (** More on [▽] *)
   Lemma tsub_guard `{!tsintpy Σ ih s, ! j ≤ⁿ j'} {i i' T U} :
-    (∀ `{!tsintpy Σ ih s'}, ih s' → T ⊑(s') U) →
+    (∀ `{!tsintpy Σ ih s'}, ih s' → T ==>(S j',s') U) →
     ▽{j,nil} T ⊑{i,i'}(s) ▽{j',nil} U.
   Proof.
     move=> TU ? /=. unfold tguard. f_equiv. iIntros "T".
-    iApply (sintpy_byintp (s:=s)). iIntros (???) "/= #to _ _".
-    iDestruct ("to" with "T") as "/= big". iClear "to".
-    iApply fupdw_expand; [iApply tinv_wsat_incl|]. iStopProof.
-    f_equiv. by apply TU.
+    iApply (sintpy_byintp (s:=s)). iIntros (?? IH) "/= to _ _ % %inE".
+    iDestruct ("to" with "T") as "/= big". iApply fupdw_trans.
+    assert (S j ≤ⁿ S j') by exact _.
+    iApply fupdw_expand; [iApply tinv_wsat_incl|]. iMod ("big" $! _ inE) as "T".
+    iModIntro. by iMod (TU _ _ IH with "T") as "$"; [solve_ndisj|].
   Qed.
   Lemma teqv_guard `{!tsintpy Σ ih s} {i i' j T U} :
-    (∀ `{!tsintpy Σ ih s'}, ih s' → T ≃(s') U) →
+    (∀ `{!tsintpy Σ ih s'}, ih s' → T <==>(S j,s') U) →
     ▽{j,nil} T ≃{i,i'}(s) ▽{j,nil} U.
   Proof.
-    move=> TU. apply teqv_tsub; split; apply tsub_guard=> *?; by rewrite TU.
+    move=> TU. apply teqv_tsub; split; apply tsub_guard=> *; by apply TU.
   Qed.
 
   (** On [∧ᵗ] *)
@@ -80,20 +130,28 @@ Section conv.
     iIntros (VT VU ?) "#V /=".
     iDestruct (VT with "V") as "$". iDestruct (VU with "V") as "$".
   Qed.
+  Lemma ttrans_and {s i j T U k T' U'} :
+    T ==>(i,s) T' →  U ==>(i,s) U' → T ∧ᵗ U ==>{j,k}(i,s) T' ∧ᵗ U'.
+  Proof.
+    iIntros (TT' UU' ???) "/=[T U]".
+    iMod (TT' with "T") as "$"; [done|]. by iMod (UU' with "U") as "$".
+  Qed.
 
   (** On [→( )] *)
   Lemma tsub_fun `{! j ≤ⁿ i, ! j' ≤ⁿ i', ! j ≤ⁿ j'} {s T U T' U'} :
-    T' ⊑(s) T →  U ⊑(s) U' →  T →(j) U ⊑{i,i'}(s) T' →(j') U'.
+    T' ==>(j',s) T →  U ==>(j',s) U' →  T →(j) U ⊑{i,i'}(s) T' →(j') U'.
   Proof.
-    move=> T'T UU' ? /=. do 4 f_equiv; [by apply T'T|].
-    rewrite twp_mono; [|apply UU']. rewrite !twpw_tinv_wsat_lt_tinv_wsat.
-    iApply twpw_expand. iApply tinv_wsat_incl.
+    move=> T'T UU' ? /=. do 3 f_equiv. iIntros "hor T'".
+    rewrite !twpw_tinv_wsat_lt_tinv_wsat. iMod (T'T with "T'") as "T"; [done|].
+    iDestruct ("hor" with "T") as "wp".
+    iDestruct (twpw_expand with "[] wp") as "?"; [iApply tinv_wsat_incl|].
+    iApply twpw_fupdw_nonval; [done|]. iStopProof. do 2 f_equiv. by iApply UU'.
   Qed.
   Lemma teqv_fun `{! j ≤ⁿ i, ! j ≤ⁿ i'} {s T U T' U'} :
-    T ≃(s) T' →  U ≃(s) U' →  T →(j) U ≃{i,i'}(s) T' →(j) U'.
+    T <==>(j,s) T' →  U <==>(j,s) U' →  T →(j) U ≃{i,i'}(s) T' →(j) U'.
   Proof.
-    move=> TT' UU' ? /=. do 4 f_equiv; [by apply TT'|].
-    rewrite !twpw_tinv_wsat_lt_tinv_wsat. by f_equiv.
+    move=> TT' UU'.
+    apply teqv_tsub; split; apply tsub_fun=> *; try apply TT'; apply UU'.
   Qed.
 
   (** On [∀:] *)
@@ -109,6 +167,11 @@ Section conv.
   Lemma tsub_exist_elim {s i i' j T U} :
     (∀ V, T /: V ⊑(s) U) → (∃: j, T) ⊑{i,i'}(s) U.
   Proof. iIntros (TU ?) "/=[% ?]". by rewrite rew_eq_hwf TU. Qed.
+  Lemma ttrans_exist {s i j j' k T U} :
+    (∀ V, T /: V ==>(i,s) U) → (∃: k, T) ==>{j,j'}(i,s) U.
+  Proof.
+    iIntros (TU ???) "/=[% T]". iApply TU; [done|]. by rewrite rew_eq_hwf.
+  Qed.
 
   (** On [recᵗ:] *)
   Lemma teqv_rec `{! j ≤ⁿ i} {s T} : (recᵗ: j, T) ≃{i,_}(s) T /: (recᵗ: j, T).

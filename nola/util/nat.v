@@ -64,3 +64,5 @@ Lemma nle_nlt_trans {l m n} : l ≤ⁿ m → m <ⁿ n → l <ⁿ n.
 Proof. apply Nat.le_lt_trans. Qed.
 Lemma nlt_nlt_S_trans {l m n} : l <ⁿ m → m <ⁿ S n → l <ⁿ n.
 Proof. move=> lm mn. exact (nlt_nle_trans lm (nlt_S_nle mn)). Qed.
+Lemma nlt_or_nle {m n} : m <ⁿ n ∨ n ≤ⁿ m.
+Proof. unfold nlt, nle. lia. Qed.
