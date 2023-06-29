@@ -165,7 +165,7 @@ Section verify.
     [[{ RET #(); True }]].
   Proof.
     iIntros (??) "#? Φ". wp_lam. wp_bind (FAA _ _).
-    iMod (nninvs_acc with "[//]") as "/= [[%k ↦] cl]"; [done|]. wp_faa.
+    iMod (nninvs_acc with "[//]") as "/=[[%k ↦] cl]"; [done|]. wp_faa.
     iModIntro. iMod ("cl" with "[↦]") as "_".
     { iExists _. by have ->: (k * d + d = (k + 1) * d)%Z by lia. }
     iModIntro. wp_pures. by iApply "Φ".
@@ -179,10 +179,10 @@ Section verify.
   Proof.
     iIntros (??) "#? Φ".
     iInduction c as [|c] "IH"; wp_lam; wp_pures; [by iApply "Φ"|].
-    wp_bind (! _)%E. iMod (nninvs_acc with "[//]") as "/= [[%k ↦] cl]"; [done|].
+    wp_bind (! _)%E. iMod (nninvs_acc with "[//]") as "/=[[%k ↦] cl]"; [done|].
     wp_load. iModIntro. iMod ("cl" with "[↦]") as "_"; [by iExists _|].
     iModIntro. wp_pures. wp_bind (CmpXchg _ _ _).
-    iMod (nninvs_acc with "[//]") as "/= [[%k' ↦] cl]"; [done|].
+    iMod (nninvs_acc with "[//]") as "/=[[%k' ↦] cl]"; [done|].
     case (decide (k' * d = k * d)%Z)=> [->|?].
     - wp_apply (twp_cmpxchg_suc with "↦")=>//; [solve_vals_compare_safe|].
       iIntros "↦". iMod ("cl" with "[↦]") as "_".

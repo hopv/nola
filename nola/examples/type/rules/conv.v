@@ -108,7 +108,7 @@ Section conv.
   Proof. iIntros (?) "/= ?". iExists _. by rewrite rew_eq_hwf. Qed.
   Lemma tsub_exist_elim {s i i' j T U} :
     (∀ V, T /: V ⊑(s) U) → (∃: j, T) ⊑{i,i'}(s) U.
-  Proof. iIntros (TU ?) "/= [% ?]". by rewrite rew_eq_hwf TU. Qed.
+  Proof. iIntros (TU ?) "/=[% ?]". by rewrite rew_eq_hwf TU. Qed.
 
   (** On [recᵗ:] *)
   Lemma teqv_rec `{! j ≤ⁿ i} {s T} : (recᵗ: j, T) ≃{i,_}(s) T /: (recᵗ: j, T).
