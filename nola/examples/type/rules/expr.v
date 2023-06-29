@@ -43,7 +43,7 @@ Section expr.
   Qed.
 
   (** Introduce [:ᵒ ⊤ᵗ] *)
-  Lemma tobj_any {v i} : ⊢ v :ᵒ{i} ⊤ᵗ.
+  Lemma tobj_any {v} : ⊢ v :ᵒ{0} ⊤ᵗ.
   Proof. done. Qed.
 
   (** Value *)
@@ -60,22 +60,22 @@ Section expr.
   Qed.
 
   (** Thread forking *)
-  Lemma texpr_fork {e i j k T} : e :ᵉ{j}(i) T -∗ Fork e :ᵉ{k}(i) 𝟙.
+  Lemma texpr_fork {e i j T} : e :ᵉ{j}(i) T -∗ Fork e :ᵉ{0}(i) 𝟙.
   Proof.
     iIntros "e". wp_apply (twp_fork with "[e]"); [|done].
     iApply (twp_wand with "[$]"). by iIntros.
   Qed.
 
   (** Literal *)
-  Lemma texpr_lit_nat {n : nat} {i j} : ⊢ # n :ᵉ{j}(i) ℕ.
+  Lemma texpr_lit_nat {n : nat} {i} : ⊢ # n :ᵉ{0}(i) ℕ.
   Proof. iApply twp_value. iModIntro. by iExists _. Qed.
-  Lemma texpr_lit_bool {b : bool} {i j} : ⊢ # b :ᵉ{j}(i) 𝔹.
+  Lemma texpr_lit_bool {b : bool} {i} : ⊢ # b :ᵉ{0}(i) 𝔹.
   Proof. iApply twp_value. iModIntro. by iExists _. Qed.
-  Lemma texpr_lit_unit {i j} : ⊢ # () :ᵉ{j}(i) 𝟙.
+  Lemma texpr_lit_unit {i} : ⊢ # () :ᵉ{0}(i) 𝟙.
   Proof. iApply twp_value. iModIntro. by iPureIntro. Qed.
 
   (** Non-determinism *)
-  Lemma texpr_ndnat {i j} : ⊢ Ndnat :ᵉ{j}(i) ℕ.
+  Lemma texpr_ndnat {i} : ⊢ Ndnat :ᵉ{0}(i) ℕ.
   Proof. wp_apply twp_ndnat; [done|]. iIntros "% _ !>". by iExists _. Qed.
 
   (** Pair *)
