@@ -26,7 +26,7 @@ Section tintp.
   Definition tcintp0 (c : tcon0) v : iProp Σ :=
     match c with
     | ⟨ℕ⟩ => ∃ n : nat, ⌜v = # n⌝ | ⟨𝔹⟩ => ∃ b : bool, ⌜v = # b⌝
-    | ⟨𝟙⟩ => ⌜v = # ()⌝
+    | ⟨𝟙⟩ => ⌜v = # ()⌝ | ⟨⊤ᵗ⟩ => True
     end.
   #[export] Instance tcintp0_persistent {c v} : Persistent (tcintp0 c v).
   Proof. case c; exact _. Qed.

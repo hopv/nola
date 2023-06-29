@@ -54,6 +54,10 @@ Section conv.
   Lemma teqv_tbump `{! i ≤ⁿ j} {s T} : ↑ᵗ T ≃{j,i}(s) T.
   Proof. move=> ?. exact tintp_tbump. Qed.
 
+  (** On [⊤ᵗ] *)
+  Lemma tsub_any {s i T j} : T ⊑{i,j}(s) ⊤ᵗ.
+  Proof. by iIntros. Qed.
+
   (** On [∧ᵗ] *)
   Lemma tsub_and_elim_l {s i T U} : T ∧ᵗ U ⊑{i,_}(s) T.
   Proof. iIntros (?) "/=[$ _]". Qed.

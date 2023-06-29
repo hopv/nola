@@ -42,6 +42,10 @@ Section expr.
     iStopProof. do 2 f_equiv. iApply fupdw_expand. iApply tinv_wsat_incl.
   Qed.
 
+  (** Introduce [:ᵒ ⊤ᵗ] *)
+  Lemma tobj_any {v i} : ⊢ v :ᵒ{i} ⊤ᵗ.
+  Proof. done. Qed.
+
   (** Value *)
   Lemma texpr_val {v i j T} : v :ᵒ T ⊢ v :ᵉ{j}(i) T.
   Proof. iIntros "?". by iApply twp_value. Qed.

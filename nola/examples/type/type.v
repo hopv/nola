@@ -6,7 +6,8 @@ From nola.util Require Export ctx nat.
 Variant tcon0 : Set :=
 | (* Natural-number type *) tc_nat
 | (* Boolean type *) tc_bool
-| (* Unit type *) tc_unit.
+| (* Unit type *) tc_unit
+| (* Trivial type *) tc_any.
 
 (** ** [tcon2]: Binary type constructor *)
 Variant tcon2 : Set :=
@@ -47,6 +48,8 @@ Notation "⟨𝔹⟩" := tc_bool : nola_scope.
 Notation 𝔹 := (t_0 ⟨𝔹⟩).
 Notation "⟨𝟙⟩" := tc_unit : nola_scope.
 Notation "𝟙" := (t_0 ⟨𝟙⟩) : nola_scope.
+Notation "⟨⊤ᵗ⟩" := tc_any : nola_scope.
+Notation "⊤ᵗ" :=  (t_0 ⟨⊤ᵗ⟩) : nola_scope.
 Notation "⟨∧ᵗ⟩" := tc_and : nola_scope.
 Infix "∧ᵗ" := (t_2 ⟨∧ᵗ⟩) (at level 80, right associativity) : nola_scope.
 Notation "⟨×⟩" := tc_pair : nola_scope.
