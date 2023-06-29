@@ -2,12 +2,23 @@
 
 From nola.util Require Export ctx nat.
 
+(** ** [tcon0]: Nullary type constructor *)
+Variant tcon0 : Set :=
+| (* Natural-number type *) tc_nat
+| (* Boolean type *) tc_bool
+| (* Unit type *) tc_unit.
+
+(** ** [tcon2]: Binary type constructor *)
+Variant tcon2 : Set :=
+| (* Intersection type *) tc_and
+| (* Pair type *) tc_pair.
+
 (** ** [type]: Syntactic type *)
-Inductive type : nat → ctx nat → Type :=
-(** Natural-number type *)
-| t_nat {i Γ} : type i Γ
-(** Intersection type *)
-| t_and {i Γ} (T U : type i Γ) : type i Γ
+Inductive type : nat → ctx nat → Set :=
+(** Nullary type *)
+| t_0 {i Γ} (c : tcon0) : type i Γ
+(** Binary type *)
+| t_2 {i Γ} (c : tcon2) (T U : type i Γ) : type i Γ
 (** Terminating function type *)
 | t_fun {i Γ} (j : nat) `{ji : ! j ≤ⁿ i} (T U : type i Γ) : type i Γ
 (** Reference type with an offset [o] *)
@@ -30,8 +41,16 @@ Inductive type : nat → ctx nat → Type :=
 (** Substituted [t_varu] *)
 | t_subu {i j Γ} `{ji : ! j <ⁿ i} (T : type j (;ᵞ)) : type i Γ.
 
-Notation ℕ := t_nat.
-Infix "∧ᵗ" := t_and (at level 80, right associativity) : nola_scope.
+Notation "⟨ℕ⟩" := tc_nat : nola_scope.
+Notation ℕ := (t_0 ⟨ℕ⟩).
+Notation "⟨𝔹⟩" := tc_bool : nola_scope.
+Notation 𝔹 := (t_0 ⟨𝔹⟩).
+Notation "⟨𝟙⟩" := tc_unit : nola_scope.
+Notation "𝟙" := (t_0 ⟨𝟙⟩) : nola_scope.
+Notation "⟨∧ᵗ⟩" := tc_and : nola_scope.
+Infix "∧ᵗ" := (t_2 ⟨∧ᵗ⟩) (at level 80, right associativity) : nola_scope.
+Notation "⟨×⟩" := tc_pair : nola_scope.
+Infix "×" := (t_2 ⟨×⟩) (at level 50, left associativity) : nola_scope.
 Notation "T →( j ) U" := (t_fun j T U)
   (at level 90, right associativity, format "T  →( j )  U") : nola_scope.
 Notation "T →{ ji } ( j ) U" := (t_fun j (ji:=ji) T U)
@@ -74,7 +93,7 @@ Notation "!ᵘ{ ji } T" := (t_subu (ji:=ji) T)
 Reserved Notation "↑ᵗ T" (at level 20, right associativity).
 Fixpoint tbump {i j Γ} (T : type i Γ) : i ≤ⁿ j → type j Γ :=
   match T with
-  | ℕ => λ _, ℕ | T ∧ᵗ U => λ _, ↑ᵗ T ∧ᵗ ↑ᵗ U
+  | t_0 c => λ _, t_0 c | t_2 c T U => λ _, t_2 c (↑ᵗ T) (↑ᵗ U)
   | T →(j) U => λ ij, let _ := nle_trans _ ij in ↑ᵗ T →(j) ↑ᵗ U
   | ref[o] T => λ _, ref[o] T | ▽ T => λ _, ▽ T
   | ∀: j, T => λ _, ∀: j, ↑ᵗ T | ∃: j, T => λ _, ∃: j, ↑ᵗ T

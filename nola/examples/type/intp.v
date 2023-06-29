@@ -22,14 +22,36 @@ Section tintp.
     (* Iris resources *) `{!tintpGS L Σ}
     (* Strong interpretation *) (s : tsintp_ty Σ).
 
+  (** Interpret [tc_0] *)
+  Definition tcintp0 (c : tcon0) v : iProp Σ :=
+    match c with
+    | ⟨ℕ⟩ => ∃ n : nat, ⌜v = # n⌝ | ⟨𝔹⟩ => ∃ b : bool, ⌜v = # b⌝
+    | ⟨𝟙⟩ => ⌜v = # ()⌝
+    end.
+  #[export] Instance tcintp0_persistent {c v} : Persistent (tcintp0 c v).
+  Proof. case c; exact _. Qed.
+
+  (** Interpret [tc_2] *)
+  Definition tcintp2 (c : tcon2) (Φ Ψ : val -d> iProp Σ) : val -d> iProp Σ :=
+    λ v, match c with
+    | ⟨∧ᵗ⟩ => Φ v ∗ Ψ v | ⟨×⟩ => ∃ u u', ⌜v = (u, u')%V⌝ ∗ Φ u ∗ Ψ u'
+    end%I.
+  #[export] Instance tcintp2_persistent
+    `{!∀ v, Persistent (Φ v), !∀ v, Persistent (Ψ v)} {c v} :
+    Persistent (tcintp2 c Φ Ψ v).
+  Proof. case c; exact _. Qed.
+  #[export] Instance tcincp2_proper :
+    Proper ((=) ==> (≡) ==> (≡) ==> (=) ==> (⊣⊢)) tcintp2.
+  Proof. solve_proper. Qed.
+
   (** [tintp']: Interpretation of [type], taking an inducive hypothesis *)
   Fixpoint tintp' {i Γ} (T : type i Γ) (H : hAcc (thgt T))
     : (∀ k, k <ⁿ i → type k (;ᵞ) → val → iProp Σ) →
       Γ.ᵞu = [] → Γ.ᵞg = [] → val → iProp Σ :=
     match T, H with
-    | ℕ, _ => λ _ _ _ v, ∃ n : nat, ⌜v = # n⌝
-    | T ∧ᵗ U, _ => λ IH un gn v,
-        tintp' T (H ‼ʰ 0) IH un gn v ∗ tintp' U (H ‼ʰ 1) IH un gn v
+    | t_0 c, _ => λ _ _ _, tcintp0 c
+    | t_2 c T U, _ => λ IH un gn, tcintp2 c
+        (tintp' T (H ‼ʰ 0) IH un gn) (tintp' U (H ‼ʰ 1) IH un gn)
     | T →{ji}(j) U, _ => λ IH un gn v, □ ∀ u,
         tintp' T (H ‼ʰ 0) IH un gn u -∗
           WP[tinv_wsat' j (λ k kj, IH k (nlt_nle_trans kj ji))]

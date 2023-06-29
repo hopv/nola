@@ -39,7 +39,8 @@ Proof. by rewrite/= tliftg_tbump tliftu_tbump. Qed.
 Fixpoint tsubstlg {i Γ Γᵍ k} (V : type k (;ᵞ)) (T : type i Γ)
   : Γ.ᵞg = Γᵍ ++ [k] → type i (Γ.ᵞu;ᵞ Γᵍ) :=
   match T with
-  | ℕ => λ _, ℕ | T ∧ᵗ U => λ eq, tsubstlg V T eq ∧ᵗ tsubstlg V U eq
+  | t_0 c => λ _, t_0 c
+  | t_2 c T U => λ eq, t_2 c (tsubstlg V T eq) (tsubstlg V U eq)
   | T →(j) U => λ eq, tsubstlg V T eq →(j) tsubstlg V U eq
   | ref[o] T => λ eq, ref[o] tsubstlg V T (eq_app_assoc_d eq)
   | ▽ T => λ eq, ▽ tsubstlg V T (eq_app_assoc_d eq)
@@ -83,7 +84,8 @@ Qed.
 Fixpoint tsubstlu {i Γ Γᵘ k} (V : type k (;ᵞ)) (T : type i Γ)
   : Γ.ᵞu = Γᵘ ++ [k] → Γ.ᵞg = [] → type i (Γᵘ;ᵞ ) :=
   match T with
-  | ℕ => λ _ _, ℕ | T ∧ᵗ U => λ eq gn, tsubstlu V T eq gn ∧ᵗ tsubstlu V U eq gn
+  | t_0 c => λ _ _, t_0 c
+  | t_2 c T U => λ eq gn, t_2 c (tsubstlu V T eq gn) (tsubstlu V U eq gn)
   | T →(j) U => λ eq gn, tsubstlu V T eq gn →(j) tsubstlu V U eq gn
   | ref[o] T => λ eq gn, ref[o]
       rew ctxeq_g app_nil'_d in tsubstlg V T (eq_trans (app_eq_nil_d gn) eq)
@@ -133,9 +135,9 @@ Proof. exact tsubstlu_tbump. Qed.
 
 Fixpoint thgt {i Γ} (T : type i Γ) : hgt :=
   match T with
-  | ℕ | ref[_] _ | ▽ _ | ¢ᵍ _ | %ᵍ _ | %ᵘ _ | !ᵘ _ => Hgt₀
+  | t_0 _ | ref[_] _ | ▽ _ | ¢ᵍ _ | %ᵍ _ | %ᵘ _ | !ᵘ _ => Hgt₀
   | ¢ᵘ T => thgt T | ∀: _, T | ∃: _, T | recᵗ: _, T => Hgt₁ (thgt T)
-  | T ∧ᵗ U | T →(_) U => Hgt₂ (thgt T) (thgt U)
+  | t_2 _ T U | T →(_) U => Hgt₂ (thgt T) (thgt U)
   end.
 
 (** [tsubstlu] preserves [thgt] *)
@@ -155,5 +157,5 @@ Proof. exact tsubstlu_thgt. Qed.
 (** [↑ᵗ] preserves [thgt] *)
 Lemma tbump_thgt `{ij : ! i ≤ⁿ j} {Γ} {T : type i Γ} : thgt (↑ᵗ{ij} T) = thgt T.
 Proof.
-  move: i Γ T ij. fix FIX 3=> i Γ T. case T=>//= >; f_equal; apply FIX.
+  move: i Γ T ij. fix FIX 3=> i Γ T. case T=>//= *; f_equal; apply FIX.
 Qed.

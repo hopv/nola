@@ -8,8 +8,14 @@ Section facts.
   (** ** Behavior of [tintp] *)
   Fact tintp_nat {s i v} : ⟦ ℕ ⟧{i}(s) v ⊣⊢ ∃ n : nat, ⌜v = # n⌝.
   Proof. done. Qed.
-  Fact tintp_and {s i T U v} :
-    ⟦ T ∧ᵗ U ⟧{i}(s) v ⊣⊢ ⟦ T ⟧{i}(s) v ∗ ⟦ U ⟧{i}(s) v.
+  Fact tintp_bool {s i v} : ⟦ 𝔹 ⟧{i}(s) v ⊣⊢ ∃ b : bool, ⌜v = # b⌝.
+  Proof. done. Qed.
+  Fact tintp_unit {s i v} : ⟦ 𝟙 ⟧{i}(s) v ⊣⊢ ⌜v = # ()⌝.
+  Proof. done. Qed.
+  Fact tintp_and {s i T U v} : ⟦ T ∧ᵗ U ⟧{i}(s) v ⊣⊢ ⟦ T ⟧(s) v ∗ ⟦ U ⟧(s) v.
+  Proof. done. Qed.
+  Fact tintp_pair {s i T U v} :
+    ⟦ T × U ⟧{i}(s) v ⊣⊢ ∃ u u', ⌜v = (u, u')%V⌝ ∗ ⟦ T ⟧(s) u ∗ ⟦ U ⟧(s) u'.
   Proof. done. Qed.
   Fact tintp_fun `{! j ≤ⁿ i} {s T U v} :
     ⟦ T →(j) U ⟧{i}(s) v ⊣⊢ □ ∀ u,

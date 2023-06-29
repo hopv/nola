@@ -71,6 +71,21 @@ Section conv.
     iMod (TT' with "T") as "$"; [done|]. by iMod (UU' with "U") as "$".
   Qed.
 
+  (** On [×] *)
+  Lemma tsub_pair {s i j T T' U U'} :
+    T ⊑(s) T' → U ⊑(s) U' → T × U ⊑{i,j}(s) T' × U'.
+  Proof. move=> ??? /=. by do 6 f_equiv. Qed.
+  Lemma teqv_pair {s i j T T' U U'} :
+    T ≃(s) T' → U ≃(s) U' → T × U ≃{i,j}(s) T' × U'.
+  Proof. move=> ??? /=. by do 6 f_equiv. Qed.
+  Lemma ttrans_pair {s i j k T T' U U'} :
+    T ==>(i,s) T' → U ==>(i,s) U' → T × U ==>{j,k}(i,s) T' × U'.
+  Proof.
+    iIntros (TT' UU' ???) "/=(%&%&%& T & U)".
+    iMod (TT' with "T"); [done|]. iMod (UU' with "U"); [done|]. iModIntro.
+    iExists _, _. by iFrame.
+  Qed.
+
   (** On [→( )] *)
   Lemma tsub_fun `{! j ≤ⁿ i, ! j' ≤ⁿ i', ! j ≤ⁿ j'} {s T U T' U'} :
     T' ==>(j',s) T →  U ==>(j',s) U' →  T →(j) U ⊑{i,i'}(s) T' →(j') U'.
