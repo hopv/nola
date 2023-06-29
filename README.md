@@ -97,7 +97,9 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
       [`adequacy`](nola/examples/type/adequacy.v) (Adequacy)
     * [`rules/`](nola/examples/type/rules/) (Typing rules)
       - [`conv`](nola/examples/type/rules/conv.v) (Type conversion),
-        [`expr`](nola/examples/type/rules/expr.v) (Expression typing)
+        [`expr`](nola/examples/type/rules/expr.v) (Expression typing),
+        [`ref`](nola/examples/type/rules/ref.v) (Expression typing for
+          references)
 
 ## Story
 
