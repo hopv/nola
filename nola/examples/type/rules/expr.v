@@ -60,6 +60,14 @@ Section expr.
     iIntros (?) ">?". wp_pures. rewrite tobj_unseal. by iApply "e'".
   Qed.
 
+  (** Sequential execution *)
+  Lemma texpr_seq {e e' i j T k U} :
+    e :ᵉ{j}(i) T -∗ e' :ᵉ{k}(i) U -∗ (e;; e') :ᵉ(i) U.
+  Proof.
+    iIntros "e ?". unfold texpr. wp_bind e. iApply (twp_wand with "[$e]").
+    iIntros (?) "_". by wp_seq.
+  Qed.
+
   (** Thread forking *)
   Lemma texpr_fork {e i j T} : e :ᵉ{j}(i) T -∗ Fork e :ᵉ{0}(i) 𝟙.
   Proof.
@@ -79,6 +87,15 @@ Section expr.
   Lemma texpr_ndnat {i} : ⊢ Ndnat :ᵉ{0}(i) ℕ.
   Proof.
     unfold texpr. wp_apply twp_ndnat; [done|]. iIntros "% _ !>". by iExists _.
+  Qed.
+
+  (** Conditional branching *)
+  Lemma texpr_if {e e' e'' i j T} :
+    e :ᵉ{0}(i) 𝔹 -∗ e' :ᵉ{j}(i) T -∗ e'' :ᵉ(i) T -∗
+    (if: e then e' else e'') :ᵉ(i) T.
+  Proof.
+    iIntros "e e' e''". unfold texpr. wp_bind e. iApply (twp_wand with "[$e]").
+    iIntros (?) ">[%b ->]". by case b; wp_pure.
   Qed.
 
   (** Pair *)
