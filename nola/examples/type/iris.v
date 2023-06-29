@@ -166,15 +166,12 @@ Section tinv_wsat'.
     case (nlt_or_nle (m:=L) (n:=M)); [|by iIntros]=> ?.
     rewrite tinv_wsat'_over. by iIntros.
   Qed.
-  Lemma tinv_wsat'_S_lt `{!tinvGS L Σ} {M intp} :
-    tinv_wsat' (S M) intp ⊢ ⌜M <ⁿ L⌝.
-  Proof. exact tinv_wsat'_le. Qed.
-  Lemma fupd_tinv_wsat'_S_lt `{!tinvGS L Σ} {M intp E E' P} :
-    (⌜M <ⁿ L⌝ =[tinv_wsat' (S M) intp]{E,E'}=∗ P)
-      =[tinv_wsat' (S M) intp]{E,E'}=∗ P.
+  Lemma fupdw_tinv_wsat'_le `{!tinvGS L Σ} {M intp E E' P} :
+    (⌜M ≤ⁿ L⌝ =[tinv_wsat' M intp]{E,E'}=∗ P)
+      =[tinv_wsat' M intp]{E,E'}=∗ P.
   Proof.
     iIntros "toP". iApply fupdw_trans. iIntros "tw".
-    iDestruct (tinv_wsat'_S_lt with "tw") as %?. iFrame "tw". by iApply "toP".
+    iDestruct (tinv_wsat'_le with "tw") as %?. iFrame "tw". by iApply "toP".
   Qed.
 End tinv_wsat'.
 Arguments tinv_wsat'' : simpl never.

@@ -115,11 +115,12 @@ Section conv.
     iApply fupdw_expand; [iApply (tinv_wsat_tninv_wsat (M:=S i))|].
     iMod (ninv_acc with "inv") as "/=[#$ cl]"; [done|]. by iApply "cl".
   Qed.
-  Lemma ttrans_guard_intro `{!tsintpy Σ ih s} {i T j} :
-    T ==>{_,j}(S i,s) ▽{i,nil} T.
+  Lemma ttrans_guard_intro `{!tsintpy Σ ih s, ! i <ⁿ j} {k T} :
+    T ==>{_,k}(j,s) ▽{i,nil} T.
   Proof.
-    iIntros (???) "/= #?". iApply fupd_tinv_wsat_S_lt. iIntros (?).
-    iApply fupdw_expand; [iApply (tinv_wsat_tninv_wsat (M:=S i))|].
+    iIntros (???) "/= #?". iApply fupdw_tinv_wsat_le. iIntros (?).
+    have ?: i <ⁿ L by apply (nlt_nle_trans _ _).
+    iApply fupdw_expand; [iApply (tinv_wsat_tninv_wsat (M:=j))|].
     iMod (ninv_alloc (P:=tinvd_guard T _) with "[]") as "inv"; [done|].
     iApply (ninv_tguard with "inv").
   Qed.
@@ -137,9 +138,8 @@ Section conv.
     ▽{j,nil} T ⊑{i,i'}(s) ▽{j',nil} U.
   Proof.
     move=> TU ? /=. unfold tguard. f_equiv. iIntros "T".
-    iApply (sintpy_byintp (s:=s)). iIntros (?? IH) "/= to _ _ % %inE".
-    iDestruct ("to" with "T") as "/= big". iApply fupdw_trans.
-    assert (S j ≤ⁿ S j') by exact _.
+    iApply (sintpy_map (s:=s) with "[] T"). iIntros (?? IH) "/= big % %inE".
+    iApply fupdw_trans. assert (S j ≤ⁿ S j') by exact _.
     iApply fupdw_expand; [iApply tinv_wsat_incl|]. iMod ("big" $! _ inE) as "T".
     iModIntro. by iMod (TU _ _ IH with "T") as "$"; [solve_ndisj|].
   Qed.
@@ -156,8 +156,7 @@ Section conv.
     ref{j,nil}[o] T ⊑{i,i'}(s) ref{j',nil}[o] U.
   Proof.
     move=> TU ? /=. unfold tref. do 4 f_equiv. iIntros "T".
-    iApply (sintpy_byintp (s:=s)). iIntros (?? IH) "/= #to _ _".
-    iDestruct ("to" with "T") as "/= big". iClear "to".
+    iApply (sintpy_map (s:=s) with "[] T"). iIntros (?? IH) "/= big".
     iApply fupdw_trans. assert (S j ≤ⁿ S j') by exact _.
     iApply fupdw_expand; [iApply tinv_wsat_incl|].
     iMod "big" as (?) "(↦ & T & cl)". iModIntro.
