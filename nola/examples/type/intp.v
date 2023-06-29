@@ -56,9 +56,9 @@ Section tintp.
         tintp' T (H ‼ʰ 0) IH un gn u -∗
           WP[tinv_wsat' j (λ k kj, IH k (nlt_nle_trans kj ji))]
             v u [{ tintp' U (H ‼ʰ 1) IH un gn }]
+    | ▽ T, _ => λ _ un gn v, tguard s (rew eq_nil_ug_g un gn in T) v
     | ref[o] T, _ => λ _ un gn v, ∃ l : loc, ⌜v = # l⌝ ∗
         tref s (l +ₗ o) (rew eq_nil_ug_g un gn in T)
-    | ▽ T, _ => λ _ un gn v, tguard s (rew eq_nil_ug_g un gn in T) v
     | ∀: _, T, _ => λ IH un gn v, ∀ V,
         tintp' (tsubst' T un gn V) (H ‼ʰ[tsubst'_thgt] 0) IH eq_refl eq_refl v
     | ∃: _, T, _ => λ IH un gn v, ∃ V,

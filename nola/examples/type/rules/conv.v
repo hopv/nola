@@ -103,29 +103,6 @@ Section conv.
     apply teqv_tsub; split; apply tsub_fun=> *; try apply TT'; apply UU'.
   Qed.
 
-  (** On [ref[ ]] *)
-  Lemma tsub_ref `{!tsintpy Σ ih s, ! j ≤ⁿ j'} {o i i' T U} :
-    (∀ `{!tsintpy Σ ih s'}, ih s' → T <==>(S j',s') U) →
-    ref{j,nil}[o] T ⊑{i,i'}(s) ref{j',nil}[o] U.
-  Proof.
-    move=> TU ? /=. unfold tref. do 4 f_equiv. iIntros "T".
-    iApply (sintpy_byintp (s:=s)). iIntros (?? IH) "/= #to _ _".
-    iDestruct ("to" with "T") as "/= big". iClear "to".
-    iApply fupdw_trans. assert (S j ≤ⁿ S j') by exact _.
-    iApply fupdw_expand; [iApply tinv_wsat_incl|].
-    iMod "big" as (?) "(↦ & T & cl)". iModIntro.
-    iMod (proj1 (TU _ _ IH) with "T") as "U"; [solve_ndisj|]. iModIntro.
-    iExists _. iFrame "↦ U". iIntros (?) "↦ U".
-    iMod (proj2 (TU _ _ IH) with "U") as "T"; [solve_ndisj|].
-    iApply fupdw_expand; [iApply tinv_wsat_incl|]. by iMod ("cl" with "↦ T").
-  Qed.
-  Lemma teqv_ref `{!tsintpy Σ ih s} {o i i' j T U} :
-    (∀ `{!tsintpy Σ ih s'}, ih s' → T <==>(S j,s') U) →
-    ref{j,nil}[o] T ≃{i,i'}(s) ref{j,nil}[o] U.
-  Proof.
-    move=> TU. apply teqv_tsub; split; apply tsub_ref=> *; split; by apply TU.
-  Qed.
-
   (** Introduce [▽] *)
   Lemma ninv_tguard `{!tsintpy Σ ih s, ! i <ⁿ L} {T v} :
     ninv tguardN (tinvd_guard T v) -∗ tguard s (i:=i) T v.
@@ -167,6 +144,29 @@ Section conv.
     ▽{j,nil} T ≃{i,i'}(s) ▽{j,nil} U.
   Proof.
     move=> TU. apply teqv_tsub; split; apply tsub_guard=> *; by apply TU.
+  Qed.
+
+  (** On [ref[ ]] *)
+  Lemma tsub_ref `{!tsintpy Σ ih s, ! j ≤ⁿ j'} {o i i' T U} :
+    (∀ `{!tsintpy Σ ih s'}, ih s' → T <==>(S j',s') U) →
+    ref{j,nil}[o] T ⊑{i,i'}(s) ref{j',nil}[o] U.
+  Proof.
+    move=> TU ? /=. unfold tref. do 4 f_equiv. iIntros "T".
+    iApply (sintpy_byintp (s:=s)). iIntros (?? IH) "/= #to _ _".
+    iDestruct ("to" with "T") as "/= big". iClear "to".
+    iApply fupdw_trans. assert (S j ≤ⁿ S j') by exact _.
+    iApply fupdw_expand; [iApply tinv_wsat_incl|].
+    iMod "big" as (?) "(↦ & T & cl)". iModIntro.
+    iMod (proj1 (TU _ _ IH) with "T") as "U"; [solve_ndisj|]. iModIntro.
+    iExists _. iFrame "↦ U". iIntros (?) "↦ U".
+    iMod (proj2 (TU _ _ IH) with "U") as "T"; [solve_ndisj|].
+    iApply fupdw_expand; [iApply tinv_wsat_incl|]. by iMod ("cl" with "↦ T").
+  Qed.
+  Lemma teqv_ref `{!tsintpy Σ ih s} {o i i' j T U} :
+    (∀ `{!tsintpy Σ ih s'}, ih s' → T <==>(S j,s') U) →
+    ref{j,nil}[o] T ≃{i,i'}(s) ref{j,nil}[o] U.
+  Proof.
+    move=> TU. apply teqv_tsub; split; apply tsub_ref=> *; split; by apply TU.
   Qed.
 
   (** On [∀:] *)

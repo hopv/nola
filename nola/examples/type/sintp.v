@@ -3,18 +3,18 @@
 From nola.examples.type Require Export intp.
 
 (** Namespaces *)
-Definition trefN := nroot .@ "tref".
 Definition tguardN := nroot .@ "tguard".
+Definition trefN := nroot .@ "tref".
 
 (** ** [tacc]: Accessor for [tinvd] *)
 Definition tacc `{!tintpGS L Σ} {i} (s : tsintp_ty Σ) (Tx : tinvd i)
   : iProp Σ :=
   match Tx with
+  | tinvd_guard T v => ∀ E, ⌜↑tguardN ⊆ E⌝ →
+      |=[tinv_wsat s (S i)]{E}=> ⟦ T ⟧(s) v
   | tinvd_ref l T => |=[tinv_wsat s (S i)]{⊤,⊤∖↑trefN}=> ∃ v,
       l ↦ v ∗ ⟦ T ⟧(s) v ∗
       (∀ w, l ↦ w -∗ ⟦ T ⟧(s) w =[tinv_wsat s (S i)]{⊤∖↑trefN,⊤}=∗ True)
-  | tinvd_guard T v => ∀ E, ⌜↑tguardN ⊆ E⌝ →
-      |=[tinv_wsat s (S i)]{E}=> ⟦ T ⟧(s) v
   end%I.
 
 (** ** [tintpsi]: [inpsi] for [tinvd] *)

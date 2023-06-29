@@ -11,10 +11,12 @@ Import EqNotations.
 
 (** Data for invariant *)
 Variant tinvd i : Type :=
-| (** Reference **) tinvd_ref (l : loc) (T : type i (;ᵞ))
-| (** Guard **) tinvd_guard (T : type i (;ᵞ)) (v : val).
-Arguments tinvd_ref {_} _ _.
+(** Guard **)
+| tinvd_guard (T : type i (;ᵞ)) (v : val)
+(** Reference **)
+| tinvd_ref (l : loc) (T : type i (;ᵞ)).
 Arguments tinvd_guard {_} _ _.
+Arguments tinvd_ref {_} _ _.
 
 (** [tinvGS']: Product of [ninvGS (tinvd ?) Σ] over [[o..o+i]] *)
 Fixpoint tinvGS' (L o : nat) Σ : Type :=
@@ -52,8 +54,8 @@ Section tinv_wsat'.
   Definition tinvd_intp {i} (intp : type i (;ᵞ) -d> val -d> iProp Σ)
     : tinvd i -d> iProp Σ :=
     λ Tx, match Tx with
-    | tinvd_ref l T => ∃ v, l ↦ v ∗ intp T v
     | tinvd_guard T v => intp T v
+    | tinvd_ref l T => ∃ v, l ↦ v ∗ intp T v
     end%I.
 
   (** [tinvd_intp] is non-expansive *)
@@ -194,9 +196,10 @@ Notation tsintp_ty Σ := (sintp_ty (tintps Σ)).
 Notation "⸨ Tx ⸩ ( s )" := (sunwrap s (Sarg () (existT _ Tx)))
   (format "'[' ⸨  Tx  ⸩ '/  ' ( s ) ']'") : nola_scope.
 
-(** [tref]: Proposition for [t_ref] *)
-Definition tref {Σ i} (s : tsintp_ty Σ) (l : loc) (T : type i (;ᵞ))
-  : iProp Σ := □ ⸨ tinvd_ref l T ⸩(s).
 (** [tguard]: Proposition for [t_guard] *)
 Definition tguard {Σ i} (s : tsintp_ty Σ) (T : type i (;ᵞ)) (v : val)
   : iProp Σ := □ ⸨ tinvd_guard T v ⸩(s).
+
+(** [tref]: Proposition for [t_ref] *)
+Definition tref {Σ i} (s : tsintp_ty Σ) (l : loc) (T : type i (;ᵞ))
+  : iProp Σ := □ ⸨ tinvd_ref l T ⸩(s).

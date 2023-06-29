@@ -21,10 +21,10 @@ Inductive type : nat → ctx nat → Set :=
 | t_2 {i Γ} (c : tcon2) (T U : type i Γ) : type i Γ
 (** Terminating function type *)
 | t_fun {i Γ} (j : nat) `{ji : ! j ≤ⁿ i} (T U : type i Γ) : type i Γ
-(** Reference type with an offset [o] *)
-| t_ref {i j Γᵘ Γᵍ} (o : Z) (T : type j (;ᵞ Γᵘ ++ Γᵍ)) : type i (Γᵘ;ᵞ Γᵍ)
 (** Guard type *)
 | t_guard {i j Γᵘ Γᵍ} (T : type j (;ᵞ Γᵘ ++ Γᵍ)) : type i (Γᵘ;ᵞ Γᵍ)
+(** Reference type with an offset [o] *)
+| t_ref {i j Γᵘ Γᵍ} (o : Z) (T : type j (;ᵞ Γᵘ ++ Γᵍ)) : type i (Γᵘ;ᵞ Γᵍ)
 (** Universal and existential type *)
 | t_forall j {i Γᵘ Γᵍ} (T : type i (j :: Γᵘ;ᵞ Γᵍ)) : type i (Γᵘ;ᵞ Γᵍ)
 | t_exist j {i Γᵘ Γᵍ} (T : type i (j :: Γᵘ;ᵞ Γᵍ)) : type i (Γᵘ;ᵞ Γᵍ)
@@ -55,6 +55,9 @@ Notation "T →( j ) U" := (t_fun j T U)
   (at level 90, right associativity, format "T  →( j )  U") : nola_scope.
 Notation "T →{ ji } ( j ) U" := (t_fun j (ji:=ji) T U)
   (at level 90, right associativity, only parsing) : nola_scope.
+Notation "▽{ j , Γᵘ } T" := (t_guard (j:=j) (Γᵘ:=Γᵘ) T)
+  (at level 20, right associativity, only parsing) : nola_scope.
+Notation "▽ T" := (t_guard T) (at level 20, right associativity) : nola_scope.
 Notation "ref{ j , Γᵘ } [ o ] T" := (t_ref o (j:=j) (Γᵘ:=Γᵘ) T)
   (at level 20, right associativity, only parsing) : nola_scope.
 Notation "ref[ o ] T" := (t_ref o T)
@@ -64,9 +67,6 @@ Notation "ref{ j , Γᵘ } : T" := (t_ref 0 (j:=j) (Γᵘ:=Γᵘ) T)
   (at level 20, right associativity, only parsing) : nola_scope.
 Notation "ref: T" := (t_ref 0 T) (at level 20, right associativity)
   : nola_scope.
-Notation "▽{ j , Γᵘ } T" := (t_guard (j:=j) (Γᵘ:=Γᵘ) T)
-  (at level 20, right associativity, only parsing) : nola_scope.
-Notation "▽ T" := (t_guard T) (at level 20, right associativity) : nola_scope.
 Notation "∀: j , T" := (t_forall j T) (at level 100, right associativity)
   : nola_scope.
 Notation "∃: j , T" := (t_exist j T) (at level 100, right associativity)
@@ -95,7 +95,7 @@ Fixpoint tbump {i j Γ} (T : type i Γ) : i ≤ⁿ j → type j Γ :=
   match T with
   | t_0 c => λ _, t_0 c | t_2 c T U => λ _, t_2 c (↑ᵗ T) (↑ᵗ U)
   | T →(j) U => λ ij, let _ := nle_trans _ ij in ↑ᵗ T →(j) ↑ᵗ U
-  | ref[o] T => λ _, ref[o] T | ▽ T => λ _, ▽ T
+  | ▽ T => λ _, ▽ T | ref[o] T => λ _, ref[o] T
   | ∀: j, T => λ _, ∀: j, ↑ᵗ T | ∃: j, T => λ _, ∃: j, ↑ᵗ T
   | recᵗ: j, T => λ ij, recᵗ:{nle_trans _ ij} j, T
   | ¢ᵘ T => λ _, ¢ᵘ ↑ᵗ T | ¢ᵍ T => λ _, ¢ᵍ ↑ᵗ T
