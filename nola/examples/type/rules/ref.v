@@ -20,9 +20,9 @@ Section eref.
   Lemma texpr_ref_ref `{! i <ⁿ j} {e k T} :
     e :ᵉ(j) T ⊢ ref e :ᵉ{k}(j) ref{i,nil}: T.
   Proof.
-    iIntros "?". wp_bind e. iApply (twp_wand with "[$]"). iIntros (?) ">#?".
-    wp_alloc l as "↦". iModIntro. iApply fupdw_tinv_wsat_le. iIntros (?).
-    have ?: i <ⁿ L by apply (nlt_nle_trans _ _).
+    iIntros "?". unfold texpr. wp_bind e. iApply (twp_wand with "[$]").
+    iIntros (?) ">#?". wp_alloc l as "↦". iModIntro. iApply fupdw_tinv_wsat_le.
+    iIntros (?). have ?: i <ⁿ L by apply (nlt_nle_trans _ _).
     iApply fupdw_expand; [iApply (tinv_wsat_tninv_wsat (M:=j))|].
     iMod (ninv_alloc (P:=tinvd_ref l T) with "[↦]") as "?";
       [iExists _; by iFrame|].
@@ -34,19 +34,21 @@ Section eref.
   Lemma texpr_ref_off' `{! i <ⁿ j} {e o k T} {o' : Z} :
     e :ᵉ{k}(j) ref{i,_}[o] T ⊢ e +ₗ #o' :ᵉ{k}(j) ref{i,_}[o - o'] T.
   Proof.
-    iIntros "?". wp_bind e. iApply (twp_wand with "[$]").
+    iIntros "?". unfold texpr. wp_bind e. iApply (twp_wand with "[$]").
     iIntros (?) "/= >(%&->& ref)". wp_pure. do 2 iModIntro. iExists _.
     iSplit; [done|]. iStopProof. rewrite Loc.add_assoc. do 2 f_equiv. lia.
   Qed.
   Lemma texpr_ref_off `{! i <ⁿ j} {e o k T} :
     e :ᵉ{k}(j) ref{i,_}[o] T ⊢ e +ₗ #o :ᵉ{k}(j) ref{i,_}: T.
-  Proof. rewrite texpr_ref_off'. do 3 f_equiv. by rewrite Z.sub_diag. Qed.
+  Proof.
+    rewrite texpr_ref_off'. unfold texpr. do 3 f_equiv. by rewrite Z.sub_diag.
+  Qed.
 
   (** Load from [ref[ ]] *)
   Lemma texpr_ref_load `{! i <ⁿ j} {e k} {T : _ i (;ᵞ)} :
     e :ᵉ{k}(j) ref: T ⊢ ! e :ᵉ(j) T.
   Proof.
-    iIntros "?". wp_bind e. iApply (twp_wand with "[$]").
+    iIntros "?". unfold texpr. wp_bind e. iApply (twp_wand with "[$]").
     iIntros (?) "/= >(%&->& ref)". rewrite Loc.add_0.
     iApply (twpw_atomic (e:=! _)); [done|]. iApply fupdw_tinv_wsat_le.
     iIntros (?). have ? : i <ⁿ L by exact (nlt_nle_trans _ _).
@@ -61,7 +63,7 @@ Section eref.
   Lemma texpr_ref_store `{! i <ⁿ j} {e e' k} {T : _ i (;ᵞ)} :
     e :ᵉ{k}(j) ref: T -∗ e' :ᵉ(j) T -∗ (e <- e') :ᵉ{0}(j) 𝟙.
   Proof.
-    iIntros "??". wp_bind e'. iApply (twp_wand with "[$]").
+    iIntros "??". unfold texpr. wp_bind e'. iApply (twp_wand with "[$]").
     iIntros (?) "/= >#T". wp_bind e. iApply (twp_wand with "[$]").
     iIntros (?) "/= >(%&->& ref)". rewrite Loc.add_0.
     iApply (twpw_atomic (e:=_ <- _)); [done|]. iApply fupdw_tinv_wsat_le.
@@ -77,7 +79,7 @@ Section eref.
   Lemma texpr_ref_xchg `{! i <ⁿ j} {e e' k} {T : _ i (;ᵞ)} :
     e :ᵉ{k}(j) ref: T -∗ e' :ᵉ(j) T -∗ Xchg e e' :ᵉ(j) T.
   Proof.
-    iIntros "??". wp_bind e'. iApply (twp_wand with "[$]").
+    iIntros "??". unfold texpr. wp_bind e'. iApply (twp_wand with "[$]").
     iIntros (?) "/= >#T". wp_bind e. iApply (twp_wand with "[$]").
     iIntros (?) "/= >(%&->& ref)". rewrite Loc.add_0.
     iApply (twpw_atomic (e:=Xchg _ _)); [done|]. iApply fupdw_tinv_wsat_le.
@@ -94,7 +96,7 @@ Section eref.
     e :ᵉ{k}(j) ref{i,_}: ℕ -∗ e' :ᵉ{0}(j) ℕ -∗ e'' :ᵉ{0}(j) ℕ -∗
     CmpXchg e e' e'' :ᵉ{0}(j) ℕ × 𝔹.
   Proof.
-    iIntros "???". wp_bind e''. iApply (twp_wand with "[$]").
+    iIntros "???". unfold texpr. wp_bind e''. iApply (twp_wand with "[$]").
     iIntros (?) ">[%n ->]". wp_bind e'. iApply (twp_wand with "[$]").
     iIntros (?) ">[%m ->]". wp_bind e. iApply (twp_wand with "[$]").
     iIntros (?) "/= >(%&->& ref)". rewrite Loc.add_0.
@@ -116,7 +118,7 @@ Section eref.
   Lemma texpr_ref_faa `{! i <ⁿ j} {e e' k} :
     e :ᵉ{k}(j) ref{i,_}: ℕ -∗ e' :ᵉ{0}(j) ℕ -∗ FAA e e' :ᵉ{0}(j) ℕ.
   Proof.
-    iIntros "??". wp_bind e'. iApply (twp_wand with "[$]").
+    iIntros "??". unfold texpr. wp_bind e'. iApply (twp_wand with "[$]").
     iIntros (?) ">[%->]". wp_bind e. iApply (twp_wand with "[$]").
     iIntros (?) "/= >(%&->& ref)". rewrite Loc.add_0.
     iApply (twpw_atomic (e:=FAA _ _)); [done|]. iApply fupdw_tinv_wsat_le.

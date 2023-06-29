@@ -14,7 +14,7 @@ Section expr.
   Context `{!tintpGS L Σ}.
 
   (** [:ᵒ] is persistent *)
-  Fact tobj_persistent {v i T} : Persistent (v :ᵒ{i} T).
+  #[export] Instance tobj_persistent {v i T} : Persistent (v :ᵒ{i} T).
   Proof. exact _. Qed.
 
   (** Modify [:ᵒ] with [⊑] *)
@@ -24,7 +24,7 @@ Section expr.
   (** Modify [:ᵉ] with [==>] *)
   Lemma texpr_ttrans {e i j T k U} :
     T ==>{j,k}(i,tsintp) U →  e :ᵉ(i) T ⊢ e :ᵉ(i) U.
-  Proof. move=> TU. do 2 f_equiv. iIntros ">?". by iApply TU. Qed.
+  Proof. move=> TU. unfold texpr. do 2 f_equiv. iIntros ">?". by iApply TU. Qed.
 
   (** Modify [:ᵒ] hypothesis of [:ᵉ] with [==>] *)
   Lemma texpr_tobj_ttrans {v e i j T k U l V} : T ==>{j,k}(i,tsintp) U →
@@ -39,7 +39,8 @@ Section expr.
   Lemma texpr_mono_lev `{! i ≤ⁿ i'} {e j T} : e :ᵉ{j}(i) T ⊢ e :ᵉ(i') T.
   Proof.
     iIntros "?". iApply twpw_expand; [iApply tinv_wsat_incl|].
-    iStopProof. do 2 f_equiv. iApply fupdw_expand. iApply tinv_wsat_incl.
+    iStopProof. unfold texpr. do 2 f_equiv. iApply fupdw_expand.
+    iApply tinv_wsat_incl.
   Qed.
 
   (** Introduce [:ᵒ ⊤ᵗ] *)
@@ -55,14 +56,14 @@ Section expr.
     e :ᵉ{j}(i) T -∗ (∀ v, v :ᵒ T -∗ subst x v e' :ᵉ{k}(i) U) -∗
     (let: x := e in e') :ᵉ(i) U.
   Proof.
-    iIntros "? e'". wp_bind e. iApply (twp_wand with "[$]").
+    iIntros "? e'". unfold texpr. wp_bind e. iApply (twp_wand with "[$]").
     iIntros (?) ">?". wp_pures. by iApply "e'".
   Qed.
 
   (** Thread forking *)
   Lemma texpr_fork {e i j T} : e :ᵉ{j}(i) T -∗ Fork e :ᵉ{0}(i) 𝟙.
   Proof.
-    iIntros "e". wp_apply (twp_fork with "[e]"); [|done].
+    iIntros "e". unfold texpr. wp_apply (twp_fork with "[e]"); [|done].
     iApply (twp_wand with "[$]"). by iIntros.
   Qed.
 
@@ -76,24 +77,26 @@ Section expr.
 
   (** Non-determinism *)
   Lemma texpr_ndnat {i} : ⊢ Ndnat :ᵉ{0}(i) ℕ.
-  Proof. wp_apply twp_ndnat; [done|]. iIntros "% _ !>". by iExists _. Qed.
+  Proof.
+    unfold texpr. wp_apply twp_ndnat; [done|]. iIntros "% _ !>". by iExists _.
+  Qed.
 
   (** Pair *)
   Lemma texpr_pair {e e' i j T U} :
     e :ᵉ(i) T -∗ e' :ᵉ(i) U -∗ (e, e') :ᵉ{j}(i) T × U.
   Proof.
-    iIntros "??". wp_bind e'. iApply (twp_wand with "[$]").
+    iIntros "??". unfold texpr. wp_bind e'. iApply (twp_wand with "[$]").
     iIntros (?) ">?". wp_bind e. iApply (twp_wand with "[$]").
     iIntros (?) ">?". wp_pure. do 2 iModIntro=>/=. iExists _, _. by iFrame.
   Qed.
   Lemma texpr_fst {e i j T U} : e :ᵉ{j}(i) T × U -∗ Fst e :ᵉ(i) T.
   Proof.
-    iIntros "?". wp_bind e. iApply (twp_wand with "[$]").
+    iIntros "?". unfold texpr. wp_bind e. iApply (twp_wand with "[$]").
     iIntros (?) "/= >(%&%&->& ? &_)". by wp_pure.
   Qed.
   Lemma texpr_snd {e i j T U} : e :ᵉ{j}(i) T × U -∗ Snd e :ᵉ(i) U.
   Proof.
-    iIntros "?". wp_bind e. iApply (twp_wand with "[$]").
+    iIntros "?". unfold texpr. wp_bind e. iApply (twp_wand with "[$]").
     iIntros (?) "/= >(%&%&->&_& ?)". by wp_pure.
   Qed.
 
@@ -101,16 +104,16 @@ Section expr.
   Lemma texpr_fun_intro `{! i ≤ⁿ j} {x e k T U} :
     □ (∀ v, v :ᵒ T -∗ subst x v e :ᵉ(i) U) -∗ (λ: x, e) :ᵉ{j}(k) (T →(i) U).
   Proof.
-    iIntros "#e". wp_pure. do 2 iModIntro=>/=. iIntros "!> % ?".
+    iIntros "#e". unfold texpr. wp_pure. do 2 iModIntro=>/=. iIntros "!> % ?".
     rewrite twpw_tinv_wsat_lt_tinv_wsat. iApply twpw_fupdw_nonval; [done|].
     wp_pure. by iApply "e".
   Qed.
   Lemma texpr_fun_call `{! i ≤ⁿ j, ! i ≤ⁿ k} {e e' T U} :
     e :ᵉ{k}(j) (T →(i) U) -∗ e' :ᵉ(j) T -∗ e e' :ᵉ(j) U.
   Proof.
-    iIntros "??". wp_bind e'. iApply (twp_wand with "[$]"). iIntros (?) ">?".
-    wp_bind e. iApply (twp_wand with "[$]"). iIntros (?) "/= >#hor".
-    iApply fupdw_twpw_fupdw. iModIntro.
+    iIntros "??". unfold texpr. wp_bind e'. iApply (twp_wand with "[$]").
+    iIntros (?) ">?". wp_bind e. iApply (twp_wand with "[$]").
+    iIntros (?) "/= >#hor". iApply fupdw_twpw_fupdw. iModIntro.
     setoid_rewrite twpw_tinv_wsat_lt_tinv_wsat.
     iApply twpw_expand; [iApply (tinv_wsat_incl (M':=j))|]. by iApply "hor".
   Qed.
@@ -119,7 +122,7 @@ Section expr.
   Lemma texpr_fun_iter `{! i ≤ⁿ j} {k e T} :
     e :ᵉ{j}(k) (T →(i) T) -∗ iter e :ᵉ(k) (ℕ × T →(i) T).
   Proof.
-    iIntros "?". wp_bind e. iApply (twp_wand with "[$]").
+    iIntros "?". unfold texpr. wp_bind e. iApply (twp_wand with "[$]").
     iIntros (f) "/= >#f". wp_lam. wp_pures. do 3 iModIntro.
     iIntros (?) "(%&%w &->&[%n ->]& #T)".
     setoid_rewrite twpw_tinv_wsat_lt_tinv_wsat.
