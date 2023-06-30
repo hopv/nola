@@ -1,6 +1,6 @@
-# Nola: Power of Deep Embedding for Later-free Impredicative Invariants
+# Nola: Power of Deep Embedding for Later-free Nested Invariants
 
-Nola is a library for achieving expressive later-free impredicative invariants
+Nola is a library for achieving expressive later-free nested invariants
 by the power of deep embedding.
 It is fully mechanized in [Coq](https://coq.inria.fr/) with the
 [Iris](https://iris-project.org/) separation logic framework.
@@ -10,7 +10,7 @@ Los Angeles, US.
 
 - [Getting Started](#getting-started)
 - [Story](#story)
-  - [Impredicative invariants](#impredicative-invariants)
+  - [Nested invariants](#nested-invariants)
   - [Obstacle: Laters](#obstacle-laters)
   - [Solution: Nola](#solution-nola)
 
@@ -105,24 +105,24 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
 
 ## Story
 
-### Impredicative Invariants
+### Nested Invariants
 
-By *impredicative invariants*, we mean various forms of invariants or
-protocols expressed by separation-logic propositions, which can flexibly model
-or reason about shared mutable state.
+By *nested invariants*, we mean various forms of invariants or
+protocols expressed by separation-logic propositions that may contain invariants
+themselves.
+They can flexibly model or reason about shared mutable state.
 Impredicative invariants have been essential in the modern usage of separation
 logic, especially [Iris](https://iris-project.org/).
 
-The standard (impredicative) invariant in Iris is `inv N P : iProp`,
+The standard invariant in Iris is `inv N P : iProp`,
 which uses the namespace `N` for access.
 Iris also uses cancellable invariants and non-atomic invariants.
 
 Also, [RustBelt](https://plv.mpi-sws.org/rustbelt/popl18/) built an Iris library
 called the lifetime logic to semantically model borrows of the
-[Rust](https://www.rust-lang.org/) programming language as rich impredicative
-invariants.
-For example, Rust's mutable borrow `&'a mut T` is modeled by an impredicative
-invariant called a full borrow `&{α} P : iProp`.
+[Rust](https://www.rust-lang.org/) programming language as rich invariants.
+For example, Rust's mutable borrow `&'a mut T` is modeled by an invariant called
+a full borrow `&{α} P : iProp`.
 It borrows during the lifetime `α` mutable state expressed by an Iris
 proposition `P : iProp`.
 This is an advanced form of cancellable invariant.
@@ -131,19 +131,17 @@ This is an advanced form of cancellable invariant.
 
 #### Step-Indexing
 
-All the existing separation logics with impredicative invariants,
+All the existing separation logics with nested invariants,
 such as [iCAP](https://www.cs.au.dk/~birke/papers/icap-conf.pdf) and Iris,
 resort to *step-indexing*.
-It is the technique of layering the logic world with step-indices `0, 1, 2, …: ℕ`,
-having notions more defined as the step-index grows.
+It is the technique of layering the logic world with step-indices
+`0, 1, 2, …: ℕ`, having notions more defined as the step-index grows.
 Why?
 
 Their separation-logic proposition `iProp` is a predicate over an abstract
 resource `Res`.
-For impredicative invariants, `Res` should be able to model agreement on
-propositions.
-So they define `Res` as some data type depending on `iProp`.
-Naively, they have a domain equation like the following,
+To model invariants, they want `Res` to model agreement on `iProp`.
+So naively, they have a domain equation like the following,
 which is a *circular* definition:
 ```
 iProp  ≜  Res → Prop     Res  ≜  F iProp
@@ -159,16 +157,16 @@ and `▶` delays the definition of a data type by one step-index.
 
 Sounds fine? But this comes with the cost of the *later modality* `▷`.
 
-Due to `▶` added to `iProp`, we can use impredicative invariants only for
-propositions under `▷`, which delays the definition of a proposition by one
-step-index.
+Due to `▶` added to `iProp`, we can use invariants only for propositions under
+`▷`, which delays the definition of a proposition by one step-index.
 ```
 inv N P ={↑N,∅}=> ▷ P ∗ (▷ P ={∅,↑N}=∗ True)
 ```
 This causes significant practical issues, especially for dealing with nested
-impredicative invariants.
+invariants.
 
-The later modality `▷` is ill-behaved: it is non-idempotent and doesn't commute with the update modality `|==>`.
+The later modality `▷` is ill-behaved: it is non-idempotent and doesn't commute
+with the update modality `|==>`.
 Various efforts have been made to get over `▷`, such as
 [later credits](https://plv.mpi-sws.org/later-credits/), but difficulties
 remain.
@@ -179,20 +177,20 @@ properties (especially, termination and total correctness) of programs.
 Indeed, recent studies
 [Simuliris](https://dl.acm.org/doi/pdf/10.1145/3498689) and
 [Fair Operational Semantics](https://dl.acm.org/doi/pdf/10.1145/3591253),
-for example, just gave up impredicative invariants in Iris for reasoning about
+for example, just gave up nested invariants in Iris for reasoning about
 rich liveness properties regarding fair scheduling.
 
 ### Solution: Nola
 
-Nola proposes a new construction of impredicative invariants,
+Nola proposes a new construction of nested invariants,
 which is free from the later modality `▷`!
 
-We can enjoy various forms of impredicative invariants, free from cumbersome
+We can enjoy various forms of nested invariants, free from cumbersome
 later handling and achieving advanced liveness verification.
 
 #### Core Idea: Deep Embedding
 
-To achieve impredicative invariants, Nola uses *deeply embedded*
+To achieve nested invariants, Nola uses *deeply embedded*
 separation-logic proposition, that is, the data type for the *syntax* `A`
 equipped with the semantic *interpretation* `⟦ ⟧ : A → iProp`.
 Now we have broken the circular definition because the resource `Res` for a
