@@ -18,25 +18,25 @@ Arguments fupdw : simpl never.
 (** Notation *)
 
 Notation "|=[ W ] => P" := (bupdw W P)
-  (at level 99, W at level 50, P at level 200,
-    format "'[  ' |=[ W ] =>  '/' P ']'") : bi_scope.
+  (at level 99, P at level 200, format "'[  ' |=[ W ] =>  '/' P ']'")
+  : bi_scope.
 Notation "P =[ W ]=∗ Q" := (P -∗ |=[W]=> Q)%I
-  (at level 99, W at level 50, Q at level 200,
-    format "'[' P  =[ W ]=∗  '/' '[' Q ']' ']'") : bi_scope.
+  (at level 99, Q at level 200, format "'[' P  =[ W ]=∗  '/' '[' Q ']' ']'")
+  : bi_scope.
 Notation "P =[ W ]=∗ Q" := (P -∗ |=[W]=> Q) : stdpp_scope.
 
 Notation "|=[ W ] { E , E' }=> P" := (fupdw E E' W P)
-  (at level 99, W at level 50, P at level 200,
+  (at level 99, P at level 200,
     format "'[  ' |=[ W ] '/' { E , E' }=>  '/' P ']'") : bi_scope.
 Notation "|=[ W ] { E }=> P" := (fupdw E E W P)
-  (at level 99, W at level 50, P at level 200,
-    format "'[  ' |=[ W ] '/' { E }=>  '/' P ']'") : bi_scope.
+  (at level 99, P at level 200, format "'[  ' |=[ W ] '/' { E }=>  '/' P ']'")
+  : bi_scope.
 Notation "P =[ W ] { E , E' }=∗ Q" := (P -∗ |=[W]{E,E'}=> Q)%I
-  (at level 99, W at level 50, Q at level 200,
+  (at level 99, Q at level 200,
     format "'[' P  =[ W ] '/' { E , E' }=∗  '/' '[' Q ']' ']'") : bi_scope.
 Notation "P =[ W ] { E , E' }=∗ Q" := (P -∗ |=[W]{E,E'}=> Q) : stdpp_scope.
 Notation "P =[ W ] { E }=∗ Q" := (P -∗ |=[W]{E}=> Q)%I
-  (at level 99, W at level 50, Q at level 200,
+  (at level 99, Q at level 200,
     format "'[' P  =[ W ] '/' { E }=∗  '/' '[' Q ']' ']'") : bi_scope.
 Notation "P =[ W ] { E }=∗ Q" := (P -∗ |=[W]{E}=> Q) : stdpp_scope.
 
