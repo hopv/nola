@@ -40,6 +40,22 @@ Notation "P =[ W ] { E }=∗ Q" := (P -∗ |=[W]{E}=> Q)%I
     format "'[' P  =[ W ] '/' { E }=∗  '/' '[' Q ']' ']'") : bi_scope.
 Notation "P =[ W ] { E }=∗ Q" := (P -∗ |=[W]{E}=> Q) : stdpp_scope.
 
+(** We move the position of [▷] to make the notation work *)
+Notation "|=[ W ] { E }▷[ E' ] => P" := (|=[W]{E,E'}=> ▷ |=[W]{E',E}=> P)%I
+  (at level 99, P at level 200,
+    format "'[  ' |=[ W ] '/' { E }▷[ E' ] =>  '/' P ']'") : bi_scope.
+Notation "|=[ W ] { E }▷=> P" := (|=[W]{E}=> ▷ |=[W]{E}=> P)%I
+  (at level 99, P at level 200,
+    format "'[  ' |=[ W ] '/' { E }▷=>  '/' P ']'") : bi_scope.
+Notation "|=[ W ] { E }▷[ E' ] =>^ n P" :=
+  (Nat.iter n (λ Q, |=[W]{E}▷[E'] => Q) P)%I
+  (at level 99, P at level 200, n at level 9,
+    format "'[  ' |=[ W ] '/' { E }▷[ E' ] =>^ n  '/' P ']'") : bi_scope.
+Notation "|=[ W ] { E }▷=>^ n P" :=
+  (Nat.iter n (λ Q, |=[W]{E}▷=> Q) P)%I
+  (at level 99, P at level 200, n at level 9,
+    format "'[  ' |=[ W ] '/' { E }▷=>^ n  '/' P ']'") : bi_scope.
+
 (** ** Lemmas *)
 Section lemmas.
   Context {PROP : bi}.
@@ -218,5 +234,17 @@ Section lemmas.
   Proof.
     iIntros "W'W WP W'". iDestruct ("W'W" with "W'") as "[W WW']".
     iMod ("WP" with "W") as "[W $]". iApply "WW'". by iModIntro.
+  Qed.
+
+  (** Turn [step_fupdwN] into [step_fupdN]
+
+    Combining this with adequacy lemmas for [step_fupdN],
+    one can prove adequacy lemmas for [step_fupdwN]. *)
+  Lemma step_fupdwN_step_fupdN `{!BiFUpd PROP} {W n E E' P} :
+    (|=[W]{E}▷[E']=>^n P) ⊢ W -∗ |={E}[E']▷=>^n W ∗ P.
+  Proof.
+    elim: n=>/=; [by iIntros; iFrame|]=> n ->.
+    iIntros "big W". iMod ("big" with "W") as "[W big]". iModIntro. iNext.
+    iMod ("big" with "W") as "[W big]". iModIntro. by iApply "big".
   Qed.
 End lemmas.
