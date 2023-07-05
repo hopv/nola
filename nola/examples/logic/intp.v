@@ -46,6 +46,7 @@ Section ncintp.
     λ s, match c with
     | ⟨▷⟩ => ▷ ni s _ P
     | ⟨○(i)⟩ => ⸨ P ⸩(s,i)
+    | nc_ag γ => nag γ P
     | nc_inv i N => nninv s i N P | nc_na_inv i p N => na_nninv s i p N P
     end%I.
 

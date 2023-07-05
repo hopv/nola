@@ -94,6 +94,7 @@ Variant ncon2 : Type :=
 Variant ncong1 : Type :=
 | (** Later modality *) nc_later
 | (** Indirection modality *) nc_indir (i : nat)
+| (** Agreement *) nc_ag (γ : gname)
 | (** Invariant *) nc_inv (i : nat) (N : namespace)
 | (** Non-atomic invariant *) nc_na_inv
     (i : nat) (p : na_inv_pool_name) (N : namespace).
@@ -231,6 +232,8 @@ Notation "○{ Γᵘ } ( i ) P" := (n_g1 (Γᵘ:=Γᵘ) ⟨○(i)⟩ P)
   (at level 20, right associativity, only parsing) : nProp_scope.
 Notation "○ ( i ) P" := (n_g1 ⟨○(i)⟩ P)
   (at level 20, right associativity, format "○ ( i )  P") : nProp_scope.
+Notation n_ag' Γᵘ γ P := (n_g1 (Γᵘ:=Γᵘ) (nc_ag γ) P) (only parsing).
+Notation n_ag γ P := (n_ag' _ γ P).
 Notation n_inv' Γᵘ i N P := (n_g1 (Γᵘ:=Γᵘ) (nc_inv i N) P) (only parsing).
 Notation n_inv i N P := (n_inv' _ i N P).
 Notation n_na_inv' Γᵘ i p N P :=
