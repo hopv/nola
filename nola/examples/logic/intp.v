@@ -23,9 +23,8 @@ Section ncintp.
   Definition ncintp0 (c : ncon0) : iProp Σ :=
     match c with
     | ⟨⌜φ⌝⟩ => ⌜φ⌝
-    | nc_na_own p E => na_own p E  | nc_cinv_own γ q => cinv_own γ q
-    | ⟨↦{dq}|l,v⟩ => l ↦{dq} v
-    | ⟨↦_J|l,v⟩ => l ↦_J v | ⟨↦□_J|l⟩ => l ↦_J □
+    | nc_na_own p E => na_own p E | nc_cinv_own γ q => cinv_own γ q
+    | ⟨↦{dq}|l,v⟩ => l ↦{dq} v | ⟨↦_J|l,v⟩ => l ↦_J v | ⟨↦□_J|l⟩ => l ↦_J □
     | nc_meta_token l E => meta_token l E
     | nc_steps_lb n => steps_lb n | nc_proph p pvs => proph p pvs
     end.
@@ -38,8 +37,7 @@ Section ncintp.
     end.
   Definition ncintp2 (c : ncon2) (P Q : iProp Σ) : iProp Σ :=
     match c with
-    | ⟨∧⟩ => P ∧ Q | ⟨∨⟩ => P ∨ Q | ⟨→⟩ => P → Q
-    | ⟨∗⟩ => P ∗ Q | ⟨-∗⟩ => P -∗ Q
+    | ⟨∧⟩ => P ∧ Q | ⟨∨⟩ => P ∨ Q | ⟨→⟩ => P → Q | ⟨∗⟩ => P ∗ Q | ⟨-∗⟩ => P -∗ Q
     | ⟨|=[]=>⟩ => |=[P]=> Q | ⟨|=[]{E,E'}=>⟩ => |=[P]{E,E'}=> Q
     end.
   Definition ncintpg1 (c : ncong1) (P : nPropL (;ᵞ))
@@ -48,8 +46,7 @@ Section ncintp.
     λ s, match c with
     | ⟨▷⟩ => ▷ ni s _ P
     | ⟨○(i)⟩ => ⸨ P ⸩(s,i)
-    | nc_inv i N => nninv s i N P
-    | nc_na_inv i p N => na_nninv s i p N P
+    | nc_inv i N => nninv s i N P | nc_na_inv i p N => na_nninv s i p N P
     end%I.
 
   (** [ncintp] is non-expansive *)
