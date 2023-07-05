@@ -35,6 +35,12 @@ Section facts.
   Proof. by rewrite/= nintp_fp_nintp. Qed.
   Fact nintp_indir {κ s i} {P : _ (;ᵞ)} : ⟦ ○{nil}(i) P ⟧{κ}(s) ⊣⊢ ⸨ P ⸩(s,i).
   Proof. done. Qed.
+  Fact nintp_inv {κ s i N} {P : _ (;ᵞ)} :
+    ⟦ n_inv i N P ⟧{κ}(s) ⊣⊢ nninv s i N P.
+  Proof. done. Qed.
+  Fact nintp_na_inv {κ s i p N} {P : _ (;ᵞ)} :
+    ⟦ n_na_inv i p N P ⟧{κ}(s) ⊣⊢ na_nninv s i p N P.
+  Proof. done. Qed.
   Fact nintp_wpw {κ W s st E e Φ} :
     ⟦ WP[W] e @ st ; E {{ Φ }} ⟧{κ}(s) ⊣⊢
       WP[⟦ W ⟧(s)] e @ st ; E {{ v, ⟦ Φ v ⟧(s) }}.
