@@ -129,7 +129,7 @@ Notation "⟨○( i )⟩" := (nc_indir i) (format "⟨○( i )⟩") : nola_scope
   and the domain [A : Type] of [n_forall]/[n_exist].
 
   Connectives that operate on the context [Γ : nctx] take decomposed contexts
-  [Γᵘ, Γᵍ] for smooth type inference *)
+  [Γᵘ, Γᵍ] for smooth type inference. *)
 
 Inductive nProp : nkind → nctx → Type :=
 
@@ -279,7 +279,7 @@ Notation "!ᵘˢ P" := (n_subus P) (at level 20, right associativity)
 
 (** ** [↑ˡ P]: Turn [P : nProp κ Γ] into [nPropL Γ]
   Although the main interest is the case [κ = nS],
-  we keep the function polymorphic over [κ] for ease of definition *)
+  we keep the function polymorphic over [κ] for ease of definition. *)
 Reserved Notation "↑ˡ P" (at level 20, right associativity).
 Fixpoint nlarge {κ Γ} (P : nProp κ Γ) : nPropL Γ :=
   match P with
