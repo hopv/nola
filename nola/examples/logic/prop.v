@@ -59,43 +59,41 @@ Notation "9@ a" := (!9 @! a) (at level 20, right associativity) : nola_scope.
 
 (** Nullary *)
 Variant ncon0 : Type :=
-| (** Pure proposition *) nc_pure (φ : Prop) : ncon0
+| (** Pure proposition *) nc_pure (φ : Prop)
 | (** Non-atomic invariant token *) nc_na_own
-    (p : na_inv_pool_name) (E : coPset) : ncon0
-| (** Cancelable invariant token *) nc_cinv_own (γ : gname) (q : frac) : ncon0
-| (** Points-to token *) nc_mapsto (l : loc) (dq : dfrac) (v : val) : ncon0
+    (p : na_inv_pool_name) (E : coPset)
+| (** Cancelable invariant token *) nc_cinv_own (γ : gname) (q : frac)
+| (** Points-to token *) nc_mapsto (l : loc) (dq : dfrac) (v : val)
 | (** Owning invariant points-to token *) nc_inv_mapsto_own
-    (l : loc) (v : val) (I : val → Prop) : ncon0
-| (** Invariant points-to token *) nc_inv_mapsto
-    (l : loc) (I : val → Prop) : ncon0
-| (** Meta token *) nc_meta_token (l : loc) (E : coPset) : ncon0
-| (** Step number token *) nc_steps_lb (n : nat) : ncon0
-| (** Prophecy token *) nc_proph
-    (p : proph_id) (pvs : list (val * val)) : ncon0.
+    (l : loc) (v : val) (I : val → Prop)
+| (** Invariant points-to token *) nc_inv_mapsto (l : loc) (I : val → Prop)
+| (** Meta token *) nc_meta_token (l : loc) (E : coPset)
+| (** Step number token *) nc_steps_lb (n : nat)
+| (** Prophecy token *) nc_proph (p : proph_id) (pvs : list (val * val)).
 (** Nullary, large *)
 Variant nconl0 : Type :=
-| (** Invariant world satisfaction *) nc_inv_wsat : nconl0.
+| (** Invariant world satisfaction *) nc_inv_wsat.
 (** Unary *)
 Variant ncon1 : Type :=
-| (** Except-0 modality *) nc_except_0 : ncon1
-| (** Persistence modality *) nc_persistently : ncon1
-| (** Plainly modality *) nc_plainly : ncon1
-| (** Basic update modality *) nc_bupd : ncon1
-| (** Fancy update modality *) nc_fupd (E E' : coPset) : ncon1.
+| (** Except-0 modality *) nc_except_0
+| (** Persistence modality *) nc_persistently
+| (** Plainly modality *) nc_plainly
+| (** Basic update modality *) nc_bupd
+| (** Fancy update modality *) nc_fupd (E E' : coPset).
 (** Binary *)
 Variant ncon2 : Type :=
-| (** Conjunction *) nc_and : ncon2
-| (** Disjunction *) nc_or : ncon2
-| (** Implication *) nc_impl : ncon2
-| (** Separating conjunction *) nc_sep : ncon2
-| (** Magic wand *) nc_wand : ncon2
-| (** Basic update modality with the world satisfaction *) nc_bupdw : ncon2
+| (** Conjunction *) nc_and
+| (** Disjunction *) nc_or
+| (** Implication *) nc_impl
+| (** Separating conjunction *) nc_sep
+| (** Magic wand *) nc_wand
+| (** Basic update modality with the world satisfaction *) nc_bupdw
 | (** Fasic update modality with the world satisfaction *)
-    nc_fupdw (E E' : coPset) : ncon2.
+    nc_fupdw (E E' : coPset).
 (** Unary, guarding *)
 Variant ncong1 : Type :=
-| (** Later modality *) nc_later : ncong1
-| (** Indirection modality *) nc_indir (i : nat) : ncong1
+| (** Later modality *) nc_later
+| (** Indirection modality *) nc_indir (i : nat)
 | (** Invariant *) nc_inv (i : nat) (N : namespace)
 | (** Non-atomic invariant *) nc_na_inv
     (i : nat) (p : na_inv_pool_name) (N : namespace).
