@@ -1,8 +1,32 @@
-(** * Paradox *)
+(** * Paradoxes *)
 
 From nola Require Export prelude.
 From iris.proofmode Require Import proofmode.
 Local Set Warnings "-notation-overridden".
+
+(** ** Paradox of the later-eliminating total weakest precondition *)
+Module twp. Section twp.
+  Context {PROP : bi} `{!BiAffine PROP, !BiLöb PROP}.
+
+  Context {expr : Type}.
+
+  (** Pure execution *)
+  Context (pure_exec : expr → expr → Prop).
+  Local Infix "→p" := pure_exec (at level 70, no associativity).
+
+  (** Total weakest precondition *)
+  Context (twp : expr → PROP → PROP).
+  (** Later-elimination *)
+  Hypothesis twp_step : ∀{e e' P}, e →p e' → ▷ twp e' P ⊢ twp e P.
+
+  (** Loop expression *)
+  Context (loop : expr).
+  Hypotheses loop_loop : loop →p loop.
+
+  (** Paradox, saying that [loop] terminates bringing [False] *)
+  Lemma twp_loop : ⊢ twp loop False.
+  Proof. iLöb as "IH". by iApply twp_step; [apply loop_loop|]. Qed.
+End twp. End twp.
 
 (** ** Paradox of later-free invariants with an unguarded fancy update
 
