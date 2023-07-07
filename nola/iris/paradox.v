@@ -2,6 +2,7 @@
 
 From nola Require Export prelude.
 From iris.proofmode Require Import proofmode.
+Local Set Warnings "-notation-overridden".
 
 (** ** Paradox of later-free invariants with an unguarded fancy update
 
@@ -9,13 +10,10 @@ From iris.proofmode Require Import proofmode.
   quantifiers, simplified from the known proof (published in Krebbers et al.'s
   ESOP 2017 paper). *)
 Module inv. Section inv.
-  Local Set Warnings "-notation-overridden".
-
   Context {PROP : bi} `{!BiAffine PROP}.
-  Implicit Types P : PROP.
 
   (** Update modalty with a binary mask *)
-  Inductive mask := mask_empty | mask_full.
+  Context {mask : Type} (mask_empty mask_full : mask).
   Local Notation "∅" := mask_empty. Local Notation "⊤" := mask_full.
   Context (fupd : mask → PROP → PROP).
   Local Notation "|={ E }=> P" := (fupd E P) : bi_scope.
