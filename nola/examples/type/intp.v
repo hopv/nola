@@ -20,7 +20,7 @@ Proof. subst. apply tsubst_thgt. Qed.
 Section tintp.
   Context
     (* Iris resources *) `{!tintpGS L Σ}
-    (* Strong interpretation *) (s : tsintp_ty Σ).
+    (* Derivability *) (s : tderiv_ty Σ).
 
   (** Interpret [tc_0] *)
   Definition tcintp0 (c : tcon0) v : iProp Σ :=

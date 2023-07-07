@@ -1,6 +1,6 @@
 (** * Expression typing *)
 
-From nola.examples.type Require Export sintp.
+From nola.examples.type Require Export deriv.
 From nola.examples.heap_lang Require Export proofmode.
 
 (** Function Iteration *)
@@ -18,22 +18,22 @@ Section expr.
   Proof. rewrite tobj_unseal. exact _. Qed.
 
   (** Modify [:ᵒ] with type conversion *)
-  Lemma tobj_tsub {v i T j U} : T ⊑(tsintp) U → v :ᵒ{i} T ⊢ v :ᵒ{j} U.
+  Lemma tobj_tsub {v i T j U} : T ⊑(tderiv) U → v :ᵒ{i} T ⊢ v :ᵒ{j} U.
   Proof. move=> TU. rewrite tobj_unseal. apply TU. Qed.
-  Lemma tobj_teqv {v i T j U} : T ≃(tsintp) U → v :ᵒ{i} T ⊣⊢ v :ᵒ{j} U.
+  Lemma tobj_teqv {v i T j U} : T ≃(tderiv) U → v :ᵒ{i} T ⊣⊢ v :ᵒ{j} U.
   Proof. move=> TU. rewrite tobj_unseal. apply TU. Qed.
 
   (** Modify [:ᵉ] with type conversion *)
   Lemma texpr_ttrans {e i j T k U} :
-    T ==>{j,k}(i,tsintp) U →  e :ᵉ(i) T ⊢ e :ᵉ(i) U.
+    T ==>{j,k}(i,tderiv) U →  e :ᵉ(i) T ⊢ e :ᵉ(i) U.
   Proof. move=> TU. unfold texpr. do 2 f_equiv. iIntros ">?". by iApply TU. Qed.
-  Lemma texpr_tsub {e i j T k U} : T ⊑{j,k}(tsintp) U → e :ᵉ(i) T ⊢ e :ᵉ(i) U.
+  Lemma texpr_tsub {e i j T k U} : T ⊑{j,k}(tderiv) U → e :ᵉ(i) T ⊢ e :ᵉ(i) U.
   Proof. move=> ?. unfold texpr. by do 3 f_equiv. Qed.
-  Lemma texpr_teqv {e i j T k U} : T ≃{j,k}(tsintp) U → e :ᵉ(i) T ⊣⊢ e :ᵉ(i) U.
+  Lemma texpr_teqv {e i j T k U} : T ≃{j,k}(tderiv) U → e :ᵉ(i) T ⊣⊢ e :ᵉ(i) U.
   Proof. move=> ?. unfold texpr. by do 3 f_equiv. Qed.
 
   (** Modify [:ᵒ] hypothesis of [:ᵉ] with [==>] *)
-  Lemma texpr_tobj_ttrans {v e i j T k U l V} : T ==>{j,k}(i,tsintp) U →
+  Lemma texpr_tobj_ttrans {v e i j T k U l V} : T ==>{j,k}(i,tderiv) U →
     v :ᵒ T -∗ (v :ᵒ U -∗ e :ᵉ{l}(i) V) -∗ e :ᵉ(i) V.
   Proof.
     iIntros (TU) "T Ue". iApply fupdw_twpw_fupdw. rewrite tobj_unseal.

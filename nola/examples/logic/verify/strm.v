@@ -18,9 +18,9 @@ Proof. done. Qed.
 (** Interpreted [strm] *)
 Definition strmtl {κ} N N' (Φ : _ → _ (;ᵞ)) l : nProp κ (;ᵞ) :=
   ∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ strm (Γᵘ:=[]) N N' Φ l'.
-Definition strmi `{!nintpGS Σ} s N N' Φ l : iProp Σ :=
-  nninv s 0 N (Φ l) ∗ nninv s 0 N' (strmtl N N' Φ l).
-Notation strmis := (strmi nsintp).
+Definition strmi `{!nintpGS Σ} d N N' Φ l : iProp Σ :=
+  nninv d 0 N (Φ l) ∗ nninv d 0 N' (strmtl N N' Φ l).
+Notation strmis := (strmi nderiv).
 
 (** A has_multiplier of [d] is stored at [l] *)
 Definition has_mult {κ Γ} (d : Z) l : nProp κ Γ := ∃ k, l ↦ #(k * d).
@@ -41,45 +41,45 @@ Section verify.
   Context `{!nintpGS Σ}.
 
   (** [strm] is interpreted into [strmi] *)
-  Fact strm_strmi {κ N N' Φ l s} :
-    ⟦ strm N N' Φ l ⟧{κ}(s) ⊣⊢ strmi s N N' Φ l.
+  Fact strm_strmi {κ N N' Φ l d} :
+    ⟦ strm N N' Φ l ⟧{κ}(d) ⊣⊢ strmi d N N' Φ l.
   Proof. by rewrite/= rew_eq_hwf /=. Qed.
 
   (** Convert the predicate of [strmi] *)
-  Lemma strmi_convert `{!nsintpy Σ ih s} {N N' Φ Ψ l} :
-    □ ⸨ ∀ l, (Φ l ={∅}=∗ Ψ l) ∗ (Ψ l ={∅}=∗ Φ l) ⸩(s, 0) -∗
-    strmi s N N' Φ l -∗ strmi s N N' Ψ l.
+  Lemma strmi_convert `{!nderivy Σ ih d} {N N' Φ Ψ l} :
+    □ ⸨ ∀ l, (Φ l ={∅}=∗ Ψ l) ∗ (Ψ l ={∅}=∗ Φ l) ⸩(d, 0) -∗
+    strmi d N N' Φ l -∗ strmi d N N' Ψ l.
   Proof.
-    move: s nsintpy0 Φ Ψ l. apply (sintpy_acc (λ _, ∀ Φ Ψ l, _ -∗ _)).
-    move=> s ? Φ Ψ l. iIntros "#? #[??]".
+    move: d nderivy0 Φ Ψ l. apply (derivy_acc (λ _, ∀ Φ Ψ l, _ -∗ _)).
+    move=> d ? Φ Ψ l. iIntros "#? #[??]".
     iSplit; iApply nninv_convert=>//; iModIntro.
-    { iApply sintpy_map; [|done]=>/=. iIntros (s' sys' _) "Φ↔Ψ Φ".
+    { iApply derivy_map; [|done]=>/=. iIntros (d' dyd' _) "Φ↔Ψ Φ".
       iDestruct ("Φ↔Ψ" $! _) as "[ΦΨ ΨΦ]". iMod ("ΦΨ" with "Φ") as "$".
       iIntros "!> Ψ". by iApply "ΨΦ". }
-    iApply sintpy_byintp=>/=. iIntros (s' sys' [IH _]) "_ #to _ (%l' & ↦ & st)".
-    iModIntro. rewrite rew_eq_hwf /=. iDestruct "st" as "#st".
+    iApply derivy_byintp=>/=. iIntros (d' dyd' [IH _]) "_ #to _ (%l' & ↦ & s)".
+    iModIntro. rewrite rew_eq_hwf /=. iDestruct "s" as "#s".
     iDestruct ("to" with "[//]") as "?". iSplitL.
     { iExists _. iFrame "↦". rewrite rew_eq_hwf /=. by iApply IH. }
-    iIntros "(%l'' & ↦ & st') !>". iExists _. iFrame "↦".
+    iIntros "(%l'' & ↦ & s') !>". iExists _. iFrame "↦".
     rewrite !rew_eq_hwf /=. iApply IH; [|done]. iModIntro.
-    iApply (sintpy_map (sintpy0:=sys')); [|done]=>/=.
+    iApply (derivy_map (derivy0:=dyd')); [|done]=>/=.
     iIntros (? _ _) "Φ↔'Ψ %". iApply bi.sep_comm. iApply "Φ↔'Ψ".
   Qed.
 
   (** [strmi] by cons *)
-  Lemma strmi_cons `{!nsintpy Σ ih s} {N N' Φ l l'} :
-    nninv s 0 N (Φ l) -∗ strmi s N N' Φ l' -∗ (l +ₗ 1) ↦ #l' =[nninv_wsat s]=∗
-      strmi s N N' Φ l.
+  Lemma strmi_cons `{!nderivy Σ ih d} {N N' Φ l l'} :
+    nninv d 0 N (Φ l) -∗ strmi d N N' Φ l' -∗ (l +ₗ 1) ↦ #l' =[nninv_wsat d]=∗
+      strmi d N N' Φ l.
   Proof.
-    iIntros "$ #st ↦".
+    iIntros "$ #s ↦".
     iMod (nninv_alloc (strmtl _ _ _ _) with "[↦]") as "$"; [|done].
     simpl. iExists _. iFrame "↦". by rewrite rew_eq_hwf /=.
   Qed.
 
   (** [strmi] from a one-node loop *)
-  Lemma strmi_loop_1 `{!nsintpy Σ ih s} {N N' Φ l} :
-    nninv s 0 N (Φ l) -∗ (l +ₗ 1) ↦ #l =[nninv_wsat s]=∗
-      strmi s N N' Φ l.
+  Lemma strmi_loop_1 `{!nderivy Σ ih d} {N N' Φ l} :
+    nninv d 0 N (Φ l) -∗ (l +ₗ 1) ↦ #l =[nninv_wsat d]=∗
+      strmi d N N' Φ l.
   Proof.
     iIntros "#Φ ↦". iFrame "Φ".
     iMod (nninv_alloc_rec (strmtl _ _ _ _) with "[↦]") as "$"; [|done].
@@ -87,10 +87,10 @@ Section verify.
   Qed.
 
   (** [strmi] from a two-node loop *)
-  Lemma strmi_loop_2 `{!nsintpy Σ ih s} {N N' Φ l l'} :
-    nninv s 0 N (Φ l) -∗ nninv s 0 N (Φ l') -∗
-    (l +ₗ 1) ↦ #l' -∗ (l' +ₗ 1) ↦ #l =[nninv_wsat s]=∗
-      strmi s N N' Φ l ∗ strmi s N N' Φ l'.
+  Lemma strmi_loop_2 `{!nderivy Σ ih d} {N N' Φ l l'} :
+    nninv d 0 N (Φ l) -∗ nninv d 0 N (Φ l') -∗
+    (l +ₗ 1) ↦ #l' -∗ (l' +ₗ 1) ↦ #l =[nninv_wsat d]=∗
+      strmi d N N' Φ l ∗ strmi d N N' Φ l'.
   Proof.
     iIntros "#Φ #Φ' ↦ ↦'". iFrame "Φ Φ'".
     iMod (nninv_alloc_rec (strmtl _ _ _ _ ∗ strmtl _ _ _ _) with "[↦ ↦']")
@@ -103,8 +103,8 @@ Section verify.
   (** [siter] terminates under [strmis] *)
   Lemma twp_siter {N N' E Φ l} {f : val} {c : nat} : ↑N' ⊆ E →
     (∀ l : loc,
-      [[{ nninvs 0 N (Φ l) }]][nninv_wsats] f #l @ E [[{ RET #(); True }]]) -∗
-    [[{ strmis N N' Φ l }]][nninv_wsats]
+      [[{ nninvd 0 N (Φ l) }]][nninv_wsatd] f #l @ E [[{ RET #(); True }]]) -∗
+    [[{ strmis N N' Φ l }]][nninv_wsatd]
       siter f #c #l @ E
     [[{ RET #(); True }]].
   Proof.
@@ -112,8 +112,8 @@ Section verify.
     iInduction c as [|c] "IH" forall (l) "ihd itl"; wp_rec; wp_pures;
       [by iApply "Ψ"|].
     wp_apply "f"; [done|]. iIntros "_". wp_pures. wp_bind (! _)%E.
-    iMod (nninvs_acc with "itl") as "/=[(%l' & ↦ & st) cl]"; [done|].
-    rewrite rew_eq_hwf /=. iDestruct "st" as "#[??]". wp_load. iModIntro.
+    iMod (nninvd_acc with "itl") as "/=[(%l' & ↦ & s) cl]"; [done|].
+    rewrite rew_eq_hwf /=. iDestruct "s" as "#[??]". wp_load. iModIntro.
     iMod ("cl" with "[↦]") as "_".
     { iExists _. rewrite rew_eq_hwf /=. iFrame "↦". by iSplit. }
     iModIntro. wp_pures. have ->: (S c - 1)%Z = c by lia.
@@ -123,8 +123,8 @@ Section verify.
   (** [siter_nd] terminates under [strmis] *)
   Lemma twp_siter_nd {N N' E Φ l} {f : val} : ↑N' ⊆ E →
     (∀ l : loc,
-      [[{ nninvs 0 N (Φ l) }]][nninv_wsats] f #l @ E [[{ RET #(); True }]]) -∗
-    [[{ strmis N N' Φ l }]][nninv_wsats]
+      [[{ nninvd 0 N (Φ l) }]][nninv_wsatd] f #l @ E [[{ RET #(); True }]]) -∗
+    [[{ strmis N N' Φ l }]][nninv_wsatd]
       siter_nd f #l @ E
     [[{ RET #(); True }]].
   Proof.
@@ -135,8 +135,8 @@ Section verify.
   (** [siter_nd_forks] terminates under [strmis] *)
   Lemma twp_siter_nd_forks {N N' E Φ l} {f : val} {c : nat} :
     (∀ l : loc,
-      [[{ nninvs 0 N (Φ l) }]][nninv_wsats] f #l [[{ RET #(); True }]]) -∗
-    [[{ strmis N N' Φ l }]][nninv_wsats]
+      [[{ nninvd 0 N (Φ l) }]][nninv_wsatd] f #l [[{ RET #(); True }]]) -∗
+    [[{ strmis N N' Φ l }]][nninv_wsatd]
       siter_nd_forks f #c #l @ E
     [[{ RET #(); True }]].
   Proof.
@@ -149,8 +149,8 @@ Section verify.
   (** [siter_nd_forks_nd] terminates under [strmis] *)
   Lemma twp_siter_nd_forks_nd {N N' E Φ l} {f : val} :
     (∀ l : loc,
-      [[{ nninvs 0 N (Φ l) }]][nninv_wsats] f #l [[{ RET #(); True }]]) -∗
-    [[{ strmis N N' Φ l }]][nninv_wsats]
+      [[{ nninvd 0 N (Φ l) }]][nninv_wsatd] f #l [[{ RET #(); True }]]) -∗
+    [[{ strmis N N' Φ l }]][nninv_wsatd]
       siter_nd_forks_nd f #l @ E
     [[{ RET #(); True }]].
   Proof.
@@ -158,31 +158,31 @@ Section verify.
     iIntros (?) "_". by wp_apply twp_siter_nd_forks.
   Qed.
 
-  (** [incr_faa] on [nninvs] over [has_mult] *)
+  (** [incr_faa] on [nninvd] over [has_mult] *)
   Lemma twp_incr_faa {N E d l} : ↑N ⊆ E →
-    [[{ nninvs 0 N (has_mult d l) }]][nninv_wsats]
+    [[{ nninvd 0 N (has_mult d l) }]][nninv_wsatd]
       incr_faa d #l @ E
     [[{ RET #(); True }]].
   Proof.
     iIntros (??) "#? Φ". wp_lam. wp_bind (FAA _ _).
-    iMod (nninvs_acc with "[//]") as "/=[[%k ↦] cl]"; [done|]. wp_faa.
+    iMod (nninvd_acc with "[//]") as "/=[[%k ↦] cl]"; [done|]. wp_faa.
     iModIntro. iMod ("cl" with "[↦]") as "_".
     { iExists _. by have ->: (k * d + d = (k + 1) * d)%Z by lia. }
     iModIntro. wp_pures. by iApply "Φ".
   Qed.
 
-  (** [may_incr_cas] on [nninvs] over [has_mult] *)
+  (** [may_incr_cas] on [nninvd] over [has_mult] *)
   Lemma twp_may_incr_cas' {N E d l} {c : nat} : ↑N ⊆ E →
-    [[{ nninvs 0 N (has_mult d l) }]][nninv_wsats]
+    [[{ nninvd 0 N (has_mult d l) }]][nninv_wsatd]
       may_incr_cas' d #c #l @ E
     [[{ RET #(); True }]].
   Proof.
     iIntros (??) "#? Φ".
     iInduction c as [|c] "IH"; wp_lam; wp_pures; [by iApply "Φ"|].
-    wp_bind (! _)%E. iMod (nninvs_acc with "[//]") as "/=[[%k ↦] cl]"; [done|].
+    wp_bind (! _)%E. iMod (nninvd_acc with "[//]") as "/=[[%k ↦] cl]"; [done|].
     wp_load. iModIntro. iMod ("cl" with "[↦]") as "_"; [by iExists _|].
     iModIntro. wp_pures. wp_bind (CmpXchg _ _ _).
-    iMod (nninvs_acc with "[//]") as "/=[[%k' ↦] cl]"; [done|].
+    iMod (nninvd_acc with "[//]") as "/=[[%k' ↦] cl]"; [done|].
     case (decide (k' * d = k * d)%Z)=> [->|?].
     - wp_apply (twp_cmpxchg_suc with "↦")=>//; [solve_vals_compare_safe|].
       iIntros "↦". iMod ("cl" with "[↦]") as "_".
@@ -194,7 +194,7 @@ Section verify.
       wp_pures. have ->: (S c - 1)%Z = c by lia. by iApply "IH".
   Qed.
   Lemma twp_may_incr_cas {N E d l} : ↑N ⊆ E →
-    [[{ nninvs 0 N (has_mult d l) }]][nninv_wsats]
+    [[{ nninvd 0 N (has_mult d l) }]][nninv_wsatd]
       may_incr_cas d #l @ E
     [[{ RET #(); True }]].
   Proof.

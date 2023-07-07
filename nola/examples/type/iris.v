@@ -2,7 +2,7 @@
 
 From nola.examples.type Require Export type.
 From nola.util Require Export prod.
-From nola.iris Require Export sintp inv wp.
+From nola.iris Require Export deriv inv wp.
 From nola.examples.heap_lang Require Export primitive_laws.
 From iris.proofmode Require Export proofmode.
 Import EqNotations.
@@ -183,20 +183,20 @@ Class tintpGS (L : nat) (Σ : gFunctors) := TintpGS {
 }.
 Arguments TintpGS {_ _} _ _.
 
-(** ** Strong interpretation structure *)
+(** ** Derivability structure *)
 
-(** [intps] for [type] *)
-Definition tintps Σ : intps := Intps unit (λ _, sigT tinvd) (iProp Σ).
+(** [derivs] for [type] *)
+Definition tderivs Σ : derivs := Intps unit (λ _, sigT tinvd) (iProp Σ).
 
-(** Notation for [tintps] *)
-Notation tsintp_ty Σ := (sintp_ty (tintps Σ)).
-Notation "⸨ Tx ⸩ ( s )" := (sunwrap s (Sarg () (existT _ Tx)))
+(** Notation for [tderivs] *)
+Notation tderiv_ty Σ := (deriv_ty (tderivs Σ)).
+Notation "⸨ Tx ⸩ ( s )" := (dunwrap s (Darg () (existT _ Tx)))
   (format "'[' ⸨  Tx  ⸩ '/  ' ( s ) ']'") : nola_scope.
 
 (** [tguard]: Proposition for [t_guard] *)
-Definition tguard {Σ i} (s : tsintp_ty Σ) (T : type i (;ᵞ)) (v : val)
+Definition tguard {Σ i} (s : tderiv_ty Σ) (T : type i (;ᵞ)) (v : val)
   : iProp Σ := □ ⸨ tinvd_guard T v ⸩(s).
 
 (** [tref]: Proposition for [t_ref] *)
-Definition tref {Σ i} (s : tsintp_ty Σ) (l : loc) (T : type i (;ᵞ))
+Definition tref {Σ i} (s : tderiv_ty Σ) (l : loc) (T : type i (;ᵞ))
   : iProp Σ := □ ⸨ tinvd_ref l T ⸩(s).

@@ -1,67 +1,67 @@
 (** * Facts *)
 
-From nola.examples.logic Require Export sintp.
+From nola.examples.logic Require Export deriv.
 
 Section facts.
   Context `{!nintpGS Σ}.
 
   (** ** Behavior of [nintp] *)
-  Fact nintp_pure {κ s φ} : ⟦ ⌜φ⌝ ⟧{κ}(s) ⊣⊢ ⌜φ⌝.
+  Fact nintp_pure {κ d φ} : ⟦ ⌜φ⌝ ⟧{κ}(d) ⊣⊢ ⌜φ⌝.
   Proof. done. Qed.
-  Fact nintp_persistently {κ s P} : ⟦ □ P ⟧{κ}(s) ⊣⊢ □ ⟦ P ⟧{κ}(s).
+  Fact nintp_persistently {κ d P} : ⟦ □ P ⟧{κ}(d) ⊣⊢ □ ⟦ P ⟧{κ}(d).
   Proof. done. Qed.
-  Fact nintp_plainly {κ s P} : ⟦ ■ P ⟧{κ}(s) ⊣⊢ ■ ⟦ P ⟧{κ}(s).
+  Fact nintp_plainly {κ d P} : ⟦ ■ P ⟧{κ}(d) ⊣⊢ ■ ⟦ P ⟧{κ}(d).
   Proof. done. Qed.
-  Fact nintp_bupd {κ s P} : ⟦ |==> P ⟧{κ}(s) ⊣⊢ |==> ⟦ P ⟧{κ}(s).
+  Fact nintp_bupd {κ d P} : ⟦ |==> P ⟧{κ}(d) ⊣⊢ |==> ⟦ P ⟧{κ}(d).
   Proof. done. Qed.
-  Fact nintp_fupd {κ s P E E'} :
-    ⟦ |={E,E'}=> P ⟧{κ}(s) ⊣⊢ |={E,E'}=> ⟦ P ⟧{κ}(s).
+  Fact nintp_fupd {κ d P E E'} :
+    ⟦ |={E,E'}=> P ⟧{κ}(d) ⊣⊢ |={E,E'}=> ⟦ P ⟧{κ}(d).
   Proof. done. Qed.
-  Fact nintp_and {κ s P Q} : ⟦ P ∧ Q ⟧{κ}(s) ⊣⊢ ⟦ P ⟧{κ}(s) ∧ ⟦ Q ⟧{κ}(s).
+  Fact nintp_and {κ d P Q} : ⟦ P ∧ Q ⟧{κ}(d) ⊣⊢ ⟦ P ⟧{κ}(d) ∧ ⟦ Q ⟧{κ}(d).
   Proof. done. Qed.
-  Fact nintp_or {κ s P Q} : ⟦ P ∨ Q ⟧{κ}(s) ⊣⊢ ⟦ P ⟧{κ}(s) ∨ ⟦ Q ⟧{κ}(s).
+  Fact nintp_or {κ d P Q} : ⟦ P ∨ Q ⟧{κ}(d) ⊣⊢ ⟦ P ⟧{κ}(d) ∨ ⟦ Q ⟧{κ}(d).
   Proof. done. Qed.
-  Fact nintp_impl {κ s P Q} : ⟦ P → Q ⟧{κ}(s) ⊣⊢ (⟦ P ⟧{κ}(s) → ⟦ Q ⟧{κ}(s)).
+  Fact nintp_impl {κ d P Q} : ⟦ P → Q ⟧{κ}(d) ⊣⊢ (⟦ P ⟧{κ}(d) → ⟦ Q ⟧{κ}(d)).
   Proof. done. Qed.
-  Fact nintp_sep {κ s P Q} : ⟦ P ∗ Q ⟧{κ}(s) ⊣⊢ ⟦ P ⟧{κ}(s) ∗ ⟦ Q ⟧{κ}(s).
+  Fact nintp_sep {κ d P Q} : ⟦ P ∗ Q ⟧{κ}(d) ⊣⊢ ⟦ P ⟧{κ}(d) ∗ ⟦ Q ⟧{κ}(d).
   Proof. done. Qed.
-  Fact nintp_wand {κ s P Q} : ⟦ P -∗ Q ⟧{κ}(s) ⊣⊢ (⟦ P ⟧{κ}(s) -∗ ⟦ Q ⟧{κ}(s)).
+  Fact nintp_wand {κ d P Q} : ⟦ P -∗ Q ⟧{κ}(d) ⊣⊢ (⟦ P ⟧{κ}(d) -∗ ⟦ Q ⟧{κ}(d)).
   Proof. done. Qed.
-  Fact nintp_forall {κ s A Φ} : ⟦ ∀' Φ ⟧{κ}(s) ⊣⊢ ∀ x : A, ⟦ Φ x ⟧{κ}(s).
+  Fact nintp_forall {κ d A Φ} : ⟦ ∀' Φ ⟧{κ}(d) ⊣⊢ ∀ x : A, ⟦ Φ x ⟧{κ}(d).
   Proof. done. Qed.
-  Fact nintp_exist {κ s A Φ} : ⟦ ∃' Φ ⟧{κ}(s) ⊣⊢ ∃ x : A, ⟦ Φ x ⟧{κ}(s).
+  Fact nintp_exist {κ d A Φ} : ⟦ ∃' Φ ⟧{κ}(d) ⊣⊢ ∃ x : A, ⟦ Φ x ⟧{κ}(d).
   Proof. done. Qed.
-  Fact nintp_later {κ s} {P : _ (;ᵞ)} : ⟦ ▷{nil} P ⟧{κ}(s) ⊣⊢ ▷ ⟦ P ⟧(s).
+  Fact nintp_later {κ d} {P : _ (;ᵞ)} : ⟦ ▷{nil} P ⟧{κ}(d) ⊣⊢ ▷ ⟦ P ⟧(d).
   Proof. by rewrite/= nintp_fp_nintp. Qed.
-  Fact nintp_indir {κ s i} {P : _ (;ᵞ)} : ⟦ ○{nil}(i) P ⟧{κ}(s) ⊣⊢ ⸨ P ⸩(s,i).
+  Fact nintp_indir {κ d i} {P : _ (;ᵞ)} : ⟦ ○{nil}(i) P ⟧{κ}(d) ⊣⊢ ⸨ P ⸩(d,i).
   Proof. done. Qed.
-  Fact nintp_ag {κ s γ} {P : _ (;ᵞ)} : ⟦ n_ag γ P ⟧{κ}(s) ⊣⊢ nag γ P.
+  Fact nintp_ag {κ d γ} {P : _ (;ᵞ)} : ⟦ n_ag γ P ⟧{κ}(d) ⊣⊢ nag γ P.
   Proof. done. Qed.
-  Fact nintp_inv {κ s i N} {P : _ (;ᵞ)} :
-    ⟦ n_inv i N P ⟧{κ}(s) ⊣⊢ nninv s i N P.
+  Fact nintp_inv {κ d i N} {P : _ (;ᵞ)} :
+    ⟦ n_inv i N P ⟧{κ}(d) ⊣⊢ nninv d i N P.
   Proof. done. Qed.
-  Fact nintp_na_inv {κ s i p N} {P : _ (;ᵞ)} :
-    ⟦ n_na_inv i p N P ⟧{κ}(s) ⊣⊢ na_nninv s i p N P.
+  Fact nintp_na_inv {κ d i p N} {P : _ (;ᵞ)} :
+    ⟦ n_na_inv i p N P ⟧{κ}(d) ⊣⊢ na_nninv d i p N P.
   Proof. done. Qed.
-  Fact nintp_wpw {κ W s st E e Φ} :
-    ⟦ WP[W] e @ st ; E {{ Φ }} ⟧{κ}(s) ⊣⊢
-      WP[⟦ W ⟧(s)] e @ st ; E {{ v, ⟦ Φ v ⟧(s) }}.
+  Fact nintp_wpw {κ d W s E e Φ} :
+    ⟦ WP[W] e @ s ; E {{ Φ }} ⟧{κ}(d) ⊣⊢
+      WP[⟦ W ⟧(d)] e @ s ; E {{ v, ⟦ Φ v ⟧(d) }}.
   Proof. done. Qed.
-  Fact nintp_twpw {κ W s st E e Φ} :
-    ⟦ WP[W] e @ st ; E [{ Φ }] ⟧{κ}(s) ⊣⊢
-      WP[⟦ W ⟧(s)] e @ st ; E [{ v, ⟦ Φ v ⟧(s) }].
+  Fact nintp_twpw {κ d W s E e Φ} :
+    ⟦ WP[W] e @ s ; E [{ Φ }] ⟧{κ}(d) ⊣⊢
+      WP[⟦ W ⟧(d)] e @ s ; E [{ v, ⟦ Φ v ⟧(d) }].
   Proof. done. Qed.
-  Fact nintp_n_forall {κ s V P} : ⟦ ∀: V, P ⟧{κ}(s) ⊣⊢ ∀ Φ, ⟦ P /: Φ ⟧(s).
+  Fact nintp_n_forall {κ d V P} : ⟦ ∀: V, P ⟧{κ}(d) ⊣⊢ ∀ Φ, ⟦ P /: Φ ⟧(d).
   Proof. simpl. f_equiv=> ?. by rewrite rew_eq_hwf. Qed.
-  Fact nintp_n_exist {κ s V P} : ⟦ ∃: V, P ⟧{κ}(s) ⊣⊢ ∃ Φ, ⟦ P /: Φ ⟧(s).
+  Fact nintp_n_exist {κ d V P} : ⟦ ∃: V, P ⟧{κ}(d) ⊣⊢ ∃ Φ, ⟦ P /: Φ ⟧(d).
   Proof. simpl. f_equiv=> ?. by rewrite rew_eq_hwf. Qed.
-  Fact nintp_n_recs {κ s A Φ} {a : A} :
-    ⟦ rec:ˢ' Φ a ⟧{κ}(s) ⊣⊢ ⟦ Φ a /: rec:ˢ' Φ ⟧(s).
+  Fact nintp_n_recs {κ d A Φ} {a : A} :
+    ⟦ rec:ˢ' Φ a ⟧{κ}(d) ⊣⊢ ⟦ Φ a /: rec:ˢ' Φ ⟧(d).
   Proof. by rewrite/= rew_eq_hwf. Qed.
-  Fact nintp_n_recl {s A Φ} {a : A} :
-    ⟦ rec:ˡ' Φ a ⟧(s) ⊣⊢ ⟦ Φ a /: rec:ˡ' Φ ⟧(s).
+  Fact nintp_n_recl {d A Φ} {a : A} :
+    ⟦ rec:ˡ' Φ a ⟧(d) ⊣⊢ ⟦ Φ a /: rec:ˡ' Φ ⟧(d).
   Proof. by rewrite/= rew_eq_hwf. Qed.
-  Fact nintp_subus {s P} : ⟦ !ᵘˢ P ⟧(s) ⊣⊢ ⟦ ↑ˡ P ⟧(s).
+  Fact nintp_subus {d P} : ⟦ !ᵘˢ P ⟧(d) ⊣⊢ ⟦ ↑ˡ P ⟧(d).
   Proof. by rewrite/= nintpS_nintp_nlarge. Qed.
 
   (** On [nag] *)
@@ -71,87 +71,87 @@ Section facts.
     iDestruct (own_valid with "o") as %v. by apply to_agree_op_valid_L in v.
   Qed.
 
-  Context `{!nsintpy Σ ih s}.
+  Context `{!nderivy Σ ih d}.
   Implicit Type (i j : nat) (P Q : nPropL (;ᵞ)).
 
-  (** Make connectives go inside the strong interpretation *)
-  Fact sintpy_and {i P Q} :
-    ⸨ P ⸩(s, i) ∧ ⸨ Q ⸩(s, i) -∗ ⸨ P ∧ Q ⸩(s, i).
+  (** Make connectives go inside the derivability *)
+  Fact derivy_and {i P Q} :
+    ⸨ P ⸩(d, i) ∧ ⸨ Q ⸩(d, i) -∗ ⸨ P ∧ Q ⸩(d, i).
   Proof.
-    iIntros "PQ". iApply sintpy_byintp. iIntros (?? _) "/= #to _ _".
+    iIntros "PQ". iApply derivy_byintp. iIntros (?? _) "/= #to _ _".
     iSplit; iApply "to"; [iDestruct "PQ" as "[$_]"|iDestruct "PQ" as "[_$]"].
   Qed.
-  Fact sintpy_or {i P Q} :
-    ⸨ P ⸩(s, i) ∨ ⸨ Q ⸩(s, i) -∗ ⸨ P ∨ Q ⸩(s, i).
+  Fact derivy_or {i P Q} :
+    ⸨ P ⸩(d, i) ∨ ⸨ Q ⸩(d, i) -∗ ⸨ P ∨ Q ⸩(d, i).
   Proof.
-    iIntros "[?|?]"; iApply sintpy_byintp; iIntros (?? _) "/= #to _ _";
+    iIntros "[?|?]"; iApply derivy_byintp; iIntros (?? _) "/= #to _ _";
       [iLeft|iRight]; by iApply "to".
   Qed.
-  Fact sintpy_forall {i A} {Φ : A → nPropL (;ᵞ)} :
-    (∀ a, ⸨ Φ a ⸩(s, i)) -∗ ⸨ ∀' Φ ⸩(s, i).
+  Fact derivy_forall {i A} {Φ : A → nPropL (;ᵞ)} :
+    (∀ a, ⸨ Φ a ⸩(d, i)) -∗ ⸨ ∀' Φ ⸩(d, i).
   Proof.
-    iIntros "Φ". iApply sintpy_byintp. iIntros (?? _) "/= #to _ _ %".
+    iIntros "Φ". iApply derivy_byintp. iIntros (?? _) "/= #to _ _ %".
     iApply "to". iApply "Φ".
   Qed.
-  Fact sintpy_exist {i A} {Φ : A → nPropL (;ᵞ)} :
-    (∃ a, ⸨ Φ a ⸩(s, i)) -∗ ⸨ ∃' Φ ⸩(s, i).
+  Fact derivy_exist {i A} {Φ : A → nPropL (;ᵞ)} :
+    (∃ a, ⸨ Φ a ⸩(d, i)) -∗ ⸨ ∃' Φ ⸩(d, i).
   Proof.
-    iDestruct 1 as (a) "Φ". iApply sintpy_byintp. iIntros (?? _) "/= #to _ _".
+    iDestruct 1 as (a) "Φ". iApply derivy_byintp. iIntros (?? _) "/= #to _ _".
     iExists a. iApply "to". iApply "Φ".
   Qed.
-  Fact sintpy_sep {i P Q} :
-    ⸨ P ⸩(s, i) ∗ ⸨ Q ⸩(s, i) -∗ ⸨ P ∗ Q ⸩(s, i).
+  Fact derivy_sep {i P Q} :
+    ⸨ P ⸩(d, i) ∗ ⸨ Q ⸩(d, i) -∗ ⸨ P ∗ Q ⸩(d, i).
   Proof.
-    iIntros "[P Q]". iApply sintpy_byintp. iIntros (?? _) "/= #to _ _".
+    iIntros "[P Q]". iApply derivy_byintp. iIntros (?? _) "/= #to _ _".
     iSplitL "P"; by iApply "to".
   Qed.
-  Fact sintpy_persistently {i P} : □ ⸨ P ⸩(s, i) -∗ ⸨ □ P ⸩(s, i).
+  Fact derivy_persistently {i P} : □ ⸨ P ⸩(d, i) -∗ ⸨ □ P ⸩(d, i).
   Proof.
-    iIntros "#P". iApply sintpy_byintp. iIntros (?? _) "/= #to _ _ !>".
+    iIntros "#P". iApply derivy_byintp. iIntros (?? _) "/= #to _ _ !>".
     by iApply "to".
   Qed.
-  Fact sintpy_bupd {i P} : (|==> ⸨ P ⸩(s, i)) -∗ ⸨ |==> P ⸩(s, i).
+  Fact derivy_bupd {i P} : (|==> ⸨ P ⸩(d, i)) -∗ ⸨ |==> P ⸩(d, i).
   Proof.
-    iIntros "P". iApply sintpy_byintp. iIntros (?? _) "/= #to _ _".
+    iIntros "P". iApply derivy_byintp. iIntros (?? _) "/= #to _ _".
     by iApply "to".
   Qed.
-  Fact sintpy_fupd {i E E' P} :
-    (|={E,E'}=> ⸨ P ⸩(s, i)) -∗ ⸨ |={E,E'}=> P ⸩(s, i).
+  Fact derivy_fupd {i E E' P} :
+    (|={E,E'}=> ⸨ P ⸩(d, i)) -∗ ⸨ |={E,E'}=> P ⸩(d, i).
   Proof.
-    iIntros "P". iApply sintpy_byintp. iIntros (?? _) "/= #to _ _".
+    iIntros "P". iApply derivy_byintp. iIntros (?? _) "/= #to _ _".
     by iApply "to".
   Qed.
-  Fact sintpy_later {i P} : ▷ ⸨ P ⸩(s, i) -∗ ⸨ ▷{nil} P ⸩(s, i).
+  Fact derivy_later {i P} : ▷ ⸨ P ⸩(d, i) -∗ ⸨ ▷{nil} P ⸩(d, i).
   Proof.
-    iIntros "P". iApply sintpy_byintp. iIntros (?? _) "/= #to _ _".
+    iIntros "P". iApply derivy_byintp. iIntros (?? _) "/= #to _ _".
     rewrite nintp_fp_nintp. by iApply "to".
   Qed.
-  Fact sintpy_n_forall {i V} {P : nPropL ([V];ᵞ )} :
-    (∀ Φ, ⸨ P /: Φ ⸩(s, i)) -∗ ⸨ ∀: V, P ⸩(s, i).
+  Fact derivy_n_forall {i V} {P : nPropL ([V];ᵞ )} :
+    (∀ Φ, ⸨ P /: Φ ⸩(d, i)) -∗ ⸨ ∀: V, P ⸩(d, i).
   Proof.
-    iIntros "P". iApply sintpy_byintp. iIntros (?? _) "/= #to _ _ %".
+    iIntros "P". iApply derivy_byintp. iIntros (?? _) "/= #to _ _ %".
     rewrite rew_eq_hwf. iApply "to". iApply "P".
   Qed.
-  Fact sintpy_n_exist {i V} {P : nPropL ([V];ᵞ )} :
-    (∃ Φ, ⸨ P /: Φ ⸩(s, i)) -∗ ⸨ ∃: V, P ⸩(s, i).
+  Fact derivy_n_exist {i V} {P : nPropL ([V];ᵞ )} :
+    (∃ Φ, ⸨ P /: Φ ⸩(d, i)) -∗ ⸨ ∃: V, P ⸩(d, i).
   Proof.
-    iDestruct 1 as (Φ) "P". iApply sintpy_byintp. iIntros (?? _) "/= #to _ _".
+    iDestruct 1 as (Φ) "P". iApply derivy_byintp. iIntros (?? _) "/= #to _ _".
     iExists Φ. rewrite rew_eq_hwf. iApply "to". iApply "P".
   Qed.
 
   (** Introduce [○(i)] *)
-  Fact sintpy_indir_intro {i j P} :
-    ⸨ P ⸩(s, i) -∗ ⸨ ○{nil}(i) P ⸩(s, j).
+  Fact derivy_indir_intro {i j P} :
+    ⸨ P ⸩(d, i) -∗ ⸨ ○{nil}(i) P ⸩(d, j).
   Proof.
-    iIntros "P". iApply sintpy_byintp. iIntros (s' _ _) "/= _ #tos' _".
+    iIntros "P". iApply derivy_byintp. iIntros (d' _ _) "/= _ #tos' _".
     by iApply "tos'".
   Qed.
-  (** Eliminate [○(i)] under a strong interpration of level [j > i] *)
-  Fact sintpy_indir_elim {i j P} :
-    i < j → ⸨ ○{nil}(i) P ⸩(s, j) -∗ ⸨ P ⸩(s, j).
+  (** Eliminate [○(i)] under the derivability of level [j > i] *)
+  Fact derivy_indir_elim {i j P} :
+    i < j → ⸨ ○{nil}(i) P ⸩(d, j) -∗ ⸨ P ⸩(d, j).
   Proof.
-    move=> ij. iIntros "○P". iApply sintpy_byintp.
-    iIntros (s' _ _) "/= #to _ #s'to". iDestruct ("to" with "○P") as "/= ○P".
-    by iApply "s'to".
+    move=> ij. iIntros "○P". iApply derivy_byintp.
+    iIntros (d' _ _) "/= #to _ #d'to". iDestruct ("to" with "○P") as "/= ○P".
+    by iApply "d'to".
   Qed.
 End facts.

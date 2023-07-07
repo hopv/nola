@@ -11,14 +11,14 @@ Section verify.
   Context `{!tintpGS L Σ}.
 
   (** Type conversion on [strm] *)
-  Lemma teqv_strm_expand `{! i ≤ⁿ j} {s} {T : _ i (;ᵞ)} :
-    strm T ≃{j,i}(s) ref: T ∧ᵗ ref[1] strm (j:=i) T.
+  Lemma teqv_strm_expand `{! i ≤ⁿ j} {d} {T : _ i (;ᵞ)} :
+    strm T ≃{j,i}(d) ref: T ∧ᵗ ref[1] strm (j:=i) T.
   Proof.
     eapply teqv_trans; [apply teqv_rec_expand|]=>/=.
     by erewrite (proof_irrel (nle_trans _ _) _).
   Qed.
-  Lemma teqv_strm_lev `{! i ≤ⁿ j, ! i ≤ⁿ k} {s} {T : _ i (;ᵞ)} :
-    strm T ≃{j,k}(s) strm T.
+  Lemma teqv_strm_lev `{! i ≤ⁿ j, ! i ≤ⁿ k} {d} {T : _ i (;ᵞ)} :
+    strm T ≃{j,k}(d) strm T.
   Proof. exact teqv_rec_lev. Qed.
 
   (** Verify [fiter] over [strm] *)

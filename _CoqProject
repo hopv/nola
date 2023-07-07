@@ -10,7 +10,7 @@ nola/util/nat.v
 nola/util/prod.v
 nola/util/hgt.v
 nola/util/ctx.v
-nola/iris/sintp.v
+nola/iris/deriv.v
 nola/iris/upd.v
 nola/iris/wp.v
 nola/iris/inv.v
@@ -35,7 +35,7 @@ nola/examples/logic/prop.v
 nola/examples/logic/subst.v
 nola/examples/logic/iris.v
 nola/examples/logic/intp.v
-nola/examples/logic/sintp.v
+nola/examples/logic/deriv.v
 nola/examples/logic/facts.v
 nola/examples/logic/adequacy.v
 nola/examples/logic/inv.v
@@ -49,7 +49,7 @@ nola/examples/type/type.v
 nola/examples/type/subst.v
 nola/examples/type/iris.v
 nola/examples/type/intp.v
-nola/examples/type/sintp.v
+nola/examples/type/deriv.v
 nola/examples/type/facts.v
 nola/examples/type/adequacy.v
 nola/examples/type/rules/conv.v

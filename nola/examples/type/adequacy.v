@@ -1,6 +1,6 @@
 (** * Adequacy *)
 
-From nola.examples.type Require Export sintp.
+From nola.examples.type Require Export deriv.
 From nola.examples.heap_lang Require Export adequacy total_adequacy.
 
 (** [tinvGpreS']: Product of [ninvGpreS (tinvd ?) Σ] over [[o..o+i]] *)
@@ -57,7 +57,7 @@ Lemma texpr_adequacy `{!tintpGpreS L Σ} {e i T σ} :
   (∀ `{!tintpGS L Σ}, ⊢ e :ᵉ{i}(L) T) → sn erased_step ([e], σ).
 Proof.
   move=> totwp. eapply (heap_total _ _ _ _ (λ _, True))=> ?.
-  iMod tinv_wsat'_alloc as (?) "tw". iModIntro. iExists (tinv_wsats L).
+  iMod tinv_wsat'_alloc as (?) "tw". iModIntro. iExists (tinv_wsatd L).
   iSplitL; [done|]. iIntros "_".
   iApply twp_mono; [|iApply (totwp (TintpGS _ _))]. by iIntros.
 Qed.

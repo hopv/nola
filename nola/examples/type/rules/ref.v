@@ -1,16 +1,16 @@
 (** * Expression rules for references *)
 
-From nola.examples.type Require Export sintp.
+From nola.examples.type Require Export deriv.
 From nola.examples.heap_lang Require Export proofmode.
 
 Section eref.
   Context `{!tintpGS L Σ}.
 
   (** Allocate [ref[ ]] *)
-  Lemma ninv_tref `{!tsintpy Σ ih s, ! i <ⁿ L} {l T} :
-    ninv trefN (tinvd_ref l T) ⊢ tref s (i:=i) l T.
+  Lemma ninv_tref `{!tderivy Σ ih d, ! i <ⁿ L} {l T} :
+    ninv trefN (tinvd_ref l T) ⊢ tref d (i:=i) l T.
   Proof.
-    iIntros "#inv !>". iApply (sintpy_intro (s:=s))=>/=. iIntros (???).
+    iIntros "#inv !>". iApply (derivy_intro (d:=d))=>/=. iIntros (???).
     iApply fupdw_expand; [iApply (tinv_wsat_tninv_wsat (M:=S i))|].
     iMod (ninv_acc with "inv") as "/=[(%& ↦ & T) cl]"; [done|].
     iModIntro. iExists _. iFrame "↦ T". iIntros (?) "↦ T".
@@ -53,7 +53,7 @@ Section eref.
     iApply (twpw_atomic (e:=! _)); [done|]. iApply fupdw_tinv_wsat_le.
     iIntros (?). have ? : i <ⁿ L by exact (nlt_nle_trans _ _).
     have ? : S i ≤ⁿ j by done. iApply fupdw_expand; [iApply tinv_wsat_incl|].
-    iDestruct tsintp_sound as "to".
+    iDestruct tderiv_sound as "to".
     iMod ("to" with "ref") as (?) "(↦ & #T & cl)". iModIntro. wp_load.
     iModIntro. iApply fupdw_expand; [iApply tinv_wsat_incl|].
     by iMod ("cl" with "↦ T") as "_".
@@ -69,7 +69,7 @@ Section eref.
     iApply (twpw_atomic (e:=_ <- _)); [done|]. iApply fupdw_tinv_wsat_le.
     iIntros (?). have ? : i <ⁿ L by exact (nlt_nle_trans _ _).
     have ? : S i ≤ⁿ j by done. iApply fupdw_expand; [iApply tinv_wsat_incl|].
-    iDestruct tsintp_sound as "to".
+    iDestruct tderiv_sound as "to".
     iMod ("to" with "ref") as (?) "(↦ &_& cl)". iModIntro. wp_store.
     iModIntro. iApply fupdw_expand; [iApply tinv_wsat_incl|].
     by iMod ("cl" with "↦ T") as "_".
@@ -85,7 +85,7 @@ Section eref.
     iApply (twpw_atomic (e:=Xchg _ _)); [done|]. iApply fupdw_tinv_wsat_le.
     iIntros (?). have ? : i <ⁿ L by exact (nlt_nle_trans _ _).
     have ? : S i ≤ⁿ j by done. iApply fupdw_expand; [iApply tinv_wsat_incl|].
-    iDestruct tsintp_sound as "to".
+    iDestruct tderiv_sound as "to".
     iMod ("to" with "ref") as (?) "(↦ & ? & cl)". iModIntro. wp_xchg.
     iModIntro. iApply fupdw_expand; [iApply tinv_wsat_incl|].
     iMod ("cl" with "↦ T") as "_". by iFrame.
@@ -103,7 +103,7 @@ Section eref.
     iApply (twpw_atomic (e:=CmpXchg _ _ _)); [done|]. iApply fupdw_tinv_wsat_le.
     iIntros (?). have ? : i <ⁿ L by exact (nlt_nle_trans _ _).
     have ? : S i ≤ⁿ j by done. iApply fupdw_expand; [iApply tinv_wsat_incl|].
-    iDestruct tsintp_sound as "to".
+    iDestruct tderiv_sound as "to".
     iMod ("to" with "ref") as (?) "(↦ &[%m' ->]& cl)". iModIntro.
     case (decide (m' = m)%Z)=> [->|?];
       [wp_apply (twp_cmpxchg_suc with "↦"); [done|solve_vals_compare_safe|]|
@@ -124,7 +124,7 @@ Section eref.
     iApply (twpw_atomic (e:=FAA _ _)); [done|]. iApply fupdw_tinv_wsat_le.
     iIntros (?). have ? : i <ⁿ L by exact (nlt_nle_trans _ _).
     have ? : S i ≤ⁿ j by done. iApply fupdw_expand; [iApply tinv_wsat_incl|].
-    iDestruct tsintp_sound as "to".
+    iDestruct tderiv_sound as "to".
     iMod ("to" with "ref") as (?) "(↦ &(%m &->)& cl)". iModIntro. wp_faa.
     iModIntro. iApply fupdw_expand; [iApply tinv_wsat_incl|].
     rewrite -Nat2Z.inj_add.

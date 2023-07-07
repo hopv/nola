@@ -63,7 +63,7 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`hgt`](nola/util/hgt.v) (General height of a tree),
     [`ctx`](nola/util/ctx.v) (Context with unguarded/guarded variables)
 - [`iris/`](nola/iris) : Iris libraries
-  + [`sintp`](nola/iris/sintp.v) (Strong interpretation)
+  + [`deriv`](nola/iris/deriv.v) (Derivability)
   + [`upd`](nola/iris/upd.v) (Update),
     [`wp`](nola/iris/wp.v) (Weakest precondition)
   + [`inv`](nola/iris/inv.v) (Invariant),
@@ -77,7 +77,7 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
       [`subst`](nola/examples/logic/subst.v) (Substitution),
       [`iris`](nola/examples/logic/iris.v) (Iris preliminaries),
       [`intp`](nola/examples/logic/intp.v) (Interpretation),
-      [`sintp`](nola/examples/logic/sintp.v) (Strong interpretation)
+      [`deriv`](nola/examples/logic/deriv.v) (Derivability)
     * [`facts`](nola/examples/logic/facts.v) (Facts),
       [`adequacy`](nola/examples/logic/adequacy.v) (Adequacy),
       [`inv`](nola/examples/logic/inv.v) (Invariant),
@@ -93,7 +93,7 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
       [`subst`](nola/examples/type/subst.v) (Substitution),
       [`iris`](nola/examples/type/iris.v) (Iris preliminaries),
       [`intp`](nola/examples/type/intp.v) (Interpretation),
-      [`sintp`](nola/examples/type/sintp.v) (Strong interpretation)
+      [`deriv`](nola/examples/type/deriv.v) (Derivability)
     * [`facts`](nola/examples/type/facts.v) (Facts),
       [`adequacy`](nola/examples/type/adequacy.v) (Adequacy)
     * [`rules/`](nola/examples/type/rules/) (Typing rules)
