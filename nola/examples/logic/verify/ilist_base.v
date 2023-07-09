@@ -1,8 +1,8 @@
-(** * Base definitions for shared mutable singly linked streams *)
+(** * Base definitions for shared mutable singly linked infinite lists *)
 
 From nola.examples.heap_lang Require Export notation.
 
-(** Calls [f] on the first [c] elements of the stream by [d] *)
+(** Calls [f] on the first [c] elements of the infinite list by [d] *)
 Definition siter : val :=
   rec: "self" "f" "c" "l" :=
     if: "c" = #0 then #() else "f" "l";; "self" "f" ("c" - #1) (! ("l" +ₗ #1)).

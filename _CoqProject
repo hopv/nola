@@ -41,9 +41,9 @@ nola/examples/logic/adequacy.v
 nola/examples/logic/inv.v
 nola/examples/logic/na_inv.v
 nola/examples/logic/verify/vlist.v
-nola/examples/logic/verify/strm_base.v
-nola/examples/logic/verify/strm.v
-nola/examples/logic/verify/na_strm.v
+nola/examples/logic/verify/ilist_base.v
+nola/examples/logic/verify/ilist.v
+nola/examples/logic/verify/na_ilist.v
 
 nola/examples/type/type.v
 nola/examples/type/subst.v
@@ -55,4 +55,4 @@ nola/examples/type/adequacy.v
 nola/examples/type/rules/conv.v
 nola/examples/type/rules/expr.v
 nola/examples/type/rules/ref.v
-nola/examples/type/verify/strm.v
+nola/examples/type/verify/ilist.v

@@ -85,9 +85,10 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     * [`verify/`](nola/examples/logic/verify/) (Verification examples)
       - [`vlist`](nola/examples/logic/verify/vlist.v) 
           (Shared mutable list with values)
-      - [`strm_base`](nola/examples/logic/verify/strm_base.v),
-        [`strm`](nola/examples/logic/verify/strm.v),
-        [`na_strm`](nola/examples/logic/verify/strm.v) (Shared mutable stream)
+      - [`ilist_base`](nola/examples/logic/verify/ilist_base.v),
+        [`ilist`](nola/examples/logic/verify/ilist.v),
+        [`na_ilist`](nola/examples/logic/verify/ilist.v)
+        (Shared mutable infinite list)
   + [`type/`](nola/examples/type/) : Nola Stratified Type System
     * [`type`](nola/examples/type/type.v) (Type),
       [`subst`](nola/examples/type/subst.v) (Substitution),
@@ -102,7 +103,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
         [`ref`](nola/examples/type/rules/ref.v) (Expression typing for
           references)
     * [`verify/`](nola/examples/type/verify/) (Verification examples)
-      - [`strm`](nola/examples/type/verify/strm.v) (Shared mutable stream)
+      - [`ilist`](nola/examples/type/verify/ilist.v)
+        (Shared mutable infinite stream)
 
 ## Story
 
