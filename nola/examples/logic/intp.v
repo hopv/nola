@@ -60,7 +60,7 @@ Section ncintp.
 
   (** [ncintpg] is contractive *)
   #[export] Instance ncintpg1_contr {c P} : Contractive (ncintpg1 c P).
-  Proof. case c=>//= ??? leq ?/=. f_contractive. apply leq. Qed.
+  Proof. case c=>//= ??? leq d/=. f_contractive. apply (leq d _ _). Qed.
 
   (** [ncintp] is proper *)
   #[export] Instance ncintp1_proper : Proper ((=) ==> (≡) ==> (≡)) ncintp1.
@@ -233,7 +233,7 @@ Section nintp.
     move: κ Γ P H un gn. fix FIX 4=> κ Γ P H.
     case: P H=>//=; intros; case H=>/= he; try apply wpw_proper=> >;
       try apply twpw_proper=> >; try f_equiv=> >; try apply FIX;
-      try apply leibniz_equiv, proof_irrel;
+      try apply leibniz_equiv_iff, proof_irrel;
       rewrite rew_eq_hwf; move: nsubst'_nhgt=>/=; subst;
       rewrite (nsubstlu_nlarge (P:=P))=> ?; apply FIX.
   Qed.
