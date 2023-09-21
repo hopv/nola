@@ -98,7 +98,7 @@ Section lemmas.
     iApply (derivy_map with "[] P"). by iIntros (???) "/=$$!>[_$]".
   Qed.
 
-  (** Combine [na_nninv]d *)
+  (** Combine [na_nninv]s *)
   Lemma nninv_combine {i p N N' N'' P Q} : N ## N' → ↑N ∪ ↑N' ⊆@{coPset} ↑N'' →
     na_nninv d i p N P -∗ na_nninv d i p N' Q -∗ na_nninv d i p N'' (P ∗ Q).
   Proof.
