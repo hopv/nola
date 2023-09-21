@@ -5,21 +5,21 @@ From nola.iris Require Export wp.
 From nola.examples.heap_lang Require Export proofmode notation.
 
 (** Infinite list whose elements satisfy the condition [Φ] *)
-Definition ilist {κ Γᵘ Γᵍ} (N N' : namespace) (Φ : loc → nPropL (;ᵞ Γᵘ ++ Γᵍ))
+Definition ilist {κ Γᵘ Γᵍ} (N : namespace) (Φ : loc → nPropL (;ᵞ Γᵘ ++ Γᵍ))
   : loc → nProp κ (Γᵘ;ᵞ Γᵍ) :=
   (rec:ˢ l, n_inv' (_::_) N (¢ᵍ Φ l) ∗
-    n_inv' (_::_) N' (∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ %ᵍˢ 0@ l'))%n.
+    n_inv' (_::_) N (∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ %ᵍˢ 0@ l'))%n.
 
 (** Substitution over [ilist] *)
-Fact ilist_nsubst {κ N N' V Φ Ψ l} :
-  ilist (κ:=κ) (Γᵘ:=[V]) N N' Φ l /: Ψ = ilist (Γᵘ:=[]) N N' (λ l, Φ l /:ᵍ Ψ) l.
+Fact ilist_nsubst {κ N V Φ Ψ l} :
+  ilist (κ:=κ) (Γᵘ:=[V]) N Φ l /: Ψ = ilist (Γᵘ:=[]) N (λ l, Φ l /:ᵍ Ψ) l.
 Proof. done. Qed.
 
 (** Interpreted [ilist] *)
-Definition ilisttl {κ} N N' (Φ : _ → _ (;ᵞ)) l : nProp κ (;ᵞ) :=
-  ∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ ilist (Γᵘ:=[]) N N' Φ l'.
-Definition ilisti `{!nintpGS Σ} d N N' Φ l : iProp Σ :=
-  nninv d N (Φ l) ∗ nninv d N' (ilisttl N N' Φ l).
+Definition ilisttl {κ} N (Φ : _ → _ (;ᵞ)) l : nProp κ (;ᵞ) :=
+  ∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ ilist (Γᵘ:=[]) N Φ l'.
+Definition ilisti `{!nintpGS Σ} d N Φ l : iProp Σ :=
+  nninv d N (Φ l) ∗ nninv d N (ilisttl N Φ l).
 Notation ilistis := (ilisti nderiv).
 
 (** A has_multiplier of [d] is stored at [l] *)
@@ -41,18 +41,17 @@ Section verify.
   Context `{!nintpGS Σ}.
 
   (** [ilist] is interpreted into [ilisti] *)
-  Fact ilist_ilisti {κ N N' Φ l d} :
-    ⟦ ilist N N' Φ l ⟧{κ}(d) ⊣⊢ ilisti d N N' Φ l.
+  Fact ilist_ilisti {κ N Φ l d} : ⟦ ilist N Φ l ⟧{κ}(d) ⊣⊢ ilisti d N Φ l.
   Proof. by rewrite/= rew_eq_hwf /=. Qed.
 
   (** Convert the predicate of [ilisti] *)
-  Lemma ilisti_convert `{!nderivy Σ ih d} {N N' Φ Ψ l} :
+  Lemma ilisti_convert `{!nderivy Σ ih d} {N Φ Ψ l} :
     □ ⸨ ∀ l, (Φ l ={∅}=∗ Ψ l) ∗ (Ψ l ={∅}=∗ Φ l) ⸩(d) -∗
-    ilisti d N N' Φ l -∗ ilisti d N N' Ψ l.
+    ilisti d N Φ l -∗ ilisti d N Ψ l.
   Proof.
     move: d nderivy0 Φ Ψ l. apply (derivy_acc (λ _, ∀ Φ Ψ l, _ -∗ _)).
-    move=> d ? Φ Ψ l. iIntros "#? #[??]".
-    iSplit; iApply nninv_convert=>//; iModIntro.
+    move=> d ? Φ Ψ l. iIntros "#? #[ihd itl]".
+    iSplit; iApply nninv_convert; [|iApply "ihd"| |iApply "itl"]; iModIntro.
     { iApply derivy_map; [|done]=>/=. iIntros (d' dyd' _) "Φ↔Ψ Φ".
       iDestruct ("Φ↔Ψ" $! _) as "[ΦΨ ΨΦ]". iMod ("ΦΨ" with "Φ") as "$".
       iIntros "!> Ψ". by iApply "ΨΦ". }
@@ -67,33 +66,33 @@ Section verify.
   Qed.
 
   (** [ilisti] by cons *)
-  Lemma ilisti_cons `{!nderivy Σ ih d} {N N' Φ l l'} :
-    nninv d N (Φ l) -∗ ilisti d N N' Φ l' -∗ (l +ₗ 1) ↦ #l' =[nninv_wsat d]=∗
-      ilisti d N N' Φ l.
+  Lemma ilisti_cons `{!nderivy Σ ih d} {N Φ l l'} :
+    nninv d N (Φ l) -∗ ilisti d N Φ l' -∗ (l +ₗ 1) ↦ #l' =[nninv_wsat d]=∗
+      ilisti d N Φ l.
   Proof.
     iIntros "$ #i ↦".
-    iMod (nninv_alloc (ilisttl _ _ _ _) with "[↦]") as "$"; [|done].
+    iMod (nninv_alloc (ilisttl _ _ _) with "[↦]") as "$"; [|done].
     simpl. iExists _. iFrame "↦". by rewrite rew_eq_hwf /=.
   Qed.
 
   (** [ilisti] from a one-node loop *)
-  Lemma ilisti_loop_1 `{!nderivy Σ ih d} {N N' Φ l} :
+  Lemma ilisti_loop_1 `{!nderivy Σ ih d} {N Φ l} :
     nninv d N (Φ l) -∗ (l +ₗ 1) ↦ #l =[nninv_wsat d]=∗
-      ilisti d N N' Φ l.
+      ilisti d N Φ l.
   Proof.
     iIntros "#Φ ↦". iFrame "Φ".
-    iMod (nninv_alloc_rec (ilisttl _ _ _ _) with "[↦]") as "$"; [|done].
+    iMod (nninv_alloc_rec (ilisttl _ _ _) with "[↦]") as "$"; [|done].
     iIntros "/= #?". iExists _. rewrite rew_eq_hwf /=. by iFrame "↦ Φ".
   Qed.
 
   (** [ilisti] from a two-node loop *)
-  Lemma ilisti_loop_2 `{!nderivy Σ ih d} {N N' Φ l l'} :
+  Lemma ilisti_loop_2 `{!nderivy Σ ih d} {N Φ l l'} :
     nninv d N (Φ l) -∗ nninv d N (Φ l') -∗
     (l +ₗ 1) ↦ #l' -∗ (l' +ₗ 1) ↦ #l =[nninv_wsat d]=∗
-      ilisti d N N' Φ l ∗ ilisti d N N' Φ l'.
+      ilisti d N Φ l ∗ ilisti d N Φ l'.
   Proof.
     iIntros "#Φ #Φ' ↦ ↦'". iFrame "Φ Φ'".
-    iMod (nninv_alloc_rec (ilisttl _ _ _ _ ∗ ilisttl _ _ _ _) with "[↦ ↦']")
+    iMod (nninv_alloc_rec (ilisttl _ _ _ ∗ ilisttl _ _ _) with "[↦ ↦']")
       as "inv"; last first.
     { simpl. by iDestruct (nninv_split with "inv") as "[$ $]". }
     iIntros "/= itls". iDestruct (nninv_split with "itls") as "[#? #?]".
@@ -101,10 +100,10 @@ Section verify.
   Qed.
 
   (** [siter] terminates under [ilistis] *)
-  Lemma twp_siter {N N' E Φ l} {f : val} {c : nat} : ↑N' ⊆ E →
+  Lemma twp_siter {N E Φ l} {f : val} {c : nat} : ↑N ⊆ E →
     (∀ l : loc,
       [[{ nninvd N (Φ l) }]][nninv_wsatd] f #l @ E [[{ RET #(); True }]]) -∗
-    [[{ ilistis N N' Φ l }]][nninv_wsatd]
+    [[{ ilistis N Φ l }]][nninv_wsatd]
       siter f #c #l @ E
     [[{ RET #(); True }]].
   Proof.
@@ -121,10 +120,10 @@ Section verify.
   Qed.
 
   (** [siter_nd] terminates under [ilistis] *)
-  Lemma twp_siter_nd {N N' E Φ l} {f : val} : ↑N' ⊆ E →
+  Lemma twp_siter_nd {N E Φ l} {f : val} : ↑N ⊆ E →
     (∀ l : loc,
       [[{ nninvd N (Φ l) }]][nninv_wsatd] f #l @ E [[{ RET #(); True }]]) -∗
-    [[{ ilistis N N' Φ l }]][nninv_wsatd]
+    [[{ ilistis N Φ l }]][nninv_wsatd]
       siter_nd f #l @ E
     [[{ RET #(); True }]].
   Proof.
@@ -133,10 +132,10 @@ Section verify.
   Qed.
 
   (** [siter_nd_forks] terminates under [ilistis] *)
-  Lemma twp_siter_nd_forks {N N' E Φ l} {f : val} {c : nat} :
+  Lemma twp_siter_nd_forks {N E Φ l} {f : val} {c : nat} :
     (∀ l : loc,
       [[{ nninvd N (Φ l) }]][nninv_wsatd] f #l [[{ RET #(); True }]]) -∗
-    [[{ ilistis N N' Φ l }]][nninv_wsatd]
+    [[{ ilistis N Φ l }]][nninv_wsatd]
       siter_nd_forks f #c #l @ E
     [[{ RET #(); True }]].
   Proof.
@@ -147,10 +146,10 @@ Section verify.
   Qed.
 
   (** [siter_nd_forks_nd] terminates under [ilistis] *)
-  Lemma twp_siter_nd_forks_nd {N N' E Φ l} {f : val} :
+  Lemma twp_siter_nd_forks_nd {N E Φ l} {f : val} :
     (∀ l : loc,
       [[{ nninvd N (Φ l) }]][nninv_wsatd] f #l [[{ RET #(); True }]]) -∗
-    [[{ ilistis N N' Φ l }]][nninv_wsatd]
+    [[{ ilistis N Φ l }]][nninv_wsatd]
       siter_nd_forks_nd f #l @ E
     [[{ RET #(); True }]].
   Proof.
