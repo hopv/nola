@@ -7,8 +7,8 @@ From nola.examples.heap_lang Require Export proofmode notation.
 (** Infinite list whose elements satisfy the condition [Φ] *)
 Definition na_ilist {κ Γᵘ Γᵍ} (p : na_inv_pool_name) (N N' : namespace)
   (Φ : loc → nPropL (;ᵞ Γᵘ ++ Γᵍ)) : loc → nProp κ (Γᵘ;ᵞ Γᵍ) :=
-  (rec:ˢ l, n_na_inv' (_::_) 0 p N (¢ᵍ Φ l) ∗
-    n_na_inv' (_::_) 0 p N' (∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ %ᵍˢ 0@ l'))%n.
+  (rec:ˢ l, n_na_inv' (_::_) p N (¢ᵍ Φ l) ∗
+    n_na_inv' (_::_) p N' (∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ %ᵍˢ 0@ l'))%n.
 
 (** Substitution over [na_ilist] *)
 Fact na_ilist_nsubst {κ p N N' V Φ Ψ l} :
@@ -20,7 +20,7 @@ Proof. done. Qed.
 Definition na_ilisttl {κ} p N N' (Φ : _ → _ (;ᵞ)) l : nProp κ (;ᵞ) :=
   ∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ na_ilist (Γᵘ:=[]) p N N' Φ l'.
 Definition na_ilisti `{!nintpGS Σ} d p N N' Φ l : iProp Σ :=
-  na_nninv d 0 p N (Φ l) ∗ na_nninv d 0 p N' (na_ilisttl p N N' Φ l).
+  na_nninv d p N (Φ l) ∗ na_nninv d p N' (na_ilisttl p N N' Φ l).
 Notation na_ilistis := (na_ilisti nderiv).
 
 Section verify.
@@ -33,7 +33,7 @@ Section verify.
 
   (** Convert the predicate of [na_ilisti] *)
   Lemma na_ilisti_convert `{!nderivy Σ ih d} {p N N' Φ Ψ l} :
-    □ ⸨ ∀ l, (Φ l ={∅}=∗ Ψ l) ∗ (Ψ l ={∅}=∗ Φ l) ⸩(d, 0) -∗
+    □ ⸨ ∀ l, (Φ l ={∅}=∗ Ψ l) ∗ (Ψ l ={∅}=∗ Φ l) ⸩(d) -∗
     na_ilisti d p N N' Φ l -∗ na_ilisti d p N N' Ψ l.
   Proof.
     move: d nderivy0 Φ Ψ l. apply (derivy_acc (λ _, ∀ Φ Ψ l, _ -∗ _)).
@@ -54,7 +54,7 @@ Section verify.
 
   (** [na_ilisti] by cons *)
   Lemma na_ilisti_cons `{!nderivy Σ ih d} {p N N' Φ l l'} :
-    na_nninv d 0 p N (Φ l) -∗ na_ilisti d p N N' Φ l' -∗ (l +ₗ 1) ↦ #l'
+    na_nninv d p N (Φ l) -∗ na_ilisti d p N N' Φ l' -∗ (l +ₗ 1) ↦ #l'
       =[nninv_wsat d]=∗ na_ilisti d p N N' Φ l.
   Proof.
     iIntros "$ #i ↦".
@@ -64,7 +64,7 @@ Section verify.
 
   (** [na_ilisti] from a one-node loop *)
   Lemma na_ilisti_loop_1 `{!nderivy Σ ih d} {p N N' Φ l} :
-    na_nninv d 0 p N (Φ l) -∗ (l +ₗ 1) ↦ #l =[nninv_wsat d]=∗
+    na_nninv d p N (Φ l) -∗ (l +ₗ 1) ↦ #l =[nninv_wsat d]=∗
       na_ilisti d p N N' Φ l.
   Proof.
     iIntros "#Φ ↦". iFrame "Φ".
@@ -74,7 +74,7 @@ Section verify.
 
   (** [na_ilisti] from a two-node loop *)
   Lemma na_ilisti_loop_2 `{!nderivy Σ ih d} {p N N' Φ l l'} :
-    na_nninv d 0 p N (Φ l) -∗ na_nninv d 0 p N (Φ l') -∗
+    na_nninv d p N (Φ l) -∗ na_nninv d p N (Φ l') -∗
     (l +ₗ 1) ↦ #l' -∗ (l' +ₗ 1) ↦ #l =[nninv_wsat d]=∗
       na_ilisti d p N N' Φ l ∗ na_ilisti d p N N' Φ l'.
   Proof.
@@ -89,7 +89,7 @@ Section verify.
   (** [siter] terminates under [na_ilistis] *)
   Lemma twp_siter_na {p N N' Φ E F l} {f : val} {c : nat} : ↑N' ⊆ E → ↑N' ⊆ F →
     na_ilistis p N N' Φ l -∗
-    (∀ l, [[{ na_nninvd 0 p N (Φ l) ∗ na_own p F }]][nninv_wsatd]
+    (∀ l, [[{ na_nninvd p N (Φ l) ∗ na_own p F }]][nninv_wsatd]
             f #l @ E
           [[{ RET #(); na_own p F }]]) -∗
     [[{ na_own p F }]][nninv_wsatd]
@@ -100,7 +100,7 @@ Section verify.
     iInduction c as [|c] "IH" forall (l) "ihd itl"; wp_rec; wp_pures;
       [by iApply "Ψ"|].
     wp_apply ("f" with "[$pF //]"). iIntros "pF". wp_pures. wp_bind (! _)%E.
-    iMod (na_nninvd_acc with "[//] pF") as "/=((%l' & ↦ & i) & pF∖N & cl)";
+    iMod (na_nninv_acc with "[//] pF") as "/=((%l' & ↦ & i) & pF∖N & cl)";
       [done..|].
     rewrite rew_eq_hwf /=. iDestruct "i" as "#[??]". wp_load. wp_pures.
     iMod ("cl" with "[↦] pF∖N") as "pF".
@@ -111,7 +111,7 @@ Section verify.
   (** [siter_nd] terminates under [na_ilistis] *)
   Lemma twp_siter_nd_na {p N N' Φ E F l} {f : val} : ↑N' ⊆ E → ↑N' ⊆ F →
     na_ilistis p N N' Φ l -∗
-    (∀ l, [[{ na_nninvd 0 p N (Φ l) ∗ na_own p F }]][nninv_wsatd]
+    (∀ l, [[{ na_nninvd p N (Φ l) ∗ na_own p F }]][nninv_wsatd]
             f #l @ E
           [[{ RET #(); na_own p F }]]) -∗
     [[{ na_own p F }]][nninv_wsatd]
@@ -126,12 +126,12 @@ Section verify.
   (** Introduce a Hoare triple with [na_nninvd] *)
   Lemma twp_na_nninvd {p N Φ E F l} {f : val} : ↑N ⊆ E → ↑N ⊆ F →
     [[{ ⟦ Φ l ⟧ }]][nninv_wsatd] f #l @ E [[{ RET #(); ⟦ Φ l ⟧ }]] -∗
-    [[{ na_nninvd 0 p N (Φ l) ∗ na_own p F }]][nninv_wsatd]
+    [[{ na_nninvd p N (Φ l) ∗ na_own p F }]][nninv_wsatd]
       f #l @ E
     [[{ RET #(); na_own p F }]].
   Proof.
     iIntros (??) "#f". iIntros (Ψ) "!> [#? pF] Ψ". iApply twpw_fupdw_nonval=>//.
-    iMod (na_nninvd_acc with "[] pF") as "/=(Φ & pF∖N & cl)"; [done..|].
+    iMod (na_nninv_acc with "[] pF") as "/=(Φ & pF∖N & cl)"; [done..|].
     wp_apply ("f" with "Φ"). iIntros "Φ". iMod ("cl" with "Φ pF∖N") as "?".
     iModIntro. by iApply "Ψ".
   Qed.

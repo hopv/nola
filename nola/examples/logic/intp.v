@@ -45,9 +45,9 @@ Section ncintp.
     : nderiv_ty Σ -d> iProp Σ :=
     λ d, match c with
     | ⟨▷⟩ => ▷ ni d _ P
-    | ⟨○(i)⟩ => ⸨ P ⸩(d,i)
+    | ⟨○⟩ => ⸨ P ⸩(d)
     | nc_ag γ => nag γ P
-    | nc_inv i N => nninv d i N P | nc_na_inv i p N => na_nninv d i p N P
+    | nc_inv N => nninv d N P | nc_na_inv p N => na_nninv d p N P
     end%I.
 
   (** [ncintp] is non-expansive *)

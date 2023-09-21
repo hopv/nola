@@ -93,11 +93,11 @@ Variant ncon2 : Type :=
 (** Unary, guarding *)
 Variant ncong1 : Type :=
 | (** Later modality *) nc_later
-| (** Indirection modality *) nc_indir (i : nat)
+| (** Indirection modality *) nc_indir
 | (** Agreement *) nc_ag (γ : gname)
-| (** Invariant *) nc_inv (i : nat) (N : namespace)
+| (** Invariant *) nc_inv (N : namespace)
 | (** Non-atomic invariant *) nc_na_inv
-    (i : nat) (p : na_inv_pool_name) (N : namespace).
+    (p : na_inv_pool_name) (N : namespace).
 
 (** Notation for [ncon] *)
 Notation "⟨⌜ φ ⌝⟩" := (nc_pure φ%type%stdpp%nola) (format "⟨⌜ φ ⌝⟩")
@@ -123,7 +123,7 @@ Notation "⟨|=[ ] =>⟩" := nc_bupdw (format "⟨|=[ ] =>⟩") : nola_scope.
 Notation "⟨|=[ ] { E , E' }=>⟩" := (nc_fupdw E E')
   (format "⟨|=[ ] { E , E' }=>⟩") : nola_scope.
 Notation "⟨▷⟩" := nc_later : nola_scope.
-Notation "⟨○( i )⟩" := (nc_indir i) (format "⟨○( i )⟩") : nola_scope.
+Notation "⟨○⟩" := nc_indir : nola_scope.
 
 (** [nProp]: Nola syntactic proposition
   Its universe level is strictly higher than those of [V : npvar]
@@ -228,17 +228,17 @@ Notation "∃ x .. z , P" :=
 Notation "▷{ Γᵘ } P" := (n_g1 (Γᵘ:=Γᵘ) ⟨▷⟩ P)
   (at level 20, right associativity, only parsing) : nProp_scope.
 Notation "▷ P" := (n_g1 ⟨▷⟩ P) : nProp_scope.
-Notation "○{ Γᵘ } ( i ) P" := (n_g1 (Γᵘ:=Γᵘ) ⟨○(i)⟩ P)
+Notation "○{ Γᵘ } P" := (n_g1 (Γᵘ:=Γᵘ) ⟨○⟩ P)
   (at level 20, right associativity, only parsing) : nProp_scope.
-Notation "○ ( i ) P" := (n_g1 ⟨○(i)⟩ P)
-  (at level 20, right associativity, format "○ ( i )  P") : nProp_scope.
+Notation "○ P" := (n_g1 ⟨○⟩ P)
+  (at level 20, right associativity, format "○  P") : nProp_scope.
 Notation n_ag' Γᵘ γ P := (n_g1 (Γᵘ:=Γᵘ) (nc_ag γ) P) (only parsing).
 Notation n_ag γ P := (n_ag' _ γ P).
-Notation n_inv' Γᵘ i N P := (n_g1 (Γᵘ:=Γᵘ) (nc_inv i N) P) (only parsing).
-Notation n_inv i N P := (n_inv' _ i N P).
-Notation n_na_inv' Γᵘ i p N P :=
-  (n_g1 (Γᵘ:=Γᵘ) (nc_na_inv i p N) P) (only parsing).
-Notation n_na_inv i p N P := (n_na_inv' _ i p N P).
+Notation n_inv' Γᵘ N P := (n_g1 (Γᵘ:=Γᵘ) (nc_inv N) P) (only parsing).
+Notation n_inv N P := (n_inv' _ N P).
+Notation n_na_inv' Γᵘ p N P :=
+  (n_g1 (Γᵘ:=Γᵘ) (nc_na_inv p N) P) (only parsing).
+Notation n_na_inv p N P := (n_na_inv' _ p N P).
 Notation "WP[ W ] e @ s ; E {{ Φ } }" := (n_wpw W s E e Φ) (only parsing)
   : nProp_scope.
 Notation "WP[ W ] e @ s ; E {{ v , P } }" := (n_wpw W s E e (λ v, P))

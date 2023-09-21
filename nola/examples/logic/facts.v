@@ -33,15 +33,14 @@ Section facts.
   Proof. done. Qed.
   Fact nintp_later {κ d} {P : _ (;ᵞ)} : ⟦ ▷{nil} P ⟧{κ}(d) ⊣⊢ ▷ ⟦ P ⟧(d).
   Proof. by rewrite/= nintp_fp_nintp. Qed.
-  Fact nintp_indir {κ d i} {P : _ (;ᵞ)} : ⟦ ○{nil}(i) P ⟧{κ}(d) ⊣⊢ ⸨ P ⸩(d,i).
+  Fact nintp_indir {κ d} {P : _ (;ᵞ)} : ⟦ ○{nil} P ⟧{κ}(d) ⊣⊢ ⸨ P ⸩(d).
   Proof. done. Qed.
   Fact nintp_ag {κ d γ} {P : _ (;ᵞ)} : ⟦ n_ag γ P ⟧{κ}(d) ⊣⊢ nag γ P.
   Proof. done. Qed.
-  Fact nintp_inv {κ d i N} {P : _ (;ᵞ)} :
-    ⟦ n_inv i N P ⟧{κ}(d) ⊣⊢ nninv d i N P.
+  Fact nintp_inv {κ d N} {P : _ (;ᵞ)} : ⟦ n_inv N P ⟧{κ}(d) ⊣⊢ nninv d N P.
   Proof. done. Qed.
-  Fact nintp_na_inv {κ d i p N} {P : _ (;ᵞ)} :
-    ⟦ n_na_inv i p N P ⟧{κ}(d) ⊣⊢ na_nninv d i p N P.
+  Fact nintp_na_inv {κ d p N} {P : _ (;ᵞ)} :
+    ⟦ n_na_inv p N P ⟧{κ}(d) ⊣⊢ na_nninv d p N P.
   Proof. done. Qed.
   Fact nintp_wpw {κ d W s E e Φ} :
     ⟦ WP[W] e @ s ; E {{ Φ }} ⟧{κ}(d) ⊣⊢
@@ -72,86 +71,77 @@ Section facts.
   Qed.
 
   Context `{!nderivy Σ ih d}.
-  Implicit Type (i j : nat) (P Q : nPropL (;ᵞ)).
+  Implicit Type P Q : nPropL (;ᵞ).
 
   (** Make connectives go inside the derivability *)
-  Fact derivy_and {i P Q} :
-    ⸨ P ⸩(d, i) ∧ ⸨ Q ⸩(d, i) -∗ ⸨ P ∧ Q ⸩(d, i).
+  Fact derivy_and {P Q} :
+    ⸨ P ⸩(d) ∧ ⸨ Q ⸩(d) -∗ ⸨ P ∧ Q ⸩(d).
   Proof.
     iIntros "PQ". iApply derivy_byintp. iIntros (?? _) "/= #to _ _".
     iSplit; iApply "to"; [iDestruct "PQ" as "[$_]"|iDestruct "PQ" as "[_$]"].
   Qed.
-  Fact derivy_or {i P Q} :
-    ⸨ P ⸩(d, i) ∨ ⸨ Q ⸩(d, i) -∗ ⸨ P ∨ Q ⸩(d, i).
+  Fact derivy_or {P Q} :
+    ⸨ P ⸩(d) ∨ ⸨ Q ⸩(d) -∗ ⸨ P ∨ Q ⸩(d).
   Proof.
     iIntros "[?|?]"; iApply derivy_byintp; iIntros (?? _) "/= #to _ _";
       [iLeft|iRight]; by iApply "to".
   Qed.
-  Fact derivy_forall {i A} {Φ : A → nPropL (;ᵞ)} :
-    (∀ a, ⸨ Φ a ⸩(d, i)) -∗ ⸨ ∀' Φ ⸩(d, i).
+  Fact derivy_forall {A} {Φ : A → nPropL (;ᵞ)} :
+    (∀ a, ⸨ Φ a ⸩(d)) -∗ ⸨ ∀' Φ ⸩(d).
   Proof.
     iIntros "Φ". iApply derivy_byintp. iIntros (?? _) "/= #to _ _ %".
     iApply "to". iApply "Φ".
   Qed.
-  Fact derivy_exist {i A} {Φ : A → nPropL (;ᵞ)} :
-    (∃ a, ⸨ Φ a ⸩(d, i)) -∗ ⸨ ∃' Φ ⸩(d, i).
+  Fact derivy_exist {A} {Φ : A → nPropL (;ᵞ)} :
+    (∃ a, ⸨ Φ a ⸩(d)) -∗ ⸨ ∃' Φ ⸩(d).
   Proof.
     iDestruct 1 as (a) "Φ". iApply derivy_byintp. iIntros (?? _) "/= #to _ _".
     iExists a. iApply "to". iApply "Φ".
   Qed.
-  Fact derivy_sep {i P Q} :
-    ⸨ P ⸩(d, i) ∗ ⸨ Q ⸩(d, i) -∗ ⸨ P ∗ Q ⸩(d, i).
+  Fact derivy_sep {P Q} :
+    ⸨ P ⸩(d) ∗ ⸨ Q ⸩(d) -∗ ⸨ P ∗ Q ⸩(d).
   Proof.
     iIntros "[P Q]". iApply derivy_byintp. iIntros (?? _) "/= #to _ _".
     iSplitL "P"; by iApply "to".
   Qed.
-  Fact derivy_persistently {i P} : □ ⸨ P ⸩(d, i) -∗ ⸨ □ P ⸩(d, i).
+  Fact derivy_persistently {P} : □ ⸨ P ⸩(d) -∗ ⸨ □ P ⸩(d).
   Proof.
     iIntros "#P". iApply derivy_byintp. iIntros (?? _) "/= #to _ _ !>".
     by iApply "to".
   Qed.
-  Fact derivy_bupd {i P} : (|==> ⸨ P ⸩(d, i)) -∗ ⸨ |==> P ⸩(d, i).
+  Fact derivy_bupd {P} : (|==> ⸨ P ⸩(d)) -∗ ⸨ |==> P ⸩(d).
   Proof.
     iIntros "P". iApply derivy_byintp. iIntros (?? _) "/= #to _ _".
     by iApply "to".
   Qed.
-  Fact derivy_fupd {i E E' P} :
-    (|={E,E'}=> ⸨ P ⸩(d, i)) -∗ ⸨ |={E,E'}=> P ⸩(d, i).
+  Fact derivy_fupd {E E' P} :
+    (|={E,E'}=> ⸨ P ⸩(d)) -∗ ⸨ |={E,E'}=> P ⸩(d).
   Proof.
     iIntros "P". iApply derivy_byintp. iIntros (?? _) "/= #to _ _".
     by iApply "to".
   Qed.
-  Fact derivy_later {i P} : ▷ ⸨ P ⸩(d, i) -∗ ⸨ ▷{nil} P ⸩(d, i).
+  Fact derivy_later {P} : ▷ ⸨ P ⸩(d) -∗ ⸨ ▷{nil} P ⸩(d).
   Proof.
     iIntros "P". iApply derivy_byintp. iIntros (?? _) "/= #to _ _".
     rewrite nintp_fp_nintp. by iApply "to".
   Qed.
-  Fact derivy_n_forall {i V} {P : nPropL ([V];ᵞ )} :
-    (∀ Φ, ⸨ P /: Φ ⸩(d, i)) -∗ ⸨ ∀: V, P ⸩(d, i).
+  Fact derivy_n_forall {V} {P : nPropL ([V];ᵞ )} :
+    (∀ Φ, ⸨ P /: Φ ⸩(d)) -∗ ⸨ ∀: V, P ⸩(d).
   Proof.
     iIntros "P". iApply derivy_byintp. iIntros (?? _) "/= #to _ _ %".
     rewrite rew_eq_hwf. iApply "to". iApply "P".
   Qed.
-  Fact derivy_n_exist {i V} {P : nPropL ([V];ᵞ )} :
-    (∃ Φ, ⸨ P /: Φ ⸩(d, i)) -∗ ⸨ ∃: V, P ⸩(d, i).
+  Fact derivy_n_exist {V} {P : nPropL ([V];ᵞ )} :
+    (∃ Φ, ⸨ P /: Φ ⸩(d)) -∗ ⸨ ∃: V, P ⸩(d).
   Proof.
     iDestruct 1 as (Φ) "P". iApply derivy_byintp. iIntros (?? _) "/= #to _ _".
     iExists Φ. rewrite rew_eq_hwf. iApply "to". iApply "P".
   Qed.
 
-  (** Introduce [○(i)] *)
-  Fact derivy_indir_intro {i j P} :
-    ⸨ P ⸩(d, i) -∗ ⸨ ○{nil}(i) P ⸩(d, j).
+  (** Introduce [○] *)
+  Fact derivy_indir_intro {P} : ⸨ P ⸩(d) -∗ ⸨ ○{nil} P ⸩(d).
   Proof.
     iIntros "P". iApply derivy_byintp. iIntros (d' _ _) "/= _ #tos' _".
     by iApply "tos'".
-  Qed.
-  (** Eliminate [○(i)] under the derivability of level [j > i] *)
-  Fact derivy_indir_elim {i j P} :
-    i < j → ⸨ ○{nil}(i) P ⸩(d, j) -∗ ⸨ P ⸩(d, j).
-  Proof.
-    move=> ij. iIntros "○P". iApply derivy_byintp.
-    iIntros (d' _ _) "/= #to _ #d'to". iDestruct ("to" with "○P") as "/= ○P".
-    by iApply "d'to".
   Qed.
 End facts.
