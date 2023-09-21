@@ -6,13 +6,13 @@ It is fully mechanized in [Coq](https://coq.inria.fr/) with the
 [Iris](https://iris-project.org/) separation logic framework.
 
 The name Nola comes from *No* *la*ters and a nickname for New Orleans,
-Los Angeles, US.
+Louisiana, US.
 
 - [Getting Started](#getting-started)
 - [Story](#story)
-  - [Nested invariants](#nested-invariants)
-  - [Obstacle: Laters](#obstacle-laters)
-  - [Solution: Nola](#solution-nola)
+  + [Nested invariants](#nested-invariants)
+  + [Obstacle: Laters](#obstacle-laters)
+  + [Solution: Nola](#solution-nola)
 
 ## Getting Started
 
@@ -89,7 +89,7 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
         [`ilist`](nola/examples/logic/verify/ilist.v),
         [`na_ilist`](nola/examples/logic/verify/ilist.v)
         (Shared mutable infinite list)
-  + [`type/`](nola/examples/type/) : Nola Stratified Type System
+  + [`type/`](nola/examples/type/) : Stratified Type System
     * [`type`](nola/examples/type/type.v) (Type),
       [`subst`](nola/examples/type/subst.v) (Substitution),
       [`iris`](nola/examples/type/iris.v) (Iris preliminaries),
