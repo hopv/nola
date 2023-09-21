@@ -100,23 +100,23 @@ Section verify.
   Qed.
 
   (** [siter] terminates under [ilistis] *)
-  Lemma twp_siter {N E Φ l} {f : val} {c : nat} : ↑N ⊆ E →
+  Lemma twp_siter {N E Φ ln l} {f : val} {n : nat} : ↑N ⊆ E →
     (∀ l : loc,
       [[{ nninvd N (Φ l) }]][nninv_wsatd] f #l @ E [[{ RET #(); True }]]) -∗
-    [[{ ilistis N Φ l }]][nninv_wsatd]
-      siter f #c #l @ E
-    [[{ RET #(); True }]].
+    [[{ ln ↦ #n ∗ ilistis N Φ l }]][nninv_wsatd]
+      siter f #ln #l @ E
+    [[{ RET #(); ln ↦ #0 }]].
   Proof.
-    iIntros (?) "#f". iIntros (Ψ) "!> #[ihd itl] Ψ".
-    iInduction c as [|c] "IH" forall (l) "ihd itl"; wp_rec; wp_pures;
-      [by iApply "Ψ"|].
-    wp_apply "f"; [done|]. iIntros "_". wp_pures. wp_bind (! _)%E.
+    iIntros (?) "#f". iIntros (Ψ) "!> [↦n #[ihd itl]] Ψ".
+    iInduction n as [|n] "IH" forall (l) "ihd itl"; wp_rec; wp_pures; wp_load;
+      wp_pures; [by iApply "Ψ"|].
+    wp_apply "f"; [done|]. iIntros "_". wp_pures. wp_load. wp_op.
+    have ->: (S n - 1)%Z = n by lia. wp_store. wp_op. wp_bind (! _)%E.
     iMod (nninv_acc with "itl") as "/=[(%l' & ↦ & i) cl]"; [done|].
     rewrite rew_eq_hwf /=. iDestruct "i" as "#[??]". wp_load. iModIntro.
     iMod ("cl" with "[↦]") as "_".
     { iExists _. rewrite rew_eq_hwf /=. iFrame "↦". by iSplit. }
-    iModIntro. wp_pures. have ->: (S c - 1)%Z = c by lia.
-    by iApply ("IH" with "Ψ").
+    iModIntro. by iApply ("IH" with "↦n Ψ").
   Qed.
 
   (** [siter_nd] terminates under [ilistis] *)
@@ -127,22 +127,24 @@ Section verify.
       siter_nd f #l @ E
     [[{ RET #(); True }]].
   Proof.
-    iIntros (?) "#?". iIntros (?) "!> #? ?". wp_lam. wp_pures.
-    wp_apply twp_ndnat; [done|]. iIntros (?) "_". by wp_apply twp_siter.
+    iIntros (?) "#?". iIntros (Ψ) "!> #? Ψ". wp_lam. wp_pures.
+    wp_apply twp_ndnat; [done|]. iIntros (?) "_". wp_alloc ln as "↦n". wp_pures.
+    wp_apply (twp_siter with "[] [$↦n]")=>//. iIntros. by iApply "Ψ".
   Qed.
 
   (** [siter_nd_forks] terminates under [ilistis] *)
-  Lemma twp_siter_nd_forks {N E Φ l} {f : val} {c : nat} :
+  Lemma twp_siter_nd_forks {N E Φ l lk} {f : val} {k : nat} :
     (∀ l : loc,
       [[{ nninvd N (Φ l) }]][nninv_wsatd] f #l [[{ RET #(); True }]]) -∗
-    [[{ ilistis N Φ l }]][nninv_wsatd]
-      siter_nd_forks f #c #l @ E
-    [[{ RET #(); True }]].
+    [[{ lk ↦ #k ∗ ilistis N Φ l }]][nninv_wsatd]
+      siter_nd_forks f #lk #l @ E
+    [[{ RET #(); lk ↦ #0 }]].
   Proof.
-    iIntros "#?" (Ψ) "!> #? Ψ".
-    iInduction c as [|c] "IH"; wp_lam; wp_pures; [by iApply "Ψ"|].
-    wp_apply twp_fork; [by wp_apply twp_siter_nd|]. wp_pures.
-    have ->: (S c - 1)%Z = c by lia. by iApply "IH".
+    iIntros "#?" (Ψ) "!> [↦k #?] Ψ".
+    iInduction k as [|k] "IH"; wp_lam; wp_pures; wp_load; wp_pures;
+      [by iApply "Ψ"|].
+    wp_apply twp_fork; [by wp_apply twp_siter_nd|]. wp_pures. wp_load. wp_pure.
+    have ->: (S k - 1)%Z = k by lia. wp_store. by iApply ("IH" with "↦k").
   Qed.
 
   (** [siter_nd_forks_nd] terminates under [ilistis] *)
@@ -153,8 +155,9 @@ Section verify.
       siter_nd_forks_nd f #l @ E
     [[{ RET #(); True }]].
   Proof.
-    iIntros "#?" (?) "!> #? ?". wp_lam. wp_pures. wp_apply twp_ndnat; [done|].
-    iIntros (?) "_". by wp_apply twp_siter_nd_forks.
+    iIntros "#?" (Ψ) "!> #? Ψ". wp_lam. wp_pures. wp_apply twp_ndnat; [done|].
+    iIntros (?) "_". wp_alloc lk as "↦k". wp_pures.
+    wp_apply (twp_siter_nd_forks with "[] [$↦k]")=>//. iIntros. by iApply "Ψ".
   Qed.
 
   (** [incr_faa] on [nninvd] over [has_mult] *)

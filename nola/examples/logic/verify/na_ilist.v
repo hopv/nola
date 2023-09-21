@@ -87,40 +87,39 @@ Section verify.
   Qed.
 
   (** [siter] terminates under [na_ilistis] *)
-  Lemma twp_siter_na {p N Φ E F l} {f : val} {c : nat} : ↑N ⊆ E → ↑N ⊆ F →
-    na_ilistis p N Φ l -∗
+  Lemma twp_siter_na {p N Φ E F ln l} {f : val} {n : nat} : ↑N ⊆ E → ↑N ⊆ F →
     (∀ l, [[{ na_nninvd p N (Φ l) ∗ na_own p F }]][nninv_wsatd]
             f #l @ E
           [[{ RET #(); na_own p F }]]) -∗
-    [[{ na_own p F }]][nninv_wsatd]
-      siter f #c #l @ E
-    [[{ RET #(); True }]].
+    [[{ ln ↦ #n ∗ na_ilistis p N Φ l ∗ na_own p F }]][nninv_wsatd]
+      siter f #ln #l @ E
+    [[{ RET #(); ln ↦ #0 ∗ na_own p F }]].
   Proof.
-    iIntros (??) "#[ihd itl] #f". iIntros (Ψ) "!> pF Ψ".
-    iInduction c as [|c] "IH" forall (l) "ihd itl"; wp_rec; wp_pures;
-      [by iApply "Ψ"|].
-    wp_apply ("f" with "[$pF //]"). iIntros "pF". wp_pures. wp_bind (! _)%E.
+    iIntros (??) "#f". iIntros (Ψ) "!> (↦n & #[ihd itl] & pF) Ψ".
+    iInduction n as [|n] "IH" forall (l) "ihd itl"; wp_rec; wp_pures; wp_load;
+      wp_pures. { iModIntro. iApply "Ψ". iFrame. }
+    wp_apply ("f" with "[$pF //]"). iIntros "pF". wp_pures. wp_load. wp_op.
+    have ->: (S n - 1)%Z = n by lia. wp_store. wp_op. wp_bind (! _)%E.
     iMod (na_nninv_acc with "[//] pF") as "/=((%l' & ↦ & i) & pF∖N & cl)";
       [done..|].
     rewrite rew_eq_hwf /=. iDestruct "i" as "#[??]". wp_load. wp_pures.
     iMod ("cl" with "[↦] pF∖N") as "pF".
     { iExists _. iFrame "↦". rewrite/= rew_eq_hwf /=. by iSplit. }
-    have ->: (S c - 1)%Z = c by lia. by iApply ("IH" with "pF Ψ").
+    by iApply ("IH" with "↦n pF Ψ").
   Qed.
 
   (** [siter_nd] terminates under [na_ilistis] *)
   Lemma twp_siter_nd_na {p N Φ E F l} {f : val} : ↑N ⊆ E → ↑N ⊆ F →
-    na_ilistis p N Φ l -∗
     (∀ l, [[{ na_nninvd p N (Φ l) ∗ na_own p F }]][nninv_wsatd]
             f #l @ E
           [[{ RET #(); na_own p F }]]) -∗
-    [[{ na_own p F }]][nninv_wsatd]
+    [[{ na_ilistis p N Φ l ∗ na_own p F }]][nninv_wsatd]
       siter_nd f #l @ E
     [[{ RET #(); True }]].
   Proof.
-    iIntros (??) "#? #?". iIntros (?) "!> pF ?". wp_lam. wp_pures.
-    wp_apply twp_ndnat; [done|]. iIntros (?) "_".
-    by wp_apply (twp_siter_na with "[] [] pF").
+    iIntros (??) "#?". iIntros (Ψ) "!> ipF Ψ". wp_lam. wp_pures.
+    wp_apply twp_ndnat; [done|]. iIntros (?) "_". wp_alloc ln as "↦n". wp_pures.
+    wp_apply (twp_siter_na with "[] [$↦n $ipF]")=>//. iIntros. by iApply "Ψ".
   Qed.
 
   (** Introduce a Hoare triple with [na_nninvd] *)
