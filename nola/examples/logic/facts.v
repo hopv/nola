@@ -141,7 +141,7 @@ Section facts.
   (** Introduce [○] *)
   Fact derivy_indir_intro {P} : ⸨ P ⸩(d) -∗ ⸨ ○{nil} P ⸩(d).
   Proof.
-    iIntros "P". iApply derivy_byintp. iIntros (d' _ _) "/= _ #tos' _".
-    by iApply "tos'".
+    iIntros "P". iApply derivy_byintp. iIntros (d' _ _) "/= _ #tod' _".
+    by iApply "tod'".
   Qed.
 End facts.
