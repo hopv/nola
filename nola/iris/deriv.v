@@ -176,31 +176,31 @@ Lemma derivy_map `{!derivy ITI ih d} {i P Q} :
   (∀ d', ⌜derivy ITI ih d'⌝ → ⌜ih d'⌝ → ⟦ P ⟧(d', i) -∗ ⟦ Q ⟧(d', i)) -∗
   ⸨ P ⸩(d, i) -∗ ⸨ Q ⸩(d, i).
 Proof.
-  iIntros "∀PQ P". iApply derivy_byintp. iIntros (???) "#to _ _".
-  iApply "∀PQ"; by [| |iApply "to"].
+  iIntros "∀PQ P". iApply derivy_byintp. iIntros (???) "#→ _ _".
+  iApply "∀PQ"; by [| |iApply "→"].
 Qed.
 Lemma derivy_map2 `{!derivy ITI ih d} {i P Q R} :
   (∀ d', ⌜derivy ITI ih d'⌝ → ⌜ih d'⌝ → ⟦ P ⟧(d', i) -∗ ⟦ Q ⟧(d', i) -∗
     ⟦ R ⟧(d', i)) -∗
   ⸨ P ⸩(d, i) -∗ ⸨ Q ⸩(d, i) -∗ ⸨ R ⸩(d, i).
 Proof.
-  iIntros "∀PQ P Q". iApply derivy_byintp. iIntros (???) "#to _ _".
-  iApply ("∀PQ" with "[//] [//] [P]"); by iApply "to".
+  iIntros "∀PQ P Q". iApply derivy_byintp. iIntros (???) "#→ _ _".
+  iApply ("∀PQ" with "[//] [//] [P]"); by iApply "→".
 Qed.
 Lemma derivy_map3 `{!derivy ITI ih d} {i P Q R S} :
   (∀ d', ⌜derivy ITI ih d'⌝ → ⌜ih d'⌝ → ⟦ P ⟧(d', i) -∗ ⟦ Q ⟧(d', i) -∗
     ⟦ R ⟧(d', i) -∗ ⟦ S ⟧(d', i)) -∗
   ⸨ P ⸩(d, i) -∗ ⸨ Q ⸩(d, i) -∗ ⸨ R ⸩(d, i) -∗ ⸨ S ⸩(d, i).
 Proof.
-  iIntros "∀PQ P Q R". iApply derivy_byintp. iIntros (???) "#to _ _".
-  iApply ("∀PQ" with "[//] [//] [P] [Q]"); by iApply "to".
+  iIntros "∀PQ P Q R". iApply derivy_byintp. iIntros (???) "#→ _ _".
+  iApply ("∀PQ" with "[//] [//] [P] [Q]"); by iApply "→".
 Qed.
 Lemma derivy_map_lev `{!derivy ITI ih d} {i j P Q} :
   i ≺ j → (∀ d', ⌜derivy ITI ih d'⌝ → ⌜ih d'⌝ → ⟦ P ⟧(d', i) -∗ ⟦ Q ⟧(d', j)) -∗
   ⸨ P ⸩(d, i) -∗ ⸨ Q ⸩(d, j).
 Proof.
-  iIntros (ij) "∀PQ P". iApply derivy_byintp. iIntros (???) "_ #tod' #d'to".
-  iApply "∀PQ"; [done..|]. iApply "d'to"; [done|]. by iApply "tod'".
+  iIntros (ij) "∀PQ P". iApply derivy_byintp. iIntros (???) "_ #→d' #d'→".
+  iApply "∀PQ"; [done..|]. iApply "d'→"; [done|]. by iApply "→d'".
 Qed.
 
 (** ** [deriv]: Derivability *)

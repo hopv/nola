@@ -170,8 +170,8 @@ Section tinv_wsat'.
     (⌜M ≤ⁿ L⌝ =[tinv_wsat' M intp]{E,E'}=∗ P)
       =[tinv_wsat' M intp]{E,E'}=∗ P.
   Proof.
-    iIntros "toP". iApply fupdw_trans. iIntros "tw".
-    iDestruct (tinv_wsat'_le with "tw") as %?. iFrame "tw". by iApply "toP".
+    iIntros "→P". iApply fupdw_trans. iIntros "tw".
+    iDestruct (tinv_wsat'_le with "tw") as %?. iFrame "tw". by iApply "→P".
   Qed.
 End tinv_wsat'.
 Arguments tinv_wsat'' : simpl never.

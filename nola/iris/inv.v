@@ -99,7 +99,7 @@ Section ninv.
     (∀ i, ⌜φ i⌝ → ownNi i P -∗ intp P) -∗ ninv_wsat intp ==∗
       ∃ i, ⌜φ i⌝ ∗ ninv_wsat intp ∗ ownNi i P.
   Proof.
-    rewrite ninv_wsat_unseal. iIntros (fresh) "toP (%Ps & aPs & W)".
+    rewrite ninv_wsat_unseal. iIntros (fresh) "→P (%Ps & aPs & W)".
     iMod (own_unit (gset_disjUR positive) disabled_name) as "?".
     iMod (own_updateP with "[$]") as (I) "[X DI]".
     { apply (gset_disj_alloc_empty_updateP_strong' (λ i, Ps !! i = None ∧ φ i)).
@@ -111,7 +111,7 @@ Section ninv.
     iModIntro. iExists i. iSplit; [done|]. unfold ownNi.
     iRevert "iP". iIntros "#iP". iFrame "iP". iExists _. iFrame "aPs".
     iApply big_sepM_insert; [done|]. iFrame "W". iLeft. unfold ownD.
-    iFrame "DI". by iApply "toP".
+    iFrame "DI". by iApply "→P".
   Qed.
 
   (** Get [ownE] out of the fancy update *)
@@ -130,12 +130,12 @@ Section ninv.
       intp P ∗ (intp P =[ninv_wsat intp]{E∖↑N,E}=∗ True)%I.
   Proof.
     move=> ?. rewrite ninv_unseal. iIntros "(%i & %iN & #iP) W".
-    iMod fupd_accE as "[N Nto]"; [done|].
+    iMod fupd_accE as "[N N→]"; [done|].
     rewrite {1 2}(union_difference_L {[i]} (↑N)); [|set_solver].
     rewrite ownE_op; [|set_solver]. iDestruct "N" as "[i N∖i]".
     iDestruct (ownNi_open with "iP i W") as "($ & $ & Di)". iModIntro.
     iIntros "P W". iDestruct (ownNi_close with "iP P Di W") as "[$ i]".
-    iApply "Nto". iFrame.
+    iApply "N→". iFrame.
   Qed.
 
   (** Turn [ownNi] to [ninv] *)
@@ -146,10 +146,10 @@ Section ninv.
   Lemma ninv_alloc_rec {intp N P} :
     (ninv N P -∗ intp P) =[ninv_wsat intp]=∗ ninv N P.
   Proof.
-    iIntros "toP W".
-    iMod (ownNi_alloc_rec (.∈ ↑N) with "[toP] W") as (i) "(%iN & W & iP)".
+    iIntros "→P W".
+    iMod (ownNi_alloc_rec (.∈ ↑N) with "[→P] W") as (i) "(%iN & W & iP)".
     - move=> ?. apply fresh_inv_name.
-    - iIntros (? iN) "iP". iApply "toP". by iApply ownNi_ninv.
+    - iIntros (? iN) "iP". iApply "→P". by iApply ownNi_ninv.
     - iModIntro. iFrame "W". by iApply ownNi_ninv.
   Qed.
   Lemma ninv_alloc {intp N P} : intp P =[ninv_wsat intp]=∗ ninv N P.

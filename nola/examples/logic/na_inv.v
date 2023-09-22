@@ -13,10 +13,10 @@ Section lemmas.
       ⟦ P ⟧ ∗ na_own p (F∖↑N) ∗
       (⟦ P ⟧ -∗ na_own p (F∖↑N) =[nninv_wsatd]{E}=∗ na_own p F).
   Proof.
-    rewrite na_nninv_unseal. iIntros (NE NF) "#accP F".
-    iDestruct nderiv_sound as "to".
-    iDestruct ("to" with "accP") as "/={accP}accP".
-    iApply ("accP" $! _ _ NE NF with "F").
+    rewrite na_nninv_unseal. iIntros (NE NF) "#∝P F".
+    iDestruct nderiv_sound as "→".
+    iDestruct ("→" with "∝P") as "/={∝P}∝P".
+    iApply ("∝P" $! _ _ NE NF with "F").
   Qed.
 
   Context `{!nderivy Σ ih d}.
@@ -28,12 +28,12 @@ Section lemmas.
     rewrite na_nninv_unseal. iIntros (jN) "#NP !>".
     iApply (derivy_intro (d:=d))=>/=.
     iIntros (??? E F NE NF) "F". rewrite -nintpS_nintp_nlarge.
-    iMod (ninv_acc NE with "NP") as "/=[bd bdto]".
-    iDestruct (na_body_acc with "bd F") as "(bd &$&$& Pto)"; [done..|].
-    iMod ("bdto" with "bd") as "_". iIntros "!> P F∖N".
-    iMod (ninv_acc NE with "NP") as "/=[bd bdto]".
-    iDestruct ("Pto" with "bd P F∖N") as "[bd $]".
-    by iMod ("bdto" with "bd") as "_".
+    iMod (ninv_acc NE with "NP") as "/=[bd bd→]".
+    iDestruct (na_body_acc with "bd F") as "(bd &$&$& P→)"; [done..|].
+    iMod ("bd→" with "bd") as "_". iIntros "!> P F∖N".
+    iMod (ninv_acc NE with "NP") as "/=[bd bd→]".
+    iDestruct ("P→" with "bd P F∖N") as "[bd $]".
+    by iMod ("bd→" with "bd") as "_".
   Qed.
 
   (** Allocate [na_nninv] *)
@@ -41,10 +41,10 @@ Section lemmas.
     (na_nninv d p N (↑ˡ P) -∗ ⟦ P ⟧(d)) =[nninv_wsat d]=∗
       na_nninv d p N (↑ˡ P).
   Proof.
-    iIntros "toP". iMod na_lock_alloc as (i) "[% lock]".
-    iMod (ninv_alloc_rec (P:=nInvd_na p i P) with "[toP lock]") as "NP".
+    iIntros "→P". iMod na_lock_alloc as (i) "[% lock]".
+    iMod (ninv_alloc_rec (P:=nInvd_na p i P) with "[→P lock]") as "NP".
     - iIntros "/=NP". iLeft. iFrame "lock". rewrite nintpS_nintp.
-      iApply "toP". by iApply na_ninv_nninv.
+      iApply "→P". by iApply na_ninv_nninv.
     - iModIntro. by iApply na_ninv_nninv.
   Qed.
   Lemma na_nninv_alloc (P : nPropS _) {p N} :
@@ -57,14 +57,14 @@ Section lemmas.
   Lemma na_nninv_convert {p N P Q} :
     □ ⸨ P ={∅}=∗ Q ∗ (Q ={∅}=∗ P) ⸩(d) -∗ na_nninv d p N P -∗ na_nninv d p N Q.
   Proof.
-    rewrite na_nninv_unseal. iIntros "#PQP #accP !>".
-    iApply (derivy_map2 with "[] PQP accP")=>/=.
-    iIntros (???) "/= {PQP}PQP {accP}accP". iIntros (E F NE NF) "F".
-    iMod ("accP" $! E F NE NF with "F") as "(P &$& Pto)".
-    iMod (fupd_mask_subseteq ∅) as "toE∖N"; [set_solver|].
-    iMod ("PQP" with "P") as "($& QP)". iMod "toE∖N" as "_". iIntros "!> Q".
-    iMod (fupd_mask_subseteq ∅) as "toE∖N"; [set_solver|].
-    iMod ("QP" with "Q") as "P". iMod "toE∖N" as "_". iApply ("Pto" with "P").
+    rewrite na_nninv_unseal. iIntros "#PQP #∝P !>".
+    iApply (derivy_map2 with "[] PQP ∝P")=>/=.
+    iIntros (???) "/= {PQP}PQP {∝P}∝P". iIntros (E F NE NF) "F".
+    iMod ("∝P" $! E F NE NF with "F") as "(P &$& P→)".
+    iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
+    iMod ("PQP" with "P") as "($& QP)". iMod "→E∖N" as "_". iIntros "!> Q".
+    iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
+    iMod ("QP" with "Q") as "P". iMod "→E∖N" as "_". iApply ("P→" with "P").
   Qed.
   Lemma na_nninv_split {p N P Q} :
     na_nninv d p N (P ∗ Q) ⊢ na_nninv d p N P ∗ na_nninv d p N Q.
@@ -93,11 +93,11 @@ Section lemmas.
     rewrite na_nninv_unseal. iIntros (??) "#NP #N'Q !>".
     iApply (derivy_map2 (d:=d) with "[] NP N'Q")=>/=.
     iIntros (???) "{NP}NP {N'Q}N'Q". iIntros (? F ??) "F".
-    iMod ("NP" with "[%] [%] F") as "($& F∖N & Pto)"; [set_solver..|].
-    iMod ("N'Q" with "[%] [%] F∖N") as "($& F∖NN' & Qto)"; [set_solver..|].
-    iDestruct (na_own_acc with "F∖NN'") as "[$ F∖N''to]"; [set_solver|].
+    iMod ("NP" with "[%] [%] F") as "($& F∖N & P→)"; [set_solver..|].
+    iMod ("N'Q" with "[%] [%] F∖N") as "($& F∖NN' & Q→)"; [set_solver..|].
+    iDestruct (na_own_acc with "F∖NN'") as "[$ F∖N''→]"; [set_solver|].
     iApply fupdw_mask_intro; [set_solver|]. iIntros "cl [P Q] F∖N''".
-    iMod "cl" as "_". iDestruct ("F∖N''to" with "F∖N''") as "F∖NN'".
-    iMod ("Qto" with "Q F∖NN'") as "F∖N". iApply ("Pto" with "P F∖N").
+    iMod "cl" as "_". iDestruct ("F∖N''→" with "F∖N''") as "F∖NN'".
+    iMod ("Q→" with "Q F∖NN'") as "F∖N". iApply ("P→" with "P F∖N").
   Qed.
 End lemmas.

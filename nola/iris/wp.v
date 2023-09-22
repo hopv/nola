@@ -431,8 +431,8 @@ Section wpw.
       ∀ Φ, □ (∀ v, Ψ v =[W]{E}=∗ Φ v) =[W]{E}=∗ WP[W] e @ s; E [{ Φ }]).
     { iIntros "wp". iApply (go with "wp"). iIntros "!>" (?) "$". }
     iRevert (e E). iApply twp_ind; [solve_proper|]. iIntros "!>" (?? Ψ).
-    iIntros "twp" (?) "#Ψto". rewrite twp_unfold /twp_pre. case (to_val e)=> >.
-    { iIntros "W". by iMod ("Ψto" with "twp W") as ">[$$]". }
+    iIntros "twp" (?) "#Ψ→". rewrite twp_unfold /twp_pre. case (to_val e)=> >.
+    { iIntros "W". by iMod ("Ψ→" with "twp W") as ">[$$]". }
     iIntros "$ !>" (????) "Wst". iMod ("twp" with "[$Wst]") as "[$ big]".
     iIntros "!>" (?????).
     iMod ("big" with "[%//]") as "[$ [[W $] [[big _] bigs]]]".
@@ -452,12 +452,12 @@ Section wpw.
     rewrite !wp_unfold /wp_pre/=. case (to_val e); [done|].
     iIntros (?????) "[W' X]".
     iMod (fupd_mask_subseteq E) as "cl"; [done|].
-    iMod ("W'W" with "W'") as "[W Wto]". iMod "cl" as "_".
+    iMod ("W'W" with "W'") as "[W W→]". iMod "cl" as "_".
     iMod ("wpW" with "[$W $X]") as "[% big]". iModIntro. iSplit; [done|].
     iIntros (????) "£". iDestruct ("big" with "[%//] £") as "big".
     iApply (step_fupdN_wand with "big"). iIntros "!> >[[W $] [wpW wpWs]]".
     iMod (fupd_mask_subseteq E) as "cl"; [done|].
-    iMod ("Wto" with "W") as "$". iMod "cl" as "_". iModIntro.
+    iMod ("W→" with "W") as "$". iMod "cl" as "_". iModIntro.
     iSplitL "wpW"; [by iApply "IH"|]. iApply (big_sepL_impl with "wpWs").
     iIntros "!>" (???). by iApply "IH".
   Qed.
@@ -478,15 +478,15 @@ Section wpw.
     iApply twp_ind; [solve_proper|]. iIntros "!>" (e F Φ) "twpW %".
     rewrite twp_unfold /twp_pre/=. case (to_val e); [done|].
     iIntros (????) "[W' X]". iMod (fupd_mask_subseteq E) as "cl"; [done|].
-    iMod ("W'W" with "W'") as "[W Wto]". iMod "cl" as "_".
+    iMod ("W'W" with "W'") as "[W W→]". iMod "cl" as "_".
     iMod ("twpW" with "[$W $X]") as "[% big]". iModIntro. iSplit; [done|].
     iIntros (?????).
     iMod ("big" with "[%//]") as (?) "[[W $] [[twpW' _] twpW's]]".
     iDestruct ("twpW'" with "[%//]") as "$".
-    iMod (fupd_mask_subseteq E) as "cl"; [done|]. iMod ("Wto" with "W") as "$".
+    iMod (fupd_mask_subseteq E) as "cl"; [done|]. iMod ("W→" with "W") as "$".
     iMod "cl" as "_". iModIntro. iSplit; [done|].
-    iApply (big_sepL_impl with "twpW's"). iIntros "!>" (???) "[to _]".
-    by iApply "to".
+    iApply (big_sepL_impl with "twpW's"). iIntros "!>" (???) "[→ _]".
+    by iApply "→".
   Qed.
   Lemma twpw_expand {e s E W W' Φ} :
     □ (W' -∗ W ∗ (W -∗ W')) -∗

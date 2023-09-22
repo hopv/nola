@@ -12,8 +12,8 @@ Section lemmas.
     nninvd N P =[nninv_wsatd]{E,E∖↑N}=∗
       ⟦ P ⟧ ∗ (⟦ P ⟧ =[nninv_wsatd]{E∖↑N,E}=∗ True).
   Proof.
-    rewrite nninv_unseal. iIntros (NE) "#accP". iDestruct nderiv_sound as "to".
-    iDestruct ("to" with "accP") as "/={accP}accP". by iApply "accP".
+    rewrite nninv_unseal. iIntros (NE) "#∝P". iDestruct nderiv_sound as "→".
+    iDestruct ("→" with "∝P") as "/={∝P}∝P". by iApply "∝P".
   Qed.
 
   Context `{!nderivy Σ ih d}.
@@ -31,9 +31,9 @@ Section lemmas.
   Lemma nninv_alloc_rec (P : nPropS _) {N} :
     (nninv d N (↑ˡ P) -∗ ⟦ P ⟧(d)) =[nninv_wsat d]=∗ nninv d N (↑ˡ P).
   Proof.
-    iIntros "toP".
-    iMod (ninv_alloc_rec (P:=nInvd_u P) with "[toP]") as "NP".
-    - iIntros "/=NP". rewrite nintpS_nintp. iApply "toP". by iApply ninv_nninv.
+    iIntros "→P".
+    iMod (ninv_alloc_rec (P:=nInvd_u P) with "[→P]") as "NP".
+    - iIntros "/=NP". rewrite nintpS_nintp. iApply "→P". by iApply ninv_nninv.
     - iModIntro. by iApply ninv_nninv.
   Qed.
   Lemma nninv_alloc (P : nPropS _) {N} :
@@ -44,14 +44,14 @@ Section lemmas.
   Lemma nninv_convert {N P Q} :
     □ ⸨ P ={∅}=∗ Q ∗ (Q ={∅}=∗ P) ⸩(d) -∗ nninv d N P -∗ nninv d N Q.
   Proof.
-    rewrite nninv_unseal. iIntros "#PQP #accP !>".
-    iApply (derivy_map2 with "[] PQP accP")=>/=.
-    iIntros (???) "/= {PQP}PQP {accP}accP". iIntros (? NE).
-    iMod ("accP" $! _ NE) as "[P Pto]".
-    iMod (fupd_mask_subseteq ∅) as "toE∖N"; [set_solver|].
-    iMod ("PQP" with "P") as "($& QP)". iMod "toE∖N" as "_". iIntros "!> Q".
-    iMod (fupd_mask_subseteq ∅) as "toE∖N"; [set_solver|].
-    iMod ("QP" with "Q") as "P". iMod "toE∖N" as "_". iApply ("Pto" with "P").
+    rewrite nninv_unseal. iIntros "#PQP #∝P !>".
+    iApply (derivy_map2 with "[] PQP ∝P")=>/=.
+    iIntros (???) "/= {PQP}PQP {∝P}∝P". iIntros (? NE).
+    iMod ("∝P" $! _ NE) as "[P P→]".
+    iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
+    iMod ("PQP" with "P") as "($& QP)". iMod "→E∖N" as "_". iIntros "!> Q".
+    iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
+    iMod ("QP" with "Q") as "P". iMod "→E∖N" as "_". iApply ("P→" with "P").
   Qed.
   Lemma nninv_split {N P Q} :
     nninv d N (P ∗ Q) ⊢ nninv d N P ∗ nninv d N Q.
@@ -79,9 +79,9 @@ Section lemmas.
     rewrite nninv_unseal. iIntros (??) "#NP #N'Q !>".
     iApply (derivy_map2 (d:=d) with "[] NP N'Q")=>/=.
     iIntros (???) "{NP}NP {N'Q}N'Q". iIntros (??).
-    iMod ("NP" with "[%]") as "[$ Pto]"; [set_solver|].
-    iMod ("N'Q" with "[%]") as "[$ Qto]"; [set_solver|].
+    iMod ("NP" with "[%]") as "[$ P→]"; [set_solver|].
+    iMod ("N'Q" with "[%]") as "[$ Q→]"; [set_solver|].
     iApply fupdw_mask_intro; [set_solver|]. iIntros "cl [P Q]".
-    iMod "cl" as "_". iMod ("Qto" with "Q") as "_". iApply ("Pto" with "P").
+    iMod "cl" as "_". iMod ("Q→" with "Q") as "_". iApply ("P→" with "P").
   Qed.
 End lemmas.

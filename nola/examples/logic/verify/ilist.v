@@ -55,9 +55,9 @@ Section verify.
     { iApply derivy_map; [|done]=>/=. iIntros (d' dyd' _) "Φ↔Ψ Φ".
       iDestruct ("Φ↔Ψ" $! _) as "[ΦΨ ΨΦ]". iMod ("ΦΨ" with "Φ") as "$".
       iIntros "!> Ψ". by iApply "ΨΦ". }
-    iApply derivy_byintp=>/=. iIntros (d' dyd' [IH _]) "_ #to _ (%l' & ↦ & i)".
+    iApply derivy_byintp=>/=. iIntros (d' dyd' [IH _]) "_ #→ _ (%l' & ↦ & i)".
     iModIntro. rewrite rew_eq_hwf /=. iDestruct "i" as "#i".
-    iDestruct ("to" with "[//]") as "?". iSplitL.
+    iDestruct ("→" with "[//]") as "?". iSplitL.
     { iExists _. iFrame "↦". rewrite rew_eq_hwf /=. by iApply IH. }
     iIntros "(%l'' & ↦ & i') !>". iExists _. iFrame "↦".
     rewrite !rew_eq_hwf /=. iApply IH; [|done]. iModIntro.

@@ -53,8 +53,8 @@ Section eref.
     iApply (twpw_atomic (e:=! _)); [done|]. iApply fupdw_tinv_wsat_le.
     iIntros (?). have ? : i <ⁿ L by exact (nlt_nle_trans _ _).
     have ? : S i ≤ⁿ j by done. iApply fupdw_expand; [iApply tinv_wsat_incl|].
-    iDestruct tderiv_sound as "to".
-    iMod ("to" with "ref") as (?) "(↦ & #T & cl)". iModIntro. wp_load.
+    iDestruct tderiv_sound as "→".
+    iMod ("→" with "ref") as (?) "(↦ & #T & cl)". iModIntro. wp_load.
     iModIntro. iApply fupdw_expand; [iApply tinv_wsat_incl|].
     by iMod ("cl" with "↦ T") as "_".
   Qed.
@@ -69,8 +69,8 @@ Section eref.
     iApply (twpw_atomic (e:=_ <- _)); [done|]. iApply fupdw_tinv_wsat_le.
     iIntros (?). have ? : i <ⁿ L by exact (nlt_nle_trans _ _).
     have ? : S i ≤ⁿ j by done. iApply fupdw_expand; [iApply tinv_wsat_incl|].
-    iDestruct tderiv_sound as "to".
-    iMod ("to" with "ref") as (?) "(↦ &_& cl)". iModIntro. wp_store.
+    iDestruct tderiv_sound as "→".
+    iMod ("→" with "ref") as (?) "(↦ &_& cl)". iModIntro. wp_store.
     iModIntro. iApply fupdw_expand; [iApply tinv_wsat_incl|].
     by iMod ("cl" with "↦ T") as "_".
   Qed.
@@ -85,8 +85,8 @@ Section eref.
     iApply (twpw_atomic (e:=Xchg _ _)); [done|]. iApply fupdw_tinv_wsat_le.
     iIntros (?). have ? : i <ⁿ L by exact (nlt_nle_trans _ _).
     have ? : S i ≤ⁿ j by done. iApply fupdw_expand; [iApply tinv_wsat_incl|].
-    iDestruct tderiv_sound as "to".
-    iMod ("to" with "ref") as (?) "(↦ & ? & cl)". iModIntro. wp_xchg.
+    iDestruct tderiv_sound as "→".
+    iMod ("→" with "ref") as (?) "(↦ & ? & cl)". iModIntro. wp_xchg.
     iModIntro. iApply fupdw_expand; [iApply tinv_wsat_incl|].
     iMod ("cl" with "↦ T") as "_". by iFrame.
   Qed.
@@ -103,8 +103,8 @@ Section eref.
     iApply (twpw_atomic (e:=CmpXchg _ _ _)); [done|]. iApply fupdw_tinv_wsat_le.
     iIntros (?). have ? : i <ⁿ L by exact (nlt_nle_trans _ _).
     have ? : S i ≤ⁿ j by done. iApply fupdw_expand; [iApply tinv_wsat_incl|].
-    iDestruct tderiv_sound as "to".
-    iMod ("to" with "ref") as (?) "(↦ &[%m' ->]& cl)". iModIntro.
+    iDestruct tderiv_sound as "→".
+    iMod ("→" with "ref") as (?) "(↦ &[%m' ->]& cl)". iModIntro.
     case (decide (m' = m)%Z)=> [->|?];
       [wp_apply (twp_cmpxchg_suc with "↦"); [done|solve_vals_compare_safe|]|
         wp_apply (twp_cmpxchg_fail with "↦");
@@ -124,8 +124,8 @@ Section eref.
     iApply (twpw_atomic (e:=FAA _ _)); [done|]. iApply fupdw_tinv_wsat_le.
     iIntros (?). have ? : i <ⁿ L by exact (nlt_nle_trans _ _).
     have ? : S i ≤ⁿ j by done. iApply fupdw_expand; [iApply tinv_wsat_incl|].
-    iDestruct tderiv_sound as "to".
-    iMod ("to" with "ref") as (?) "(↦ &(%m &->)& cl)". iModIntro. wp_faa.
+    iDestruct tderiv_sound as "→".
+    iMod ("→" with "ref") as (?) "(↦ &(%m &->)& cl)". iModIntro. wp_faa.
     iModIntro. iApply fupdw_expand; [iApply tinv_wsat_incl|].
     rewrite -Nat2Z.inj_add.
     iMod ("cl" with "↦ []") as "_"; [|do 2 iModIntro]; by iExists _.

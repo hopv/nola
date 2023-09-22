@@ -132,8 +132,8 @@ Section conv.
   (** Eliminate [▽] *)
   Lemma ttrans_guard_elim {i T j} : ▽{i,nil} T ==>{j,_}(S i,tderiv) T.
   Proof.
-    iIntros (???) "/= #gT". iDestruct tderiv_sound as "to".
-    iDestruct ("to" with "gT") as "toT". by iApply "toT".
+    iIntros (???) "/= #gT". iDestruct tderiv_sound as "→".
+    iDestruct ("→" with "gT") as "→T". by iApply "→T".
   Qed.
 
   (** More on [▽] *)
