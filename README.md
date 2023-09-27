@@ -1,4 +1,4 @@
-# Nola: Deep Embedding for Later-free Nested Invariants
+# Nola: Nested Invariants without Step-Indexing
 
 Nola is a library for achieving expressive later-free nested invariants
 by the power of deep embedding.
