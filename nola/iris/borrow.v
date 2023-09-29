@@ -67,6 +67,12 @@ Section lft.
   Fact lft_dead_persistent {α} : Persistent [†α].
   Proof. apply _. Qed.
 
+  (** Lifetime and dead lifetime tokens are timeless *)
+  Fact lft_tok_timeless {α q} : Timeless q.[α].
+  Proof. apply _. Qed.
+  Fact lft_dead_timeless {α} : Timeless [†α].
+  Proof. apply _. Qed.
+
   (** Lifetime and dead lifetime tokens can't coexist *)
   Lemma lft_tok_dead {α q} : q.[α] -∗ [†α] -∗ False.
   Proof.
