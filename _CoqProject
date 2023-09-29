@@ -16,6 +16,7 @@ nola/iris/wp.v
 nola/iris/inv.v
 nola/iris/na_inv.v
 nola/iris/lft.v
+nola/iris/borrow.v
 nola/iris/paradox.v
 
 nola/examples/heap_lang/locations.v

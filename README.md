@@ -68,7 +68,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     [`wp`](nola/iris/wp.v) (Weakest precondition)
   + [`inv`](nola/iris/inv.v) (Invariant),
     [`na_inv`](nola/iris/na_inv.v) (Non-atomic invariant)
-  + [`lft`](nola/iris/lft.v) (Lifetime)
+  + [`lft`](nola/iris/lft.v) (Lifetime),
+    [`borrow`](nola/iris/borrow.v) (Borrowing)
   + [`paradox`](nola/iris/paradox.v) (Paradoxes)
 - [`examples/`](nola/examples/) : Examples
   + [`heap_lang/`](nola/examples/heap_lang/) : Variant of Iris HeapLang,
