@@ -26,34 +26,29 @@ Section ninv.
   (** ** Propositions *)
 
   (** [ownNi]: Basic invariant token *)
-
-  Definition ownNi (i : positive) (P : PROP) : iProp Σ :=
+  Local Definition ownNi (i : positive) (P : PROP) : iProp Σ :=
     own ninv_name (gmap_view_frag i DfracDiscarded (P : leibnizO _)).
-  #[export] Typeclasses Opaque ownNi.
-  #[export] Instance ownNi_timeless {i P} : Timeless (ownNi i P).
-  Proof. unfold ownNi. exact _. Qed.
-  #[export] Instance ownNi_persistent {i P} : Persistent (ownNi i P).
-  Proof. unfold ownNi. exact _. Qed.
 
   (** [ninv]: Invariant token *)
-  Definition ninv_def (N : namespace) (P : PROP) : iProp Σ :=
+  Local Definition ninv_def (N : namespace) (P : PROP) : iProp Σ :=
     ∃ i, ⌜i ∈ (↑N:coPset)⌝ ∧ ownNi i P.
-  Definition ninv_aux : seal ninv_def. Proof. by eexists. Qed.
+  Local Definition ninv_aux : seal ninv_def. Proof. by eexists. Qed.
   Definition ninv := ninv_aux.(unseal).
-  Lemma ninv_unseal : ninv = ninv_def. Proof. exact ninv_aux.(seal_eq). Qed.
+  Local Lemma ninv_unseal : ninv = ninv_def.
+  Proof. exact ninv_aux.(seal_eq). Qed.
   #[export] Instance ninv_timeless {N P} : Timeless (ninv N P).
   Proof. rewrite ninv_unseal. exact _. Qed.
   #[export] Instance ninv_persistent {N P} : Persistent (ninv N P).
   Proof. rewrite ninv_unseal. exact _. Qed.
 
   (** [ninv_wsat]: Invariant world satisfaction *)
-  Definition authNi (Ps : gmap positive (leibnizO PROP)) :=
+  Local Definition authNi (Ps : gmap positive (leibnizO PROP)) :=
     own ninv_name (gmap_view_auth (DfracOwn 1) Ps).
-  Definition ninv_wsat_def (intp : PROP -d> iProp Σ) : iProp Σ :=
+  Local Definition ninv_wsat_def (intp : PROP -d> iProp Σ) : iProp Σ :=
     ∃ Ps, authNi Ps ∗ [∗ map] i ↦ P ∈ Ps, intp P ∗ ownD {[i]} ∨ ownE {[i]}.
-  Definition ninv_wsat_aux : seal ninv_wsat_def. Proof. by eexists. Qed.
+  Local Definition ninv_wsat_aux : seal ninv_wsat_def. Proof. by eexists. Qed.
   Definition ninv_wsat := ninv_wsat_aux.(unseal).
-  Lemma ninv_wsat_unseal : ninv_wsat = ninv_wsat_def.
+  Local Lemma ninv_wsat_unseal : ninv_wsat = ninv_wsat_def.
   Proof. exact ninv_wsat_aux.(seal_eq). Qed.
   #[export] Instance ninv_wsat_ne : NonExpansive ninv_wsat.
   Proof. rewrite ninv_wsat_unseal. solve_proper. Qed.
@@ -63,7 +58,8 @@ Section ninv.
   (** ** Lemmas *)
 
   (** ** Lookup in [authNi] *)
-  Lemma authNi_lookup {Ps i P} : authNi Ps -∗ ownNi i P -∗ ⌜Ps !! i = Some P⌝.
+  Local Lemma authNi_lookup {Ps i P} :
+    authNi Ps -∗ ownNi i P -∗ ⌜Ps !! i = Some P⌝.
   Proof.
     iIntros "aPs iP". unfold authNi, ownNi. iCombine "aPs iP" as "eq".
     rewrite own_valid gmap_view_both_validI bi.and_elim_r.
@@ -71,7 +67,7 @@ Section ninv.
   Qed.
 
   (** Open and close by [ownNi] *)
-  Lemma ownNi_open {intp i P} :
+  Local Lemma ownNi_open {intp i P} :
     ownNi i P -∗ ownE {[i]} -∗ ninv_wsat intp -∗
       ninv_wsat intp ∗ intp P ∗ ownD {[i]}.
   Proof.
@@ -81,7 +77,7 @@ Section ninv.
       [done| |iDestruct (ownE_singleton_twice with "[$]") as "[]"].
     iExists _. iFrame "aPs". iApply big_sepM_delete; [done|]. iFrame.
   Qed.
-  Lemma ownNi_close {intp i P} :
+  Local Lemma ownNi_close {intp i P} :
     ownNi i P -∗ intp P -∗ ownD {[i]} -∗ ninv_wsat intp -∗
       ninv_wsat intp ∗ ownE {[i]}.
   Proof.
@@ -94,7 +90,7 @@ Section ninv.
   Qed.
 
   (** Allocate [ownNi] *)
-  Lemma ownNi_alloc_rec {intp P} φ :
+  Local Lemma ownNi_alloc_rec {intp P} φ :
     (∀ E : gset positive, ∃ i, i ∉ E ∧ φ i) →
     (∀ i, ⌜φ i⌝ → ownNi i P -∗ intp P) -∗ ninv_wsat intp ==∗
       ∃ i, ⌜φ i⌝ ∗ ninv_wsat intp ∗ ownNi i P.
@@ -115,7 +111,7 @@ Section ninv.
   Qed.
 
   (** Get [ownE] out of the fancy update *)
-  Lemma fupd_accE {N E} : ↑N ⊆ E →
+  Local Lemma fupd_accE {N E} : ↑N ⊆ E →
     ⊢ |={E,E∖↑N}=> ownE (↑N) ∗ (ownE (↑N) ={E∖↑N,E}=∗ True).
   Proof.
     rewrite fancy_updates.uPred_fupd_unseal /fancy_updates.uPred_fupd_def.
@@ -139,7 +135,7 @@ Section ninv.
   Qed.
 
   (** Turn [ownNi] to [ninv] *)
-  Lemma ownNi_ninv {i N P} : i ∈ (↑N:coPset) → ownNi i P -∗ ninv N P.
+  Local Lemma ownNi_ninv {i N P} : i ∈ (↑N:coPset) → ownNi i P -∗ ninv N P.
   Proof. rewrite ninv_unseal. iIntros. iExists _. by iSplit. Qed.
 
   (** Allocate [ninv] *)
