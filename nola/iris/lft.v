@@ -9,7 +9,7 @@ From iris.proofmode Require Import proofmode.
 (** ** Lifetime *)
 
 (** Atomic lifetime *)
-Definition alft := positive.
+Local Definition alft := positive.
 (** Lifetime *)
 Notation lft := (gmultiset alft).
 Implicit Type α β : lft.
@@ -46,14 +46,15 @@ Proof. solve_inG. Qed.
 (** ** Lifetime tokens *)
 
 (** Atomic lifetime token *)
-Definition alft_tok `{!lftG Σ} (a : alft) (q : Qp) : iProp Σ := own a (Cinl q).
+Local Definition alft_tok `{!lftG Σ} (a : alft) (q : Qp) : iProp Σ :=
+  own a (Cinl q).
 (** Lifetime token *)
 Notation lft_tok α q := ([∗ mset] a ∈ α, alft_tok a q)%I.
 Notation "q .[ α ]" := (lft_tok α q)
   (format "q .[ α ]", at level 2, left associativity) : bi_scope.
 
 (** Dead atomic lifetime token *)
-Definition alft_dead `{!lftG Σ} (a : alft) : iProp Σ := own a (Cinr ()).
+Local Definition alft_dead `{!lftG Σ} (a : alft) : iProp Σ := own a (Cinr ()).
 (** Dead lifetime token *)
 Definition lft_dead `{!lftG Σ} (α : lft) : iProp Σ :=
   ∃ a, ⌜a ∈ α⌝ ∗ alft_dead a.
