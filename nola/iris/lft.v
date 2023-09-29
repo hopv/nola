@@ -1,38 +1,17 @@
-(** * Borrow *)
+(** * Lifetime machinery *)
 
 From nola Require Export prelude.
-From stdpp Require Import namespaces.
 From iris.algebra Require Import csum frac.
 From iris.bi Require Import fractional.
-From iris.base_logic Require Import fancy_updates lib.invariants.
+From iris.base_logic Require Import lib.invariants.
 From iris.proofmode Require Import proofmode.
 
-(** ** Ghost state *)
-
-(** Namespace for borrow *)
-Definition borN : namespace := nroot .@ "bor".
-
-(** Resource for lifetimes *)
-Definition lftR := csumR fracR unitR.
-
-(** Resource for borrow machinery *)
-Class borGS Σ := BorG {
-  borGS_lft :: inG Σ lftR;
-}.
-Class borGpreS Σ := BorGPreS {
-  borGpreS_lft :: inG Σ lftR;
-}.
-Definition borΣ : gFunctors := #[GFunctor lftR].
-#[export] Instance subG_bor `{!subG borΣ Σ} : borGpreS Σ.
-Proof. solve_inG. Qed.
-
-(** ** Lifetimes *)
+(** ** Lifetime *)
 
 (** Atomic lifetime *)
 Definition alft := positive.
 (** Lifetime *)
 Notation lft := (gmultiset alft).
-
 Implicit Type α β : lft.
 
 (** Static lifetime [⊤], empty [∅] as a multiset *)
@@ -40,28 +19,48 @@ Implicit Type α β : lft.
 (** Lifetime meet [⊓], sum [⊎] as a multiset *)
 #[export] Instance lft_meet : Meet lft := disj_union.
 
+(** [⊓] is unital over [⊤], commutative, and associative *)
+Fact lft_meet_id_l : LeftId (=) ⊤ (meet (A:=lft)).
+Proof. apply _. Qed.
+Fact lft_meet_id_r : RightId (=) ⊤ (meet (A:=lft)).
+Proof. apply _. Qed.
+Fact lft_meet_comm : Comm (=) (meet (A:=lft)).
+Proof. apply _. Qed.
+Fact lft_meet_assoc : Assoc (=) (meet (A:=lft)).
+Proof. apply _. Qed.
+
+(** ** Ghost state *)
+
+(** Algebra for an atomic lifetime *)
+Definition lftR := csumR
+  fracR (* Alive, fractionally owned *)
+  unitR (* Dead *).
+
+(** Ghost state *)
+Class lftG Σ := LftG { lftG_inG : inG Σ lftR }.
+Local Existing Instance lftG_inG.
+Definition lftΣ : gFunctors := GFunctor lftR.
+#[export] Instance subG_lft `{!subG lftΣ Σ} : lftG Σ.
+Proof. solve_inG. Qed.
+
+(** ** Lifetime tokens *)
+
 (** Atomic lifetime token *)
-Definition alft_tok `{!borGS Σ} (a : alft) (q : Qp) : iProp Σ := own a (Cinl q).
+Definition alft_tok `{!lftG Σ} (a : alft) (q : Qp) : iProp Σ := own a (Cinl q).
 (** Lifetime token *)
 Notation lft_tok α q := ([∗ mset] a ∈ α, alft_tok a q)%I.
 Notation "q .[ α ]" := (lft_tok α q)
   (format "q .[ α ]", at level 2, left associativity) : bi_scope.
 
 (** Dead atomic lifetime token *)
-Definition alft_dead `{!borGS Σ} (a : alft) : iProp Σ := own a (Cinr ()).
+Definition alft_dead `{!lftG Σ} (a : alft) : iProp Σ := own a (Cinr ()).
 (** Dead lifetime token *)
-Definition lft_dead `{!borGS Σ} (α : lft) : iProp Σ :=
+Definition lft_dead `{!lftG Σ} (α : lft) : iProp Σ :=
   ∃ a, ⌜a ∈ α⌝ ∗ alft_dead a.
 Notation "[† α ]" := (lft_dead α) (format "[† α ]") : bi_scope.
 
-(** Semantic lifetime inclusion *)
-Definition lft_incl `{!borGS Σ, !invGS_gen hlc Σ} (α β : lft) : iProp Σ :=
-  □ ((∀ q, q.[α] ={↑borN}=∗ ∃ r, r.[β] ∗ (r.[β] ={↑borN}=∗ q.[α])) ∧
-     ([†β] ={↑borN}=∗ [†α])).
-Infix "⊑" := lft_incl (at level 70) : bi_scope.
-
 Section lft.
-  Context `{!borGS Σ}.
+  Context `{!lftG Σ}.
 
   (** Dead lifetime token is persistent *)
   Fact lft_dead_persistent {α} : Persistent [†α].
@@ -104,16 +103,6 @@ Section lft.
     Frame p q.[α] r.[α] s.[α] | 5.
   Proof. apply: frame_fractional. Qed.
 
-  (** [⊓] is unital over [⊤], commutative, and associative *)
-  Fact lft_meet_id_l : LeftId (=) ⊤ (meet (A:=lft)).
-  Proof. apply _. Qed.
-  Fact lft_meet_id_r : RightId (=) ⊤ (meet (A:=lft)).
-  Proof. apply _. Qed.
-  Fact lft_meet_comm : Comm (=) (meet (A:=lft)).
-  Proof. apply _. Qed.
-  Fact lft_meet_assoc : Assoc (=) (meet (A:=lft)).
-  Proof. apply _. Qed.
-
   (** Lifetime token over [⊤]/[⊓] *)
   Lemma lft_tok_top {q} : ⊢ q.[⊤].
   Proof. by apply big_sepMS_empty'. Qed.
@@ -131,8 +120,21 @@ Section lft.
     - iDestruct 1 as "[(%a & % & †)|(%a & % & †)]"; iExists _; iFrame "†";
         iPureIntro; set_solver.
   Qed.
+End lft.
 
-  Context `{!invGS_gen hlc Σ}.
+(** ** Lifetime inclusion *)
+
+(** Namespace for the lifetime machinery *)
+Definition lftN : namespace := nroot .@ "lft".
+
+(** Lifetime inclusion, defined semantically *)
+Definition lft_incl `{!lftG Σ, !invGS_gen hlc Σ} (α β : lft) : iProp Σ :=
+  □ ((∀ q, q.[α] ={↑lftN}=∗ ∃ r, r.[β] ∗ (r.[β] ={↑lftN}=∗ q.[α])) ∧
+     ([†β] ={↑lftN}=∗ [†α])).
+Infix "⊑" := lft_incl (at level 70) : bi_scope.
+
+Section lft.
+  Context `{!lftG Σ, !invGS_gen hlc Σ}.
 
   (** Lifetime inclusion is persistent *)
   Fact lft_incl_persistent {α β} : Persistent (α ⊑ β).
@@ -187,7 +189,7 @@ Section lft.
   (** Eternalize a lifetime by consuming a token *)
   Lemma lft_tok_eternalize {α q E} : q.[α] ={E}=∗ ∀ β, β ⊑ α.
   Proof.
-    iIntros "α". iMod (inv_alloc borN _ (∃ q, q.[α]) with "[α]") as "#i".
+    iIntros "α". iMod (inv_alloc lftN _ (∃ q, q.[α]) with "[α]") as "#i".
     { by iExists _. } iIntros "!> %β !>". iSplit.
     - iIntros (?) "$". iInv "i" as (?) ">[α α']". iModIntro. iSplitL "α'".
       { by iExists _. } iModIntro. iExists _. iFrame "α". by iIntros.
