@@ -137,11 +137,11 @@ Infix "⊑" := lft_incl (at level 70) : bi_scope.
 Section lft.
   Context `{!lftG Σ, !invGS_gen hlc Σ}.
 
-  (** Lifetime inclusion is persistent *)
+  (** [⊑] is persistent *)
   Fact lft_incl_persistent {α β} : Persistent (α ⊑ β).
   Proof. apply _. Qed.
 
-  (** Lifetime inclusion is reflexive, is transitive, has the maximum [⊤] *)
+  (** [⊑] is reflexive, is transitive, has the maximum [⊤] *)
   Lemma lft_incl_refl {α} : ⊢ α ⊑ α.
   Proof.
     iModIntro. iSplit.
@@ -163,7 +163,14 @@ Section lft.
     - iDestruct 1 as (?) "[% _]". set_solver.
   Qed.
 
-  (** [⊓] is the lub w.r.t. lifetime inclusion *)
+  (** A dead lifetime is the minimum w.r.t. [⊑] *)
+  Lemma lft_incl_dead {α} : [†α] ⊢ ∀ β, α ⊑ β.
+  Proof.
+    iIntros "#† %β !>". iSplit; [|by iIntros]. iIntros (?) "α".
+    iDestruct (lft_tok_dead with "α †") as "[]".
+  Qed.
+
+  (** [⊓] is the lub w.r.t. [⊑] *)
   Lemma lft_incl_meet_l {α β} : ⊢ α ⊓ β ⊑ α.
   Proof.
     iModIntro. iSplit.
