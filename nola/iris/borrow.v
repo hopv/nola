@@ -121,7 +121,7 @@ Section borrow.
     move: incl. rewrite lookup_fmap leibniz_equiv_iff fmap_Some.
     move=> [?[?[?]]]. subst. by eexists _, _.
   Qed.
-  (** Update the borrower state w.r.t. [lend_stm_tok] and [bor_ijtok] *)
+  (** Update the borrower state w.r.t. [lend_stm_tok] *)
   Local Lemma lend_stm_bor_stupd {Lm i j α C Bm B B'} :
     Lm !! i = Some (α, C, Bm) → Bm !! j = Some B →
     lend_stm_tok Lm -∗ bor_ijtok i j α B ==∗
@@ -162,7 +162,7 @@ Section borrow.
   Qed.
   (** Retrieve for a lender w.r.t. [lend_stm_tok] *)
   Local Lemma lend_stm_lend_retrieve {Lm i α P Bm} :
-    Lm !! i = Some (α,(P,true),Bm) →
+    Lm !! i = Some (α, (P, true), Bm) →
     lend_stm_tok Lm -∗ lend_itok i α P ==∗
       lend_stm_tok (<[i := (α, (P, false), Bm)]> Lm).
   Proof.
@@ -178,7 +178,7 @@ End borrow.
 (** ** World satisfactions *)
 
 Section borrow.
-  Context `{!lftG Σ, !borrowGS PROP Σ, !invGS_gen hlc Σ}.
+  Context `{!lftG Σ, !borrowGS PROP Σ}.
   Implicit Type (M : iProp Σ → iProp Σ) (intp : PROP → iProp Σ)
     (P Q : PROP) (B : bor_st PROP) (Bm : bor_stm PROP).
 
@@ -188,15 +188,15 @@ Section borrow.
 
   (** World satisfaction for a lender *)
   Local Definition lend_wsat' M intp α P Bm : iProp Σ :=
-    ([∗ map] _ ↦ B ∈ Bm, bor_wsat intp α B) ∗
-    (([∗ map] _ ↦ B ∈ Bm, intp B.1) -∗ M (intp P)).
+    ([∗ map] B ∈ Bm, bor_wsat intp α B) ∗
+    (([∗ map] B ∈ Bm, intp B.1) -∗ M (intp P)).
   Local Definition lend_wsat M intp α P l Bm : iProp Σ :=
     if l then lend_wsat' M intp α P Bm else [†α]%I.
 
   (** World satisfaction for the borrowing machinery *)
   Local Definition borrow_wsat_def M intp : iProp Σ :=
     ∃ Lm, lend_stm_tok Lm ∗
-      [∗ map] _ ↦ L ∈ Lm, lend_wsat M intp L.1.1 L.1.2.1 L.1.2.2 L.2.
+      [∗ map] L ∈ Lm, lend_wsat M intp L.1.1 L.1.2.1 L.1.2.2 L.2.
   Local Definition borrow_wsat_aux : seal borrow_wsat_def.
   Proof. by eexists. Qed.
   Definition borrow_wsat := borrow_wsat_aux.(unseal).
@@ -294,7 +294,7 @@ Section borrow.
 End borrow.
 
 (** Allocate [borrow_wsat] *)
-Lemma borrow_wsat_alloc `{!lftG Σ, !borrowGpreS PROP Σ, !invGS_gen hlc Σ} :
+Lemma borrow_wsat_alloc `{!lftG Σ, !borrowGpreS PROP Σ} :
   ⊢ |==> ∃ _ : borrowGS PROP Σ, ∀ M intp, borrow_wsat M intp.
 Proof.
   iMod (own_alloc (● ∅)) as (γ) "●"; [by apply auth_auth_valid|]. iModIntro.
