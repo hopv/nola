@@ -121,6 +121,10 @@ Section lft.
     - iDestruct 1 as "[(%a & % & †)|(%a & % & †)]"; iExists _; iFrame "†";
         iPureIntro; set_solver.
   Qed.
+  Lemma lft_dead_meet_l {α β} : [†α] ⊢ [†α ⊓ β].
+  Proof. iIntros. rewrite lft_dead_meet. by iLeft. Qed.
+  Lemma lft_dead_meet_r {α β} : [†β] ⊢ [†α ⊓ β].
+  Proof. iIntros. rewrite lft_dead_meet. by iRight. Qed.
 End lft.
 
 (** ** Lifetime inclusion *)
@@ -129,9 +133,15 @@ End lft.
 Definition lftN : namespace := nroot .@ "lft".
 
 (** Lifetime inclusion, defined semantically *)
-Definition lft_incl `{!lftG Σ, !invGS_gen hlc Σ} (α β : lft) : iProp Σ :=
-  □ ((∀ q, q.[α] ={↑lftN}=∗ ∃ r, r.[β] ∗ (r.[β] ={↑lftN}=∗ q.[α])) ∧
-     ([†β] ={↑lftN}=∗ [†α])).
+Section lft.
+  Context `{!lftG Σ, !invGS_gen hlc Σ}.
+  Definition lft_incl_def  (α β : lft) : iProp Σ :=
+    □ ((∀ q, q.[α] ={↑lftN}=∗ ∃ r, r.[β] ∗ (r.[β] -∗ q.[α])) ∧
+      ([†β] ={↑lftN}=∗ [†α])).
+  Lemma lft_incl_aux : seal lft_incl_def. Proof. by eexists. Qed.
+  Definition lft_incl := lft_incl_aux.(unseal).
+  Lemma lft_incl_unseal : lft_incl = lft_incl_def. Proof. exact: seal_eq. Qed.
+End lft.
 Infix "⊑" := lft_incl (at level 70) : bi_scope.
 
 Section lft.
@@ -139,26 +149,34 @@ Section lft.
 
   (** [⊑] is persistent *)
   Fact lft_incl_persistent {α β} : Persistent (α ⊑ β).
-  Proof. apply _. Qed.
+  Proof. rewrite lft_incl_unseal. apply _. Qed.
+
+  (** Access a lifetime token by [⊑] *)
+  Lemma lft_incl_tok_acc {α β q} :
+    α ⊑ β -∗ q.[α] ={↑lftN}=∗ ∃ r, r.[β] ∗ (r.[β] -∗ q.[α]).
+  Proof. rewrite lft_incl_unseal. by iIntros "#[? _]". Qed.
+
+  (** Access a dead lifetime token by [⊑] *)
+  Lemma lft_incl_dead_acc {α β} : α ⊑ β -∗ [†β] ={↑lftN}=∗ [†α].
+  Proof. rewrite lft_incl_unseal. by iIntros "#[_ ?]". Qed.
 
   (** [⊑] is reflexive, is transitive, has the maximum [⊤] *)
   Lemma lft_incl_refl {α} : ⊢ α ⊑ α.
   Proof.
-    iModIntro. iSplit.
-    - iIntros (q) "α !>". iExists q. iFrame "α". by iIntros.
-    - by iIntros.
+    rewrite lft_incl_unseal. iModIntro. iSplit; [|by iIntros].
+    iIntros (q) "α !>". iExists q. iFrame "α". by iIntros.
   Qed.
   Lemma lft_incl_trans {α β γ} : α ⊑ β -∗ β ⊑ γ -∗ α ⊑ γ.
   Proof.
-    iIntros "#[αβα †βα] #[βγβ †γβ] !>". iSplit.
+    rewrite lft_incl_unseal. iIntros "#[αβα †βα] #[βγβ †γβ] !>". iSplit.
     - iIntros (q) "α". iMod ("αβα" with "α") as (r) "[β βα]".
       iMod ("βγβ" with "β") as (s) "[γ βγ]". iModIntro. iExists s. iFrame "γ".
-      iIntros "γ". iMod ("βγ" with "γ") as "β". by iApply "βα".
+      iIntros "γ". iDestruct ("βγ" with "γ") as "β". by iApply "βα".
     - iIntros "†γ". iMod ("†γβ" with "†γ") as "†β". by iApply "†βα".
   Qed.
   Lemma lft_incl_top {α} : ⊢ α ⊑ ⊤.
   Proof.
-    iModIntro. iSplit.
+    rewrite lft_incl_unseal. iModIntro. iSplit.
     - iIntros (?) "$ !>". iExists 1%Qp. iSplit; by [|iIntros].
     - iDestruct 1 as (?) "[% _]". set_solver.
   Qed.
@@ -166,38 +184,37 @@ Section lft.
   (** A dead lifetime is the minimum w.r.t. [⊑] *)
   Lemma lft_incl_dead {α} : [†α] ⊢ ∀ β, α ⊑ β.
   Proof.
-    iIntros "#† %β !>". iSplit; [|by iIntros]. iIntros (?) "α".
-    iDestruct (lft_tok_dead with "α †") as "[]".
+    rewrite lft_incl_unseal. iIntros "#† %β !>". iSplit; [|by iIntros].
+    iIntros (?) "α". iDestruct (lft_tok_dead with "α †") as "[]".
   Qed.
 
   (** [⊓] is the lub w.r.t. [⊑] *)
   Lemma lft_incl_meet_l {α β} : ⊢ α ⊓ β ⊑ α.
   Proof.
-    iModIntro. iSplit.
-    - iIntros (q) "[α $] !>". iExists q. iFrame "α". by iIntros "$".
-    - iDestruct 1 as (a) "[% †]". iModIntro. iExists a. iFrame "†".
-      iPureIntro. set_solver.
+    rewrite lft_incl_unseal. iModIntro.
+    iSplit; [|rewrite -lft_dead_meet_l; by iIntros].
+    iIntros (q) "[α $] !>". iExists q. iFrame "α". by iIntros.
   Qed.
   Lemma lft_incl_meet_r {α β} : ⊢ α ⊓ β ⊑ β.
   Proof. by rewrite comm -lft_incl_meet_l. Qed.
   Lemma lft_incl_meet_intro {α β γ} : α ⊑ β -∗ α ⊑ γ -∗ α ⊑ β ⊓ γ.
   Proof.
-    iIntros "#[αβα †βα] #[αγα †γα] !>". iSplit.
-    - iIntros (q) "[α α']". iMod ("αβα" with "α") as (r) "[β βα]".
-      iMod ("αγα" with "α'") as (s) "[γ γα']". iModIntro.
-      case (Qp.lower_bound r s)=> [t[?[?[->->]]]].
-      iDestruct "β" as "[β β']". iDestruct "γ" as "[γ γ']". iExists t.
-      iFrame "β γ". iIntros "[β γ]". iMod ("βα" with "[$β $β']") as "$".
-      by iMod ("γα'" with "[$γ $γ']") as "$".
-    - iDestruct 1 as (a) "[%e †]".
-      move: e=> /gmultiset_elem_of_disj_union[?|?]; [iApply "†βα"|iApply "†γα"];
-        iExists _; by iFrame.
+    rewrite lft_incl_unseal. iIntros "#[αβα †βα] #[αγα †γα] !>".
+    iSplit; last first.
+    { rewrite lft_dead_meet. iIntros "[?|?]"; by [iApply "†βα"|iApply "†γα"]. }
+    iIntros (q) "[α α']". iMod ("αβα" with "α") as (r) "[β βα]".
+    iMod ("αγα" with "α'") as (s) "[γ γα']". iModIntro.
+    case (Qp.lower_bound r s)=> [t[?[?[->->]]]].
+    iDestruct "β" as "[β β']". iDestruct "γ" as "[γ γ']". iExists t.
+    iFrame "β γ". iIntros "[β γ]". iDestruct ("βα" with "[$β $β']") as "$".
+    iApply ("γα'" with "[$γ $γ']").
   Qed.
 
   (** Eternalize a lifetime by consuming a token *)
   Lemma lft_tok_eternalize {α q E} : q.[α] ={E}=∗ ∀ β, β ⊑ α.
   Proof.
-    iIntros "α". iMod (inv_alloc lftN _ (∃ q, q.[α]) with "[α]") as "#i".
+    rewrite lft_incl_unseal. iIntros "α".
+    iMod (inv_alloc lftN _ (∃ q, q.[α]) with "[α]") as "#i".
     { by iExists _. } iIntros "!> %β !>". iSplit.
     - iIntros (?) "$". iInv "i" as (?) ">[α α']". iModIntro. iSplitL "α'".
       { by iExists _. } iModIntro. iExists _. iFrame "α". by iIntros.
