@@ -329,8 +329,8 @@ Section borrow.
     by iExists _, _.
   Qed.
 
-  (** Subdivide a borrow *)
-  Lemma bor_subdivl `{!GenUpd _ M} {intp q α P Ql} :
+  (** Subdivide a borrower *)
+  Lemma bor_subdiv `{!GenUpd _ M} {intp q α P} Ql :
     bor_otok α P q -∗ ([∗ list] Q ∈ Ql, intp Q) -∗
     (([∗ list] Q ∈ Ql, intp Q) -∗ M (intp P)) =[borrow_wsat M intp]=∗
       q.[α] ∗ [∗ list] Q ∈ Ql, bor_tok α Q.
@@ -348,14 +348,6 @@ Section borrow.
     iExists _. iFrame "●". iApply "→Lm"=>/=.
     iSplitL "Ql Bm'"; rewrite eq' big_sepL_fmap /=; [by iFrame|].
     iIntros "[Ql Bm']". iMod ("→P" with "Ql") as "P". iApply "→R". by iFrame.
-  Qed.
-  Lemma bor_subdiv `{!GenUpd _ M} {intp q α P Q} :
-    bor_otok α P q -∗ intp Q -∗ (intp Q -∗ M (intp P)) =[borrow_wsat M intp]=∗
-      q.[α] ∗ bor_tok α Q.
-  Proof.
-    iIntros "α Q →P".
-    iMod (bor_subdivl (Ql:=[Q]) with "α [Q] [→P]") as "[$[$_]]";
-      by [iFrame|rewrite big_sepL_singleton|].
   Qed.
 
   (** Extend the lender token *)
@@ -437,7 +429,7 @@ Section borrow.
     iMod (bor_open with "b α") as "[Φ b]".
     have eq: intp (Φ r) ⊣⊢ intp (Φ (r/2)%Qp) ∗ intp (Φ (r/2)%Qp).
     { by erewrite fractional_half; [|apply: fractional_as_fractional]. }
-    iMod (bor_subdivl (Ql:=[_;_]) with "b [Φ] []") as "[α[b[b' _]]]";
+    iMod (bor_subdiv [_;_] with "b [Φ] []") as "[α[b[b' _]]]";
       rewrite ?eq; [by iDestruct "Φ" as "[$$]"|by iIntros "[$[$_]]"|].
     iModIntro. iSplitL "b'"; [by iExists _|].
     iMod (bor_open with "b α") as "?". iModIntro. by iExists _.
