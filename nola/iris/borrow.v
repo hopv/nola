@@ -284,12 +284,12 @@ Section borrow.
   Qed.
   (** Retrieve from the lender token *)
   Lemma lend_retrieve {E W intp α P} :
-    [†α] -∗ lend_tok α P =[borrow_wsat E W intp ∗ W]{E}=∗ intp P.
+    [†α] -∗ lend_tok α P =[borrow_wsat E W intp]=∗ |=[W]{E}=> intp P.
   Proof.
-    rewrite borrow_wsat_unseal. iIntros "#† [%i l] [[%Lm[● Lm]] W]".
+    rewrite borrow_wsat_unseal. iIntros "#† [%i l] [%Lm[● Lm]]".
     iDestruct (lend_stm_lend_agree with "● l") as %[Bm ?].
     iDestruct (big_sepM_insert_acc with "Lm") as "[L →Lm]"; [done|]=>/=.
-    iMod (lend_wsat'_dead with "† L W") as "[$$]". iExists _.
+    iDestruct (lend_wsat'_dead with "† L") as "$". iExists _.
     iMod (lend_stm_lend_retrieve with "● l") as "$"; by [|iApply "→Lm"].
   Qed.
 End borrow.
