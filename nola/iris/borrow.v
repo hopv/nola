@@ -386,3 +386,42 @@ Proof.
   iExists (BorrowGS _ _ _ γ). iIntros (M intp). rewrite borrow_wsat_unseal.
   iExists ∅. by iFrame "●".
 Qed.
+
+(** ** Fractured borrowing *)
+
+(** Namespace for the borrowing machinery *)
+Definition borN : namespace := nroot .@ "bor".
+
+Section borrow.
+  Context `{!borrowGS PROP Σ, !invGS_gen hlc Σ}.
+  Implicit Type (M : iProp Σ → iProp Σ) (intp : PROP → iProp Σ) (Φ : Qp → PROP).
+
+  (** Fractured borrower token
+
+    We exploit the timelessness of [bor_tok] to piggyback on [inv] *)
+  Definition frbor_tok α Φ : iProp Σ := inv borN (∃ q, bor_tok α (Φ q)).
+
+  (** [frbor_tok] is persistent *)
+  Fact frbor_tok_persistent {α Φ} : Persistent (frbor_tok α Φ).
+  Proof. apply _. Qed.
+
+  (** Turn [bor_tok] into [frbor_tok] *)
+  Lemma bor_frbor {α Φ q E} : bor_tok α (Φ q) ={E}=∗ frbor_tok α Φ.
+  Proof. iIntros "b". iApply (inv_alloc borN _). by iExists _. Qed.
+
+  (** Open [frbor_tok] *)
+  Lemma frbor_open `{!lftG Σ, !GenUpd _ M} {intp Φ α q E} :
+    ↑borN ⊆ E → Fractional (intp ∘ Φ) →
+    frbor_tok α Φ -∗ q.[α] =[borrow_wsat M intp]{E}=∗ ∃ r,
+      intp (Φ r) ∗ bor_otok α (Φ r) q.
+  Proof.
+    move=> ??. iIntros "#i α W". iInv "i" as ">[%r b]".
+    iMod (bor_open with "b α W") as "[W[Φ b]]".
+    have eq: intp (Φ r) ⊣⊢ intp (Φ (r/2)%Qp) ∗ intp (Φ (r/2)%Qp).
+    { by erewrite fractional_half; [|apply: fractional_as_fractional]. }
+    iMod (bor_subdivl (Ql:=[_;_]) with "b [Φ] [] W") as "[W[α[b[b' _]]]]";
+      rewrite ?eq; [by iDestruct "Φ" as "[$$]"|by iIntros "[$[$_]]"|].
+    iModIntro. iSplitL "b'"; [by iExists _|].
+    iMod (bor_open with "b α W") as "[$ ?]". iModIntro. by iExists _.
+  Qed.
+End borrow.
