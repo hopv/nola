@@ -200,8 +200,8 @@ Section borrow.
     move: v=> /auth_both_valid_discrete[/singleton_included_l[?[
       /Some_equiv_eq[?[/lookup_fmap_Some[[[??]Bm][<-?]]<-]]
       /Some_included_total/prod_included[/prod_included/=[
-        /to_agree_included/leibniz_equiv_iff? /Excl_included/leibniz_equiv_iff?]
-        _]]]_].
+        /to_agree_included/leibniz_equiv_iff?
+        /Excl_included/leibniz_equiv_iff?]_]]]_].
     subst. by eexists _.
   Qed.
   (** Extend a lender w.r.t. [lend_stm_tok] *)
