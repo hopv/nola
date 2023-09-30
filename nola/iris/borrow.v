@@ -64,7 +64,7 @@ Section borrow.
 
   (** Borrower token *)
   Local Definition bor_ijtok i j α B : iProp Σ :=
-    own borrow_name (◯ {[i := (to_agree α, None, {[j := Excl B]})]}).
+    own borrow_name (◯ {[i := (to_agree α, ε, {[j := Excl B]})]}).
   Definition bor_tok α P : iProp Σ := ∃ i j, bor_ijtok i j α (P, None).
   Definition bor_otok `{!lftG Σ} α P q : iProp Σ :=
     (q/2).[α] ∗ ∃ i j, bor_ijtok i j α (P, Some (q/2)%Qp).
@@ -98,7 +98,7 @@ Section borrow.
     iMod (own_update with "●") as "[$[$$]]"; [|done].
     rewrite -auth_frag_op singleton_op fmap_insert. apply auth_update_alloc.
     have <-: lend_st_to_lendR (α, (P, true), {[1%positive := (P, None)]}) ≡
-      ((to_agree α, None, {[1%positive := Excl (P, None)]}) : lendR _) ⋅
+      ((to_agree α, ε, {[1%positive := Excl (P, None)]}) : lendR _) ⋅
         (to_agree α, Excl' (P, true), ε).
     { split; [split|]=>/=; by [rewrite agree_idemp|]. }
     apply alloc_singleton_local_update.
@@ -314,8 +314,8 @@ Section borrow.
   (** Subdivide a borrow *)
   Lemma bor_subdivl `{!GenUpd _ M} {intp q α P Ql} :
     bor_otok α P q -∗ ([∗ list] Q ∈ Ql, intp Q) -∗
-    (([∗ list] Q ∈ Ql, intp Q) -∗ M (intp P))
-      =[borrow_wsat M intp]=∗ q.[α] ∗ [∗ list] Q ∈ Ql, bor_tok α Q.
+    (([∗ list] Q ∈ Ql, intp Q) -∗ M (intp P)) =[borrow_wsat M intp]=∗
+      q.[α] ∗ [∗ list] Q ∈ Ql, bor_tok α Q.
   Proof.
     rewrite borrow_wsat_unseal. iIntros "[α[%i[%j b]]] Ql →P [%Lm[● Lm]]".
     iDestruct (lend_stm_bor_agree with "● b") as %[[R l][Bm[??]]].
