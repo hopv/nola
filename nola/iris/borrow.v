@@ -66,8 +66,8 @@ Section borrow.
   Local Definition bor_ijtok i j α B : iProp Σ :=
     own borrow_name (◯ {[i := (to_agree α, None, {[j := Excl B]})]}).
   Definition bor_tok α P : iProp Σ := ∃ i j, bor_ijtok i j α (P, None).
-  Definition bor_otok `{!lftG Σ} α P q : iProp Σ := ∃ i j,
-    (q/2).[α] ∗ bor_ijtok i j α (P, Some (q/2)%Qp).
+  Definition bor_otok `{!lftG Σ} α P q : iProp Σ :=
+    (q/2).[α] ∗ ∃ i j, bor_ijtok i j α (P, Some (q/2)%Qp).
 
   (** Lender token *)
   Local Definition lend_itok i α P : iProp Σ :=
@@ -203,7 +203,7 @@ Section borrow.
   Local Lemma borrow_wsat_unseal : borrow_wsat = borrow_wsat_def.
   Proof. exact: borrow_wsat_aux.(seal_eq). Qed.
 
-  (** Create a borrow and a lender *)
+  (** Create a borrower and a lender *)
   Lemma bor_lend_create {E W intp α P} :
     intp P =[borrow_wsat E W intp]=∗ bor_tok α P ∗ lend_tok α P.
   Proof.
@@ -221,7 +221,7 @@ Section borrow.
     iIntros "α †". case: l; [done|]=>/=.
     iDestruct (lft_tok_dead with "α †") as "[]".
   Qed.
-  (** Update the borrow state *)
+  (** Update the borrower state *)
   Local Lemma bor_stupd {E W intp q i j α P b b'} :
     q.[α] -∗ bor_ijtok i j α (P, b) -∗ bor_wsat intp α (P, b')
       =[borrow_wsat E W intp]=∗
@@ -238,19 +238,19 @@ Section borrow.
     iStopProof. f_equiv=>/=. apply bi.equiv_entails_1_1.
     by apply: big_sepM_insert_override.
   Qed.
-  (** Open the borrow *)
+  (** Open the borrower *)
   Lemma bor_open {E W intp q α P} :
     bor_tok α P -∗ q.[α] =[borrow_wsat E W intp]=∗ intp P ∗ bor_otok α P q.
   Proof.
-    iIntros "[%[% b]] [α α']".
-    iMod (bor_stupd (b':=Some _) with "α b α'") as "[α[b $]]". iModIntro.
-    iExists _, _. iFrame.
+    iIntros "[%i[%j b]] [α α']".
+    iMod (bor_stupd (b':=Some _) with "α b α'") as "[$[b $]]". iModIntro.
+    by iExists _, _.
   Qed.
-  (** Close the borrow *)
+  (** Close the borrower *)
   Lemma bor_close {E W intp q α P} :
     bor_otok α P q -∗ intp P =[borrow_wsat E W intp]=∗ q.[α] ∗ bor_tok α P.
   Proof.
-    iIntros "[%[%[α b]]] P".
+    iIntros "[α[%i[%j b]]] P".
     iMod (bor_stupd (b':=None) with "α b P") as "[$[b $]]". iModIntro.
     by iExists _, _.
   Qed.
@@ -286,7 +286,7 @@ Section borrow.
   Lemma lend_retrieve {E W intp α P} :
     [†α] -∗ lend_tok α P =[borrow_wsat E W intp ∗ W]{E}=∗ intp P.
   Proof.
-    rewrite borrow_wsat_unseal. iIntros "#† [%i l] [(%Lm & ● & Lm) W]".
+    rewrite borrow_wsat_unseal. iIntros "#† [%i l] [[%Lm[● Lm]] W]".
     iDestruct (lend_stm_lend_agree with "● l") as %[Bm ?].
     iDestruct (big_sepM_insert_acc with "Lm") as "[L →Lm]"; [done|]=>/=.
     iMod (lend_wsat'_dead with "† L W") as "[$$]". iExists _.
