@@ -179,7 +179,7 @@ End borrow.
 
 Section borrow.
   Context `{!lftG Σ, !borrowGS PROP Σ, !invGS_gen hlc Σ}.
-  Implicit Type (E : coPset) (W : iProp Σ) (intp : PROP → iProp Σ)
+  Implicit Type (M : iProp Σ → iProp Σ) (intp : PROP → iProp Σ)
     (P Q : PROP) (B : bor_st PROP) (Bm : bor_stm PROP).
 
   (** World satisfaction for a borrower *)
@@ -187,16 +187,16 @@ Section borrow.
     match B.2 with None => intp B.1 | Some q => q.[α] end.
 
   (** World satisfaction for a lender *)
-  Local Definition lend_wsat' E W intp α P Bm : iProp Σ :=
+  Local Definition lend_wsat' M intp α P Bm : iProp Σ :=
     ([∗ map] _ ↦ B ∈ Bm, bor_wsat intp α B) ∗
-    (([∗ map] _ ↦ B ∈ Bm, intp B.1) =[W]{E}=∗ intp P).
-  Local Definition lend_wsat E W intp α P l Bm : iProp Σ :=
-    if l then lend_wsat' E W intp α P Bm else [†α]%I.
+    (([∗ map] _ ↦ B ∈ Bm, intp B.1) -∗ M (intp P)).
+  Local Definition lend_wsat M intp α P l Bm : iProp Σ :=
+    if l then lend_wsat' M intp α P Bm else [†α]%I.
 
   (** World satisfaction for the borrowing machinery *)
-  Local Definition borrow_wsat_def E W intp : iProp Σ :=
+  Local Definition borrow_wsat_def M intp : iProp Σ :=
     ∃ Lm, lend_stm_tok Lm ∗
-      [∗ map] _ ↦ L ∈ Lm, lend_wsat E W intp L.1.1 L.1.2.1 L.1.2.2 L.2.
+      [∗ map] _ ↦ L ∈ Lm, lend_wsat M intp L.1.1 L.1.2.1 L.1.2.2 L.2.
   Local Definition borrow_wsat_aux : seal borrow_wsat_def.
   Proof. by eexists. Qed.
   Definition borrow_wsat := borrow_wsat_aux.(unseal).
@@ -204,8 +204,8 @@ Section borrow.
   Proof. exact: borrow_wsat_aux.(seal_eq). Qed.
 
   (** Create a borrower and a lender *)
-  Lemma bor_lend_create {E W intp α P} :
-    intp P =[borrow_wsat E W intp]=∗ bor_tok α P ∗ lend_tok α P.
+  Lemma bor_lend_create `{!GenUpd _ M} {intp α P} :
+    intp P =[borrow_wsat M intp]=∗ bor_tok α P ∗ lend_tok α P.
   Proof.
     rewrite borrow_wsat_unseal. iIntros "P [%Lm[● Lm]]".
     iMod (lend_stm_create with "●") as (??) "[● [b l]]"; [done..|]. iModIntro.
@@ -215,16 +215,16 @@ Section borrow.
   Qed.
 
   (** [lend_wsat] with a lifetime token *)
-  Local Lemma lend_wsat_tok {E W intp q α P l Bm} :
-    q.[α] -∗ lend_wsat E W intp α P l Bm -∗ ⌜l = true⌝.
+  Local Lemma lend_wsat_tok {M intp q α P l Bm} :
+    q.[α] -∗ lend_wsat M intp α P l Bm -∗ ⌜l = true⌝.
   Proof.
     iIntros "α †". case: l; [done|]=>/=.
     iDestruct (lft_tok_dead with "α †") as "[]".
   Qed.
   (** Update the borrower state *)
-  Local Lemma bor_stupd {E W intp q i j α P b b'} :
+  Local Lemma bor_stupd {M intp q i j α P b b'} :
     q.[α] -∗ bor_ijtok i j α (P, b) -∗ bor_wsat intp α (P, b')
-      =[borrow_wsat E W intp]=∗
+      =[borrow_wsat M intp]=∗
       q.[α] ∗ bor_ijtok i j α (P, b') ∗ bor_wsat intp α (P, b).
   Proof.
     rewrite borrow_wsat_unseal. iIntros "α b B' [%Lm[● Lm]]".
@@ -239,16 +239,16 @@ Section borrow.
     by apply: big_sepM_insert_override.
   Qed.
   (** Open the borrower *)
-  Lemma bor_open {E W intp q α P} :
-    bor_tok α P -∗ q.[α] =[borrow_wsat E W intp]=∗ intp P ∗ bor_otok α P q.
+  Lemma bor_open {M intp q α P} :
+    bor_tok α P -∗ q.[α] =[borrow_wsat M intp]=∗ intp P ∗ bor_otok α P q.
   Proof.
     iIntros "[%i[%j b]] [α α']".
     iMod (bor_stupd (b':=Some _) with "α b α'") as "[$[b $]]". iModIntro.
     by iExists _, _.
   Qed.
   (** Close the borrower *)
-  Lemma bor_close {E W intp q α P} :
-    bor_otok α P q -∗ intp P =[borrow_wsat E W intp]=∗ q.[α] ∗ bor_tok α P.
+  Lemma bor_close {M intp q α P} :
+    bor_otok α P q -∗ intp P =[borrow_wsat M intp]=∗ q.[α] ∗ bor_tok α P.
   Proof.
     iIntros "[α[%i[%j b]]] P".
     iMod (bor_stupd (b':=None) with "α b P") as "[$[b $]]". iModIntro.
@@ -256,9 +256,8 @@ Section borrow.
   Qed.
 
   (** Extend the lender token *)
-  Lemma lend_extend {E W intp α P Q} :
-    lend_tok α P -∗ (intp P =[W]{E}=∗ intp Q) =[borrow_wsat E W intp]=∗
-      lend_tok α Q.
+  Lemma lend_extend `{!GenUpd _ M} {intp α P Q} :
+    lend_tok α P -∗ (intp P -∗ M (intp Q)) =[borrow_wsat M intp]=∗ lend_tok α Q.
   Proof.
     rewrite borrow_wsat_unseal. iIntros "[%i l] PQ [%Lm[● Lm]]".
     iDestruct (lend_stm_lend_agree with "● l") as %[Bm ?].
@@ -276,15 +275,15 @@ Section borrow.
     iDestruct (lft_tok_dead with "q †") as "[]".
   Qed.
   (** [lend_wsat'] with the dead lifetime token *)
-  Local Lemma lend_wsat'_dead {E W intp α P Bm} :
-    [†α] -∗ lend_wsat' E W intp α P Bm =[W]{E}=∗ intp P.
+  Local Lemma lend_wsat'_dead {M intp α P Bm} :
+    [†α] -∗ lend_wsat' M intp α P Bm -∗ M (intp P).
   Proof.
     iIntros "#† [Bm →P]". iApply "→P". iApply (big_sepM_impl with "Bm").
     iIntros "!>" (?? _). by iApply bor_wsat_dead.
   Qed.
   (** Retrieve from the lender token *)
-  Lemma lend_retrieve {E W intp α P} :
-    [†α] -∗ lend_tok α P =[borrow_wsat E W intp]=∗ |=[W]{E}=> intp P.
+  Lemma lend_retrieve {M intp α P} :
+    [†α] -∗ lend_tok α P =[borrow_wsat M intp]=∗ M (intp P).
   Proof.
     rewrite borrow_wsat_unseal. iIntros "#† [%i l] [%Lm[● Lm]]".
     iDestruct (lend_stm_lend_agree with "● l") as %[Bm ?].
@@ -296,9 +295,9 @@ End borrow.
 
 (** Allocate [borrow_wsat] *)
 Lemma borrow_wsat_alloc `{!lftG Σ, !borrowGpreS PROP Σ, !invGS_gen hlc Σ} :
-  ⊢ |==> ∃ _ : borrowGS PROP Σ, ∀ E W intp, borrow_wsat E W intp.
+  ⊢ |==> ∃ _ : borrowGS PROP Σ, ∀ M intp, borrow_wsat M intp.
 Proof.
   iMod (own_alloc (● ∅)) as (γ) "●"; [by apply auth_auth_valid|]. iModIntro.
-  iExists (BorrowGS _ _ _ γ). iIntros (E W intp). rewrite borrow_wsat_unseal.
+  iExists (BorrowGS _ _ _ γ). iIntros (M intp). rewrite borrow_wsat_unseal.
   iExists ∅. by iFrame "●".
 Qed.

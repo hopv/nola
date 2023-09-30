@@ -4,6 +4,74 @@ From nola Require Export prelude.
 From iris.base_logic Require Import fancy_updates.
 From iris.proofmode Require Import proofmode.
 
+(** ** General update *)
+
+Class GenUpd (PROP : bi) (M : PROP → PROP) : Prop := {
+  gen_upd_ne :: NonExpansive M;
+  gen_upd_intro {P} : P ⊢ M P;
+  gen_upd_mono {P Q} : (P ⊢ Q) → M P ⊢ M Q;
+  gen_upd_trans {P} : M (M P) ⊢ M P;
+  gen_upd_frame_r {P Q} : M P ∗ Q ⊢ M (P ∗ Q);
+}.
+
+(** [bupd] and [fupd] satisfy [GenUpd] *)
+#[export] Instance gen_upd_bupd `{!BiBUpd PROP} : GenUpd PROP bupd.
+Proof.
+  split. { apply _. } { by iIntros "%$". } { by move=> ??->. }
+  { iIntros "%>$". } { by iIntros "%%[>$$]". }
+Qed.
+#[export] Instance gen_upd_fupd `{!BiFUpd PROP} {E} : GenUpd PROP (fupd E E).
+Proof.
+  split. { apply _. } { by iIntros "%$". } { by move=> ??->. }
+  { iIntros "%>$". } { by iIntros "%%[>$$]". }
+Qed.
+
+Section gen_upd.
+  Context `{!GenUpd PROP M}.
+
+  (** Monotonicity *)
+
+  #[export] Instance gen_upd_mono' : Proper ((⊢) ==> (⊢)) M | 10.
+  Proof. move=> ??. apply gen_upd_mono. Qed.
+  #[export] Instance gen_upd_flip_mono' : Proper (flip (⊢) ==> flip (⊢)) M | 10.
+  Proof. move=>/= ??. apply gen_upd_mono. Qed.
+  #[export] Instance gen_upd_proper : Proper ((⊣⊢) ==> (⊣⊢)) M | 10.
+  Proof. apply ne_proper, _. Qed.
+
+  (** Introduce *)
+
+  #[export] Instance from_modal_gen_upd {P} :
+    FromModal True modality_id (M P) (M P) P | 10.
+  Proof. move=> _. rewrite /FromModal /=. apply gen_upd_intro. Qed.
+  #[export] Instance from_assumption_gen_upd {p P Q} :
+    FromAssumption p P Q → KnownRFromAssumption p P (M Q) | 10.
+  Proof.
+    rewrite /KnownRFromAssumption /FromAssumption=>->. apply gen_upd_intro.
+  Qed.
+  #[export] Instance from_pure_gen_upd {a P φ} :
+    FromPure a P φ → FromPure a (M P) φ | 10.
+  Proof. rewrite /FromPure=> <-. apply gen_upd_intro. Qed.
+
+  (** Frame *)
+
+  Lemma gen_upd_frame_l {P Q} : P ∗ M Q ⊢ M (P ∗ Q).
+  Proof. by rewrite comm gen_upd_frame_r comm. Qed.
+  #[export] Instance frame_gen_upd {p R P Q} :
+    Frame p R P Q → Frame p R (M P) (M Q) | 10.
+  Proof. rewrite /Frame=> <-. apply gen_upd_frame_l. Qed.
+
+  (** Transitivity *)
+
+  #[export] Instance elim_modal_gen_upd {p P Q} :
+    ElimModal True p false (M P) P (M Q) (M Q) | 10.
+  Proof.
+    by rewrite /ElimModal bi.intuitionistically_if_elim gen_upd_frame_r
+      bi.wand_elim_r gen_upd_trans.
+  Qed.
+  #[export] Instance add_modal_gen_upd {P Q} : AddModal (M P) P (M Q) | 10.
+  Proof. by rewrite /AddModal gen_upd_frame_r bi.wand_elim_r gen_upd_trans. Qed.
+End gen_upd.
+
 (** ** Update with a custom world satisfaction [W] *)
 
 (** Basic update with a world satisfaction *)
@@ -207,6 +275,19 @@ Section lemmas.
   #[export] Instance add_modal_fupdw `{!BiFUpd PROP} {E E' W P Q} :
     AddModal (|=[W]{E}=> P) P (|=[W]{E,E'}=> Q).
   Proof. by rewrite /AddModal fupdw_frame_r bi.wand_elim_r fupdw_trans. Qed.
+
+  (** [bupdw] and [fupdw] satisfy [GenUpd] *)
+  #[export] Instance gen_upd_bupdw `{!BiBUpd PROP} {W} : GenUpd PROP (bupdw W).
+  Proof.
+    split. { apply _. } { by iIntros "%$". } { by move=> ??->. }
+    { iIntros "%>$". } { by iIntros "%%[>$$]". }
+  Qed.
+  #[export] Instance gen_upd_fupdw `{!BiFUpd PROP} {E W} :
+    GenUpd PROP (fupdw E E W).
+  Proof.
+    split. { apply _. } { by iIntros "%$". } { by move=> ??->. }
+    { iIntros "%>$". } { by iIntros "%%[>$$]". }
+  Qed.
 
   (** Expand the world satisfaction of [bupdw] *)
   Lemma bupdw_expand_bupd `{!BiBUpd PROP} {W W' P} :
