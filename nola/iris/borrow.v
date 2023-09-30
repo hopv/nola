@@ -259,6 +259,24 @@ Section borrow.
   Local Lemma borrow_wsat_unseal : borrow_wsat = borrow_wsat_def.
   Proof. exact: borrow_wsat_aux.(seal_eq). Qed.
 
+  (** Non-expansiveness *)
+  #[export] Instance bor_wsat_ne :
+    Proper (pointwise_relation _ (⊣⊢) ==> (=) ==> (=) ==> (⊣⊢)) bor_wsat.
+  Proof. move=> ?? eq ??<-[?[?|]]?<-; by rewrite /bor_wsat/= ?eq. Qed.
+  #[export] Instance lend_wsat'_ne `{!GenUpd _ M} :
+    Proper (pointwise_relation _ (⊣⊢) ==> (=) ==> (=) ==> (=) ==> (⊣⊢))
+      (lend_wsat' M).
+  Proof. move=> ?????<-??<-??<-. rewrite /lend_wsat'. repeat f_equiv. Qed.
+  #[export] Instance lend_wsat_ne `{!GenUpd _ M} :
+    Proper (pointwise_relation _ (⊣⊢) ==> (=) ==> (=) ==> (=) ==> (=) ==> (⊣⊢))
+      (lend_wsat M).
+  Proof. move=> ?????<-??<-[|]?<-??<-/=; by f_equiv. Qed.
+  #[export] Instance borrow_wsat_ne `{!GenUpd _ M} :
+    Proper (pointwise_relation _ (⊣⊢) ==> (⊣⊢)) (borrow_wsat M).
+  Proof.
+    move=> ???. rewrite borrow_wsat_unseal /borrow_wsat_def/=. repeat f_equiv.
+  Qed.
+
   (** Create a borrower and a lender *)
   Lemma bor_lend_create `{!GenUpd _ M} {intp α P} :
     intp P =[borrow_wsat M intp]=∗ bor_tok α P ∗ lend_tok α P.
