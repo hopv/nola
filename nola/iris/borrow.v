@@ -134,6 +134,62 @@ Section borrow.
     rewrite fmap_insert. apply: singleton_local_update.
     { rewrite lookup_fmap_Some. by eexists _. } by apply exclusive_local_update.
   Qed.
+  (** Delete the borrower w.r.t. [lend_stm_tok] *)
+  Local Lemma lend_stm_bor_delete {Lm i j α C Bm B} :
+    Lm !! i = Some (α, C, Bm) → Bm !! j = Some B →
+    lend_stm_tok Lm -∗ bor_ijtok i j α B ==∗ ∃ Bm',
+      lend_stm_tok (<[i := (α, C, Bm')]> Lm) ∗
+      ⌜∀ Φ : _ → iProp Σ, ([∗ map] B ∈ Bm, Φ B) ⊣⊢ Φ B ∗ [∗ map] B ∈ Bm', Φ B⌝.
+  Proof.
+    move=> ??. iIntros "● B". iExists (delete j Bm).
+    iMod (own_update_2 with "● B") as "[$_]"; last first.
+    { iPureIntro=> ?. by apply big_sepM_delete. }
+    apply auth_update. rewrite fmap_insert.
+    eapply (singleton_local_update _ _ _ _ _ (_,_,_)).
+    { rewrite lookup_fmap_Some. by eexists _. }
+    apply prod_local_update; [apply prod_local_update|]=>/=; [done..|].
+    rewrite fmap_delete.
+    apply: delete_local_update; [|by rewrite lookup_singleton]. apply _.
+  Qed.
+  (** Create a new borrower w.r.t. [lend_stm_tok] *)
+  Local Lemma lend_stm_new_bor {Lm i α C Bm B} :
+    Lm !! i = Some (α, C, Bm) →
+    lend_stm_tok Lm ==∗ ∃ Bm', lend_stm_tok (<[i := (α, C, Bm')]> Lm) ∗
+      (∃ j, bor_ijtok i j α B) ∗
+      ⌜∀ Φ : _ → iProp Σ, ([∗ map] B ∈ Bm', Φ B) ⊣⊢ Φ B ∗ [∗ map] B ∈ Bm, Φ B⌝.
+  Proof.
+    move=> Lmi. iIntros "●". iExists (<[fresh (dom Bm) := B]> Bm).
+    iMod (own_update with "●") as "[$ b]"; last first.
+    { iModIntro. iSplit; [by iExists _|]. iPureIntro=> Φ.
+      apply big_sepM_insert, not_elem_of_dom_1, is_fresh. }
+    apply auth_update_alloc. rewrite !fmap_insert.
+    apply gmap_local_update=> j. case: (decide (i = j))=> [<-|?];
+      [|by rewrite !lookup_insert_ne].
+    rewrite !lookup_insert lookup_fmap Lmi lookup_empty.
+    apply local_update_unital_discrete=>/= L _ eq. split.
+    { split; [done|]=>/= ?. rewrite lookup_fmap. by case: (_ !! _). }
+    rewrite left_id in eq. rewrite -eq. apply Some_proper.
+    split; [split|]=>/=; [by rewrite agree_idemp|done|].
+    rewrite fmap_insert. rewrite -insert_singleton_op; [done|].
+    rewrite lookup_fmap. apply fmap_None, not_elem_of_dom_1, is_fresh.
+  Qed.
+  (** Create new borrowers w.r.t. [lend_stm_tok] *)
+  Local Lemma lend_stm_new_bors {Lm i α C Bm Bl} :
+    Lm !! i = Some (α, C, Bm) →
+    lend_stm_tok Lm ==∗ ∃ Bm', lend_stm_tok (<[i := (α, C, Bm')]> Lm) ∗
+      ([∗ list] B ∈ Bl, ∃ j, bor_ijtok i j α B) ∗
+      ⌜∀ Φ : _ → iProp Σ,
+        ([∗ map] B ∈ Bm', Φ B) ⊣⊢ ([∗ list] B ∈ Bl, Φ B) ∗ [∗ map] B ∈ Bm, Φ B⌝.
+  Proof.
+    move=> ?. elim: Bl=> /=[|B Bl IH].
+    { iIntros "●". iModIntro. iExists Bm. iSplit; [by rewrite insert_id|].
+      iSplit; [done|]. iPureIntro=> ?. by rewrite left_id. }
+    iIntros "●". iMod (IH with "●") as (Bm') "[●[$ %eq]]".
+    iMod (lend_stm_new_bor with "●") as (Bm'') "[●[$ %eq']]";
+      [by rewrite lookup_insert|].
+    rewrite insert_insert. iModIntro. iExists _. iSplit; [done|].
+    iPureIntro=> ?. by rewrite -assoc -eq.
+  Qed.
 
   (** Agreement between [lend_stm_tok] and [lend_itok] *)
   Local Lemma lend_stm_lend_agree {Lm i α P} :
@@ -253,6 +309,35 @@ Section borrow.
     iIntros "[α[%i[%j b]]] P".
     iMod (bor_stupd (b':=None) with "α b P") as "[$[b $]]". iModIntro.
     by iExists _, _.
+  Qed.
+
+  (** Subdivide a borrow *)
+  Lemma bor_subdivl `{!GenUpd _ M} {intp q α P Ql} :
+    bor_otok α P q -∗ ([∗ list] Q ∈ Ql, intp Q) -∗
+    (([∗ list] Q ∈ Ql, intp Q) -∗ M (intp P))
+      =[borrow_wsat M intp]=∗ q.[α] ∗ [∗ list] Q ∈ Ql, bor_tok α Q.
+  Proof.
+    rewrite borrow_wsat_unseal. iIntros "[α[%i[%j b]]] Ql →P [%Lm[● Lm]]".
+    iDestruct (lend_stm_bor_agree with "● b") as %[[R l][Bm[??]]].
+    iDestruct (big_sepM_insert_acc with "Lm") as "[L →Lm]"; [done|]=>/=.
+    iDestruct (lend_wsat_tok with "α L") as %->=>/=. iFrame "α".
+    iMod (lend_stm_bor_delete with "● b") as (Bm') "[● %eq]"; [done..|].
+    iMod (lend_stm_new_bors (i:=i) (Bl:=(λ Q,(Q,None)) <$> Ql) with "●")
+      as (Bm'') "[● [bl %eq']]"; [by rewrite lookup_insert|]. iModIntro.
+    rewrite insert_insert big_sepL_fmap. iDestruct "L" as "[Bm →R]".
+    rewrite !eq. iDestruct "Bm" as "[$ Bm']". iSplitR "bl"; last first.
+    { iApply (big_sepL_mono with "bl")=> *. iIntros "[% ?]". by iExists _, _. }
+    iExists _. iFrame "●". iApply "→Lm"=>/=.
+    iSplitL "Ql Bm'"; rewrite eq' big_sepL_fmap /=; [by iFrame|].
+    iIntros "[Ql Bm']". iMod ("→P" with "Ql") as "P". iApply "→R". by iFrame.
+  Qed.
+  Lemma bor_subdiv `{!GenUpd _ M} {intp q α P Q} :
+    bor_otok α P q -∗ intp Q -∗ (intp Q -∗ M (intp P)) =[borrow_wsat M intp]=∗
+      q.[α] ∗ bor_tok α Q.
+  Proof.
+    iIntros "α Q →P".
+    iMod (bor_subdivl (Ql:=[Q]) with "α [Q] [→P]") as "[$[$_]]";
+      by [iFrame|rewrite big_sepL_singleton|].
   Qed.
 
   (** Extend the lender token *)
