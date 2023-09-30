@@ -155,6 +155,11 @@ Section lemmas.
     Proper ((=) ==> (=) ==> (⊣⊢) ==> (⊣⊢) ==> (⊣⊢)) (fupdw (PROP:=PROP)).
   Proof. solve_proper. Qed.
 
+  (** [fupdw] absorbs [◇] *)
+  #[export] Instance is_except_0_fupdw `{!BiFUpd PROP} {E E' W P} :
+    IsExcept0 (|=[W]{E,E'}=> P).
+  Proof. rewrite /IsExcept0. by iIntros ">?". Qed.
+
   (** [bupdw] is monotone *)
   Lemma bupdw_mono `{!BiBUpd PROP} {W P Q} : (P ⊢ Q) → (|=[W]=> P) ⊢ |=[W]=> Q.
   Proof. by rewrite /bupdw=> ->. Qed.
@@ -275,6 +280,17 @@ Section lemmas.
   #[export] Instance add_modal_fupdw `{!BiFUpd PROP} {E E' W P Q} :
     AddModal (|=[W]{E}=> P) P (|=[W]{E,E'}=> Q).
   Proof. by rewrite /AddModal fupdw_frame_r bi.wand_elim_r fupdw_trans. Qed.
+  #[export] Instance add_modal_fupd_fupdw `{!BiFUpd PROP} {E E' W P Q} :
+    AddModal (|={E}=> P) P (|=[W]{E,E'}=> Q).
+  Proof. rewrite /AddModal fupd_frame_r bi.wand_elim_r. iIntros ">$". Qed.
+  #[export] Instance elim_acc_fupdw `{!BiFUpd PROP} {X E E' E'' W α β γ P} :
+    ElimAcc (X:=X) True (fupd E E') (fupd E' E) α β γ (|=[W]{E,E''}=> P)
+      (λ x, |=[W]{E'}=> β x ∗ (γ x -∗? |=[W]{E,E''}=> P))%I | 10.
+  Proof.
+    iIntros (_) "→P ∝ W". iMod "∝" as (x) "[α β→]".
+    iMod ("→P" with "α W") as "[W[β γ→]]".
+    iMod ("β→" with "β") as "γ". by iApply ("γ→" with "γ").
+  Qed.
 
   (** [bupdw] and [fupdw] satisfy [GenUpd] *)
   #[export] Instance gen_upd_bupdw `{!BiBUpd PROP} {W} : GenUpd PROP (bupdw W).

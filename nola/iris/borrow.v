@@ -415,13 +415,13 @@ Section borrow.
     frbor_tok α Φ -∗ q.[α] =[borrow_wsat M intp]{E}=∗ ∃ r,
       intp (Φ r) ∗ bor_otok α (Φ r) q.
   Proof.
-    move=> ??. iIntros "#i α W". iInv "i" as ">[%r b]".
-    iMod (bor_open with "b α W") as "[W[Φ b]]".
+    move=> ??. iIntros "#i α". iInv "i" as ">[%r b]".
+    iMod (bor_open with "b α") as "[Φ b]".
     have eq: intp (Φ r) ⊣⊢ intp (Φ (r/2)%Qp) ∗ intp (Φ (r/2)%Qp).
     { by erewrite fractional_half; [|apply: fractional_as_fractional]. }
-    iMod (bor_subdivl (Ql:=[_;_]) with "b [Φ] [] W") as "[W[α[b[b' _]]]]";
+    iMod (bor_subdivl (Ql:=[_;_]) with "b [Φ] []") as "[α[b[b' _]]]";
       rewrite ?eq; [by iDestruct "Φ" as "[$$]"|by iIntros "[$[$_]]"|].
     iModIntro. iSplitL "b'"; [by iExists _|].
-    iMod (bor_open with "b α W") as "[$ ?]". iModIntro. by iExists _.
+    iMod (bor_open with "b α") as "?". iModIntro. by iExists _.
   Qed.
 End borrow.
