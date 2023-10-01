@@ -207,6 +207,12 @@ Section lft.
   Lemma lft_dead_meet_r {α β} : [†β] ⊢ [†α ⊓ β].
   Proof. iIntros. rewrite lft_dead_meet. by iRight. Qed.
 
+  (** Eternal lifetime token over [⊤]/[⊓] *)
+  Lemma lft_eter_top : ⊢ [∞⊤].
+  Proof. by apply big_sepMS_empty'. Qed.
+  Lemma lft_eter_meet {α β} : [∞α ⊓ β] ⊣⊢ [∞α] ∗ [∞β].
+  Proof. by apply big_sepMS_disj_union. Qed.
+
   (** Access a lifetime token using [⊑] *)
   Local Lemma alftl_incl_tok_acc {α q} bl :
     (∀ a, a ∈ bl → a ∈ α) → q.[α] -∗ ∃ r,
