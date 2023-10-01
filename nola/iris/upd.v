@@ -4,6 +4,12 @@ From nola Require Export prelude.
 From iris.base_logic Require Import fancy_updates.
 From iris.proofmode Require Import proofmode.
 
+(** ** Utility *)
+
+(* [M] can be eliminated under [M'] *)
+Notation ElimModalS M M' :=
+  (∀ p P Q, ElimModal True p false (M P) P (M' Q) (M' Q)).
+
 (** ** General update *)
 
 Class GenUpd (PROP : bi) (M : PROP → PROP) : Prop := {
