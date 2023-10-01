@@ -20,7 +20,14 @@ Class GenUpd (PROP : bi) (M : PROP → PROP) : Prop := {
   gen_upd_frame_r {P Q} : M P ∗ Q ⊢ M (P ∗ Q);
 }.
 
-(** [bupd] and [fupd] satisfy [GenUpd] *)
+(** Identity, [◇], [bupd] and [fupd] satisfy [GenUpd] *)
+#[export] Instance gen_upd_id {PROP} : GenUpd PROP id.
+Proof. split; [apply _|done..]. Qed.
+#[export] Instance gen_upd_except_0 {PROP} : GenUpd PROP bi_except_0.
+Proof.
+  split. { apply _. } { by iIntros. } { by move=> ??->. }
+  { iIntros "%>$". } { by iIntros "%%[>$$]". }
+Qed.
 #[export] Instance gen_upd_bupd `{!BiBUpd PROP} : GenUpd PROP bupd.
 Proof.
   split. { apply _. } { by iIntros "%$". } { by move=> ??->. }
