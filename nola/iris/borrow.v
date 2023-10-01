@@ -317,16 +317,14 @@ Section borrow.
     bor_tok α P -∗ q.[α] =[borrow_wsat M intp]=∗ intp P ∗ bor_otok α P q.
   Proof.
     iIntros "[%i[%j b]] [α α']".
-    iMod (bor_stupd (b':=Some _) with "α b α'") as "[$[b $]]". iModIntro.
-    by iExists _, _.
+    iMod (bor_stupd (b':=Some _) with "α b α'") as "[$[b $]]". by iExists _, _.
   Qed.
   (** Close the borrower *)
   Lemma bor_close {M intp q α P} :
     bor_otok α P q -∗ intp P =[borrow_wsat M intp]=∗ q.[α] ∗ bor_tok α P.
   Proof.
     iIntros "[α[%i[%j b]]] P".
-    iMod (bor_stupd (b':=None) with "α b P") as "[$[b $]]". iModIntro.
-    by iExists _, _.
+    iMod (bor_stupd (b':=None) with "α b P") as "[$[b $]]". by iExists _, _.
   Qed.
 
   (** Subdivide a borrower *)
@@ -432,6 +430,6 @@ Section borrow.
     iMod (bor_subdiv [_;_] with "b [Φ] []") as "[α[b[b' _]]]";
       rewrite ?eq; [by iDestruct "Φ" as "[$$]"|by iIntros "[$[$_]]"|].
     iModIntro. iSplitL "b'"; [by iExists _|].
-    iMod (bor_open with "b α") as "?". iModIntro. by iExists _.
+    iMod (bor_open with "b α") as "?". by iExists _.
   Qed.
 End borrow.

@@ -43,14 +43,15 @@ Section gen_upd.
   #[export] Instance from_modal_gen_upd {P} :
     FromModal True modality_id (M P) (M P) P | 10.
   Proof. move=> _. rewrite /FromModal /=. apply gen_upd_intro. Qed.
-  #[export] Instance from_assumption_gen_upd {p P Q} :
-    FromAssumption p P Q → KnownRFromAssumption p P (M Q) | 10.
+  #[export] Instance from_assumption_gen_upd `{!FromAssumption p P Q} :
+    KnownRFromAssumption p P (M Q) | 10.
   Proof.
-    rewrite /KnownRFromAssumption /FromAssumption=>->. apply gen_upd_intro.
+    rewrite /KnownRFromAssumption /FromAssumption from_assumption.
+    apply gen_upd_intro.
   Qed.
-  #[export] Instance from_pure_gen_upd {a P φ} :
-    FromPure a P φ → FromPure a (M P) φ | 10.
-  Proof. rewrite /FromPure=> <-. apply gen_upd_intro. Qed.
+  #[export] Instance from_pure_gen_upd `{!FromPure a P φ} :
+    FromPure a (M P) φ | 10.
+  Proof. rewrite /FromPure -(from_pure _ P). apply gen_upd_intro. Qed.
 
   (** Frame *)
 
@@ -70,6 +71,33 @@ Section gen_upd.
   Qed.
   #[export] Instance add_modal_gen_upd {P Q} : AddModal (M P) P (M Q) | 10.
   Proof. by rewrite /AddModal gen_upd_frame_r bi.wand_elim_r gen_upd_trans. Qed.
+
+  (** More instances *)
+
+  #[export] Instance from_sep_gen_upd `{!FromSep P Q Q'} :
+    FromSep (M P) (M Q) (M Q') | 10.
+  Proof. rewrite /FromSep -(from_sep P). by iIntros "[>$ >$]". Qed.
+  #[export] Instance from_or_gen_upd `{!FromOr P Q Q'} :
+    FromOr (M P) (M Q) (M Q') | 10.
+  Proof.
+    rewrite /FromOr -(from_or P). iIntros "[>?|>?] !>"; by [iLeft|iRight].
+  Qed.
+  #[export] Instance from_exist_gen_upd `{!FromExist (A:=A) P Φ} :
+    FromExist (M P) (λ x, M (Φ x)) | 10.
+  Proof.
+    rewrite /FromExist -(from_exist P). iIntros "[% >?] !>". by iExists _.
+  Qed.
+  #[export] Instance into_and_gen_upd `{!IntoAnd false P Q R} :
+    IntoAnd false (M P) (M Q) (M R) | 10.
+  Proof.
+    move: IntoAnd0. rewrite /IntoAnd=>/=->. iIntros "∧".
+    iSplit; by [iMod "∧" as "[$ _]"|iMod "∧" as "[_ $]"].
+  Qed.
+  #[export] Instance into_forall_gen_upd `{!IntoForall (A:=A) P Φ} :
+    IntoForall (M P) (λ x, M (Φ x)) | 10.
+  Proof.
+    rewrite /IntoForall (into_forall P). iIntros "Φ %". iMod "Φ". iApply "Φ".
+  Qed.
 End gen_upd.
 
 (** ** Update with a custom world satisfaction [W] *)
@@ -187,14 +215,16 @@ Section lemmas.
   #[export] Instance from_modal_bupdw `{!BiBUpd PROP} {W P} :
     FromModal True modality_id (|=[W]=> P) (|=[W]=> P) P.
   Proof. by rewrite /FromModal /= -bupdw_intro. Qed.
-  #[export] Instance from_assumption_bupdw `{!BiBUpd PROP} {p W P Q} :
-    FromAssumption p P Q → KnownRFromAssumption p P (|=[W]=> Q).
+  #[export] Instance from_assumption_bupdw
+    `{!BiBUpd PROP, !FromAssumption p P Q} {W} :
+    KnownRFromAssumption p P (|=[W]=> Q).
   Proof.
-    rewrite /KnownRFromAssumption /FromAssumption=>->. apply bupdw_intro.
+    rewrite /KnownRFromAssumption /FromAssumption from_assumption.
+    apply bupdw_intro.
   Qed.
-  #[export] Instance from_pure_bupdw `{!BiBUpd PROP} {a W P φ} :
-    FromPure a P φ → FromPure a (|=[W]=> P) φ.
-  Proof. rewrite /FromPure=> <-. apply bupdw_intro. Qed.
+  #[export] Instance from_pure_bupdw `{!BiBUpd PROP, !FromPure a P φ} {W} :
+    FromPure a (|=[W]=> P) φ.
+  Proof. rewrite /FromPure -(from_pure _ P). apply bupdw_intro. Qed.
 
   (** Introduce [fupdw] *)
   Lemma fupdw_intro `{!BiFUpd PROP} {E W P} : P ⊢ |=[W]{E}=> P.
@@ -202,18 +232,25 @@ Section lemmas.
   #[export] Instance from_modal_fupdw `{!BiFUpd PROP} {E W P} :
     FromModal True modality_id (|=[W]{E}=> P) (|=[W]{E}=> P) P.
   Proof. by rewrite /FromModal /= -fupdw_intro. Qed.
+  #[export] Instance from_modal_fupdw_wrong_mask `{!BiFUpd PROP} {E E' W P} :
+    FromModal
+      (pm_error "Only non-mask-changing update modalities can be introduced directly.
+Use [iApply fupd_mask_intro] to introduce mask-changing update modalities")
+      modality_id (|=[W]{E,E'}=> P) (|=[W]{E,E'}=> P) P | 100.
+  Proof. by intros []. Qed.
   Lemma bupdw_fupdw `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} E {W P} :
     (|=[W]=> P) ⊢ |=[W]{E}=> P.
   Proof. apply bi.wand_mono; by [|rewrite bupd_fupd]. Qed.
   #[export] Instance from_assumption_fupdw
-    `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {E p W P Q} :
-    FromAssumption p P (|=[W]=> Q) → KnownRFromAssumption p P (|=[W]{E}=> Q).
+    `{!BiFUpd PROP, !FromAssumption p P Q} {E W} :
+    KnownRFromAssumption p P (|=[W]{E}=> Q).
   Proof.
-    rewrite /KnownRFromAssumption /FromAssumption=>->. apply bupdw_fupdw.
+    rewrite /KnownRFromAssumption /FromAssumption from_assumption.
+    apply fupdw_intro.
   Qed.
-  #[export] Instance from_pure_fupdw `{!BiFUpd PROP} {a E W P φ} :
-    FromPure a P φ → FromPure a (|=[W]{E}=> P) φ.
-  Proof. rewrite /FromPure=> <-. apply fupdw_intro. Qed.
+  #[export] Instance from_pure_fupdw `{!BiFUpd PROP, !FromPure a P φ} {E W} :
+    FromPure a (|=[W]{E}=> P) φ.
+  Proof. rewrite /FromPure -(from_pure _ P). apply fupdw_intro. Qed.
   Lemma fupdw_mask_intro `{!BiFUpd PROP} {E E' W P} : E' ⊆ E →
     ((|={E',E}=> emp) -∗ P) ⊢ |=[W]{E,E'}=> P.
   Proof. iIntros (?) "? $". by iApply fupd_mask_intro. Qed.
@@ -233,7 +270,7 @@ Section lemmas.
     (|=[W]{E,E'}=> P) ∗ Q ⊢ |=[W]{E,E'}=> P ∗ Q.
   Proof. by iIntros "[? $]". Qed.
 
-  (** Eliminate [bupdw] *)
+  (** Compose [bupdw] *)
   Lemma bupdw_trans `{!BiBUpd PROP} {W P} : (|=[W]=> |=[W]=> P) ⊢ |=[W]=> P.
   Proof.
     iIntros "WWP W". iMod ("WWP" with "W") as "[W WP]". iApply ("WP" with "W").
@@ -251,7 +288,7 @@ Section lemmas.
     AddModal (|=[W]=> P) P (|=[W]=> Q).
   Proof. by rewrite /AddModal bupdw_frame_r bi.wand_elim_r bupdw_trans. Qed.
 
-  (** Eliminate [fupdw] *)
+  (** Compose [fupdw] *)
   Lemma fupdw_trans `{!BiFUpd PROP} {E E' E'' W P} :
     (|=[W]{E,E'}=> |=[W]{E',E''}=> P) ⊢ |=[W]{E,E''}=> P.
   Proof.
@@ -277,12 +314,73 @@ Section lemmas.
     `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {p E E' W P Q} :
     ElimModal True p false (|==> P) P (|=[W]{E,E'}=> Q) (|=[W]{E,E'}=> Q) | 10.
   Proof. exact _. Qed.
+  #[export] Instance elim_modal_fupdw_fupdw_wrong_mask
+    `{!BiFUpd PROP} {p E E' E'' E''' P Q W} :
+    ElimModal
+      (pm_error "Goal and eliminated modality must have the same mask.
+Use [iMod (fupd_mask_subseteq E')] to adjust the mask of your goal to [E']")
+      p false (|=[W]{E,E'}=> P) False (|=[W]{E'',E'''}=> Q) False | 100.
+  Proof. intros []. Qed.
   #[export] Instance add_modal_fupdw `{!BiFUpd PROP} {E E' W P Q} :
     AddModal (|=[W]{E}=> P) P (|=[W]{E,E'}=> Q).
   Proof. by rewrite /AddModal fupdw_frame_r bi.wand_elim_r fupdw_trans. Qed.
   #[export] Instance add_modal_fupd_fupdw `{!BiFUpd PROP} {E E' W P Q} :
     AddModal (|={E}=> P) P (|=[W]{E,E'}=> Q).
   Proof. rewrite /AddModal fupd_frame_r bi.wand_elim_r. iIntros ">$". Qed.
+
+  (** More instances for [bupdw] *)
+  #[export] Instance from_sep_bupdw `{!BiBUpd PROP, !FromSep P Q Q'} {W} :
+    FromSep (|=[W]=> P) (|=[W]=> Q) (|=[W]=> Q').
+  Proof. rewrite /FromSep -(from_sep P). by iIntros "[>$ >$]". Qed.
+  #[export] Instance from_or_bupdw `{!BiBUpd PROP, !FromOr P Q Q'} {W} :
+    FromOr (|=[W]=> P) (|=[W]=> Q) (|=[W]=> Q').
+  Proof.
+    rewrite /FromOr -(from_or P). iIntros "[>?|>?] !>"; by [iLeft|iRight].
+  Qed.
+  #[export] Instance from_exist_bupdw `{!BiBUpd PROP, !FromExist (A:=A) P Φ}
+    {W} : FromExist (|=[W]=> P) (λ x, |=[W]=> (Φ x))%I.
+  Proof.
+    rewrite /FromExist -(from_exist P). iIntros "[% >?] !>". by iExists _.
+  Qed.
+  #[export] Instance into_and_bupdw `{!BiBUpd PROP, !IntoAnd false P Q R} {W} :
+    IntoAnd false (|=[W]=> P) (|=[W]=> Q) (|=[W]=> R).
+  Proof.
+    move: IntoAnd0. rewrite /IntoAnd=>/=->. iIntros "∧".
+    iSplit; by [iMod "∧" as "[$ _]"|iMod "∧" as "[_ $]"].
+  Qed.
+  #[export] Instance into_forall_bupdw `{!BiBUpd PROP, !IntoForall (A:=A) P Φ}
+    {W} : IntoForall (|=[W]=> P) (λ x, |=[W]=> (Φ x))%I.
+  Proof.
+    rewrite /IntoForall (into_forall P). iIntros "Φ %". iMod "Φ". iApply "Φ".
+  Qed.
+
+  (** More instances for [fupdw] *)
+  #[export] Instance from_sep_fupdw `{!BiFUpd PROP, !FromSep P Q Q'} {E W} :
+    FromSep (|=[W]{E}=> P) (|=[W]{E}=> Q) (|=[W]{E}=> Q').
+  Proof. rewrite /FromSep -(from_sep P). by iIntros "[>$ >$]". Qed.
+  #[export] Instance from_or_fupdw `{!BiFUpd PROP, !FromOr P Q Q'} {E W} :
+    FromOr (|=[W]{E}=> P) (|=[W]{E}=> Q) (|=[W]{E}=> Q').
+  Proof.
+    rewrite /FromOr -(from_or P). iIntros "[>?|>?] !>"; by [iLeft|iRight].
+  Qed.
+  #[export] Instance from_exist_fupdw `{!BiFUpd PROP, !FromExist (A:=A) P Φ}
+    {E E' W} : FromExist (|=[W]{E,E'}=> P) (λ x, |=[W]{E,E'}=> (Φ x))%I.
+  Proof.
+    rewrite /FromExist -(from_exist P). iIntros "[% >?] !>". by iExists _.
+  Qed.
+  #[export] Instance into_and_fupdw
+    `{!BiFUpd PROP, !IntoAnd false P Q R} {E E' W} :
+    IntoAnd false (|=[W]{E,E'}=> P) (|=[W]{E,E'}=> Q) (|=[W]{E,E'}=> R).
+  Proof.
+    move: IntoAnd0. rewrite /IntoAnd=>/=->. iIntros "∧".
+    iSplit; by [iMod "∧" as "[$ _]"|iMod "∧" as "[_ $]"].
+  Qed.
+  #[export] Instance into_forall_fupdw
+    `{!BiFUpd PROP, !IntoForall (A:=A) P Φ} {E E' W} :
+    IntoForall (|=[W]{E,E'}=> P) (λ x, |=[W]{E,E'}=> (Φ x))%I.
+  Proof.
+    rewrite /IntoForall (into_forall P). iIntros "Φ %". iMod "Φ". iApply "Φ".
+  Qed.
   #[export] Instance elim_acc_fupdw `{!BiFUpd PROP} {X E E' E'' W α β γ P} :
     ElimAcc (X:=X) True (fupd E E') (fupd E' E) α β γ (|=[W]{E,E''}=> P)
       (λ x, |=[W]{E'}=> β x ∗ (γ x -∗? |=[W]{E,E''}=> P))%I | 10.
