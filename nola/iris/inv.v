@@ -5,18 +5,18 @@ From iris.algebra Require Import gmap_view gset coPset.
 From iris.proofmode Require Import proofmode.
 From iris.base_logic.lib Require Export own wsat fancy_updates invariants.
 
+Implicit Type PROP : Type.
+
 (** ** Resources *)
 
-Class ninvGpreS (PROP : Type) (Σ : gFunctors) := NinvGpreS {
-  ninvGpreS_inv :: inG Σ (gmap_viewR positive (leibnizO PROP));
-}.
-Class ninvGS (PROP : Type) (Σ : gFunctors) := NinvGS {
+Class ninvGpreS PROP Σ :=
+  ninvGpreS_inv :: inG Σ (gmap_viewR positive (leibnizO PROP)).
+Class ninvGS PROP Σ := NinvGS {
   ninv_inG :: ninvGpreS PROP Σ;
   ninv_name : gname;
 }.
-
-Definition ninvΣ (PROP : Type) : gFunctors :=
-  #[GFunctor (gmap_viewRF positive (leibnizO PROP))].
+Definition ninvΣ PROP : gFunctors :=
+  GFunctor (gmap_viewRF positive (leibnizO PROP)).
 #[export] Instance subG_ninvΣ `{!subG (ninvΣ PROP) Σ} : ninvGpreS PROP Σ.
 Proof. solve_inG. Qed.
 

@@ -17,7 +17,7 @@ Notation tinvGpreS L Σ := (tinvGpreS' L 0 Σ).
   : tinvGpreS' L (S o) Σ := tΣ.2'.
 
 (** Precursor of [tintpGS] *)
-Class tintpGpreS L (Σ : gFunctors) := TintpGpreS {
+Class tintpGpreS L Σ := TintpGpreS {
   tintpGpreS_tinvGpreS :: tinvGpreS L Σ;
   tintpGpreS_heapGpreS :: heapGpreS Σ;
 }.

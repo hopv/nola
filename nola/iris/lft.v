@@ -50,8 +50,7 @@ Definition lftR := csumR
   unitR (* Dead *).
 
 (** Ghost state *)
-Class lftG Σ := LftG { lftG_inG : inG Σ lftR }.
-Local Existing Instance lftG_inG.
+Class lftG Σ := lftG_inG :: inG Σ lftR.
 Definition lftΣ : gFunctors := GFunctor lftR.
 #[export] Instance subG_lft `{!subG lftΣ Σ} : lftG Σ.
 Proof. solve_inG. Qed.

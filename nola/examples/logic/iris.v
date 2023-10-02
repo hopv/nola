@@ -14,13 +14,13 @@ Variant nInvd : Type :=
     (p : na_inv_pool_name) (i : positive) (P : nPropS (;ᵞ)).
 
 (** Agreement *)
-Class agreeG A Σ := { agree_inG :: inG Σ (agreeR (leibnizO A)) }.
-Definition agreeΣ A : gFunctors := #[GFunctor (agreeR (leibnizO A))].
+Class agreeG A Σ := agree_inG :: inG Σ (agreeR (leibnizO A)).
+Definition agreeΣ A : gFunctors := GFunctor (agreeR (leibnizO A)).
 #[export] Instance subG_agreeΣ `{!subG (agreeΣ A) Σ} : agreeG A Σ.
 Proof. solve_inG. Qed.
 
 (** [nintpGS]: Iris resource *)
-Class nintpGS (Σ : gFunctors) := NintpGS {
+Class nintpGS Σ := NintpGS {
   nintpGS_agreeG :: agreeG (nPropL (;ᵞ)) Σ;
   nintpGS_ninvGS :: ninvGS nInvd Σ;
   nintpGS_na_invG :: na_invG Σ;

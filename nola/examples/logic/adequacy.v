@@ -4,7 +4,7 @@ From nola.examples.logic Require Export deriv.
 From nola.examples.heap_lang Require Export adequacy total_adequacy.
 
 (** Precursor of [nintpGS] *)
-Class nintpGpreS (Σ : gFunctors) := NintpGpreS {
+Class nintpGpreS Σ := NintpGpreS {
   nintpGpreS_agreeG :: agreeG (nPropL (;ᵞ)) Σ;
   nintpGpreS_ninvGpreS :: ninvGpreS nInvd Σ;
   nintpGpreS_na_invG :: na_invG Σ;

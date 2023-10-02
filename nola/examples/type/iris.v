@@ -177,7 +177,7 @@ End tinv_wsat'.
 Arguments tinv_wsat'' : simpl never.
 
 (** [tintpGS]: Iris resource *)
-Class tintpGS (L : nat) (Σ : gFunctors) := TintpGS {
+Class tintpGS (L : nat) Σ := TintpGS {
   tintpGS_tinvGS :: tinvGS L Σ;
   tintpGS_heapGS :: heapGS_gen HasNoLc Σ;
 }.

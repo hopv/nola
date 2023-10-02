@@ -6,7 +6,7 @@ From iris.bi Require Import fixpoint.
 From iris.proofmode Require Import proofmode.
 
 (** ** What becomes [irisGS_gen] combined with an extra world satisfaction *)
-Class irisGS'_gen (hlc : has_lc) (Λ : language) (Σ : gFunctors) := IrisG' {
+Class irisGS'_gen (hlc : has_lc) (Λ : language) Σ := IrisG' {
   iris'_invGS :: invGS_gen hlc Σ;
   state_interp' : state Λ → nat → list (observation Λ) → nat → iProp Σ;
   fork_post' : val Λ → iProp Σ;
