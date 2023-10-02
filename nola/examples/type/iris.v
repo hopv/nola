@@ -3,7 +3,7 @@
 From nola.examples.type Require Export type.
 From nola.util Require Export prod.
 From nola.iris Require Export deriv inv wp.
-From nola.examples.heap_lang Require Export primitive_laws.
+From nola.examples.heap_lang Require Export definitions.
 From iris.proofmode Require Export proofmode.
 Import EqNotations.
 

@@ -5,7 +5,7 @@ From nola.iris Require Export upd.
 From stdpp Require Export coPset namespaces.
 From iris.bi Require Import notation.
 From iris.base_logic Require Export lib.na_invariants.
-From nola.examples.heap_lang Require Import primitive_laws.
+From nola.examples.heap_lang Require Import definitions.
 Import EqNotations.
 
 (** ** Preliminaries for [nProp] *)

@@ -3,7 +3,7 @@
 From nola.examples.logic Require Export prop.
 From nola.iris Require Export deriv inv na_inv wp.
 From iris.base_logic.lib Require Export cancelable_invariants.
-From nola.examples.heap_lang Require Export primitive_laws.
+From nola.examples.heap_lang Require Export definitions.
 
 (** ** Iris resources *)
 
