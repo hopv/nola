@@ -111,7 +111,7 @@ Section verify.
     iInduction n as [|n] "IH" forall (l) "ihd itl"; wp_rec; wp_pures; wp_load;
       wp_pures; [by iApply "Ψ"|].
     wp_apply "f"; [done|]. iIntros "_". wp_pures. wp_load. wp_op.
-    have ->: (S n - 1)%Z = n by lia. wp_store. wp_op. wp_bind (! _)%E.
+    have -> : (S n - 1)%Z = n by lia. wp_store. wp_op. wp_bind (! _)%E.
     iMod (nninv_acc with "itl") as "/=[(%l' & ↦ & i) cl]"; [done|].
     rewrite rew_eq_hwf /=. iDestruct "i" as "#[??]". wp_load. iModIntro.
     iMod ("cl" with "[↦]") as "_".
@@ -144,7 +144,7 @@ Section verify.
     iInduction k as [|k] "IH"; wp_lam; wp_pures; wp_load; wp_pures;
       [by iApply "Ψ"|].
     wp_apply twp_fork; [by wp_apply twp_siter_nd|]. wp_pures. wp_load. wp_pure.
-    have ->: (S k - 1)%Z = k by lia. wp_store. by iApply ("IH" with "↦k").
+    have -> : (S k - 1)%Z = k by lia. wp_store. by iApply ("IH" with "↦k").
   Qed.
 
   (** [siter_nd_forks_nd] terminates under [ilistis] *)
@@ -169,7 +169,7 @@ Section verify.
     iIntros (??) "#? Φ". wp_lam. wp_bind (FAA _ _).
     iMod (nninv_acc with "[//]") as "/=[[%k ↦] cl]"; [done|]. wp_faa.
     iModIntro. iMod ("cl" with "[↦]") as "_".
-    { iExists _. by have ->: (k * d + d = (k + 1) * d)%Z by lia. }
+    { iExists _. by have -> : (k * d + d = (k + 1) * d)%Z by lia. }
     iModIntro. wp_pures. by iApply "Φ".
   Qed.
 
@@ -188,12 +188,12 @@ Section verify.
     case (decide (k' * d = k * d)%Z)=> [->|?].
     - wp_apply (twp_cmpxchg_suc with "↦")=>//; [solve_vals_compare_safe|].
       iIntros "↦". iMod ("cl" with "[↦]") as "_".
-      { iExists _. by have ->: (k * d + d = (k + 1) * d)%Z by lia. }
+      { iExists _. by have -> : (k * d + d = (k + 1) * d)%Z by lia. }
       iModIntro. wp_pures. by iApply "Φ".
     - wp_apply (twp_cmpxchg_fail with "↦")=>//;
         [by case|solve_vals_compare_safe|].
       iIntros "↦". iMod ("cl" with "[↦]") as "_"; [by iExists _|]. iModIntro.
-      wp_pures. have ->: (S c - 1)%Z = c by lia. by iApply "IH".
+      wp_pures. have -> : (S c - 1)%Z = c by lia. by iApply "IH".
   Qed.
   Lemma twp_may_incr_cas {N E d l} : ↑N ⊆ E →
     [[{ nninvd N (has_mult d l) }]][nninv_wsatd]

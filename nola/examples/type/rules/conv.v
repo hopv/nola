@@ -123,7 +123,7 @@ Section conv.
     T ==>{_,k}(j,d) ▽{i,nil} T.
   Proof.
     iIntros (???) "/= #?". iApply fupdw_tinv_wsat_le. iIntros (?).
-    have ?: i <ⁿ L by apply (nlt_nle_trans _ _).
+    have ? : i <ⁿ L by apply (nlt_nle_trans _ _).
     iApply fupdw_incl; [apply wsat_incl_tinv_tninv|].
     iMod (ninv_alloc (P:=tinvd_guard T _) with "[]") as "inv"; [done|].
     iApply (ninv_tguard with "inv").

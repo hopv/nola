@@ -150,6 +150,6 @@ Section expr.
     setoid_rewrite twpw_tinv_wsat_lt_tinv_wsat.
     iInduction n as [|n] "IH" forall (w) "T"; wp_pures; [done|]. wp_bind (f _).
     iApply (twp_wand with "[]"); [by iApply "f"|]. iIntros (?) "#T'".
-    do 2 wp_pure. have ->: (S n - 1)%Z = n by lia. by iApply "IH".
+    do 2 wp_pure. have -> : (S n - 1)%Z = n by lia. by iApply "IH".
   Qed.
 End expr.

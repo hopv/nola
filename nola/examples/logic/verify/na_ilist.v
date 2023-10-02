@@ -99,7 +99,7 @@ Section verify.
     iInduction n as [|n] "IH" forall (l) "ihd itl"; wp_rec; wp_pures; wp_load;
       wp_pures. { iModIntro. iApply "Ψ". iFrame. }
     wp_apply ("f" with "[$pF //]"). iIntros "pF". wp_pures. wp_load. wp_op.
-    have ->: (S n - 1)%Z = n by lia. wp_store. wp_op. wp_bind (! _)%E.
+    have -> : (S n - 1)%Z = n by lia. wp_store. wp_op. wp_bind (! _)%E.
     iMod (na_nninv_acc with "[//] pF") as "/=((%l' & ↦ & i) & pF∖N & cl)";
       [done..|].
     rewrite rew_eq_hwf /=. iDestruct "i" as "#[??]". wp_load. wp_pures.

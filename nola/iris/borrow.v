@@ -176,7 +176,7 @@ Section borrow.
     iIntros "●". iExists (fresh (dom Lm)), 1%positive.
     iMod (own_update with "●") as "[$[$$]]"; [|done].
     rewrite -auth_frag_op singleton_op fmap_insert. apply auth_update_alloc.
-    have <-: lend_st_to_lendR (α, (d, P, Lend), {[1%positive := (P, Clsd)]}) ≡
+    have <- : lend_st_to_lendR (α, (d, P, Lend), {[1%positive := (P, Clsd)]}) ≡
       ((to_agree α, ε, {[1%positive := Excl (P, Clsd)]}) : lendR _) ⋅
         (to_agree α, Excl' (d, P, Lend), ε).
     { split; [split|]=>/=; by [rewrite agree_idemp|]. }
@@ -460,7 +460,7 @@ Section borrow.
     { case: Ql=> /=[|??]. { by iDestruct ("→P" with "[//]") as "$". }
       iDestruct "Ql" as "[[%[Sd _]]_]". iIntros "[g _]".
       iDestruct (depth_bound with "g Sd") as %?. lia. }
-    have ->: d + S k = S d + k by lia. iInduction Ql as [|Q Ql] "IH"=>/=.
+    have -> : d + S k = S d + k by lia. iInduction Ql as [|Q Ql] "IH"=>/=.
     { by iDestruct ("→P" with "[//]") as "$". }
     iDestruct "Ql" as "[[%β l] Ql]".
     iMod (IH with "[†] l") as "Q"; [by rewrite lft_dead_meet_l|].
@@ -614,7 +614,7 @@ Section borrow.
   Proof.
     move=> ????. iIntros "#i α". iInv "i" as ">[%r b]".
     iMod (bor_open with "α b") as "[b >Φ]".
-    have eq: intp (Φ r) ⊣⊢ intp (Φ (r/2)%Qp) ∗ intp (Φ (r/2)%Qp).
+    have eq : intp (Φ r) ⊣⊢ intp (Φ (r/2)%Qp) ∗ intp (Φ (r/2)%Qp).
     { by erewrite fractional_half; [|apply: fractional_as_fractional]. }
     iMod (bor_subdiv [_;_] with "b [Φ] []") as "[α[b[b' _]]]"=>/=;
       rewrite ?eq; [by iDestruct "Φ" as "[$$]"|by iIntros "_[$[$_]]"|].

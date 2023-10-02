@@ -224,7 +224,7 @@ Section lft.
     iIntros "[α α']". iDestruct (IH with "α'") as (r) "[bl →α']"; [set_solver|].
     iDestruct (big_sepMS_elem_of_acc _ _ b with "α") as "[b →α]"; [set_solver|].
     case: (Qp.lower_bound r (q/2)%Qp)=> [s[t[t'[->eq]]]].
-    have ->: alft_tok b (q / 2) ⊣⊢ alft_tok b s ∗ alft_tok b t'.
+    have -> : alft_tok b (q / 2) ⊣⊢ alft_tok b s ∗ alft_tok b t'.
     { by rewrite eq fractional. }
     iExists _. iDestruct "b" as "[$ b']". setoid_rewrite fractional.
     rewrite big_sepL_sep. iDestruct "bl" as "[$ bl']". iIntros "[b bl]".
