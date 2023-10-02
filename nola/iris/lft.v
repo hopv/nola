@@ -263,7 +263,7 @@ Section lft.
   Context `{!lftG Σ}.
 
   (** [⊑s] is persistent *)
-  Fact lft_sincl_persistent {α β} : Persistent (α ⊑s β).
+  #[export] Instance lft_sincl_persistent {α β} : Persistent (α ⊑s β).
   Proof. rewrite lft_sincl_unseal. apply _. Qed.
 
   (** Access a lifetime token by [⊑s] *)

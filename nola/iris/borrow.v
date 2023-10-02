@@ -118,7 +118,7 @@ Section borrow.
 
   (** Closed borrower token *)
   Local Definition bor_ctok_def α P : iProp Σ :=
-    [†α] ∨ ∃ i j, bor_itok i j α (P, Clsd).
+    [†α] ∨ ∃ α', α ⊑s α' ∗ (∃ i j, bor_itok i j α' (P, Clsd)).
   Local Lemma bor_ctok_aux : seal bor_ctok_def. Proof. by eexists. Qed.
   Definition bor_ctok := bor_ctok_aux.(unseal).
   Local Lemma bor_ctok_unseal : bor_ctok = bor_ctok_def.
@@ -128,7 +128,7 @@ Section borrow.
     It may be a dead lifetime token, a closed borrower,
     or an retrieving reborrower *)
   Local Definition bor_tok_def α P : iProp Σ :=
-    bor_ctok α P ∨ ∃ i j β, [†β] ∗ bor_itok i j α (P, Rebor β).
+    bor_ctok α P ∨ ∃ α', α ⊑s α' ∗ ∃ i j β, [†β] ∗ bor_itok i j α' (P, Rebor β).
   Local Lemma bor_tok_aux : seal bor_tok_def. Proof. by eexists. Qed.
   Definition bor_tok := bor_tok_aux.(unseal).
   Local Lemma bor_tok_unseal : bor_tok = bor_tok_def.
@@ -138,7 +138,8 @@ Section borrow.
 
     It keeps a lifetime token at hand *)
   Local Definition bor_otok_def α P q : iProp Σ :=
-    (q/2).[α] ∗ ∃ i j, bor_itok i j α (P, Open (q/2)%Qp).
+    ∃ α' r, α ⊑s α' ∗ (r.[α'] -∗ q.[α]) ∗
+      (r/2).[α'] ∗ ∃ i j, bor_itok i j α' (P, Open (r/2)).
   Local Lemma bor_otok_aux : seal bor_otok_def. Proof. by eexists. Qed.
   Definition bor_otok := bor_otok_aux.(unseal).
   Local Lemma bor_otok_unseal : bor_otok = bor_otok_def.
@@ -149,7 +150,8 @@ Section borrow.
     own borrow_name (◯ {[i := (to_agree α, Excl' (d, P, Lend), ε)]}).
   Local Definition lend_dtok α d P : iProp Σ :=
     depth d ∗ ∃ i, lend_itok i α d P.
-  Local Definition lend_tok_def α P : iProp Σ := ∃ d, lend_dtok α d P.
+  Local Definition lend_tok_def α P : iProp Σ :=
+    ∃ α', α' ⊑s α ∗ ∃ d, lend_dtok α' d P.
   Local Lemma lend_tok_aux : seal lend_tok_def. Proof. by eexists. Qed.
   Definition lend_tok := lend_tok_aux.(unseal).
   Local Lemma lend_tok_unseal : lend_tok = lend_tok_def.
@@ -165,6 +167,31 @@ Section borrow.
   Lemma bor_tok_fake {α P} : [†α] ⊢ bor_tok α P.
   Proof. by rewrite bor_ctok_fake bor_ctok_tok. Qed.
 
+  (** Modify the lifetime of borrower and lender tokens *)
+  Lemma bor_ctok_lft {α α' P} : α' ⊑s α -∗ bor_ctok α P -∗ bor_ctok α' P.
+  Proof.
+    rewrite bor_ctok_unseal. iIntros "#? [#?|[%α''[? c]]]".
+    { iLeft. by iApply lft_sincl_dead_acc. }
+    iRight. iExists _. iFrame "c". by iApply lft_sincl_trans.
+  Qed.
+  Lemma bor_tok_lft {α α' P} : α' ⊑s α -∗ bor_tok α P -∗ bor_tok α' P.
+    rewrite bor_tok_unseal. iIntros "#? [c|[%α''[#? r]]]".
+    { iLeft. by iApply bor_ctok_lft. }
+    iRight. iExists _. iFrame "r". by iApply lft_sincl_trans.
+  Qed.
+  Lemma bor_otok_lft {α α' P q r} :
+    α' ⊑s α -∗ (q.[α] -∗ r.[α']) -∗ bor_otok α P q -∗ bor_otok α' P r.
+  Proof.
+    rewrite bor_otok_unseal. iIntros "#? →α' [%α''[%s[#?[→α o]]]]".
+    iExists _, _. iFrame "o". iSplit; [by iApply lft_sincl_trans|].
+    iIntros "α''". iApply "→α'". by iApply "→α".
+  Qed.
+  Lemma lend_tok_lft {α α' P} : α ⊑s α' -∗ lend_tok α P -∗ lend_tok α' P.
+  Proof.
+    rewrite lend_tok_unseal. iIntros "#? [%α''[#? l]]". iExists _. iFrame "l".
+    by iApply lft_sincl_trans.
+  Qed.
+
   (** Token for [lend_stm] *)
   Local Definition lend_st_to_lendR L : lendR PROP :=
     (to_agree L.1.1, Excl' L.1.2, (Excl : bor_st _ → _) <$> L.2).
@@ -172,7 +199,7 @@ Section borrow.
     own borrow_name (● (lend_st_to_lendR <$> Lm : gmapR _ _)).
 
   (** Create [bor_itok] and [lend_itok] w.r.t. [lend_stm_tok] *)
-  Local Lemma lend_stm_create {Lm α P} d :
+  Local Lemma lend_stm_create {Lm} d α P :
     lend_stm_tok Lm -∗ |==> ∃ i j,
       lend_stm_tok (<[i := (α, (d, P, Lend), {[j := (P, Clsd)]})]> Lm) ∗
       bor_itok i j α (P, Clsd) ∗ lend_itok i α d P.
@@ -380,10 +407,12 @@ Section borrow.
   Proof.
     rewrite borrow_wsat_unseal bor_ctok_unseal lend_tok_unseal.
     iIntros "P [%g[g[%Lm[● Lm]]]]". iMod depth_0 as "d".
-    iMod (lend_stm_create with "●") as (??) "[●[b l]]"; [done..|]. iModIntro.
-    iSplitR "b l d"; last first.
-    { iSplitL "b"; [|iExists _; iFrame "d"; by iExists _].
-      iRight. by iExists _, _. }
+    iMod (lend_stm_create with "●") as (??) "[●[c l]]"; [done..|]. iModIntro.
+    iSplitR "c l d"; last first.
+    { iSplitL "c".
+      { iRight. iExists _. iSplitR; [iApply lft_sincl_refl|]. by iExists _, _. }
+      iExists _. iSplitR; [iApply lft_sincl_refl|]. iExists _. iFrame "d".
+      by iExists _. }
     iExists _. iFrame "g". iExists _. iFrame "●".
     iApply (big_sepM_insert_2 with "[P] Lm")=>/=.
     iSplitL; rewrite big_sepM_singleton /=; by [iLeft|iIntros].
@@ -394,18 +423,19 @@ Section borrow.
 
   (** Extend the lender token *)
   Lemma lend_extend `{!GenUpd _ M} {intp α P} Q :
-    lend_tok α P -∗ ([†α] -∗ intp P -∗ M (intp Q)) =[borrow_wsat M intp]=∗
+    lend_tok α P -∗ (intp P -∗ M (intp Q)) =[borrow_wsat M intp]=∗
       lend_tok α Q.
   Proof.
     rewrite lend_tok_unseal borrow_wsat_unseal.
-    iIntros "[%d[d[%i l]]] PQ [%g[g[%Lm[● Lm]]]]".
+    iIntros "[%α'[#?[%d[d[%i l]]]]] PQ [%g[g[%Lm[● Lm]]]]".
     iDestruct (lend_stm_lend_agree with "● l") as %[Bm ?].
     iDestruct (big_sepM_insert_acc with "Lm") as "[L →Lm]"; [done|]=>/=.
     iMod (lend_stm_lend_extend with "● l") as "[● l]"; [done|]. iModIntro.
-    iSplitR "d l"; [|iExists _; iFrame "d"; by iExists _]. iExists _.
-    iFrame "g". iExists _. iFrame "●". iApply "→Lm"=>/=.
+    iSplitR "d l"; last first.
+    { iExists _. iSplitR; [done|]. iExists _. iFrame "d". by iExists _. }
+    iExists _. iFrame "g". iExists _. iFrame "●". iApply "→Lm"=>/=.
     iDestruct "L" as "[$ →P]"=>/=. iIntros "#† Bm".
-    iMod ("→P" with "† Bm") as "P". by iApply "PQ".
+    iMod ("→P" with "† Bm") as "P". iApply ("PQ" with "P").
   Qed.
 
   (** [bor_wsat] with the dead lifetime token *)
@@ -476,9 +506,11 @@ Section borrow.
   Lemma lend_retrieve `{!GenUpd _ M} {intp α P} :
     [†α] -∗ lend_tok α P =[borrow_wsat M intp]=∗ M (intp P).
   Proof.
-    rewrite lend_tok_unseal borrow_wsat_unseal. iIntros "† [%d[d l]] [%g[g W]]".
+    rewrite lend_tok_unseal borrow_wsat_unseal.
+    iIntros "#† [%α'[#?[%d[d l]]]] [%g[g W]]".
     iDestruct (depth_bound with "g d") as %le. move: le=> /Nat.le_sum[?->].
-    iMod (lend_retrieve' with "† [$d $l] [$g $W]") as "[W $]". by iExists _.
+    iMod (lend_retrieve' with "[†] [$d $l] [$g $W]") as "[W $]";
+      [by iApply lft_sincl_dead_acc|by iExists _].
   Qed.
 
   (** [lend_wsat] with a lifetime token *)
@@ -498,8 +530,10 @@ Section borrow.
     iDestruct (lend_wsat_tok with "α L") as %->. iDestruct "L" as "[Bm →Q]"=>/=.
     iDestruct (big_sepM_insert_acc with "Bm") as "[B →Bm]"; [done|].
     iMod (lend_stm_bor_stupd with "● b") as "[● o]"; [done..|]. iModIntro.
-    iSplitR "α o B"; last first. { iSplitR "B"; [|by iExists _].
-      rewrite bor_otok_unseal. iFrame "α". by iExists _, _. }
+    iSplitR "α o B"; last first.
+    { iSplitR "B"; [|by iExists _]. rewrite bor_otok_unseal.
+      iExists α, q. iSplitR; [iApply lft_sincl_refl|]. iSplitR; [by iIntros|].
+      iFrame "α". by iExists _, _. }
     iExists _. iFrame "g". iExists _. iFrame "●".
     iApply "→Lm". iSplitR "→Q"=>/=; [by iApply "→Bm"|]. iStopProof.
     do 2 f_equiv. apply bi.equiv_entails_1_1.
@@ -509,19 +543,23 @@ Section borrow.
   Lemma bor_open' {M intp q α P} :
     q.[α] -∗ bor_ctok α P =[borrow_wsat M intp]=∗ bor_otok α P q ∗ intp P.
   Proof.
-    rewrite bor_ctok_unseal. iIntros "α [†|[%i[%j c]]]".
+    rewrite bor_ctok_unseal. iIntros "α [†|[%α'[#?[%i[%j c]]]]]".
     { by iDestruct (lft_tok_dead with "α †") as "[]". }
-    by iMod (bor_open_core with "α c") as "[$[%d $]]".
+    iMod (lft_sincl_tok_acc with "[//] α") as (r) "[α' →α]".
+    iMod (bor_open_core with "α' c") as "[o[%d $]]".
+    iApply (bor_otok_lft with "[//] →α o").
   Qed.
   (** Open a borrower, possibly retrieving reborrowing *)
   Lemma bor_open `{!GenUpd _ M} {intp q α P} :
     q.[α] -∗ bor_tok α P =[borrow_wsat M intp]=∗ bor_otok α P q ∗ M (intp P).
   Proof.
-    rewrite bor_tok_unseal. iIntros "α [c|[%i[%j[%β[† r]]]]]".
+    rewrite bor_tok_unseal. iIntros "α [c|[%α'[#?[%i[%j[%β[† r]]]]]]]".
     { by iMod (bor_open' with "α c") as "[$$]". }
-    iMod (bor_open_core with "α r") as "[$[%d l]]".
-    rewrite lft_dead_meet_r. iApply (lend_retrieve with "† [l]").
-    rewrite lend_tok_unseal. by iExists _.
+    iMod (lft_sincl_tok_acc with "[//] α") as (r') "[α' →α]".
+    iMod (bor_open_core with "α' r") as "[o[%d l]]".
+    iDestruct (bor_otok_lft with "[//] →α o") as "$". rewrite lft_dead_meet_r.
+    iApply (lend_retrieve with "† [l]"). rewrite lend_tok_unseal. iExists _.
+    iSplitR; by [iApply lft_sincl_refl|iExists _].
   Qed.
 
   (** Close a borrower with subdivision *)
@@ -531,21 +569,23 @@ Section borrow.
       q.[α] ∗ ([∗ list] Q ∈ Ql, bor_ctok α Q).
   Proof.
     rewrite bor_otok_unseal borrow_wsat_unseal.
-    iIntros "[α[%i[%j b]]] Ql →P [%g[g[%Lm[● Lm]]]]".
-    iDestruct (lend_stm_bor_agree with "● b") as %[[[d R]l][Bm[??]]].
+    iIntros "[%α'[%r[#?[→α[α'[%i[%j o]]]]]]] Ql →P [%g[g[%Lm[● Lm]]]]".
+    iDestruct (lend_stm_bor_agree with "● o") as %[[[d R]l][Bm[??]]].
     iDestruct (big_sepM_insert_acc with "Lm") as "[L →Lm]"; [done|]=>/=.
-    iDestruct (lend_wsat_tok with "α L") as %->=>/=. iFrame "α".
-    iMod (lend_stm_bor_delete with "● b") as (Bm') "[● %eq]"; [done..|].
+    iDestruct (lend_wsat_tok with "α' L") as %->=>/=.
+    iMod (lend_stm_bor_delete with "● o") as (Bm') "[● %eq]"; [done..|].
     iMod (lend_stm_new_bors (i:=i) (Bl:=(λ Q,(Q,Clsd)) <$> Ql) with "●") as
       (Bm'') "[● [bl %eq']]"; [by rewrite lookup_insert|]. iModIntro.
     rewrite insert_insert big_sepL_fmap. iDestruct "L" as "[Bm →R]".
-    rewrite !eq. iDestruct "Bm" as "[$ Bm']". iSplitR "bl"; last first.
-    { iApply (big_sepL_mono with "bl")=> *. iIntros "[% ?]".
-      rewrite bor_ctok_unseal. iRight. by iExists _, _. }
+    rewrite !eq. iDestruct "Bm" as "[+α' Bm']".
+    iDestruct ("→α" with "[$α' $+α'//]") as "$". iSplitR "bl"; last first.
+    { iApply (big_sepL_impl with "bl"). iIntros "!> %% _ [%j' ?]".
+      rewrite bor_ctok_unseal. iRight. iExists _. iSplit; [done|].
+      by iExists _, _. }
     iExists _. iFrame "g". iExists _. iFrame "●". iApply "→Lm"=>/=.
     iSplitL "Bm' Ql"; rewrite !eq' !big_sepL_fmap /=; [by iFrame|].
-    iIntros "#† [Ql Bm]". iMod ("→P" with "† Ql") as "P".
-    iApply ("→R" with "†"). iFrame.
+    iIntros "#† [Ql Bm]". iMod ("→P" with "[†] Ql") as "P".
+    { by iApply lft_sincl_dead_acc. } iApply ("→R" with "†"). iFrame.
   Qed.
   Lemma bor_subdiv `{!GenUpd _ M} {intp q α P} Ql :
     bor_otok α P q -∗ ([∗ list] Q ∈ Ql, intp Q) -∗
@@ -573,26 +613,29 @@ Section borrow.
       r.[β] ∗ bor_ctok (α ⊓ β) R ∗ ([†α] -∗ bor_tok β R).
   Proof.
     rewrite bor_otok_unseal borrow_wsat_unseal.
-    iIntros "[β[%i[%j o]]] R [%g[g[%Lm[● Lm]]]]".
+    iIntros "[%β'[%s[#?[→β[β'[%i[%j o]]]]]]] R [%g[g[%Lm[● Lm]]]]".
     iDestruct (lend_stm_bor_agree with "● o") as %[[[d Q]l][Bm[??]]].
     iDestruct (big_sepM_insert_acc with "Lm") as "[L →Lm]"; [done|]=>/=.
-    iDestruct (lend_wsat_tok with "β L") as %->. iFrame "β".
+    iDestruct (lend_wsat_tok with "β' L") as %->.
     iMod (lend_stm_bor_stupd (B':=(_,Rebor α)) with "● o") as "[● r]";
       [done..|].
-    iMod (lend_stm_create with "●") as (i' j') "[● [b l]]"; [done..|].
+    iMod (lend_stm_create with "●") as (i' j') "[● [c l]]"; [done..|].
     iMod (depth_alloc with "g") as (g') "[g d]". iModIntro.
     iDestruct "L" as "[Bm →Q]"=>/=.
-    iDestruct (big_sepM_insert_acc with "Bm") as "[B →Bm]"; [done|]. iFrame "B".
-    iSplitR "b r"; last first.
-    { rewrite bor_tok_unseal bor_ctok_unseal.
-      iSplitL "b"; [|iIntros "†"]; iRight; iExists _, _;
-        by [|iExists _; iFrame]. }
+    iDestruct (big_sepM_insert_acc with "Bm") as "[B →Bm]"; [done|].
+    iDestruct ("→β" with "[$β' $B//]") as "$". iSplitR "c r"; last first.
+    { rewrite bor_tok_unseal bor_ctok_unseal. iSplitL "c"; last first.
+      { iIntros "?". iRight. iExists _. iSplit; [done|]. iExists _, _, _.
+        iFrame. }
+      iRight. iExists (α ⊓ β'). iSplit; [|by iExists _, _].
+      iApply lft_sincl_meet_intro; [by iApply lft_sincl_meet_l|].
+      iApply lft_sincl_trans; [|done]. iApply lft_sincl_meet_r. }
     iExists _. iFrame "g". iExists _. iFrame "●".
     iApply (big_sepM_insert_2 with "[R]")=>/=.
     { iSplitL; rewrite big_sepM_singleton /=; by [|iIntros]. }
     iApply "→Lm". iSplitR "→Q"=>/=.
     { iApply "→Bm". iFrame "d". rewrite comm. by iExists _. }
-    iStopProof. do 2 f_equiv. apply bi.equiv_entails_1_1.
+    iClear "#". iStopProof. do 2 f_equiv. apply bi.equiv_entails_1_1.
     by apply: big_sepM_insert_override.
   Qed.
   Lemma bor_reborrow `{!GenUpd _ M} {intp β R r} α :
@@ -632,12 +675,12 @@ Definition fborrowΣ PROP : gFunctors := ghost_mapΣ positive (fbor_st PROP).
 Proof. solve_inG. Qed.
 
 Section fborrow.
-  Context `{!fborrowGS PROP Σ}.
+  Context `{!fborrowGS PROP Σ, !borrowGS PROP Σ}.
   Implicit Type (Φ : Qp → PROP) (F : fbor_stm PROP).
 
   (** Fractional borrower token *)
-  Local Definition fbor_itok i α Φ : iProp Σ := i ↪[fborrow_name]□ (α, Φ).
-  Definition fbor_tok_def α Φ : iProp Σ := ∃ i, fbor_itok i α Φ.
+  Definition fbor_tok_def α Φ : iProp Σ :=
+    ∃ α', α ⊑s α' ∗ ∃ i, i ↪[fborrow_name]□ (α', Φ).
   Lemma fbor_tok_aux : seal (@fbor_tok_def). Proof. by eexists. Qed.
   Definition fbor_tok := fbor_tok_aux.(unseal).
   Lemma fbor_tok_unseal : @fbor_tok = @fbor_tok_def.
@@ -647,14 +690,17 @@ Section fborrow.
   #[export] Instance fbor_tok_persistent α Φ : Persistent (fbor_tok α Φ).
   Proof. rewrite fbor_tok_unseal. apply _. Qed.
 
-  (** Token for all the fractional borrowers *)
-  Local Definition fbors_tok F : iProp Σ := ghost_map_auth fborrow_name 1 F.
-
-  Context `{!borrowGS PROP Σ}.
+  (** Modify the lifetime of [fbor_tok] *)
+  Lemma fbor_tok_lft {α α' Φ} : α' ⊑s α -∗ fbor_tok α Φ -∗ fbor_tok α' Φ.
+  Proof.
+    rewrite fbor_tok_unseal. iIntros "#? [%α''[#? f]]". iExists _. iFrame "f".
+    by iApply lft_sincl_trans.
+  Qed.
 
   (** World satisfaction for the fractional borrowing machinery *)
   Definition fborrow_wsat_def : iProp Σ :=
-    ∃ F, fbors_tok F ∗ ([∗ map] αΦ ∈ F, ∃ q, bor_ctok αΦ.1 (αΦ.2 q)).
+    ∃ F, ghost_map_auth fborrow_name 1 F ∗
+      ([∗ map] αΦ ∈ F, ∃ q, bor_ctok αΦ.1 (αΦ.2 q)).
   Lemma fborrow_wsat_aux : seal fborrow_wsat_def. Proof. by eexists. Qed.
   Definition fborrow_wsat := fborrow_wsat_aux.(unseal).
   Lemma fborrow_wsat_unseal : fborrow_wsat = fborrow_wsat_def.
@@ -668,7 +714,8 @@ Section fborrow.
       [apply not_elem_of_dom_1, is_fresh|]. iModIntro.
     iDestruct (big_sepM_insert_2 _ _ _ (_,_) with "[c] F") as "F";
       [by iExists q|].
-    iSplitR "i"; [iExists _; iFrame|]. rewrite fbor_tok_unseal. by iExists _.
+    iSplitR "i"; [iExists _; iFrame|]. rewrite fbor_tok_unseal. iExists _.
+    iSplit; by [iApply lft_sincl_refl|iExists _].
   Qed.
   Lemma bor_frbor `{!GenUpd _ M} {intp α Φ q r} :
     bor_otok α (Φ q) r -∗ intp (Φ q) =[fborrow_wsat ∗ borrow_wsat M intp]=∗
@@ -683,16 +730,19 @@ Section fborrow.
     q.[α] -∗ fbor_tok α Φ =[fborrow_wsat ∗ borrow_wsat M intp]=∗
       ∃ r, bor_otok α (Φ r) q ∗ intp (Φ r).
   Proof.
-    rewrite fbor_tok_unseal fborrow_wsat_unseal. iIntros "α[%i i] [[%F[● F]]W]".
+    rewrite fbor_tok_unseal fborrow_wsat_unseal.
+    iIntros "α [%α'[#?[%i i]]] [[%F[● F]]W]".
+    iMod (lft_sincl_tok_acc with "[//] α") as (s) "[α' →α]".
     iDestruct (ghost_map_lookup with "● i") as %?.
     iDestruct (big_sepM_lookup_acc with "F") as "[[%r c]→F]"; [done|]=>/=.
-    iMod (bor_open' with "α c W") as "[W[o Φ]]".
+    iMod (bor_open' with "α' c W") as "[W[o Φ]]".
     have eq : intp (Φ r) ⊣⊢ intp (Φ (r/2)%Qp) ∗ intp (Φ (r/2)%Qp).
     { by erewrite fractional_half; [|apply: fractional_as_fractional]. }
     rewrite eq. iDestruct "Φ" as "[Φ Φ']".
-    iMod (bor_subdiv' [_;_] with "o [Φ Φ'] [] W") as "[W[α[c[c' _]]]]".
+    iMod (bor_subdiv' [_;_] with "o [Φ Φ'] [] W") as "[W[α'[c[c' _]]]]".
     { by iFrame. } { rewrite eq. by iIntros "_ [$[$ _]]". }
-    iMod (bor_open' with "α c' W") as "[$[o Φ]]". iModIntro.
+    iMod (bor_open' with "α' c' W") as "[$[o Φ]]". iModIntro.
+    iDestruct (bor_otok_lft with "[//] →α o") as "o".
     iSplitR "o Φ"; [|iExists _; by iFrame]. iExists _. iFrame "●". iApply "→F".
     by iExists _.
   Qed.
