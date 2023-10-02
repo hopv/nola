@@ -443,56 +443,54 @@ Section wpw.
     WP[W] e @ s; E [{ v, |=[W]{E}=> Φ v }] ⊢ WP[W] e @ s; E [{ Φ }].
   Proof. move=> ?. by rewrite twpw_fupdw_fupdw fupdw_twpw_nonval. Qed.
 
-  (** Expand the world satisfaction of [wpw] *)
-  Lemma wpw_expand_fupd {e s E F W W' Φ} :
-    E ⊆ F → □ (W' ={E}=∗ W ∗ (W ={E}=∗ W')) -∗
-    WP[W] e @ s; F {{ Φ }} -∗ WP[W'] e @ s; F {{ Φ }}.
+  (** Modify the world satisfaction of [wpw] *)
+  Lemma wpw_incl_fupd {e s E F W W' Φ} :
+    E ⊆ F → □ (W ={E}=∗ W' ∗ (W' ={E}=∗ W)) -∗
+    WP[W'] e @ s; F {{ Φ }} -∗ WP[W] e @ s; F {{ Φ }}.
   Proof.
-    iIntros (EF) "#W'W wpW". iLöb as "IH" forall (F e Φ EF).
+    iIntros (EF) "#∝ wp". iLöb as "IH" forall (F e Φ EF).
     rewrite !wp_unfold /wp_pre/=. case (to_val e); [done|].
-    iIntros (?????) "[W' X]".
+    iIntros (?????) "[W X]".
     iMod (fupd_mask_subseteq E) as "cl"; [done|].
-    iMod ("W'W" with "W'") as "[W W→]". iMod "cl" as "_".
-    iMod ("wpW" with "[$W $X]") as "[% big]". iModIntro. iSplit; [done|].
+    iMod ("∝" with "W") as "[W' →W]". iMod "cl" as "_".
+    iMod ("wp" with "[$W' $X]") as "[% big]". iModIntro. iSplit; [done|].
     iIntros (????) "£". iDestruct ("big" with "[%//] £") as "big".
-    iApply (step_fupdN_wand with "big"). iIntros "!> >[[W $] [wpW wpWs]]".
+    iApply (step_fupdN_wand with "big"). iIntros "!> >[[W' $] [wp wps]]".
     iMod (fupd_mask_subseteq E) as "cl"; [done|].
-    iMod ("W→" with "W") as "$". iMod "cl" as "_". iModIntro.
-    iSplitL "wpW"; [by iApply "IH"|]. iApply (big_sepL_impl with "wpWs").
+    iMod ("→W" with "W'") as "$". iMod "cl" as "_". iModIntro.
+    iSplitL "wp"; [by iApply "IH"|]. iApply (big_sepL_impl with "wps").
     iIntros "!>" (???). by iApply "IH".
   Qed.
-  Lemma wpw_expand {e s E W W' Φ} :
-    □ (W' -∗ W ∗ (W -∗ W')) -∗
-    WP[W] e @ s; E {{ Φ }} -∗ WP[W'] e @ s; E {{ Φ }}.
+  Lemma wpw_incl {e s E Φ} `(!WsatIncl W W' Wr) :
+    WP[W'] e @ s; E {{ Φ }} ⊢ WP[W] e @ s; E {{ Φ }}.
   Proof.
-    iIntros "#W'W". iApply (wpw_expand_fupd (E:=E)); [done|]. iIntros "!> W'".
-    iDestruct ("W'W" with "W'") as "[$ WW']". iIntros "!>?!>". by iApply "WW'".
+    iApply (wpw_incl_fupd (E:=E)); [done|]. rewrite (wsat_incl W W').
+    by iIntros "!> [$$]".
   Qed.
 
-  (** Expand the world satisfaction of [twpw] *)
-  Lemma twpw_expand_fupd {e s E F W W' Φ} :
-    E ⊆ F → □ (W' ={E}=∗ W ∗ (W ={E}=∗ W')) -∗
-    WP[W] e @ s; F [{ Φ }] -∗ WP[W'] e @ s; F [{ Φ }].
+  (** Modify the world satisfaction of [twpw] *)
+  Lemma twpw_incl_fupd {e s E F W W' Φ} :
+    E ⊆ F → □ (W ={E}=∗ W' ∗ (W' ={E}=∗ W)) -∗
+    WP[W'] e @ s; F [{ Φ }] -∗ WP[W] e @ s; F [{ Φ }].
   Proof.
-    iIntros (EF) "#W'W twpW". iRevert (EF). iRevert (e F Φ) "twpW".
-    iApply twp_ind; [solve_proper|]. iIntros "!>" (e F Φ) "twpW %".
+    iIntros (EF) "#∝ twp". iRevert (EF). iRevert (e F Φ) "twp".
+    iApply twp_ind; [solve_proper|]. iIntros "!>" (e F Φ) "twp %".
     rewrite twp_unfold /twp_pre/=. case (to_val e); [done|].
-    iIntros (????) "[W' X]". iMod (fupd_mask_subseteq E) as "cl"; [done|].
-    iMod ("W'W" with "W'") as "[W W→]". iMod "cl" as "_".
-    iMod ("twpW" with "[$W $X]") as "[% big]". iModIntro. iSplit; [done|].
+    iIntros (????) "[W X]". iMod (fupd_mask_subseteq E) as "cl"; [done|].
+    iMod ("∝" with "W") as "[W' →W]". iMod "cl" as "_".
+    iMod ("twp" with "[$W' $X]") as "[% big]". iModIntro. iSplit; [done|].
     iIntros (?????).
-    iMod ("big" with "[%//]") as (?) "[[W $] [[twpW' _] twpW's]]".
-    iDestruct ("twpW'" with "[%//]") as "$".
-    iMod (fupd_mask_subseteq E) as "cl"; [done|]. iMod ("W→" with "W") as "$".
+    iMod ("big" with "[%//]") as (?) "[[W' $] [[twp _] twps]]".
+    iDestruct ("twp" with "[%//]") as "$".
+    iMod (fupd_mask_subseteq E) as "cl"; [done|]. iMod ("→W" with "W'") as "$".
     iMod "cl" as "_". iModIntro. iSplit; [done|].
-    iApply (big_sepL_impl with "twpW's"). iIntros "!>" (???) "[→ _]".
+    iApply (big_sepL_impl with "twps"). iIntros "!>" (???) "[→ _]".
     by iApply "→".
   Qed.
-  Lemma twpw_expand {e s E W W' Φ} :
-    □ (W' -∗ W ∗ (W -∗ W')) -∗
-    WP[W] e @ s; E [{ Φ }] -∗ WP[W'] e @ s; E [{ Φ }].
+  Lemma twpw_incl {e s E Φ} `(!WsatIncl W W' Wr) :
+    WP[W'] e @ s; E [{ Φ }] ⊢ WP[W] e @ s; E [{ Φ }].
   Proof.
-    iIntros "#W'W". iApply (twpw_expand_fupd (E:=E)); [done|]. iIntros "!> W'".
-    iDestruct ("W'W" with "W'") as "[$ WW']". iIntros "!>?!>". by iApply "WW'".
+    iApply (twpw_incl_fupd (E:=E)); [done|]. rewrite (wsat_incl W W').
+    by iIntros "!> [$$]".
   Qed.
 End wpw.

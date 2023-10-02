@@ -44,9 +44,8 @@ Section expr.
   (** [:ᵉ] is monotone over the level *)
   Lemma texpr_mono_lev `{! i ≤ⁿ i'} {e j T} : e :ᵉ{j}(i) T ⊢ e :ᵉ(i') T.
   Proof.
-    iIntros "?". iApply twpw_expand; [iApply tinv_wsat_incl|].
-    iStopProof. unfold texpr. do 2 f_equiv. iApply fupdw_expand.
-    iApply tinv_wsat_incl.
+    iIntros "?". iApply twpw_incl; [apply wsat_incl_tinv|].
+    iStopProof. unfold texpr. do 2 f_equiv. iApply fupdw_incl.
   Qed.
 
   (** Introduce [:ᵒ ⊤ᵗ] *)
@@ -138,7 +137,7 @@ Section expr.
     iIntros (?) ">?". wp_bind e. iApply (twp_wand with "[$]").
     iIntros (?) "/= >#hor". iApply fupdw_twpw_fupdw. iModIntro.
     setoid_rewrite twpw_tinv_wsat_lt_tinv_wsat.
-    iApply twpw_expand; [iApply (tinv_wsat_incl (M':=j))|]. by iApply "hor".
+    iApply twpw_incl; [apply (wsat_incl_tinv (M':=j))|]. by iApply "hor".
   Qed.
 
   (** On [fiter] *)

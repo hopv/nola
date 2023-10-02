@@ -178,14 +178,20 @@ Section tintp.
   Proof. apply twpw_proper; [exact tinv_wsat_lt_tinv_wsat|done]. Qed.
 
   (** Take out [tninv_wsat] out of [tinv_wsat] *)
-  Lemma tinv_wsat_tninv_wsat `{! i <ⁿ M, ! i <ⁿ L} {s} :
-    tinv_wsat s M -∗ tninv_wsat s i ∗ (tninv_wsat s i -∗ tinv_wsat s M).
-  Proof. iIntros "tw". iApply (tinv_wsat'_ninv_wsat with "tw"). Qed.
+  #[export] Instance wsat_incl_tinv_tninv `{! i <ⁿ M, ! i <ⁿ L} {s} :
+    WsatIncl (tinv_wsat s M) (tninv_wsat s i) (tninv_wsat s i -∗ tinv_wsat s M).
+  Proof.
+    rewrite /WsatIncl. iSplit; [|iIntros "[? →]"; by iApply "→"].
+    iIntros "tw". iApply (tinv_wsat'_ninv_wsat with "tw").
+  Qed.
 
   (** Inclusion between [tinv_wsat]s *)
-  Lemma tinv_wsat_incl `{! M ≤ⁿ M'} {s} :
-    tinv_wsat s M' -∗ tinv_wsat s M ∗ (tinv_wsat s M -∗ tinv_wsat s M').
-  Proof. by apply tinv_wsat'_incl. Qed.
+  #[export] Instance wsat_incl_tinv `{! M ≤ⁿ M'} {s} :
+    WsatIncl (tinv_wsat s M') (tinv_wsat s M) (tinv_wsat s M -∗ tinv_wsat s M').
+  Proof.
+    rewrite /WsatIncl. iSplit; [|iIntros "[? →]"; by iApply "→"].
+    by iApply tinv_wsat'_incl.
+  Qed.
 
   (** Get inequality out of [tinv_wsat] *)
   Lemma fupdw_tinv_wsat_le {s M E E' P} :

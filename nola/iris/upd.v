@@ -165,7 +165,32 @@ Notation "|=[ W ] { E }▷=>^ n P" :=
   (at level 99, P at level 200, n at level 9,
     format "'[  ' |=[ W ] '/' { E }▷=>^ n  '/' P ']'") : bi_scope.
 
-(** ** Lemmas *)
+(** *** World satisfaction inclusion *)
+
+Class WsatIncl {PROP : bi} (W W' Wr : PROP) : Prop :=
+  wsat_incl : W ⊣⊢ W' ∗ Wr.
+Arguments WsatIncl {_} _%I _%I _%I : simpl never.
+Arguments wsat_incl {_} _%I _%I _%I {_}.
+Hint Mode WsatIncl + ! ! - : typeclass_instances.
+
+Section wsat_incl.
+  Context {PROP : bi}.
+  Implicit Types W Wr : PROP.
+
+  #[export] Instance wsat_incl_refl {W} : WsatIncl W W emp%I | 1.
+  Proof. by rewrite /WsatIncl right_id. Qed.
+  #[export] Instance wsat_incl_sep_in {W W'1 W'2 Wr Wr'} :
+    WsatIncl W W'1 Wr → WsatIncl Wr W'2 Wr' → WsatIncl W (W'1 ∗ W'2) Wr' | 3.
+  Proof. rewrite /WsatIncl=> ->->. by rewrite assoc. Qed.
+  #[export] Instance wsat_incl_in_sep_l {W1 W2 W' Wr} :
+    WsatIncl W1 W' Wr → WsatIncl (W1 ∗ W2) W' (Wr ∗ W2) | 5.
+  Proof. rewrite /WsatIncl=> ->. by rewrite assoc. Qed.
+  #[export] Instance wsat_incl_in_sep_r {W1 W2 W' Wr} :
+    WsatIncl W2 W' Wr → WsatIncl (W1 ∗ W2) W' (W1 ∗ Wr) | 7.
+  Proof. rewrite /WsatIncl=> ->. rewrite !assoc. f_equiv. by rewrite comm. Qed.
+End wsat_incl.
+
+(** *** Lemmas *)
 Section lemmas.
   Context {PROP : bi}.
   Implicit Type W P Q R : PROP.
@@ -221,6 +246,28 @@ Section lemmas.
   #[export] Instance fupdw_flip_mono' `{!BiFUpd PROP} {E E' W} :
     Proper (flip (⊢) ==> flip (⊢)) (fupdw (PROP:=PROP) E E' W).
   Proof. move=>/= ??. apply fupdw_mono. Qed.
+
+  (** Modify the world satisfaction of [bupdw] *)
+  Lemma bupdw_incl_bupd `{!BiBUpd PROP} {W W' P} :
+    (W ==∗ W' ∗ (W' ==∗ W)) -∗ (|=[W']=> P) =[W]=∗ P.
+  Proof.
+    iIntros "∝ →P W". iMod ("∝" with "W") as "[W' →W]".
+    iMod ("→P" with "W'") as "[W' $]". by iApply "→W".
+  Qed.
+  Lemma bupdw_incl `{!BiBUpd PROP} {P} `(!WsatIncl W W' Wr) :
+    (|=[W']=> P) ⊢ |=[W]=> P.
+  Proof. rewrite (wsat_incl W W'). iIntros "→P [? $]". by iApply "→P". Qed.
+
+  (** Modify the world satisfaction of [fupdw] *)
+  Lemma fupdw_incl_fupd `{!BiFUpd PROP} {W W' E E' P} :
+    (W ={E}=∗ W' ∗ (W' ={E'}=∗ W)) -∗ (|=[W']{E,E'}=> P) =[W]{E,E'}=∗ P.
+  Proof.
+    iIntros "∝ →P W". iMod ("∝" with "W") as "[W' →W]".
+    iMod ("→P" with "W'") as "[W' $]". by iApply "→W".
+  Qed.
+  Lemma fupdw_incl `{!BiFUpd PROP} {E E' P} `(!WsatIncl W W' Wr) :
+    (|=[W']{E,E'}=> P) ⊢ |=[W]{E,E'}=> P.
+  Proof. rewrite (wsat_incl W W'). iIntros "→P [? $]". by iApply "→P". Qed.
 
   (** Introduce [bupdw] *)
   Lemma bupdw_intro `{!BiBUpd PROP} {W P} : P ⊢ |=[W]=> P.
@@ -288,11 +335,11 @@ Use [iApply fupd_mask_intro] to introduce mask-changing update modalities")
   Proof.
     iIntros "WWP W". iMod ("WWP" with "W") as "[W WP]". iApply ("WP" with "W").
   Qed.
-  #[export] Instance elim_modal_bupdw `{!BiBUpd PROP} {p W P Q} :
-    ElimModal True p false (|=[W]=> P) P (|=[W]=> Q) (|=[W]=> Q).
+  #[export] Instance elim_modal_bupdw `{!BiBUpd PROP, !WsatIncl W W' Wr}
+    {p P Q} : ElimModal True p false (|=[W']=> P) P (|=[W]=> Q) (|=[W]=> Q).
   Proof.
     by rewrite /ElimModal bi.intuitionistically_if_elim bupdw_frame_r
-      bi.wand_elim_r bupdw_trans.
+      bi.wand_elim_r (bupdw_incl (W:=W)) bupdw_trans.
   Qed.
   #[export] Instance elim_modal_bupd_bupdw `{!BiBUpd PROP} {p W P Q} :
     ElimModal True p false (|==> P) P (|=[W]=> Q) (|=[W]=> Q).
@@ -307,12 +354,13 @@ Use [iApply fupd_mask_intro] to introduce mask-changing update modalities")
   Proof.
     iIntros "WWP W". iMod ("WWP" with "W") as "[W WP]". iApply ("WP" with "W").
   Qed.
-  #[export] Instance elim_modal_fupdw_fupdw `{!BiFUpd PROP} {p E E' E'' W P Q} :
-    ElimModal True p false (|=[W]{E,E'}=> P) P
+  #[export] Instance elim_modal_fupdw_fupdw
+    `{!BiFUpd PROP, !WsatIncl W W' Wr} {p E E' E'' P Q} :
+    ElimModal True p false (|=[W']{E,E'}=> P) P
       (|=[W]{E,E''}=> Q) (|=[W]{E',E''}=> Q).
   Proof.
     by rewrite /ElimModal bi.intuitionistically_if_elim fupdw_frame_r
-      bi.wand_elim_r fupdw_trans.
+      bi.wand_elim_r (fupdw_incl (W:=W)) fupdw_trans.
   Qed.
   #[export] Instance elim_modal_bupdw_fupdw
     `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {p E E' W P Q} :
@@ -414,34 +462,6 @@ Use [iMod (fupd_mask_subseteq E')] to adjust the mask of your goal to [E']")
   Proof.
     split. { apply _. } { by iIntros "%$". } { by move=> ??->. }
     { iIntros "%>$". } { by iIntros "%%[>$$]". }
-  Qed.
-
-  (** Expand the world satisfaction of [bupdw] *)
-  Lemma bupdw_expand_bupd `{!BiBUpd PROP} {W W' P} :
-    (W' ==∗ W ∗ (W ==∗ W')) -∗ (|=[W]=> P) =[W']=∗ P.
-  Proof.
-    iIntros "W'W WP W'". iMod ("W'W" with "W'") as "[W WW']".
-    iMod ("WP" with "W") as "[W $]". by iApply "WW'".
-  Qed.
-  Lemma bupdw_expand `{!BiBUpd PROP} {W W' P} :
-    (W' -∗ W ∗ (W -∗ W')) -∗ (|=[W]=> P) =[W']=∗ P.
-  Proof.
-    iIntros "W'W WP W'". iDestruct ("W'W" with "W'") as "[W WW']".
-    iMod ("WP" with "W") as "[W $]". by iApply "WW'".
-  Qed.
-
-  (** Expand the world satisfaction of [fupdw] *)
-  Lemma fupdw_expand_fupd `{!BiFUpd PROP} {W W' E E' P} :
-    (W' ={E}=∗ W ∗ (W ={E'}=∗ W')) -∗ (|=[W]{E,E'}=> P) =[W']{E,E'}=∗ P.
-  Proof.
-    iIntros "W'W WP W'". iMod ("W'W" with "W'") as "[W WW']".
-    iMod ("WP" with "W") as "[W $]". by iApply "WW'".
-  Qed.
-  Lemma fupdw_expand `{!BiFUpd PROP} {W W' E E' P} :
-    (W' -∗ W ∗ (W -∗ W')) -∗ (|=[W]{E,E'}=> P) =[W']{E,E'}=∗ P.
-  Proof.
-    iIntros "W'W WP W'". iDestruct ("W'W" with "W'") as "[W WW']".
-    iMod ("WP" with "W") as "[W $]". iApply "WW'". by iModIntro.
   Qed.
 
   (** Turn [step_fupdwN] into [step_fupdN]
