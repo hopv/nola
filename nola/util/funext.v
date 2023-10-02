@@ -4,20 +4,13 @@ From nola Require Export prelude.
 From Coq Require Export FunctionalExtensionality.
 From stdpp Require Import well_founded.
 
-(** ** Apply functional extensionality, without introducing a name *)
+(** Apply the functional extensionality axiom
+
+  Unlike [extensionality x], it doesn't introduce the argument *)
 Ltac funext :=
   apply functional_extensionality || apply functional_extensionality_dep.
 
-(** ** On [subrelation] *)
-
-(** Make [(=)] a subrelation of [==>] *)
-#[export] Instance eq_subrel_respect
-  `{subR : subrelation A R (=)} `{subR' : subrelation B (=) R'} :
-  subrelation (=) (R ==> R')%signature.
-Proof. move=> f _ <- a _ /subR<-. by apply subR'. Qed.
-
-(** Make [pointwise_relation] a subrelation of [(=)],
-  using functional extensionality *)
+(** Make [pointwise_relation] a subrelation of [(=)] *)
 #[export] Instance pointwise_subrel_eq `{subR : subrelation B R (=)} {A} :
   subrelation (pointwise_relation A R) (=).
 Proof. move=> f g Rfg. funext=> a. by apply subR. Qed.
