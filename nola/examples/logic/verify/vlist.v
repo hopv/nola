@@ -11,22 +11,22 @@ Fixpoint vlist {κ Γ} (N : namespace) (φ : Z → Prop) (ns : list Z) (l : loc)
       n_inv N (∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ vlist N φ ns l') end.
 
 (** Interpretaion of [vlist] *)
-Definition vlisti `{!nintpGS Σ} d N φ (ns : list Z) l
+Definition vlisti `{!nintpGS Σ} δ N φ (ns : list Z) l
   : iProp Σ :=
   match ns with [] => True | n :: ns =>
-    nninv d N (⌜φ n⌝ ∗ l ↦ # n) ∗
-      nninv d N (∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ vlist N φ ns l') end.
+    nninv δ N (⌜φ n⌝ ∗ l ↦ # n) ∗
+      nninv δ N (∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ vlist N φ ns l') end.
 Notation vlistis := (vlisti nderiv).
 
 Section verify.
   Context `{!nintpGS Σ}.
 
-  #[export] Instance vlisti_pers {d N φ ns l} :
-    Persistent (vlisti d N φ ns l).
+  #[export] Instance vlisti_pers {δ N φ ns l} :
+    Persistent (vlisti δ N φ ns l).
   Proof. case ns; exact _. Qed.
 
-  Lemma vlist_vlisti {κ N φ ns l d} :
-    ⟦ vlist N φ ns l ⟧{κ}(d) ⊣⊢ vlisti d N φ ns l.
+  Lemma vlist_vlisti {κ N φ ns l δ} :
+    ⟦ vlist N φ ns l ⟧{κ}(δ) ⊣⊢ vlisti δ N φ ns l.
   Proof. by case ns. Qed.
 
   Lemma vlist_all {E N φ ns l} : ↑ N ⊆ E → ↑ N ⊆ E →

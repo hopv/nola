@@ -7,19 +7,19 @@ Definition tguardN := nroot .@ "tguard".
 Definition trefN := nroot .@ "tref".
 
 (** ** [tacc]: Accessor for [tinvd] *)
-Definition tacc `{!tintpGS L Σ} {i} (d : tderiv_ty Σ) (Tx : tinvd i)
+Definition tacc `{!tintpGS L Σ} {i} (δ : tderiv_ty Σ) (Tx : tinvd i)
   : iProp Σ :=
   match Tx with
   | tinvd_guard T v => ∀ E, ⌜↑tguardN ⊆ E⌝ →
-      |=[tinv_wsat d (S i)]{E}=> ⟦ T ⟧(d) v
-  | tinvd_ref l T => |=[tinv_wsat d (S i)]{⊤,⊤∖↑trefN}=> ∃ v,
-      l ↦ v ∗ ⟦ T ⟧(d) v ∗
-      (∀ w, l ↦ w -∗ ⟦ T ⟧(d) w =[tinv_wsat d (S i)]{⊤∖↑trefN,⊤}=∗ True)
+      |=[tinv_wsat δ (S i)]{E}=> ⟦ T ⟧(δ) v
+  | tinvd_ref l T => |=[tinv_wsat δ (S i)]{⊤,⊤∖↑trefN}=> ∃ v,
+      l ↦ v ∗ ⟦ T ⟧(δ) v ∗
+      (∀ w, l ↦ w -∗ ⟦ T ⟧(δ) w =[tinv_wsat δ (S i)]{⊤∖↑trefN,⊤}=∗ True)
   end%I.
 
 (** ** [tderivsi]: [derivsi] for [tinvd] *)
 Definition tderivsi Σ `{!tintpGS L Σ} : derivsi :=
-  Derivsi (tderivs Σ) (λ d '(Darg _ (existT _ Tx)), tacc d Tx).
+  Derivsi (tderivs Σ) (λ δ '(Darg _ (existT _ Tx)), tacc δ Tx).
 
 (** Notation for [tderivsi] *)
 Notation tderivy Σ := (derivy (tderivsi Σ)).
@@ -38,37 +38,37 @@ Notation tninv_wsatd i := (tninv_wsat tderiv i).
 (** ** Type judgments *)
 
 (** Subtyping *)
-Definition tsub `{!tintpGS L Σ} d {i j} (T : type i (;ᵞ)) (U : type j (;ᵞ))
-  : Prop := ∀ v, ⟦ T ⟧(d) v ⊢ ⟦ U ⟧(d) v.
-Infix "⊑{ i , j } ( d )" := (tsub d (i:=i) (j:=j))
+Definition tsub `{!tintpGS L Σ} δ {i j} (T : type i (;ᵞ)) (U : type j (;ᵞ))
+  : Prop := ∀ v, ⟦ T ⟧(δ) v ⊢ ⟦ U ⟧(δ) v.
+Infix "⊑{ i , j } ( δ )" := (tsub δ (i:=i) (j:=j))
   (at level 99, no associativity, only parsing) : nola_scope.
-Notation "T ⊑( d ) U" := (tsub d T U)
-  (at level 99, no associativity, format "T  ⊑( d )  U") : nola_scope.
+Notation "T ⊑( δ ) U" := (tsub δ T U)
+  (at level 99, no associativity, format "T  ⊑( δ )  U") : nola_scope.
 
 (** Type equivalence *)
-Definition teqv `{!tintpGS L Σ} d {i j} (T : type i (;ᵞ)) (U : type j (;ᵞ))
-  : Prop := ∀ v, ⟦ T ⟧(d) v ⊣⊢ ⟦ U ⟧(d) v.
-Infix "≃{ i , j } ( d )" := (teqv d (i:=i) (j:=j))
+Definition teqv `{!tintpGS L Σ} δ {i j} (T : type i (;ᵞ)) (U : type j (;ᵞ))
+  : Prop := ∀ v, ⟦ T ⟧(δ) v ⊣⊢ ⟦ U ⟧(δ) v.
+Infix "≃{ i , j } ( δ )" := (teqv δ (i:=i) (j:=j))
   (at level 99, no associativity, only parsing) : nola_scope.
-Notation "T ≃( d ) U" := (teqv d T U)
-  (at level 99, no associativity, format "T  ≃( d )  U") : nola_scope.
+Notation "T ≃( δ ) U" := (teqv δ T U)
+  (at level 99, no associativity, format "T  ≃( δ )  U") : nola_scope.
 
 (** Type transmutation *)
-Definition ttrans `{!tintpGS L Σ} d (i : nat)
+Definition ttrans `{!tintpGS L Σ} δ (i : nat)
   {j k} (T : type j (;ᵞ)) (U : type k (;ᵞ)) : Prop :=
-  ∀ E v, ↑tguardN ⊆ E → ⟦ T ⟧(d) v =[tinv_wsat d i]{E}=∗ ⟦ U ⟧(d) v.
-Infix "==>{ j , k } ( i , d )" := (ttrans d i (j:=j) (k:=k))
+  ∀ E v, ↑tguardN ⊆ E → ⟦ T ⟧(δ) v =[tinv_wsat δ i]{E}=∗ ⟦ U ⟧(δ) v.
+Infix "==>{ j , k } ( i , δ )" := (ttrans δ i (j:=j) (k:=k))
   (at level 99, no associativity, only parsing) : nola_scope.
-Notation "T ==>( i , d ) U" := (ttrans d i T U)
-  (at level 99, no associativity, format "T  ==>( i , d )  U") : nola_scope.
+Notation "T ==>( i , δ ) U" := (ttrans δ i T U)
+  (at level 99, no associativity, format "T  ==>( i , δ )  U") : nola_scope.
 
-Definition tbitrans `{!tintpGS L Σ} d (i : nat)
+Definition tbitrans `{!tintpGS L Σ} δ (i : nat)
   {j k} (T : type j (;ᵞ)) (U : type k (;ᵞ)) : Prop :=
-  (T ==>(i,d) U) ∧ (U ==>(i,d) T).
-Infix "<==>{ j , k } ( i , d )" := (tbitrans d i (j:=j) (k:=k))
+  (T ==>(i,δ) U) ∧ (U ==>(i,δ) T).
+Infix "<==>{ j , k } ( i , δ )" := (tbitrans δ i (j:=j) (k:=k))
   (at level 99, no associativity, only parsing) : nola_scope.
-Notation "T <==>( i , d ) U" := (tbitrans d i T U)
-  (at level 99, no associativity, format "T  <==>( i , d )  U") : nola_scope.
+Notation "T <==>( i , δ ) U" := (tbitrans δ i T U)
+  (at level 99, no associativity, format "T  <==>( i , δ )  U") : nola_scope.
 
 (** Typed object *)
 Definition tobj_def `{!tintpGS L Σ} {i} (v : val) (T : type i (;ᵞ)) : iProp Σ :=

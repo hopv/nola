@@ -7,10 +7,10 @@ Section eref.
   Context `{!tintpGS L Σ}.
 
   (** Allocate [ref[ ]] *)
-  Lemma ninv_tref `{!tderivy Σ ih d, ! i <ⁿ L} {l T} :
-    ninv trefN (tinvd_ref l T) ⊢ tref d (i:=i) l T.
+  Lemma ninv_tref `{!tderivy Σ ih δ, ! i <ⁿ L} {l T} :
+    ninv trefN (tinvd_ref l T) ⊢ tref δ (i:=i) l T.
   Proof.
-    iIntros "#inv !>". iApply (derivy_intro (d:=d))=>/=. iIntros (???).
+    iIntros "#inv !>". iApply (derivy_intro (δ:=δ))=>/=. iIntros (???).
     iMod (ninv_acc with "inv") as "/=[(%& ↦ & T) cl]"; [done|].
     iModIntro. iExists _. iFrame "↦ T". iIntros (?) "↦ T".
     iApply fupdw_incl; [apply wsat_incl_tinv_tninv|]. iApply "cl". iExists _.

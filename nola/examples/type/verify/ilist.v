@@ -11,14 +11,14 @@ Section verify.
   Context `{!tintpGS L Σ}.
 
   (** Type conversion on [ilist] *)
-  Lemma teqv_ilist_expand `{! i ≤ⁿ j} {d} {T : _ i (;ᵞ)} :
-    ilist T ≃{j,i}(d) ref: T ∧ᵗ ref[1] ilist (j:=i) T.
+  Lemma teqv_ilist_expand `{! i ≤ⁿ j} {δ} {T : _ i (;ᵞ)} :
+    ilist T ≃{j,i}(δ) ref: T ∧ᵗ ref[1] ilist (j:=i) T.
   Proof.
     eapply teqv_trans; [apply teqv_rec_expand|]=>/=.
     by erewrite (proof_irrel (nle_trans _ _) _).
   Qed.
-  Lemma teqv_ilist_lev `{! i ≤ⁿ j, ! i ≤ⁿ k} {d} {T : _ i (;ᵞ)} :
-    ilist T ≃{j,k}(d) ilist T.
+  Lemma teqv_ilist_lev `{! i ≤ⁿ j, ! i ≤ⁿ k} {δ} {T : _ i (;ᵞ)} :
+    ilist T ≃{j,k}(δ) ilist T.
   Proof. exact teqv_rec_lev. Qed.
 
   (** Verify [fiter] over [ilist] *)

@@ -18,44 +18,44 @@ Proof. done. Qed.
 (** Interpreted [ilist] *)
 Definition ilisttl {κ} N (Φ : _ → _ (;ᵞ)) l : nProp κ (;ᵞ) :=
   ∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ ilist (Γᵘ:=[]) N Φ l'.
-Definition ilisti `{!nintpGS Σ} d N Φ l : iProp Σ :=
-  nninv d N (Φ l) ∗ nninv d N (ilisttl N Φ l).
+Definition ilisti `{!nintpGS Σ} δ N Φ l : iProp Σ :=
+  nninv δ N (Φ l) ∗ nninv δ N (ilisttl N Φ l).
 Notation ilistis := (ilisti nderiv).
 
-(** A has_multiplier of [d] is stored at [l] *)
-Definition has_mult {κ Γ} (d : Z) l : nProp κ Γ := ∃ k, l ↦ #(k * d).
+(** A has_multiplier of [δ] is stored at [l] *)
+Definition has_mult {κ Γ} (δ : Z) l : nProp κ Γ := ∃ k, l ↦ #(k * δ).
 
 (** Increment by calling [FAA] *)
-Definition incr_faa (d : Z) : val := λ: "l", FAA "l" #d;; #().
+Definition incr_faa (δ : Z) : val := λ: "l", FAA "l" #δ;; #().
 
 (** Posssibly increment by calling [CAS] *)
-Definition may_incr_cas' (d : Z) : val :=
+Definition may_incr_cas' (δ : Z) : val :=
   rec: "self" "c" "l" :=
     if: "c" = #0 then #() else
       let: "n" := !"l" in
-      if: CAS "l" "n" ("n" + #d) then #() else "self" ("c" - #1) "l".
-Definition may_incr_cas (d : Z) : val :=
-  λ: "l", may_incr_cas' d Ndnat "l".
+      if: CAS "l" "n" ("n" + #δ) then #() else "self" ("c" - #1) "l".
+Definition may_incr_cas (δ : Z) : val :=
+  λ: "l", may_incr_cas' δ Ndnat "l".
 
 Section verify.
   Context `{!nintpGS Σ}.
 
   (** [ilist] is interpreted into [ilisti] *)
-  Fact ilist_ilisti {κ N Φ l d} : ⟦ ilist N Φ l ⟧{κ}(d) ⊣⊢ ilisti d N Φ l.
+  Fact ilist_ilisti {κ N Φ l δ} : ⟦ ilist N Φ l ⟧{κ}(δ) ⊣⊢ ilisti δ N Φ l.
   Proof. by rewrite/= rew_eq_hwf /=. Qed.
 
   (** Convert the predicate of [ilisti] *)
-  Lemma ilisti_convert `{!nderivy Σ ih d} {N Φ Ψ l} :
-    □ ⸨ ∀ l, (Φ l ={∅}=∗ Ψ l) ∗ (Ψ l ={∅}=∗ Φ l) ⸩(d) -∗
-    ilisti d N Φ l -∗ ilisti d N Ψ l.
+  Lemma ilisti_convert `{!nderivy Σ ih δ} {N Φ Ψ l} :
+    □ ⸨ ∀ l, (Φ l ={∅}=∗ Ψ l) ∗ (Ψ l ={∅}=∗ Φ l) ⸩(δ) -∗
+    ilisti δ N Φ l -∗ ilisti δ N Ψ l.
   Proof.
-    move: d nderivy0 Φ Ψ l. apply (derivy_acc (λ _, ∀ Φ Ψ l, _ -∗ _)).
-    move=> d ? Φ Ψ l. iIntros "#? #[ihd itl]".
+    move: δ nderivy0 Φ Ψ l. apply (derivy_acc (λ _, ∀ Φ Ψ l, _ -∗ _)).
+    move=> δ ? Φ Ψ l. iIntros "#? #[ihd itl]".
     iSplit; iApply nninv_convert; [|iApply "ihd"| |iApply "itl"]; iModIntro.
-    { iApply derivy_map; [|done]=>/=. iIntros (d' dyd' _) "Φ↔Ψ Φ".
+    { iApply derivy_map; [|done]=>/=. iIntros (δ' dyd' _) "Φ↔Ψ Φ".
       iDestruct ("Φ↔Ψ" $! _) as "[ΦΨ ΨΦ]". iMod ("ΦΨ" with "Φ") as "$".
       iIntros "!> Ψ". by iApply "ΨΦ". }
-    iApply derivy_byintp=>/=. iIntros (d' dyd' [IH _]) "_ #→ _ (%l' & ↦ & i)".
+    iApply derivy_byintp=>/=. iIntros (δ' dyd' [IH _]) "_ #→ _ (%l' & ↦ & i)".
     iModIntro. rewrite rew_eq_hwf /=. iDestruct "i" as "#i".
     iDestruct ("→" with "[//]") as "?". iSplitL.
     { iExists _. iFrame "↦". rewrite rew_eq_hwf /=. by iApply IH. }
@@ -66,9 +66,9 @@ Section verify.
   Qed.
 
   (** [ilisti] by cons *)
-  Lemma ilisti_cons `{!nderivy Σ ih d} {N Φ l l'} :
-    nninv d N (Φ l) -∗ ilisti d N Φ l' -∗ (l +ₗ 1) ↦ #l' =[nninv_wsat d]=∗
-      ilisti d N Φ l.
+  Lemma ilisti_cons `{!nderivy Σ ih δ} {N Φ l l'} :
+    nninv δ N (Φ l) -∗ ilisti δ N Φ l' -∗ (l +ₗ 1) ↦ #l' =[nninv_wsat δ]=∗
+      ilisti δ N Φ l.
   Proof.
     iIntros "$ #i ↦".
     iMod (nninv_alloc (ilisttl _ _ _) with "[↦]") as "$"; [|done].
@@ -76,9 +76,9 @@ Section verify.
   Qed.
 
   (** [ilisti] from a one-node loop *)
-  Lemma ilisti_loop_1 `{!nderivy Σ ih d} {N Φ l} :
-    nninv d N (Φ l) -∗ (l +ₗ 1) ↦ #l =[nninv_wsat d]=∗
-      ilisti d N Φ l.
+  Lemma ilisti_loop_1 `{!nderivy Σ ih δ} {N Φ l} :
+    nninv δ N (Φ l) -∗ (l +ₗ 1) ↦ #l =[nninv_wsat δ]=∗
+      ilisti δ N Φ l.
   Proof.
     iIntros "#Φ ↦". iFrame "Φ".
     iMod (nninv_alloc_rec (ilisttl _ _ _) with "[↦]") as "$"; [|done].
@@ -86,10 +86,10 @@ Section verify.
   Qed.
 
   (** [ilisti] from a two-node loop *)
-  Lemma ilisti_loop_2 `{!nderivy Σ ih d} {N Φ l l'} :
-    nninv d N (Φ l) -∗ nninv d N (Φ l') -∗
-    (l +ₗ 1) ↦ #l' -∗ (l' +ₗ 1) ↦ #l =[nninv_wsat d]=∗
-      ilisti d N Φ l ∗ ilisti d N Φ l'.
+  Lemma ilisti_loop_2 `{!nderivy Σ ih δ} {N Φ l l'} :
+    nninv δ N (Φ l) -∗ nninv δ N (Φ l') -∗
+    (l +ₗ 1) ↦ #l' -∗ (l' +ₗ 1) ↦ #l =[nninv_wsat δ]=∗
+      ilisti δ N Φ l ∗ ilisti δ N Φ l'.
   Proof.
     iIntros "#Φ #Φ' ↦ ↦'". iFrame "Φ Φ'".
     iMod (nninv_alloc_rec (ilisttl _ _ _ ∗ ilisttl _ _ _) with "[↦ ↦']")
@@ -161,22 +161,22 @@ Section verify.
   Qed.
 
   (** [incr_faa] on [nninvd] over [has_mult] *)
-  Lemma twp_incr_faa {N E d l} : ↑N ⊆ E →
-    [[{ nninvd N (has_mult d l) }]][nninv_wsatd]
-      incr_faa d #l @ E
+  Lemma twp_incr_faa {N E δ l} : ↑N ⊆ E →
+    [[{ nninvd N (has_mult δ l) }]][nninv_wsatd]
+      incr_faa δ #l @ E
     [[{ RET #(); True }]].
   Proof.
     iIntros (??) "#? Φ". wp_lam. wp_bind (FAA _ _).
     iMod (nninv_acc with "[//]") as "/=[[%k ↦] cl]"; [done|]. wp_faa.
     iModIntro. iMod ("cl" with "[↦]") as "_".
-    { iExists _. by have -> : (k * d + d = (k + 1) * d)%Z by lia. }
+    { iExists _. by have -> : (k * δ + δ = (k + 1) * δ)%Z by lia. }
     iModIntro. wp_pures. by iApply "Φ".
   Qed.
 
   (** [may_incr_cas] on [nninvd] over [has_mult] *)
-  Lemma twp_may_incr_cas' {N E d l} {c : nat} : ↑N ⊆ E →
-    [[{ nninvd N (has_mult d l) }]][nninv_wsatd]
-      may_incr_cas' d #c #l @ E
+  Lemma twp_may_incr_cas' {N E δ l} {c : nat} : ↑N ⊆ E →
+    [[{ nninvd N (has_mult δ l) }]][nninv_wsatd]
+      may_incr_cas' δ #c #l @ E
     [[{ RET #(); True }]].
   Proof.
     iIntros (??) "#? Φ".
@@ -185,19 +185,19 @@ Section verify.
     wp_load. iModIntro. iMod ("cl" with "[↦]") as "_"; [by iExists _|].
     iModIntro. wp_pures. wp_bind (CmpXchg _ _ _).
     iMod (nninv_acc with "[//]") as "/=[[%k' ↦] cl]"; [done|].
-    case (decide (k' * d = k * d)%Z)=> [->|?].
+    case (decide (k' * δ = k * δ)%Z)=> [->|?].
     - wp_apply (twp_cmpxchg_suc with "↦")=>//; [solve_vals_compare_safe|].
       iIntros "↦". iMod ("cl" with "[↦]") as "_".
-      { iExists _. by have -> : (k * d + d = (k + 1) * d)%Z by lia. }
+      { iExists _. by have -> : (k * δ + δ = (k + 1) * δ)%Z by lia. }
       iModIntro. wp_pures. by iApply "Φ".
     - wp_apply (twp_cmpxchg_fail with "↦")=>//;
         [by case|solve_vals_compare_safe|].
       iIntros "↦". iMod ("cl" with "[↦]") as "_"; [by iExists _|]. iModIntro.
       wp_pures. have -> : (S c - 1)%Z = c by lia. by iApply "IH".
   Qed.
-  Lemma twp_may_incr_cas {N E d l} : ↑N ⊆ E →
-    [[{ nninvd N (has_mult d l) }]][nninv_wsatd]
-      may_incr_cas d #l @ E
+  Lemma twp_may_incr_cas {N E δ l} : ↑N ⊆ E →
+    [[{ nninvd N (has_mult δ l) }]][nninv_wsatd]
+      may_incr_cas δ #l @ E
     [[{ RET #(); True }]].
   Proof.
     iIntros (??) "#? Φ". wp_lam. wp_apply twp_ndnat; [done|].

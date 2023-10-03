@@ -31,10 +31,10 @@ Add Printing Constructor dwrap.
 
 (** Notation for [dwrap] *)
 Module DerivNotation.
-  Notation "⸨ iP ⸩ ( d )" := (dunwrap d iP)
-    (format "'[' ⸨  iP  ⸩ '/  ' ( d ) ']'") : nola_scope.
-  Notation "⸨ P ⸩ ( d , i )" := (dunwrap d (Darg i P))
-    (format "'[' ⸨  P  ⸩ '/  ' ( d ,  i ) ']'") : nola_scope.
+  Notation "⸨ iP ⸩ ( δ )" := (dunwrap δ iP)
+    (format "'[' ⸨  iP  ⸩ '/  ' ( δ ) ']'") : nola_scope.
+  Notation "⸨ P ⸩ ( δ , i )" := (dunwrap δ (Darg i P))
+    (format "'[' ⸨  P  ⸩ '/  ' ( δ ,  i ) ']'") : nola_scope.
 End DerivNotation.
 Import DerivNotation.
 
@@ -83,124 +83,124 @@ Arguments derivsi_intp {D} : rename.
 Implicit Type DI : derivsi.
 
 (** Notation for [derivs_intp] *)
-Notation derivsi_intp' d := (Dwrap (derivsi_intp d)).
+Notation derivsi_intp' δ := (Dwrap (derivsi_intp δ)).
 Module IntpNotation.
-  Notation "⟦ iP ⟧ ( d )" := (derivsi_intp d iP)
-    (format "'[' ⟦  iP  ⟧ '/  ' ( d ) ']'") : nola_scope.
-  Notation "⟦ P ⟧ ( d , i )" := (derivsi_intp d (Darg i P))
-    (format "'[' ⟦  P  ⟧ '/  ' ( d ,  i ) ']'") : nola_scope.
+  Notation "⟦ iP ⟧ ( δ )" := (derivsi_intp δ iP)
+    (format "'[' ⟦  iP  ⟧ '/  ' ( δ ) ']'") : nola_scope.
+  Notation "⟦ P ⟧ ( δ , i )" := (derivsi_intp δ (Darg i P))
+    (format "'[' ⟦  P  ⟧ '/  ' ( δ ,  i ) ']'") : nola_scope.
 End IntpNotation.
 Import IntpNotation.
 
 (** Magic wand between derivabilitys *)
-Definition wandˢ {D} (d d' : deriv_ty D) : D.(derivs_bi) :=
-  ∀ iP, ⸨ iP ⸩(d) -∗ ⸨ iP ⸩(d').
+Definition wandˢ {D} (δ δ' : deriv_ty D) : D.(derivs_bi) :=
+  ∀ iP, ⸨ iP ⸩(δ) -∗ ⸨ iP ⸩(δ').
 Infix "-∗ˢ" := wandˢ (at level 99, right associativity) : nola_scope.
 #[export] Instance wandˢ_ne {D} : NonExpansive2 (wandˢ (D:=D)).
 Proof.
-  unfold wandˢ=> ??? seq ?? d'eq. do 3 f_equiv; [apply seq|apply d'eq].
+  unfold wandˢ=> ??? seq ?? δ'eq. do 3 f_equiv; [apply seq|apply δ'eq].
 Qed.
 
 (** Propositions for soundness of a derivability *)
-Definition dsound' {DI} (d d' : deriv_ty DI) i : DI.(derivs_bi) :=
-  ∀ P, ⸨ P ⸩(d, i) -∗ ⟦ P ⟧(d', i).
-Definition dsound {DI} (d : deriv_ty DI) i : DI.(derivs_bi) :=
-  ∀ P, ⸨ P ⸩(d, i) -∗ ⟦ P ⟧(d, i).
-Definition low_dsound {DI} (d : deriv_ty DI) i : DI.(derivs_bi) :=
-  ∀ j, ⌜j ≺ i⌝ → dsound d j.
+Definition dsound' {DI} (δ δ' : deriv_ty DI) i : DI.(derivs_bi) :=
+  ∀ P, ⸨ P ⸩(δ, i) -∗ ⟦ P ⟧(δ', i).
+Definition dsound {DI} (δ : deriv_ty DI) i : DI.(derivs_bi) :=
+  ∀ P, ⸨ P ⸩(δ, i) -∗ ⟦ P ⟧(δ, i).
+Definition low_dsound {DI} (δ : deriv_ty DI) i : DI.(derivs_bi) :=
+  ∀ j, ⌜j ≺ i⌝ → dsound δ j.
 
 (** ** [derivy] : Characterization of the derivability *)
 
-Inductive derivy DI (ih : deriv_ty DI → Prop) (d : deriv_ty DI) : Prop := {
+Inductive derivy DI (ih : deriv_ty DI → Prop) (δ : deriv_ty DI) : Prop := {
   (** For [derivy_intp] *)
   derivy_byintp' :
     (* Parameterization by [derivy'] is for strict positivity *)
-    ∃ derivy' : _ → Prop, (∀ d', derivy' d' → derivy DI ih d') ∧
+    ∃ derivy' : _ → Prop, (∀ δ', derivy' δ' → derivy DI ih δ') ∧
     ∀ iP, let i := iP.(darg_idx) in
-    (∀ d', ⌜derivy' d'⌝ → ⌜ih d'⌝ → □ dsound' d d' i -∗
-      □ (d -∗ˢ d') -∗ □ low_dsound d' i -∗ ⟦ iP ⟧(d'))
-    -∗ ⸨ iP ⸩(d)
+    (∀ δ', ⌜derivy' δ'⌝ → ⌜ih δ'⌝ → □ dsound' δ δ' i -∗
+      □ (δ -∗ˢ δ') -∗ □ low_dsound δ' i -∗ ⟦ iP ⟧(δ'))
+    -∗ ⸨ iP ⸩(δ)
 }.
 Existing Class derivy.
 
-(** Get the derivability [⸨ P ⸩(d, i)] by the interpretaion *)
-Lemma derivy_byintp `{!derivy DI ih d} {i P} :
-  (∀ d',
-    (* Take any derivability [d'] *)
-    ⌜derivy DI ih d'⌝ →
+(** Get the derivability [⸨ P ⸩(δ, i)] by the interpretaion *)
+Lemma derivy_byintp `{!derivy DI ih δ} {i P} :
+  (∀ δ',
+    (* Take any derivability [δ'] *)
+    ⌜derivy DI ih δ'⌝ →
     (* Get access to the inductive hypothesis *)
-    ⌜ih d'⌝ →
+    ⌜ih δ'⌝ →
     (* Turn the derivability at level [i] into the interpretation *)
-    □ dsound' d d' i -∗
+    □ dsound' δ δ' i -∗
     (* Turn the coinductive derivability into
       the given derivability *)
-    □ (d -∗ˢ d') -∗
+    □ (δ -∗ˢ δ') -∗
     (* Turn the given derivability at a level lower than [i]
       into the interpretation *)
-    □ low_dsound d' i -∗
-    ⟦ P ⟧(d', i))
-  -∗ ⸨ P ⸩(d, i).
+    □ low_dsound δ' i -∗
+    ⟦ P ⟧(δ', i))
+  -∗ ⸨ P ⸩(δ, i).
 Proof.
-  have X := (@derivy_byintp' _ ih d). move: X=> [dy[dyto byintp]]. iIntros "→".
-  iApply byintp. iIntros (d' dyd'). apply dyto in dyd'. by iApply "→".
+  have X := (@derivy_byintp' _ ih δ). move: X=> [dy[dyto byintp]]. iIntros "→".
+  iApply byintp. iIntros (δ' dyd'). apply dyto in dyd'. by iApply "→".
 Qed.
 
 (** [derivy] is monotone over the inductive hypothesis *)
-Lemma derivy_mono `{!derivy DI ih d} (ih' : _ → Prop) :
-  (∀ d', ih d' → ih' d') → derivy DI ih' d.
+Lemma derivy_mono `{!derivy DI ih δ} (ih' : _ → Prop) :
+  (∀ δ', ih δ' → ih' δ') → derivy DI ih' δ.
 Proof.
-  move=> ihto. move: d derivy0. fix FIX 2=> d [[dy[dyto byintp]]]. split.
+  move=> ihto. move: δ derivy0. fix FIX 2=> δ [[dy[dyto byintp]]]. split.
   exists (derivy _ ih'). split; [done|]=>/= ?. iIntros "big". iApply byintp.
   iIntros (???). iApply "big"; iPureIntro; by [apply FIX, dyto|apply ihto].
 Qed.
 
 (** [derivy] can accumulate the inductive hypothesis *)
 Lemma derivy_acc {DI ih} res :
-  (∀ d, derivy DI (res ∧₁ ih) d → res d) → ∀ d, derivy DI ih d → res d.
+  (∀ δ, derivy DI (res ∧₁ ih) δ → res δ) → ∀ δ, derivy DI ih δ → res δ.
 Proof.
-  move=> to d dyd. apply to. move: d dyd. fix FIX 2=> d [[dy[dyto byintp]]].
+  move=> to δ dyd. apply to. move: δ dyd. fix FIX 2=> δ [[dy[dyto byintp]]].
   split. exists (derivy _ (res ∧₁ ih)). split; [done|]=>/= ?. iIntros "big".
   iApply byintp. iIntros (? dyd' ?). move: dyd'=>/dyto/FIX ?.
   iApply "big"; iPureIntro; [done|]. split; by [apply to|].
 Qed.
 
 (** Introduce a derivability *)
-Lemma derivy_intro `{!derivy DI ih d} {i P} :
-  (∀ d', ⌜derivy DI ih d'⌝ → ⌜ih d'⌝ → ⟦ P ⟧(d', i)) -∗ ⸨ P ⸩(d, i).
+Lemma derivy_intro `{!derivy DI ih δ} {i P} :
+  (∀ δ', ⌜derivy DI ih δ'⌝ → ⌜ih δ'⌝ → ⟦ P ⟧(δ', i)) -∗ ⸨ P ⸩(δ, i).
 Proof.
   iIntros "∀P". iApply derivy_byintp. iIntros (???) "_ _ _". by iApply "∀P".
 Qed.
 
 (** Update derivabilitys *)
-Lemma derivy_map `{!derivy DI ih d} {i P Q} :
-  (∀ d', ⌜derivy DI ih d'⌝ → ⌜ih d'⌝ → ⟦ P ⟧(d', i) -∗ ⟦ Q ⟧(d', i)) -∗
-  ⸨ P ⸩(d, i) -∗ ⸨ Q ⸩(d, i).
+Lemma derivy_map `{!derivy DI ih δ} {i P Q} :
+  (∀ δ', ⌜derivy DI ih δ'⌝ → ⌜ih δ'⌝ → ⟦ P ⟧(δ', i) -∗ ⟦ Q ⟧(δ', i)) -∗
+  ⸨ P ⸩(δ, i) -∗ ⸨ Q ⸩(δ, i).
 Proof.
   iIntros "∀PQ P". iApply derivy_byintp. iIntros (???) "#→ _ _".
   iApply "∀PQ"; by [| |iApply "→"].
 Qed.
-Lemma derivy_map2 `{!derivy DI ih d} {i P Q R} :
-  (∀ d', ⌜derivy DI ih d'⌝ → ⌜ih d'⌝ → ⟦ P ⟧(d', i) -∗ ⟦ Q ⟧(d', i) -∗
-    ⟦ R ⟧(d', i)) -∗
-  ⸨ P ⸩(d, i) -∗ ⸨ Q ⸩(d, i) -∗ ⸨ R ⸩(d, i).
+Lemma derivy_map2 `{!derivy DI ih δ} {i P Q R} :
+  (∀ δ', ⌜derivy DI ih δ'⌝ → ⌜ih δ'⌝ → ⟦ P ⟧(δ', i) -∗ ⟦ Q ⟧(δ', i) -∗
+    ⟦ R ⟧(δ', i)) -∗
+  ⸨ P ⸩(δ, i) -∗ ⸨ Q ⸩(δ, i) -∗ ⸨ R ⸩(δ, i).
 Proof.
   iIntros "∀PQ P Q". iApply derivy_byintp. iIntros (???) "#→ _ _".
   iApply ("∀PQ" with "[//] [//] [P]"); by iApply "→".
 Qed.
-Lemma derivy_map3 `{!derivy DI ih d} {i P Q R S} :
-  (∀ d', ⌜derivy DI ih d'⌝ → ⌜ih d'⌝ → ⟦ P ⟧(d', i) -∗ ⟦ Q ⟧(d', i) -∗
-    ⟦ R ⟧(d', i) -∗ ⟦ S ⟧(d', i)) -∗
-  ⸨ P ⸩(d, i) -∗ ⸨ Q ⸩(d, i) -∗ ⸨ R ⸩(d, i) -∗ ⸨ S ⸩(d, i).
+Lemma derivy_map3 `{!derivy DI ih δ} {i P Q R S} :
+  (∀ δ', ⌜derivy DI ih δ'⌝ → ⌜ih δ'⌝ → ⟦ P ⟧(δ', i) -∗ ⟦ Q ⟧(δ', i) -∗
+    ⟦ R ⟧(δ', i) -∗ ⟦ S ⟧(δ', i)) -∗
+  ⸨ P ⸩(δ, i) -∗ ⸨ Q ⸩(δ, i) -∗ ⸨ R ⸩(δ, i) -∗ ⸨ S ⸩(δ, i).
 Proof.
   iIntros "∀PQ P Q R". iApply derivy_byintp. iIntros (???) "#→ _ _".
   iApply ("∀PQ" with "[//] [//] [P] [Q]"); by iApply "→".
 Qed.
-Lemma derivy_map_lev `{!derivy DI ih d} {i j P Q} :
-  i ≺ j → (∀ d', ⌜derivy DI ih d'⌝ → ⌜ih d'⌝ → ⟦ P ⟧(d', i) -∗ ⟦ Q ⟧(d', j)) -∗
-  ⸨ P ⸩(d, i) -∗ ⸨ Q ⸩(d, j).
+Lemma derivy_map_lev `{!derivy DI ih δ} {i j P Q} :
+  i ≺ j → (∀ δ', ⌜derivy DI ih δ'⌝ → ⌜ih δ'⌝ → ⟦ P ⟧(δ', i) -∗ ⟦ Q ⟧(δ', j)) -∗
+  ⸨ P ⸩(δ, i) -∗ ⸨ Q ⸩(δ, j).
 Proof.
-  iIntros (ij) "∀PQ P". iApply derivy_byintp. iIntros (???) "_ #→d' #d'→".
-  iApply "∀PQ"; [done..|]. iApply "d'→"; [done|]. by iApply "→d'".
+  iIntros (ij) "∀PQ P". iApply derivy_byintp. iIntros (???) "_ #→δ' #δ'→".
+  iApply "∀PQ"; [done..|]. iApply "δ'→"; [done|]. by iApply "→δ'".
 Qed.
 
 (** ** [deriv]: Derivability *)
@@ -208,9 +208,9 @@ Qed.
 (** [deriv_gen]: What becomes [deriv] by taking [bi_least_fixpoint] *)
 Definition deriv_gen {DI} (self : deriv_ty' DI)
   : deriv_ty' DI := λ iP, let i := iP.(darg_idx) in
-  (∀ d', ⌜derivy DI True₁ d'⌝ → □ dsound' (Dwrap self) d' i -∗
-    □ (Dwrap self -∗ˢ d') -∗ □ low_dsound d' i -∗
-    ⟦ iP ⟧(d'))%I.
+  (∀ δ', ⌜derivy DI True₁ δ'⌝ → □ dsound' (Dwrap self) δ' i -∗
+    □ (Dwrap self -∗ˢ δ') -∗ □ low_dsound δ' i -∗
+    ⟦ iP ⟧(δ'))%I.
 #[export] Instance deriv_gen_mono {DI} : BiMonoPred (deriv_gen (DI:=DI)).
 Proof.
   split; [|solve_proper]=> Φ Ψ ??. iIntros "#ΦΨ" (?) "big".

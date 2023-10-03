@@ -19,30 +19,30 @@ Proof. done. Qed.
 (** Interpreted [ilist] *)
 Definition na_ilisttl {κ} p N (Φ : _ → _ (;ᵞ)) l : nProp κ (;ᵞ) :=
   ∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ na_ilist (Γᵘ:=[]) p N Φ l'.
-Definition na_ilisti `{!nintpGS Σ} d p N Φ l : iProp Σ :=
-  na_nninv d p N (Φ l) ∗ na_nninv d p N (na_ilisttl p N Φ l).
+Definition na_ilisti `{!nintpGS Σ} δ p N Φ l : iProp Σ :=
+  na_nninv δ p N (Φ l) ∗ na_nninv δ p N (na_ilisttl p N Φ l).
 Notation na_ilistis := (na_ilisti nderiv).
 
 Section verify.
   Context `{!nintpGS Σ}.
 
   (** [na_ilist] is interpreted into [na_ilisti] *)
-  Fact na_ilist_ilisti {κ p N Φ l d} :
-    ⟦ na_ilist p N Φ l ⟧{κ}(d) ⊣⊢ na_ilisti d p N Φ l.
+  Fact na_ilist_ilisti {κ p N Φ l δ} :
+    ⟦ na_ilist p N Φ l ⟧{κ}(δ) ⊣⊢ na_ilisti δ p N Φ l.
   Proof. by rewrite/= rew_eq_hwf /=. Qed.
 
   (** Convert the predicate of [na_ilisti] *)
-  Lemma na_ilisti_convert `{!nderivy Σ ih d} {p N Φ Ψ l} :
-    □ ⸨ ∀ l, (Φ l ={∅}=∗ Ψ l) ∗ (Ψ l ={∅}=∗ Φ l) ⸩(d) -∗
-    na_ilisti d p N Φ l -∗ na_ilisti d p N Ψ l.
+  Lemma na_ilisti_convert `{!nderivy Σ ih δ} {p N Φ Ψ l} :
+    □ ⸨ ∀ l, (Φ l ={∅}=∗ Ψ l) ∗ (Ψ l ={∅}=∗ Φ l) ⸩(δ) -∗
+    na_ilisti δ p N Φ l -∗ na_ilisti δ p N Ψ l.
   Proof.
-    move: d nderivy0 Φ Ψ l. apply (derivy_acc (λ _, ∀ Φ Ψ l, _ -∗ _)).
-    move=> d ? Φ Ψ l. iIntros "#sΦ↔Ψ #[ihd itl]".
+    move: δ nderivy0 Φ Ψ l. apply (derivy_acc (λ _, ∀ Φ Ψ l, _ -∗ _)).
+    move=> δ ? Φ Ψ l. iIntros "#sΦ↔Ψ #[ihd itl]".
     iSplit; iApply na_nninv_convert; [|iApply "ihd"| |iApply "itl"]; iModIntro.
-    { iApply derivy_map; [|done]=>/=. iIntros (d' sys' _) "Φ↔Ψ Φ".
+    { iApply derivy_map; [|done]=>/=. iIntros (δ' sys' _) "Φ↔Ψ Φ".
       iDestruct ("Φ↔Ψ" $! _) as "[ΦΨ ΨΦ]". iMod ("ΦΨ" with "Φ") as "$".
       iIntros "!> Ψ". by iApply "ΨΦ". }
-    iApply derivy_byintp=>/=. iIntros (d' sys' [IH _]) "_ #→ _ (%l' & ↦ & i)".
+    iApply derivy_byintp=>/=. iIntros (δ' sys' [IH _]) "_ #→ _ (%l' & ↦ & i)".
     iModIntro. rewrite rew_eq_hwf /=. iDestruct "i" as "#i".
     iDestruct ("→" with "[//]") as "?". iSplitL.
     { iExists _. iFrame "↦". rewrite rew_eq_hwf /=. by iApply IH. }
@@ -53,9 +53,9 @@ Section verify.
   Qed.
 
   (** [na_ilisti] by cons *)
-  Lemma na_ilisti_cons `{!nderivy Σ ih d} {p N Φ l l'} :
-    na_nninv d p N (Φ l) -∗ na_ilisti d p N Φ l' -∗ (l +ₗ 1) ↦ #l'
-      =[nninv_wsat d]=∗ na_ilisti d p N Φ l.
+  Lemma na_ilisti_cons `{!nderivy Σ ih δ} {p N Φ l l'} :
+    na_nninv δ p N (Φ l) -∗ na_ilisti δ p N Φ l' -∗ (l +ₗ 1) ↦ #l'
+      =[nninv_wsat δ]=∗ na_ilisti δ p N Φ l.
   Proof.
     iIntros "$ #i ↦".
     iMod (na_nninv_alloc (na_ilisttl _ _ _ _) with "[↦]") as "$"; [|done].
@@ -63,9 +63,9 @@ Section verify.
   Qed.
 
   (** [na_ilisti] from a one-node loop *)
-  Lemma na_ilisti_loop_1 `{!nderivy Σ ih d} {p N Φ l} :
-    na_nninv d p N (Φ l) -∗ (l +ₗ 1) ↦ #l =[nninv_wsat d]=∗
-      na_ilisti d p N Φ l.
+  Lemma na_ilisti_loop_1 `{!nderivy Σ ih δ} {p N Φ l} :
+    na_nninv δ p N (Φ l) -∗ (l +ₗ 1) ↦ #l =[nninv_wsat δ]=∗
+      na_ilisti δ p N Φ l.
   Proof.
     iIntros "#Φ ↦". iFrame "Φ".
     iMod (na_nninv_alloc_rec (na_ilisttl _ _ _ _) with "[↦]") as "$"; [|done].
@@ -73,10 +73,10 @@ Section verify.
   Qed.
 
   (** [na_ilisti] from a two-node loop *)
-  Lemma na_ilisti_loop_2 `{!nderivy Σ ih d} {p N Φ l l'} :
-    na_nninv d p N (Φ l) -∗ na_nninv d p N (Φ l') -∗
-    (l +ₗ 1) ↦ #l' -∗ (l' +ₗ 1) ↦ #l =[nninv_wsat d]=∗
-      na_ilisti d p N Φ l ∗ na_ilisti d p N Φ l'.
+  Lemma na_ilisti_loop_2 `{!nderivy Σ ih δ} {p N Φ l l'} :
+    na_nninv δ p N (Φ l) -∗ na_nninv δ p N (Φ l') -∗
+    (l +ₗ 1) ↦ #l' -∗ (l' +ₗ 1) ↦ #l =[nninv_wsat δ]=∗
+      na_ilisti δ p N Φ l ∗ na_ilisti δ p N Φ l'.
   Proof.
     iIntros "#Φ #Φ' ↦ ↦'". iFrame "Φ Φ'".
     iMod (na_nninv_alloc_rec (na_ilisttl _ _ _ _ ∗ na_ilisttl _ _ _ _)
