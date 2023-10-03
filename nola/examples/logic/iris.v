@@ -48,7 +48,7 @@ Notation ninv_wsat' intp := (ninv_wsat (nInvd_intp intp)).
 (** ** Derivability structure *)
 
 (** [derivs] for [nPropL] *)
-Definition nderivs Σ : derivs := Intps unit (λ _, nPropL (;ᵞ)) (iProp Σ).
+Definition nderivs Σ : derivs := Derivs unit (λ _, nPropL (;ᵞ)) (iProp Σ).
 
 (** Notation for [nderivs] *)
 Notation nderiv_ty Σ := (deriv_ty (nderivs Σ)).

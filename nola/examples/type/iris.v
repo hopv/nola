@@ -186,7 +186,7 @@ Arguments TintpGS {_ _} _ _.
 (** ** Derivability structure *)
 
 (** [derivs] for [type] *)
-Definition tderivs Σ : derivs := Intps unit (λ _, sigT tinvd) (iProp Σ).
+Definition tderivs Σ : derivs := Derivs unit (λ _, sigT tinvd) (iProp Σ).
 
 (** Notation for [tderivs] *)
 Notation tderiv_ty Σ := (deriv_ty (tderivs Σ)).
