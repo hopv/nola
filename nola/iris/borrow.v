@@ -627,9 +627,8 @@ Section borrow.
     { rewrite bor_tok_unseal bor_ctok_unseal. iSplitL "c"; last first.
       { iIntros "?". iRight. iExists _. iSplit; [done|]. iExists _, _, _.
         iFrame. }
-      iRight. iExists (α ⊓ β'). iSplit; [|by iExists _, _].
-      iApply lft_sincl_meet_intro; [by iApply lft_sincl_meet_l|].
-      iApply lft_sincl_trans; [|done]. iApply lft_sincl_meet_r. }
+      iRight. iExists _. iSplit; by [iApply lft_sincl_meet_mono_r|iExists _, _].
+    }
     iExists _. iFrame "g". iExists _. iFrame "●".
     iApply (big_sepM_insert_2 with "[R]")=>/=.
     { iSplitL; rewrite big_sepM_singleton /=; by [|iIntros]. }

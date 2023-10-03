@@ -68,6 +68,10 @@ Lemma lft_incl_meet_l {α β} : α ⊓ β ⊑ α. Proof. set_solver. Qed.
 Lemma lft_incl_meet_r {α β} : α ⊓ β ⊑ β. Proof. set_solver. Qed.
 Lemma lft_incl_meet_intro {α β γ} : α ⊑ β → α ⊑ γ → α ⊑ β ⊓ γ.
 Proof. set_solver. Qed.
+Lemma lft_incl_meet_mono_l {α α' β} : α ⊑ α' → α ⊓ β ⊑ α' ⊓ β.
+Proof. set_solver. Qed.
+Lemma lft_incl_meet_mono_r {α β β'} : β ⊑ β' → α ⊓ β ⊑ α ⊓ β'.
+Proof. set_solver. Qed.
 
 (** ** Lifetime tokens *)
 
@@ -335,4 +339,11 @@ Section lft.
     iFrame "β γ". iIntros "[β γ]". iDestruct ("βα" with "[$β $β']") as "$".
     iApply ("γα'" with "[$γ $γ']").
   Qed.
+  Lemma lft_sincl_meet_mono_l {α α' β} : α ⊑s α' -∗ α ⊓ β ⊑s α' ⊓ β.
+  Proof.
+    iIntros "#?". iApply lft_sincl_meet_intro; [|by iApply lft_sincl_meet_r].
+    iApply lft_sincl_trans; [|done]. iApply lft_sincl_meet_l.
+  Qed.
+  Lemma lft_sincl_meet_mono_r {α β β'} : β ⊑s β' -∗ α ⊓ β ⊑s α ⊓ β'.
+  Proof. rewrite comm [α ⊓ β']comm. exact lft_sincl_meet_mono_l. Qed.
 End lft.
