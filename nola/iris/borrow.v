@@ -706,8 +706,8 @@ Section fborrow.
   Lemma fborrow_wsat_unseal : fborrow_wsat = fborrow_wsat_def.
   Proof. exact: fborrow_wsat_aux.(seal_eq). Qed.
 
-  (** Turn [bor_ctok] into [frbor_tok] *)
-  Lemma bor_frbor' {α Φ q} : bor_ctok α (Φ q) =[fborrow_wsat]=∗ fbor_tok α Φ.
+  (** Turn [bor_ctok] into [fbor_tok] *)
+  Lemma bor_fbor' {α Φ q} : bor_ctok α (Φ q) =[fborrow_wsat]=∗ fbor_tok α Φ.
   Proof.
     rewrite fborrow_wsat_unseal. iIntros "c [%F[● F]]".
     iMod (ghost_map_insert_persist with "●") as "[● i]";
@@ -717,16 +717,47 @@ Section fborrow.
     iSplitR "i"; [iExists _; iFrame|]. rewrite fbor_tok_unseal. iExists _.
     iSplit; by [iApply lft_sincl_refl|iExists _].
   Qed.
-  Lemma bor_frbor `{!GenUpd _ M} {intp α Φ q r} :
+  Lemma bor_fbor `{!GenUpd _ M} {intp α Φ q r} :
     bor_otok α (Φ q) r -∗ intp (Φ q) =[fborrow_wsat ∗ borrow_wsat M intp]=∗
       fbor_tok α Φ ∗ r.[α].
   Proof.
     iIntros "o Φ". iMod (bor_close' with "o Φ") as "[$ c]".
-    by iMod (bor_frbor' with "c") as "$".
+    by iMod (bor_fbor' with "c") as "$".
   Qed.
 
-  (** Open [frbor_tok] *)
-  Lemma frbor_open `{!GenUpd _ M} {intp α q} `(Fractional _ (intp ∘ Φ)) :
+  (** Get [fbor_tok] from borrow subdivision *)
+  Lemma bor_subdivf' `{!GenUpd _ M} {intp q α P} Ql Φrl :
+    bor_otok α P q -∗ ([∗ list] Q ∈ Ql, intp Q) -∗
+    ([∗ list] Φr ∈ Φrl, intp (Φr.1 Φr.2)) -∗
+    ([†α] -∗ ([∗ list] Q ∈ Ql, intp Q) -∗
+      ([∗ list] Φr ∈ Φrl, intp (Φr.1 Φr.2)) -∗ M (intp P))
+      =[fborrow_wsat ∗ borrow_wsat M intp]=∗
+      q.[α] ∗ ([∗ list] Q ∈ Ql, bor_ctok α Q) ∗
+      [∗ list] Φr ∈ Φrl, fbor_tok α Φr.1.
+  Proof.
+    iIntros "o Ql Φrl →P".
+    iMod (bor_subdiv' (Ql ++ ((λ Φr, Φr.1 Φr.2) <$> Φrl))
+      with "o [$Ql Φrl] [→P]") as "[$[$ cl]]"; [by rewrite big_sepL_fmap| |].
+    { iIntros "† [Ql Φrl]". rewrite big_sepL_fmap.
+      iApply ("→P" with "† Ql Φrl"). }
+    iStopProof. elim: Φrl=> [|[Φ r] Φrl IH]/=; [by iIntros|].
+    iIntros "[b bl]". iMod (IH with "bl") as "$". by iMod (bor_fbor' with "b").
+  Qed.
+  Lemma bor_subdivf `{!GenUpd _ M} {intp q α P} Ql Φrl :
+    bor_otok α P q -∗ ([∗ list] Q ∈ Ql, intp Q) -∗
+    ([∗ list] Φr ∈ Φrl, intp (Φr.1 Φr.2)) -∗
+    ([†α] -∗ ([∗ list] Q ∈ Ql, intp Q) -∗
+      ([∗ list] Φr ∈ Φrl, intp (Φr.1 Φr.2)) -∗ M (intp P))
+      =[fborrow_wsat ∗ borrow_wsat M intp]=∗
+      q.[α] ∗ ([∗ list] Q ∈ Ql, bor_tok α Q) ∗
+      [∗ list] Φr ∈ Φrl, fbor_tok α Φr.1.
+  Proof.
+    iIntros "o Ql Φrl →P". iMod (bor_subdivf' with "o Ql Φrl →P") as "[$[? $]]".
+    iModIntro. iStopProof. do 3 f_equiv. exact bor_ctok_tok.
+  Qed.
+
+  (** Open [fbor_tok] *)
+  Lemma fbor_open `{!GenUpd _ M} {intp α q} `(Fractional _ (intp ∘ Φ)) :
     q.[α] -∗ fbor_tok α Φ =[fborrow_wsat ∗ borrow_wsat M intp]=∗
       ∃ r, bor_otok α (Φ r) q ∗ intp (Φ r).
   Proof.
