@@ -69,7 +69,7 @@ Section iris.
           P ∗ (P =[n_inv_wsat]{E∖↑N,E}=∗ True) ⸩(δ).
   Definition nninv_aux : seal nninv_def. Proof. by eexists. Qed.
   Definition nninv := nninv_aux.(unseal).
-  Lemma nninv_unseal : nninv = nninv_def. Proof. exact nninv_aux.(seal_eq). Qed.
+  Lemma nninv_unseal : nninv = nninv_def. Proof. exact: seal_eq. Qed.
   #[export] Instance nninv_persistent {δ N P} : Persistent (nninv δ N P).
   Proof. rewrite nninv_unseal. exact _. Qed.
 
@@ -81,8 +81,7 @@ Section iris.
           (P -∗ n_na_own p (F∖↑N) =[n_inv_wsat]{E}=∗ n_na_own p F) ⸩(δ).
   Definition na_nninv_aux : seal na_nninv_def. Proof. by eexists. Qed.
   Definition na_nninv := na_nninv_aux.(unseal).
-  Lemma na_nninv_unseal : na_nninv = na_nninv_def.
-  Proof. exact na_nninv_aux.(seal_eq). Qed.
+  Lemma na_nninv_unseal : na_nninv = na_nninv_def. Proof. exact: seal_eq. Qed.
   #[export] Instance na_nninv_persistent {δ p N P} :
     Persistent (na_nninv δ p N P).
   Proof. rewrite na_nninv_unseal. exact _. Qed.

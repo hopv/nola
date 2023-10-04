@@ -34,8 +34,7 @@ Section ninv.
     ∃ i, ⌜i ∈ (↑N:coPset)⌝ ∗ ownI i P.
   Local Definition ninv_aux : seal ninv_def. Proof. by eexists. Qed.
   Definition ninv := ninv_aux.(unseal).
-  Local Lemma ninv_unseal : ninv = ninv_def.
-  Proof. exact ninv_aux.(seal_eq). Qed.
+  Local Lemma ninv_unseal : ninv = ninv_def. Proof. exact: seal_eq. Qed.
 
   (** [ninv] is timeless and persistent *)
   #[export] Instance ninv_timeless {N P} : Timeless (ninv N P).
@@ -51,7 +50,7 @@ Section ninv.
   Local Definition ninv_wsat_aux : seal ninv_wsat_def. Proof. by eexists. Qed.
   Definition ninv_wsat := ninv_wsat_aux.(unseal).
   Local Lemma ninv_wsat_unseal : ninv_wsat = ninv_wsat_def.
-  Proof. exact ninv_wsat_aux.(seal_eq). Qed.
+  Proof. exact: seal_eq. Qed.
 
   (** [ninv_wsat] is non-expansive *)
   #[export] Instance ninv_wsat_ne : NonExpansive ninv_wsat.
