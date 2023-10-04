@@ -11,15 +11,6 @@ From nola.examples.heap_lang Require Export primitive_laws.
 From nola.examples.heap_lang Require Import tactics notation.
 From iris.prelude Require Import options.
 
-(** The [array] connective is a version of [mapsto] that works
-with lists of values. *)
-
-Definition array `{!heapGS_gen hlc Σ} (l : loc) (dq : dfrac) (vs : list val) : iProp Σ :=
-  [∗ list] i ↦ v ∈ vs, (l +ₗ i) ↦{dq} v.
-
-Notation "l ↦∗ dq vs" := (array l dq vs)
-  (at level 20, dq custom dfrac  at level 1, format "l  ↦∗ dq  vs") : bi_scope.
-
 (** We have [FromSep] and [IntoSep] instances to split the fraction (via the
 [AsFractional] instance below), but not for splitting the list, as that would
 lead to overlapping instances. *)

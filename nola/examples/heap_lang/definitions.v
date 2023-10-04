@@ -57,6 +57,15 @@ the notations.  That also helps for scopes and coercions. *)
 Notation "l ↦ dq v" := (mapsto (L:=loc) (V:=option val) l dq (Some v%V))
   (at level 20, dq custom dfrac at level 1, format "l  ↦ dq  v") : bi_scope.
 
+(** The [array] connective is a version of [mapsto] that works
+with lists of values. *)
+
+Definition array `{!heapGS_gen hlc Σ} (l : loc) (dq : dfrac) (vs : list val) : iProp Σ :=
+  [∗ list] i ↦ v ∈ vs, (l +ₗ i) ↦{dq} v.
+
+Notation "l ↦∗ dq vs" := (array l dq vs)
+  (at level 20, dq custom dfrac  at level 1, format "l  ↦∗ dq  vs") : bi_scope.
+
 (** Same for [gen_inv_heap], except that these are higher-order notations so to
 make setoid rewriting in the predicate [I] work we need actual definitions
 here. *)
