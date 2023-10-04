@@ -22,20 +22,20 @@ Class GenUpd (PROP : bi) (M : PROP → PROP) : Prop := {
 
 (** Identity, [◇], [bupd] and [fupd] satisfy [GenUpd] *)
 #[export] Instance gen_upd_id {PROP} : GenUpd PROP id.
-Proof. split; [apply _|done..]. Qed.
+Proof. split; [exact _|done..]. Qed.
 #[export] Instance gen_upd_except_0 {PROP} : GenUpd PROP bi_except_0.
 Proof.
-  split. { apply _. } { by iIntros. } { by move=> ??->. }
+  split. { exact _. } { by iIntros. } { by move=> ??->. }
   { iIntros "%>$". } { by iIntros "%%[>$$]". }
 Qed.
 #[export] Instance gen_upd_bupd `{!BiBUpd PROP} : GenUpd PROP bupd.
 Proof.
-  split. { apply _. } { by iIntros "%$". } { by move=> ??->. }
+  split. { exact _. } { by iIntros "%$". } { by move=> ??->. }
   { iIntros "%>$". } { by iIntros "%%[>$$]". }
 Qed.
 #[export] Instance gen_upd_fupd `{!BiFUpd PROP} {E} : GenUpd PROP (fupd E E).
 Proof.
-  split. { apply _. } { by iIntros "%$". } { by move=> ??->. }
+  split. { exact _. } { by iIntros "%$". } { by move=> ??->. }
   { iIntros "%>$". } { by iIntros "%%[>$$]". }
 Qed.
 
@@ -454,13 +454,13 @@ Use [iMod (fupd_mask_subseteq E')] to adjust the mask of your goal to [E']")
   (** [bupdw] and [fupdw] satisfy [GenUpd] *)
   #[export] Instance gen_upd_bupdw `{!BiBUpd PROP} {W} : GenUpd PROP (bupdw W).
   Proof.
-    split. { apply _. } { by iIntros "%$". } { by move=> ??->. }
+    split. { exact _. } { by iIntros "%$". } { by move=> ??->. }
     { iIntros "%>$". } { by iIntros "%%[>$$]". }
   Qed.
   #[export] Instance gen_upd_fupdw `{!BiFUpd PROP} {E W} :
     GenUpd PROP (fupdw E E W).
   Proof.
-    split. { apply _. } { by iIntros "%$". } { by move=> ??->. }
+    split. { exact _. } { by iIntros "%$". } { by move=> ??->. }
     { iIntros "%>$". } { by iIntros "%%[>$$]". }
   Qed.
 

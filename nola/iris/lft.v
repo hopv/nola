@@ -34,13 +34,13 @@ Implicit Type α β : lft.
 
 (** [⊓] is unital over [⊤], commutative, and associative *)
 Fact lft_meet_id_l : LeftId (=) ⊤ (meet (A:=lft)).
-Proof. apply _. Qed.
+Proof. exact _. Qed.
 Fact lft_meet_id_r : RightId (=) ⊤ (meet (A:=lft)).
-Proof. apply _. Qed.
+Proof. exact _. Qed.
 Fact lft_meet_comm : Comm (=) (meet (A:=lft)).
-Proof. apply _. Qed.
+Proof. exact _. Qed.
 Fact lft_meet_assoc : Assoc (=) (meet (A:=lft)).
-Proof. apply _. Qed.
+Proof. exact _. Qed.
 
 (** ** Ghost state *)
 
@@ -102,17 +102,17 @@ Section lft.
 
   (** Dead and eternal lifetime tokens are persistent *)
   Fact lft_dead_persistent {α} : Persistent [†α].
-  Proof. apply _. Qed.
+  Proof. exact _. Qed.
   Fact lft_eter_persistent {α} : Persistent [∞α].
-  Proof. apply _. Qed.
+  Proof. exact _. Qed.
 
   (** Lifetime, dead, eternal lifetime tokens are timeless *)
   Fact lft_tok_timeless {α q} : Timeless q.[α].
-  Proof. apply _. Qed.
+  Proof. exact _. Qed.
   Fact lft_dead_timeless {α} : Timeless [†α].
-  Proof. apply _. Qed.
+  Proof. exact _. Qed.
   Fact lft_eter_timeless {α} : Timeless [∞α].
-  Proof. apply _. Qed.
+  Proof. exact _. Qed.
 
   (** Lifetime and dead lifetime tokens can't coexist *)
   Lemma lft_tok_dead {α q} : q.[α] -∗ [†α] -∗ False.
@@ -134,12 +134,12 @@ Section lft.
   Proof. move=> ??. by rewrite -own_op -Cinl_op. Qed.
   Local Instance alft_tok_as_fract {a q} :
     AsFractional (alft_tok a q) (alft_tok a) q.
-  Proof. split; [done|apply _]. Qed.
+  Proof. split; [done|exact _]. Qed.
   #[export] Instance lft_tok_fract {α} : Fractional (λ q, q.[α])%I.
-  Proof. apply _. Qed.
+  Proof. exact _. Qed.
   #[export] Instance lft_tok_as_fract {α q} :
     AsFractional q.[α] (λ q, q.[α])%I q.
-  Proof. split; [done|apply _]. Qed.
+  Proof. split; [done|exact _]. Qed.
   #[export] Instance lft_tok_fract_frame {p α} `{!FrameFractionalQp q r s} :
     Frame p q.[α] r.[α] s.[α] | 5.
   Proof. apply: frame_fractional. Qed.
@@ -172,7 +172,7 @@ Section lft.
     iIntros "∞".
     iMod (own_updateP (λ a, ∃ q, a = Cinl (DfracOwn q)) with "∞") as
       (q[?->]) "?"; [|by iExists _].
-    eapply csum_updateP_l; [by apply dfrac_restore_update|]=>/= ?[?->].
+    eapply csum_updateP_l; [exact dfrac_restore_update|]=>/= ?[?->].
     by eexists _.
   Qed.
   Local Lemma alftl_eter_tok {al} :
@@ -268,7 +268,7 @@ Section lft.
 
   (** [⊑s] is persistent *)
   #[export] Instance lft_sincl_persistent {α β} : Persistent (α ⊑s β).
-  Proof. rewrite lft_sincl_unseal. apply _. Qed.
+  Proof. rewrite lft_sincl_unseal. exact _. Qed.
 
   (** Access a lifetime token by [⊑s] *)
   Lemma lft_sincl_tok_acc {α β q} :
