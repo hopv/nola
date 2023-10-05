@@ -48,6 +48,10 @@ Proof. simpl. exact _. Qed.
 Proof. simpl. exact _. Qed.
 Lemma nlt_no0 `{n0 : ! n <ⁿ 0} {A} : A.
 Proof. move: n0. unfold nlt. lia. Qed.
+Lemma nle_diag_S {n} : n ≤ⁿ S n.
+Proof. unfold nle. lia. Qed.
+Lemma nlt_diag_S {n} : n <ⁿ S n.
+Proof. unfold nlt. lia. Qed.
 Lemma nle_unS {m n} : S m ≤ⁿ S n → m ≤ⁿ n.
 Proof. unfold nle. lia. Qed.
 Lemma nlt_unS {m n} : S m <ⁿ S n → m <ⁿ n.
