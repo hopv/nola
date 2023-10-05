@@ -106,8 +106,7 @@ Section tinv_wsat'.
       (ninv_wsat (tinvd_intp (intp i _)) -∗ tinv_wsat'' L M o _ intp).
   Proof.
     move: L M i o tΣ iM iL intp. fix FIX 3=> L M i.
-    case: L M i=> [|L][|M][|i]/=; try (unfold nlt; lia);
-      iIntros (?? iM ??) "[nw tw]".
+    case: L M i=> [|L][|M][|i]/=; try nlia; iIntros (?? iM ??) "[nw tw]".
     { rewrite (proof_irrel nlt_0 iM). iFrame. by iIntros. }
     iFrame "nw".
     iDestruct (FIX L M i _ _ (nlt_unS iM) with "tw") as "?".
@@ -152,9 +151,9 @@ Section tinv_wsat'.
   Lemma tinv_wsat''_over `{tΣ : !tinvGS' L o Σ, LM : ! L <ⁿ M} {intp} :
     tinv_wsat'' L M o _ intp ⊢ False.
   Proof.
-    move: L M o tΣ LM intp. fix FIX 2=> L M.
-    case: L M=> [|L][|M]//=; try (unfold nlt; lia). move=>/= o ???.
-    iIntros "[_ tw]". iDestruct (FIX with "tw") as "[]". by apply nlt_unS.
+    move: L M o tΣ LM intp. fix FIX 2=> L M. case: L M=> [|L][|M]//=; try nlia.
+    move=>/= o ???. iIntros "[_ tw]". iDestruct (FIX with "tw") as "[]".
+    by apply nlt_unS.
   Qed.
   Lemma tinv_wsat'_over `{!tinvGS L Σ, ! L <ⁿ M} {intp} :
     tinv_wsat' M intp ⊢ False.

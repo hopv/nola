@@ -146,8 +146,7 @@ Section tintp.
   Lemma tintp_lt_tintp `{iM : ! i <ⁿ M} {s T v} :
     tintp_lt s M T v ⊣⊢ ⟦ T ⟧(s) v.
   Proof.
-    case: M iM; try (unfold nlt; lia). move=> ??.
-    apply tintp'_eq=> >. exact tintp_lt_eq.
+    case: M iM; try nlia. move=> ??. apply tintp'_eq=> >. exact tintp_lt_eq.
   Qed.
 
   (** Simplify [tintp'] over [↑ᵗ] *)

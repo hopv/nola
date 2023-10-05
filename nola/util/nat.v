@@ -29,44 +29,46 @@ Existing Class nle'. Existing Class nlt'.
 Notation "(.≤ⁿ i )" := (nle' i) (format "(.≤ⁿ  i )") : nola_scope.
 Notation "(.<ⁿ i )" := (nlt' i) (format "(.<ⁿ  i )") : nola_scope.
 
+Ltac nlia := unfold nle, nlt in *; lia.
+
 (** Construct [≤ⁿ] and [<ⁿ] *)
 #[export] Instance nle_0 {n} : 0 ≤ⁿ n.
-Proof. unfold nle. lia. Qed.
-#[export] Instance nle_S `(mn : ! m ≤ⁿ n) : S m ≤ⁿ S n.
-Proof. move: mn. unfold nle. lia. Qed.
+Proof. nlia. Qed.
+#[export] Instance nle_S `(! m ≤ⁿ n) : S m ≤ⁿ S n.
+Proof. nlia. Qed.
 #[export] Instance nle_refl {n} : n ≤ⁿ n | 3.
-Proof. unfold nle. lia. Qed.
+Proof. nlia. Qed.
 #[export] Instance nlt_0 {n} : 0 <ⁿ S n.
-Proof. unfold nlt. lia. Qed.
-#[export] Instance nlt_S `(mn : ! m <ⁿ n) : S m <ⁿ S n.
-Proof. move: mn. unfold nlt. lia. Qed.
+Proof. nlia. Qed.
+#[export] Instance nlt_S `(! m <ⁿ n) : S m <ⁿ S n.
+Proof. nlia. Qed.
 #[export] Instance nlt_refl {n} : n <ⁿ S n | 3.
-Proof. unfold nlt. lia. Qed.
+Proof. nlia. Qed.
 #[export] Instance nle'_nle `{! m ≤ⁿ n} : nle' n m.
 Proof. simpl. exact _. Qed.
 #[export] Instance nlt'_nlt `{! m <ⁿ n} : nlt' n m.
 Proof. simpl. exact _. Qed.
-Lemma nlt_no0 `{n0 : ! n <ⁿ 0} {A} : A.
-Proof. move: n0. unfold nlt. lia. Qed.
+Lemma nlt_no0 `{! n <ⁿ 0} {A} : A.
+Proof. nlia. Qed.
 Lemma nle_diag_S {n} : n ≤ⁿ S n.
-Proof. unfold nle. lia. Qed.
+Proof. nlia. Qed.
 Lemma nlt_diag_S {n} : n <ⁿ S n.
-Proof. unfold nlt. lia. Qed.
-Lemma nle_unS {m n} : S m ≤ⁿ S n → m ≤ⁿ n.
-Proof. unfold nle. lia. Qed.
-Lemma nlt_unS {m n} : S m <ⁿ S n → m <ⁿ n.
-Proof. unfold nlt. lia. Qed.
-Lemma nlt_S_nle {m n} : m <ⁿ S n → m ≤ⁿ n.
-Proof. unfold nlt, nle. lia. Qed.
-Lemma nle_trans {l m n} : l ≤ⁿ m → m ≤ⁿ n → l ≤ⁿ n.
-Proof. apply Nat.le_trans. Qed.
-Lemma nlt_trans {l m n} : l <ⁿ m → m <ⁿ n → l <ⁿ n.
-Proof. apply Nat.lt_trans. Qed.
-Lemma nlt_nle_trans {l m n} : l <ⁿ m → m ≤ⁿ n → l <ⁿ n.
-Proof. apply Nat.lt_le_trans. Qed.
-Lemma nle_nlt_trans {l m n} : l ≤ⁿ m → m <ⁿ n → l <ⁿ n.
-Proof. apply Nat.le_lt_trans. Qed.
-Lemma nlt_nlt_S_trans {l m n} : l <ⁿ m → m <ⁿ S n → l <ⁿ n.
-Proof. move=> lm mn. exact (nlt_nle_trans lm (nlt_S_nle mn)). Qed.
+Proof. nlia. Qed.
+Lemma nle_unS `(! S m ≤ⁿ S n) : m ≤ⁿ n.
+Proof. nlia. Qed.
+Lemma nlt_unS `(! S m <ⁿ S n) : m <ⁿ n.
+Proof. nlia. Qed.
+Lemma nlt_S_nle `(! m <ⁿ S n) : m ≤ⁿ n.
+Proof. nlia. Qed.
+Lemma nle_trans `(! l ≤ⁿ m, m ≤ⁿ n) : l ≤ⁿ n.
+Proof. nlia. Qed.
+Lemma nlt_trans `(! l <ⁿ m, ! m <ⁿ n) : l <ⁿ n.
+Proof. nlia. Qed.
+Lemma nlt_nle_trans `(! l <ⁿ m, ! m ≤ⁿ n) : l <ⁿ n.
+Proof. nlia. Qed.
+Lemma nle_nlt_trans `(! l ≤ⁿ m, ! m <ⁿ n) : l <ⁿ n.
+Proof. nlia. Qed.
+Lemma nlt_nlt_S_trans `(! l <ⁿ m, ! m <ⁿ S n) : l <ⁿ n.
+Proof. nlia. Qed.
 Lemma nlt_or_nle {m n} : m <ⁿ n ∨ n ≤ⁿ m.
-Proof. unfold nlt, nle. lia. Qed.
+Proof. nlia. Qed.
