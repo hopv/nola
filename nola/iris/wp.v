@@ -305,15 +305,17 @@ Section wpw.
     (|=[W]{E}=> WP[W] e @ s; E {{ v, |=[W]{E}=> Φ v }}) ⊢
       WP[W] e @ s; E {{ v, |=[W]{E}=> Φ v }}.
   Proof. rewrite fupdw_wpw_fupdw. apply wp_mono. iIntros (?) ">$". Qed.
-  #[export] Instance elim_modal_fupdw_wpw_nonval {p e s E W P Φ} :
-    ElimModal (to_val e = None) p false (|=[W]{E}=> P) P
+  #[export] Instance elim_modal_fupdw_wpw_nonval
+    `{!WsatIncl W W' Wr} {p e s E P Φ} :
+    ElimModal (to_val e = None) p false (|=[W']{E}=> P) P
       (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E {{ Φ }}).
   Proof.
     move=> ?. by rewrite /ElimModal bi.intuitionistically_if_elim fupdw_frame_r
-      bi.wand_elim_r fupdw_wpw_nonval.
+      bi.wand_elim_r (fupdw_incl (W:=W)) fupdw_wpw_nonval.
   Qed.
-  #[export] Instance elim_modal_bupdw_wpw_nonval {p e s E W P Φ} :
-    ElimModal (to_val e = None) p false (|=[W]=> P) P
+  #[export] Instance elim_modal_bupdw_wpw_nonval
+    `{!WsatIncl W W' Wr} {p e s E P Φ} :
+    ElimModal (to_val e = None) p false (|=[W']=> P) P
       (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E {{ Φ }}).
   Proof. move=> ?. by rewrite (bupdw_fupdw E) elim_modal_fupdw_wpw_nonval. Qed.
 
@@ -336,15 +338,17 @@ Section wpw.
     (|=[W]{E}=> WP[W] e @ s; E [{ v, |=[W]{E}=> Φ v }]) ⊢
       WP[W] e @ s; E [{ v, |=[W]{E}=> Φ v }].
   Proof. rewrite fupdw_twpw_fupdw. apply twp_mono. iIntros (?) ">$". Qed.
-  #[export] Instance elim_modal_fupdw_twpw_nonval {p e s E W P Φ} :
-    ElimModal (to_val e = None) p false (|=[W]{E}=> P) P
+  #[export] Instance elim_modal_fupdw_twpw_nonval
+    `{!WsatIncl W W' Wr} {p e s E P Φ} :
+    ElimModal (to_val e = None) p false (|=[W']{E}=> P) P
       (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E [{ Φ }]).
   Proof.
     move=> ?. by rewrite /ElimModal bi.intuitionistically_if_elim fupdw_frame_r
-      bi.wand_elim_r fupdw_twpw_nonval.
+      bi.wand_elim_r (fupdw_incl (W:=W)) fupdw_twpw_nonval.
   Qed.
-  #[export] Instance elim_modal_bupdw_twpw_nonval {p e s E W P Φ} :
-    ElimModal (to_val e = None) p false (|=[W]=> P) P
+  #[export] Instance elim_modal_bupdw_twpw_nonval
+    `{!WsatIncl W W' Wr} {p e s E P Φ} :
+    ElimModal (to_val e = None) p false (|=[W']=> P) P
       (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E [{ Φ }]).
   Proof. move=> ?. by rewrite (bupdw_fupdw E) elim_modal_fupdw_twpw_nonval. Qed.
 
@@ -368,13 +372,13 @@ Section wpw.
       rewrite !wp_value_fupd'. by iMod ("wp" with "W") as ">[$$]".
   Qed.
   #[export] Instance elim_modal_fupdw_wpw_atomic
-    `{!Atomic (stuckness_to_atomicity s) e} {p E E' W P Φ} :
-    ElimModal (to_val e = None) p false (|=[W]{E,E'}=> P) P
+    `{!Atomic (stuckness_to_atomicity s) e, !WsatIncl W W' Wr} {p E E' P Φ} :
+    ElimModal (to_val e = None) p false (|=[W']{E,E'}=> P) P
       (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E' {{ v, |=[W]{E',E}=> Φ v }})%I
     | 100.
   Proof.
-    move=> ?. by rewrite bi.intuitionistically_if_elim fupdw_frame_r
-      bi.wand_elim_r wpw_atomic.
+    move=> ?. by  rewrite bi.intuitionistically_if_elim fupdw_frame_r
+      bi.wand_elim_r (fupdw_incl (W:=W)) wpw_atomic.
   Qed.
 
   (** Mask-changing [fupdw] on atomic [twpw] *)
@@ -394,14 +398,14 @@ Section wpw.
     - iFrame "st". destruct (atomic _ _ _ _ _ step) as [? <-%of_to_val].
       rewrite !twp_value_fupd'. by iMod ("wp" with "W") as ">[$$]".
   Qed.
-  #[export] Instance elim_modal_fupdw_twpw_atomic {p e s E E' W P Φ}
-    `{!Atomic (stuckness_to_atomicity s) e} :
-    ElimModal (to_val e = None) p false (|=[W]{E,E'}=> P) P
+  #[export] Instance elim_modal_fupdw_twpw_atomic {p e s E E' P Φ}
+    `{!Atomic (stuckness_to_atomicity s) e, !WsatIncl W W' Wr} :
+    ElimModal (to_val e = None) p false (|=[W']{E,E'}=> P) P
       (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E' [{ v, |=[W]{E',E}=> Φ v }])%I
     | 100.
   Proof.
     move=> ?. by rewrite bi.intuitionistically_if_elim fupdw_frame_r
-      bi.wand_elim_r twpw_atomic.
+      bi.wand_elim_r (fupdw_incl (W:=W)) twpw_atomic.
   Qed.
 
   (** Eliminate [fupdw] in [wpw] *)

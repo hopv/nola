@@ -177,16 +177,16 @@ Section wsat_incl.
   Context {PROP : bi}.
   Implicit Types W Wr : PROP.
 
-  #[export] Instance wsat_incl_refl {W} : WsatIncl W W emp%I | 1.
+  #[export] Instance wsat_incl_refl {W} : WsatIncl W W emp%I.
   Proof. by rewrite /WsatIncl right_id. Qed.
   #[export] Instance wsat_incl_sep_in {W W'1 W'2 Wr Wr'} :
-    WsatIncl W W'1 Wr → WsatIncl Wr W'2 Wr' → WsatIncl W (W'1 ∗ W'2) Wr' | 3.
+    WsatIncl W W'1 Wr → WsatIncl Wr W'2 Wr' → WsatIncl W (W'1 ∗ W'2) Wr' | 2.
   Proof. rewrite /WsatIncl=> ->->. by rewrite assoc. Qed.
   #[export] Instance wsat_incl_in_sep_l {W1 W2 W' Wr} :
-    WsatIncl W1 W' Wr → WsatIncl (W1 ∗ W2) W' (Wr ∗ W2) | 5.
+    WsatIncl W1 W' Wr → WsatIncl (W1 ∗ W2) W' (Wr ∗ W2) | 4.
   Proof. rewrite /WsatIncl=> ->. by rewrite assoc. Qed.
   #[export] Instance wsat_incl_in_sep_r {W1 W2 W' Wr} :
-    WsatIncl W2 W' Wr → WsatIncl (W1 ∗ W2) W' (W1 ∗ Wr) | 7.
+    WsatIncl W2 W' Wr → WsatIncl (W1 ∗ W2) W' (W1 ∗ Wr) | 6.
   Proof. rewrite /WsatIncl=> ->. rewrite !assoc. f_equiv. by rewrite comm. Qed.
 End wsat_incl.
 
@@ -362,9 +362,9 @@ Use [iApply fupd_mask_intro] to introduce mask-changing update modalities")
     by rewrite /ElimModal bi.intuitionistically_if_elim fupdw_frame_r
       bi.wand_elim_r (fupdw_incl (W:=W)) fupdw_trans.
   Qed.
-  #[export] Instance elim_modal_bupdw_fupdw
-    `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {p E E' W P Q} :
-    ElimModal True p false (|=[W]=> P) P (|=[W]{E,E'}=> Q) (|=[W]{E,E'}=> Q)
+  #[export] Instance elim_modal_bupdw_fupdw {p E E' P Q}
+    `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP, !WsatIncl W W' Wr} :
+    ElimModal True p false (|=[W']=> P) P (|=[W]{E,E'}=> Q) (|=[W]{E,E'}=> Q)
     | 10.
   Proof. move=> ?. by rewrite (bupdw_fupdw E) elim_modal_fupdw_fupdw. Qed.
   #[export] Instance elim_modal_fupd_fupdw `{!BiFUpd PROP} {p E E' E'' W P Q} :
@@ -376,11 +376,11 @@ Use [iApply fupd_mask_intro] to introduce mask-changing update modalities")
     ElimModal True p false (|==> P) P (|=[W]{E,E'}=> Q) (|=[W]{E,E'}=> Q) | 10.
   Proof. exact _. Qed.
   #[export] Instance elim_modal_fupdw_fupdw_wrong_mask
-    `{!BiFUpd PROP} {p E E' E'' E''' P Q W} :
+    `{!BiFUpd PROP} {p E E' E'' E''' P Q W W'} :
     ElimModal
       (pm_error "Goal and eliminated modality must have the same mask.
 Use [iMod (fupd_mask_subseteq E')] to adjust the mask of your goal to [E']")
-      p false (|=[W]{E,E'}=> P) False (|=[W]{E'',E'''}=> Q) False | 100.
+      p false (|=[W']{E,E'}=> P) False (|=[W]{E'',E'''}=> Q) False | 100.
   Proof. intros []. Qed.
   #[export] Instance add_modal_fupdw `{!BiFUpd PROP} {E E' W P Q} :
     AddModal (|=[W]{E}=> P) P (|=[W]{E,E'}=> Q).

@@ -12,9 +12,8 @@ Section eref.
   Proof.
     iIntros "#inv !>". iApply (derivy_intro (δ:=δ))=>/=. iIntros (???).
     iMod (ninv_acc with "inv") as "/=[(%& ↦ & T) cl]"; [done|].
-    iModIntro. iExists _. iFrame "↦ T". iIntros (?) "↦ T".
-    iApply fupdw_incl; [apply wsat_incl_tinv_tninv|]. iApply "cl". iExists _.
-    iFrame.
+    iModIntro. iExists _. iFrame "↦ T". iIntros (?) "↦ #?".
+    iMod ("cl" with "[↦]"); [|done]. iExists _. by iFrame.
   Qed.
   Lemma texpr_ref_ref `{! i <ⁿ j} {e k T} :
     e :ᵉ(j) T ⊢ ref e :ᵉ{k}(j) ref{i,nil}: T.
@@ -22,7 +21,6 @@ Section eref.
     iIntros "?". unfold texpr. wp_bind e. iApply (twp_wand with "[$]").
     iIntros (?) ">#?". wp_alloc l as "↦". iModIntro. iApply fupdw_tinv_wsat_le.
     iIntros (?). have ?: i <ⁿ L by apply (nlt_nle_trans _ _).
-    iApply fupdw_incl; [apply (wsat_incl_tinv_tninv (M:=j))|].
     iMod (ninv_alloc (P:=tinvd_ref l T) with "[↦]") as "?";
       [iExists _; by iFrame|].
     iModIntro=>/=. iExists _. iSplit; [done|]. iApply ninv_tref.

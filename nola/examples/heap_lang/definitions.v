@@ -106,34 +106,38 @@ Qed.
   Context `{!heapGS_gen hlc Σ}.
   Let iris := heapGS_irisGS'.
 
-  #[export] Instance elim_modal_fupdw_wpw_nonval {p e s E W P Φ} :
-    ElimModal (to_val e = None) p false (|=[W]{E}=> P) P
+  #[export] Instance elim_modal_fupdw_wpw_nonval
+    `{!WsatIncl W W' Wr} {p e s E P Φ} :
+    ElimModal (to_val e = None) p false (|=[W']{E}=> P) P
       (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E {{ Φ }}).
   Proof. apply (elim_modal_fupdw_wpw_nonval (irisGS'_gen0:=iris)). Qed.
-  #[export] Instance elim_modal_bupdw_wpw_nonval {p e s E W P Φ} :
-    ElimModal (to_val e = None) p false (|=[W]=> P) P
+  #[export] Instance elim_modal_bupdw_wpw_nonval
+    `{!WsatIncl W W' Wr} {p e s E P Φ} :
+    ElimModal (to_val e = None) p false (|=[W']=> P) P
       (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E {{ Φ }}).
   Proof. apply (elim_modal_bupdw_wpw_nonval (irisGS'_gen0:=iris)). Qed.
 
-  #[export] Instance elim_modal_fupdw_twpw_nonval {p e s E W P Φ} :
-    ElimModal (to_val e = None) p false (|=[W]{E}=> P) P
+  #[export] Instance elim_modal_fupdw_twpw_nonval
+    `{!WsatIncl W W' Wr} {p e s E P Φ} :
+    ElimModal (to_val e = None) p false (|=[W']{E}=> P) P
       (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E [{ Φ }]).
   Proof. apply (elim_modal_fupdw_twpw_nonval (irisGS'_gen0:=iris)). Qed.
-  #[export] Instance elim_modal_bupdw_twpw_nonval {p e s E W P Φ} :
-    ElimModal (to_val e = None) p false (|=[W]=> P) P
+  #[export] Instance elim_modal_bupdw_twpw_nonval
+    `{!WsatIncl W W' Wr} {p e s E P Φ} :
+    ElimModal (to_val e = None) p false (|=[W']=> P) P
       (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E [{ Φ }]).
   Proof. apply (elim_modal_bupdw_twpw_nonval (irisGS'_gen0:=iris)). Qed.
 
-  #[export] Instance elim_modal_fupdw_wpw_atomic {p e s E E' W P Φ}
-    `{!Atomic (stuckness_to_atomicity s) e} :
-    ElimModal (to_val e = None) p false (|=[W]{E,E'}=> P) P
+  #[export] Instance elim_modal_fupdw_wpw_atomic {p e s E E' P Φ}
+    `{!Atomic (stuckness_to_atomicity s) e, !WsatIncl W W' Wr} :
+    ElimModal (to_val e = None) p false (|=[W']{E,E'}=> P) P
       (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E' {{ v, |=[W]{E',E}=> Φ v }})%I
     | 100.
   Proof. apply (elim_modal_fupdw_wpw_atomic (irisGS'_gen0:=iris)). Qed.
 
-  #[export] Instance elim_modal_fupdw_twpw_atomic {p e s E E' W P Φ}
-    `{!Atomic (stuckness_to_atomicity s) e} :
-    ElimModal (to_val e = None) p false (|=[W]{E,E'}=> P) P
+  #[export] Instance elim_modal_fupdw_twpw_atomic {p e s E E' P Φ}
+    `{!Atomic (stuckness_to_atomicity s) e, !WsatIncl W W' Wr} :
+    ElimModal (to_val e = None) p false (|=[W']{E,E'}=> P) P
       (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E' [{ v, |=[W]{E',E}=> Φ v }])%I
     | 100.
   Proof. apply (elim_modal_fupdw_twpw_atomic (irisGS'_gen0:=iris)). Qed.
