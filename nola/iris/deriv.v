@@ -220,12 +220,15 @@ Proof.
 Qed.
 
 (** [deriv]: Derivability *)
-Definition deriv {DI} : deriv_ty DI := Dwrap (bi_least_fixpoint deriv_gen).
+Definition deriv_def {DI} : deriv_ty DI := Dwrap (bi_least_fixpoint deriv_gen).
+Lemma deriv_aux : seal (@deriv_def). Proof. by eexists. Qed.
+Definition deriv {DI} := deriv_aux.(unseal) DI.
+Lemma deriv_unseal : @deriv = @deriv_def. Proof. exact: seal_eq. Qed.
 
 (** [deriv] satisfies [derivy] *)
 #[export] Instance deriv_derivy {DI} : derivy DI True₁ deriv.
-Proof. split.
-  eexists _. split; [done|]=>/=. iIntros (?) "big".
+Proof.
+  rewrite deriv_unseal. split. eexists _. split; [done|]=>/=. iIntros (?) "big".
   rewrite least_fixpoint_unfold. iIntros (??) "#A #B".
   iApply "big"; [done..| |]; iIntros "!> % ?/="; by [iApply "A"|iApply "B"].
 Qed.
@@ -233,11 +236,11 @@ Qed.
 (** [deriv] is sound w.r.t. the interpretation under [deriv] *)
 Lemma deriv_sound {DI i} : ⊢ dsound (DI:=DI) deriv i.
 Proof.
-  elim: {i}(wft_lt_wf i)=> i _ IH. iIntros (P) "/= X".
+  rewrite deriv_unseal. elim: {i}(wft_lt_wf i)=> i _ IH. iIntros (P) "/= X".
   have: (Darg i P).(darg_idx) = i by done.
   move: {P}(Darg i P : deriv_aty _)=> iP eq. iRevert (eq). iRevert (iP) "X".
   iApply least_fixpoint_ind. iIntros "!>" ([??]) "/= X ->".
-  iApply ("X" $! _ deriv_derivy); iIntros "!> % /=".
-  { iIntros "[X _]". by iApply "X". } { iIntros "[_ $]". }
-  { iIntros (?). by iApply IH. }
+  rewrite -deriv_unseal. iApply ("X" $! _ deriv_derivy); iIntros "!> % /=";
+    rewrite deriv_unseal. { iIntros "[X _]". by iApply "X". }
+  { iIntros "[_ $]". } { iIntros (?). by iApply IH. }
 Qed.
