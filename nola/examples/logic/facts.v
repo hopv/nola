@@ -70,7 +70,7 @@ Section facts.
     iDestruct (own_valid with "o") as %v. by apply to_agree_op_valid_L in v.
   Qed.
 
-  Context `{!nderivy Σ ih δ}.
+  Context `{!nderivy ih δ}.
   Implicit Type P Q : nPropL (;ᵞ).
 
   (** Make connectives go inside the derivability *)

@@ -16,7 +16,7 @@ Section lemmas.
     iDestruct ("→" with "∝P") as "/={∝P}∝P". by iApply "∝P".
   Qed.
 
-  Context `{!nderivy Σ ih δ}.
+  Context `{!nderivy ih δ}.
 
   (** Turn [ninv] into [nninv] *)
   Lemma ninv_nninv (P : nPropS _) {N} :

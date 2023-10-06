@@ -18,14 +18,13 @@ Definition tacc `{!tintpGS L Σ} {i} (δ : tderiv_ty Σ) (Tx : tinvd i)
   end%I.
 
 (** ** [tderivsi]: [derivsi] for [tinvd] *)
-Definition tderivsi Σ `{!tintpGS L Σ} : derivsi :=
+Canonical tderivsi `{!tintpGS L Σ} :=
   Derivsi (tderivs Σ) (λ δ '(Darg _ (existT _ Tx)), tacc δ Tx).
 
 (** Notation for [tderivsi] *)
-Notation tderivy Σ := (derivy (tderivsi Σ)).
-Notation tderiv := (deriv (DI:=tderivsi _)).
-Notation tdsound := (dsound (DI:=tderivsi _)).
-Notation tderiv_sound := (deriv_sound (DI:=tderivsi _)).
+Notation tderivy := (derivy tderivsi).
+Notation tderiv := (deriv (DI:=tderivsi)).
+Notation tderiv_sound := (deriv_sound (DI:=tderivsi)).
 
 (** Utility for [tderiv] *)
 Notation trefd := (tref tderiv).

@@ -19,7 +19,7 @@ Section lemmas.
     iApply ("∝P" $! _ _ NE NF with "F").
   Qed.
 
-  Context `{!nderivy Σ ih δ}.
+  Context `{!nderivy ih δ}.
 
   (** Turn [na_ninv] into [na_nninv] *)
   Lemma na_ninv_nninv (P : nPropS _) {i p N} : i ∈ (↑N:coPset) →

@@ -32,7 +32,7 @@ Section verify.
   Proof. by rewrite/= rew_eq_hwf /=. Qed.
 
   (** Convert the predicate of [na_ilisti] *)
-  Lemma na_ilisti_convert `{!nderivy Σ ih δ} {p N Φ Ψ l} :
+  Lemma na_ilisti_convert `{!nderivy ih δ} {p N Φ Ψ l} :
     □ ⸨ ∀ l, (Φ l ={∅}=∗ Ψ l) ∗ (Ψ l ={∅}=∗ Φ l) ⸩(δ) -∗
     na_ilisti δ p N Φ l -∗ na_ilisti δ p N Ψ l.
   Proof.
@@ -53,7 +53,7 @@ Section verify.
   Qed.
 
   (** [na_ilisti] by cons *)
-  Lemma na_ilisti_cons `{!nderivy Σ ih δ} {p N Φ l l'} :
+  Lemma na_ilisti_cons `{!nderivy ih δ} {p N Φ l l'} :
     na_nninv δ p N (Φ l) -∗ na_ilisti δ p N Φ l' -∗ (l +ₗ 1) ↦ #l'
       =[nninv_wsat δ]=∗ na_ilisti δ p N Φ l.
   Proof.
@@ -63,7 +63,7 @@ Section verify.
   Qed.
 
   (** [na_ilisti] from a one-node loop *)
-  Lemma na_ilisti_loop_1 `{!nderivy Σ ih δ} {p N Φ l} :
+  Lemma na_ilisti_loop_1 `{!nderivy ih δ} {p N Φ l} :
     na_nninv δ p N (Φ l) -∗ (l +ₗ 1) ↦ #l =[nninv_wsat δ]=∗
       na_ilisti δ p N Φ l.
   Proof.
@@ -73,7 +73,7 @@ Section verify.
   Qed.
 
   (** [na_ilisti] from a two-node loop *)
-  Lemma na_ilisti_loop_2 `{!nderivy Σ ih δ} {p N Φ l l'} :
+  Lemma na_ilisti_loop_2 `{!nderivy ih δ} {p N Φ l l'} :
     na_nninv δ p N (Φ l) -∗ na_nninv δ p N (Φ l') -∗
     (l +ₗ 1) ↦ #l' -∗ (l' +ₗ 1) ↦ #l =[nninv_wsat δ]=∗
       na_ilisti δ p N Φ l ∗ na_ilisti δ p N Φ l'.

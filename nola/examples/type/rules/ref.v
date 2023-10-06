@@ -7,7 +7,7 @@ Section eref.
   Context `{!tintpGS L Σ}.
 
   (** Allocate [ref[ ]] *)
-  Lemma ninv_tref `{!tderivy Σ ih δ, ! i <ⁿ L} {l T} :
+  Lemma ninv_tref `{!tderivy ih δ, ! i <ⁿ L} {l T} :
     ninv trefN (tinvd_ref l T) ⊢ tref δ (i:=i) l T.
   Proof.
     iIntros "#inv !>". iApply (derivy_intro (δ:=δ))=>/=. iIntros (???).
