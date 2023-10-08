@@ -1,6 +1,7 @@
 (** * Borrowing machinery *)
 
 From nola.util Require Export prod.
+From nola.iris Require Import util.
 From nola.iris Require Export lft upd.
 From iris.algebra Require Import numbers excl agree gmap auth.
 From iris.bi Require Import fractional.
@@ -464,9 +465,6 @@ Section borrow.
       [iIntros "Ql p"|iIntros "[Q Ql] p"]; iApply ("→q" with "Ql [$Q $p]").
   Qed.
   (** [lend_wsat'] with the dead lifetime token *)
-  Local Lemma big_sepM_map_to_list_snd (Φ : _ → iProp Σ) Bm :
-    ([∗ map] B ∈ Bm, Φ B) ⊣⊢ [∗ list] B ∈ (map_to_list Bm).*2, Φ B.
-  Proof. by rewrite big_sepM_map_to_list big_sepL_fmap. Qed.
   Local Lemma lend_wsat'_dead `{!GenUpd _ M} {intp α d P Bm} :
     [†α] -∗ lend_wsat' M intp α d P Bm -∗ ∃ Ql,
       ([∗ list] Q ∈ Ql, ∃ β, lend_dtok (α ⊓ β) (S d) Q) ∗
