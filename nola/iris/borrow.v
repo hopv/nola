@@ -58,7 +58,7 @@ Local Definition borrowR_def PROP := authR (gmapR depo_id (depoR PROP)).
 Local Lemma borrowR_aux : seal borrowR_def. Proof. by eexists. Qed.
 Definition borrowR := borrowR_aux.(unseal).
 Local Lemma borrowR_unseal : borrowR = borrowR_def.
-Proof. exact: borrowR_aux.(seal_eq). Qed.
+Proof. exact: seal_eq. Qed.
 
 (** Ghost state for the borrowing machinery *)
 Class borrowGS PROP Σ := BorrowGS {
@@ -101,7 +101,7 @@ Section borrow.
   Local Lemma bor_ctok_aux : seal bor_ctok_def. Proof. by eexists. Qed.
   Definition bor_ctok := bor_ctok_aux.(unseal).
   Local Lemma bor_ctok_unseal : bor_ctok = bor_ctok_def.
-  Proof. exact: bor_ctok_aux.(seal_eq). Qed.
+  Proof. exact: seal_eq. Qed.
 
   (** Borrower token
 
@@ -112,7 +112,7 @@ Section borrow.
   Local Lemma bor_tok_aux : seal bor_tok_def. Proof. by eexists. Qed.
   Definition bor_tok := bor_tok_aux.(unseal).
   Local Lemma bor_tok_unseal : bor_tok = bor_tok_def.
-  Proof. exact: bor_tok_aux.(seal_eq). Qed.
+  Proof. exact: seal_eq. Qed.
 
   (** Open borrower token
 
@@ -123,7 +123,7 @@ Section borrow.
   Local Lemma bor_otok_aux : seal bor_otok_def. Proof. by eexists. Qed.
   Definition bor_otok := bor_otok_aux.(unseal).
   Local Lemma bor_otok_unseal : bor_otok = bor_otok_def.
-  Proof. exact: bor_otok_aux.(seal_eq). Qed.
+  Proof. exact: seal_eq. Qed.
 
   (** Lender token *)
   Local Definition lend_itok i k d α P : iProp Σ :=
@@ -135,7 +135,7 @@ Section borrow.
   Local Lemma lend_tok_aux : seal lend_tok_def. Proof. by eexists. Qed.
   Definition lend_tok := lend_tok_aux.(unseal).
   Local Lemma lend_tok_unseal : lend_tok = lend_tok_def.
-  Proof. exact: lend_tok_aux.(seal_eq). Qed.
+  Proof. exact: seal_eq. Qed.
 
   (** Borrower and lender tokens are timelesss *)
   #[export] Instance bor_ctok_timeless {α P} : Timeless (bor_ctok α P).
@@ -393,22 +393,14 @@ Section borrow.
   Proof. by eexists. Qed.
   Definition borrow_wsat := borrow_wsat_aux.(unseal).
   Local Lemma borrow_wsat_unseal : borrow_wsat = borrow_wsat_def.
-  Proof. exact: borrow_wsat_aux.(seal_eq). Qed.
+  Proof. exact: seal_eq. Qed.
 
-  (** Non-expansiveness *)
-  #[export] Instance bor_wsat_ne :
+  (** [borrow_wsat] is non-expansive *)
+  Local Instance bor_wsat_ne :
     Proper (pointwise_relation _ (⊣⊢) ==> (=) ==> (=) ==> (=) ==> (⊣⊢))
       bor_wsat.
   Proof. solve_proper. Qed.
-  #[export] Instance depo_wsat_in_ne :
-    Proper ((⊣⊢) ==> (=) ==> pointwise_relation _ (⊣⊢) ==> (=) ==> (=) ==>
-      (=) ==> (=) ==> (⊣⊢)) depo_wsat_in.
-  Proof. solve_proper. Qed.
-  #[export] Instance depo_wsat_dead_ne :
-    Proper ((⊣⊢) ==> (=) ==> pointwise_relation _ (⊣⊢) ==> (=) ==> (=) ==> (⊣⊢))
-      depo_wsat_dead.
-  Proof. solve_proper. Qed.
-  #[export] Instance depo_wsat_ne :
+  Local Instance depo_wsat_ne :
     Proper ((⊣⊢) ==> (=) ==> pointwise_relation _ (⊣⊢) ==> (=) ==> (=) ==>
       (=) ==> (=) ==> (⊣⊢)) depo_wsat.
   Proof.
@@ -445,7 +437,7 @@ Section borrow.
     =[borrow_wsat W E intp]=∗
       ([∗ list] P ∈ Pl, bor_ctok α P) ∗ [∗ list] Q ∈ Ql, lend_tok α Q.
   Proof.
-    iIntros "Pl →Ql". iMod (bor_lend_create_list_dep 0 with "Pl →Ql") as "[$ ?]".
+    iIntros "Pl →Ql". iMod (bor_lend_create_list_dep 0 with "Pl →Ql") as "[$?]".
     iModIntro. iStopProof. do 3 f_equiv. iIntros "l". rewrite lend_tok_unseal.
     iExists _. iSplit; [by iApply lft_sincl_refl|]. by iExists _.
   Qed.
@@ -733,7 +725,7 @@ Section borrow.
         ⌜d' < d ∧ β = α' ⊓ β'⌝ ∗ bor_odtok d' α α' P q.
   Proof.
     elim: Pql=>/=.
-    { iIntros. iExists 0, α. iSplit; [iApply lft_sincl_refl|done]. }
+    { iIntros. iExists 0, ⊤. iSplit; [iApply lft_sincl_top|done]. }
     move=> [P q] Pql ->. rewrite bor_otok_odtok.
     iIntros "[[%d[%α'[#⊑ o]]] [%d'[%β[#? big]]]]".
     iExists (S d `max` d'), (α' ⊓ β).
@@ -838,18 +830,20 @@ Proof. solve_inG. Qed.
 
 Section fborrow.
   Context `{!fborrowGS PROP Σ, !borrowGS PROP Σ, !invGS_gen hlc Σ}.
-  Implicit Type (Φ : Qp → PROP) (F : fbor_stm PROP).
+  Implicit Type (c : bool) (Φ : Qp → PROP) (F : fbor_stm PROP).
 
   (** Fractional borrower token *)
-  Definition fbor_tok_def α Φ : iProp Σ :=
+  Local Definition fbor_tok_def α Φ : iProp Σ :=
     ∃ α', α ⊑□ α' ∗ ∃ i, i ↪[fborrow_name]□ (α', Φ)'.
-  Lemma fbor_tok_aux : seal (@fbor_tok_def). Proof. by eexists. Qed.
+  Local Lemma fbor_tok_aux : seal fbor_tok_def. Proof. by eexists. Qed.
   Definition fbor_tok := fbor_tok_aux.(unseal).
-  Lemma fbor_tok_unseal : @fbor_tok = @fbor_tok_def.
-  Proof. exact: fbor_tok_aux.(seal_eq). Qed.
+  Local Lemma fbor_tok_unseal : @fbor_tok = @fbor_tok_def.
+  Proof. exact: seal_eq. Qed.
 
-  (** [fbor_tok] is persistent *)
-  #[export] Instance fbor_tok_persistent α Φ : Persistent (fbor_tok α Φ).
+  (** [fbor_tok] is persistent and timelesss *)
+  #[export] Instance fbor_tok_persistent {α Φ} : Persistent (fbor_tok α Φ).
+  Proof. rewrite fbor_tok_unseal. exact _. Qed.
+  #[export] Instance fbor_tok_timeless {α Φ} : Timeless (fbor_tok α Φ).
   Proof. rewrite fbor_tok_unseal. exact _. Qed.
 
   (** Modify the lifetime of [fbor_tok] *)
@@ -859,17 +853,31 @@ Section fborrow.
     by iApply lft_sincl_trans.
   Qed.
 
-  (** World satisfaction for the fractional borrowing machinery *)
-  Definition fborrow_wsat_def : iProp Σ :=
-    ∃ F, ghost_map_auth fborrow_name 1 F ∗
-      ([∗ map] '(α, Φ)' ∈ F, ∃ q, bor_tok α (Φ q)).
-  Lemma fborrow_wsat_aux : seal fborrow_wsat_def. Proof. by eexists. Qed.
-  Definition fborrow_wsat := fborrow_wsat_aux.(unseal).
-  Lemma fborrow_wsat_unseal : fborrow_wsat = fborrow_wsat_def.
-  Proof. exact: fborrow_wsat_aux.(seal_eq). Qed.
+  (** Choice between [bor_ctok] and [bor_tok] *)
+  Definition bor_xtok c := if c then bor_ctok else bor_tok.
+  Lemma bor_xtok_tok {c α P} : bor_xtok c α P ⊢ bor_tok α P.
+  Proof. case: c; [exact bor_ctok_tok|done]. Qed.
+  Lemma bor_ctok_xtok {c α P} : bor_ctok α P ⊢ bor_xtok c α P.
+  Proof. case: c; [done|exact bor_ctok_tok]. Qed.
+  #[export] Instance bor_xtok_timeless {c α P} : Timeless (bor_xtok c α P).
+  Proof. case: c; exact _. Qed.
 
-  (** Turn [bor_tok] into [fbor_tok] *)
-  Lemma bor_fbor {α Φ q} : bor_tok α (Φ q) =[fborrow_wsat]=∗ fbor_tok α Φ.
+  (** World satisfaction for the fractional borrowing machinery *)
+  Definition fborrow_wsat_def c : iProp Σ :=
+    ∃ F, ghost_map_auth fborrow_name 1 F ∗
+      [∗ map] '(α, Φ)' ∈ F, ∃ q, bor_xtok c α (Φ q).
+  Local Lemma fborrow_wsat_aux : seal fborrow_wsat_def. Proof. by eexists. Qed.
+  Definition fborrow_wsat := fborrow_wsat_aux.(unseal).
+  Local Lemma fborrow_wsat_unseal : fborrow_wsat = fborrow_wsat_def.
+  Proof. exact: seal_eq. Qed.
+
+  (** [fborrow_wsat] is timelesss *)
+  #[export] Instance fborrow_wsat_timeless {c} : Timeless (fborrow_wsat c).
+  Proof. rewrite fborrow_wsat_unseal. exact _. Qed.
+
+  (** Turn [bor_ctok] into [fbor_tok] *)
+  Lemma bor_fbor {α Φ q} c :
+    bor_xtok c α (Φ q) =[fborrow_wsat c]=∗ fbor_tok α Φ.
   Proof.
     rewrite fborrow_wsat_unseal. iIntros "b [%F[● F]]".
     iMod (ghost_map_insert_persist with "●") as "[● i]";
@@ -881,16 +889,16 @@ Section fborrow.
   Qed.
 
   (** Open [fbor_tok] *)
-  Lemma fbor_open {W E intp α q} `(!Fractional (intp ∘ Φ)) :
-    q.[α] -∗ fbor_tok α Φ =[fborrow_wsat ∗ borrow_wsat W E intp ∗ W]{E}=∗
+  Lemma fbor_open' {W E intp α q} `(!Fractional (intp ∘ Φ)) :
+    q.[α] -∗ fbor_tok α Φ =[fborrow_wsat true ∗ borrow_wsat W E intp]=∗
       ∃ r, bor_otok α (Φ r) q ∗ intp (Φ r).
   Proof.
     rewrite fbor_tok_unseal fborrow_wsat_unseal.
-    iIntros "α [%α'[#?[%i i]]] [[%F[● F]] BW]".
+    iIntros "α [%α'[#?[%i i]]] [[%F[● F]] B]".
     iMod (lft_sincl_tok_acc with "[//] α") as (s) "[α' →α]".
     iDestruct (ghost_map_lookup with "● i") as %?.
-    iDestruct (big_sepM_lookup_acc with "F") as "[[%r b]→F]"; [done|]=>/=.
-    iMod (bor_open with "α' b BW") as "[[B $] [o Φ]]".
+    iDestruct (big_sepM_lookup_acc with "F") as "[[%r c]→F]"; [done|]=>/=.
+    iMod (bor_open' with "α' c B") as "[B [o Φ]]".
     have eq : intp (Φ r) ⊣⊢ intp (Φ (r/2)%Qp) ∗ intp (Φ (r/2)%Qp).
     { by erewrite fractional_half; [|apply: fractional_as_fractional]. }
     rewrite eq. iDestruct "Φ" as "[Φ Φ']".
@@ -899,14 +907,34 @@ Section fborrow.
     iMod (bor_open' with "α' c' B") as "[$ [o Φ]]". iModIntro.
     iDestruct (bor_otok_lft with "[//] →α o") as "o".
     iSplitR "o Φ"; [|iExists _; by iFrame]. iExists _. iFrame "●". iApply "→F".
-    rewrite bor_ctok_tok. by iExists _.
+    by iExists _.
+  Qed.
+  Lemma fbor_open {c W E intp α q} `(!Fractional (intp ∘ Φ)) :
+    q.[α] -∗ fbor_tok α Φ =[fborrow_wsat c ∗ borrow_wsat W E intp ∗ W]{E}=∗
+      ∃ r, bor_otok α (Φ r) q ∗ intp (Φ r).
+  Proof.
+    rewrite fbor_tok_unseal fborrow_wsat_unseal.
+    iIntros "α [%α'[#?[%i i]]] [[%F[● F]] BW]".
+    iMod (lft_sincl_tok_acc with "[//] α") as (s) "[α' →α]".
+    iDestruct (ghost_map_lookup with "● i") as %?.
+    iDestruct (big_sepM_lookup_acc with "F") as "[[%r b]→F]"; [done|]=>/=.
+    rewrite bor_xtok_tok. iMod (bor_open with "α' b BW") as "[[B $] [o Φ]]".
+    have eq : intp (Φ r) ⊣⊢ intp (Φ (r/2)%Qp) ∗ intp (Φ (r/2)%Qp).
+    { by erewrite fractional_half; [|apply: fractional_as_fractional]. }
+    rewrite eq. iDestruct "Φ" as "[Φ Φ']".
+    iMod (bor_subdiv [_;_] with "o [Φ Φ'] [] B") as "[B [α'[c[c' _]]]]".
+    { by iFrame. } { rewrite eq. by iIntros "_ [$[$ _]]". }
+    iMod (bor_open' with "α' c' B") as "[$ [o Φ]]". iModIntro.
+    iDestruct (bor_otok_lft with "[//] →α o") as "o".
+    iSplitR "o Φ"; [|iExists _; by iFrame]. iExists _. iFrame "●". iApply "→F".
+    rewrite bor_ctok_xtok. by iExists _.
   Qed.
 End fborrow.
 
 (** Allocate [fborrow_wsat] *)
 Lemma fborrow_wsat_alloc `{!fborrowGpreS PROP Σ, !borrowGS PROP Σ} :
-  ⊢ |==> ∃ _ : fborrowGS PROP Σ, fborrow_wsat.
+  ⊢ |==> ∃ _ : fborrowGS PROP Σ, ∀ c, fborrow_wsat c.
 Proof.
   iMod ghost_map_alloc_empty as (γ) "●". iModIntro. iExists (FborrowGS _ _ _ γ).
-  rewrite fborrow_wsat_unseal. iExists ∅. by iFrame.
+  iIntros. rewrite fborrow_wsat_unseal. iExists ∅. by iFrame.
 Qed.
