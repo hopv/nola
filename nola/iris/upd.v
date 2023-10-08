@@ -113,6 +113,35 @@ Section gen_upd.
   Qed.
 End gen_upd.
 
+(** ** World satisfaction inclusion *)
+
+Class WsatIncl {PROP : bi} (W W' Wr : PROP) : Prop :=
+  wsat_incl : W ⊣⊢ W' ∗ Wr.
+Arguments WsatIncl {_} _%I _%I _%I : simpl never.
+Arguments wsat_incl {_} _%I _%I _%I {_}.
+Hint Mode WsatIncl + ! ! - : typeclass_instances.
+
+Section wsat_incl.
+  Context {PROP : bi}.
+  Implicit Types W Wr : PROP.
+
+  #[export] Instance wsat_incl_refl {W} : WsatIncl W W emp.
+  Proof. by rewrite /WsatIncl right_id. Qed.
+  #[export] Instance wsat_incl_emp {W} : WsatIncl W emp W.
+  Proof. by rewrite /WsatIncl left_id. Qed.
+  #[export] Instance wsat_incl_True `{!BiAffine PROP} {W} : WsatIncl W True W.
+  Proof. by rewrite /WsatIncl bi.True_sep. Qed.
+  #[export] Instance wsat_incl_sep_in {W W'1 W'2 Wr Wr'} :
+    WsatIncl W W'1 Wr → WsatIncl Wr W'2 Wr' → WsatIncl W (W'1 ∗ W'2) Wr' | 2.
+  Proof. rewrite /WsatIncl=> ->->. by rewrite assoc. Qed.
+  #[export] Instance wsat_incl_in_sep_l {W1 W2 W' Wr} :
+    WsatIncl W1 W' Wr → WsatIncl (W1 ∗ W2) W' (Wr ∗ W2) | 4.
+  Proof. rewrite /WsatIncl=> ->. by rewrite assoc. Qed.
+  #[export] Instance wsat_incl_in_sep_r {W1 W2 W' Wr} :
+    WsatIncl W2 W' Wr → WsatIncl (W1 ∗ W2) W' (W1 ∗ Wr) | 6.
+  Proof. rewrite /WsatIncl=> ->. rewrite !assoc. f_equiv. by rewrite comm. Qed.
+End wsat_incl.
+
 (** ** Update with a custom world satisfaction [W] *)
 
 (** Basic update with a world satisfaction *)
@@ -164,31 +193,6 @@ Notation "|=[ W ] { E }▷=>^ n P" :=
   (Nat.iter n (λ Q, |=[W]{E}▷=> Q) P)%I
   (at level 99, P at level 200, n at level 9,
     format "'[  ' |=[ W ] '/' { E }▷=>^ n  '/' P ']'") : bi_scope.
-
-(** *** World satisfaction inclusion *)
-
-Class WsatIncl {PROP : bi} (W W' Wr : PROP) : Prop :=
-  wsat_incl : W ⊣⊢ W' ∗ Wr.
-Arguments WsatIncl {_} _%I _%I _%I : simpl never.
-Arguments wsat_incl {_} _%I _%I _%I {_}.
-Hint Mode WsatIncl + ! ! - : typeclass_instances.
-
-Section wsat_incl.
-  Context {PROP : bi}.
-  Implicit Types W Wr : PROP.
-
-  #[export] Instance wsat_incl_refl {W} : WsatIncl W W emp%I.
-  Proof. by rewrite /WsatIncl right_id. Qed.
-  #[export] Instance wsat_incl_sep_in {W W'1 W'2 Wr Wr'} :
-    WsatIncl W W'1 Wr → WsatIncl Wr W'2 Wr' → WsatIncl W (W'1 ∗ W'2) Wr' | 2.
-  Proof. rewrite /WsatIncl=> ->->. by rewrite assoc. Qed.
-  #[export] Instance wsat_incl_in_sep_l {W1 W2 W' Wr} :
-    WsatIncl W1 W' Wr → WsatIncl (W1 ∗ W2) W' (Wr ∗ W2) | 4.
-  Proof. rewrite /WsatIncl=> ->. by rewrite assoc. Qed.
-  #[export] Instance wsat_incl_in_sep_r {W1 W2 W' Wr} :
-    WsatIncl W2 W' Wr → WsatIncl (W1 ∗ W2) W' (W1 ∗ Wr) | 6.
-  Proof. rewrite /WsatIncl=> ->. rewrite !assoc. f_equiv. by rewrite comm. Qed.
-End wsat_incl.
 
 (** *** Lemmas *)
 Section lemmas.
