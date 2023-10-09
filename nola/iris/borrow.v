@@ -4,7 +4,7 @@ From nola.util Require Export prod.
 From nola.iris Require Import util.
 From nola.iris Require Export lft upd.
 From nola.util Require Import prod.
-From iris.algebra Require Import numbers excl agree gmap auth.
+From iris.algebra Require Import excl agree gmap auth.
 From iris.bi Require Import fractional.
 From iris.base_logic.lib Require Import ghost_map.
 From iris.proofmode Require Import proofmode.
@@ -137,7 +137,7 @@ Section borrow.
   Local Lemma lend_tok_unseal : lend_tok = lend_tok_def.
   Proof. exact: seal_eq. Qed.
 
-  (** Borrower and lender tokens are timelesss *)
+  (** Borrower and lender tokens are timeless *)
   #[export] Instance bor_ctok_timeless {α P} : Timeless (bor_ctok α P).
   Proof. rewrite bor_ctok_unseal. apply _. Qed.
   #[export] Instance bor_tok_timeless {α P} : Timeless (bor_tok α P).
@@ -837,10 +837,10 @@ Section fborrow.
     ∃ α', α ⊑□ α' ∗ ∃ i, i ↪[fborrow_name]□ (α', Φ)'.
   Local Lemma fbor_tok_aux : seal fbor_tok_def. Proof. by eexists. Qed.
   Definition fbor_tok := fbor_tok_aux.(unseal).
-  Local Lemma fbor_tok_unseal : @fbor_tok = @fbor_tok_def.
+  Local Lemma fbor_tok_unseal : fbor_tok = fbor_tok_def.
   Proof. exact: seal_eq. Qed.
 
-  (** [fbor_tok] is persistent and timelesss *)
+  (** [fbor_tok] is persistent and timeless *)
   #[export] Instance fbor_tok_persistent {α Φ} : Persistent (fbor_tok α Φ).
   Proof. rewrite fbor_tok_unseal. exact _. Qed.
   #[export] Instance fbor_tok_timeless {α Φ} : Timeless (fbor_tok α Φ).
@@ -871,7 +871,7 @@ Section fborrow.
   Local Lemma fborrow_wsat_unseal : fborrow_wsat = fborrow_wsat_def.
   Proof. exact: seal_eq. Qed.
 
-  (** [fborrow_wsat] is timelesss *)
+  (** [fborrow_wsat] is timeless *)
   #[export] Instance fborrow_wsat_timeless {c} : Timeless (fborrow_wsat c).
   Proof. rewrite fborrow_wsat_unseal. exact _. Qed.
 
