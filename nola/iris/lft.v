@@ -85,8 +85,12 @@ Notation "q .[ α ]" := (lft_tok α q)
 (** Dead atomic lifetime token *)
 Local Definition alft_dead `{!lftG Σ} (a : alft) : iProp Σ := own a (Cinr ()).
 (** Dead lifetime token *)
-Definition lft_dead `{!lftG Σ} (α : lft) : iProp Σ :=
+Local Definition lft_dead_def `{!lftG Σ} (α : lft) : iProp Σ :=
   ∃ a, ⌜a ∈ α⌝ ∗ alft_dead a.
+Local Lemma lft_dead_aux : seal (@lft_dead_def). Proof. by eexists. Qed.
+Definition lft_dead `{!lftG Σ} := lft_dead_aux.(unseal) _ _.
+Local Lemma lft_dead_unseal `{!lftG Σ} : @lft_dead = @lft_dead_def.
+Proof. exact: seal_eq. Qed.
 Notation "[† α ]" := (lft_dead α) (format "[† α ]") : bi_scope.
 
 (** Eternal atomic lifetime token *)
@@ -100,30 +104,30 @@ Section lft.
   Context `{!lftG Σ}.
 
   (** Dead and eternal lifetime tokens are persistent *)
-  Fact lft_dead_persistent {α} : Persistent [†α].
-  Proof. exact _. Qed.
+  #[export] Instance lft_dead_persistent {α} : Persistent [†α].
+  Proof. rewrite lft_dead_unseal. exact _. Qed.
   Fact lft_eter_persistent {α} : Persistent [∞α].
   Proof. exact _. Qed.
 
   (** Lifetime, dead, eternal lifetime tokens are timeless *)
   Fact lft_tok_timeless {α q} : Timeless q.[α].
   Proof. exact _. Qed.
-  Fact lft_dead_timeless {α} : Timeless [†α].
-  Proof. exact _. Qed.
+  #[export] Instance lft_dead_timeless {α} : Timeless [†α].
+  Proof. rewrite lft_dead_unseal. exact _. Qed.
   Fact lft_eter_timeless {α} : Timeless [∞α].
   Proof. exact _. Qed.
 
   (** Lifetime and dead lifetime tokens can't coexist *)
   Lemma lft_tok_dead {α q} : q.[α] -∗ [†α] -∗ False.
   Proof.
-    iIntros "q". iDestruct 1 as (a) "[%e †]".
+    rewrite lft_dead_unseal. iIntros "q". iDestruct 1 as (a) "[%e †]".
     rewrite big_sepMS_elem_of; [|done].
     by iDestruct (own_valid_2 with "q †") as "%".
   Qed.
   (** Eternal and dead lifetime tokens can't coexist *)
   Lemma lft_eter_dead {α} : [∞α] -∗ [†α] -∗ False.
   Proof.
-    iIntros "∞". iDestruct 1 as (a) "[%e †]".
+    rewrite lft_dead_unseal. iIntros "∞". iDestruct 1 as (a) "[%e †]".
     rewrite big_sepMS_elem_of; [|done].
     by iDestruct (own_valid_2 with "∞ †") as "%".
   Qed.
@@ -150,7 +154,8 @@ Section lft.
     rewrite big_sepMS_singleton. iFrame "a". iIntros "!>!> a".
     iMod (own_update _ _ (Cinr ()) with "a") as "†".
     { by apply cmra_update_exclusive. }
-    iModIntro. iExists _. iFrame "†". iPureIntro. set_solver.
+    iModIntro. rewrite lft_dead_unseal. iExists _. iFrame "†". iPureIntro.
+    set_solver.
   Qed.
 
   (** Eternalize a lifetime *)
@@ -195,10 +200,10 @@ Section lft.
 
   (** Dead lifetime token over [⊤]/[⊓] *)
   Lemma lft_dead_top : [†⊤] ⊢ False.
-  Proof. iDestruct 1 as (?) "[% _]". set_solver. Qed.
+  Proof. rewrite lft_dead_unseal. iDestruct 1 as (?) "[% _]". set_solver. Qed.
   Lemma lft_dead_meet {α β} : [†α ⊓ β] ⊣⊢ [†α] ∨ [†β].
   Proof.
-    iSplit.
+    rewrite lft_dead_unseal. iSplit.
     - iDestruct 1 as (a) "[%e †]". rewrite gmultiset_elem_of_disj_union in e.
       case e as [?|?]; [iLeft|iRight]; iExists _; by iFrame "†".
     - iDestruct 1 as "[(%a & % & †)|(%a & % & †)]"; iExists _; iFrame "†";
@@ -243,8 +248,8 @@ Section lft.
   (** Modify a dead lifetime token using [⊑] *)
   Lemma lft_incl_dead {α β} : α ⊑ β → [†β] ⊢ [†α].
   Proof.
-    move=> ?. iDestruct 1 as (a) "[%aβ †]". iExists a. iFrame "†". iPureIntro.
-    move: aβ. rewrite -!gmultiset_elem_of_elements. set_solver.
+    rewrite lft_dead_unseal=> ?. iDestruct 1 as (a) "[%aβ †]". iExists a.
+    iFrame "†". iPureIntro. move: aβ. rewrite -!gmultiset_elem_of_elements. set_solver.
   Qed.
   #[export] Instance lft_dead_mono : Proper (flip (⊑) ==> (⊢)) (λ α, [†α])%I.
   Proof. move=> >. exact lft_incl_dead. Qed.
@@ -304,9 +309,8 @@ Section lft.
   Lemma lft_sincl_dead {α β} : α ⊑□ β ⊢ [†β] -∗ [†α].
   Proof.
     rewrite lft_sincl_unseal. iIntros "[$|[%[% γ]]] †"; [done|].
-    iDestruct (lft_incl_dead with "†") as "†"; [done|].
-    rewrite lft_dead_meet. iDestruct "†" as "[$|†]".
-    iDestruct (lft_eter_dead with "γ †") as "[]".
+    rewrite lft_incl_dead; [|done]. rewrite lft_dead_meet.
+    iDestruct "†" as "[$|†]". iDestruct (lft_eter_dead with "γ †") as "[]".
   Qed.
 
   (** Modify an eternal lifetime token using [⊑□] *)
@@ -331,9 +335,8 @@ Section lft.
   Proof.
     rewrite lft_sincl_unseal. iIntros "[$|[%δ[% δ]]]"; [by iIntros|].
     iIntros "[†|[%δ'[% δ']]]".
-    { iLeft. iDestruct (lft_incl_dead with "†") as "†"; [done|].
-      rewrite lft_dead_meet. iDestruct "†" as "[$|†]".
-      iDestruct (lft_eter_dead with "δ †") as "[]". }
+    { iLeft. rewrite lft_incl_dead; [|done]. rewrite lft_dead_meet.
+      iDestruct "†" as "[$|†]". iDestruct (lft_eter_dead with "δ †") as "[]". }
     iRight. iExists (δ ⊓ δ'). iFrame "δ δ'". iPureIntro. etrans; [|done].
     rewrite assoc. by apply lft_incl_meet_mono_l.
   Qed.
