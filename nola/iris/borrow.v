@@ -1,7 +1,7 @@
 (** * Borrowing machinery *)
 
 From nola.util Require Export prod.
-From nola.iris Require Import util.
+From nola.iris Require Import util sinv.
 From nola.iris Require Export lft upd.
 From nola.util Require Import prod.
 From iris.algebra Require Import excl agree gmap auth.
@@ -813,28 +813,22 @@ Qed.
 
 (** State of a fractured borrower *)
 Local Definition fbor_st PROP : Type := lft *' (Qp → PROP).
-(** State of all the fractured borrowers *)
-Local Definition fbor_stm PROP : Type := gmap positive (fbor_st PROP).
 
 (** Ghost state for fractured borrowing *)
-Class fborrowGS PROP Σ := FborrowGS {
-  fborrowGS_in :: ghost_mapG Σ positive (fbor_st PROP);
-  fborrow_name : gname;
-}.
-Class fborrowGpreS PROP Σ :=
-  fborrowGpreS_in :: ghost_mapG Σ positive (fbor_st PROP).
-Definition fborrowΣ PROP : gFunctors := ghost_mapΣ positive (fbor_st PROP).
+Class fborrowGS PROP Σ := fborrowGS_in :: sinvGS (fbor_st PROP) Σ.
+Class fborrowGpreS PROP Σ := fborrowGpreS_in :: sinvGpreS (fbor_st PROP) Σ.
+Definition fborrowΣ PROP : gFunctors := sinvΣ (fbor_st PROP).
 #[export] Instance subG_fborrow `{!subG (fborrowΣ PROP) Σ} :
   fborrowGpreS PROP Σ.
 Proof. solve_inG. Qed.
 
 Section fborrow.
   Context `{!fborrowGS PROP Σ, !borrowGS PROP Σ, !invGS_gen hlc Σ}.
-  Implicit Type (c : bool) (Φ : Qp → PROP) (F : fbor_stm PROP).
+  Implicit Type (c : bool) (Φ : Qp → PROP).
 
   (** Fractional borrower token *)
   Local Definition fbor_tok_def α Φ : iProp Σ :=
-    ∃ α', α ⊑□ α' ∗ ∃ i, i ↪[fborrow_name]□ (α', Φ)'.
+    ∃ α', α ⊑□ α' ∗ sinv_tok (α', Φ)'.
   Local Lemma fbor_tok_aux : seal fbor_tok_def. Proof. by eexists. Qed.
   Definition fbor_tok := fbor_tok_aux.(unseal).
   Local Lemma fbor_tok_unseal : fbor_tok = fbor_tok_def.
@@ -864,8 +858,7 @@ Section fborrow.
 
   (** World satisfaction for the fractional borrowing machinery *)
   Definition fborrow_wsat_def c : iProp Σ :=
-    ∃ F, ghost_map_auth fborrow_name 1 F ∗
-      [∗ map] '(α, Φ)' ∈ F, ∃ q, bor_xtok c α (Φ q).
+    sinv_wsat (λ '(α, Φ)', ∃ q, bor_xtok c α (Φ q))%I.
   Local Lemma fborrow_wsat_aux : seal fborrow_wsat_def. Proof. by eexists. Qed.
   Definition fborrow_wsat := fborrow_wsat_aux.(unseal).
   Local Lemma fborrow_wsat_unseal : fborrow_wsat = fborrow_wsat_def.
@@ -879,13 +872,10 @@ Section fborrow.
   Lemma bor_fbor {α Φ q} c :
     bor_xtok c α (Φ q) =[fborrow_wsat c]=∗ fbor_tok α Φ.
   Proof.
-    rewrite fborrow_wsat_unseal. iIntros "b [%F[● F]]".
-    iMod (ghost_map_insert_persist with "●") as "[● i]";
-      [apply not_elem_of_dom_1, is_fresh|]. iModIntro.
-    iDestruct (big_sepM_insert_2 _ _ _ (_,_)' with "[b] F") as "F";
-      [by iExists q|].
-    iSplitR "i"; [iExists _; iFrame|]. rewrite fbor_tok_unseal. iExists _.
-    iSplit; by [iApply lft_sincl_refl|iExists _].
+    rewrite fborrow_wsat_unseal. iIntros "b W".
+    iMod (sinv_alloc (_,_)' with "W") as "[#t →W]". iModIntro. iSplitL.
+    { iApply "→W". by iExists _. }
+    rewrite fbor_tok_unseal. iExists _. iSplit; by [iApply lft_sincl_refl|].
   Qed.
 
   (** Open [fbor_tok] *)
@@ -893,11 +883,9 @@ Section fborrow.
     q.[α] -∗ fbor_tok α Φ =[fborrow_wsat true ∗ borrow_wsat W E intp]=∗
       ∃ r, bor_otok α (Φ r) q ∗ intp (Φ r).
   Proof.
-    rewrite fbor_tok_unseal fborrow_wsat_unseal.
-    iIntros "α [%α'[#?[%i i]]] [[%F[● F]] B]".
-    iMod (lft_sincl_tok_acc with "[//] α") as (s) "[α' →α]".
-    iDestruct (ghost_map_lookup with "● i") as %?.
-    iDestruct (big_sepM_lookup_acc with "F") as "[[%r c]→F]"; [done|]=>/=.
+    rewrite fbor_tok_unseal fborrow_wsat_unseal. iIntros "α [%α'[#⊑ i]] [F B]".
+    iDestruct (sinv_acc with "i F") as "[[%r c] →F]".
+    iMod (lft_sincl_tok_acc with "⊑ α") as (s) "[α' →α]".
     iMod (bor_open' with "α' c B") as "[B [o Φ]]".
     have eq : intp (Φ r) ⊣⊢ intp (Φ (r/2)%Qp) ∗ intp (Φ (r/2)%Qp).
     { by erewrite fractional_half; [|apply: fractional_as_fractional]. }
@@ -906,19 +894,16 @@ Section fborrow.
     { by iFrame. } { rewrite eq. by iIntros "_ [$[$ _]]". }
     iMod (bor_open' with "α' c' B") as "[$ [o Φ]]". iModIntro.
     iDestruct (bor_otok_lft with "[//] →α o") as "o".
-    iSplitR "o Φ"; [|iExists _; by iFrame]. iExists _. iFrame "●". iApply "→F".
-    by iExists _.
+    iSplitR "o Φ"; [|iExists _; by iFrame]. iApply "→F". by iExists _.
   Qed.
   Lemma fbor_open {c W E intp α q} `(!Fractional (intp ∘ Φ)) :
     q.[α] -∗ fbor_tok α Φ =[fborrow_wsat c ∗ borrow_wsat W E intp ∗ W]{E}=∗
       ∃ r, bor_otok α (Φ r) q ∗ intp (Φ r).
   Proof.
-    rewrite fbor_tok_unseal fborrow_wsat_unseal.
-    iIntros "α [%α'[#?[%i i]]] [[%F[● F]] BW]".
-    iMod (lft_sincl_tok_acc with "[//] α") as (s) "[α' →α]".
-    iDestruct (ghost_map_lookup with "● i") as %?.
-    iDestruct (big_sepM_lookup_acc with "F") as "[[%r b]→F]"; [done|]=>/=.
-    rewrite bor_xtok_tok. iMod (bor_open with "α' b BW") as "[[B $] [o Φ]]".
+    rewrite fbor_tok_unseal fborrow_wsat_unseal. iIntros "α [%α'[#⊑ i]] [F BW]".
+    iDestruct (sinv_acc with "i F") as "[[%r b] →F]". rewrite bor_xtok_tok.
+    iMod (lft_sincl_tok_acc with "⊑ α") as (s) "[α' →α]".
+    iMod (bor_open with "α' b BW") as "[[B $] [o Φ]]".
     have eq : intp (Φ r) ⊣⊢ intp (Φ (r/2)%Qp) ∗ intp (Φ (r/2)%Qp).
     { by erewrite fractional_half; [|apply: fractional_as_fractional]. }
     rewrite eq. iDestruct "Φ" as "[Φ Φ']".
@@ -926,8 +911,8 @@ Section fborrow.
     { by iFrame. } { rewrite eq. by iIntros "_ [$[$ _]]". }
     iMod (bor_open' with "α' c' B") as "[$ [o Φ]]". iModIntro.
     iDestruct (bor_otok_lft with "[//] →α o") as "o".
-    iSplitR "o Φ"; [|iExists _; by iFrame]. iExists _. iFrame "●". iApply "→F".
-    rewrite bor_ctok_xtok. by iExists _.
+    iSplitR "o Φ"; [|iExists _; by iFrame]. iApply "→F". rewrite bor_ctok_xtok.
+    by iExists _.
   Qed.
 End fborrow.
 
@@ -935,6 +920,6 @@ End fborrow.
 Lemma fborrow_wsat_alloc `{!fborrowGpreS PROP Σ, !borrowGS PROP Σ} :
   ⊢ |==> ∃ _ : fborrowGS PROP Σ, ∀ c, fborrow_wsat c.
 Proof.
-  iMod ghost_map_alloc_empty as (γ) "●". iModIntro. iExists (FborrowGS _ _ _ γ).
-  iIntros. rewrite fborrow_wsat_unseal. iExists ∅. by iFrame.
+  iMod sinv_wsat_alloc as (?) "W". iModIntro. iExists _. iIntros (?).
+  rewrite fborrow_wsat_unseal. iApply "W".
 Qed.
