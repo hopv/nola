@@ -25,11 +25,9 @@ Section sinv.
   Definition sinv_tok' := sinv_tok'_aux.(unseal).
   Local Lemma sinv_tok'_unseal : sinv_tok' = sinv_tok'_def.
   Proof. exact: seal_eq. Qed.
-  Local Definition sinv_tok_def P : iProp Σ := ∃ i, sinv_tok' i P.
-  Local Lemma sinv_tok_aux : seal sinv_tok_def. Proof. by eexists. Qed.
-  Definition sinv_tok := sinv_tok_aux.(unseal).
-  Local Lemma sinv_tok_unseal : sinv_tok = sinv_tok_def.
-  Proof. exact: seal_eq. Qed.
+
+  (** Simple invariant token with the index hidden *)
+  Definition sinv_tok P : iProp Σ := ∃ i, sinv_tok' i P.
 
   (** World satisfaction *)
   Definition sinv_wsat'_def intp : iProp Σ :=
@@ -39,6 +37,7 @@ Section sinv.
   Local Lemma sinv_wsat'_unseal : sinv_wsat' = sinv_wsat'_def.
   Proof. exact: seal_eq. Qed.
 End sinv.
+(** World satisfaction whose interpretation ignores the index *)
 Notation sinv_wsat intp := (sinv_wsat' (λ _, intp)).
 
 Section sinv.
@@ -50,10 +49,10 @@ Section sinv.
   Proof. rewrite sinv_tok'_unseal. exact _. Qed.
   #[export] Instance sinv_tok'_timeless {i P} : Timeless (sinv_tok' i P).
   Proof. rewrite sinv_tok'_unseal. exact _. Qed.
-  #[export] Instance sinv_tok_persistent {P} : Persistent (sinv_tok P).
-  Proof. rewrite sinv_tok_unseal. exact _. Qed.
-  #[export] Instance sinv_tok_timeless {P} : Timeless (sinv_tok P).
-  Proof. rewrite sinv_tok_unseal. exact _. Qed.
+  Fact sinv_tok_persistent {P} : Persistent (sinv_tok P).
+  Proof. exact _. Qed.
+  Fact sinv_tok_timeless {P} : Timeless (sinv_tok P).
+  Proof. exact _. Qed.
 
   (** [sinv_wsat'] is non-expansive *)
   #[export] Instance sinv_wsat'_ne {n} :
@@ -85,7 +84,7 @@ Section sinv.
   Proof.
     iIntros "W". iDestruct (sinv_alloc' with "W") as (?) "big".
     iMod ("big" with "[]") as "[? $]". { iPureIntro. apply is_fresh. }
-    iModIntro. rewrite sinv_tok_unseal. by iExists _.
+    iModIntro. by iExists _.
   Qed.
 
   (** Accesss via [sinv_tok] *)
@@ -100,9 +99,7 @@ Section sinv.
   Qed.
   Lemma sinv_acc {intp P} :
     sinv_tok P -∗ sinv_wsat intp -∗ intp P ∗ (intp P -∗ sinv_wsat intp).
-  Proof.
-    rewrite sinv_tok_unseal. iIntros "[%i i]". iApply (sinv_acc' with "i").
-  Qed.
+  Proof. iIntros "[%i i]". iApply (sinv_acc' with "i"). Qed.
 End sinv.
 
 (** Allocate [sinv_wsat] *)
