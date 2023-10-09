@@ -320,8 +320,8 @@ Section borrow.
     move=> i'. case: (decide (i = i'))=> [<-|?]; last first.
     { rewrite lookup_insert_ne; [|done]. by rewrite lookup_singleton_ne. }
     rewrite lookup_empty lookup_fmap eq !lookup_insert /=.
-    apply local_update_unital_discrete=> ??. rewrite left_id=> <-. split.
-    { split; [split|]; [done|by apply: gmap_fmap_valid..]. }
+    apply local_update_unital_discrete=> ?[/=??]. rewrite left_id=> <-. split.
+    { split; [done|]. by apply: gmap_fmap_valid. }
     rewrite -Some_op. f_equiv.
     split; [split|]=>/=; [by rewrite agree_idemp|by rewrite left_id|].
     rewrite gmap_op_disj; [|by apply map_disjoint_fmap, map_without_disj].
