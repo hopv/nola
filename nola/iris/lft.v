@@ -250,6 +250,19 @@ Section lft.
   Proof. move=> >. exact lft_incl_dead. Qed.
   #[export] Instance lft_dead_mono' : Proper ((⊑) ==> flip (⊢)) (λ α, [†α])%I.
   Proof. solve_proper. Qed.
+
+  (** Modify an eternal lifetime token using [⊑] *)
+  Lemma lft_incl_eter {α β} : α ⊑ β → [∞α] ⊢ [∞β].
+  Proof.
+    rewrite !big_opMS_elements=> αβ. iIntros "α". iApply big_sepL_forall.
+    iIntros (?? eq). apply elem_of_list_lookup_2 in eq.
+    rewrite big_sepL_elem_of; [done|]. by apply αβ.
+  Qed.
+  #[export] Instance lft_eter_mono : Proper ((⊑) ==> (⊢)) (λ α, [∞α])%I.
+  Proof. move=> >. exact lft_incl_eter. Qed.
+  #[export] Instance lft_eter_mono' :
+    Proper (flip (⊑) ==> flip (⊢)) (λ α, [∞α])%I.
+  Proof. solve_proper. Qed.
 End lft.
 
 (** ** Persistent lifetime inclusion *)
@@ -296,6 +309,14 @@ Section lft.
     iDestruct (lft_eter_dead with "γ †") as "[]".
   Qed.
 
+  (** Modify an eternal lifetime token using [⊑□] *)
+  Lemma lft_sincl_eter {α β} : α ⊑□ β ⊢ [∞α] -∗ [∞β].
+  Proof.
+    rewrite lft_sincl_unseal. iIntros "[†|[%γ[%inc γ]]] α".
+    { iDestruct (lft_eter_dead with "α †") as "[]". }
+    iApply lft_incl_eter; [done|]. by iSplit.
+  Qed.
+
   (** [⊑] entails [⊑□] *)
   Lemma lft_incl_sincl {α β} : α ⊑ β → ⊢ α ⊑□ β.
   Proof.
@@ -324,13 +345,13 @@ Section lft.
   Proof. rewrite lft_sincl_unseal. by iIntros "$". Qed.
 
   (** An eternal lifetime is the maximum w.r.t. [⊑□] *)
-  Lemma lft_sincl_eter {α} : [∞α] ⊢ ∀ β, β ⊑□ α.
+  Lemma lft_sincl_by_eter {α} : [∞α] ⊢ ∀ β, β ⊑□ α.
   Proof.
     rewrite lft_sincl_unseal. iIntros "#∞ %β". iRight. iExists _. iFrame "∞".
     iPureIntro. exact lft_incl_meet_r.
   Qed.
   Lemma lft_eternalize_sincl {α q} : q.[α] ==∗ ∀ β, β ⊑□ α.
-  Proof. rewrite -lft_sincl_eter. apply lft_eternalize. Qed.
+  Proof. rewrite -lft_sincl_by_eter. apply lft_eternalize. Qed.
 
   (** [⊓] is the lub w.r.t. [⊑□] *)
   Lemma lft_sincl_meet_l {α β} : ⊢ α ⊓ β ⊑□ α.
