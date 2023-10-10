@@ -7,19 +7,20 @@ Import EqNotations.
 (** ** [nlift]: Turn [nProp κ (;ᵞ)] into [nProp κ Γ] *)
 
 (** [nliftg]: Turn [nProp κ (;ᵞ)] into [nProp κ (;ᵞ Γᵍ)] *)
-Fixpoint nliftg {κ Γᵍ} (P : nProp κ (;ᵞ)) : nProp κ (;ᵞ Γᵍ) :=
+Local Fixpoint nliftg {κ Γᵍ} (P : nProp κ (;ᵞ)) : nProp κ (;ᵞ Γᵍ) :=
   match Γᵍ with [] => P | _ :: _ => ¢ᵍ (nliftg P) end.
 
 (** [nliftg] commutes with [↑ˡ] *)
-Lemma nliftg_nlarge {κ Γᵍ P} : nliftg (Γᵍ:=Γᵍ) (↑ˡ P) = ↑ˡ (nliftg (κ:=κ) P).
+Local Lemma nliftg_nlarge {κ Γᵍ P} :
+  nliftg (Γᵍ:=Γᵍ) (↑ˡ P) = ↑ˡ (nliftg (κ:=κ) P).
 Proof. by elim Γᵍ; [done|]=>/= ??->. Qed.
 
 (** [nliftu]: Turn [nProp κ (;ᵞ Γᵍ)] into [nProp κ (Γᵘ;ᵞ Γᵍ)] *)
-Fixpoint nliftu {κ Γᵘ Γᵍ} (P : nProp κ (;ᵞ Γᵍ)) : nProp κ (Γᵘ;ᵞ Γᵍ) :=
+Local Fixpoint nliftu {κ Γᵘ Γᵍ} (P : nProp κ (;ᵞ Γᵍ)) : nProp κ (Γᵘ;ᵞ Γᵍ) :=
   match Γᵘ with [] => P | _ :: _ => ¢ᵘ (nliftu P) end.
 
 (** [nliftu] commutes with [↑ˡ] *)
-Lemma nliftu_nlarge {κ Γᵘ Γᵍ P} :
+Local Lemma nliftu_nlarge {κ Γᵘ Γᵍ P} :
   nliftu (Γᵘ:=Γᵘ) (Γᵍ:=Γᵍ) (↑ˡ P) = ↑ˡ (nliftu (κ:=κ) P).
 Proof. by elim Γᵘ; [done|]=>/= ??->. Qed.
 
@@ -42,7 +43,7 @@ Definition napply {κ V} : nparg κ V → nPred V → nProp κ (;ᵞ) :=
   λ '(@! a) Φ, Φ a.
 
 (** [nsubstlg Φ P]: Substitute [Φ] for [P]'s last guarded variable *)
-Fixpoint nsubstlg {κ Γ Γᵍ V} (Φ : nPred V) (P : nProp κ Γ)
+Local Fixpoint nsubstlg {κ Γ Γᵍ V} (Φ : nPred V) (P : nProp κ Γ)
   : Γ.ᵞg = Γᵍ ++ [V] → nProp κ (Γ.ᵞu;ᵞ Γᵍ) :=
   match P with
   | n_0 c => λ _, n_0 c | n_l0 c => λ _, n_l0 c
@@ -71,17 +72,18 @@ Fixpoint nsubstlg {κ Γ Γᵍ V} (Φ : nPred V) (P : nProp κ Γ)
   end%n.
 
 (** [P /:ᵍ Φ]: Substitute [Φ] for [P]'s only unguarded variable *)
-Definition nsubstg {κ V} (P : nProp κ (;ᵞ [V])) (Φ : nPred V) : nProp κ (;ᵞ) :=
-  nsubstlg (Γᵍ:=[]) Φ P eq_refl.
+Local Definition nsubstg {κ V} (P : nProp κ (;ᵞ [V])) (Φ : nPred V)
+  : nProp κ (;ᵞ) := nsubstlg (Γᵍ:=[]) Φ P eq_refl.
 Arguments nsubstg {_ _} _ _ /.
 Infix "/:ᵍ" := nsubstg (at level 25, no associativity).
 
 (** [/:ᵍ] on [¢ᵍ P] *)
-Fact nsubstg_n_constg {κ V} {Φ : _ V} {P : nProp κ (;ᵞ)} : ¢ᵍ P /:ᵍ Φ = P.
+Local Fact nsubstg_n_constg {κ V} {Φ : _ V} {P : nProp κ (;ᵞ)} : ¢ᵍ P /:ᵍ Φ = P.
 Proof. done. Qed.
 
 (** [nsubstlg] commutes with [↑ˡ] *)
-Lemma nsubstlg_nlarge {κ Γ V Γᵍ Φ} {P : nProp κ Γ} {eq : Γ.ᵞg = Γᵍ ++ [V] } :
+Local Lemma nsubstlg_nlarge
+  {κ Γ V Γᵍ Φ} {P : nProp κ Γ} {eq : Γ.ᵞg = Γᵍ ++ [V] } :
   nsubstlg Φ (↑ˡ P) eq = ↑ˡ (nsubstlg Φ P eq).
 Proof.
   move: κ Γ Γᵍ P eq. fix FIX 4=> κ Γ Γᵍ.
@@ -161,7 +163,7 @@ Fixpoint nhgt {κ Γ} (P : nProp κ Γ) : hgt :=
   end%n.
 
 (** [nsubstlu] preserves [nhgt] *)
-Lemma nsubstlu_nhgt {κ Γ Γᵘ V Φ P eq gn} :
+Local Lemma nsubstlu_nhgt {κ Γ Γᵘ V Φ P eq gn} :
   nhgt (@nsubstlu κ Γ Γᵘ V Φ P eq gn) = nhgt P.
 Proof.
   move: κ Γ Γᵘ P eq gn. fix FIX 4=> ?? Γᵘ.

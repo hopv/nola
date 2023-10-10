@@ -339,7 +339,7 @@ Definition nunsmall {κ Γ} (P : nPropS Γ) : nProp κ Γ :=
   match κ with nS => P | nL => ↑ˡ P end.
 
 (** [↑ˡ] is identity for [nPropL] *)
-Lemma nlarge_id' {κ Γ} {P : nProp κ Γ} (eq : κ = nL) :
+Local Lemma nlarge_id' {κ Γ} {P : nProp κ Γ} (eq : κ = nL) :
   ↑ˡ P = rew[λ κ, nProp κ Γ] eq in P.
 Proof.
   move: κ Γ P eq. fix FIX 3=> κ Γ.
