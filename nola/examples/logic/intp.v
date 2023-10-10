@@ -22,9 +22,10 @@ Section nintp.
   (** Interpret basic connectives *)
   Local Definition ncintp0 (c : ncon0) : iProp Σ :=
     match c with
-    | ⟨⌜φ⌝⟩ => ⌜φ⌝
+    | nc_pure φ => ⌜φ⌝
     | nc_na_own p E => na_own p E | nc_cinv_own γ q => cinv_own γ q
-    | ⟨↦{dq}|l,v⟩ => l ↦{dq} v | ⟨↦_J|l,v⟩ => l ↦_J v | ⟨↦□_J|l⟩ => l ↦_J □
+    | nc_mapsto l dq v => l ↦{dq} v
+    | nc_inv_mapsto_own l v J => l ↦_J v | nc_inv_mapsto l J => l ↦_J □
     | nc_meta_token l E => meta_token l E
     | nc_steps_lb n => steps_lb n | nc_proph p pvs => proph p pvs
     | nc_lft_tok α q => (q).[α] | nc_lft_dead α => [†α] | nc_lft_eter α => [∞α]
@@ -37,8 +38,8 @@ Section nintp.
     end.
   Local Definition ncintp1 (c : ncon1) (P : iProp Σ) : iProp Σ :=
     match c with
-    | ⟨◇⟩ => ◇ P | ⟨□⟩ => □ P | ⟨■⟩ => ■ P
-    | ⟨|==>⟩ => |==> P | ⟨|={E,E'}=>⟩ => |={E,E'}=> P
+    | nc_except_0 => ◇ P | nc_persistently => □ P | nc_plainly => ■ P
+    | nc_bupd => |==> P | nc_fupd E E' => |={E,E'}=> P
     end.
   Local Definition ncintpl1 (c : nconl1) (P : iProp Σ)
     (niS : nPropS (;ᵞ) -d> iProp Σ) : iProp Σ :=
@@ -47,8 +48,9 @@ Section nintp.
     end.
   Local Definition ncintp2 (c : ncon2) (P Q : iProp Σ) : iProp Σ :=
     match c with
-    | ⟨∧⟩ => P ∧ Q | ⟨∨⟩ => P ∨ Q | ⟨→⟩ => P → Q | ⟨∗⟩ => P ∗ Q | ⟨-∗⟩ => P -∗ Q
-    | ⟨|=[]=>⟩ => |=[P]=> Q | ⟨|=[]{E,E'}=>⟩ => |=[P]{E,E'}=> Q
+    | nc_and => P ∧ Q | nc_or => P ∨ Q | nc_impl => P → Q
+    | nc_sep => P ∗ Q | nc_wand => P -∗ Q
+    | nc_bupdw => |=[P]=> Q | nc_fupdw E E' => |=[P]{E,E'}=> Q
     end.
   Local Definition ncintpwpw (c : nconwpw) (W : iProp Σ) (Φ : val -d> iProp Σ)
     : iProp Σ := match c with
@@ -58,8 +60,8 @@ Section nintp.
     (ni : nderiv_ty Σ -d> discrete_fun (λ κ, nProp κ (;ᵞ) -d> iProp Σ))
     : nderiv_ty Σ -d> iProp Σ :=
     λ δ, match c with
-    | ⟨▷⟩ => ▷ ni δ _ P
-    | ⟨○⟩ => ⸨ P ⸩(δ)
+    | nc_later => ▷ ni δ _ P
+    | nc_indir => ⸨ P ⸩(δ)
     | nc_ag γ => nag γ P
     | nc_inv N => ninv δ N P | nc_na_inv p N => na_ninv δ p N P
     | nc_borc α => borc δ α P | nc_bor α => bor δ α P

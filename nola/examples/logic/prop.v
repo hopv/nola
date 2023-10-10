@@ -119,32 +119,6 @@ Variant ncong1 : Type :=
 Variant ncong1f : Type :=
 | (** Fractured borrower token *) nc_fbor (α : lft).
 
-(** Notation for [ncon] *)
-Notation "⟨⌜ φ ⌝⟩" := (nc_pure φ%type%stdpp%nola) (format "⟨⌜ φ ⌝⟩")
-  : nola_scope.
-Notation "⟨↦ dq | l , v ⟩" := (nc_mapsto l dq v)
-  (dq custom dfrac, format "⟨↦ dq | l , v ⟩") : nola_scope.
-Notation "⟨↦_ I | l , v ⟩" := (nc_inv_mapsto_own l v I%stdpp%type)
-  (format "⟨↦_ I | l , v ⟩") : nola_scope.
-Notation "⟨↦□_ I | l ⟩" := (nc_inv_mapsto l I%stdpp%type)
-  (format "⟨↦□_ I | l ⟩") : nola_scope.
-Notation "⟨◇⟩" := nc_except_0 : nola_scope.
-Notation "⟨□⟩" := nc_persistently : nola_scope.
-Notation "⟨■⟩" := nc_plainly : nola_scope.
-Notation "⟨|==>⟩" := nc_bupd : nola_scope.
-Notation "⟨|={ E , E' }=>⟩" := (nc_fupd E E')
-  (format "⟨|={ E , E' }=>⟩") : nola_scope.
-Notation "⟨∧⟩" := nc_and : nola_scope.
-Notation "⟨∨⟩" := nc_or : nola_scope.
-Notation "⟨→⟩" := nc_impl : nola_scope.
-Notation "⟨∗⟩" := nc_sep : nola_scope.
-Notation "⟨-∗⟩" := nc_wand : nola_scope.
-Notation "⟨|=[ ] =>⟩" := nc_bupdw (format "⟨|=[ ] =>⟩") : nola_scope.
-Notation "⟨|=[ ] { E , E' }=>⟩" := (nc_fupdw E E')
-  (format "⟨|=[ ] { E , E' }=>⟩") : nola_scope.
-Notation "⟨▷⟩" := nc_later : nola_scope.
-Notation "⟨○⟩" := nc_indir : nola_scope.
-
 (** [nProp]: Nola syntactic proposition
   Its universe level is strictly higher than those of [V : npvar]
   and the domain [A : Type] of [n_forall]/[n_exist].
@@ -202,14 +176,14 @@ Delimit Scope nProp_scope with n.
 Bind Scope nProp_scope with nProp.
 Local Open Scope nProp_scope.
 
-Notation "'⌜' φ '⌝'" := (n_0 ⟨⌜φ⌝⟩) : nProp_scope.
-Notation "'True'" := (n_0 ⟨⌜True⌝⟩) : nProp_scope.
-Notation "'False'" := (n_0 ⟨⌜False⌝⟩) : nProp_scope.
+Notation "'⌜' φ '⌝'" := (n_0 (nc_pure φ)) : nProp_scope.
+Notation "'True'" := ⌜True⌝ : nProp_scope.
+Notation "'False'" := ⌜False⌝ : nProp_scope.
 Notation n_na_own p E := (n_0 (nc_na_own p E)).
 Notation n_cinv_own γ q := (n_0 (nc_cinv_own γ q)).
-Notation "l ↦ dq v" := (n_0 ⟨↦{dq}|l,v⟩) : nProp_scope.
-Notation "l ↦_ I v" := (n_0 ⟨↦_I|l,v⟩) : nProp_scope.
-Notation "l ↦_ I □" := (n_0 ⟨↦□_I|l⟩) : nProp_scope.
+Notation "l ↦ dq v" := (n_0 (nc_mapsto l dq v)) : nProp_scope.
+Notation "l ↦_ I v" := (n_0 (nc_inv_mapsto_own l I v)) : nProp_scope.
+Notation "l ↦_ I □" := (n_0 (nc_inv_mapsto l I)): nProp_scope.
 Notation n_meta_token l E := (n_0 (nc_meta_token l E)).
 Notation n_steps_lb n := (n_0 (nc_steps_lb n)).
 Notation n_proph p pvs := (n_0 (nc_proph p pvs)).
@@ -220,26 +194,26 @@ Notation "α ⊑□ β" := (n_0 (nc_lft_sincl α β)) : nProp_scope.
 Notation n_fborrow_wsat c := (n_0 (nc_fborrow_wsat c)).
 Notation n_inv_wsat := (n_l0 nc_inv_wsat).
 Notation n_na_inv_wsat := (n_l0 nc_na_inv_wsat).
-Notation "◇ P" := (n_1 ⟨◇⟩ P) : nProp_scope.
-Notation "□ P" := (n_1 ⟨□⟩ P) : nProp_scope.
-Notation "■ P" := (n_1 ⟨■⟩ P) : nProp_scope.
-Notation "|==> P" := (n_1 ⟨|==>⟩ P) : nProp_scope.
-Notation "|={ E , E' }=> P" := (n_1 ⟨|={E,E'}=>⟩ P) : nProp_scope.
-Notation "|={ E }=> P" := (n_1 ⟨|={E,E}=>⟩ P) : nProp_scope.
+Notation "◇ P" := (n_1 nc_except_0 P) : nProp_scope.
+Notation "□ P" := (n_1 nc_persistently P) : nProp_scope.
+Notation "■ P" := (n_1 nc_plainly P) : nProp_scope.
+Notation "|==> P" := (n_1 nc_bupd P) : nProp_scope.
+Notation "|={ E , E' }=> P" := (n_1 (nc_fupd E E') P) : nProp_scope.
+Notation "|={ E }=> P" := (n_1 (nc_fupd E E) P) : nProp_scope.
 Notation n_borrow_wsat W E := (n_l1 (nc_borrow_wsat E) W).
-Infix "∧" := (n_2 ⟨∧⟩) : nProp_scope.
-Infix "∨" := (n_2 ⟨∨⟩) : nProp_scope.
-Infix "→" := (n_2 ⟨→⟩) : nProp_scope.
+Infix "∧" := (n_2 nc_and) : nProp_scope.
+Infix "∨" := (n_2 nc_or) : nProp_scope.
+Infix "→" := (n_2 nc_impl) : nProp_scope.
 Notation "¬ P" := (P → False) : nProp_scope.
-Infix "∗" := (n_2 ⟨∗⟩) : nProp_scope.
-Infix "-∗" := (n_2 ⟨-∗⟩) : nProp_scope.
+Infix "∗" := (n_2 nc_sep) : nProp_scope.
+Infix "-∗" := (n_2 nc_wand) : nProp_scope.
 Notation "P ==∗ Q" := (P -∗ |==> Q) : nProp_scope.
 Notation "P ={ E , E' }=∗ Q" := (P -∗ |={E,E'}=> Q) : nProp_scope.
 Notation "P ={ E }=∗ Q" := (P -∗ |={E}=> Q) : nProp_scope.
-Notation "|=[ W ] => P" := (n_2 ⟨|=[]=>⟩ W P) : nProp_scope.
+Notation "|=[ W ] => P" := (n_2 nc_bupdw W P) : nProp_scope.
 Notation "P =[ W ]=∗ Q" := (P -∗ |=[W]=> Q) : nProp_scope.
-Notation "|=[ W ] { E , E' }=> P" := (n_2 ⟨|=[]{E,E'}=>⟩ W P) : nProp_scope.
-Notation "|=[ W ] { E }=> P" := (n_2 ⟨|=[]{E,E}=>⟩ W P) : nProp_scope.
+Notation "|=[ W ] { E , E' }=> P" := (n_2 (nc_fupdw E E') W P) : nProp_scope.
+Notation "|=[ W ] { E }=> P" := (n_2 (nc_fupdw E E) W P) : nProp_scope.
 Notation "P =[ W ] { E , E' }=∗ Q" := (P -∗ |=[W]{E,E'}=> Q) : nProp_scope.
 Notation "P =[ W ] { E }=∗ Q" := (P =[W]{E,E}=∗ Q) : nProp_scope.
 Notation n_wpw W s E e Φ := (n_cwpw (nc_wpw s E e) W Φ).
@@ -259,12 +233,12 @@ Notation "∃'" := n_exist (only parsing) : nProp_scope.
 Notation "∃ x .. z , P" :=
   (n_exist (λ x, .. (n_exist (λ z, P%n)) ..)) : nProp_scope.
 
-Notation "▷{ Γᵘ } P" := (n_g1 (Γᵘ:=Γᵘ) ⟨▷⟩ P)
+Notation "▷{ Γᵘ } P" := (n_g1 (Γᵘ:=Γᵘ) nc_later P)
   (at level 20, right associativity, only parsing) : nProp_scope.
-Notation "▷ P" := (n_g1 ⟨▷⟩ P) : nProp_scope.
-Notation "○{ Γᵘ } P" := (n_g1 (Γᵘ:=Γᵘ) ⟨○⟩ P)
+Notation "▷ P" := (n_g1 nc_later P) : nProp_scope.
+Notation "○{ Γᵘ } P" := (n_g1 (Γᵘ:=Γᵘ) nc_indir P)
   (at level 20, right associativity, only parsing) : nProp_scope.
-Notation "○ P" := (n_g1 ⟨○⟩ P)
+Notation "○ P" := (n_g1 nc_indir P)
   (at level 20, right associativity, format "○  P") : nProp_scope.
 Notation n_ag' Γᵘ γ P := (n_g1 (Γᵘ:=Γᵘ) (nc_ag γ) P) (only parsing).
 Notation n_ag γ P := (n_ag' _ γ P).
