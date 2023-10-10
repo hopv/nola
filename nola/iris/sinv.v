@@ -89,7 +89,7 @@ Section sinv.
     iModIntro. by iExists _.
   Qed.
 
-  (** Accesss via [sinv_tok] *)
+  (** Access via [sinv_tok] *)
   Lemma sinv_acc' {intp i P} :
     sinv_tok' i P -∗ sinv_wsat' intp -∗
       intp i P ∗ (intp i P -∗ sinv_wsat' intp).

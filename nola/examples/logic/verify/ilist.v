@@ -28,7 +28,7 @@ Definition has_mult {κ Γ} (δ : Z) l : nProp κ Γ := ∃ k, l ↦ #(k * δ).
 (** Increment by calling [FAA] *)
 Definition incr_faa (δ : Z) : val := λ: "l", FAA "l" #δ;; #().
 
-(** Posssibly increment by calling [CAS] *)
+(** Possibly increment by calling [CAS] *)
 Definition may_incr_cas' (δ : Z) : val :=
   rec: "self" "c" "l" :=
     if: "c" = #0 then #() else
