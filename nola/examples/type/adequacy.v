@@ -45,7 +45,7 @@ Lemma tinv_wsat''_alloc `{!heapGS_gen HasNoLc Σ, tpreΣ : !tinvGpreS' L o Σ} :
   ⊢ |==> ∃ _ : tinvGS' L o Σ, ∀ intp, tinv_wsat'' L L o _ intp.
 Proof.
   move: L o tpreΣ. elim=> [|L IH] o tpreΣ. { iModIntro. by iExists (). }
-  iMod (ninv_wsat_alloc (PROP:=tinvd o)) as (nΣ) "nw". iMod IH as (tΣ) "tw".
+  iMod (inv_wsat_alloc (PROP:=tinvd o)) as (nΣ) "nw". iMod IH as (tΣ) "tw".
   iModIntro. iExists (nΣ, tΣ)'. iIntros (intp). by iSplitL "nw".
 Qed.
 Lemma tinv_wsat'_alloc `{!heapGS_gen HasNoLc Σ, !tinvGpreS L Σ} :

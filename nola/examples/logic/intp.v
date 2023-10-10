@@ -29,7 +29,7 @@ Section ncintp.
     | nc_steps_lb n => steps_lb n | nc_proph p pvs => proph p pvs
     end.
   Definition ncintpl0 (c : nconl0) (niS : nPropS (;ᵞ) -d> iProp Σ) : iProp Σ :=
-    match c with nc_inv_wsat => ninv_wsat' niS end.
+    match c with nc_inv_wsat => inv_wsat' niS end.
   Definition ncintp1 (c : ncon1) (P : iProp Σ) : iProp Σ :=
     match c with
     | ⟨◇⟩ => ◇ P | ⟨□⟩ => □ P | ⟨■⟩ => ■ P
@@ -47,7 +47,7 @@ Section ncintp.
     | ⟨▷⟩ => ▷ ni δ _ P
     | ⟨○⟩ => ⸨ P ⸩(δ)
     | nc_ag γ => nag γ P
-    | nc_inv N => nninv δ N P | nc_na_inv p N => na_nninv δ p N P
+    | nc_inv N => ninv δ N P | nc_na_inv p N => na_ninv δ p N P
     end%I.
 
   (** [ncintp] is non-expansive *)
@@ -204,7 +204,7 @@ Notation "⟦ P ⟧ˢ ( δ )" := ⟦ P ⟧ˢ(δ, hwf)
 Notation nintpS δ P := ⟦ P ⟧ˢ(δ) (only parsing).
 
 (** Utility *)
-Notation nninv_wsat δ := (ninv_wsat' (λ P, ⟦ P ⟧ˢ(δ))).
+Notation inv_wsat' δ := (inv_wsat' (λ P, ⟦ P ⟧ˢ(δ))).
 
 (** ** Lemmas on [⟦ ⟧] etc. *)
 Section nintp.

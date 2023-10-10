@@ -101,7 +101,7 @@ Notation tinv_wsat_lt_f s M M' f :=
   (tinv_wsat' M (λ i iM, tintp_lt s M' (iM:=f i iM))) (only parsing).
 Notation tinv_wsat_lt s M M' := (tinv_wsat' M (λ i iM, tintp_lt s M')).
 Notation tinv_wsat s M := (tinv_wsat' M (λ i _ T, ⟦ T ⟧{i}(s))).
-Notation tninv_wsat s i := (ninv_wsat (tinvd_intp (λ T, ⟦ T ⟧{i}(s)))).
+Notation inv_wsat' s i := (inv_wsat (tinvd_intp (λ T, ⟦ T ⟧{i}(s)))).
 
 (** ** Lemmas on [⟦ ⟧] etc. *)
 Section tintp.
@@ -176,12 +176,12 @@ Section tintp.
     WP[tinv_wsat_lt_f s M M' f] e [{ Φ }] ⊣⊢ WP[tinv_wsat s M] e [{ Φ }].
   Proof. apply twpw_proper; [exact tinv_wsat_lt_tinv_wsat|done]. Qed.
 
-  (** Take out [tninv_wsat] out of [tinv_wsat] *)
-  #[export] Instance wsat_incl_tinv_tninv `{! i <ⁿ M, ! i <ⁿ L} {s} :
-    WsatIncl (tinv_wsat s M) (tninv_wsat s i) (tninv_wsat s i -∗ tinv_wsat s M).
+  (** Take out [inv_wsat'] out of [tinv_wsat] *)
+  #[export] Instance wsat_incl_tinv_inv `{! i <ⁿ M, ! i <ⁿ L} {s} :
+    WsatIncl (tinv_wsat s M) (inv_wsat' s i) (inv_wsat' s i -∗ tinv_wsat s M).
   Proof.
     rewrite /WsatIncl. iSplit; [|iIntros "[? →]"; by iApply "→"].
-    iIntros "tw". iApply (tinv_wsat'_ninv_wsat with "tw").
+    iIntros "tw". iApply (tinv_wsat'_inv_wsat with "tw").
   Qed.
 
   (** Inclusion between [tinv_wsat]s *)

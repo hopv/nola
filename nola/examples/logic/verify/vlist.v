@@ -14,8 +14,8 @@ Fixpoint vlist {κ Γ} (N : namespace) (φ : Z → Prop) (ns : list Z) (l : loc)
 Definition vlisti `{!nintpGS Σ} δ N φ (ns : list Z) l
   : iProp Σ :=
   match ns with [] => True | n :: ns =>
-    nninv δ N (⌜φ n⌝ ∗ l ↦ # n) ∗
-      nninv δ N (∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ vlist N φ ns l') end.
+    ninv δ N (⌜φ n⌝ ∗ l ↦ # n) ∗
+      ninv δ N (∃ l' : loc, (l +ₗ 1) ↦ # l' ∗ vlist N φ ns l') end.
 Notation vlistis := (vlisti nderiv).
 
 Section verify.
@@ -30,13 +30,13 @@ Section verify.
   Proof. by case ns. Qed.
 
   Lemma vlist_all {E N φ ns l} : ↑ N ⊆ E → ↑ N ⊆ E →
-    vlistis N φ ns l =[nninv_wsatd]{E}=∗ ⌜Forall φ ns⌝.
+    vlistis N φ ns l =[inv_wsatd]{E}=∗ ⌜Forall φ ns⌝.
   Proof.
     move=> ?. move: l. elim ns; [iPureIntro=>/= ??; by apply Forall_nil|].
     iIntros (?? IH ??) "[#ihd #itl]".
-    iMod (nninv_acc with "ihd") as "/=[[% ↦] cl]"; [done|].
+    iMod (ninv_acc with "ihd") as "/=[[% ↦] cl]"; [done|].
     iMod ("cl" with "[$↦//]") as "_".
-    iMod (nninv_acc with "itl") as "/=[(%& ↦ & vl) cl]"; [done|].
+    iMod (ninv_acc with "itl") as "/=[(%& ↦ & vl) cl]"; [done|].
     rewrite vlist_vlisti. iDestruct "vl" as "#?". iMod ("cl" with "[↦]") as "_".
     { iExists _. rewrite vlist_vlisti. by iFrame. }
     iMod (IH with "[//]") as %?; [done|]. iPureIntro. by constructor.

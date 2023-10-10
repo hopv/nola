@@ -37,10 +37,10 @@ Section facts.
   Proof. done. Qed.
   Fact nintp_ag {κ δ γ} {P : _ (;ᵞ)} : ⟦ n_ag γ P ⟧{κ}(δ) ⊣⊢ nag γ P.
   Proof. done. Qed.
-  Fact nintp_inv {κ δ N} {P : _ (;ᵞ)} : ⟦ n_inv N P ⟧{κ}(δ) ⊣⊢ nninv δ N P.
+  Fact nintp_inv {κ δ N} {P : _ (;ᵞ)} : ⟦ n_inv N P ⟧{κ}(δ) ⊣⊢ ninv δ N P.
   Proof. done. Qed.
   Fact nintp_na_inv {κ δ p N} {P : _ (;ᵞ)} :
-    ⟦ n_na_inv p N P ⟧{κ}(δ) ⊣⊢ na_nninv δ p N P.
+    ⟦ n_na_inv p N P ⟧{κ}(δ) ⊣⊢ na_ninv δ p N P.
   Proof. done. Qed.
   Fact nintp_wpw {κ δ W s E e Φ} :
     ⟦ WP[W] e @ s ; E {{ Φ }} ⟧{κ}(δ) ⊣⊢

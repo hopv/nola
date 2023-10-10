@@ -72,7 +72,7 @@ Section tinv_wsat'.
     iProp Σ :=
     match M with 0 => λ _ _, True | S M =>
       match L with 0 => λ _ _, False | S L => λ _ intp,
-        ninv_wsat (tinvd_intp (intp 0 _)) ∗
+        inv_wsat (tinvd_intp (intp 0 _)) ∗
         tinv_wsat'' L M (S o) _ (λ i _ T, intp (S i) _ T)
       end
     end%I.
@@ -99,11 +99,11 @@ Section tinv_wsat'.
     Proper ((≡) ==> (≡)) (tinv_wsat' M).
   Proof. apply ne_proper, _. Qed.
 
-  (** Take out [ninv_wsat] out of [tinv_wsat'] *)
-  Lemma tinv_wsat''_ninv_wsat
+  (** Take out [inv_wsat] out of [tinv_wsat'] *)
+  Lemma tinv_wsat''_inv_wsat
     `{tΣ : !tinvGS' L o Σ, iM : ! i <ⁿ M, iL : ! i <ⁿ L} {intp} :
-    tinv_wsat'' L M o _ intp -∗ ninv_wsat (tinvd_intp (intp i _)) ∗
-      (ninv_wsat (tinvd_intp (intp i _)) -∗ tinv_wsat'' L M o _ intp).
+    tinv_wsat'' L M o _ intp -∗ inv_wsat (tinvd_intp (intp i _)) ∗
+      (inv_wsat (tinvd_intp (intp i _)) -∗ tinv_wsat'' L M o _ intp).
   Proof.
     move: L M i o tΣ iM iL intp. fix FIX 3=> L M i.
     case: L M i=> [|L][|M][|i]/=; try nlia; iIntros (?? iM ??) "[nw tw]".
@@ -112,18 +112,18 @@ Section tinv_wsat'.
     iDestruct (FIX L M i _ _ (nlt_unS iM) with "tw") as "?".
     by rewrite (proof_irrel (nlt_S _) iM).
   Qed.
-  (** Key equality hack for [tinv_wsat'_ninv_wsat] *)
-  Local Lemma ninv_wsat_rew `{nΣ : !ninvGS (tinvd i) Σ, ! j <ⁿ M} (eq : i = j)
+  (** Key equality hack for [tinv_wsat'_inv_wsat] *)
+  Local Lemma inv_wsat_rew `{nΣ : !ninvGS (tinvd i) Σ, ! j <ⁿ M} (eq : i = j)
     {intp : ∀ k, k <ⁿ M → type k (;ᵞ) → val → iProp Σ} :
-    ninv_wsat (tinvd_intp (λ T, intp j _ (rew[λ i, _ i _] eq in T))) ⊣⊢
-      ninv_wsat (ninvGS0:=ninvGS_rew eq) (tinvd_intp (intp j _)).
+    inv_wsat (tinvd_intp (λ T, intp j _ (rew[λ i, _ i _] eq in T))) ⊣⊢
+      inv_wsat (ninvGS0:=ninvGS_rew eq) (tinvd_intp (intp j _)).
   Proof. by subst. Qed.
-  Lemma tinv_wsat'_ninv_wsat `{!tinvGS L Σ, ! i <ⁿ M, ! i <ⁿ L} {intp} :
-    tinv_wsat' M intp -∗ ninv_wsat (tinvd_intp (intp i _)) ∗
-      (ninv_wsat (tinvd_intp (intp i _)) -∗ tinv_wsat' M intp).
+  Lemma tinv_wsat'_inv_wsat `{!tinvGS L Σ, ! i <ⁿ M, ! i <ⁿ L} {intp} :
+    tinv_wsat' M intp -∗ inv_wsat (tinvd_intp (intp i _)) ∗
+      (inv_wsat (tinvd_intp (intp i _)) -∗ tinv_wsat' M intp).
   Proof.
-    iIntros "tw". iDestruct (tinv_wsat''_ninv_wsat with "tw") as "[??]".
-    rewrite ninv_wsat_rew /=. iFrame.
+    iIntros "tw". iDestruct (tinv_wsat''_inv_wsat with "tw") as "[??]".
+    rewrite inv_wsat_rew /=. iFrame.
   Qed.
 
   (** Inclusion between [tinv_wsat']s *)

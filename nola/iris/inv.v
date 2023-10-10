@@ -16,42 +16,44 @@ Definition ninvΣ PROP : gFunctors := sinvΣ PROP.
 #[export] Instance subG_ninvΣ `{!subG (ninvΣ PROP) Σ} : ninvGpreS PROP Σ.
 Proof. solve_inG. Qed.
 
-Section ninv.
+Section inv_tok.
   Context `{!invGS_gen hlc Σ, !ninvGS PROP Σ}.
 
-  (** [ninv]: Invariant token *)
-  Local Definition ninv_def (N : namespace) (P : PROP) : iProp Σ :=
+  (** [inv_tok]: Invariant token *)
+  Local Definition inv_tok_def (N : namespace) (P : PROP) : iProp Σ :=
     ∃ i, ⌜i ∈ (↑N:coPset)⌝ ∗ sinv_tok' i P.
-  Local Definition ninv_aux : seal ninv_def. Proof. by eexists. Qed.
-  Definition ninv := ninv_aux.(unseal).
-  Local Lemma ninv_unseal : ninv = ninv_def. Proof. exact: seal_eq. Qed.
-
-  (** [ninv] is persistent and timeless *)
-  #[export] Instance ninv_persistent {N P} : Persistent (ninv N P).
-  Proof. rewrite ninv_unseal. exact _. Qed.
-  #[export] Instance ninv_timeless {N P} : Timeless (ninv N P).
-  Proof. rewrite ninv_unseal. exact _. Qed.
-
-  Local Definition ninv_wsat_def (intp : PROP -d> iProp Σ) : iProp Σ :=
-    sinv_wsat' (λ i P, intp P ∗ ownD {[i]} ∨ ownE {[i]})%I.
-  Local Definition ninv_wsat_aux : seal ninv_wsat_def. Proof. by eexists. Qed.
-  Definition ninv_wsat := ninv_wsat_aux.(unseal).
-  Local Lemma ninv_wsat_unseal : ninv_wsat = ninv_wsat_def.
+  Local Definition inv_tok_aux : seal inv_tok_def. Proof. by eexists. Qed.
+  Definition inv_tok := inv_tok_aux.(unseal).
+  Local Lemma inv_tok_unseal : inv_tok = inv_tok_def.
   Proof. exact: seal_eq. Qed.
 
-  (** [ninv_wsat] is non-expansive *)
-  #[export] Instance ninv_wsat_ne : NonExpansive ninv_wsat.
-  Proof. rewrite ninv_wsat_unseal. solve_proper. Qed.
-  #[export] Instance ninv_wsat_proper : Proper ((≡) ==> (≡)) ninv_wsat.
+  (** [inv_tok] is persistent and timeless *)
+  #[export] Instance inv_tok_persistent {N P} : Persistent (inv_tok N P).
+  Proof. rewrite inv_tok_unseal. exact _. Qed.
+  #[export] Instance inv_tok_timeless {N P} : Timeless (inv_tok N P).
+  Proof. rewrite inv_tok_unseal. exact _. Qed.
+
+  (** World satisfaction *)
+  Local Definition inv_wsat_def (intp : PROP -d> iProp Σ) : iProp Σ :=
+    sinv_wsat' (λ i P, intp P ∗ ownD {[i]} ∨ ownE {[i]})%I.
+  Local Definition inv_wsat_aux : seal inv_wsat_def. Proof. by eexists. Qed.
+  Definition inv_wsat := inv_wsat_aux.(unseal).
+  Local Lemma inv_wsat_unseal : inv_wsat = inv_wsat_def.
+  Proof. exact: seal_eq. Qed.
+
+  (** [inv_wsat] is non-expansive *)
+  #[export] Instance inv_wsat_ne : NonExpansive inv_wsat.
+  Proof. rewrite inv_wsat_unseal. solve_proper. Qed.
+  #[export] Instance inv_wsat_proper : Proper ((≡) ==> (≡)) inv_wsat.
   Proof. apply ne_proper, _. Qed.
 
   (** ** Lemmas *)
 
-  (** Allocate [ninv] *)
-  Lemma ninv_alloc_rec {intp N P} :
-    (ninv N P -∗ intp P) =[ninv_wsat intp]=∗ ninv N P.
+  (** Allocate [inv_tok] *)
+  Lemma inv_tok_alloc_rec {intp N P} :
+    (inv_tok N P -∗ intp P) =[inv_wsat intp]=∗ inv_tok N P.
   Proof.
-    rewrite ninv_unseal ninv_wsat_unseal. iIntros "→P W".
+    rewrite inv_tok_unseal inv_wsat_unseal. iIntros "→P W".
     iDestruct (sinv_alloc' with "W") as (I) "big".
     iMod (own_unit (gset_disjUR positive) disabled_name) as "D".
     iMod (own_updateP with "[$]") as (x) "[X D]".
@@ -63,8 +65,10 @@ Section ninv.
     iModIntro. iSplitL; [|iExists _; by iSplit]. iApply "→W". iLeft.
     iSplitR "D"; [|done]. iApply "→P". iExists _; by iSplit.
   Qed.
-  Lemma ninv_alloc {intp N P} : intp P =[ninv_wsat intp]=∗ ninv N P.
-  Proof. iIntros "P W". iApply (ninv_alloc_rec with "[P] W"). by iIntros. Qed.
+  Lemma inv_tok_alloc {intp N P} : intp P =[inv_wsat intp]=∗ inv_tok N P.
+  Proof.
+    iIntros "P W". iApply (inv_tok_alloc_rec with "[P] W"). by iIntros.
+  Qed.
 
   (** Access [ownE] *)
   Local Lemma ownE_acc {N E} :
@@ -75,12 +79,12 @@ Section ninv.
     rewrite {1 4}(union_difference_L (↑ N) E); [|done].
     rewrite ownE_op; [|set_solver]. iDestruct "E" as "[$$]". by iIntros "$$".
   Qed.
-  (** Access [ninv] *)
-  Lemma ninv_acc {intp N E P} :
-    ↑N ⊆ E → ninv N P =[ninv_wsat intp]{E,E∖↑N}=∗
-      intp P ∗ (intp P =[ninv_wsat intp]{E∖↑N,E}=∗ True)%I.
+  (** Access [inv_tok] *)
+  Lemma inv_tok_acc {intp N E P} :
+    ↑N ⊆ E → inv_tok N P =[inv_wsat intp]{E,E∖↑N}=∗
+      intp P ∗ (intp P =[inv_wsat intp]{E∖↑N,E}=∗ True)%I.
   Proof.
-    move=> ?. rewrite ninv_unseal ninv_wsat_unseal. iIntros "[%i[% #i]] W".
+    move=> ?. rewrite inv_tok_unseal inv_wsat_unseal. iIntros "[%i[% #i]] W".
     iMod ownE_acc as "[N cl]"; [done|].
     iDestruct (sinv_acc' with "i W") as "[in →W]".
     rewrite {1 2}(union_difference_L {[i]} (↑N)); [|set_solver].
@@ -93,12 +97,12 @@ Section ninv.
     iMod ("cl" with "[$Ei $EN∖i]") as "_". iModIntro. iSplitL; [|done].
     iApply "→W". iLeft. iFrame.
   Qed.
-End ninv.
+End inv_tok.
 
-(** Allocate [ninv_wsat] *)
-Lemma ninv_wsat_alloc `{!ninvGpreS PROP Σ, !invGS_gen hlc Σ} :
-  ⊢ |==> ∃ _ : ninvGS PROP Σ, ∀ intp, ninv_wsat intp.
+(** Allocate [inv_wsat] *)
+Lemma inv_wsat_alloc `{!ninvGpreS PROP Σ, !invGS_gen hlc Σ} :
+  ⊢ |==> ∃ _ : ninvGS PROP Σ, ∀ intp, inv_wsat intp.
 Proof.
   iMod sinv_wsat_alloc as (?) "W". iModIntro. iExists _. iIntros (?).
-  rewrite ninv_wsat_unseal. iApply "W".
+  rewrite inv_wsat_unseal. iApply "W".
 Qed.

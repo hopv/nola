@@ -42,8 +42,8 @@ Section nInvd_intp.
   Proof. solve_proper. Qed.
 End nInvd_intp.
 
-(** [ninv_wsat] for [nInvd] *)
-Notation ninv_wsat' intp := (ninv_wsat (nInvd_intp intp)).
+(** [inv_wsat] for [nInvd] *)
+Notation inv_wsat' intp := (inv_wsat (nInvd_intp intp)).
 
 (** ** Derivability structure *)
 
@@ -62,27 +62,27 @@ Section iris.
     (γ : gname) (P : nPropL (;ᵞ)) : iProp Σ :=
     own γ (to_agree (P : leibnizO _)).
 
-  (** [nninv]: [ninv] in the accessor style *)
-  Definition nninv_def (δ : nderiv_ty Σ) (N : namespace) (P : nPropL (;ᵞ))
+  (** [ninv]: [inv_tok] in the accessor style *)
+  Definition ninv_def (δ : nderiv_ty Σ) (N : namespace) (P : nPropL (;ᵞ))
     : iProp Σ :=
     □ ⸨ ∀ E, ⌜↑N ⊆ E⌝ → |=[n_inv_wsat]{E,E∖↑N}=>
           P ∗ (P =[n_inv_wsat]{E∖↑N,E}=∗ True) ⸩(δ).
-  Definition nninv_aux : seal nninv_def. Proof. by eexists. Qed.
-  Definition nninv := nninv_aux.(unseal).
-  Lemma nninv_unseal : nninv = nninv_def. Proof. exact: seal_eq. Qed.
-  #[export] Instance nninv_persistent {δ N P} : Persistent (nninv δ N P).
-  Proof. rewrite nninv_unseal. exact _. Qed.
+  Definition ninv_aux : seal ninv_def. Proof. by eexists. Qed.
+  Definition ninv := ninv_aux.(unseal).
+  Lemma ninv_unseal : ninv = ninv_def. Proof. exact: seal_eq. Qed.
+  #[export] Instance ninv_persistent {δ N P} : Persistent (ninv δ N P).
+  Proof. rewrite ninv_unseal. exact _. Qed.
 
-  (** [na_nninv]: [na_ninv] in the accessor style *)
-  Definition na_nninv_def (δ : nderiv_ty Σ)
+  (** [na_ninv]: [na_ninv] in the accessor style *)
+  Definition na_ninv_def (δ : nderiv_ty Σ)
     (p : na_inv_pool_name) (N : namespace) (P : nPropL (;ᵞ)) : iProp Σ :=
     □ ⸨ ∀ E F, ⌜↑N ⊆ E⌝ → ⌜↑N ⊆ F⌝ → n_na_own p F =[n_inv_wsat]{E}=∗
           P ∗ n_na_own p (F∖↑N) ∗
           (P -∗ n_na_own p (F∖↑N) =[n_inv_wsat]{E}=∗ n_na_own p F) ⸩(δ).
-  Definition na_nninv_aux : seal na_nninv_def. Proof. by eexists. Qed.
-  Definition na_nninv := na_nninv_aux.(unseal).
-  Lemma na_nninv_unseal : na_nninv = na_nninv_def. Proof. exact: seal_eq. Qed.
-  #[export] Instance na_nninv_persistent {δ p N P} :
-    Persistent (na_nninv δ p N P).
-  Proof. rewrite na_nninv_unseal. exact _. Qed.
+  Definition na_ninv_aux : seal na_ninv_def. Proof. by eexists. Qed.
+  Definition na_ninv := na_ninv_aux.(unseal).
+  Lemma na_ninv_unseal : na_ninv = na_ninv_def. Proof. exact: seal_eq. Qed.
+  #[export] Instance na_ninv_persistent {δ p N P} :
+    Persistent (na_ninv δ p N P).
+  Proof. rewrite na_ninv_unseal. exact _. Qed.
 End iris.

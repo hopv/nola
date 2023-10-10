@@ -112,17 +112,17 @@ Section conv.
 
   (** Introduce [▽] *)
   Lemma ninv_tguard `{!tderivy ih δ, ! i <ⁿ L} {T v} :
-    ninv tguardN (tinvd_guard T v) -∗ tguard δ (i:=i) T v.
+    inv_tok tguardN (tinvd_guard T v) -∗ tguard δ (i:=i) T v.
   Proof.
     iIntros "#inv !>". iApply (derivy_intro (δ:=δ))=>/=. iIntros (?????).
-    iMod (ninv_acc with "inv") as "/=[#T cl]"; [done|]. by iMod ("cl" with "T").
+    iMod (inv_tok_acc with "inv") as "/=[#T cl]"; [done|]. by iMod ("cl" with "T").
   Qed.
   Lemma ttrans_guard_intro `{!tderivy ih δ, ! i <ⁿ j} {k T} :
     T ==>{_,k}(j,δ) ▽{i,nil} T.
   Proof.
     iIntros (???) "/= #?". iApply fupdw_tinv_wsat_le. iIntros (?).
     have ? : i <ⁿ L by apply (nlt_nle_trans _ _).
-    iMod (ninv_alloc (P:=tinvd_guard T _) with "[]") as "inv"; [done|].
+    iMod (inv_tok_alloc (P:=tinvd_guard T _) with "[]") as "inv"; [done|].
     iApply (ninv_tguard with "inv").
   Qed.
 

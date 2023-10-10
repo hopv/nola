@@ -32,7 +32,7 @@ Notation tguardd := (tguard tderiv).
 Notation "⟦ T ⟧{ i }" := ⟦ T ⟧{i}(tderiv) (only parsing) : nola_scope.
 Notation "⟦ T ⟧" := ⟦ T ⟧(tderiv) : nola_scope.
 Notation tinv_wsatd M := (tinv_wsat tderiv M).
-Notation tninv_wsatd i := (tninv_wsat tderiv i).
+Notation inv_wsatd i := (inv_wsat' tderiv i).
 
 (** ** Type judgments *)
 

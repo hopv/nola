@@ -13,11 +13,11 @@ Notation nderiv := (deriv (DI:=nderivsi)).
 Notation nderiv_sound := (deriv_sound (DI:=nderivsi)).
 
 (** Utility for [nderiv] *)
-Notation nninvd := (nninv nderiv).
-Notation na_nninvd := (na_nninv nderiv).
+Notation ninvd := (ninv nderiv).
+Notation na_ninvd := (na_ninv nderiv).
 Notation "⟦ P ⟧{ κ }" := ⟦ P ⟧{κ}(nderiv) (only parsing) : nola_scope.
 Notation "⟦ P ⟧" := ⟦ P ⟧(nderiv) : nola_scope.
 Notation "⟦ P ⟧ˢ" := ⟦ P ⟧ˢ(nderiv) : nola_scope.
-Notation nninv_wsatd := (nninv_wsat nderiv).
+Notation inv_wsatd := (inv_wsat' nderiv).
 
 Implicit Type P : nPropL (;ᵞ).

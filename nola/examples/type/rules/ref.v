@@ -8,10 +8,10 @@ Section eref.
 
   (** Allocate [ref[ ]] *)
   Lemma ninv_tref `{!tderivy ih δ, ! i <ⁿ L} {l T} :
-    ninv trefN (tinvd_ref l T) ⊢ tref δ (i:=i) l T.
+    inv_tok trefN (tinvd_ref l T) ⊢ tref δ (i:=i) l T.
   Proof.
     iIntros "#inv !>". iApply (derivy_intro (δ:=δ))=>/=. iIntros (???).
-    iMod (ninv_acc with "inv") as "/=[(%& ↦ & T) cl]"; [done|].
+    iMod (inv_tok_acc with "inv") as "/=[(%& ↦ & T) cl]"; [done|].
     iModIntro. iExists _. iFrame "↦ T". iIntros (?) "↦ #?".
     iMod ("cl" with "[↦]"); [|done]. iExists _. by iFrame.
   Qed.
@@ -21,7 +21,7 @@ Section eref.
     iIntros "?". unfold texpr. wp_bind e. iApply (twp_wand with "[$]").
     iIntros (?) ">#?". wp_alloc l as "↦". iModIntro. iApply fupdw_tinv_wsat_le.
     iIntros (?). have ?: i <ⁿ L by apply (nlt_nle_trans _ _).
-    iMod (ninv_alloc (P:=tinvd_ref l T) with "[↦]") as "?";
+    iMod (inv_tok_alloc (P:=tinvd_ref l T) with "[↦]") as "?";
       [iExists _; by iFrame|].
     iModIntro=>/=. iExists _. iSplit; [done|]. iApply ninv_tref.
     by rewrite Loc.add_0.
