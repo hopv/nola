@@ -91,6 +91,10 @@ Variant ncon2 : Type :=
 | (** Basic update modality with the world satisfaction *) nc_bupdw
 | (** Fasic update modality with the world satisfaction *)
     nc_fupdw (E E' : coPset).
+(** Weakest precondition predicate with a world satisfaction *)
+Variant nconwpw : Type :=
+| (** Partial *) nc_wpw (s : stuckness) (E : coPset) (e : expr)
+| (** Total *) nc_twpw (s : stuckness) (E : coPset) (e : expr).
 (** Unary, guarding *)
 Variant ncong1 : Type :=
 | (** Later modality *) nc_later
@@ -140,18 +144,12 @@ Inductive nProp : nkind → nctx → Type :=
 | n_l0 {Γ} (c : nconl0) : nProp nL Γ
 | n_1 {κ Γ} (c : ncon1) (P : nProp κ Γ) : nProp κ Γ
 | n_2 {κ Γ} (c : ncon2) (P Q : nProp κ Γ) : nProp κ Γ
+| n_cwpw {κ Γ} (c : nconwpw) (W : nProp κ Γ) (Φ : val → nProp κ Γ) : nProp κ Γ
 | n_g1 {κ Γᵘ Γᵍ} (c : ncong1) (P : nProp nL (;ᵞ Γᵘ ++ Γᵍ)) : nProp κ (Γᵘ;ᵞ Γᵍ)
-
 (** Universal quantification *)
 | n_forall {κ Γ} {A : Type} (Φ : A → nProp κ Γ) : nProp κ Γ
 (** Existential quantification *)
 | n_exist {κ Γ} {A : Type} (Φ : A → nProp κ Γ) : nProp κ Γ
-(** Weakest precondition *)
-| n_wpw {κ Γ} (W : nProp κ Γ) (s : stuckness) (E : coPset) (e : expr)
-    (Φ : val → nProp κ Γ) : nProp κ Γ
-(** Total weakest precondition *)
-| n_twpw {κ Γ} (W : nProp κ Γ) (s : stuckness) (E : coPset) (e : expr)
-    (Φ : val → nProp κ Γ) : nProp κ Γ
 
 (** Universal quantification over [A → nProp] *)
 | n_n_forall {κ Γᵘ Γᵍ} V (P : nProp κ (V :: Γᵘ;ᵞ Γᵍ)) : nProp κ (Γᵘ;ᵞ Γᵍ)
@@ -220,6 +218,16 @@ Notation "|=[ W ] { E , E' }=> P" := (n_2 ⟨|=[]{E,E'}=>⟩ W P) : nProp_scope.
 Notation "|=[ W ] { E }=> P" := (n_2 ⟨|=[]{E,E}=>⟩ W P) : nProp_scope.
 Notation "P =[ W ] { E , E' }=∗ Q" := (P -∗ |=[W]{E,E'}=> Q) : nProp_scope.
 Notation "P =[ W ] { E }=∗ Q" := (P =[W]{E,E}=∗ Q) : nProp_scope.
+Notation n_wpw W s E e Φ := (n_cwpw (nc_wpw s E e) W Φ).
+Notation n_twpw W s E e Φ := (n_cwpw (nc_twpw s E e) W Φ).
+Notation "WP[ W ] e @ s ; E {{ Φ } }" := (n_wpw W s E e Φ) (only parsing)
+  : nProp_scope.
+Notation "WP[ W ] e @ s ; E {{ v , P } }" := (n_wpw W s E e (λ v, P))
+  : nProp_scope.
+Notation "WP[ W ] e @ s ; E [{ Φ } ]" := (n_twpw W s E e Φ) (only parsing)
+  : nProp_scope.
+Notation "WP[ W ] e @ s ; E [{ v , P } ]" := (n_twpw W s E e (λ v, P))
+  : nProp_scope.
 Notation "∀'" := n_forall (only parsing) : nProp_scope.
 Notation "∀ x .. z , P" :=
   (n_forall (λ x, .. (n_forall (λ z, P%n)) ..)) : nProp_scope.
@@ -241,14 +249,6 @@ Notation n_inv N P := (n_inv' _ N P).
 Notation n_na_inv' Γᵘ p N P :=
   (n_g1 (Γᵘ:=Γᵘ) (nc_na_inv p N) P) (only parsing).
 Notation n_na_inv p N P := (n_na_inv' _ p N P).
-Notation "WP[ W ] e @ s ; E {{ Φ } }" := (n_wpw W s E e Φ) (only parsing)
-  : nProp_scope.
-Notation "WP[ W ] e @ s ; E {{ v , P } }" := (n_wpw W s E e (λ v, P))
-  : nProp_scope.
-Notation "WP[ W ] e @ s ; E [{ Φ } ]" := (n_twpw W s E e Φ) (only parsing)
-  : nProp_scope.
-Notation "WP[ W ] e @ s ; E [{ v , P } ]" := (n_twpw W s E e (λ v, P))
-  : nProp_scope.
 
 Notation "∀: V , P" := (n_n_forall V P)
   (at level 200, right associativity,
@@ -289,10 +289,9 @@ Reserved Notation "↑ˡ P" (at level 20, right associativity).
 Fixpoint nlarge {κ Γ} (P : nProp κ Γ) : nPropL Γ :=
   match P with
   | n_0 c => n_0 c | n_l0 c => n_l0 c | n_1 c P => n_1 c (↑ˡ P)
-  | n_2 c P Q => n_2 c (↑ˡ P) (↑ˡ Q) | n_g1 c P => n_g1 c P
+  | n_2 c P Q => n_2 c (↑ˡ P) (↑ˡ Q)
+  | n_cwpw c W Φ => n_cwpw c (↑ˡ W) (λ v, ↑ˡ Φ v) | n_g1 c P => n_g1 c P
   | ∀' Φ => ∀ a, ↑ˡ Φ a | ∃' Φ => ∃ a, ↑ˡ Φ a
-  | n_wpw W s E e Φ => n_wpw (↑ˡ W) s E e (λ v, ↑ˡ Φ v)
-  | n_twpw W s E e Φ => n_twpw (↑ˡ W) s E e (λ v, ↑ˡ Φ v)
   | ∀: V, P => ∀: V, ↑ˡ P | ∃: V, P => ∃: V, ↑ˡ P
   | rec:ˢ' Φ a => rec:ˢ' Φ a | rec:ˡ' Φ a => rec:ˡ' Φ a
   | ¢ᵘ P => ¢ᵘ ↑ˡ P | ¢ᵍ P => ¢ᵍ ↑ˡ P

@@ -42,6 +42,10 @@ Section ncintp.
     | ⟨∧⟩ => P ∧ Q | ⟨∨⟩ => P ∨ Q | ⟨→⟩ => P → Q | ⟨∗⟩ => P ∗ Q | ⟨-∗⟩ => P -∗ Q
     | ⟨|=[]=>⟩ => |=[P]=> Q | ⟨|=[]{E,E'}=>⟩ => |=[P]{E,E'}=> Q
     end.
+  Definition ncintpwpw (c : nconwpw) (W : iProp Σ) (Φ : val -d> iProp Σ)
+    : iProp Σ := match c with
+    | nc_wpw s E e => wpw W s E e Φ | nc_twpw s E e => twpw W s E e Φ
+    end.
   Definition ncintpg1 (c : ncong1) (P : nPropL (;ᵞ))
     (ni : nderiv_ty Σ -d> discrete_fun (λ κ, nProp κ (;ᵞ) -d> iProp Σ))
     : nderiv_ty Σ -d> iProp Σ :=
@@ -59,6 +63,8 @@ Section ncintp.
   Proof. solve_proper. Qed.
   #[export] Instance ncintp2_ne {c} : NonExpansive2 (ncintp2 c).
   Proof. solve_proper. Qed.
+  #[export] Instance ncintpwpw_ne {c} : NonExpansive2 (ncintpwpw c).
+  Proof. move=> ???????. case c=> >; by [apply wpw_ne|apply twpw_ne]. Qed.
 
   (** [ncintpg] is contractive *)
   #[export] Instance ncintpg1_contr {c P} : Contractive (ncintpg1 c P).
@@ -70,6 +76,11 @@ Section ncintp.
   #[export] Instance ncintp2_proper :
     Proper ((=) ==> (≡) ==> (≡) ==> (≡)) ncintp2.
   Proof. solve_proper. Qed.
+  #[export] Instance ncintpwpw_proper :
+    Proper ((=) ==> (≡) ==> (≡) ==> (≡)) ncintpwpw.
+  Proof.
+    move=> c ?<-??????. case c=> >; by [apply wpw_proper|apply twpw_proper].
+  Qed.
 End ncintp.
 
 Section nintp_gen.
@@ -87,13 +98,12 @@ Section nintp_gen.
     | n_1 c P, _ => λ κS un gn, ncintp1 c (nintpS_gen P (H ‼ʰ 0) κS un gn)
     | n_2 c P Q, _ => λ κS un gn, ncintp2 c
         (nintpS_gen P (H ‼ʰ 0) κS un gn) (nintpS_gen Q (H ‼ʰ 1) κS un gn)
+    | n_cwpw c W Φ, _ => λ κS un gn, ncintpwpw c
+        (nintpS_gen W (H ‼ʰ 0) κS un gn)
+        (λ v, nintpS_gen (Φ v) (H ‼ʰ 1 ‼ʰ v) κS un gn)
     | n_g1 c P, _ => λ _ un gn, ncintpg1 c (rew eq_nil_ug_g un gn in P) ni δ
     | (∀' Φ)%n, _ => λ κS un gn, ∀ a, nintpS_gen (Φ a) (H ‼ʰ a) κS un gn
     | (∃' Φ)%n, _ => λ κS un gn, ∃ a, nintpS_gen (Φ a) (H ‼ʰ a) κS un gn
-    | n_wpw W δ E e Φ, _ => λ κS un gn, wpw (nintpS_gen W (H ‼ʰ 0) κS un gn)
-        δ E e (λ v, nintpS_gen (Φ v) (H ‼ʰ 1 ‼ʰ v) κS un gn)
-    | n_twpw W δ E e Φ, _ => λ κS un gn, twpw (nintpS_gen W (H ‼ʰ 0) κS un gn)
-        δ E e (λ v, nintpS_gen (Φ v) (H ‼ʰ 1 ‼ʰ v) κS un gn)
     | (∀: V, P)%n, _ => λ κS un gn, ∀ Φ, nintpS_gen
         (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nhgt] 0) κS eq_refl eq_refl
     | (∃: V, P)%n, _ => λ κS un gn, ∃ Φ, nintpS_gen
@@ -118,13 +128,12 @@ Section nintp_gen.
     | n_1 c P, _ => λ un gn, ncintp1 c (nintp_gen P (H ‼ʰ 0) un gn)
     | n_2 c P Q, _ => λ un gn, ncintp2 c
         (nintp_gen P (H ‼ʰ 0) un gn) (nintp_gen Q (H ‼ʰ 1) un gn)
+    | n_cwpw c W Φ, _ => λ un gn, ncintpwpw c
+        (nintp_gen W (H ‼ʰ 0) un gn)
+        (λ v, nintp_gen (Φ v) (H ‼ʰ 1 ‼ʰ v) un gn)
     | n_g1 c P, _ => λ un gn, ncintpg1 c (rew eq_nil_ug_g un gn in P) ni δ
     | (∀' Φ)%n, _ => λ un gn, ∀ a, nintp_gen (Φ a) (H ‼ʰ a) un gn
     | (∃' Φ)%n, _ => λ un gn, ∃ a, nintp_gen (Φ a) (H ‼ʰ a) un gn
-    | n_wpw W δ E e Φ, _ => λ un gn, wpw (nintp_gen W (H ‼ʰ 0) un gn)
-        δ E e (λ v, nintp_gen (Φ v) (H ‼ʰ 1 ‼ʰ v) un gn)
-    | n_twpw W δ E e Φ, _ => λ un gn, twpw (nintp_gen W (H ‼ʰ 0) un gn)
-        δ E e (λ v, nintp_gen (Φ v) (H ‼ʰ 1 ‼ʰ v) un gn)
     | (∀: V, P)%n, _ => λ un gn, ∀ Φ,
         nintp_gen (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nhgt] 0) eq_refl eq_refl
     | (∃: V, P)%n, _ => λ un gn, ∃ Φ,
@@ -157,9 +166,8 @@ Section nintp.
   #[export] Instance nintpS_gen_contractive : Contractive nintpS_gen'.
   Proof.
     unfold nintpS_gen'=> i ni ni' nInvd δ + + + + + + +. fix FIX 4=> κ Γ P H.
-    case: P H=>/=; intros; case H=>//= ?; try (by f_equiv=> >; apply FIX);
-    try (by apply ncintpg1_contr; apply nInvd);
-    [apply wpw_ne=> >|apply twpw_ne=> >]; by apply FIX.
+    case: P H=>/=; intros; case H=>//= ?; try (by f_equiv=> >; apply FIX).
+    by apply ncintpg1_contr.
   Qed.
 
   (** [nintp_gen] is contractive *)
@@ -167,9 +175,8 @@ Section nintp.
   Proof.
     unfold nintp_gen'=> i ni ni' nInvd δ + + + + + +. fix FIX 4=> κ Γ P H.
     case: P H=>/=; intros; case H=>//= ?; try (by f_equiv=> >; apply FIX);
-      try (by apply ncintpg1_contr; apply nInvd);
-      try (by try (f_equiv=> ?); apply nintpS_gen_contractive);
-      [apply wpw_ne=> >|apply twpw_ne=> >]; by apply FIX.
+      try (by apply ncintpg1_contr);
+      by try (f_equiv=> ?); apply nintpS_gen_contractive.
   Qed.
 
   (** [nintp_pre]: Generator of [nintp_fp] *)
@@ -222,8 +229,7 @@ Section nintp.
     nintpS_gen ni δ P H κS un gn ⊣⊢ nintp_gen ni δ P H un gn.
   Proof.
     move: κ Γ P H κS un gn. fix FIX 4=> κ Γ P H.
-    case: P H; intros; case H=>//= ?; try apply wpw_proper=> >;
-      try apply twpw_proper=> >; try f_equiv=> >; apply FIX.
+    case: P H; intros; case H=>//= ?; try f_equiv=> >; apply FIX.
   Qed.
   (** [⟦ ⟧ˢ] coincides with [⟦ ⟧] *)
   Lemma nintpS_nintp {δ P} : ⟦ P ⟧ˢ(δ) ⊣⊢ ⟦ P ⟧(δ).
@@ -234,8 +240,7 @@ Section nintp.
     nintp_gen ni δ (↑ˡ P) H un gn ⊣⊢ nintp_gen ni δ P hwf un gn.
   Proof.
     move: κ Γ P H un gn. fix FIX 4=> κ Γ P H.
-    case: P H=>//=; intros; case H=>/= he; try apply wpw_proper=> >;
-      try apply twpw_proper=> >; try f_equiv=> >; try apply FIX;
+    case: P H=>//=; intros; case H=>/= he; try f_equiv=> >; try apply FIX;
       try apply leibniz_equiv_iff, proof_irrel;
       rewrite rew_eq_hwf; move: nsubst'_nhgt=>/=; subst;
       rewrite (nsubstlu_nlarge (P:=P))=> ?; apply FIX.

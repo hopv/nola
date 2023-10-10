@@ -48,13 +48,10 @@ Fixpoint nsubstlg {κ Γ Γᵍ V} (Φ : nPred V) (P : nProp κ Γ)
   | n_0 c => λ _, n_0 c | n_l0 c => λ _, n_l0 c
   | n_1 c P => λ eq, n_1 c (nsubstlg Φ P eq)
   | n_2 c P Q => λ eq, n_2 c (nsubstlg Φ P eq) (nsubstlg Φ Q eq)
+  | n_cwpw c W Ψ => λ eq, n_cwpw c (nsubstlg Φ W eq) (λ v, nsubstlg Φ (Ψ v) eq)
   | n_g1 c P => λ eq, n_g1 c (nsubstlg Φ P (eq_app_assoc_d eq))
   | ∀' Ψ => λ eq, ∀ a, nsubstlg Φ (Ψ a) eq
   | ∃' Ψ => λ eq, ∃ a, nsubstlg Φ (Ψ a) eq
-  | n_wpw W s E e Ψ => λ eq,
-      n_wpw (nsubstlg Φ W eq) s E e (λ v, nsubstlg Φ (Ψ v) eq)
-  | n_twpw W s E e Ψ => λ eq,
-      n_twpw (nsubstlg Φ W eq) s E e (λ v, nsubstlg Φ (Ψ v) eq)
   | ∀: V, P => λ eq, ∀: V, nsubstlg Φ P eq
   | ∃: V, P => λ eq, ∃: V, nsubstlg Φ P eq
   | rec:ˢ' Ψ a => λ eq, (rec:ˢ b, nsubstlg Φ (Ψ b) eq) a
@@ -100,14 +97,12 @@ Fixpoint nsubstlu {κ Γ Γᵘ V} (Φ : nPred V) (P : nProp κ Γ)
   | n_0 c => λ _ _, n_0 c | n_l0 c => λ _ _, n_l0 c
   | n_1 c P => λ eq gn, n_1 c (nsubstlu Φ P eq gn)
   | n_2 c P Q => λ eq gn, n_2 c (nsubstlu Φ P eq gn) (nsubstlu Φ Q eq gn)
+  | n_cwpw c W Ψ => λ eq gn,
+      n_cwpw c (nsubstlu Φ W eq gn) (λ v, nsubstlu Φ (Ψ v) eq gn)
   | n_g1 c P => λ eq gn, n_g1 c
       (rew ctxeq_g app_nil'_d in nsubstlg Φ P (eq_trans (app_eq_nil_d gn) eq))
   | ∀' Ψ => λ eq gn, ∀ a, nsubstlu Φ (Ψ a) eq gn
   | ∃' Ψ => λ eq gn, ∃ a, nsubstlu Φ (Ψ a) eq gn
-  | n_wpw W s E e Ψ => λ eq gn,
-      n_wpw (nsubstlu Φ W eq gn) s E e (λ v, nsubstlu Φ (Ψ v) eq gn)
-  | n_twpw W s E e Ψ => λ eq gn,
-      n_twpw (nsubstlu Φ W eq gn) s E e (λ v, nsubstlu Φ (Ψ v) eq gn)
   | ∀: V, P => λ eq gn, ∀: V, nsubstlu Φ P (f_equal _ eq) gn
   | ∃: V, P => λ eq gn, ∃: V, nsubstlu Φ P (f_equal _ eq) gn
   | rec:ˢ' Ψ a => λ eq gn, (rec:ˢ b, nsubstlu Φ (Ψ b) (f_equal _ eq) gn) a
@@ -154,7 +149,7 @@ Fixpoint nhgt {κ Γ} (P : nProp κ Γ) : hgt :=
   | n_0 _ | n_l0 _ | n_g1 _ _ | ¢ᵍ _ | %ᵍˢ _ | %ᵍˡ _ | %ᵘˢ _ | !ᵘˢ _ => Hgt₀
   | ¢ᵘ P => nhgt P | n_1 _ P | ∀: _, P | ∃: _, P => Hgt₁ (nhgt P)
   | n_2 _ P Q => Hgt₂ (nhgt P) (nhgt Q) | ∀' Φ | ∃' Φ => Hgtᶠ (λ a, nhgt (Φ a))
-  | n_wpw W _ _ _ Φ | n_twpw W _ _ _ Φ => Hgt₂ (nhgt W) (Hgtᶠ (λ a, nhgt (Φ a)))
+  | n_cwpw _ W Φ => Hgt₂ (nhgt W) (Hgtᶠ (λ a, nhgt (Φ a)))
   | rec:ˢ' Φ a | rec:ˡ' Φ a => Hgt₁ (nhgt (Φ a))
   end%n.
 
