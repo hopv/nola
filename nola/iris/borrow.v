@@ -365,8 +365,8 @@ End borrow.
 
 Section borrow.
   Context `{!borrowGS PROP Σ, !invGS_gen hlc Σ}.
-  Implicit Type (W : iProp Σ) (E : coPset) (intp : PROP → iProp Σ) (P Q : PROP)
-    (D : depo_st PROP) (Dm : depo_stm PROP) (Bm : bor_stm PROP)
+  Implicit Type (W : iProp Σ) (E : coPset) (intp : PROP -d> iProp Σ)
+    (P Q : PROP) (D : depo_st PROP) (Dm : depo_stm PROP) (Bm : bor_stm PROP)
     (Pm : lendm PROP).
 
   (** World satisfaction for a borrower *)
@@ -397,22 +397,26 @@ Section borrow.
   Proof. exact: seal_eq. Qed.
 
   (** [borrow_wsat] is non-expansive *)
-  Local Instance bor_wsat_ne :
-    Proper (pointwise_relation _ (⊣⊢) ==> (=) ==> (=) ==> (=) ==> (⊣⊢))
-      bor_wsat.
+  Local Instance bor_wsat_ne {n} :
+    Proper ((≡{n}≡) ==> (=) ==> (=) ==> (=) ==> (≡{n}≡)) bor_wsat.
   Proof. solve_proper. Qed.
-  Local Instance depo_wsat_ne :
-    Proper ((⊣⊢) ==> (=) ==> pointwise_relation _ (⊣⊢) ==> (=) ==> (=) ==>
-      (=) ==> (=) ==> (⊣⊢)) depo_wsat.
+  Local Instance depo_wsat_ne {n} :
+    Proper ((≡{n}≡) ==> (=) ==> (≡{n}≡) ==> (=) ==> (=) ==> (=) ==> (=) ==>
+      (≡{n}≡)) depo_wsat.
   Proof.
     move=> ?????<-?????<-??<-??<-??<-. rewrite /depo_wsat.
     f_equiv; solve_proper.
   Qed.
-  #[export] Instance borrow_wsat_ne :
-    Proper ((⊣⊢) ==> (=) ==> pointwise_relation _ (⊣⊢) ==> (⊣⊢)) borrow_wsat.
+  #[export] Instance borrow_wsat_ne {n} :
+    Proper ((≡{n}≡) ==> (=) ==> (≡{n}≡) ==> (≡{n}≡)) borrow_wsat.
   Proof.
     rewrite borrow_wsat_unseal /borrow_wsat_def. move=> ?????<-???.
     do 6 f_equiv. by apply depo_wsat_ne.
+  Qed.
+  #[export] Instance borrow_wsat_proper :
+    Proper ((≡) ==> (=) ==> (≡) ==> (≡)) borrow_wsat.
+  Proof.
+    move=> ?????<-???. apply equiv_dist=> ?. f_equiv; by apply equiv_dist.
   Qed.
 
   (** Create borrowers and lenders with a specific depth *)
