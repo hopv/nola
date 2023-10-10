@@ -48,7 +48,7 @@ Section inv_tok.
   Proof. apply ne_proper, _. Qed.
 
   (** Allocate [inv_tok] *)
-  Lemma inv_tok_alloc_rec {intp N P} :
+  Lemma inv_tok_alloc_rec {intp} P N :
     (inv_tok N P -∗ intp P) =[inv_wsat intp]=∗ inv_tok N P.
   Proof.
     rewrite inv_tok_unseal inv_wsat_unseal. iIntros "→P W".
@@ -63,7 +63,7 @@ Section inv_tok.
     iModIntro. iSplitL; [|iExists _; by iSplit]. iApply "→W". iLeft.
     iSplitR "D"; [|done]. iApply "→P". iExists _; by iSplit.
   Qed.
-  Lemma inv_tok_alloc {intp N P} : intp P =[inv_wsat intp]=∗ inv_tok N P.
+  Lemma inv_tok_alloc {intp} P N : intp P =[inv_wsat intp]=∗ inv_tok N P.
   Proof.
     iIntros "P W". iApply (inv_tok_alloc_rec with "[P] W"). by iIntros.
   Qed.

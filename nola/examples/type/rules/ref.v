@@ -21,7 +21,7 @@ Section eref.
     iIntros "?". unfold texpr. wp_bind e. iApply (twp_wand with "[$]").
     iIntros (?) ">#?". wp_alloc l as "↦". iModIntro. iApply fupdw_tinv_wsat_le.
     iIntros (?). have ?: i <ⁿ L by apply (nlt_nle_trans _ _).
-    iMod (inv_tok_alloc (P:=tinvd_ref l T) with "[↦]") as "?";
+    iMod (inv_tok_alloc (tinvd_ref l T) with "[↦]") as "?";
       [iExists _; by iFrame|].
     iModIntro=>/=. iExists _. iSplit; [done|]. iApply ninv_tref.
     by rewrite Loc.add_0.

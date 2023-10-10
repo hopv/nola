@@ -22,8 +22,8 @@ Section lemmas.
   Context `{!nderivy ih δ}.
 
   (** Turn [na_ninv] into [na_ninv] *)
-  Lemma na_ninv_ninv (P : nPropS _) {i p N} : i ∈ (↑N:coPset) →
-    inv_tok N (nInvd_na p i P) -∗ na_ninv (Σ:=Σ) δ p N (↑ˡ P).
+  Local Lemma na_inv_tok_ninv {P : nPropS _} {i p N} : i ∈ (↑N:coPset) →
+    inv_tok N (nInvd_na p i P) ⊢ na_ninv (Σ:=Σ) δ p N (↑ˡ P).
   Proof.
     rewrite na_ninv_unseal. iIntros (jN) "#NP !>".
     iApply (derivy_intro (δ:=δ))=>/=.
@@ -35,19 +35,17 @@ Section lemmas.
     iDestruct ("P→" with "bd P F∖N") as "[bd $]".
     by iMod ("bd→" with "bd") as "_".
   Qed.
-
   (** Allocate [na_ninv] *)
-  Lemma na_ninv_alloc_rec (P : nPropS _) {p N} :
+  Lemma na_ninv_alloc_rec (P : nPropS _) p N :
     (na_ninv δ p N (↑ˡ P) -∗ ⟦ P ⟧(δ)) =[inv_wsat' δ]=∗
       na_ninv δ p N (↑ˡ P).
   Proof.
     iIntros "→P". iMod na_lock_alloc as (i) "[% lock]".
-    iMod (inv_tok_alloc_rec (P:=nInvd_na p i P) with "[→P lock]") as "NP".
-    - iIntros "/=NP". iLeft. iFrame "lock". rewrite nintpS_nintp.
-      iApply "→P". by iApply na_ninv_ninv.
-    - iModIntro. by iApply na_ninv_ninv.
+    rewrite -na_inv_tok_ninv; [|done].
+    iApply (inv_tok_alloc_rec (nInvd_na p i P) with "[→P lock]").
+    iIntros "/=NP". iLeft. iFrame "lock". rewrite nintpS_nintp. by iApply "→P".
   Qed.
-  Lemma na_ninv_alloc (P : nPropS _) {p N} :
+  Lemma na_ninv_alloc (P : nPropS _) p N :
     ⟦ P ⟧(δ) =[inv_wsat' δ]=∗ na_ninv δ p N (↑ˡ P).
   Proof.
     iIntros "P". iApply (na_ninv_alloc_rec with "[P]"). by iIntros.

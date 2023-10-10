@@ -19,23 +19,22 @@ Section lemmas.
   Context `{!nderivy ih δ}.
 
   (** Turn [inv_tok] into [ninv] *)
-  Local Lemma inv_tok_ninv (P : nPropS _) {N} :
-    inv_tok N (nInvd_u P) -∗ ninv δ N (↑ˡ P).
+  Local Lemma inv_tok_ninv {P : nPropS _} {N} :
+    inv_tok N (nInvd_u P) ⊢ ninv δ N (↑ˡ P).
   Proof.
     rewrite ninv_unseal. iIntros "#NP !>". iApply (derivy_intro (δ:=δ))=>/=.
     iIntros (?????). rewrite -nintpS_nintp_nlarge.
     by iApply (inv_tok_acc with "NP").
   Qed.
   (** Allocate [ninv] *)
-  Lemma ninv_alloc_rec (P : nPropS _) {N} :
+  Lemma ninv_alloc_rec (P : nPropS _) N :
     (ninv δ N (↑ˡ P) -∗ ⟦ P ⟧(δ)) =[inv_wsat' δ]=∗ ninv δ N (↑ˡ P).
   Proof.
-    iIntros "→P".
-    iMod (inv_tok_alloc_rec (P:=nInvd_u P) with "[→P]") as "NP".
-    - iIntros "/=NP". rewrite nintpS_nintp. iApply "→P". by iApply inv_tok_ninv.
-    - iModIntro. by iApply inv_tok_ninv.
+    rewrite -inv_tok_ninv. iIntros "→P".
+    iApply (inv_tok_alloc_rec (nInvd_u P) with "[→P]"). iIntros "NP".
+    rewrite/= nintpS_nintp. by iApply "→P".
   Qed.
-  Lemma ninv_alloc (P : nPropS _) {N} :
+  Lemma ninv_alloc (P : nPropS _) N :
     ⟦ P ⟧(δ) =[inv_wsat' δ]=∗ ninv δ N (↑ˡ P).
   Proof. iIntros "P". iApply (ninv_alloc_rec with "[P]"). by iIntros. Qed.
 

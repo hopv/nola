@@ -122,7 +122,7 @@ Section conv.
   Proof.
     iIntros (???) "/= #?". iApply fupdw_tinv_wsat_le. iIntros (?).
     have ? : i <ⁿ L by apply (nlt_nle_trans _ _).
-    iMod (inv_tok_alloc (P:=tinvd_guard T _) with "[]") as "inv"; [done|].
+    iMod (inv_tok_alloc (tinvd_guard T _) with "[]") as "inv"; [done|].
     iApply (ninv_tguard with "inv").
   Qed.
 
