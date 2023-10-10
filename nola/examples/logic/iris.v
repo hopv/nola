@@ -1,7 +1,7 @@
 (** * Iris preliminaries *)
 
 From nola.examples.logic Require Export prop.
-From nola.iris Require Export deriv inv na_inv wp.
+From nola.iris Require Export deriv wp inv na_inv borrow.
 From iris.base_logic.lib Require Export cancelable_invariants.
 From nola.examples.heap_lang Require Export definitions.
 
@@ -20,9 +20,11 @@ Class nintpGS Σ := NintpGS {
   nintpGS_na_ninv :: na_ninvGS (nPropS (;ᵞ)) Σ;
   nintpGS_na_inv :: na_invG Σ;
   nintpGS_cinv :: cinvG Σ;
+  nintpGS_borrow :: borrowGS (nPropS (;ᵞ)) Σ;
+  nintpGS_fborrow :: fborrowGS (nPropS (;ᵞ)) Σ;
   nintpGS_heap :: heapGS_gen HasNoLc Σ;
 }.
-Arguments NintpGS {_} _ _ _ _ _.
+Arguments NintpGS {_}.
 
 (** ** Derivability structure *)
 
@@ -34,16 +36,18 @@ Notation nderiv_ty Σ := (deriv_ty (nderivs Σ)).
 Notation "⸨ P ⸩ ( δ )" := (dunwrap δ (Darg () P%n))
   (format "'[' ⸨  P  ⸩ '/  ' ( δ ) ']'") : nola_scope.
 
-Section iris.
-  Context (* Iris resources *) {Σ : gFunctors}.
+Implicit Type (P : nPropL (;ᵞ)) (N : namespace) (p : na_inv_pool_name)
+  (α : lft) (q : Qp).
 
-  Definition nag `{!agreeG (nPropL (;ᵞ)) Σ}
-    (γ : gname) (P : nPropL (;ᵞ)) : iProp Σ :=
+Section iris.
+  Context (* Iris resources *) `{!nintpGS Σ}.
+  Implicit Type (δ : nderiv_ty Σ) .
+
+  Definition nag γ P : iProp Σ :=
     own γ (to_agree (P : leibnizO _)).
 
   (** [ninv]: [inv_tok] in the accessor style *)
-  Definition ninv_def (δ : nderiv_ty Σ) (N : namespace) (P : nPropL (;ᵞ))
-    : iProp Σ :=
+  Definition ninv_def δ N P : iProp Σ :=
     □ ⸨ ∀ E, ⌜↑N ⊆ E⌝ → |=[n_inv_wsat]{E,E∖↑N}=>
           P ∗ (P =[n_inv_wsat]{E∖↑N,E}=∗ True) ⸩(δ).
   Definition ninv_aux : seal ninv_def. Proof. by eexists. Qed.
@@ -53,8 +57,7 @@ Section iris.
   Proof. rewrite ninv_unseal. exact _. Qed.
 
   (** [na_ninv]: [na_ninv] in the accessor style *)
-  Definition na_ninv_def (δ : nderiv_ty Σ)
-    (p : na_inv_pool_name) (N : namespace) (P : nPropL (;ᵞ)) : iProp Σ :=
+  Definition na_ninv_def δ p N P : iProp Σ :=
     □ ⸨ ∀ E F, ⌜↑N ⊆ E⌝ → ⌜↑N ⊆ F⌝ → n_na_own p F =[n_na_inv_wsat]{E}=∗
           n_na_own p (F∖↑N) ∗ P ∗
           (n_na_own p (F∖↑N) -∗ P =[n_na_inv_wsat]{E}=∗ n_na_own p F) ⸩(δ).
@@ -64,4 +67,17 @@ Section iris.
   #[export] Instance na_ninv_persistent {δ p N P} :
     Persistent (na_ninv δ p N P).
   Proof. rewrite na_ninv_unseal. exact _. Qed.
+
+  (** [borc]: Modified [bor_ctok] *)
+  Definition borc δ α P : iProp Σ :=
+    ∃ Q, □ ⸨ P ={∅}=∗ ↑ˡ Q ⸩(δ) ∗ □ ⸨ ↑ˡ Q ={∅}=∗ P ⸩(δ) ∗ bor_ctok α Q.
+  (** [bor]: Modified [bor_tok] *)
+  Definition bor δ α P : iProp Σ :=
+    ∃ Q, □ ⸨ P ={∅}=∗ ↑ˡ Q ⸩(δ) ∗ □ ⸨ ↑ˡ Q ={∅}=∗ P ⸩(δ) ∗ bor_tok α Q.
+  (** [boro]: Modified [bor_otok] *)
+  Definition boro δ α P q : iProp Σ :=
+    ∃ Q, □ ⸨ P ={∅}=∗ ↑ˡ Q ⸩(δ) ∗ bor_otok α Q q.
+  (** [lend]: Modified [lend_tok] *)
+  Definition lend δ α P : iProp Σ :=
+    ∃ Q, □ ⸨ ↑ˡ Q ={∅}=∗ P ⸩(δ) ∗ lend_tok α Q.
 End iris.

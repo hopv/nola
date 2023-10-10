@@ -1,7 +1,7 @@
 (** * [nProp]: Syntactic proposition *)
 
 From nola.util Require Export funext rel ctx.
-From nola.iris Require Export upd.
+From nola.iris Require Export upd lft.
 From stdpp Require Export coPset namespaces.
 From iris.bi Require Import notation.
 From iris.base_logic Require Export lib.na_invariants.
@@ -62,14 +62,19 @@ Variant ncon0 : Type :=
 | (** Pure proposition *) nc_pure (φ : Prop)
 | (** Non-atomic invariant token *) nc_na_own
     (p : na_inv_pool_name) (E : coPset)
-| (** Cancelable invariant token *) nc_cinv_own (γ : gname) (q : frac)
+| (** Cancelable invariant token *) nc_cinv_own (γ : gname) (q : Qp)
 | (** Points-to token *) nc_mapsto (l : loc) (dq : dfrac) (v : val)
 | (** Owning invariant points-to token *) nc_inv_mapsto_own
     (l : loc) (v : val) (I : val → Prop)
 | (** Invariant points-to token *) nc_inv_mapsto (l : loc) (I : val → Prop)
 | (** Meta token *) nc_meta_token (l : loc) (E : coPset)
 | (** Step number token *) nc_steps_lb (n : nat)
-| (** Prophecy token *) nc_proph (p : proph_id) (pvs : list (val * val)).
+| (** Prophecy token *) nc_proph (p : proph_id) (pvs : list (val * val))
+| (** Lifetime token *) nc_lft_tok (α : lft) (q : Qp)
+| (** Dead lifetime token *) nc_lft_dead (α : lft)
+| (** Eternal lifetime token *) nc_lft_eter (α : lft)
+| (** Persistent lifetime inclusion *) nc_lft_sincl (α β : lft)
+| (** Fractured borrowing world satisfaction *) nc_fborrow_wsat (c : bool).
 (** Nullary, large *)
 Variant nconl0 : Type :=
 | (** Invariant world satisfaction *) nc_inv_wsat
@@ -81,6 +86,9 @@ Variant ncon1 : Type :=
 | (** Plainly modality *) nc_plainly
 | (** Basic update modality *) nc_bupd
 | (** Fancy update modality *) nc_fupd (E E' : coPset).
+(** Unary large *)
+Variant nconl1 : Type :=
+| (** Borrowing world satisfaction *) nc_borrow_wsat (E : coPset).
 (** Binary *)
 Variant ncon2 : Type :=
 | (** Conjunction *) nc_and
@@ -102,7 +110,14 @@ Variant ncong1 : Type :=
 | (** Agreement *) nc_ag (γ : gname)
 | (** Invariant *) nc_inv (N : namespace)
 | (** Non-atomic invariant *) nc_na_inv
-    (p : na_inv_pool_name) (N : namespace).
+    (p : na_inv_pool_name) (N : namespace)
+| (** Closed borrower *) nc_borc (α : lft)
+| (** Borrower *) nc_bor (α : lft)
+| (** Open borrower *) nc_boro (α : lft) (q : Qp)
+| (** Lender *) nc_lend (α : lft).
+(** Unary, fractional, guarding *)
+Variant ncong1f : Type :=
+| (** Fractured borrower token *) nc_fbor (α : lft).
 
 (** Notation for [ncon] *)
 Notation "⟨⌜ φ ⌝⟩" := (nc_pure φ%type%stdpp%nola) (format "⟨⌜ φ ⌝⟩")
@@ -143,9 +158,12 @@ Inductive nProp : nkind → nctx → Type :=
 | n_0 {κ Γ} (c : ncon0) : nProp κ Γ
 | n_l0 {Γ} (c : nconl0) : nProp nL Γ
 | n_1 {κ Γ} (c : ncon1) (P : nProp κ Γ) : nProp κ Γ
+| n_l1 {Γ} (c : nconl1) (W : nProp nL Γ) : nProp nL Γ
 | n_2 {κ Γ} (c : ncon2) (P Q : nProp κ Γ) : nProp κ Γ
 | n_cwpw {κ Γ} (c : nconwpw) (W : nProp κ Γ) (Φ : val → nProp κ Γ) : nProp κ Γ
 | n_g1 {κ Γᵘ Γᵍ} (c : ncong1) (P : nProp nL (;ᵞ Γᵘ ++ Γᵍ)) : nProp κ (Γᵘ;ᵞ Γᵍ)
+| n_g1f {κ Γᵘ Γᵍ} (c : ncong1f) (Φ : Qp → nProp nL (;ᵞ Γᵘ ++ Γᵍ))
+    : nProp κ (Γᵘ;ᵞ Γᵍ)
 (** Universal quantification *)
 | n_forall {κ Γ} {A : Type} (Φ : A → nProp κ Γ) : nProp κ Γ
 (** Existential quantification *)
@@ -195,6 +213,11 @@ Notation "l ↦_ I □" := (n_0 ⟨↦□_I|l⟩) : nProp_scope.
 Notation n_meta_token l E := (n_0 (nc_meta_token l E)).
 Notation n_steps_lb n := (n_0 (nc_steps_lb n)).
 Notation n_proph p pvs := (n_0 (nc_proph p pvs)).
+Notation "q .[ α ]" := (n_0 (nc_lft_tok α q)) : nProp_scope.
+Notation "[† α ]" := (n_0 (nc_lft_dead α)) : nProp_scope.
+Notation "[∞ α ]" := (n_0 (nc_lft_eter α)) : nProp_scope.
+Notation "α ⊑□ β" := (n_0 (nc_lft_sincl α β)) : nProp_scope.
+Notation n_fborrow_wsat c := (n_0 (nc_fborrow_wsat c)).
 Notation n_inv_wsat := (n_l0 nc_inv_wsat).
 Notation n_na_inv_wsat := (n_l0 nc_na_inv_wsat).
 Notation "◇ P" := (n_1 ⟨◇⟩ P) : nProp_scope.
@@ -203,6 +226,7 @@ Notation "■ P" := (n_1 ⟨■⟩ P) : nProp_scope.
 Notation "|==> P" := (n_1 ⟨|==>⟩ P) : nProp_scope.
 Notation "|={ E , E' }=> P" := (n_1 ⟨|={E,E'}=>⟩ P) : nProp_scope.
 Notation "|={ E }=> P" := (n_1 ⟨|={E,E}=>⟩ P) : nProp_scope.
+Notation n_borrow_wsat W E := (n_l1 (nc_borrow_wsat E) W).
 Infix "∧" := (n_2 ⟨∧⟩) : nProp_scope.
 Infix "∨" := (n_2 ⟨∨⟩) : nProp_scope.
 Infix "→" := (n_2 ⟨→⟩) : nProp_scope.
@@ -249,6 +273,16 @@ Notation n_inv N P := (n_inv' _ N P).
 Notation n_na_inv' Γᵘ p N P :=
   (n_g1 (Γᵘ:=Γᵘ) (nc_na_inv p N) P) (only parsing).
 Notation n_na_inv p N P := (n_na_inv' _ p N P).
+Notation n_borc' Γᵘ α P := (n_g1 (Γᵘ:=Γᵘ) (nc_borc α) P) (only parsing).
+Notation n_borc α P := (n_borc' _ α P).
+Notation n_bor' Γᵘ α P := (n_g1 (Γᵘ:=Γᵘ) (nc_bor α) P) (only parsing).
+Notation n_bor α P := (n_bor' _ α P).
+Notation n_boro' Γᵘ α q P := (n_g1 (Γᵘ:=Γᵘ) (nc_boro α q) P) (only parsing).
+Notation n_boro α q P := (n_boro' _ α q P).
+Notation n_lend' Γᵘ α P := (n_g1 (Γᵘ:=Γᵘ) (nc_lend α) P) (only parsing).
+Notation n_lend α P := (n_lend' _ α P).
+Notation n_fbor' Γᵘ α Φ := (n_g1f (Γᵘ:=Γᵘ) (nc_fbor α) Φ) (only parsing).
+Notation n_fbor α Φ := (n_fbor' _ α Φ).
 
 Notation "∀: V , P" := (n_n_forall V P)
   (at level 200, right associativity,
@@ -289,8 +323,9 @@ Reserved Notation "↑ˡ P" (at level 20, right associativity).
 Fixpoint nlarge {κ Γ} (P : nProp κ Γ) : nPropL Γ :=
   match P with
   | n_0 c => n_0 c | n_l0 c => n_l0 c | n_1 c P => n_1 c (↑ˡ P)
-  | n_2 c P Q => n_2 c (↑ˡ P) (↑ˡ Q)
-  | n_cwpw c W Φ => n_cwpw c (↑ˡ W) (λ v, ↑ˡ Φ v) | n_g1 c P => n_g1 c P
+  | n_l1 c P => n_l1 c P | n_2 c P Q => n_2 c (↑ˡ P) (↑ˡ Q)
+  | n_cwpw c W Φ => n_cwpw c (↑ˡ W) (λ v, ↑ˡ Φ v)
+  | n_g1 c P => n_g1 c P | n_g1f c Φ => n_g1f c Φ
   | ∀' Φ => ∀ a, ↑ˡ Φ a | ∃' Φ => ∃ a, ↑ˡ Φ a
   | ∀: V, P => ∀: V, ↑ˡ P | ∃: V, P => ∃: V, ↑ˡ P
   | rec:ˢ' Φ a => rec:ˢ' Φ a | rec:ˡ' Φ a => rec:ˡ' Φ a
