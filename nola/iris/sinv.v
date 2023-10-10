@@ -7,11 +7,13 @@ From iris.proofmode Require Import proofmode.
 Implicit Type PROP : Type.
 
 Class sinvGS PROP Σ := SinvGS {
-  sinvGS_in :: ghost_mapG Σ positive (leibnizO PROP);
+  sinvGS_in : ghost_mapG Σ positive (leibnizO PROP);
   sinv_name : gname;
 }.
+Local Existing Instance sinvGS_in.
 Class sinvGpreS PROP Σ :=
-  sinvGpreS_in :: ghost_mapG Σ positive (leibnizO PROP).
+  sinvGpreS_in : ghost_mapG Σ positive (leibnizO PROP).
+Local Existing Instance sinvGpreS_in.
 Definition sinvΣ PROP : gFunctors := ghost_mapΣ positive (leibnizO PROP).
 #[export] Instance subG_sinvΣ `{!subG (sinvΣ PROP) Σ} : sinvGpreS PROP Σ.
 Proof. solve_inG. Qed.

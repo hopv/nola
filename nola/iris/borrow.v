@@ -63,7 +63,7 @@ Proof. exact: seal_eq. Qed.
 (** Ghost state for the borrowing machinery *)
 Class borrowGS PROP Σ := BorrowGS {
   borrowGS_lft :: lftG Σ;
-  borrowGS_borrow :: inG Σ (borrowR PROP);
+  borrowGS_borrow : inG Σ (borrowR PROP);
   borrow_name : gname;
 }.
 Local Existing Instance borrowGS_borrow.
@@ -72,8 +72,9 @@ Local Instance inG_borrow_def `{!inG Σ (borrowR PROP)} :
 Proof. rewrite -borrowR_unseal. exact _. Qed.
 Class borrowGpreS PROP Σ := BorrowGpreS {
   borrowGpreS_lft :: lftG Σ;
-  borrowGpreS_borrow :: inG Σ (borrowR PROP);
+  borrowGpreS_borrow : inG Σ (borrowR PROP);
 }.
+Local Existing Instance borrowGpreS_borrow.
 Definition borrowΣ PROP : gFunctors :=
   #[GFunctor lftR; GFunctor (borrowR PROP)].
 #[export] Instance subG_borrow `{!subG (borrowΣ PROP) Σ} : borrowGpreS PROP Σ.
@@ -815,8 +816,10 @@ Qed.
 Local Definition fbor_st PROP : Type := lft *' (Qp → PROP).
 
 (** Ghost state for fractured borrowing *)
-Class fborrowGS PROP Σ := fborrowGS_in :: sinvGS (fbor_st PROP) Σ.
-Class fborrowGpreS PROP Σ := fborrowGpreS_in :: sinvGpreS (fbor_st PROP) Σ.
+Class fborrowGS PROP Σ := fborrowGS_in : sinvGS (fbor_st PROP) Σ.
+Local Existing Instance fborrowGS_in.
+Class fborrowGpreS PROP Σ := fborrowGpreS_in : sinvGpreS (fbor_st PROP) Σ.
+Local Existing Instance fborrowGpreS_in.
 Definition fborrowΣ PROP : gFunctors := sinvΣ (fbor_st PROP).
 #[export] Instance subG_fborrow `{!subG (fborrowΣ PROP) Σ} :
   fborrowGpreS PROP Σ.

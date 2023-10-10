@@ -8,10 +8,10 @@ From iris.proofmode Require Import proofmode.
 
 Implicit Type PROP : Type.
 
-(** ** Resources *)
-
-Class ninvGS PROP Σ := ninvGS_in :: sinvGS PROP Σ.
-Class ninvGpreS PROP Σ := ninvGpreS_in :: sinvGpreS PROP Σ.
+Class ninvGS PROP Σ := ninvGS_in : sinvGS PROP Σ.
+Local Existing Instance ninvGS_in.
+Class ninvGpreS PROP Σ := ninvGpreS_in : sinvGpreS PROP Σ.
+Local Existing Instance ninvGpreS_in.
 Definition ninvΣ PROP : gFunctors := sinvΣ PROP.
 #[export] Instance subG_ninvΣ `{!subG (ninvΣ PROP) Σ} : ninvGpreS PROP Σ.
 Proof. solve_inG. Qed.
@@ -46,8 +46,6 @@ Section inv_tok.
   Proof. rewrite inv_wsat_unseal. solve_proper. Qed.
   #[export] Instance inv_wsat_proper : Proper ((≡) ==> (≡)) inv_wsat.
   Proof. apply ne_proper, _. Qed.
-
-  (** ** Lemmas *)
 
   (** Allocate [inv_tok] *)
   Lemma inv_tok_alloc_rec {intp N P} :
