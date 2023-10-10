@@ -1,7 +1,7 @@
-# Nola: Nested Invariants without Step-Indexing
+# Nola: Nested Invariants and Borrows without Step-Indexing
 
-Nola is a library for achieving expressive later-free nested invariants
-by the power of deep embedding.
+Nola is a library for achieving expressive later-free nested invariants 
+and borrows by the power of deep embedding.
 It is fully mechanized in [Coq](https://coq.inria.fr/) with the
 [Iris](https://iris-project.org/) separation logic framework.
 
