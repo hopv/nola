@@ -19,5 +19,6 @@ Notation "⟦ P ⟧{ κ }" := ⟦ P ⟧{κ}(nderiv) (only parsing) : nola_scope.
 Notation "⟦ P ⟧" := ⟦ P ⟧(nderiv) : nola_scope.
 Notation "⟦ P ⟧ˢ" := ⟦ P ⟧ˢ(nderiv) : nola_scope.
 Notation inv_wsatd := (inv_wsat' nderiv).
+Notation na_inv_wsatd := (na_inv_wsat' nderiv).
 
 Implicit Type P : nPropL (;ᵞ).

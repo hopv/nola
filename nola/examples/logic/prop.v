@@ -72,7 +72,8 @@ Variant ncon0 : Type :=
 | (** Prophecy token *) nc_proph (p : proph_id) (pvs : list (val * val)).
 (** Nullary, large *)
 Variant nconl0 : Type :=
-| (** Invariant world satisfaction *) nc_inv_wsat.
+| (** Invariant world satisfaction *) nc_inv_wsat
+| (** Non-atomic invariant world satisfaction *) nc_na_inv_wsat.
 (** Unary *)
 Variant ncon1 : Type :=
 | (** Except-0 modality *) nc_except_0
@@ -197,6 +198,7 @@ Notation n_meta_token l E := (n_0 (nc_meta_token l E)).
 Notation n_steps_lb n := (n_0 (nc_steps_lb n)).
 Notation n_proph p pvs := (n_0 (nc_proph p pvs)).
 Notation n_inv_wsat := (n_l0 nc_inv_wsat).
+Notation n_na_inv_wsat := (n_l0 nc_na_inv_wsat).
 Notation "◇ P" := (n_1 ⟨◇⟩ P) : nProp_scope.
 Notation "□ P" := (n_1 ⟨□⟩ P) : nProp_scope.
 Notation "■ P" := (n_1 ⟨■⟩ P) : nProp_scope.
