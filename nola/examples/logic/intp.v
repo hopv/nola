@@ -134,8 +134,8 @@ Section nintp.
       | (%ᵍˢ s)%n, _ => λ _ _, seqnil s
       | (¢ᵘ _)%n, _ => λ _ (un : _::_ = _), match un with end
       | (¢ᵍ _)%n, _ => λ _ _ (gn : _::_ = _), match gn with end
-      | n_l0 _, _ | n_l1 _ _, _ | (rec:ˡ' _ _)%n, _ | (%ᵍˡ _)%n, _ | (%ᵘˢ _)%n, _
-        | (!ᵘˢ _)%n, _
+      | n_l0 _, _ | n_l1 _ _, _ | (rec:ˡ' _ _)%n, _ | (%ᵍˡ _)%n, _
+        | (%ᵘˢ _)%n, _ | (!ᵘˢ _)%n, _
         => λ κS, match κS with end
       end%I.
     Local Notation nintpS P := (nintpS_gen P hwf eq_refl eq_refl eq_refl).
