@@ -279,7 +279,7 @@ Proof. solve_inG. Qed.
 (** Namespace for the prophecy machinery *)
 Definition prophN: namespace := nroot .@ "proph".
 
-(** Access a summary at a prophecy *)
+(** Access a summary at a prophecy variable *)
 Local Notation proph_access S ξ := (S ξ.(aprvar_ty) !! ξ.(prvar_id)).
 
 (** Fractional item *)
@@ -427,9 +427,9 @@ Section lemmas.
   Proof. apply: (frame_fractional _ _ _ _ _ _ _ proph_toks_as_fractional). Qed.
 
   (** [proph_obs] is persistent, timeless and monotone *)
-  #[export] Instance proph_obs_persistent φπ : Persistent .⟨φπ⟩.
+  #[export] Instance proph_obs_persistent {φπ} : Persistent .⟨φπ⟩.
   Proof. rewrite proph_obs_unseal. exact _. Qed.
-  #[export] Instance proph_obs_timeless φπ : Timeless .⟨φπ⟩.
+  #[export] Instance proph_obs_timeless {φπ} : Timeless .⟨φπ⟩.
   Proof. rewrite proph_obs_unseal. exact _. Qed.
   #[export] Instance proph_obs_mono :
     Proper (pointwise_relation _ impl ==> (⊢)) proph_obs.
@@ -466,7 +466,7 @@ Section lemmas.
     iExists (L ++ L'). iFrame "L L'". iPureIntro=> ? /Forall_app[??].
     split; by [apply Toφπ|apply Toψπ].
   Qed.
-  #[export] Instance proph_obs_combine φπ ψπ :
+  #[export] Instance proph_obs_combine {φπ ψπ} :
     CombineSepAs .⟨φπ⟩ .⟨ψπ⟩ ⟨π, φπ π ∧ ψπ π⟩.
   Proof. rewrite /CombineSepAs. iIntros "#[??]". by iApply proph_obs_and. Qed.
 
@@ -523,7 +523,7 @@ Section lemmas.
     by inversion sat.
   Qed.
   (** Resolve a prophecy *)
-  Lemma proph_resolve E ξ aπ ηl q : ↑prophN ⊆ E → aπ ./ ηl →
+  Lemma proph_resolve {E ξ aπ q} ηl : ↑prophN ⊆ E → aπ ./ ηl →
     proph_ctx -∗ 1:[ξ] -∗ q:∗[ηl] ={E}=∗ ⟨π, π ξ = aπ π⟩ ∗ q:∗[ηl].
   Proof.
     iIntros (? dep) "? ξ ηl". rewrite proph_ctx_unseal.
@@ -567,7 +567,7 @@ Section lemmas.
     move=> val. move: inc. move: val=> /Cinr_valid/to_agree_uninj [?<-].
     inversion eq. by move/to_agree_included <-.
   Qed.
-  Lemma proph_obs_false E φπ :
+  Lemma proph_obs_false {E φπ} :
     ↑prophN ⊆ E → (∀π, ¬ φπ π) → proph_ctx -∗ .⟨φπ⟩ ={E}=∗ False.
   Proof.
     iIntros (? neg) "C obs".
