@@ -68,16 +68,19 @@ Section iris.
     Persistent (na_ninv δ p N P).
   Proof. rewrite na_ninv_unseal. exact _. Qed.
 
+  (** [conv]: Proposition converter *)
+  Definition conv δ P Q : iProp Σ := ⸨ ∀ E, P ={E}=∗ Q ⸩(δ).
+
   (** [borc]: Modified [bor_ctok] *)
   Definition borc δ α P : iProp Σ :=
-    ∃ Q, □ ⸨ P ={∅}=∗ ↑ˡ Q ⸩(δ) ∗ □ ⸨ ↑ˡ Q ={∅}=∗ P ⸩(δ) ∗ bor_ctok α Q.
+    ∃ Q, □ conv δ P (↑ˡ Q) ∗ □ conv δ (↑ˡ Q) P ∗ bor_ctok α Q.
   (** [bor]: Modified [bor_tok] *)
   Definition bor δ α P : iProp Σ :=
-    ∃ Q, □ ⸨ P ={∅}=∗ ↑ˡ Q ⸩(δ) ∗ □ ⸨ ↑ˡ Q ={∅}=∗ P ⸩(δ) ∗ bor_tok α Q.
+    ∃ Q, □ conv δ P (↑ˡ Q) ∗ □ conv δ (↑ˡ Q) P ∗ bor_tok α Q.
   (** [boro]: Modified [bor_otok] *)
   Definition boro δ α P q : iProp Σ :=
-    ∃ Q, □ ⸨ P ={∅}=∗ ↑ˡ Q ⸩(δ) ∗ bor_otok α Q q.
+    ∃ Q, □ conv δ P (↑ˡ Q) ∗ □ conv δ (↑ˡ Q) P ∗ bor_otok α Q q.
   (** [lend]: Modified [lend_tok] *)
   Definition lend δ α P : iProp Σ :=
-    ∃ Q, □ ⸨ ↑ˡ Q ={∅}=∗ P ⸩(δ) ∗ lend_tok α Q.
+    ∃ Q, □ conv δ (↑ˡ Q) P ∗ lend_tok α Q.
 End iris.

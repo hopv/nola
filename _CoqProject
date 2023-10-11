@@ -45,6 +45,7 @@ nola/examples/logic/facts.v
 nola/examples/logic/adequacy.v
 nola/examples/logic/inv.v
 nola/examples/logic/na_inv.v
+nola/examples/logic/borrow.v
 nola/examples/logic/verify/vlist.v
 nola/examples/logic/verify/ilist_base.v
 nola/examples/logic/verify/ilist.v
