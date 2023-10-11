@@ -148,6 +148,14 @@ Section lft.
     Frame p q.[α] r.[α] s.[α] | 5.
   Proof. apply: frame_fractional. Qed.
 
+  (** Combine lifetime tokens *)
+  Lemma lft_tok_combine {α β q r} :
+    q.[α] -∗ r.[β] -∗ ∃ s, s.[α ⊓ β] ∗ (s.[α ⊓ β] -∗ q.[α] ∗ r.[β]).
+  Proof.
+    case: (Qp.lower_bound q r)=> [s[t[t'[->->]]]]. iIntros "[α α'][β β']".
+    iExists s. iFrame "α β α' β'". iIntros "[$$]".
+  Qed.
+
   (** Create a full token and a killer for a fresh lifetime *)
   Lemma lft_tok_alloc : ⊢ |==> ∃ α, 1.[α] ∗ ■ (1.[α] ==∗ [†α]).
   Proof.
@@ -300,10 +308,10 @@ Section lft.
     rewrite lft_sincl_unseal. iIntros "[†|[%[% γ]]] α".
     { iDestruct (lft_tok_dead with "α †") as "[]". }
     iMod (lft_eter_tok with "γ") as (r) "γ". iModIntro.
-    case: (Qp.lower_bound q r)=> [s[t[t'[->->]]]].  iDestruct "α" as "[α α']".
-    iDestruct "γ" as "[γ _]". iCombine "α γ" as "αγ". rewrite -lft_tok_meet.
-    iDestruct (lft_incl_tok_acc with "αγ") as (?) "[β →α]"; [done|].
-    iExists _. iFrame "β". iIntros "β". by iDestruct ("→α" with "β") as "[$_]".
+    iDestruct (lft_tok_combine with "α γ") as (s) "[αγ →]".
+    iDestruct (lft_incl_tok_acc with "αγ") as (?) "[β →α]"; [done|]. iExists _.
+    iFrame "β". iIntros "β". iDestruct ("→α" with "β") as "αγ".
+    iDestruct ("→" with "αγ") as "[$ _]".
   Qed.
 
   (** Modify a dead lifetime token by [⊑□] *)
