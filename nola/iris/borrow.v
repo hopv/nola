@@ -454,7 +454,7 @@ Section borrow.
       as "[[$_][$_]]"; by [iFrame|iIntros|].
   Qed.
 
-  (** Extend the lender token *)
+  (** Extend a lender *)
   Lemma lend_tok_extend {W E intp α P} Ql :
     lend_tok α P -∗ (intp P =[W]{E}=∗ [∗ list] Q ∈ Ql, intp Q)
       =[borrow_wsat W E intp]=∗ [∗ list] Q ∈ Ql, lend_tok α Q.
@@ -770,8 +770,8 @@ Section borrow.
     iMod (bor_otok_merge_subdiv [(_,_)'] with "[o] Ql [→P]") as "[[$ _]$]"=>/=;
       by [iFrame|rewrite bi.sep_emp|].
   Qed.
-  (** Simply close the borrower *)
-  Lemma bor_close {W E intp q α P} :
+  (** Simply close a borrower *)
+  Lemma bor_tok_close {W E intp q α P} :
     bor_otok α P q -∗ intp P =[borrow_wsat W E intp]=∗ q.[α] ∗ bor_ctok α P.
   Proof.
     iIntros "o P". iMod (bor_otok_subdiv [P] with "o [P] []") as "[$[$_]]"=>/=;
