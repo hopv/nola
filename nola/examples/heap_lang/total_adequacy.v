@@ -6,7 +6,7 @@ From nola.examples.heap_lang Require Import proofmode notation.
 From iris.prelude Require Import options.
 
 Definition heap_total Σ `{!heapGpreS Σ} s e σ φ :
-  (∀ `{!heapGS_gen HasNoLc Σ}, ⊢ |==> ∃ W,
+  (∀ `{!heapGS_gen HasNoLc Σ}, ⊢ |={⊤}=> ∃ W,
     W ∗ (inv_heap_inv -∗ WP[W] e @ s; ⊤ [{ v, ⌜φ v⌝ }])) →
   sn erased_step ([e], σ).
 Proof.

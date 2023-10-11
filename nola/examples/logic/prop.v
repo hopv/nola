@@ -1,5 +1,6 @@
 (** * [nProp]: Syntactic proposition *)
 
+From nola.examples.logic Require Export synty.
 From nola.util Require Export funext rel ctx.
 From nola.iris Require Export upd lft.
 From stdpp Require Export coPset namespaces.
@@ -74,7 +75,12 @@ Variant ncon0 : Type :=
 | (** Dead lifetime token *) nc_lft_dead (α : lft)
 | (** Eternal lifetime token *) nc_lft_eter (α : lft)
 | (** Persistent lifetime inclusion *) nc_lft_sincl (α β : lft)
-| (** Fractured borrowing world satisfaction *) nc_fborrow_wsat (c : bool).
+| (** Fractured borrowing world satisfaction *) nc_fborrow_wsat (c : bool)
+| (** Prophecy context *) nc_proph_ctx
+| (** Prophecy token *) nc_proph_tok (ξ : aprvarn) (q : Qp)
+| (** Prophecy tokens *) nc_proph_toks (ξl : list aprvarn) (q : Qp)
+| (** Prophecy observation *) nc_proph_obs (φπ : prophn Prop)
+| (** Prophecy equalizer *) nc_proph_eqz (A : Type) (aπ bπ : prophn A).
 (** Nullary, large *)
 Variant nconl0 : Type :=
 | (** Invariant world satisfaction *) nc_inv_wsat
@@ -192,6 +198,12 @@ Notation "[† α ]" := (n_0 (nc_lft_dead α)) : nProp_scope.
 Notation "[∞ α ]" := (n_0 (nc_lft_eter α)) : nProp_scope.
 Notation "α ⊑□ β" := (n_0 (nc_lft_sincl α β)) : nProp_scope.
 Notation n_fborrow_wsat c := (n_0 (nc_fborrow_wsat c)).
+Notation n_proph_ctx := (n_0 nc_proph_ctx).
+Notation "q :[ ξ ]" := (n_0 (nc_proph_tok ξ q)) : nProp_scope.
+Notation "q :∗[ ξ ]" := (n_0 (nc_proph_toks ξ q)) : nProp_scope.
+Notation ".⟨ φπ ⟩" := (n_0 (nc_proph_obs φπ)) (only parsing) : nProp_scope.
+Notation "⟨ π , φ ⟩" := (n_0 (nc_proph_obs (λ π, φ))) : nProp_scope.
+Notation "aπ :== bπ" := (n_0 (nc_proph_eqz _ aπ bπ)) : nProp_scope.
 Notation n_inv_wsat := (n_l0 nc_inv_wsat).
 Notation n_na_inv_wsat := (n_l0 nc_na_inv_wsat).
 Notation "◇ P" := (n_1 nc_except_0 P) : nProp_scope.

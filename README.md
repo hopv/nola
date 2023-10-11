@@ -79,6 +79,7 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`heap_lang/`](nola/examples/heap_lang/) : Variant of Iris HeapLang,
     with `Ndnat` (terminating infinite non-determinism) added
   + [`logic/`](nola/examples/logic/) : Showcase Logic
+    * [`synty`](nola/examples/logic/synty.v) (Syntactic type),
     * [`prop`](nola/examples/logic/prop.v) (Proposition),
       [`subst`](nola/examples/logic/subst.v) (Substitution),
       [`iris`](nola/examples/logic/iris.v) (Iris preliminaries),

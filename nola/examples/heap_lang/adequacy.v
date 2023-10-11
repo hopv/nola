@@ -25,7 +25,7 @@ with a non-constant step index function. We thus use the more general
 [wp_adequacy], and it hence would make sense to see if we can prove a version
 of [wp_adequacy] for a non-constant step version. *)
 Definition heap_adequacy Σ `{!heapGpreS Σ} hlc s e σ φ :
-  (∀ `{!heapGS_gen hlc Σ}, ⊢ |==> ∃ W,
+  (∀ `{!heapGS_gen hlc Σ}, ⊢ |={⊤}=> ∃ W,
     W ∗ (inv_heap_inv -∗ WP[W] e @ s; ⊤ {{ v, ⌜φ v⌝ }})) →
   adequate s e σ (λ v _, φ v).
 Proof.
