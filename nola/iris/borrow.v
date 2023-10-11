@@ -422,7 +422,7 @@ Section borrow.
   (** Create borrowers and lenders with a specific depth *)
   Local Lemma bor_lend_tok_new_list' {W E intp} d α Pl Ql :
     ([∗ list] P ∈ Pl, intp P) -∗
-    ([†α] -∗ ([∗ list] P ∈ Pl, intp P) =[W]{E}=∗ ([∗ list] Q ∈ Ql, intp Q))
+    ([†α] -∗ ([∗ list] P ∈ Pl, intp P) =[W]{E}=∗ [∗ list] Q ∈ Ql, intp Q)
     =[borrow_wsat W E intp]=∗
       ([∗ list] P ∈ Pl, bor_ctok α P) ∗ [∗ list] Q ∈ Ql, lend_dtok d α Q.
   Proof.
@@ -438,7 +438,7 @@ Section borrow.
   (** Create borrowers and lenders *)
   Lemma bor_lend_tok_new_list {W E intp} α Pl Ql :
     ([∗ list] P ∈ Pl, intp P) -∗
-    ([†α] -∗ ([∗ list] P ∈ Pl, intp P) =[W]{E}=∗ ([∗ list] Q ∈ Ql, intp Q))
+    ([†α] -∗ ([∗ list] P ∈ Pl, intp P) =[W]{E}=∗ [∗ list] Q ∈ Ql, intp Q)
     =[borrow_wsat W E intp]=∗
       ([∗ list] P ∈ Pl, bor_ctok α P) ∗ [∗ list] Q ∈ Ql, lend_tok α Q.
   Proof.
