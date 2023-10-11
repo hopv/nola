@@ -12,6 +12,7 @@ nola/util/hgt.v
 nola/util/ctx.v
 nola/iris/dfrac.v
 nola/iris/gmap.v
+nola/iris/discrete_fun.v
 nola/iris/deriv.v
 nola/iris/upd.v
 nola/iris/wp.v
@@ -20,6 +21,7 @@ nola/iris/inv.v
 nola/iris/na_inv.v
 nola/iris/lft.v
 nola/iris/borrow.v
+nola/iris/prophecy.v
 nola/iris/paradox.v
 
 nola/examples/heap_lang/locations.v

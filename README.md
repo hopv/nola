@@ -64,7 +64,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     [`ctx`](nola/util/ctx.v) (Context with unguarded/guarded variables)
 - [`iris/`](nola/iris) : Iris libraries
   + [`dfrac`](nola/iris/dfrac.v) (For discardable fractions),
-    [`gmap`](nola/iris/gmap.v) (On `gmap`)
+    [`gmap`](nola/iris/gmap.v) (On `gmap`),
+    [`discrete_fun`](nola/iris/discrete_fun.v) (On discrete functions)
   + [`deriv`](nola/iris/deriv.v) (Derivability)
   + [`upd`](nola/iris/upd.v) (Update),
     [`wp`](nola/iris/wp.v) (Weakest precondition)
