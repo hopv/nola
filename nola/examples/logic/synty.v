@@ -3,7 +3,7 @@
 From nola.iris Require Export prophecy.
 
 (** Syntactic type *)
-Inductive nsynty := Empty_setₛ | natₛ | Zₛ | boolₛ | unitₛ | Propₛ
+Inductive nsynty := Empty_setₛ | unitₛ | boolₛ | natₛ | Zₛ | Propₛ
 | optionₛ (X : nsynty) | listₛ (X : nsynty) | prodₛ (X Y : nsynty)
 | sumₛ (X Y : nsynty) | funₛ (X Y : nsynty).
 Implicit Type (X Y : nsynty).
@@ -16,10 +16,10 @@ Infix "*" := prodₛ : nsynty_scope. Infix "+" := sumₛ : nsynty_scope.
 Infix "→" := funₛ : nsynty_scope.
 
 (** Interpret [nsynty] as a type *)
-Fixpoint nsynty_ty (X: nsynty) : Type :=
+Fixpoint nsynty_ty (X : nsynty) : Type :=
   match X with
-  | Empty_setₛ => Empty_set | natₛ => nat | Zₛ => Z | boolₛ => bool
-  | unitₛ => () | Propₛ => Prop | optionₛ X => option (nsynty_ty X)
+  | Empty_setₛ => Empty_set | unitₛ => () | boolₛ => bool | natₛ => nat
+  | Zₛ => Z | Propₛ => Prop | optionₛ X => option (nsynty_ty X)
   | listₛ X => list (nsynty_ty X) | prodₛ X Y => nsynty_ty X * nsynty_ty Y
   | sumₛ X Y => nsynty_ty X + nsynty_ty Y
   | funₛ X Y => nsynty_ty X → nsynty_ty Y
