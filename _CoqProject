@@ -10,7 +10,8 @@ nola/util/nat.v
 nola/util/prod.v
 nola/util/hgt.v
 nola/util/ctx.v
-nola/iris/util.v
+nola/iris/dfrac.v
+nola/iris/gmap.v
 nola/iris/deriv.v
 nola/iris/upd.v
 nola/iris/wp.v

@@ -1,7 +1,7 @@
 (** * Lifetime machinery *)
 
 From nola Require Export prelude.
-From nola.iris Require Import util.
+From nola.iris Require Import dfrac.
 From iris.algebra Require Import csum dfrac.
 From iris.bi Require Import fractional.
 From iris.base_logic Require Import lib.invariants.

@@ -1,7 +1,7 @@
 (** * Borrowing machinery *)
 
 From nola.util Require Export prod.
-From nola.iris Require Import util sinv.
+From nola.iris Require Import gmap sinv.
 From nola.iris Require Export lft upd.
 From nola.util Require Import prod.
 From iris.algebra Require Import excl agree gmap auth.
