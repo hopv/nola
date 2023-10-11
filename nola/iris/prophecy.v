@@ -14,15 +14,16 @@ Import EqNotations.
 #[projections(primitive)]
 Structure synty := Synty {
   (* Syntax *) synty_car :> Type;
-  (* Type interpretation *) synty_ty : synty_car → Type;
-  (* Equality decision over the syntax *) synty_eqdec :: EqDecision synty_car;
-  (* Inhabitance proposition *) synty_inhab : synty_car → Prop;
-  (* [synty_inhab] ensures [Inhabited] *) synty_inhabited ::
-    ∀ X, synty_inhab X → Inhabited (synty_ty X);
-  (* An inhabitance implies [synty_inhab] *) synty_to_inhab :
-    ∀ X, synty_ty X → synty_inhab X;
-  (* [synty_inhab] is proof-irrelevant *) synty_inhab_irrel ::
-    ∀ X, ProofIrrel (synty_inhab X);
+  (* Type interpretation *) #[canonical=no] synty_ty : synty_car → Type;
+  (* Equality decision over the syntax *) #[canonical=no]
+    synty_eqdec :: EqDecision synty_car;
+  (* Inhabitance predicate *) #[canonical=no] synty_inhab : synty_car → Prop;
+  (* [synty_inhab] ensures [Inhabited] *) #[canonical=no]
+    synty_inhabited :: ∀ X, synty_inhab X → Inhabited (synty_ty X);
+  (* An inhabitance implies [synty_inhab] *) #[canonical=no]
+    synty_to_inhab : ∀ X, synty_ty X → synty_inhab X;
+  (* [synty_inhab] is proof-irrelevant *) #[canonical=no]
+    synty_inhab_irrel :: ∀ X, ProofIrrel (synty_inhab X);
 }.
 Coercion synty_ty : synty_car >-> Sortclass.
 Arguments synty_ty {_} _. Arguments synty_eqdec {_} _.
