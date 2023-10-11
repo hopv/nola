@@ -258,7 +258,8 @@ Section lft.
   Lemma lft_incl_dead {α β} : α ⊑ β → [†β] ⊢ [†α].
   Proof.
     rewrite lft_dead_unseal=> ?. iDestruct 1 as (a) "[%aβ †]". iExists a.
-    iFrame "†". iPureIntro. move: aβ. rewrite -!gmultiset_elem_of_elements. set_solver.
+    iFrame "†". iPureIntro. move: aβ. rewrite -!gmultiset_elem_of_elements.
+    set_solver.
   Qed.
   #[export] Instance lft_dead_mono : Proper (flip (⊑) ==> (⊢)) (λ α, [†α])%I.
   Proof. move=> >. exact lft_incl_dead. Qed.
