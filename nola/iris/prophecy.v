@@ -240,8 +240,7 @@ Local Fixpoint proph_upds {TY} L (π : proph_asn TY) :=
   | [] => π
   | .{ξ := aπ} :: L' => proph_upds L' (:<[ξ := aπ]> π)
   end.
-Local Notation ":<[ L ]>" := (proph_upds L)
-  (at level 5, format ":<[ L ]>").
+Local Notation ":<[ L ]>" := (proph_upds L) (at level 5, format ":<[ L ]>").
 
 (** Equivalence out of [L] for [proph_upds] *)
 Local Lemma proph_upds_eqv_out {TY} (L : proph_log TY) :
@@ -616,9 +615,7 @@ Section proph_eqz.
 
   (** Construct an equalizer from a token *)
   Lemma proph_eqz_token ξ aπ : 1:[ξ] -∗ (.$ ξ) :== aπ.
-  Proof.
-    iIntros "ξ" (???) "ξl". by iMod (proph_resolve with "ξ ξl").
-  Qed.
+  Proof. iIntros "ξ" (???) "ξl". by iMod (proph_resolve with "ξ ξl"). Qed.
   (** Construct an equalizer from an observation *)
   Lemma proph_eqz_obs {A} (aπ bπ : proph _ A) : ⟨π, aπ π = bπ π⟩ -∗ aπ :== bπ.
   Proof. iIntros "?" (???) "? !>". iFrame. Qed.
