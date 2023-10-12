@@ -1,11 +1,10 @@
 (** * Prophecy *)
 
-From nola Require Export prelude.
+From nola.iris Require Export upd.
 From nola.util Require Import rel.
 From nola.iris Require Import discrete_fun.
 From iris.algebra Require Import auth functions gmap csum frac agree.
 From iris.bi Require Import fractional.
-From iris.base_logic Require Import invariants.
 From iris.proofmode Require Import proofmode.
 Import EqNotations.
 
@@ -295,9 +294,6 @@ Definition prophΣ TY := GFunctor (prophR TY).
 #[export] Instance subG_prophPreG `{!subG (prophΣ TY) Σ} : prophGpreS TY Σ.
 Proof. solve_inG. Qed.
 
-(** Namespace for the prophecy machinery *)
-Definition prophN: namespace := nroot .@ "proph".
-
 (** Access a summary at a prophecy variable *)
 Local Notation "S .!! ξ" := (S ξ.(aprvar_ty) !! ξ.(prvar_id))
   (at level 20, format "S  .!!  ξ").
@@ -358,20 +354,7 @@ Qed.
 (** ** Iris propositions *)
 
 Section defs.
-  Context `{!prophGS TY Σ, !invGS_gen hlc Σ}.
-
-  (** Token for a prophecy summary *)
-  Local Definition proph_smry_tok (S : proph_smryR TY) : iProp Σ :=
-    own proph_name (● S).
-  (** Invariant for the prophecy *)
-  Local Definition proph_inv : iProp Σ :=
-    ∃ S, ⌜∃L, .✓ L ∧ S :~ L⌝ ∗ proph_smry_tok S.
-  (** Prophecy context *)
-  Local Definition proph_ctx_def : iProp Σ := inv prophN proph_inv.
-  Lemma proph_ctx_aux : seal proph_ctx_def. Proof. by eexists. Qed.
-  Definition proph_ctx := proph_ctx_aux.(unseal).
-  Lemma proph_ctx_unseal : proph_ctx = proph_ctx_def.
-  Proof. exact: seal_eq. Qed.
+  Context `{!prophGS TY Σ}.
 
   (** Prophecy token *)
   Local Definition proph_tok_def (ξ : aprvar _) (q : Qp) : iProp Σ :=
@@ -391,6 +374,17 @@ Section defs.
   Definition proph_obs := proph_obs_aux.(unseal).
   Lemma proph_obs_unseal : proph_obs = proph_obs_def.
   Proof. exact: seal_eq. Qed.
+
+  (** Token for a prophecy summary *)
+  Local Definition proph_smry_tok (S : proph_smryR TY) : iProp Σ :=
+    own proph_name (● S).
+  (** World satisfaction for the prophecy *)
+  Local Definition proph_wsat_def : iProp Σ :=
+    ∃ S, ⌜∃L, .✓ L ∧ S :~ L⌝ ∗ proph_smry_tok S.
+  Lemma proph_wsat_aux : seal proph_wsat_def. Proof. by eexists. Qed.
+  Definition proph_wsat := proph_wsat_aux.(unseal).
+  Lemma proph_wsat_unseal : proph_wsat = proph_wsat_def.
+  Proof. exact: seal_eq. Qed.
 End defs.
 
 Notation "q :[ ξ ]" := (proph_tok ξ q)
@@ -405,24 +399,19 @@ Notation "⟨ π , φ ⟩" := (proph_obs (λ π, φ%type%stdpp))
 
 (** ** Lemmas *)
 
-(** Allocate [proph_ctx] *)
-Lemma proph_init `{!prophGpreS TY Σ, !invGS_gen hlc Σ} E :
-  ↑prophN ⊆ E → ⊢ |={E}=> ∃ _ : prophGS TY Σ, proph_ctx.
+(** Allocate [proph_wsat] *)
+Lemma proph_wsat_alloc `{!prophGpreS TY Σ} :
+  ⊢ |==> ∃ _ : prophGS TY Σ, proph_wsat.
 Proof.
-  move=> ?. iMod (own_alloc (● ε)) as (γ) "●"; [by apply auth_auth_valid|].
-  iExists (ProphGS _ _ _ γ). rewrite proph_ctx_unseal.
-  iMod (inv_alloc _ _ proph_inv with "[●]") as "?"; [|done]. iModIntro.
+  iMod (own_alloc (● ε)) as (γ) "●"; [by apply auth_auth_valid|]. iModIntro.
+  iExists (ProphGS _ _ _ γ). rewrite proph_wsat_unseal.
   iExists ε. iFrame "●". iPureIntro. exists []. split; [done|]=> ??.
   rewrite lookup_empty. split=> hyp; inversion hyp.
 Qed.
 
 Section lemmas.
-  Context `{!prophGS TY Σ, !invGS_gen hlc Σ}.
+  Context `{!prophGS TY Σ}.
   Implicit Type (φπ ψπ : proph TY Prop).
-
-  (** [proph_ctx] is persistent *)
-  #[export] Instance proph_ctx_persistent : Persistent proph_ctx.
-  Proof. rewrite proph_ctx_unseal. exact _. Qed.
 
   (** [proph_tok] is timelesss and fractional *)
   #[export] Instance proph_tok_timeless {q ξ} : Timeless q:[ξ].
@@ -466,6 +455,10 @@ Section lemmas.
     move=>/= ?? iff. by apply bi.equiv_entails; split; f_equiv=> ? /iff.
   Qed.
 
+  (** [proph_wsat] is timeless *)
+  #[export] Instance proph_wsat_timeless : Timeless proph_wsat.
+  Proof. rewrite proph_wsat_unseal. exact _. Qed.
+
   (** On [proph_tok] *)
   Lemma proph_tok_singleton {ξ q} : q:[ξ] ⊣⊢ q:∗[[ξ]].
   Proof. by rewrite/= right_id. Qed.
@@ -490,20 +483,18 @@ Section lemmas.
     CombineSepAs .⟨φπ⟩ .⟨ψπ⟩ ⟨π, φπ π ∧ ψπ π⟩.
   Proof. rewrite /CombineSepAs. iIntros "#[??]". by iApply proph_obs_and. Qed.
 
-  Lemma proph_intro (I : gset positive) {X : TY} (x : X) {E} :
-    ↑prophN ⊆ E → proph_ctx ={E}=∗ ∃ i, ⌜i ∉ I⌝ ∗
-      1:[Prvar (synty_to_inhab x) i].
+  Lemma proph_intro (I : gset positive) {X : TY} (x : X) :
+    ⊢ |=[proph_wsat]=> ∃ i, ⌜i ∉ I⌝ ∗ 1:[Prvar (synty_to_inhab x) i].
   Proof.
-    rewrite proph_ctx_unseal proph_tok_unseal. iIntros (?) "?".
-    iInv prophN as (S) ">[[%L[% %sim]] ●]".
+    rewrite proph_wsat_unseal proph_tok_unseal. iIntros "[%S [[%L[% %sim]] ●]]".
     case (exist_fresh (I ∪ dom (S X)))=>
       i /not_elem_of_union[? /not_elem_of_dom nin].
     set ξ := Prvar (synty_to_inhab x) i. set S' := add_line ξ (fitem 1) S.
     iMod (own_update _ _ (● S' ⋅ ◯ line ξ (fitem 1)) with "●") as "[● ?]".
     { by apply auth_update_alloc,
         discrete_fun_insert_local_update, alloc_singleton_local_update. }
-    iModIntro. iSplitL "●"; last first. { iModIntro. iExists i. by iFrame. }
-    iModIntro. iExists S'. iFrame "●". iPureIntro. exists L.
+    iModIntro. iSplitL "●"; last first. { iExists _. by iFrame. }
+    iExists _. iFrame "●". iPureIntro. exists L.
     split; by [|apply add_line_fitem_sim].
   Qed.
 
@@ -543,11 +534,10 @@ Section lemmas.
     by inversion sat.
   Qed.
   (** Resolve a prophecy *)
-  Lemma proph_resolve {E ξ aπ q} ηl : ↑prophN ⊆ E → aπ ./ ηl →
-    proph_ctx -∗ 1:[ξ] -∗ q:∗[ηl] ={E}=∗ ⟨π, π ξ = aπ π⟩ ∗ q:∗[ηl].
+  Lemma proph_resolve {ξ aπ q} ηl : aπ ./ ηl →
+    1:[ξ] -∗ q:∗[ηl] =[proph_wsat]=∗ ⟨π, π ξ = aπ π⟩ ∗ q:∗[ηl].
   Proof.
-    iIntros (? dep) "? ξ ηl". rewrite proph_ctx_unseal.
-    iInv prophN as (S) ">[[%L[% %sim]] ●]".
+    rewrite proph_wsat_unseal. iIntros (dep) "ξ ηl [%S[[%L[% %sim]] ●]]".
     iDestruct (proph_tok_out with "● ξ") as %?; [done|].
     set L' := .{ξ := aπ} :: L.
     iAssert ⌜∀η, η ∈ ηl → η ∉ pl_vars L'⌝%I as %outηl.
@@ -557,21 +547,20 @@ Section lemmas.
       iDestruct (proph_tok_out with "● η") as %?; [done|].
       by rewrite not_elem_of_cons. }
     iFrame "ηl". iMod (proph_resolve_obs with "● ξ") as "[● $]". iModIntro.
-    iSplitL; [|done]. iExists _. iFrame "●". iPureIntro. exists L'.
+    iExists _. iFrame "●". iPureIntro. exists L'.
     split; [|by apply add_line_aitem_sim].
     split; [done|split; [|done]]=> ?? eqv. apply dep=> ? /outηl ?. by apply eqv.
   Qed.
 
   (** Get a satisfiability from a prophecy observation *)
-  Lemma proph_obs_sat {E φπ} :
-    ↑prophN ⊆ E → proph_ctx -∗ .⟨φπ⟩ ={E}=∗ ⌜∃ π, φπ π⌝.
+  Lemma proph_obs_sat {φπ} : .⟨φπ⟩ =[proph_wsat]=∗ ⌜∃ π, φπ π⌝.
   Proof.
-    rewrite proph_ctx_unseal proph_obs_unseal. iIntros "% ? [%L'[%Toφπ #L']]".
-    iInv prophN as (S) ">[[%L[%Lval %sim]] ●]".
+    rewrite proph_wsat_unseal proph_obs_unseal.
+    iIntros "[%L'[%Toφπ #L']] [%S[[%L[%Lval %sim]] ●]]".
     move: (Lval)=> /proph_valid_sat[π /Forall_forall sat]. iModIntro.
     iAssert ⌜π ◁ L'⌝%I as %?; last first.
     { iSplitL; last first. { iPureIntro. exists π. by apply Toφπ. }
-      iModIntro. iExists S. iFrame "●". iPureIntro. by exists L. }
+      iExists _. iFrame "●". iPureIntro. by exists L. }
     rewrite /proph_sat Forall_forall. iIntros ([ξ aπ] el)=>/=.
     iAssert (proph_aobs .{ξ := aπ}) with "[L']" as "ξvπ".
     { iApply big_sepL_elem_of; by [apply el|]. }
@@ -587,12 +576,10 @@ Section lemmas.
     move=> val. move: inc. move: val=> /Cinr_valid/to_agree_uninj [?<-].
     inversion eq. by move/to_agree_included <-.
   Qed.
-  Lemma proph_obs_false {E φπ} :
-    ↑prophN ⊆ E → (∀π, ¬ φπ π) → proph_ctx -∗ .⟨φπ⟩ ={E}=∗ False.
+  Lemma proph_obs_false {φπ} : (∀π, ¬ φπ π) → .⟨φπ⟩ =[proph_wsat]=∗ False.
   Proof.
-    iIntros (? neg) "C obs".
-    iMod (proph_obs_sat with "C obs") as %[? ex]; [done|].
-    by apply neg in ex.
+    iIntros (neg) "obs". iMod (proph_obs_sat with "obs") as %[? φx].
+    by apply neg in φx.
   Qed.
 End lemmas.
 
@@ -600,38 +587,34 @@ End lemmas.
 
 (** Prophecy equalizer, an ability to get [⟨π, aπ π = bπ π⟩]
   after getting dependent prophecy tokens *)
-Definition proph_eqz `{!prophGS TY Σ, !invGS_gen hlc Σ} {A}
-  (aπ bπ : proph TY A) : iProp Σ :=
-  ∀ E ξl q, ⌜↑prophN ⊆ E⌝ -∗ ⌜bπ ./ ξl⌝ -∗
-    q:∗[ξl] ={E}=∗ ⟨π, aπ π = bπ π⟩ ∗ q:∗[ξl].
+Definition proph_eqz `{!prophGS TY Σ} {A} (aπ bπ : proph TY A) : iProp Σ :=
+  ∀ ξl q, ⌜bπ ./ ξl⌝ -∗ q:∗[ξl] =[proph_wsat]=∗ ⟨π, aπ π = bπ π⟩ ∗ q:∗[ξl].
 
 Notation "aπ :== bπ" := (proph_eqz aπ bπ)
   (at level 70, format "aπ  :==  bπ") : bi_scope.
 
 Section proph_eqz.
-  Context `{!prophGS TY Σ, !invGS_gen hlc Σ}.
+  Context `{!prophGS TY Σ}.
 
   (** Use a prophecy equalizer *)
-  Lemma proph_eqz_use {A} {aπ bπ : proph _ A} {E} ξl q :
-    ↑prophN ⊆ E → bπ ./ ξl →
-    aπ :== bπ -∗ q:∗[ξl] ={E}=∗ ⟨π, aπ π = bπ π⟩ ∗ q:∗[ξl].
-  Proof. iIntros "%% eq". by iApply "eq". Qed.
-  Lemma proph_eqz_use' {A} {aπ : proph _ A} {b E} :
-    ↑prophN ⊆ E → aπ :== (λ _, b) ={E}=∗ ⟨π, aπ π = b⟩.
+  Lemma proph_eqz_use {A} {aπ bπ : proph _ A} ξl q :
+    bπ ./ ξl → aπ :== bπ -∗ q:∗[ξl] =[proph_wsat]=∗ ⟨π, aπ π = bπ π⟩ ∗ q:∗[ξl].
+  Proof. iIntros "% eq". by iApply "eq". Qed.
+  Lemma proph_eqz_use' {A aπ} {b : A} :
+    aπ :== (λ _, b) =[proph_wsat]=∗ ⟨π, aπ π = b⟩.
   Proof.
-    iIntros "% eq".
-    iDestruct (proph_eqz_use [] 1 with "eq") as "eq"; [done..|]=>/=.
+    iIntros "eq". iDestruct (proph_eqz_use [] 1 with "eq") as "eq"; [done..|].
     by iMod ("eq" with "[//]") as "[$ _]".
   Qed.
 
   (** Construct an equalizer from a token *)
-  Lemma proph_eqz_token ξ aπ : proph_ctx -∗ 1:[ξ] -∗ (.$ ξ) :== aπ.
+  Lemma proph_eqz_token ξ aπ : 1:[ξ] -∗ (.$ ξ) :== aπ.
   Proof.
-    iIntros "C ξ" (?????) "ξl". by iMod (proph_resolve with "C ξ ξl").
+    iIntros "ξ" (???) "ξl". by iMod (proph_resolve with "ξ ξl").
   Qed.
   (** Construct an equalizer from an observation *)
   Lemma proph_eqz_obs {A} (aπ bπ : proph _ A) : ⟨π, aπ π = bπ π⟩ -∗ aπ :== bπ.
-  Proof. iIntros "?" (?????) "? !>". iFrame. Qed.
+  Proof. iIntros "?" (???) "? !>". iFrame. Qed.
   Lemma proph_eqz_refl {A} (aπ : proph _ A) : ⊢ aπ :== aπ.
   Proof. iApply proph_eqz_obs. by iApply proph_obs_true. Qed.
 
@@ -639,17 +622,16 @@ Section proph_eqz.
   Lemma proph_eqz_modify {A} (aπ bπ cπ : proph _ A) :
     ⟨π, aπ π = bπ π⟩ -∗ aπ :== cπ -∗ bπ :== cπ.
   Proof.
-    iIntros "obs eqz" (?????) "ξl".
-    iMod ("eqz" with "[//] [//] ξl") as "[obs' $]". iModIntro.
-    iCombine "obs obs'" as "?". iStopProof. by f_equiv=> ?[->->].
+    iIntros "obs eqz" (???) "ξl". iMod ("eqz" with "[//] ξl") as "[obs' $]".
+    iModIntro. iCombine "obs obs'" as "?". iStopProof. by f_equiv=> ?[->->].
   Qed.
 
   (** Construct a prophecy equalizer from injective functions *)
   Lemma proph_eqz_constr {A B} f `{!@Inj A B (=) (=) f} aπ bπ :
     aπ :== bπ -∗ (λ π, f (aπ π)) :== (λ π, f (bπ π)).
   Proof.
-    iIntros "eqz" (???? dep) "ξl". move/proph_dep_destr in dep.
-    iMod ("eqz" with "[//] [//] ξl") as "[? $]". iModIntro. iStopProof.
+    iIntros "eqz" (?? dep) "ξl". move/proph_dep_destr in dep.
+    iMod ("eqz" with "[//] ξl") as "[? $]". iModIntro. iStopProof.
     by f_equiv=> ?->.
   Qed.
   Lemma proph_eqz_constr2 {A B C} f
@@ -657,9 +639,9 @@ Section proph_eqz.
     aπ :== aπ' -∗ bπ :== bπ' -∗
     (λ π, f (aπ π) (bπ π)) :== (λ π, f (aπ' π) (bπ' π)).
   Proof.
-    iIntros "eqz eqz'" (???? dep) "ξl". move: dep=> /proph_dep_destr2[??].
-    iMod ("eqz" with "[//] [//] ξl") as "[obs ξl]".
-    iMod ("eqz'" with "[//] [//] ξl") as "[obs' $]". iModIntro.
+    iIntros "eqz eqz'" (?? dep) "ξl". move: dep=> /proph_dep_destr2[??].
+    iMod ("eqz" with "[//] ξl") as "[obs ξl]".
+    iMod ("eqz'" with "[//] ξl") as "[obs' $]". iModIntro.
     iCombine "obs obs'" as "?". iStopProof. by f_equiv=>/= ?[->->].
   Qed.
 End proph_eqz.

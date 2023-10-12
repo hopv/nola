@@ -30,8 +30,8 @@ Section nintp.
     | nc_steps_lb n => steps_lb n | nc_proph p pvs => proph p pvs
     | nc_lft_tok α q => (q).[α] | nc_lft_dead α => [†α] | nc_lft_eter α => [∞α]
     | nc_lft_sincl α β => α ⊑□ β | nc_fborrow_wsat c => fborrow_wsat c
-    | nc_proph_ctx => proph_ctx | nc_proph_tok ξ q => q:[ξ]
-    | nc_proph_toks ξl q => q:∗[ξl] | nc_proph_obs φπ => .⟨φπ⟩
+    | nc_proph_tok ξ q => q:[ξ] | nc_proph_toks ξl q => q:∗[ξl]
+    | nc_proph_obs φπ => .⟨φπ⟩ | nc_proph_wsat => proph_wsat
     | nc_proph_eqz _ aπ bπ => aπ :== bπ
     end.
   Local Definition ncintpl0 (c : nconl0)

@@ -76,10 +76,10 @@ Variant ncon0 : Type :=
 | (** Eternal lifetime token *) nc_lft_eter (α : lft)
 | (** Persistent lifetime inclusion *) nc_lft_sincl (α β : lft)
 | (** Fractured borrowing world satisfaction *) nc_fborrow_wsat (c : bool)
-| (** Prophecy context *) nc_proph_ctx
 | (** Prophecy token *) nc_proph_tok (ξ : aprvarn) (q : Qp)
 | (** Prophecy tokens *) nc_proph_toks (ξl : list aprvarn) (q : Qp)
 | (** Prophecy observation *) nc_proph_obs (φπ : prophn Prop)
+| (** Prophecy world satisfaction *) nc_proph_wsat
 | (** Prophecy equalizer *) nc_proph_eqz (A : Type) (aπ bπ : prophn A).
 (** Nullary, large *)
 Variant nconl0 : Type :=
@@ -198,7 +198,7 @@ Notation "[† α ]" := (n_0 (nc_lft_dead α)) : nProp_scope.
 Notation "[∞ α ]" := (n_0 (nc_lft_eter α)) : nProp_scope.
 Notation "α ⊑□ β" := (n_0 (nc_lft_sincl α β)) : nProp_scope.
 Notation n_fborrow_wsat c := (n_0 (nc_fborrow_wsat c)).
-Notation n_proph_ctx := (n_0 nc_proph_ctx).
+Notation n_proph_wsat := (n_0 nc_proph_wsat).
 Notation "q :[ ξ ]" := (n_0 (nc_proph_tok ξ q)) : nProp_scope.
 Notation "q :∗[ ξ ]" := (n_0 (nc_proph_toks ξ q)) : nProp_scope.
 Notation ".⟨ φπ ⟩" := (n_0 (nc_proph_obs φπ)) (only parsing) : nProp_scope.
