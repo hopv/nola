@@ -878,7 +878,7 @@ Section fborrow.
   Proof. rewrite fborrow_wsat_unseal. exact _. Qed.
 
   (** Turn [bor_ctok] into [fbor_tok] *)
-  Lemma bor_fbor_tok {α Φ q} c :
+  Lemma bor_fbor_tok {α q} c Φ :
     bor_xtok c α (Φ q) =[fborrow_wsat c]=∗ fbor_tok α Φ.
   Proof.
     rewrite fborrow_wsat_unseal. iIntros "b W".
