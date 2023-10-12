@@ -102,7 +102,7 @@ Proof. apply populate. move=> [?[??]]. by apply synty_inhabited. Qed.
 (** ** Prophecy Dependency *)
 
 (** Equivalence of prophecy assignments over a set of prophecy variables *)
-Local Definition proph_asn_eqv {TY}
+Definition proph_asn_eqv {TY}
   (φ : aprvar TY → Prop) (π π' : proph_asn TY) :=
   ∀ ξ : aprvar TY, φ ξ → π ξ = π' ξ.
 Local Notation "π .≡{ φ }≡ π'" := (proph_asn_eqv φ π π')
@@ -130,6 +130,10 @@ Section lemmas.
   #[export] Instance proph_dep_proper {A} (aπ : proph TY A) :
     Proper ((≡ₚ) ==> iff) (proph_dep aπ).
   Proof. move=> ?? eq. split; apply proph_dep_mono; by rewrite eq. Qed.
+
+  (** On a constant *)
+  Lemma proph_dep_const {A} (a : A) : (λ _ : proph_asn TY, a) ./ [].
+  Proof. done. Qed.
 
   (** On [(.$ ξ)] *)
   Lemma proph_dep_one ξ : (λ π, π ξ) ./ [ξ].
@@ -605,6 +609,19 @@ Notation "aπ :== bπ" := (proph_eqz aπ bπ)
 
 Section proph_eqz.
   Context `{!prophGS TY Σ, !invGS_gen hlc Σ}.
+
+  (** Use a prophecy equalizer *)
+  Lemma proph_eqz_use {A} {aπ bπ : proph _ A} {E} ξl q :
+    ↑prophN ⊆ E → bπ ./ ξl →
+    aπ :== bπ -∗ q:∗[ξl] ={E}=∗ ⟨π, aπ π = bπ π⟩ ∗ q:∗[ξl].
+  Proof. iIntros "%% eq". by iApply "eq". Qed.
+  Lemma proph_eqz_use' {A} {aπ : proph _ A} {b E} :
+    ↑prophN ⊆ E → aπ :== (λ _, b) ={E}=∗ ⟨π, aπ π = b⟩.
+  Proof.
+    iIntros "% eq".
+    iDestruct (proph_eqz_use [] 1 with "eq") as "eq"; [done..|]=>/=.
+    by iMod ("eq" with "[//]") as "[$ _]".
+  Qed.
 
   (** Construct an equalizer from a token *)
   Lemma proph_eqz_token ξ aπ : proph_ctx -∗ 1:[ξ] -∗ (.$ ξ) :== aπ.
