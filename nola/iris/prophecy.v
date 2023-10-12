@@ -299,7 +299,8 @@ Proof. solve_inG. Qed.
 Definition prophN: namespace := nroot .@ "proph".
 
 (** Access a summary at a prophecy variable *)
-Local Notation proph_access S ξ := (S ξ.(aprvar_ty) !! ξ.(prvar_id)).
+Local Notation "S .!! ξ" := (S ξ.(aprvar_ty) !! ξ.(prvar_id))
+  (at level 20, format "S  .!!  ξ").
 
 (** Fractional item *)
 Local Definition fitem {TY} {X : TY} (q : Qp) : proph_itemR X := Cinl q.
@@ -314,7 +315,7 @@ Local Definition add_line {TY} ξ it (S : proph_smryR TY) : proph_smryR TY :=
 
 (** Access [add_line] out of the additionn *)
 Local Lemma add_line_ne {TY} {ξ η : aprvar TY} {S aπ} : ξ ≠ η →
-  proph_access (add_line ξ (aitem aπ) S) η ≡ proph_access S η.
+  add_line ξ (aitem aπ) S .!! η ≡ S .!! η.
 Proof.
   move: aπ. case: ξ η=> [X[h i]][Y[h' j]] ? ne.
   rewrite /add_line /discrete_fun_insert /=.
@@ -325,7 +326,7 @@ Qed.
 
 (** A prophecy summary simulating a prophecy log *)
 Local Definition proph_sim {TY} (S : proph_smryR TY) (L : proph_log TY) :=
-  ∀ (ξ : aprvar _) aπ, proph_access S ξ ≡ Some (aitem aπ) ↔ .{ξ := aπ} ∈ L.
+  ∀ (ξ : aprvar _) aπ, S .!! ξ ≡ Some (aitem aπ) ↔ .{ξ := aπ} ∈ L.
 Local Notation "S :~ L" := (proph_sim S L) (at level 70, format "S  :~  L").
 
 (** [:~] on [add_line] *)
