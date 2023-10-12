@@ -9,37 +9,24 @@ From iris.base_logic Require Import invariants.
 From iris.proofmode Require Import proofmode.
 Import EqNotations.
 
-(** ** Syntactic type *)
+(** ** Syntactic pre-type and prophecy variable *)
 
 #[projections(primitive)]
-Structure synty := Synty {
-  (* Syntax *) synty_car :> Type;
-  (* Type interpretation *) #[canonical=no] synty_ty : synty_car → Type;
+Structure synpty := Synpty {
+  (* Syntax *) synpty_car :> Type;
   (* Equality decision over the syntax *) #[canonical=no]
-    synty_eqdec :: EqDecision synty_car;
-  (* Inhabitance predicate *) #[canonical=no] synty_inhab : synty_car → Prop;
-  (* [synty_inhab] ensures [Inhabited] *) #[canonical=no]
-    synty_inhabited :: ∀ X, synty_inhab X → Inhabited (synty_ty X);
-  (* An inhabitance implies [synty_inhab] *) #[canonical=no]
-    synty_to_inhab : ∀ X, synty_ty X → synty_inhab X;
+    synpty_eqdec :: EqDecision synpty_car;
+  (* Inhabitance predicate *) #[canonical=no] synpty_inhab : synpty_car → Prop;
   (* [synty_inhab] is proof-irrelevant *) #[canonical=no]
-    synty_inhab_irrel :: ∀ X, ProofIrrel (synty_inhab X);
+    synpty_inhab_irrel :: ∀ X, ProofIrrel (synpty_inhab X);
 }.
-Coercion synty_ty : synty_car >-> Sortclass.
-Arguments synty_ty {_} _. Arguments synty_eqdec {_} _.
-Arguments synty_inhab {_} _. Arguments synty_inhabited {_ _} _.
-Arguments synty_to_inhab {_ _} _. Arguments synty_inhab_irrel {_ _} _.
-
-(** Prophecy variable *)
-
-Implicit Type TY : synty.
-
-(** ** Prophecy variable and assignment *)
+Arguments synpty_eqdec {_} _. Arguments synpty_inhab {_} _.
+Arguments synpty_inhab_irrel {_ _} _.
 
 (** Prophecy variable *)
 #[projections(primitive)]
-Record prvar {TY : synty} (A : TY) := Prvar {
-  (* Proof of inhabitance *) prvar_inhab : synty_inhab A;
+Record prvar {TY : synpty} (A : TY) := Prvar {
+  (* Proof of inhabitance *) prvar_inhab : synpty_inhab A;
   (* Id *) prvar_id : positive;
 }.
 Add Printing Constructor prvar.
@@ -47,17 +34,24 @@ Arguments prvar_inhab {_ _} _. Arguments prvar_id {_ _} _.
 Arguments Prvar {_ _} _ _.
 
 (** Equality decision over [prvar] *)
-#[export] Instance prvar_eq_dec {TY} (A : TY) : EqDecision (prvar A).
+#[export] Instance prvar_eq_dec {TY : synpty} (A : TY) : EqDecision (prvar A).
 Proof.
   move=> [h i] [h' j]. rewrite (proof_irrel h h'). case: (decide (i = j))=> ?.
   { subst. by left. } { right. by case. }
 Defined.
 
-(** Inhabitedness of [prvar] *)
+(** Inhabitant of [prvar] by [synpty_inhab] *)
+Definition prvar_by_inhab {TY : synpty} (X : TY) (h : synpty_inhab X)
+  : prvar X := Prvar h inhabitant.
+
+(** Negated [synpty_inhab] ensures the emptyness of [prvar] *)
+Lemma prvar_neg_inhab {TY : synpty} (X : TY) :
+  ¬ synpty_inhab X → prvar X → False.
+Proof. move=> neg [??]. by apply neg. Qed.
 
 (** Prophecy variable of any type *)
 #[projections(primitive)]
-Record aprvar (TY : synty) := Aprvar {
+Record aprvar (TY : synpty) := Aprvar {
   (* Type *) aprvar_ty : TY;
   (* Variable *) aprvar_var :> prvar aprvar_ty;
 }.
@@ -75,7 +69,28 @@ Proof.
   case: (decide (i = j))=> ?. { subst. by left. } { right. by case. }
 Defined.
 
-(** Prophecy assignment *)
+(** Inhabitant of [aprvar] by [synpty_inhab] *)
+Definition aprvar_by_inhab {TY : synpty} (X : TY) (h : synpty_inhab X)
+  : aprvar TY := prvar_by_inhab X h.
+
+(** ** Syntactic type and prophecy assignment *)
+
+(** Syntactic type *)
+#[projections(primitive)]
+Structure synty := Synty {
+  (* Pre-type *) synty_pty :> synpty;
+  (* Type interpretation *) #[canonical=no] synty_ty : synty_pty → Type;
+  (* [synty_inhab] ensures [Inhabited] *) #[canonical=no]
+    synty_inhabited :: ∀ X, synpty_inhab X → Inhabited (synty_ty X);
+  (* An inhabitant implies [synty_inhab] *) #[canonical=no]
+    synty_to_inhab : ∀ X, synty_ty X → synpty_inhab X;
+}.
+Arguments synty_inhabited {_ _} _. Arguments synty_to_inhab {_ _} _.
+#[warnings="-uniform-inheritance"]
+Coercion synty_ty : synpty_car >-> Sortclass.
+
+Implicit Type TY : synty.
+
 Definition proph_asn (TY : synty) := ∀ ξ : aprvar TY, ξ.(aprvar_ty).
 (** Value under a prophecy assignment *)
 Notation proph TY A := (proph_asn TY → A).
