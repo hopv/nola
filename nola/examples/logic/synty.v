@@ -12,12 +12,10 @@ Inductive nsynty := Empty_setₛ | unitₛ | boolₛ | natₛ | Zₛ | Propₛ |
 | prod'ₛ (X Y : nsynty) | sumₛ (X Y : nsynty) | funₛ (X Y : nsynty).
 Implicit Type (X Y : nsynty).
 
-Declare Scope nsynty_scope.
-Bind Scope nsynty_scope with nsynty.
-Delimit Scope nsynty_scope with ST.
-Notation "()" := unitₛ : nsynty_scope.
-Infix "*'" := prod'ₛ : nsynty_scope. Infix "+" := sumₛ : nsynty_scope.
-Infix "→" := funₛ : nsynty_scope.
+Notation "()ₛ" := unitₛ : nola_scope.
+Infix "*'ₛ" := prod'ₛ (at level 80, right associativity) : nola_scope.
+Infix "+ₛ" := sumₛ (at level 85, right associativity) : nola_scope.
+Infix "→ₛ" := funₛ (at level 99, right associativity) : nola_scope.
 
 (** Decidable equality *)
 #[export] Instance nsynty_eq_dec : EqDecision nsynty.
@@ -30,9 +28,9 @@ Proof. solve_decision. Defined.
 Fixpoint nsynty_inhab X : bool :=
   match X with
   | Empty_setₛ => false | prvarₛ X => nsynty_inhab X
-  | prod'ₛ X Y => nsynty_inhab X && nsynty_inhab Y
-  | sumₛ X Y => nsynty_inhab X || nsynty_inhab Y
-  | funₛ X Y => negb (nsynty_inhab X) || nsynty_inhab Y
+  | X *'ₛ Y => nsynty_inhab X && nsynty_inhab Y
+  | X +ₛ Y => nsynty_inhab X || nsynty_inhab Y
+  | X →ₛ Y => negb (nsynty_inhab X) || nsynty_inhab Y
   | _ => true
   end.
 
@@ -48,9 +46,9 @@ Fixpoint nsynty_ty (X : nsynty) : Type :=
   | Empty_setₛ => Empty_set | unitₛ => () | boolₛ => bool | natₛ => nat
   | Zₛ => Z | Propₛ => Prop | nsyntyₛ => nsynty | aprvarₛ => aprvarn
   | prvarₛ X => prvar X | optionₛ X => option (nsynty_ty X)
-  | listₛ X => list (nsynty_ty X) | prod'ₛ X Y => nsynty_ty X *' nsynty_ty Y
-  | sumₛ X Y => nsynty_ty X + nsynty_ty Y
-  | funₛ X Y => nsynty_ty X → nsynty_ty Y
+  | listₛ X => list (nsynty_ty X) | X *'ₛ Y => nsynty_ty X *' nsynty_ty Y
+  | X +ₛ Y => nsynty_ty X + nsynty_ty Y
+  | X →ₛ Y => nsynty_ty X → nsynty_ty Y
   end.
 Coercion nsynty_ty: nsynty >-> Sortclass.
 
