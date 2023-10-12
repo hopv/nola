@@ -28,7 +28,7 @@ Section nintp.
     | nc_inv_mapsto_own l v J => l ↦_J v | nc_inv_mapsto l J => l ↦_J □
     | nc_meta_token l E => meta_token l E
     | nc_steps_lb n => steps_lb n | nc_proph p pvs => proph p pvs
-    | nc_lft_tok α q => (q).[α] | nc_lft_dead α => [†α] | nc_lft_eter α => [∞α]
+    | nc_lft_tok α q => q.[α] | nc_lft_dead α => [†α] | nc_lft_eter α => [∞α]
     | nc_lft_sincl α β => α ⊑□ β | nc_fborrow_wsat c => fborrow_wsat c
     | nc_proph_tok ξ q => q:[ξ] | nc_proph_toks ξl q => q:∗[ξl]
     | nc_proph_obs φπ => .⟨φπ⟩ | nc_proph_wsat => proph_wsat
