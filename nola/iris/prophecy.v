@@ -295,7 +295,7 @@ Definition prophΣ TY := GFunctor (prophR TY).
 Proof. solve_inG. Qed.
 
 (** Access a summary at a prophecy variable *)
-Local Notation "S .!! ξ" := (S ξ.(aprvar_ty) !! ξ.(prvar_id))
+Local Notation "S .!! ξ" := (S ξ.(aprvar_ty) !! ξ.(aprvar_var).(prvar_id))
   (at level 20, format "S  .!!  ξ").
 
 (** Fractional item *)
@@ -311,7 +311,7 @@ Local Definition add_line {TY} ξ it (S : proph_smryR TY) : proph_smryR TY :=
 
 (** Access [add_line] out of the additionn *)
 Local Lemma add_line_ne {TY} {ξ η : aprvar TY} {S aπ} : ξ ≠ η →
-  add_line ξ (aitem aπ) S .!! η ≡ S .!! η.
+  add_line ξ (aitem aπ) S .!! η = S .!! η.
 Proof.
   move: aπ. case: ξ η=> [X[h i]][Y[h' j]] ? ne.
   rewrite /add_line /discrete_fun_insert /=.
@@ -483,17 +483,25 @@ Section lemmas.
     CombineSepAs .⟨φπ⟩ .⟨ψπ⟩ ⟨π, φπ π ∧ ψπ π⟩.
   Proof. rewrite /CombineSepAs. iIntros "#[??]". by iApply proph_obs_and. Qed.
 
+  (** Lemma for [proph_intro] *)
+  Local Lemma proph_tok_alloc {S} (ξ : aprvar TY) : S .!! ξ = None →
+    proph_smry_tok S ==∗ proph_smry_tok (add_line ξ (fitem 1) S) ∗ 1:[ξ].
+  Proof.
+    rewrite proph_tok_unseal=> ?. iIntros "●".
+    iMod (own_update with "●") as "[$$]"; [|done].
+    by apply auth_update_alloc,
+      discrete_fun_insert_local_update, alloc_singleton_local_update.
+  Qed.
+  (** Introduce a prophecy variable *)
   Lemma proph_intro (I : gset positive) {X : TY} (x : X) :
     ⊢ |=[proph_wsat]=> ∃ i, ⌜i ∉ I⌝ ∗ 1:[Prvar (synty_to_inhab x) i].
   Proof.
-    rewrite proph_wsat_unseal proph_tok_unseal. iIntros "[%S [[%L[% %sim]] ●]]".
+    rewrite proph_wsat_unseal. iIntros "[%S [[%L[% %sim]] ●]]".
     case (exist_fresh (I ∪ dom (S X)))=>
       i /not_elem_of_union[? /not_elem_of_dom nin].
-    set ξ := Prvar (synty_to_inhab x) i. set S' := add_line ξ (fitem 1) S.
-    iMod (own_update _ _ (● S' ⋅ ◯ line ξ (fitem 1)) with "●") as "[● ?]".
-    { by apply auth_update_alloc,
-        discrete_fun_insert_local_update, alloc_singleton_local_update. }
-    iModIntro. iSplitL "●"; last first. { iExists _. by iFrame. }
+    set ξ := Prvar (synty_to_inhab x) i.
+    iMod (proph_tok_alloc ξ with "●") as "[● ξ]"; [done|]. iModIntro.
+    iSplitL "●"; last first. { iExists _. by iFrame. }
     iExists _. iFrame "●". iPureIntro. exists L.
     split; by [|apply add_line_fitem_sim].
   Qed.
@@ -527,7 +535,7 @@ Section lemmas.
     rewrite proph_tok_unseal. iIntros "● ξ".
     iMod (own_update_2 with "● ξ") as "[$ ?]".
     { apply auth_update, discrete_fun_singleton_local_update_any,
-      singleton_local_update_any=> ? _.
+        singleton_local_update_any=> ? _.
       by apply exclusive_local_update. }
     iModIntro. rewrite proph_obs_unseal. iExists [.{ξ := aπ}].
     rewrite big_sepL_singleton. iSplitR; [|done]. iPureIntro=> ? sat.
@@ -552,6 +560,21 @@ Section lemmas.
     split; [done|split; [|done]]=> ?? eqv. apply dep=> ? /outηl ?. by apply eqv.
   Qed.
 
+  (** Lemma for [proph_obs_sat] *)
+  Local Lemma proph_aobs_agree {S ξ aπ} :
+    proph_smry_tok S -∗ proph_aobs .{ξ := aπ} -∗ ⌜S .!! ξ ≡ Some (aitem aπ)⌝.
+  Proof.
+    iIntros "● a". iDestruct (own_valid_2 with "● a") as %val. iPureIntro.
+    move: val=> /auth_both_valid_discrete [inc val].
+    move/(discrete_fun_included_spec_1 _ _ ξ.(aprvar_ty)) in inc.
+    rewrite /line discrete_fun_lookup_singleton in inc.
+    move: inc=> /singleton_included_l[it[eqv /Some_included[->|inc]]]; [done|].
+    rewrite eqv. constructor.
+    apply (lookup_valid_Some _ ξ.(prvar_id) it) in val; [|done]. move: val.
+    move: inc=> /csum_included [->|[[?[?[?]]]|[?[?[eq[->inc]]]]]]; [done..|].
+    move=> val. move: inc. move: val=> /Cinr_valid/to_agree_uninj [?<-].
+    inversion eq. by move/to_agree_included <-.
+  Qed.
   (** Get a satisfiability from a prophecy observation *)
   Lemma proph_obs_sat {φπ} : .⟨φπ⟩ =[proph_wsat]=∗ ⌜∃ π, φπ π⌝.
   Proof.
@@ -562,19 +585,9 @@ Section lemmas.
     { iSplitL; last first. { iPureIntro. exists π. by apply Toφπ. }
       iExists _. iFrame "●". iPureIntro. by exists L. }
     rewrite /proph_sat Forall_forall. iIntros ([ξ aπ] el)=>/=.
-    iAssert (proph_aobs .{ξ := aπ}) with "[L']" as "ξvπ".
-    { iApply big_sepL_elem_of; by [apply el|]. }
-    iDestruct (own_valid_2 with "● ξvπ") as %val. iPureIntro.
-    move: val=> /auth_both_valid_discrete [inc val].
-    apply (sat .{ξ := aπ}), sim.
-    move/(discrete_fun_included_spec_1 _ _ ξ.(aprvar_ty)) in inc.
-    rewrite /line discrete_fun_lookup_singleton in inc.
-    move: inc=> /singleton_included_l[it[eqv /Some_included[->|inc]]]; [done|].
-    rewrite eqv. constructor.
-    apply (lookup_valid_Some _ ξ.(prvar_id) it) in val; [|done]. move: val.
-    move: inc=> /csum_included [->|[[?[?[?]]]|[?[?[eq[->inc]]]]]]; [done|done|].
-    move=> val. move: inc. move: val=> /Cinr_valid/to_agree_uninj [?<-].
-    inversion eq. by move/to_agree_included <-.
+    iDestruct (proph_aobs_agree with "● []") as %eqv.
+    { by iApply big_sepL_elem_of. }
+    { iPureIntro. by apply (sat .{ξ := aπ}), sim. }
   Qed.
   Lemma proph_obs_false {φπ} : (∀π, ¬ φπ π) → .⟨φπ⟩ =[proph_wsat]=∗ False.
   Proof.
