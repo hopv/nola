@@ -25,35 +25,33 @@ Definition nintpΣ : gFunctors :=
 Proof. solve_inG. Qed.
 
 (** Whole world satisfaction *)
-Definition nwsatd `{!nintpGS Σ} W E c : iProp Σ :=
-  inv_wsatd ∗ na_inv_wsatd ∗ borrow_wsatd W E ∗ fborrow_wsat c ∗ proph_wsat.
+Definition nwsatd `{!nintpGS Σ} : iProp Σ :=
+  inv_wsatd ∗ na_inv_wsatd ∗ borrow_wsatd ∗ fborrow_wsat false ∗ proph_wsat.
 
 (** Adequacy of [wp] over [inv_wsatd] *)
 Lemma wp_n_adequacy `{!nintpGpreS Σ} {s e σ φ} :
-  (∀ `{!nintpGS Σ}, ⊢ ∃ W E c, inv_heap_inv -∗
-    WP[nwsatd W E c] e @ s; ⊤ {{ v, ⌜φ v⌝ }}) →
+  (∀ `{!nintpGS Σ}, ⊢ inv_heap_inv -∗ WP[nwsatd] e @ s; ⊤ {{ v, ⌜φ v⌝ }}) →
   adequate s e σ (λ v _, φ v).
 Proof.
   move=> towp. apply (heap_adequacy Σ HasNoLc)=> ?.
   iMod inv_wsat_alloc as (?) "W0". iMod na_inv_wsat_alloc as (?) "W1".
   iMod borrow_wsat_alloc as (?) "W2". iMod fborrow_wsat_alloc as (?) "W3".
   iMod proph_wsat_alloc as (?) "W4". iModIntro.
-  iDestruct (towp (NintpGS _ _ _ _ _ _ _ _ _)) as (W E c) "big".
-  iExists (nwsatd W E c). iFrame "big". iSplitL "W0"; [done|].
+  iDestruct (towp (NintpGS _ _ _ _ _ _ _ _ _)) as "big". iExists nwsatd.
+  iFrame "big". iSplitL "W0"; [done|].
   iSplitL "W1"; [done|]. iSplitL "W2"; [done|]. by iSplitL "W3".
 Qed.
 
 (** Adequacy of [twp] over [inv_wsatd] *)
 Lemma twp_n_adequacy `{!nintpGpreS Σ} {s e σ φ} :
-  (∀ `{!nintpGS Σ}, ⊢ ∃ W E c, inv_heap_inv -∗
-    WP[nwsatd W E c] e @ s; ⊤ [{ v, ⌜φ v⌝ }]) →
+  (∀ `{!nintpGS Σ}, ⊢ inv_heap_inv -∗  WP[nwsatd] e @ s; ⊤ [{ v, ⌜φ v⌝ }]) →
   sn erased_step ([e], σ).
 Proof.
   move=> totwp. apply (heap_total Σ s _ _ φ)=> ?.
   iMod inv_wsat_alloc as (?) "W0". iMod na_inv_wsat_alloc as (?) "W1".
   iMod borrow_wsat_alloc as (?) "W2". iMod fborrow_wsat_alloc as (?) "W3".
   iMod proph_wsat_alloc as (?) "W4". iModIntro.
-  iDestruct (totwp (NintpGS _ _ _ _ _ _ _ _ _)) as (W E c) "big".
-  iExists (nwsatd W E c). iFrame "big". iSplitL "W0"; [done|].
+  iDestruct (totwp (NintpGS _ _ _ _ _ _ _ _ _)) as "big". iExists nwsatd.
+  iFrame "big". iSplitL "W0"; [done|].
   iSplitL "W1"; [done|]. iSplitL "W2"; [done|]. by iSplitL "W3".
 Qed.

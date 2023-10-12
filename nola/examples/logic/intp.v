@@ -29,7 +29,8 @@ Section nintp.
     | nc_meta_token l E => meta_token l E
     | nc_steps_lb n => steps_lb n | nc_proph p pvs => proph p pvs
     | nc_lft_tok α q => q.[α] | nc_lft_dead α => [†α] | nc_lft_eter α => [∞α]
-    | nc_lft_sincl α β => α ⊑□ β | nc_fborrow_wsat c => fborrow_wsat c
+    | nc_lft_sincl α β => α ⊑□ β
+    | nc_fborrow_wsat => fborrow_wsat false
     | nc_proph_tok ξ q => q:[ξ] | nc_proph_toks ξl q => q:∗[ξl]
     | nc_proph_obs φπ => .⟨φπ⟩ | nc_proph_wsat => proph_wsat
     | nc_proph_eqz _ aπ bπ => aπ :== bπ
@@ -38,16 +39,12 @@ Section nintp.
     (niS : nPropS (;ᵞ) -d> iProp Σ) : iProp Σ :=
     match c with
     | nc_inv_wsat => inv_wsat niS | nc_na_inv_wsat => na_inv_wsat niS
+    | nc_borrow_wsat => borrow_wsat True ∅ niS
     end.
   Local Definition ncintp1 (c : ncon1) (P : iProp Σ) : iProp Σ :=
     match c with
     | nc_except_0 => ◇ P | nc_persistently => □ P | nc_plainly => ■ P
     | nc_bupd => |==> P | nc_fupd E E' => |={E,E'}=> P
-    end.
-  Local Definition ncintpl1 (c : nconl1) (P : iProp Σ)
-    (niS : nPropS (;ᵞ) -d> iProp Σ) : iProp Σ :=
-    match c with
-    | nc_borrow_wsat E => borrow_wsat P E niS
     end.
   Local Definition ncintp2 (c : ncon2) (P Q : iProp Σ) : iProp Σ :=
     match c with
@@ -79,8 +76,6 @@ Section nintp.
   Local Instance ncintpl0_ne {c} : NonExpansive (ncintpl0 c).
   Proof. solve_proper. Qed.
   Local Instance ncintp1_ne {c} : NonExpansive (ncintp1 c).
-  Proof. solve_proper. Qed.
-  Local Instance ncintpl1_ne {c} : NonExpansive2 (ncintpl1 c).
   Proof. solve_proper. Qed.
   Local Instance ncintp2_ne {c} : NonExpansive2 (ncintp2 c).
   Proof. solve_proper. Qed.
@@ -137,9 +132,8 @@ Section nintp.
       | (%ᵍˢ s)%n, _ => λ _ _, seqnil s
       | (¢ᵘ _)%n, _ => λ _ (un : _::_ = _), match un with end
       | (¢ᵍ _)%n, _ => λ _ _ (gn : _::_ = _), match gn with end
-      | n_l0 _, _ | n_l1 _ _, _ | (rec:ˡ' _ _)%n, _ | (%ᵍˡ _)%n, _
-        | (%ᵘˢ _)%n, _ | (!ᵘˢ _)%n, _
-        => λ κS, match κS with end
+      | n_l0 _, _ | (rec:ˡ' _ _)%n, _ | (%ᵍˡ _)%n, _ | (%ᵘˢ _)%n, _
+        | (!ᵘˢ _)%n, _ => λ κS, match κS with end
       end%I.
     Local Notation nintpS P := (nintpS_gen P hwf eq_refl eq_refl eq_refl).
 
@@ -150,8 +144,6 @@ Section nintp.
       | n_0 c, _ => λ _ _, ncintp0 c
       | n_l0 c, _ => λ _ _, ncintpl0 c (λ P, nintpS P)
       | n_1 c P, _ => λ un gn, ncintp1 c (nintp_gen P (H ‼ʰ 0) un gn)
-      | n_l1 c P, _ => λ un gn,
-          ncintpl1 c (nintp_gen P (H ‼ʰ 0) un gn) (λ Q, nintpS Q)
       | n_2 c P Q, _ => λ un gn, ncintp2 c
           (nintp_gen P (H ‼ʰ 0) un gn) (nintp_gen Q (H ‼ʰ 1) un gn)
       | n_cwpw c W Φ, _ => λ un gn, ncintpwpw c
@@ -241,7 +233,8 @@ Notation nintpS δ P := ⟦ P ⟧ˢ(δ) (only parsing).
 (** Utility *)
 Notation inv_wsat' δ := (inv_wsat (λ P, ⟦ P ⟧ˢ(δ))).
 Notation na_inv_wsat' δ := (na_inv_wsat (λ P, ⟦ P ⟧ˢ(δ))).
-Notation borrow_wsat' δ W E := (borrow_wsat W E (λ P, ⟦ P ⟧ˢ(δ))).
+Notation borrow_wsat' δ := (borrow_wsat True ∅ (λ P, ⟦ P ⟧ˢ(δ))).
+Notation fborrow_wsat' := (fborrow_wsat false).
 
 (** ** Lemmas on [⟦ ⟧] etc. *)
 Section nintp.

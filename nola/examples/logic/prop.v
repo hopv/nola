@@ -75,7 +75,7 @@ Variant ncon0 : Type :=
 | (** Dead lifetime token *) nc_lft_dead (α : lft)
 | (** Eternal lifetime token *) nc_lft_eter (α : lft)
 | (** Persistent lifetime inclusion *) nc_lft_sincl (α β : lft)
-| (** Fractured borrowing world satisfaction *) nc_fborrow_wsat (c : bool)
+| (** Fractured borrowing world satisfaction *) nc_fborrow_wsat
 | (** Prophecy token *) nc_proph_tok (ξ : aprvarn) (q : Qp)
 | (** Prophecy tokens *) nc_proph_toks (ξl : list aprvarn) (q : Qp)
 | (** Prophecy observation *) nc_proph_obs (φπ : prophn Prop)
@@ -84,7 +84,8 @@ Variant ncon0 : Type :=
 (** Nullary, large *)
 Variant nconl0 : Type :=
 | (** Invariant world satisfaction *) nc_inv_wsat
-| (** Non-atomic invariant world satisfaction *) nc_na_inv_wsat.
+| (** Non-atomic invariant world satisfaction *) nc_na_inv_wsat
+| (** Borrowing world satisfaction *) nc_borrow_wsat.
 (** Unary *)
 Variant ncon1 : Type :=
 | (** Except-0 modality *) nc_except_0
@@ -92,10 +93,6 @@ Variant ncon1 : Type :=
 | (** Plainly modality *) nc_plainly
 | (** Basic update modality *) nc_bupd
 | (** Fancy update modality *) nc_fupd (E E' : coPset).
-(** Unary large *)
-Variant nconl1 : Type :=
-| (** Borrowing world satisfaction *) nc_borrow_wsat (E : coPset).
-(** Binary *)
 Variant ncon2 : Type :=
 | (** Conjunction *) nc_and
 | (** Disjunction *) nc_or
@@ -138,7 +135,6 @@ Inductive nProp : nkind → nctx → Type :=
 | n_0 {κ Γ} (c : ncon0) : nProp κ Γ
 | n_l0 {Γ} (c : nconl0) : nProp nL Γ
 | n_1 {κ Γ} (c : ncon1) (P : nProp κ Γ) : nProp κ Γ
-| n_l1 {Γ} (c : nconl1) (W : nProp nL Γ) : nProp nL Γ
 | n_2 {κ Γ} (c : ncon2) (P Q : nProp κ Γ) : nProp κ Γ
 | n_cwpw {κ Γ} (c : nconwpw) (W : nProp κ Γ) (Φ : val → nProp κ Γ) : nProp κ Γ
 | n_g1 {κ Γᵘ Γᵍ} (c : ncong1) (P : nProp nL (;ᵞ Γᵘ ++ Γᵍ)) : nProp κ (Γᵘ;ᵞ Γᵍ)
@@ -197,7 +193,7 @@ Notation "q .[ α ]" := (n_0 (nc_lft_tok α q)) : nProp_scope.
 Notation "[† α ]" := (n_0 (nc_lft_dead α)) : nProp_scope.
 Notation "[∞ α ]" := (n_0 (nc_lft_eter α)) : nProp_scope.
 Notation "α ⊑□ β" := (n_0 (nc_lft_sincl α β)) : nProp_scope.
-Notation n_fborrow_wsat c := (n_0 (nc_fborrow_wsat c)).
+Notation n_fborrow_wsat := (n_0 nc_fborrow_wsat).
 Notation n_proph_wsat := (n_0 nc_proph_wsat).
 Notation "q :[ ξ ]" := (n_0 (nc_proph_tok ξ q)) : nProp_scope.
 Notation "q :∗[ ξ ]" := (n_0 (nc_proph_toks ξ q)) : nProp_scope.
@@ -206,13 +202,13 @@ Notation "⟨ π , φ ⟩" := (n_0 (nc_proph_obs (λ π, φ))) : nProp_scope.
 Notation "aπ :== bπ" := (n_0 (nc_proph_eqz _ aπ bπ)) : nProp_scope.
 Notation n_inv_wsat := (n_l0 nc_inv_wsat).
 Notation n_na_inv_wsat := (n_l0 nc_na_inv_wsat).
+Notation n_borrow_wsat := (n_l0 nc_borrow_wsat).
 Notation "◇ P" := (n_1 nc_except_0 P) : nProp_scope.
 Notation "□ P" := (n_1 nc_persistently P) : nProp_scope.
 Notation "■ P" := (n_1 nc_plainly P) : nProp_scope.
 Notation "|==> P" := (n_1 nc_bupd P) : nProp_scope.
 Notation "|={ E , E' }=> P" := (n_1 (nc_fupd E E') P) : nProp_scope.
 Notation "|={ E }=> P" := (n_1 (nc_fupd E E) P) : nProp_scope.
-Notation n_borrow_wsat W E := (n_l1 (nc_borrow_wsat E) W).
 Infix "∧" := (n_2 nc_and) : nProp_scope.
 Infix "∨" := (n_2 nc_or) : nProp_scope.
 Infix "→" := (n_2 nc_impl) : nProp_scope.
@@ -309,7 +305,7 @@ Reserved Notation "↑ˡ P" (at level 20, right associativity).
 Fixpoint nlarge {κ Γ} (P : nProp κ Γ) : nPropL Γ :=
   match P with
   | n_0 c => n_0 c | n_l0 c => n_l0 c | n_1 c P => n_1 c (↑ˡ P)
-  | n_l1 c P => n_l1 c P | n_2 c P Q => n_2 c (↑ˡ P) (↑ˡ Q)
+  | n_2 c P Q => n_2 c (↑ˡ P) (↑ˡ Q)
   | n_cwpw c W Φ => n_cwpw c (↑ˡ W) (λ v, ↑ˡ Φ v)
   | n_g1 c P => n_g1 c P | n_g1f c Φ => n_g1f c Φ
   | ∀' Φ => ∀ a, ↑ˡ Φ a | ∃' Φ => ∃ a, ↑ˡ Φ a
