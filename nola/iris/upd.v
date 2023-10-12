@@ -300,9 +300,9 @@ Section lemmas.
   #[export] Instance from_modal_fupdw_wrong_mask `{!BiFUpd PROP} {W E E' P} :
     FromModal
       (pm_error "Only non-mask-changing update modalities can be introduced directly.
-Use [iApply fupd_mask_intro] to introduce mask-changing update modalities")
+Use [iApply fupdw_mask_intro] to introduce mask-changing update modalities")
       modality_id (|=[W]{E,E'}=> P) (|=[W]{E,E'}=> P) P | 100.
-  Proof. by intros []. Qed.
+  Proof. by case. Qed.
   Lemma bupdw_fupdw `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} E {W P} :
     (|=[W]=> P) ⊢ |=[W]{E}=> P.
   Proof. apply bi.wand_mono; by [|rewrite bupd_fupd]. Qed.
@@ -346,6 +346,11 @@ Use [iApply fupd_mask_intro] to introduce mask-changing update modalities")
     by rewrite /ElimModal bi.intuitionistically_if_elim bupdw_frame_r
       bi.wand_elim_r (bupdw_incl (W:=W)) bupdw_trans.
   Qed.
+  #[export] Instance elim_modal_bupdw_wrong_wsat `{!BiBUpd PROP} {p P Q W W'} :
+    ElimModal
+      (pm_error "The target world satisfaction doesn't satisfy [WsatIncl]")
+      p false (|=[W']=> P) False (|=[W]=> Q) False | 100.
+  Proof. case. Qed.
   #[export] Instance elim_modal_bupd_bupdw `{!BiBUpd PROP} {p W P Q} :
     ElimModal True p false (|==> P) P (|=[W]=> Q) (|=[W]=> Q).
   Proof. exact _. Qed.
@@ -367,26 +372,45 @@ Use [iApply fupd_mask_intro] to introduce mask-changing update modalities")
     by rewrite /ElimModal bi.intuitionistically_if_elim fupdw_frame_r
       bi.wand_elim_r (fupdw_incl (W:=W)) fupdw_trans.
   Qed.
+  #[export] Instance elim_modal_fupdw_fupdw_wrong_mask
+    `{!BiFUpd PROP, !WsatIncl W W' Wr} {p E E' E'' E''' P Q} :
+    ElimModal
+      (pm_error "Goal and eliminated modality must have the same mask.
+Use [iMod (fupd_mask_subseteq E')] to adjust the mask of your goal to [E']")
+      p false (|=[W']{E,E'}=> P) False (|=[W]{E'',E'''}=> Q) False | 80.
+  Proof. case. Qed.
+  #[export] Instance elim_modal_fupdw_fupdw_wrong_wsat
+    `{!BiFUpd PROP} {p E E' E'' P Q W W'} :
+    ElimModal
+      (pm_error "The target world satisfaction doesn't satisfy [WsatIncl]")
+      p false (|=[W']{E,E'}=> P) False (|=[W]{E,E''}=> Q) False | 100.
+  Proof. case. Qed.
   #[export] Instance elim_modal_bupdw_fupdw {p E E' P Q}
     `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP, !WsatIncl W W' Wr} :
     ElimModal True p false (|=[W']=> P) P (|=[W]{E,E'}=> Q) (|=[W]{E,E'}=> Q)
     | 10.
   Proof. move=> ?. by rewrite (bupdw_fupdw E) elim_modal_fupdw_fupdw. Qed.
+  #[export] Instance elim_modal_bupdw_fupdw_wrong_wsat {p E E' P Q W W'}
+    `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} :
+    ElimModal
+      (pm_error "The target world satisfaction doesn't satisfy [WsatIncl]")
+      p false (|=[W']=> P) False (|=[W]{E,E'}=> Q) False | 100.
+  Proof. case. Qed.
   #[export] Instance elim_modal_fupd_fupdw `{!BiFUpd PROP} {p E E' E'' W P Q} :
     ElimModal True p false (|={E,E'}=> P) P
       (|=[W]{E,E''}=> Q) (|=[W]{E',E''}=> Q).
   Proof. exact _. Qed.
+  #[export] Instance elim_modal_fupd_fupdw_wrong_mask `{!BiFUpd PROP}
+    {p E E' E'' E''' P Q W} :
+    ElimModal
+      (pm_error "Goal and eliminated modality must have the same mask.
+Use [iMod (fupd_mask_subseteq E')] to adjust the mask of your goal to [E']")
+      p false (|={E,E'}=> P) False (|=[W]{E'',E'''}=> Q) False | 100.
+  Proof. case. Qed.
   #[export] Instance elim_modal_bupd_fupdw
     `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {p W E E' P Q} :
     ElimModal True p false (|==> P) P (|=[W]{E,E'}=> Q) (|=[W]{E,E'}=> Q) | 10.
   Proof. exact _. Qed.
-  #[export] Instance elim_modal_fupdw_fupdw_wrong_mask
-    `{!BiFUpd PROP} {p E E' E'' E''' P Q W W'} :
-    ElimModal
-      (pm_error "Goal and eliminated modality must have the same mask.
-Use [iMod (fupd_mask_subseteq E')] to adjust the mask of your goal to [E']")
-      p false (|=[W']{E,E'}=> P) False (|=[W]{E'',E'''}=> Q) False | 100.
-  Proof. intros []. Qed.
   #[export] Instance add_modal_fupdw `{!BiFUpd PROP} {W E E' P Q} :
     AddModal (|=[W]{E}=> P) P (|=[W]{E,E'}=> Q).
   Proof. by rewrite /AddModal fupdw_frame_r bi.wand_elim_r fupdw_trans. Qed.
