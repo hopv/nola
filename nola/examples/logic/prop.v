@@ -80,7 +80,9 @@ Variant ncon0 : Type :=
 | (** Prophecy tokens *) nc_proph_toks (ξl : list aprvarn) (q : Qp)
 | (** Prophecy observation *) nc_proph_obs (φπ : prophn Prop)
 | (** Prophecy world satisfaction *) nc_proph_wsat
-| (** Prophecy equalizer *) nc_proph_eqz (A : Type) (aπ bπ : prophn A).
+| (** Prophecy equalizer *) nc_proph_eqz (A : Type) (aπ bπ : prophn A)
+| (** Prophetic agreement *) nc_anyty_var
+    (γ : gname) (q : Qp) (X : nsynty) (x : X).
 (** Nullary, large *)
 Variant nconl0 : Type :=
 | (** Invariant world satisfaction *) nc_inv_wsat
@@ -200,6 +202,9 @@ Notation "q :∗[ ξ ]" := (n_0 (nc_proph_toks ξ q)) : nProp_scope.
 Notation ".⟨ φπ ⟩" := (n_0 (nc_proph_obs φπ)) (only parsing) : nProp_scope.
 Notation "⟨ π , φ ⟩" := (n_0 (nc_proph_obs (λ π, φ))) : nProp_scope.
 Notation "aπ :== bπ" := (n_0 (nc_proph_eqz _ aπ bπ)) : nProp_scope.
+Notation "γ ⤇{ X } ( q ) x" := (n_0 (nc_anyty_var γ q X x))
+  (only parsing) : nProp_scope.
+Notation "γ ⤇( q ) x" := (n_0 (nc_anyty_var γ q _ x)) : nProp_scope.
 Notation n_inv_wsat := (n_l0 nc_inv_wsat).
 Notation n_na_inv_wsat := (n_l0 nc_na_inv_wsat).
 Notation n_borrow_wsat := (n_l0 nc_borrow_wsat).

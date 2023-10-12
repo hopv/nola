@@ -13,6 +13,7 @@ Class nintpGpreS Σ := NintpGpreS {
   nintpGpreS_borrow :: borrowGpreS (nPropS (;ᵞ)) Σ;
   nintpGpreS_fborrow :: fborrowGpreS (nPropS (;ᵞ)) Σ;
   nintpGpreS_proph :: prophGpreS nsynty Σ;
+  nintpGpreS_anyty_var :: anyty_varG Σ;
   nintpGpreS_heap :: heapGpreS Σ;
 }.
 
@@ -20,7 +21,7 @@ Class nintpGpreS Σ := NintpGpreS {
 Definition nintpΣ : gFunctors :=
   #[agreeΣ (nPropL (;ᵞ)); ninvΣ (nPropS (;ᵞ)); na_ninvΣ (nPropS (;ᵞ));
     na_invΣ; cinvΣ; borrowΣ (nPropS (;ᵞ)); fborrowΣ (nPropS (;ᵞ));
-    prophΣ nsynty; heapΣ].
+    prophΣ nsynty; anyty_varΣ; heapΣ].
 #[export] Instance subG_nintpGpreS `{!subG nintpΣ Σ} : nintpGpreS Σ.
 Proof. solve_inG. Qed.
 
@@ -37,7 +38,7 @@ Proof.
   iMod inv_wsat_alloc as (?) "W0". iMod na_inv_wsat_alloc as (?) "W1".
   iMod borrow_wsat_alloc as (?) "W2". iMod fborrow_wsat_alloc as (?) "W3".
   iMod proph_wsat_alloc as (?) "W4". iModIntro.
-  iDestruct (towp (NintpGS _ _ _ _ _ _ _ _ _)) as "big". iExists nwsatd.
+  iDestruct (towp (NintpGS _ _ _ _ _ _ _ _ _ _)) as "big". iExists nwsatd.
   iFrame "big". iSplitL "W0"; [done|].
   iSplitL "W1"; [done|]. iSplitL "W2"; [done|]. by iSplitL "W3".
 Qed.
@@ -51,7 +52,7 @@ Proof.
   iMod inv_wsat_alloc as (?) "W0". iMod na_inv_wsat_alloc as (?) "W1".
   iMod borrow_wsat_alloc as (?) "W2". iMod fborrow_wsat_alloc as (?) "W3".
   iMod proph_wsat_alloc as (?) "W4". iModIntro.
-  iDestruct (totwp (NintpGS _ _ _ _ _ _ _ _ _)) as "big". iExists nwsatd.
+  iDestruct (totwp (NintpGS _ _ _ _ _ _ _ _ _ _)) as "big". iExists nwsatd.
   iFrame "big". iSplitL "W0"; [done|].
   iSplitL "W1"; [done|]. iSplitL "W2"; [done|]. by iSplitL "W3".
 Qed.

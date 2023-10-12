@@ -23,6 +23,7 @@ Class nintpGS Σ := NintpGS {
   nintpGS_borrow :: borrowGS (nPropS (;ᵞ)) Σ;
   nintpGS_fborrow :: fborrowGS (nPropS (;ᵞ)) Σ;
   nintpGS_proph :: prophGS nsynty Σ;
+  nintpGS_anyty_var :: anyty_varG Σ;
   nintpGS_heap :: heapGS_gen HasNoLc Σ;
 }.
 Arguments NintpGS {_}.
