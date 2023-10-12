@@ -1,6 +1,7 @@
 -Q nola nola
 
 nola/prelude.v
+
 nola/util/funext.v
 nola/util/pred.v
 nola/util/rel.v
@@ -10,6 +11,7 @@ nola/util/nat.v
 nola/util/prod.v
 nola/util/hgt.v
 nola/util/ctx.v
+
 nola/iris/dfrac.v
 nola/iris/gmap.v
 nola/iris/discrete_fun.v
