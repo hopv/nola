@@ -30,3 +30,6 @@ Notation bord := (bor nderiv).
 Notation borod := (boro nderiv).
 Notation lendd := (lend nderiv).
 Notation fbord := (fbor nderiv).
+Notation fbor_mapstod α l v := (fbor_mapsto nderiv α l v).
+Notation "l ↦[ α ] v" := (fbor_mapstod α l v)
+  (at level 20, format "l  ↦[ α ]  v") : bi_scope.

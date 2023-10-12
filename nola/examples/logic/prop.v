@@ -265,6 +265,9 @@ Notation n_lend' Γᵘ α P := (n_g1 (Γᵘ:=Γᵘ) (nc_lend α) P) (only parsin
 Notation n_lend α P := (n_lend' _ α P).
 Notation n_fbor' Γᵘ α Φ := (n_g1f (Γᵘ:=Γᵘ) (nc_fbor α) Φ) (only parsing).
 Notation n_fbor α Φ := (n_fbor' _ α Φ).
+Notation n_fbor_mapsto α l v := (n_fbor α (λ q, l ↦{#q} v)).
+Notation "l ↦[ α ] v" := (n_fbor_mapsto α l v)
+  (at level 20, format "l  ↦[ α ]  v") : nProp_scope.
 
 Notation "∀: V , P" := (n_n_forall V P)
   (at level 200, right associativity,
