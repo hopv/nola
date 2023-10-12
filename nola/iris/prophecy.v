@@ -325,11 +325,10 @@ Local Definition proph_sim {TY} (S : proph_smryR TY) (L : proph_log TY) :=
 Local Notation "S :~ L" := (proph_sim S L) (at level 70, format "S  :~  L").
 
 (** [:~] on [add_line] *)
-Local Lemma add_line_fitem_sim {TY X} {S : proph_smryR TY} {L h i} :
-  S :~ L → S X !! i = None → let ξ := Aprvar X (Prvar h i) in
-  add_line ξ (fitem 1) S :~ L.
+Local Lemma add_line_fitem_sim {TY} {S : proph_smryR TY} {L} {ξ} :
+  S :~ L → S .!! ξ = None → add_line ξ (fitem 1) S :~ L.
 Proof.
-  move=> sim no ?[Y [? j]]?.
+  move: ξ=> [X[? i]] sim no [Y[? j]]?.
   rewrite -sim /add_line /discrete_fun_insert /=.
   case: (decide (X = Y)); [|done]=> ?. subst=>/=.
   case: (decide (i = j))=> ?; [|by rewrite lookup_insert_ne]. subst.
@@ -491,17 +490,14 @@ Section lemmas.
       discrete_fun_insert_local_update, alloc_singleton_local_update.
   Qed.
   (** Introduce a prophecy variable *)
-  Lemma proph_intro (I : gset positive) {X : TY} (x : X) :
-    ⊢ |=[proph_wsat]=> ∃ i, ⌜i ∉ I⌝ ∗ 1:[Prvar (synty_to_inhab x) i].
+  Lemma proph_intro {X : TY} : X → ⊢ |=[proph_wsat]=> ∃ ξ : prvar X, 1:[ξ].
   Proof.
-    rewrite proph_wsat_unseal. iIntros "[%S [[%L[% %sim]] ●]]".
-    case (exist_fresh (I ∪ dom (S X)))=>
-      i /not_elem_of_union[? /not_elem_of_dom nin].
-    set ξ := Prvar (synty_to_inhab x) i.
+    rewrite proph_wsat_unseal=> x. iIntros "[%S [[%L[% %sim]] ●]]".
+    set ξ := Prvar (synty_to_inhab x) (fresh (dom (S X))).
+    have ?: S .!! ξ = None. { apply (not_elem_of_dom_1 (S X)), is_fresh. }
     iMod (proph_tok_alloc ξ with "●") as "[● ξ]"; [done|]. iModIntro.
-    iSplitL "●"; last first. { iExists _. by iFrame. }
-    iExists _. iFrame "●". iPureIntro. exists L.
-    split; by [|apply add_line_fitem_sim].
+    iSplitL "●"; [|iExists _; by iFrame]. iExists _. iFrame "●". iPureIntro.
+    exists L. split; by [|apply add_line_fitem_sim].
   Qed.
 
   (** Lemmas for [proph_resolve] *)
