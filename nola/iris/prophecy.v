@@ -431,6 +431,17 @@ Section lemmas.
     Frame p q:∗[ξl] r:∗[ξl] s:∗[ξl] | 5.
   Proof. apply: (frame_fractional _ _ _ _ _ _ _ proph_toks_as_fractional). Qed.
 
+  (** On [proph_tok] *)
+  Lemma proph_tok_singleton {ξ q} : q:[ξ] ⊣⊢ q:∗[[ξ]].
+  Proof. by rewrite/= right_id. Qed.
+  Lemma proph_tok_combine {ξl ηl q r} :
+    q:∗[ξl] -∗ r:∗[ηl] -∗ ∃ s,
+      s:∗[ξl ++ ηl] ∗ (s:∗[ξl ++ ηl] -∗ q:∗[ξl] ∗ r:∗[ηl]).
+  Proof.
+    case: (Qp.lower_bound q r)=> [s[?[?[->->]]]]. iIntros "[ξl ξl'][ηl ηl']".
+    iExists s. iFrame "ξl ηl ξl' ηl'". iIntros "[$$]".
+  Qed.
+
   (** [proph_obs] is persistent, timeless and monotone *)
   #[export] Instance proph_obs_persistent {φπ} : Persistent .⟨φπ⟩.
   Proof. rewrite proph_obs_unseal. exact _. Qed.
@@ -451,22 +462,7 @@ Section lemmas.
     move=>/= ?? iff. by apply bi.equiv_entails; split; f_equiv=> ? /iff.
   Qed.
 
-  (** [proph_wsat] is timeless *)
-  #[export] Instance proph_wsat_timeless : Timeless proph_wsat.
-  Proof. rewrite proph_wsat_unseal. exact _. Qed.
-
-  (** On [proph_tok] *)
-  Lemma proph_tok_singleton {ξ q} : q:[ξ] ⊣⊢ q:∗[[ξ]].
-  Proof. by rewrite/= right_id. Qed.
-  Lemma proph_tok_combine {ξl ηl q r} :
-    q:∗[ξl] -∗ r:∗[ηl] -∗ ∃ s,
-      s:∗[ξl ++ ηl] ∗ (s:∗[ξl ++ ηl] -∗ q:∗[ξl] ∗ r:∗[ηl]).
-  Proof.
-    case: (Qp.lower_bound q r)=> [s[?[?[->->]]]]. iIntros "[ξl ξl'][ηl ηl']".
-    iExists s. iFrame "ξl ηl ξl' ηl'". iIntros "[$$]".
-  Qed.
-
-  (** On [proph_tok] *)
+  (** On [proph_obs] *)
   Lemma proph_obs_true {φπ} : (∀π, φπ π) → ⊢ ⟨π, φπ π⟩.
   Proof. rewrite proph_obs_unseal=> ?. iExists []. by iSplit. Qed.
   Lemma proph_obs_and {φπ ψπ} : .⟨φπ⟩ -∗ .⟨ψπ⟩ -∗ ⟨π, φπ π ∧ ψπ π⟩.
@@ -478,6 +474,18 @@ Section lemmas.
   #[export] Instance proph_obs_combine {φπ ψπ} :
     CombineSepAs .⟨φπ⟩ .⟨ψπ⟩ ⟨π, φπ π ∧ ψπ π⟩.
   Proof. rewrite /CombineSepAs. iIntros "#[??]". by iApply proph_obs_and. Qed.
+  Lemma proph_obs_impl {φπ ψπ} : (∀ π, φπ π → ψπ π) → .⟨φπ⟩ -∗ .⟨ψπ⟩.
+  Proof. iIntros "% ?". iStopProof. by f_equiv. Qed.
+  Lemma proph_obs_impl2 {φπ φπ' ψπ} :
+    (∀ π, φπ π → φπ' π → ψπ π) → .⟨φπ⟩ -∗ .⟨φπ'⟩ -∗ .⟨ψπ⟩.
+  Proof.
+    iIntros "%imp obs obs'". iCombine "obs obs'" as "?". iStopProof.
+    do 2 f_equiv. move=> [??]. by apply imp.
+  Qed.
+
+  (** [proph_wsat] is timeless *)
+  #[export] Instance proph_wsat_timeless : Timeless proph_wsat.
+  Proof. rewrite proph_wsat_unseal. exact _. Qed.
 
   (** Lemma for [proph_intro] *)
   Local Lemma proph_tok_alloc {S} (ξ : aprvar TY) : S .!! ξ = None →
@@ -489,7 +497,7 @@ Section lemmas.
       discrete_fun_insert_local_update, alloc_singleton_local_update.
   Qed.
   (** Introduce a prophecy variable *)
-  Lemma proph_intro {X : TY} : X → ⊢ |=[proph_wsat]=> ∃ ξ : prvar X, 1:[ξ].
+  Lemma proph_intro (X : TY) : X → ⊢ |=[proph_wsat]=> ∃ ξ : prvar X, 1:[ξ].
   Proof.
     rewrite proph_wsat_unseal=> x. iIntros "[%S [[%L[% %sim]] ●]]".
     set ξ := Prvar (synty_to_inhab x) (fresh (dom (S X))).
@@ -499,7 +507,7 @@ Section lemmas.
     exists L. split; by [|apply add_line_fitem_sim].
   Qed.
 
-  (** Lemmas for [proph_resolve] *)
+  (** Lemmas for [proph_resolve_dep] *)
   Local Lemma proph_tok_out {S L ξ q} :
     S :~ L → proph_smry_tok S -∗ q:[ξ] -∗ ⌜ξ ∉ pl_vars L⌝.
   Proof.
@@ -535,8 +543,8 @@ Section lemmas.
     by inversion sat.
   Qed.
   (** Resolve a prophecy *)
-  Lemma proph_resolve {ξ aπ q} ηl : aπ ./ ηl →
-    1:[ξ] -∗ q:∗[ηl] =[proph_wsat]=∗ ⟨π, π ξ = aπ π⟩ ∗ q:∗[ηl].
+  Lemma proph_resolve_dep ηl ξ aπ q : aπ ./ ηl →
+    1:[ξ] -∗ q:∗[ηl] =[proph_wsat]=∗ q:∗[ηl] ∗ ⟨π, π ξ = aπ π⟩.
   Proof.
     rewrite proph_wsat_unseal. iIntros (dep) "ξ ηl [%S[[%L[% %sim]] ●]]".
     iDestruct (proph_tok_out with "● ξ") as %?; [done|].
@@ -551,6 +559,11 @@ Section lemmas.
     iExists _. iFrame "●". iPureIntro. exists L'.
     split; [|by apply add_line_aitem_sim].
     split; [done|split; [|done]]=> ?? eqv. apply dep=> ? /outηl ?. by apply eqv.
+  Qed.
+  Lemma proph_resolve ξ x : 1:[ξ] =[proph_wsat]=∗ ⟨π, π ξ = x⟩.
+  Proof.
+    iIntros "ξ".
+    by iMod (proph_resolve_dep [] ξ (λ _, x) 1 with "ξ [//]") as "[_ $]".
   Qed.
 
   (** Lemma for [proph_obs_sat] *)
@@ -594,7 +607,7 @@ End lemmas.
 (** Prophecy equalizer, an ability to get [⟨π, aπ π = bπ π⟩]
   after getting dependent prophecy tokens *)
 Definition proph_eqz `{!prophGS TY Σ} {A} (aπ bπ : proph TY A) : iProp Σ :=
-  ∀ ξl q, ⌜bπ ./ ξl⌝ -∗ q:∗[ξl] =[proph_wsat]=∗ ⟨π, aπ π = bπ π⟩ ∗ q:∗[ξl].
+  ∀ ξl q, ⌜bπ ./ ξl⌝ -∗ q:∗[ξl] =[proph_wsat]=∗ q:∗[ξl] ∗ ⟨π, aπ π = bπ π⟩.
 
 Notation "aπ :== bπ" := (proph_eqz aπ bπ)
   (at level 70, format "aπ  :==  bπ") : bi_scope.
@@ -604,18 +617,12 @@ Section proph_eqz.
 
   (** Use a prophecy equalizer *)
   Lemma proph_eqz_use {A} {aπ bπ : proph _ A} ξl q :
-    bπ ./ ξl → aπ :== bπ -∗ q:∗[ξl] =[proph_wsat]=∗ ⟨π, aπ π = bπ π⟩ ∗ q:∗[ξl].
+    bπ ./ ξl → aπ :== bπ -∗ q:∗[ξl] =[proph_wsat]=∗ q:∗[ξl] ∗ ⟨π, aπ π = bπ π⟩.
   Proof. iIntros "% eq". by iApply "eq". Qed.
-  Lemma proph_eqz_use' {A aπ} {b : A} :
-    aπ :== (λ _, b) =[proph_wsat]=∗ ⟨π, aπ π = b⟩.
-  Proof.
-    iIntros "eq". iDestruct (proph_eqz_use [] 1 with "eq") as "eq"; [done..|].
-    by iMod ("eq" with "[//]") as "[$ _]".
-  Qed.
 
   (** Construct an equalizer from a token *)
   Lemma proph_eqz_token ξ aπ : 1:[ξ] -∗ (.$ ξ) :== aπ.
-  Proof. iIntros "ξ" (???) "ξl". by iMod (proph_resolve with "ξ ξl"). Qed.
+  Proof. iIntros "ξ" (???) "ξl". by iMod (proph_resolve_dep with "ξ ξl"). Qed.
   (** Construct an equalizer from an observation *)
   Lemma proph_eqz_obs {A} (aπ bπ : proph _ A) : ⟨π, aπ π = bπ π⟩ -∗ aπ :== bπ.
   Proof. iIntros "?" (???) "? !>". iFrame. Qed.
@@ -626,8 +633,8 @@ Section proph_eqz.
   Lemma proph_eqz_modify {A} (aπ bπ cπ : proph _ A) :
     ⟨π, aπ π = bπ π⟩ -∗ aπ :== cπ -∗ bπ :== cπ.
   Proof.
-    iIntros "obs eqz" (???) "ξl". iMod ("eqz" with "[//] ξl") as "[obs' $]".
-    iModIntro. iCombine "obs obs'" as "?". iStopProof. by f_equiv=> ?[->->].
+    iIntros "obs eqz" (???) "ξl". iMod ("eqz" with "[//] ξl") as "[$ obs']".
+    iModIntro. by iApply (proph_obs_impl2 with "obs obs'")=> ?->->.
   Qed.
 
   (** Construct a prophecy equalizer from injective functions *)
@@ -635,7 +642,7 @@ Section proph_eqz.
     aπ :== bπ -∗ (λ π, f (aπ π)) :== (λ π, f (bπ π)).
   Proof.
     iIntros "eqz" (?? dep) "ξl". move/proph_dep_destr in dep.
-    iMod ("eqz" with "[//] ξl") as "[? $]". iModIntro. iStopProof.
+    iMod ("eqz" with "[//] ξl") as "[$ ?]". iModIntro. iStopProof.
     by f_equiv=> ?->.
   Qed.
   Lemma proph_eqz_constr2 {A B C} f
@@ -644,8 +651,8 @@ Section proph_eqz.
     (λ π, f (aπ π) (bπ π)) :== (λ π, f (aπ' π) (bπ' π)).
   Proof.
     iIntros "eqz eqz'" (?? dep) "ξl". move: dep=> /proph_dep_destr2[??].
-    iMod ("eqz" with "[//] ξl") as "[obs ξl]".
-    iMod ("eqz'" with "[//] ξl") as "[obs' $]". iModIntro.
-    iCombine "obs obs'" as "?". iStopProof. by f_equiv=>/= ?[->->].
+    iMod ("eqz" with "[//] ξl") as "[ξl obs]".
+    iMod ("eqz'" with "[//] ξl") as "[$ obs']". iModIntro.
+    by iApply (proph_obs_impl2 with "obs obs'")=> ?->->.
   Qed.
 End proph_eqz.
