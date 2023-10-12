@@ -70,7 +70,7 @@ Section iris.
   Proof. rewrite na_ninv_unseal. exact _. Qed.
 
   (** [conv]: Proposition converter *)
-  Definition conv δ P Q : iProp Σ := ⸨ ∀ E, P ={E}=∗ Q ⸩(δ).
+  Definition conv δ P Q : iProp Σ := ⸨ P -∗ Q ⸩(δ).
 
   (** [borc]: Modified [bor_ctok] *)
   Definition borc δ α P : iProp Σ :=
@@ -84,4 +84,11 @@ Section iris.
   (** [lend]: Modified [lend_tok] *)
   Definition lend δ α P : iProp Σ :=
     ∃ Q, □ conv δ (↑ˡ Q) P ∗ lend_tok α Q.
+  (** [fbor]: Modified [fbor_tok] *)
+  Definition fbor δ α Φ : iProp Σ := ∃ Ψ,
+    □ (∀ q, conv δ (Φ q) (↑ˡ Ψ q)) ∗ □ (∀ q, conv δ (↑ˡ Ψ q) (Φ q)) ∗
+    fbor_tok α Ψ.
 End iris.
+
+(** Utility *)
+Notation fborrow_wsat' := (fborrow_wsat true).

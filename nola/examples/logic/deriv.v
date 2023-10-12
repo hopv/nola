@@ -29,3 +29,4 @@ Notation borcd := (borc nderiv).
 Notation bord := (bor nderiv).
 Notation borod := (boro nderiv).
 Notation lendd := (lend nderiv).
+Notation fbord := (fbor nderiv).

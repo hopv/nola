@@ -30,7 +30,7 @@ Section nintp.
     | nc_steps_lb n => steps_lb n | nc_proph p pvs => proph p pvs
     | nc_lft_tok α q => q.[α] | nc_lft_dead α => [†α] | nc_lft_eter α => [∞α]
     | nc_lft_sincl α β => α ⊑□ β
-    | nc_fborrow_wsat => fborrow_wsat false
+    | nc_fborrow_wsat => fborrow_wsat'
     | nc_proph_tok ξ q => q:[ξ] | nc_proph_toks ξl q => q:∗[ξl]
     | nc_proph_obs φπ => .⟨φπ⟩ | nc_proph_wsat => proph_wsat
     | nc_proph_eqz _ aπ bπ => aπ :== bπ
@@ -70,7 +70,7 @@ Section nintp.
   Local Definition ncintpg1f (c : ncong1f) (Φ : Qp → nPropL (;ᵞ))
     (ni : nderiv_ty Σ -d> discrete_fun (λ κ, nProp κ (;ᵞ) -d> iProp Σ))
     : nderiv_ty Σ -d> iProp Σ :=
-    λ δ, match c with nc_fbor α => True end%I.
+    λ δ, match c with nc_fbor α => fbor δ α Φ end.
 
   (** [ncintp] is non-expansive *)
   Local Instance ncintpl0_ne {c} : NonExpansive (ncintpl0 c).
@@ -234,7 +234,6 @@ Notation nintpS δ P := ⟦ P ⟧ˢ(δ) (only parsing).
 Notation inv_wsat' δ := (inv_wsat (λ P, ⟦ P ⟧ˢ(δ))).
 Notation na_inv_wsat' δ := (na_inv_wsat (λ P, ⟦ P ⟧ˢ(δ))).
 Notation borrow_wsat' δ := (borrow_wsat True ∅ (λ P, ⟦ P ⟧ˢ(δ))).
-Notation fborrow_wsat' := (fborrow_wsat false).
 
 (** ** Lemmas on [⟦ ⟧] etc. *)
 Section nintp.
