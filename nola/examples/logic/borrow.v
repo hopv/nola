@@ -138,8 +138,8 @@ Section borrow.
     [†α] -∗ lendd α P =[borrow_wsatd W E ∗ W]{E}=∗ ⟦ P ⟧.
   Proof.
     iIntros "† [%[→ l]]". rewrite convd_use.
-    iMod (lend_tok_retrieve with "† l") as "Q". rewrite nintpS_nintp_nlarge.
-    by iMod ("→" with "Q").
+    iMod (lend_tok_retrieve with "† l") as "Q"; [done|].
+    rewrite nintpS_nintp_nlarge. by iMod ("→" with "Q").
   Qed.
 
   (** Open a closed borrower *)
@@ -154,7 +154,8 @@ Section borrow.
   Lemma bor_open {W E q α P} :
     q.[α] -∗ bord α P =[borrow_wsatd W E ∗ W]{E}=∗ borod α P q ∗ ⟦ P ⟧.
   Proof.
-    iIntros "α [%Q[PQ[#QP b]]]". iMod (bor_tok_open with "α b") as "[o Q]".
+    iIntros "α [%Q[PQ[#QP b]]]".
+    iMod (bor_tok_open with "α b") as "[o Q]"; [done|].
     rewrite nintpS_nintp_nlarge. iMod (convd_use with "QP Q") as "$". iModIntro.
     iExists _. by iFrame.
   Qed.
