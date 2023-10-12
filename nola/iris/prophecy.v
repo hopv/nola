@@ -204,8 +204,7 @@ Local Notation "aπ ./~ ξl" := (proph_dep_out aπ ξl)
 Local Fixpoint proph_log_valid {TY} (L : proph_log TY) :=
   match L with
   | [] => True
-  | .{ξ := aπ} :: L' =>
-      ξ ∉ pl_vars L' ∧ aπ ./~ pl_vars L ∧ proph_log_valid L'
+  | .{ξ := aπ} :: L' => ξ ∉ pl_vars L' ∧ aπ ./~ pl_vars L ∧ proph_log_valid L'
   end.
 Local Notation ".✓ L" := (proph_log_valid L) (at level 20, format ".✓  L").
 
@@ -338,8 +337,7 @@ Proof.
   split=> eqv; [apply (inj Some) in eqv|]; inversion eqv.
 Qed.
 Local Lemma add_line_aitem_sim {TY} {S : proph_smryR TY} {L ξ aπ} :
-  S :~ L → ξ ∉ pl_vars L →
-  add_line ξ (aitem aπ) S :~ .{ξ := aπ} :: L.
+  S :~ L → ξ ∉ pl_vars L → add_line ξ (aitem aπ) S :~ .{ξ := aπ} :: L.
 Proof.
   move=> sim ?. have inLne η wπ : .{η := wπ} ∈ L → ξ ≠ η.
   { move=> /(elem_of_list_fmap_1 pli_var) ??. by subst. }
