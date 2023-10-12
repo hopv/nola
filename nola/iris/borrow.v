@@ -886,43 +886,47 @@ Section fborrow.
     { iApply "→W". by iExists _. }
     rewrite fbor_tok_unseal. iExists _. iSplit; by [iApply lft_sincl_refl|].
   Qed.
+  Lemma bor_fbor_toks {α} c Φql :
+    ([∗ list] '(Φ, q)' ∈ Φql, bor_xtok c α (Φ q)) =[fborrow_wsat c]=∗
+      [∗ list] Φ ∈ Φql.*1', fbor_tok α Φ.
+  Proof.
+    elim: Φql; [by iIntros|]=>/= [[Φ q]Φql] IH.
+    iIntros "[b bl]". iMod (IH with "bl") as "$". by iApply bor_fbor_tok.
+  Qed.
 
   (** Open [fbor_tok] *)
-  Lemma fbor_tok_open' {W E intp α q} `(!Fractional (intp ∘ Φ)) :
+  Lemma fbor_tok_open' {W E intp α q Φ} :
+    □ (∀ r s, intp (Φ (r + s)%Qp) ∗-∗ intp (Φ r) ∗ intp (Φ s)) -∗
     q.[α] -∗ fbor_tok α Φ =[fborrow_wsat true ∗ borrow_wsat W E intp]=∗
-      ∃ r, bor_otok α (Φ r) q ∗ intp (Φ r).
+      q.[α] ∗ ∃ r, bor_ctok α (Φ r).
   Proof.
-    rewrite fbor_tok_unseal fborrow_wsat_unseal. iIntros "α [%α'[#⊑ i]] [F B]".
+    rewrite fbor_tok_unseal fborrow_wsat_unseal.
+    iIntros "#fr α [%α'[#⊑ i]] [F B]".
     iDestruct (sinv_acc with "i F") as "[[%r c] →F]".
     iMod (lft_sincl_tok_acc with "⊑ α") as (s) "[α' →α]".
     iMod (bor_ctok_open with "α' c B") as "[B [o Φ]]".
-    have eq : intp (Φ r) ⊣⊢ intp (Φ (r/2)%Qp) ∗ intp (Φ (r/2)%Qp).
-    { by erewrite fractional_half; [|apply: fractional_as_fractional]. }
-    rewrite eq. iDestruct "Φ" as "[Φ Φ']".
-    iMod (bor_otok_subdiv [_;_] with "o [Φ Φ'] [] B") as "[B [α'[c[c' _]]]]".
-    { by iFrame. } { rewrite eq. by iIntros "_ [$[$ _]]". }
-    iMod (bor_ctok_open with "α' c' B") as "[$ [o Φ]]". iModIntro.
-    iDestruct (bor_otok_lft with "[//] →α o") as "o".
-    iSplitR "o Φ"; [|iExists _; by iFrame]. iApply "→F". by iExists _.
+    rewrite -(Qp.div_2 r). iDestruct ("fr" with "Φ") as "[Φ Φ']".
+    iMod (bor_otok_subdiv [_;_] with "o [Φ Φ'] [] B") as "[$ [α'[c[c' _]]]]".
+    { by iFrame. } { iIntros "_ [Φ[Φ' _]]". iModIntro. iApply "fr". iFrame. }
+    iModIntro. iDestruct ("→α" with "α'") as "$". iSplitL "→F c".
+    { iApply "→F". by iExists _. } { iExists _. by iApply bor_ctok_lft. }
   Qed.
-  Lemma fbor_tok_open {c W E F intp α q} `(!Fractional (intp ∘ Φ)) : E ⊆ F →
+  Lemma fbor_tok_open {c W E F intp α q Φ} : E ⊆ F →
+    □ (∀ r s, intp (Φ (r + s)%Qp) ∗-∗ intp (Φ r) ∗ intp (Φ s)) -∗
     q.[α] -∗ fbor_tok α Φ =[fborrow_wsat c ∗ borrow_wsat W E intp ∗ W]{F}=∗
-      ∃ r, bor_otok α (Φ r) q ∗ intp (Φ r).
+      q.[α] ∗ ∃ r, bor_ctok α (Φ r).
   Proof.
     rewrite fbor_tok_unseal fborrow_wsat_unseal=> ?.
-    iIntros "α [%α'[#⊑ i]] [F BW]".
+    iIntros "#fr α [%α'[#⊑ i]] [F BW]".
     iDestruct (sinv_acc with "i F") as "[[%r b] →F]". rewrite bor_xtok_tok.
     iMod (lft_sincl_tok_acc with "⊑ α") as (s) "[α' →α]".
     iMod (bor_tok_open with "α' b BW") as "[[B $] [o Φ]]"; [done|].
-    have eq : intp (Φ r) ⊣⊢ intp (Φ (r/2)%Qp) ∗ intp (Φ (r/2)%Qp).
-    { by erewrite fractional_half; [|apply: fractional_as_fractional]. }
-    rewrite eq. iDestruct "Φ" as "[Φ Φ']".
-    iMod (bor_otok_subdiv [_;_] with "o [Φ Φ'] [] B") as "[B [α'[c[c' _]]]]".
-    { by iFrame. } { rewrite eq. by iIntros "_ [$[$ _]]". }
-    iMod (bor_ctok_open with "α' c' B") as "[$ [o Φ]]". iModIntro.
-    iDestruct (bor_otok_lft with "[//] →α o") as "o".
-    iSplitR "o Φ"; [|iExists _; by iFrame]. iApply "→F". rewrite bor_ctok_xtok.
-    by iExists _.
+    rewrite -(Qp.div_2 r). iDestruct ("fr" with "Φ") as "[Φ Φ']".
+    iMod (bor_otok_subdiv [_;_] with "o [Φ Φ'] [] B") as "[$ [α'[c[c' _]]]]".
+    { by iFrame. } { iIntros "_ [Φ[Φ' _]]". iModIntro. iApply "fr". iFrame. }
+    iModIntro. iDestruct ("→α" with "α'") as "$". iSplitL "→F c".
+    { iApply "→F". iExists _. by rewrite bor_ctok_xtok. }
+    { iExists _. by iApply bor_ctok_lft. }
   Qed.
 End fborrow.
 
