@@ -97,6 +97,7 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
         [`ilist`](nola/examples/logic/verify/ilist.v),
         [`na_ilist`](nola/examples/logic/verify/ilist.v)
         (Shared mutable infinite list)
+      - [`borrow`](nola/examples/logic/verify/borrow.v) (Borrowing)
   + [`type/`](nola/examples/type/) : Stratified Type System
     * [`type`](nola/examples/type/type.v) (Type),
       [`subst`](nola/examples/type/subst.v) (Substitution),

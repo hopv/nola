@@ -56,6 +56,7 @@ nola/examples/logic/verify/vlist.v
 nola/examples/logic/verify/ilist_base.v
 nola/examples/logic/verify/ilist.v
 nola/examples/logic/verify/na_ilist.v
+nola/examples/logic/verify/borrow.v
 
 nola/examples/type/type.v
 nola/examples/type/subst.v
