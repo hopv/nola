@@ -1,8 +1,8 @@
 (** * Verification on borrowing *)
 
 From nola.examples.logic Require Export borrow.
-From nola.examples.heap_lang Require Export notation.
-From iris.base_logic.lib Require Import ghost_var.
+From nola.examples.heap_lang Require Export proofmode notation.
+From iris.base_logic.lib Require Export ghost_var.
 
 Section borrow.
   Context `{!nintpGS Σ}.
@@ -24,20 +24,20 @@ Section borrow.
   Qed.
 
   (** Dereference a nested mutable reference *)
-  Lemma bor_bor_deref {α β l Φ q E} :
-    q.[α ⊓ β] -∗
-    bord α (∃ l' : loc, l ↦ #l' ∗ n_bor' [] β (∃ v, l' ↦ v ∗ Φ v))
-      =[borrow_wsatd ∗ fborrow_wsat' ∗ proph_wsat]{E}=∗
-      q.[α ⊓ β] ∗ ∃ l' : loc,
-        l ↦[α] #l' ∗ bord (α ⊓ β) (∃ v, l' ↦ v ∗ Φ v).
+  Lemma bor_bor_deref {α β l Φ q} :
+    [[{ q.[α ⊓ β] ∗
+      bord α (∃ l' : loc, l ↦ #l' ∗ n_bor' [] β (∃ v, l' ↦ v ∗ Φ v)) }]]
+      [borrow_wsatd ∗ fborrow_wsat' ∗ proph_wsat]
+      !#l
+    [[{ l', RET #l' ; q.[α ⊓ β] ∗ bord (α ⊓ β) (∃ v, l' ↦ v ∗ Φ v) }]].
   Proof.
-    iIntros "[α β] b". iMod (bor_open with "α b") as "[o big]"=>/=.
-    iDestruct "big" as (l') "[↦ b']".
-    iMod (bor_reborrow α with "β b'") as "[$[b' →b']]". rewrite [_⊓_]comm.
-    iMod (obor_subdiv [] [(λ q, l ↦{#q} #l', 1%Qp)']%n
-      with "o [//] [$↦//] [→b']") as "[$[_[f _]]]"=>/=.
-    { iIntros "† _ [↦ _]". iModIntro. iExists _. iFrame "↦". by iApply "→b'". }
-    iModIntro. iExists _. iFrame "f". by rewrite borc_bor.
+    iIntros "%Ψ [[α β] b] →Ψ". iMod (bor_open with "α b") as "[o big]"=>/=.
+    iDestruct "big" as (l') "[↦ b']". iApply twpw_fupdw_nonval; [done|].
+    wp_load. iModIntro. iMod (bor_reborrow α with "β b'") as "[β[b' →b']]".
+    rewrite [_⊓_]comm.
+    iMod (obor_subdiv [] [] with "o [//] [//] [↦ →b']") as "[α _]"=>/=.
+    { iIntros "† _ _". iModIntro. iExists _. iFrame "↦". by iApply "→b'". }
+    iModIntro. iApply "→Ψ". rewrite borc_bor. iFrame.
   Qed.
 
   Implicit Type X : nsynty.
@@ -106,26 +106,27 @@ Section borrow.
 
   (** Dereference a nested prophetic mutable reference *)
   Lemma proph_bor_bor_deref
-    {γ X η ξ α β l q E} {x : X} {Φ : _ → _ → nPropS (;ᵞ)} :
-    q.[α ⊓ β] -∗ vo γ (X *'ₛ prvarₛ X) (x, ξ)' -∗
-    bord α (∃ (x : X) ξ γ' (l' : loc),
-      n_pc γ (X *'ₛ prvarₛ X) (x, ξ)' η ∗ l ↦ #l' ∗ n_vo γ' X x ∗
-      n_bor' [] β (∃ x v, n_pc γ' X x ξ ∗ l' ↦ v ∗ ↑ˡ Φ x v))
-      =[borrow_wsatd ∗ fborrow_wsat' ∗ proph_wsat]{E}=∗
-      q.[α ⊓ β] ∗ ∃ (ζ : prvar X) γ'' (l' : loc),
-        ⟨π, π η = (π ζ, ξ)'⟩ ∗ l ↦[α] #l' ∗ vo γ'' X x ∗
-        bord (α ⊓ β) (∃ x v, n_pc γ'' X x ζ ∗ l' ↦ v ∗ ↑ˡ Φ x v).
+    {γ X η ξ α β l q} {x : X} {Φ : _ → _ → nPropS (;ᵞ)} :
+    [[{ q.[α ⊓ β] ∗ vo γ (X *'ₛ prvarₛ X) (x, ξ)' ∗
+      bord α (∃ (x : X) ξ γ' (l' : loc),
+        n_pc γ (X *'ₛ prvarₛ X) (x, ξ)' η ∗ l ↦ #l' ∗ n_vo γ' X x ∗
+        n_bor' [] β (∃ x v, n_pc γ' X x ξ ∗ l' ↦ v ∗ ↑ˡ Φ x v)) }]]
+      [borrow_wsatd ∗ fborrow_wsat' ∗ proph_wsat]
+      !#l
+    [[{ l', RET #l' ; q.[α ⊓ β] ∗ ∃ (ζ : prvar X) γ'',
+      ⟨π, π η = (π ζ, ξ)'⟩ ∗ vo γ'' X x ∗
+      bord (α ⊓ β) (∃ x v, n_pc γ'' X x ζ ∗ l' ↦ v ∗ ↑ˡ Φ x v) }]].
   Proof.
-    iIntros "[α β] vo b". iMod (bor_open with "α b") as "[o big]"=>/=.
+    iIntros "%Ψ [[α β][vo b]] →Ψ". iMod (bor_open with "α b") as "[o big]"=>/=.
     iDestruct "big" as (x2 ξ2 γ' l') "[pc[↦[vo' b']]]".
+    iApply twpw_fupdw_nonval; [done|]. wp_load. iModIntro.
     iDestruct (vo_pc_agree with "vo pc") as %eq. case: eq=> <-<-.
-    iMod (bor_reborrow α with "β b'") as "[[β β'][b' →b']]". rewrite [_⊓_]comm.
+    iMod (bor_reborrow α with "β b'") as "[[β β'][b' →b']]". rewrite [β⊓_]comm.
     iMod (obor_subdiv
-      [∃ (x : X), n_pc γ (X *'ₛ prvarₛ X) (x, ξ)' η ∗ n_vo γ' X x]%n
-      [(λ q, l ↦{#q} #l', 1%Qp)']%n with
-      "o [pc vo'] [$↦//] [→b']") as "[[α α'][[c _][f _]]]"=>/=.
+      [∃ (x : X), n_pc γ (X *'ₛ prvarₛ X) (x, ξ)' η ∗ n_vo γ' X x]%n [] with
+      "o [pc vo'] [//] [↦ →b']") as "[[α α'][[c _]_]]"=>/=.
     { iSplit; [|done]. iExists _. by iFrame "vo'". }
-    { iIntros "† [big _] [↦ _]". iDestruct "big" as (x'') "[pc vo']". iModIntro.
+    { iIntros "† [big _] _". iDestruct "big" as (x'') "[pc vo']". iModIntro.
       iExists _, _, _, _. iFrame "↦ vo' pc". by iApply "→b'". }
     iDestruct (borc_lft with "[] c") as "c"; [iApply lft_sincl_meet_l|].
     iMod (borc_open with "[α β] c") as "[o big]"; [by iFrame|]=>/=.
@@ -142,7 +143,7 @@ Section borrow.
     iMod (obor_merge_subdiv [(_,_)';(_,_)']
       [∃ x v, n_pc γ'' X x ζ ∗ l' ↦ v ∗ Φ x v]%n []
       with "[$o $o'//] [pc'' ↦' Φ] [//] [→pc vo' pc']")
-      as "[[[$$][[$$]_]][[c _]_]]"=>/=.
+      as "[[αβ[αβ' _]][[c _]_]]"=>/=.
     { iSplit; [|done]. iExists _, _. rewrite nintp_nlarge. iFrame. }
     { iIntros "† [big _] _". iDestruct "big" as (x'' v') "[pc''[↦ Φ]]".
       iMod (vo_pc_update with "vo' pc'") as "[vo' pc']".
@@ -150,6 +151,7 @@ Section borrow.
       - iExists x''. iFrame "vo'". iApply "→pc".
         by iApply (proph_obs_impl with "obs'")=> ?->.
       - iSplit; [|done]. iExists _, _. rewrite nintp_nlarge. iFrame. }
-    iModIntro. iExists _, _, _. rewrite borc_bor. by iFrame.
+    iModIntro. iApply "→Ψ". iFrame "αβ αβ'". iExists _, _.
+    rewrite borc_bor. by iFrame.
   Qed.
 End borrow.
