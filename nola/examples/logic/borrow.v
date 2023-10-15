@@ -230,12 +230,12 @@ Section borrow.
       by [iFrame|rewrite bi.sep_emp|].
   Qed.
   (** Simply close a borrower *)
-  Lemma bor_close {q α P} :
+  Lemma obor_close {q α P} :
     obord α P q -∗ ⟦ P ⟧ =[borrow_wsatd]=∗ q.[α] ∗ borcd α P.
   Proof.
     iIntros "[%Q[#PQ[QP o]]] P". iDestruct (convd_use with "PQ P") as "Q".
     rewrite -nintpS_nintp_nlarge.
-    iMod (bor_tok_close (intp:=λ Q, ⟦ Q ⟧ˢ) with "o Q") as "[$ c]". iModIntro.
+    iMod (obor_tok_close (intp:=λ Q, ⟦ Q ⟧ˢ) with "o Q") as "[$ c]". iModIntro.
     iExists _. by iFrame.
   Qed.
 

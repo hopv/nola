@@ -773,7 +773,7 @@ Section borrow.
       by [iFrame|rewrite bi.sep_emp|].
   Qed.
   (** Simply close a borrower *)
-  Lemma bor_tok_close {W E intp q α P} :
+  Lemma obor_tok_close {W E intp q α P} :
     obor_tok α P q -∗ intp P =[borrow_wsat W E intp]=∗ q.[α] ∗ bor_ctok α P.
   Proof.
     iIntros "o P". iMod (obor_tok_subdiv [P] with "o [P] []") as "[$[$_]]"=>/=;
