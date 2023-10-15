@@ -73,6 +73,16 @@ Proof. rewrite !lft_incl_unfold !gmultiset_elements_disj_union. set_solver. Qed.
 Lemma lft_incl_meet_mono_r {α β β'} : β ⊑ β' → α ⊓ β ⊑ α ⊓ β'.
 Proof. rewrite !lft_incl_unfold !gmultiset_elements_disj_union. set_solver. Qed.
 
+(** [= ⊤] and [⊓] *)
+Lemma lft_eqtop_meet_l {α β} : α ⊓ β = ⊤ → α = ⊤.
+Proof. rewrite -!gmultiset_size_empty_iff gmultiset_size_disj_union. lia. Qed.
+Lemma lft_eqtop_meet_r {α β} : α ⊓ β = ⊤ → β = ⊤.
+Proof. rewrite [_ ⊓ _]comm. exact lft_eqtop_meet_l. Qed.
+Lemma lft_neqtop_meet_l {α β} : α ≠ ⊤ → α ⊓ β ≠ ⊤.
+Proof. by move=> ? /lft_eqtop_meet_l. Qed.
+Lemma lft_neqtop_meet_r {α β} : β ≠ ⊤ → α ⊓ β ≠ ⊤.
+Proof. by move=> ? /lft_eqtop_meet_r. Qed.
+
 (** ** Lifetime tokens *)
 
 (** Atomic lifetime token *)
@@ -156,15 +166,21 @@ Section lft.
     iExists s. iFrame "α β α' β'". iIntros "[$$]".
   Qed.
 
-  (** Create a full token and a killer for a fresh lifetime *)
-  Lemma lft_tok_alloc : ⊢ |==> ∃ α, 1.[α] ∗ ■ (1.[α] ==∗ [†α]).
+  (** Allcate a fresh lifetime *)
+  Lemma lft_alloc : ⊢ |==> ∃ α, ⌜α ≠ ⊤⌝ ∗ 1.[α].
   Proof.
-    iMod (own_alloc (Cinl (DfracOwn 1))) as (a) "a"; [done|]. iExists {[+a+]}.
-    rewrite big_sepMS_singleton. iFrame "a". iIntros "!>!> a".
+    iMod (own_alloc (Cinl (DfracOwn 1))) as (a) "a"; [done|]. iModIntro.
+    iExists {[+a+]}. rewrite big_sepMS_singleton. by iFrame "a".
+  Qed.
+
+  (** Kill a lifetime *)
+  Lemma lft_kill {α} : α ≠ ⊤ → 1.[α] ==∗ [†α].
+  Proof.
+    case: (gmultiset_choose_or_empty α); [|done]=> [[a ?]_]. iIntros "α".
+    iDestruct (big_sepMS_elem_of with "α") as "a"; [done|].
     iMod (own_update _ _ (Cinr ()) with "a") as "†".
     { by apply cmra_update_exclusive. }
-    iModIntro. rewrite lft_dead_unseal. iExists _. iFrame "†". iPureIntro.
-    set_solver.
+    iModIntro. rewrite lft_dead_unseal. iExists a. by iFrame "†".
   Qed.
 
   (** Eternalize a lifetime *)
