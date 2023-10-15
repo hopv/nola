@@ -895,7 +895,7 @@ Section fborrow.
   Qed.
 
   (** Open [fbor_tok] *)
-  Lemma fbor_tok_open' {W E intp α q Φ} :
+  Lemma fbor_tok_take' {W E intp α q Φ} :
     □ (∀ r s, intp (Φ (r + s)%Qp) ∗-∗ intp (Φ r) ∗ intp (Φ s)) -∗
     q.[α] -∗ fbor_tok α Φ =[fborrow_wsat true ∗ borrow_wsat W E intp]=∗
       q.[α] ∗ ∃ r, bor_ctok α (Φ r).
@@ -911,7 +911,15 @@ Section fborrow.
     iModIntro. iDestruct ("→α" with "α'") as "$". iSplitL "→F c".
     { iApply "→F". by iExists _. } { iExists _. by iApply bor_ctok_lft. }
   Qed.
-  Lemma fbor_tok_open {c W E F intp α q Φ} : E ⊆ F →
+  Lemma fbor_tok_open' {W E intp α q Φ} :
+    □ (∀ r s, intp (Φ (r + s)%Qp) ∗-∗ intp (Φ r) ∗ intp (Φ s)) -∗
+    q.[α] -∗ fbor_tok α Φ =[fborrow_wsat true ∗ borrow_wsat W E intp]=∗
+      ∃ r, obor_tok α (Φ r) q ∗ intp (Φ r).
+  Proof.
+    iIntros "fr α f". iMod (fbor_tok_take' with "fr α f") as "[α[% c]]".
+    iMod (bor_ctok_open with "α c") as "?". iModIntro. by iExists _.
+  Qed.
+  Lemma fbor_tok_take {c W E F intp α q Φ} : E ⊆ F →
     □ (∀ r s, intp (Φ (r + s)%Qp) ∗-∗ intp (Φ r) ∗ intp (Φ s)) -∗
     q.[α] -∗ fbor_tok α Φ =[fborrow_wsat c ∗ borrow_wsat W E intp ∗ W]{F}=∗
       q.[α] ∗ ∃ r, bor_ctok α (Φ r).
@@ -927,6 +935,15 @@ Section fborrow.
     iModIntro. iDestruct ("→α" with "α'") as "$". iSplitL "→F c".
     { iApply "→F". iExists _. by rewrite bor_ctok_xtok. }
     { iExists _. by iApply bor_ctok_lft. }
+  Qed.
+  Lemma fbor_tok_open {c W E F intp α q Φ} : E ⊆ F →
+    □ (∀ r s, intp (Φ (r + s)%Qp) ∗-∗ intp (Φ r) ∗ intp (Φ s)) -∗
+    q.[α] -∗ fbor_tok α Φ =[fborrow_wsat c ∗ borrow_wsat W E intp ∗ W]{F}=∗
+      ∃ r, obor_tok α (Φ r) q ∗ intp (Φ r).
+  Proof.
+    iIntros "% fr α f".
+    iMod (fbor_tok_take with "fr α f") as "[α[% c]]"; [done|].
+    iMod (bor_ctok_open with "α c") as "?". iModIntro. by iExists _.
   Qed.
 End fborrow.
 

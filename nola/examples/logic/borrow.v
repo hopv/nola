@@ -273,7 +273,7 @@ Section borrow.
       q.[α] ∗ ∃ r, borcd α (Φ r).
   Proof.
     iIntros "#fr α [%[#ΦΨ[#ΨΦ f]]]".
-    iMod (fbor_tok_open' with "[] α f") as "[$[% c]]"; last first.
+    iMod (fbor_tok_take' with "[] α f") as "[$[% c]]"; last first.
     { iModIntro. iExists _, _. iFrame "c". by iSplit; iModIntro. }
     iIntros "!> %r %s". rewrite !nintpS_nintp_nlarge. iSplit.
     - iIntros "Ψ". iDestruct (convd_use with "ΨΦ Ψ") as "Φ".
