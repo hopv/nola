@@ -79,9 +79,9 @@ Section iris.
   (** [bor]: Modified [bor_tok] *)
   Definition bor δ α P : iProp Σ :=
     ∃ Q, □ conv δ P (↑ˡ Q) ∗ □ conv δ (↑ˡ Q) P ∗ bor_tok α Q.
-  (** [boro]: Modified [bor_otok] *)
-  Definition boro δ α P q : iProp Σ :=
-    ∃ Q, □ conv δ P (↑ˡ Q) ∗ □ conv δ (↑ˡ Q) P ∗ bor_otok α Q q.
+  (** [obor]: Modified [obor_tok] *)
+  Definition obor δ α P q : iProp Σ :=
+    ∃ Q, □ conv δ P (↑ˡ Q) ∗ □ conv δ (↑ˡ Q) P ∗ obor_tok α Q q.
   (** [lend]: Modified [lend_tok] *)
   Definition lend δ α P : iProp Σ :=
     ∃ Q, □ conv δ (↑ˡ Q) P ∗ lend_tok α Q.

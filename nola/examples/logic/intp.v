@@ -65,7 +65,7 @@ Section nintp.
     | nc_ag γ => nag γ P
     | nc_inv N => ninv δ N P | nc_na_inv p N => na_ninv δ p N P
     | nc_borc α => borc δ α P | nc_bor α => bor δ α P
-    | nc_boro α q => boro δ α P q | nc_lend α => lend δ α P
+    | nc_obor α q => obor δ α P q | nc_lend α => lend δ α P
     end%I.
   Local Definition ncintpg1f (c : ncong1f) (Φ : Qp → nPropL (;ᵞ))
     (ni : nderiv_ty Σ -d> discrete_fun (λ κ, nProp κ (;ᵞ) -d> iProp Σ))

@@ -34,7 +34,7 @@ Section borrow.
     iIntros "[α β] b". iMod (bor_open with "α b") as "[o big]"=>/=.
     iDestruct "big" as (l') "[↦ b']".
     iMod (bor_reborrow α with "β b'") as "[$[b' →b']]". rewrite [_⊓_]comm.
-    iMod (boro_subdiv [] [(λ q, l ↦{#q} #l', 1%Qp)']%n
+    iMod (obor_subdiv [] [(λ q, l ↦{#q} #l', 1%Qp)']%n
       with "o [//] [$↦//] [→b']") as "[$[_[f _]]]"=>/=.
     { iIntros "† _ [↦ _]". iModIntro. iExists _. iFrame "↦". by iApply "→b'". }
     iModIntro. iExists _. iFrame "f". by rewrite borc_bor.
@@ -120,7 +120,7 @@ Section borrow.
     iDestruct "big" as (x2 ξ2 γ' l') "[pc[↦[vo' b']]]".
     iDestruct (vo_pc_agree with "vo pc") as %eq. case: eq=> <-<-.
     iMod (bor_reborrow α with "β b'") as "[[β β'][b' →b']]". rewrite [_⊓_]comm.
-    iMod (boro_subdiv
+    iMod (obor_subdiv
       [∃ (x : X), n_pc γ (X *'ₛ prvarₛ X) (x, ξ)' η ∗ n_vo γ' X x]%n
       [(λ q, l ↦{#q} #l', 1%Qp)']%n with
       "o [pc vo'] [$↦//] [→b']") as "[[α α'][[c _][f _]]]"=>/=.
@@ -139,7 +139,7 @@ Section borrow.
       with "[$ζ//] vo pc") as "[[ζ _][#obs →pc]]".
     { apply (proph_dep_constr (λ x, (x, ξ)')), (proph_dep_one ζ). }
     iMod (vo_pc_alloc with "ζ") as (γ'') "[vo'' pc'']".
-    iMod (boro_merge_subdiv [(_,_)';(_,_)']
+    iMod (obor_merge_subdiv [(_,_)';(_,_)']
       [∃ x v, n_pc γ'' X x ζ ∗ l' ↦ v ∗ Φ x v]%n []
       with "[$o $o'//] [pc'' ↦' Φ] [//] [→pc vo' pc']")
       as "[[[$$][[$$]_]][[c _]_]]"=>/=.

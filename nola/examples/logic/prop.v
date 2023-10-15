@@ -118,7 +118,7 @@ Variant ncong1 : Type :=
     (p : na_inv_pool_name) (N : namespace)
 | (** Closed borrower *) nc_borc (α : lft)
 | (** Borrower *) nc_bor (α : lft)
-| (** Open borrower *) nc_boro (α : lft) (q : Qp)
+| (** Open borrower *) nc_obor (α : lft) (q : Qp)
 | (** Lender *) nc_lend (α : lft).
 (** Unary, fractional, guarding *)
 Variant ncong1f : Type :=
@@ -264,8 +264,8 @@ Notation n_borc' Γᵘ α P := (n_g1 (Γᵘ:=Γᵘ) (nc_borc α) P) (only parsin
 Notation n_borc α P := (n_borc' _ α P).
 Notation n_bor' Γᵘ α P := (n_g1 (Γᵘ:=Γᵘ) (nc_bor α) P) (only parsing).
 Notation n_bor α P := (n_bor' _ α P).
-Notation n_boro' Γᵘ α q P := (n_g1 (Γᵘ:=Γᵘ) (nc_boro α q) P) (only parsing).
-Notation n_boro α q P := (n_boro' _ α q P).
+Notation n_obor' Γᵘ α q P := (n_g1 (Γᵘ:=Γᵘ) (nc_obor α q) P) (only parsing).
+Notation n_obor α q P := (n_obor' _ α q P).
 Notation n_lend' Γᵘ α P := (n_g1 (Γᵘ:=Γᵘ) (nc_lend α) P) (only parsing).
 Notation n_lend α P := (n_lend' _ α P).
 Notation n_fbor' Γᵘ α Φ := (n_g1f (Γᵘ:=Γᵘ) (nc_fbor α) Φ) (only parsing).
