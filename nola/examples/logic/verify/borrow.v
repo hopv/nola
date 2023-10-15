@@ -42,68 +42,6 @@ Section borrow.
 
   Implicit Type X : nsynty.
 
-  (** Value observer *)
-  Notation vo γ X x := (γ ⤇{X}(1/2) x)%I.
-  Notation n_vo γ X x := (γ ⤇{X}(1/2) x)%n.
-  Notation vo2 γ X x := (γ ⤇{X}(1) x)%I.
-  Notation n_vo2 γ X x := (γ ⤇{X}(1) x)%n.
-
-  (** Prophecy controller *)
-  Definition pc γ X x (ξ : prvar X) : iProp Σ :=
-    (vo γ X x ∗ 1:[ξ]) ∨
-    ((∃ x', vo2 γ X x') ∗ ⟨π, π ξ = x⟩).
-  Definition n_pc {κ Γ} γ X x (ξ : prvar X) : nProp κ Γ :=
-    (n_vo γ X x ∗ 1:[ξ]) ∨
-    ((∃ x', n_vo2 γ X x') ∗ ⟨π, π ξ = x⟩).
-
-  (** [vo] and [vo2] can't coexist *)
-  Lemma vo_vo2 {γ X x x'} : vo γ X x -∗ vo2 γ X x' -∗ False.
-  Proof.
-    iIntros "vo vo'". by iDestruct (ghost_var_valid_2 with "vo vo'") as %[? _].
-  Qed.
-
-  (** Allocate [vo] and [pc] *)
-  Lemma vo_pc_alloc {X x} {ξ : prvar X} : 1:[ξ] ==∗ ∃ γ, vo γ X x ∗ pc γ X x ξ.
-  Proof.
-    iIntros "ξ". iMod (ghost_var_alloc) as (γ) "[vo vo']". iModIntro. iExists _.
-    iFrame "vo". iLeft. iFrame.
-  Qed.
-
-  (** Agreement between [vo] and [pc] *)
-  Lemma vo_pc_agree {γ X x x' ξ} : vo γ X x -∗ pc γ X x' ξ -∗ ⌜x = x'⌝.
-  Proof.
-    iIntros "vo [[vo' _]|[[% vo2] _]]"; last first.
-    { iDestruct (vo_vo2 with "vo vo2") as %[]. }
-    by iDestruct (anyty_var_agree with "vo vo'") as %?.
-  Qed.
-
-  (** Update the value of [vo] and [pc] *)
-  Lemma vo_pc_update {γ X x x' y ξ} :
-    vo γ X x -∗ pc γ X x' ξ ==∗ vo γ X y ∗ pc γ X y ξ.
-  Proof.
-    iIntros "vo [[vo' ξ]|[[% vo2] _]]"; last first.
-    { iDestruct (vo_vo2 with "vo vo2") as %[]. }
-    iMod (ghost_var_update_2 with "vo vo'") as "[$ vo]"; [by rewrite Qp.div_2|].
-    iModIntro. iLeft. iFrame.
-  Qed.
-
-  (** Resolve the prophecy of [pc] *)
-  Lemma vo_pc_preresolve {γ X x x'} ξ aπ ηl q : aπ ./ ηl →
-    q:∗[ηl] -∗ vo γ X x -∗ pc γ X x' ξ =[proph_wsat]=∗
-      q:∗[ηl] ∗ ⟨π, π ξ = aπ π⟩ ∗ (∀ y, ⟨π, aπ π = y⟩ -∗ pc γ X y ξ).
-  Proof.
-    iIntros "% ηl vo [[vo' ξ]|[[% vo2] _]]"; last first.
-    { iDestruct (vo_vo2 with "vo vo2") as %[]. }
-    iMod (proph_resolve_dep with "ξ ηl") as "[$ #obs]"; [done|]. iModIntro.
-    iFrame "obs". iIntros "%y obs'". iRight. iCombine "vo vo'" as "vo2".
-    iSplit; [by iExists _|]. by iApply (proph_obs_impl2 with "obs obs'")=> ?->.
-  Qed.
-  Lemma pc_resolve {γ X x} ξ :
-    pc γ X x ξ =[proph_wsat]=∗ ⟨π, π ξ = x⟩.
-  Proof.
-    iIntros "[[_ ξ]|[_ $]]"; [|done]. iApply (proph_resolve with "ξ").
-  Qed.
-
   (** Dereference a nested prophetic mutable reference *)
   Lemma proph_bor_bor_deref
     {γ X η ξ α β l q} {x : X} {Φ : _ → _ → nPropS (;ᵞ)} :
@@ -125,7 +63,7 @@ Section borrow.
     iMod (obor_subdiv
       [∃ (x : X), n_pc γ (X *'ₛ prvarₛ X) (x, ξ)' η ∗ n_vo γ' X x]%n [] with
       "o [pc vo'] [//] [↦ →b']") as "[[α α'][[c _]_]]"=>/=.
-    { iSplit; [|done]. iExists _. by iFrame "vo'". }
+    { iSplit; [|done]. iExists _. iFrame. }
     { iIntros "† [big _] _". iDestruct "big" as (x'') "[pc vo']". iModIntro.
       iExists _, _, _, _. iFrame "↦ vo' pc". by iApply "→b'". }
     iDestruct (borc_lft with "[] c") as "c"; [iApply lft_sincl_meet_l|].

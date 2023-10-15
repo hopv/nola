@@ -2,9 +2,6 @@
 
 From nola.util Require Export prod.
 From nola.iris Require Export prophecy.
-From iris.bi Require Import fractional.
-From iris.base_logic.lib Require Import ghost_var.
-From iris.proofmode Require Import proofmode.
 
 (** Syntactic type *)
 Inductive nsynty := Empty_setₛ | unitₛ | boolₛ | natₛ | Zₛ | Propₛ | nsyntyₛ
@@ -99,44 +96,3 @@ Next Obligation. by move=> ? /to_nsynty_inhab. Qed.
 
 Notation proph_asnn := (proph_asn nsynty).
 Notation prophn A := (proph nsynty A).
-
-(** Existential type over a syntactic type *)
-#[projections(primitive)]
-Record anyty := Anyty {
-  anyty_ty : nsynty;
-  anyty_val : anyty_ty;
-}.
-Add Printing Constructor anyty.
-
-(** Ghost state *)
-Class anyty_varG Σ := anyty_varG_in :: ghost_varG Σ anyty.
-Definition anyty_varΣ := ghost_varΣ anyty.
-#[export] Instance subG_anyty_varΣ `{!subG anyty_varΣ Σ} : anyty_varG Σ.
-Proof. solve_inG. Qed.
-
-(** Agreement over [anyty] *)
-Notation anyty_var γ q X x := (ghost_var γ q (Anyty X x)).
-Notation "γ ⤇{ X } ( q ) x" := (anyty_var γ q X x)
-  (at level 20, only parsing) : bi_scope.
-Notation "γ ⤇( q ) x" := (anyty_var γ q _ x)
-  (at level 20, format "γ  ⤇( q )  x") : bi_scope.
-
-Section anyty_var.
-  Context `{!anyty_varG Σ}.
-
-  (** [anyty_var] is timeless and fractional *)
-  Fact anyty_var_timeless {X γ q x} : Timeless (γ ⤇{X}(q) x).
-  Proof. exact _. Qed.
-  Fact anyty_var_fractional {X γ x} : Fractional (λ q, γ ⤇{X}(q) x)%I.
-  Proof. exact _. Qed.
-
-  (** Allocate [anyty_var] *)
-  Lemma anyty_var_alloc {X x} : ⊢ |==> ∃ γ, γ ⤇{X}(1) x.
-  Proof. iApply ghost_var_alloc. Qed.
-
-  (** Agreement between [anyty_var]s *)
-  Lemma anyty_var_agree {X γ x y q r} : γ ⤇{X}(q) x -∗ γ ⤇{X}(r) y -∗ ⌜x = y⌝.
-  Proof.
-    iIntros "x y". iDestruct (ghost_var_agree with "x y") as %?. by simplify_eq.
-  Qed.
-End anyty_var.

@@ -1,6 +1,6 @@
 (** * Iris preliminaries *)
 
-From nola.examples.logic Require Export prop.
+From nola.examples.logic Require Export proph_ag prop.
 From nola.iris Require Export deriv wp inv na_inv borrow.
 From iris.base_logic.lib Require Export cancelable_invariants.
 From nola.examples.heap_lang Require Export definitions.
@@ -23,7 +23,7 @@ Class nintpGS Σ := NintpGS {
   nintpGS_borrow :: borrowGS (nPropS (;ᵞ)) Σ;
   nintpGS_fborrow :: fborrowGS (nPropS (;ᵞ)) Σ;
   nintpGS_proph :: prophGS nsynty Σ;
-  nintpGS_anyty_var :: anyty_varG Σ;
+  nintpGS_proph_ag :: proph_agG Σ;
   nintpGS_heap :: heapGS_gen HasNoLc Σ;
 }.
 Arguments NintpGS {_}.

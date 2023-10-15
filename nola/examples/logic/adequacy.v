@@ -13,7 +13,7 @@ Class nintpGpreS Σ := NintpGpreS {
   nintpGpreS_borrow :: borrowGpreS (nPropS (;ᵞ)) Σ;
   nintpGpreS_fborrow :: fborrowGpreS (nPropS (;ᵞ)) Σ;
   nintpGpreS_proph :: prophGpreS nsynty Σ;
-  nintpGpreS_anyty_var :: anyty_varG Σ;
+  nintpGpreS_proph_ag :: proph_agG Σ;
   nintpGpreS_heap :: heapGpreS Σ;
 }.
 
@@ -21,7 +21,7 @@ Class nintpGpreS Σ := NintpGpreS {
 Definition nintpΣ : gFunctors :=
   #[agreeΣ (nPropL (;ᵞ)); ninvΣ (nPropS (;ᵞ)); na_ninvΣ (nPropS (;ᵞ));
     na_invΣ; cinvΣ; borrowΣ (nPropS (;ᵞ)); fborrowΣ (nPropS (;ᵞ));
-    prophΣ nsynty; anyty_varΣ; heapΣ].
+    prophΣ nsynty; proph_agΣ; heapΣ].
 #[export] Instance subG_nintpGpreS `{!subG nintpΣ Σ} : nintpGpreS Σ.
 Proof. solve_inG. Qed.
 
