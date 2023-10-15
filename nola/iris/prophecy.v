@@ -43,7 +43,7 @@ Defined.
 Definition prvar_by_inhab {TY : synpty} (X : TY) (h : synpty_inhab X)
   : prvar X := Prvar h inhabitant.
 
-(** Negated [synpty_inhab] ensures the emptyness of [prvar] *)
+(** Negated [synpty_inhab] ensures the emptiness of [prvar] *)
 Lemma prvar_neg_inhab {TY : synpty} (X : TY) :
   ¬ synpty_inhab X → prvar X → False.
 Proof. move=> neg [??]. by apply neg. Qed.
