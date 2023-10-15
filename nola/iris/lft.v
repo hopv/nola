@@ -142,6 +142,13 @@ Section lft.
     rewrite big_sepMS_elem_of; [|done].
     by iDestruct (own_valid_2 with "∞ †") as "%".
   Qed.
+  (** The fraction of a lifetime token is no more than [1] *)
+  Lemma lft_tok_valid {α q} : α ≠ ⊤ → q.[α] -∗ ⌜q ≤ 1⌝%Qp.
+  Proof.
+    case: (gmultiset_choose_or_empty α); [|done]=> [[a ?]_]. iIntros "α".
+    iDestruct (big_sepMS_elem_of with "α") as "a"; [done|].
+    by iDestruct (own_valid with "a") as %?.
+  Qed.
 
   (** Lifetime token is fractional *)
   Local Instance alft_tok_fract {a} : Fractional (alft_tok a)%I.
