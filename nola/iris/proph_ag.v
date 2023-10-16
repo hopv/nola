@@ -1,26 +1,27 @@
 (** * Prophetic agreement *)
 
-From nola.examples.logic Require Import synty.
-From iris.bi Require Export fractional.
-From iris.base_logic.lib Require Export ghost_var.
+From nola.iris Require Export prophecy.
+From iris.bi Require Import fractional.
+From iris.base_logic.lib Require Import ghost_var.
 From iris.proofmode Require Import proofmode.
 
 (** Existential type over a syntactic type *)
 #[projections(primitive)]
-Record anyty := Anyty {
-  anyty_ty : nsynty;
+Record anyty (TY : synty) := Anyty {
+  anyty_ty : TY;
   anyty_val : anyty_ty;
 }.
 Add Printing Constructor anyty.
+Arguments Anyty {_} _ _. Arguments anyty_ty {_} _. Arguments anyty_val {_} _.
 
 (** Ghost state *)
-Class proph_agG Σ := proph_agG_in :: ghost_varG Σ anyty.
-Definition proph_agΣ := ghost_varΣ anyty.
-#[export] Instance subG_proph_agΣ `{!subG proph_agΣ Σ} : proph_agG Σ.
+Class proph_agG TY Σ := proph_agG_in :: ghost_varG Σ (anyty TY).
+Definition proph_agΣ TY := ghost_varΣ (anyty TY).
+#[export] Instance subG_proph_agΣ `{!subG (proph_agΣ TY) Σ} : proph_agG TY Σ.
 Proof. solve_inG. Qed.
 
 Section proph_ag.
-  Context `{!proph_agG Σ, !prophGS nsynty Σ}.
+  Context `{!proph_agG TY Σ, !prophGS TY Σ}.
 
   (** Value observer *)
   Definition vo γ X x : iProp Σ := (ghost_var γ (1/2) (Anyty X x)).
