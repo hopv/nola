@@ -1,7 +1,7 @@
 (** * [nProp]: Syntactic proposition *)
 
 From nola.examples.logic Require Export synty.
-From nola.util Require Export funext rel ctx.
+From nola.util Require Export funext rel ctx schoice.
 From nola.iris Require Export upd lft.
 From stdpp Require Export coPset namespaces.
 From iris.bi Require Import notation.

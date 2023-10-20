@@ -9,6 +9,7 @@ nola/util/wft.v
 nola/util/list.v
 nola/util/nat.v
 nola/util/prod.v
+nola/util/schoice.v
 nola/util/hgt.v
 nola/util/ctx.v
 
