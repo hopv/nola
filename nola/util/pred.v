@@ -10,8 +10,8 @@ Arguments False₁ {_} _ /.
 
 Definition and₁ {A} (φ ψ : A → Prop) (a : A) := φ a ∧ ψ a.
 Arguments and₁ {_} _ _ _ /.
-Infix "∧₁" := and₁ (at level 80, right associativity).
+Infix "∧₁" := and₁ (at level 80, right associativity) : nola_scope.
 
 Definition or₁ {A} (φ ψ : A → Prop) (a : A) := φ a ∨ ψ a.
 Arguments or₁ {_} _ _ _ /.
-Infix "∨₁" := or₁ (at level 85, right associativity).
+Infix "∨₁" := or₁ (at level 85, right associativity) : nola_scope.
