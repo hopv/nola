@@ -1,7 +1,7 @@
 (** * Prophecy *)
 
 From nola.iris Require Export upd.
-From nola.util Require Import rel.
+From nola.util Require Import rel plist.
 From nola.iris Require Import discrete_fun.
 From iris.algebra Require Import auth functions gmap csum frac agree.
 From iris.bi Require Import fractional.
@@ -72,6 +72,12 @@ Defined.
 Definition aprvar_by_inhab {TY : synpty} (X : TY) (h : synpty_inhab X)
   : aprvar TY := prvar_by_inhab X h.
 
+(** [plist prvar] as [list aprvar] *)
+Definition of_plist_prvar {TY : synpty} {Xl : list TY}
+  : plist prvar Xl → list (aprvar TY) := of_plist Aprvar.
+
+(** [plist aprvar Xl] as [list prvar] *)
+
 (** ** Syntactic type and prophecy assignment *)
 
 (** Syntactic type *)
@@ -90,6 +96,10 @@ Coercion synty_ty : synpty_car >-> Sortclass.
 
 Implicit Type TY : synty.
 
+(** Product over [list TY] *)
+Definition plist_synty {TY} (Xl : list TY) : Type := plist (λ X : TY, X) Xl.
+
+(** Prophecy assignment *)
 Definition proph_asn (TY : synty) := ∀ ξ : aprvar TY, ξ.(aprvar_ty).
 (** Value under a prophecy assignment *)
 Notation proph TY A := (proph_asn TY → A).
@@ -97,6 +107,11 @@ Notation proph TY A := (proph_asn TY → A).
 (** [proph_asn] is inhabited *)
 #[export] Instance proph_asn_inhabited {TY} : Inhabited (proph_asn TY).
 Proof. apply populate. move=> [?[??]]. by apply synty_inhabited. Qed.
+
+(** Evaluate [plist prvar] with [proph_asn] *)
+Definition app_plist_prvar {TY} {Xl : list TY}
+  (π : proph_asn TY) (ξl : plist prvar Xl) : plist_synty Xl :=
+  plist_map (λ _ (ξ : prvar _), π ξ) ξl.
 
 (** ** Prophecy Dependency *)
 
@@ -156,6 +171,17 @@ Section lemmas.
     eapply proph_dep_mono, (.$ eqv) in dep, dep', dep''; [|set_solver..].
     by f_equal.
   Qed.
+  Lemma proph_dep_plist' {Xl : list TY} (ξl : plist prvar Xl) :
+    (λ π, app_plist_prvar π ξl) ./ of_plist_prvar ξl.
+  Proof.
+    move: ξl. elim: Xl=>/=; [done|]=> ?? IH [ξ ξl] ?? eqv.
+    unfold app_plist_prvar=>/=. f_equal.
+    { apply (eqv ξ). set_solver. } { apply IH=> ??. apply eqv. set_solver. }
+  Qed.
+  Lemma proph_dep_plist {A} {Xl : list TY}
+    (f : plist_synty Xl → A) (ξl : plist prvar Xl) :
+    (λ π, f (app_plist_prvar π ξl)) ./ of_plist_prvar ξl.
+  Proof. apply proph_dep_constr, proph_dep_plist'. Qed.
 
   (** On a singleton type *)
   Lemma proph_dep_singleton {A} (aπ : proph TY A) :

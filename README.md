@@ -60,13 +60,15 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     [`list`](nola/util/list.v) (Lists),
     [`nat`](nola/util/nat.v) (Natural numbers),
     [`prod`](nola/util/prod.v) (Modified product),
-    [`schoice`](nola/util/schoice.v) (Variant over a list)
+    [`schoice`](nola/util/schoice.v) (Variant over a list),
+    [`plist`](nola/util/plist.v) (Product list)
   + [`hgt`](nola/util/hgt.v) (General height of a tree),
     [`ctx`](nola/util/ctx.v) (Context with unguarded/guarded variables)
 - [`iris/`](nola/iris) : Iris libraries
   + [`dfrac`](nola/iris/dfrac.v) (For discardable fractions),
     [`gmap`](nola/iris/gmap.v) (On `gmap`),
     [`discrete_fun`](nola/iris/discrete_fun.v) (On discrete functions)
+  + [`plist`](nola/iris/plist.v) (On `plist`)
   + [`deriv`](nola/iris/deriv.v) (Derivability)
   + [`upd`](nola/iris/upd.v) (Update),
     [`wp`](nola/iris/wp.v) (Weakest precondition)

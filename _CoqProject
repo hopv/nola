@@ -10,12 +10,14 @@ nola/util/list.v
 nola/util/nat.v
 nola/util/prod.v
 nola/util/schoice.v
+nola/util/plist.v
 nola/util/hgt.v
 nola/util/ctx.v
 
 nola/iris/dfrac.v
 nola/iris/gmap.v
 nola/iris/discrete_fun.v
+nola/iris/plist.v
 nola/iris/deriv.v
 nola/iris/upd.v
 nola/iris/wp.v
