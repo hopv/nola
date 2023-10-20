@@ -59,7 +59,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     [`wft`](nola/util/wft.v) (Well-founded types),
     [`list`](nola/util/list.v) (Lists),
     [`nat`](nola/util/nat.v) (Natural numbers),
-    [`prod`](nola/util/prod.v) (Modified product)
+    [`prod`](nola/util/prod.v) (Modified product),
+    [`schoice`](nola/util/schoice.v) (Variant over a list)
   + [`hgt`](nola/util/hgt.v) (General height of a tree),
     [`ctx`](nola/util/ctx.v) (Context with unguarded/guarded variables)
 - [`iris/`](nola/iris) : Iris libraries
@@ -97,7 +98,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
         [`ilist`](nola/examples/logic/verify/ilist.v),
         [`na_ilist`](nola/examples/logic/verify/ilist.v)
         (Shared mutable infinite list)
-      - [`borrow`](nola/examples/logic/verify/borrow.v) (Borrowing)
+      - [`borrow`](nola/examples/logic/verify/borrow.v) (Borrow),
+        [`fborrow`](nola/examples/logic/verify/fborrow.v) (Fractional borrow)
   + [`type/`](nola/examples/type/) : Stratified Type System
     * [`type`](nola/examples/type/type.v) (Type),
       [`subst`](nola/examples/type/subst.v) (Substitution),

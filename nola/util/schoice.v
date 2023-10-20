@@ -1,8 +1,8 @@
-
-(** * [schoice]: Variant choosing an element of [list] with a value *)
+(** * [schoice]: Variant over [list] *)
 
 From nola Require Export prelude.
 
+(** Variant over [list] *)
 Inductive schoice {A} {F : A → Type} : list A → Type :=
 | sbyhd {x} : F x → ∀ xs, schoice (x :: xs)
 | sbytl {xs} : ∀ x, schoice xs → schoice (x :: xs).
