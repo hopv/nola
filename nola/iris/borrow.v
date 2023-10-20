@@ -3,9 +3,7 @@
 From nola.util Require Export prod.
 From nola.iris Require Import gmap.
 From nola.iris Require Export lft upd.
-From nola.util Require Import prod.
 From iris.algebra Require Import excl agree gmap auth.
-From iris.base_logic.lib Require Import ghost_map.
 From iris.proofmode Require Import proofmode.
 
 (** ** Ghost state *)
