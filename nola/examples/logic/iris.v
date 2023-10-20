@@ -1,7 +1,7 @@
 (** * Iris preliminaries *)
 
 From nola.examples.logic Require Export prop.
-From nola.iris Require Export deriv wp inv na_inv borrow proph_ag.
+From nola.iris Require Export deriv wp inv na_inv borrow fborrow proph_ag.
 From iris.base_logic.lib Require Export cancelable_invariants.
 From nola.examples.heap_lang Require Export definitions.
 
