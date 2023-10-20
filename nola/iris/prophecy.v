@@ -157,16 +157,6 @@ Section lemmas.
     by f_equal.
   Qed.
 
-  (** Destruct from an injective function *)
-  Lemma proph_dep_destr {A B} f `{!@Inj A B (=) (=) f} aπ ξl :
-    (λ π, f (aπ π)) ./ ξl → aπ ./ ξl.
-  Proof. by move=> dep ?? /dep/(inj f) ?. Qed.
-  Lemma proph_dep_destr2 {A B C} f `{!@Inj2 A B C (=) (=) (=) f} aπ bπ ξl :
-    (λ π, f (aπ π) (bπ π)) ./ ξl → aπ ./ ξl ∧ bπ ./ ξl.
-  Proof.
-    move=> dep. split; move=> ?? /dep eq; apply (inj2 f) in eq; tauto.
-  Qed.
-
   (** On a singleton type *)
   Lemma proph_dep_singleton {A} (aπ : proph TY A) :
     (∀ a a' : A, a = a') → aπ ./ [].
