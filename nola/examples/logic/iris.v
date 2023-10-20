@@ -31,11 +31,11 @@ Arguments NintpGS {_}.
 (** ** Derivability structure *)
 
 (** [derivs] for [nPropL] *)
-Definition nderivs Σ : derivs := Derivs unit (λ _, nPropL (;ᵞ)) (iProp Σ).
+Canonical nderivs Σ : derivs := Derivs (nPropL (;ᵞ)) (iProp Σ).
 
 (** Notation for [nderivs] *)
 Notation nderiv_ty Σ := (deriv_ty (nderivs Σ)).
-Notation "⸨ P ⸩ ( δ )" := (dunwrap δ (Darg () P%n))
+Notation "⸨ P ⸩ ( δ )" := (dunwrap δ P%n)
   (format "'[' ⸨  P  ⸩ '/  ' ( δ ) ']'") : nola_scope.
 
 Implicit Type (P : nPropL (;ᵞ)) (N : namespace) (p : na_inv_pool_name)

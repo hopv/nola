@@ -4,11 +4,10 @@ From nola.examples.logic Require Export intp.
 From iris.proofmode Require Export proofmode.
 
 (** ** [nderivsi]: [derivsi] for [nPropL] *)
-Canonical nderivsi `{!nintpGS Σ} :=
-  Derivsi (nderivs Σ) (λ δ '(Darg _ P), ⟦ P ⟧(δ)).
+Canonical nderivsi `{!nintpGS Σ} := Derivsi (nderivs Σ) (λ δ P, ⟦ P ⟧(δ)).
 
 (** Notation for [nderivsi] *)
-Notation nderivy := (derivy nderivsi).
+Notation nDeriv := (Deriv nderivsi).
 Notation nderiv := (deriv (DI:=nderivsi)).
 Notation nderiv_sound := (deriv_sound (DI:=nderivsi)).
 

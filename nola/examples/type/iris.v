@@ -185,17 +185,17 @@ Arguments TintpGS {_ _} _ _.
 (** ** Derivability structure *)
 
 (** [derivs] for [type] *)
-Definition tderivs Σ : derivs := Derivs unit (λ _, sigT tinvd) (iProp Σ).
+Canonical tderivs Σ : derivs := Derivs (sigT tinvd) (iProp Σ).
 
 (** Notation for [tderivs] *)
 Notation tderiv_ty Σ := (deriv_ty (tderivs Σ)).
-Notation "⸨ Tx ⸩ ( s )" := (dunwrap s (Darg () (existT _ Tx)))
+Notation "⸨ Tx ⸩ ( s )" := (dunwrap s (existT _ Tx))
   (format "'[' ⸨  Tx  ⸩ '/  ' ( s ) ']'") : nola_scope.
 
 (** [tguard]: Proposition for [t_guard] *)
-Definition tguard {Σ i} (s : tderiv_ty Σ) (T : type i (;ᵞ)) (v : val)
-  : iProp Σ := □ ⸨ tinvd_guard T v ⸩(s).
+Definition tguard {Σ i} (s : tderiv_ty Σ) (T : type i (;ᵞ)) (v : val) : iProp Σ
+  := □ ⸨ tinvd_guard T v ⸩(s).
 
 (** [tref]: Proposition for [t_ref] *)
-Definition tref {Σ i} (s : tderiv_ty Σ) (l : loc) (T : type i (;ᵞ))
-  : iProp Σ := □ ⸨ tinvd_ref l T ⸩(s).
+Definition tref {Σ i} (s : tderiv_ty Σ) (l : loc) (T : type i (;ᵞ)) : iProp Σ
+  := □ ⸨ tinvd_ref l T ⸩(s).

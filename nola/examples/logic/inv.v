@@ -16,13 +16,13 @@ Section lemmas.
     iDestruct ("→" with "∝P") as "/={∝P}∝P". by iApply "∝P".
   Qed.
 
-  Context `{!nderivy ih δ}.
+  Context `{!nDeriv ih δ}.
 
   (** Turn [inv_tok] into [ninv] *)
   Local Lemma inv_tok_ninv {P : nPropS _} {N} :
     inv_tok N P ⊢ ninv δ N (↑ˡ P).
   Proof.
-    rewrite ninv_unseal. iIntros "#NP !>". iApply (derivy_intro (δ:=δ))=>/=.
+    rewrite ninv_unseal. iIntros "#NP !>". iApply (Deriv_intro (δ:=δ))=>/=.
     iIntros (?????). rewrite -nintpS_nintp_nlarge.
     by iApply (inv_tok_acc with "NP").
   Qed.
@@ -42,7 +42,7 @@ Section lemmas.
     □ ⸨ P ={∅}=∗ Q ∗ (Q ={∅}=∗ P) ⸩(δ) -∗ ninv δ N P -∗ ninv δ N Q.
   Proof.
     rewrite ninv_unseal. iIntros "#PQP #∝P !>".
-    iApply (derivy_map2 with "[] PQP ∝P")=>/=.
+    iApply (Deriv_map2 with "[] PQP ∝P")=>/=.
     iIntros (???) "/= {PQP}PQP {∝P}∝P". iIntros (? NE).
     iMod ("∝P" $! _ NE) as "[P P→]".
     iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
@@ -54,19 +54,19 @@ Section lemmas.
     ninv δ N (P ∗ Q) ⊢ ninv δ N P ∗ ninv δ N Q.
   Proof.
     iIntros "#NPQ". iSplit; iApply (ninv_convert with "[] NPQ"); iModIntro;
-    iApply (derivy_intro (δ:=δ)); by iIntros (???) "/=[$$]!>$".
+    iApply (Deriv_intro (δ:=δ)); by iIntros (???) "/=[$$]!>$".
   Qed.
   Lemma ninv_fupd {N P} :
     ninv δ N (|={∅}=> P) ⊣⊢ ninv δ N P.
   Proof.
-    iSplit; iApply ninv_convert; iModIntro; iApply (derivy_intro (δ:=δ))=>/=;
+    iSplit; iApply ninv_convert; iModIntro; iApply (Deriv_intro (δ:=δ))=>/=;
       iIntros (???); by [iIntros ">$!>$"|iIntros "$!>"; iSplitR; iIntros].
   Qed.
   Lemma ninv_add {N P Q} :
     □ ⸨ P ⸩(δ) -∗ ninv δ N Q -∗ ninv δ N (P ∗ Q).
   Proof.
     iIntros "#P". iApply ninv_convert. iModIntro.
-    iApply (derivy_map with "[] P"). by iIntros (???) "/=$$!>[_$]".
+    iApply (Deriv_map with "[] P"). by iIntros (???) "/=$$!>[_$]".
   Qed.
 
   (** Combine [ninv]s *)
@@ -74,7 +74,7 @@ Section lemmas.
     ninv δ N P -∗ ninv δ N' Q -∗ ninv δ N'' (P ∗ Q).
   Proof.
     rewrite ninv_unseal. iIntros (??) "#NP #N'Q !>".
-    iApply (derivy_map2 (δ:=δ) with "[] NP N'Q")=>/=.
+    iApply (Deriv_map2 (δ:=δ) with "[] NP N'Q")=>/=.
     iIntros (???) "{NP}NP {N'Q}N'Q". iIntros (??).
     iMod ("NP" with "[%]") as "[$ P→]"; [set_solver|].
     iMod ("N'Q" with "[%]") as "[$ Q→]"; [set_solver|].

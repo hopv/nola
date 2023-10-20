@@ -19,13 +19,13 @@ Section lemmas.
     iApply ("∝P" $! _ _ NE NF with "F").
   Qed.
 
-  Context `{!nderivy ih δ}.
+  Context `{!nDeriv ih δ}.
 
   (** Turn [na_ninv] into [na_ninv] *)
   Local Lemma na_inv_tok_ninv {P : nPropS _} {p N} :
     na_inv_tok p N P ⊢ na_ninv (Σ:=Σ) δ p N (↑ˡ P).
   Proof.
-    rewrite na_ninv_unseal. iIntros "#NP !>". iApply (derivy_intro (δ:=δ))=>/=.
+    rewrite na_ninv_unseal. iIntros "#NP !>". iApply (Deriv_intro (δ:=δ))=>/=.
     iIntros (???????) "F". rewrite -nintpS_nintp_nlarge.
     by iApply (na_inv_tok_acc with "F NP").
   Qed.
@@ -49,7 +49,7 @@ Section lemmas.
     □ ⸨ P ={∅}=∗ Q ∗ (Q ={∅}=∗ P) ⸩(δ) -∗ na_ninv δ p N P -∗ na_ninv δ p N Q.
   Proof.
     rewrite na_ninv_unseal. iIntros "#PQP #∝P !>".
-    iApply (derivy_map2 with "[] PQP ∝P")=>/=.
+    iApply (Deriv_map2 with "[] PQP ∝P")=>/=.
     iIntros (???) "/= {PQP}PQP {∝P}∝P". iIntros (E F NE NF) "F".
     iMod ("∝P" $! E F NE NF with "F") as "[$[P P→]]".
     iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
@@ -61,20 +61,20 @@ Section lemmas.
     na_ninv δ p N (P ∗ Q) ⊢ na_ninv δ p N P ∗ na_ninv δ p N Q.
   Proof.
     iIntros "#NPQ". iSplit; iApply (na_ninv_convert with "[] NPQ"); iModIntro;
-    iApply (derivy_intro (δ:=δ)); by iIntros (???) "/=[$$]!>$".
+    iApply (Deriv_intro (δ:=δ)); by iIntros (???) "/=[$$]!>$".
   Qed.
   Lemma na_ninv_fupd {p N P} :
     na_ninv δ p N (|={∅}=> P) ⊣⊢ na_ninv δ p N P.
   Proof.
     iSplit; iApply na_ninv_convert; iModIntro;
-      iApply (derivy_intro (δ:=δ))=>/=; iIntros (???);
+      iApply (Deriv_intro (δ:=δ))=>/=; iIntros (???);
       by [iIntros ">$!>$"|iIntros "$!>"; iSplitR; iIntros].
   Qed.
   Lemma na_ninv_add {p N P Q} :
     □ ⸨ P ⸩(δ) -∗ na_ninv δ p N Q -∗ na_ninv δ p N (P ∗ Q).
   Proof.
     iIntros "#P". iApply na_ninv_convert. iModIntro.
-    iApply (derivy_map with "[] P"). by iIntros (???) "/=$$!>[_$]".
+    iApply (Deriv_map with "[] P"). by iIntros (???) "/=$$!>[_$]".
   Qed.
 
   (** Combine [na_ninv]s *)
@@ -82,7 +82,7 @@ Section lemmas.
     na_ninv δ p N P -∗ na_ninv δ p N' Q -∗ na_ninv δ p N'' (P ∗ Q).
   Proof.
     rewrite na_ninv_unseal. iIntros (??) "#NP #N'Q !>".
-    iApply (derivy_map2 (δ:=δ) with "[] NP N'Q")=>/=.
+    iApply (Deriv_map2 (δ:=δ) with "[] NP N'Q")=>/=.
     iIntros (???) "{NP}NP {N'Q}N'Q". iIntros (? F ??) "F".
     iMod ("NP" with "[%] [%] F") as "[F∖N[$ P→]]"; [set_solver..|].
     iMod ("N'Q" with "[%] [%] F∖N") as "[F∖NN'[$ Q→]]"; [set_solver..|].

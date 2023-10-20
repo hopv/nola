@@ -70,78 +70,78 @@ Section facts.
     iDestruct (own_valid with "o") as %v. by apply to_agree_op_valid_L in v.
   Qed.
 
-  Context `{!nderivy ih δ}.
+  Context `{!nDeriv ih δ}.
   Implicit Type P Q : nPropL (;ᵞ).
 
   (** Make connectives go inside the derivability *)
-  Fact derivy_and {P Q} :
+  Fact Deriv_and {P Q} :
     ⸨ P ⸩(δ) ∧ ⸨ Q ⸩(δ) -∗ ⸨ P ∧ Q ⸩(δ).
   Proof.
-    iIntros "PQ". iApply derivy_byintp. iIntros (?? _) "/= #→ _ _".
+    iIntros "PQ". iApply Deriv_byintp. iIntros (?? _) "/= #→ _".
     iSplit; iApply "→"; [iDestruct "PQ" as "[$_]"|iDestruct "PQ" as "[_$]"].
   Qed.
-  Fact derivy_or {P Q} :
+  Fact Deriv_or {P Q} :
     ⸨ P ⸩(δ) ∨ ⸨ Q ⸩(δ) -∗ ⸨ P ∨ Q ⸩(δ).
   Proof.
-    iIntros "[?|?]"; iApply derivy_byintp; iIntros (?? _) "/= #→ _ _";
+    iIntros "[?|?]"; iApply Deriv_byintp; iIntros (?? _) "/= #→ _";
       [iLeft|iRight]; by iApply "→".
   Qed.
-  Fact derivy_forall {A} {Φ : A → nPropL (;ᵞ)} :
+  Fact Deriv_forall {A} {Φ : A → nPropL (;ᵞ)} :
     (∀ a, ⸨ Φ a ⸩(δ)) -∗ ⸨ ∀' Φ ⸩(δ).
   Proof.
-    iIntros "Φ". iApply derivy_byintp. iIntros (?? _) "/= #→ _ _ %".
+    iIntros "Φ". iApply Deriv_byintp. iIntros (?? _) "/= #→ _ %".
     iApply "→". iApply "Φ".
   Qed.
-  Fact derivy_exist {A} {Φ : A → nPropL (;ᵞ)} :
+  Fact Deriv_exist {A} {Φ : A → nPropL (;ᵞ)} :
     (∃ a, ⸨ Φ a ⸩(δ)) -∗ ⸨ ∃' Φ ⸩(δ).
   Proof.
-    iDestruct 1 as (a) "Φ". iApply derivy_byintp. iIntros (?? _) "/= #→ _ _".
+    iDestruct 1 as (a) "Φ". iApply Deriv_byintp. iIntros (?? _) "/= #→ _".
     iExists a. iApply "→". iApply "Φ".
   Qed.
-  Fact derivy_sep {P Q} :
+  Fact Deriv_sep {P Q} :
     ⸨ P ⸩(δ) ∗ ⸨ Q ⸩(δ) -∗ ⸨ P ∗ Q ⸩(δ).
   Proof.
-    iIntros "[P Q]". iApply derivy_byintp. iIntros (?? _) "/= #→ _ _".
+    iIntros "[P Q]". iApply Deriv_byintp. iIntros (?? _) "/= #→ _".
     iSplitL "P"; by iApply "→".
   Qed.
-  Fact derivy_persistently {P} : □ ⸨ P ⸩(δ) -∗ ⸨ □ P ⸩(δ).
+  Fact Deriv_persistently {P} : □ ⸨ P ⸩(δ) -∗ ⸨ □ P ⸩(δ).
   Proof.
-    iIntros "#P". iApply derivy_byintp. iIntros (?? _) "/= #→ _ _ !>".
+    iIntros "#P". iApply Deriv_byintp. iIntros (?? _) "/= #→ _ !>".
     by iApply "→".
   Qed.
-  Fact derivy_bupd {P} : (|==> ⸨ P ⸩(δ)) -∗ ⸨ |==> P ⸩(δ).
+  Fact Deriv_bupd {P} : (|==> ⸨ P ⸩(δ)) -∗ ⸨ |==> P ⸩(δ).
   Proof.
-    iIntros "P". iApply derivy_byintp. iIntros (?? _) "/= #→ _ _".
+    iIntros "P". iApply Deriv_byintp. iIntros (?? _) "/= #→ _".
     by iApply "→".
   Qed.
-  Fact derivy_fupd {E E' P} :
+  Fact Deriv_fupd {E E' P} :
     (|={E,E'}=> ⸨ P ⸩(δ)) -∗ ⸨ |={E,E'}=> P ⸩(δ).
   Proof.
-    iIntros "P". iApply derivy_byintp. iIntros (?? _) "/= #→ _ _".
+    iIntros "P". iApply Deriv_byintp. iIntros (?? _) "/= #→ _".
     by iApply "→".
   Qed.
-  Fact derivy_later {P} : ▷ ⸨ P ⸩(δ) -∗ ⸨ ▷{nil} P ⸩(δ).
+  Fact Deriv_later {P} : ▷ ⸨ P ⸩(δ) -∗ ⸨ ▷{nil} P ⸩(δ).
   Proof.
-    iIntros "P". iApply derivy_byintp. iIntros (?? _) "/= #→ _ _".
+    iIntros "P". iApply Deriv_byintp. iIntros (?? _) "/= #→ _".
     rewrite nintp_fp_nintp. by iApply "→".
   Qed.
-  Fact derivy_n_forall {V} {P : nPropL ([V];ᵞ )} :
+  Fact Deriv_n_forall {V} {P : nPropL ([V];ᵞ )} :
     (∀ Φ, ⸨ P /: Φ ⸩(δ)) -∗ ⸨ ∀: V, P ⸩(δ).
   Proof.
-    iIntros "P". iApply derivy_byintp. iIntros (?? _) "/= #→ _ _ %".
+    iIntros "P". iApply Deriv_byintp. iIntros (?? _) "/= #→ _ %".
     rewrite rew_eq_hwf. iApply "→". iApply "P".
   Qed.
-  Fact derivy_n_exist {V} {P : nPropL ([V];ᵞ )} :
+  Fact Deriv_n_exist {V} {P : nPropL ([V];ᵞ )} :
     (∃ Φ, ⸨ P /: Φ ⸩(δ)) -∗ ⸨ ∃: V, P ⸩(δ).
   Proof.
-    iDestruct 1 as (Φ) "P". iApply derivy_byintp. iIntros (?? _) "/= #→ _ _".
+    iDestruct 1 as (Φ) "P". iApply Deriv_byintp. iIntros (?? _) "/= #→ _".
     iExists Φ. rewrite rew_eq_hwf. iApply "→". iApply "P".
   Qed.
 
   (** Introduce [○] *)
-  Fact derivy_indir_intro {P} : ⸨ P ⸩(δ) -∗ ⸨ ○{nil} P ⸩(δ).
+  Fact Deriv_indir_intro {P} : ⸨ P ⸩(δ) -∗ ⸨ ○{nil} P ⸩(δ).
   Proof.
-    iIntros "P". iApply derivy_byintp. iIntros (δ' _ _) "/= _ #→δ' _".
+    iIntros "P". iApply Deriv_byintp. iIntros (δ' _ _) "/= _ #→δ'".
     by iApply "→δ'".
   Qed.
 End facts.

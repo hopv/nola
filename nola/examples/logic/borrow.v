@@ -12,12 +12,12 @@ Section conv.
     iIntros "c". iDestruct nderiv_sound as "→". iApply ("→" with "c").
   Qed.
 
-  Context `{!nderivy ih δ}.
+  Context `{!nDeriv ih δ}.
 
   (** Introduce [conv] *)
   Lemma conv_intro P Q : (∀ δ', ⟦ P ⟧(δ') -∗ ⟦ Q ⟧(δ')) ⊢ conv δ P Q.
   Proof.
-    iIntros "→". iApply (derivy_intro (δ:=δ))=>/=. iIntros. by iApply "→".
+    iIntros "→". iApply (Deriv_intro (δ:=δ))=>/=. iIntros. by iApply "→".
   Qed.
   Lemma conv_refl P : ⊢ conv δ P P.
   Proof. rewrite -conv_intro. by iIntros "% ?". Qed.
@@ -25,7 +25,7 @@ Section conv.
   (** Modify [conv] *)
   Lemma conv_trans P Q R : conv δ P Q -∗ conv δ Q R -∗ conv δ P R.
   Proof.
-    iIntros "PQ QR". iApply (derivy_map2 (δ:=δ) with "[] PQ QR")=>/=.
+    iIntros "PQ QR". iApply (Deriv_map2 (δ:=δ) with "[] PQ QR")=>/=.
     iIntros "% _ _ PQ QR P". iDestruct ("PQ" with "P") as "Q". by iApply "QR".
   Qed.
 End conv.
@@ -33,7 +33,7 @@ End conv.
 (** ** On borrowing *)
 
 Section borrow.
-  Context `{!nintpGS Σ, !nderivy ih δ}.
+  Context `{!nintpGS Σ, !nDeriv ih δ}.
 
   (** Modify tokens with [conv] *)
   Lemma borc_conv {α P Q} :

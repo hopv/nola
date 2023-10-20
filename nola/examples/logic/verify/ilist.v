@@ -45,28 +45,28 @@ Section verify.
   Proof. by rewrite/= rew_eq_hwf /=. Qed.
 
   (** Convert the predicate of [ilisti] *)
-  Lemma ilisti_convert `{!nderivy ih δ} {N Φ Ψ l} :
+  Lemma ilisti_convert `{!nDeriv ih δ} {N Φ Ψ l} :
     □ ⸨ ∀ l, (Φ l ={∅}=∗ Ψ l) ∗ (Ψ l ={∅}=∗ Φ l) ⸩(δ) -∗
     ilisti δ N Φ l -∗ ilisti δ N Ψ l.
   Proof.
-    move: δ nderivy0 Φ Ψ l. apply (derivy_acc (λ _, ∀ Φ Ψ l, _ -∗ _)).
+    move: δ nDeriv0 Φ Ψ l. apply (Deriv_acc (λ _, ∀ Φ Ψ l, _ -∗ _)).
     move=> δ ? Φ Ψ l. iIntros "#? #[ihd itl]".
     iSplit; iApply ninv_convert; [|iApply "ihd"| |iApply "itl"]; iModIntro.
-    { iApply derivy_map; [|done]=>/=. iIntros (δ' dyd' _) "Φ↔Ψ Φ".
+    { iApply Deriv_map; [|done]=>/=. iIntros (δ' dyd' _) "Φ↔Ψ Φ".
       iDestruct ("Φ↔Ψ" $! _) as "[ΦΨ ΨΦ]". iMod ("ΦΨ" with "Φ") as "$".
       iIntros "!> Ψ". by iApply "ΨΦ". }
-    iApply derivy_byintp=>/=. iIntros (δ' dyd' [IH _]) "_ #→ _ (%l' & ↦ & i)".
+    iApply Deriv_byintp=>/=. iIntros (δ' dyd' [IH _]) "_ #→ (%l' & ↦ & i)".
     iModIntro. rewrite rew_eq_hwf /=. iDestruct "i" as "#i".
     iDestruct ("→" with "[//]") as "?". iSplitL.
     { iExists _. iFrame "↦". rewrite rew_eq_hwf /=. by iApply IH. }
     iIntros "(%l'' & ↦ & i') !>". iExists _. iFrame "↦".
     rewrite !rew_eq_hwf /=. iApply IH; [|done]. iModIntro.
-    iApply (derivy_map (derivy0:=dyd')); [|done]=>/=.
+    iApply (Deriv_map (Deriv0:=dyd')); [|done]=>/=.
     iIntros (? _ _) "Φ↔'Ψ %". iApply bi.sep_comm. iApply "Φ↔'Ψ".
   Qed.
 
   (** [ilisti] by cons *)
-  Lemma ilisti_cons `{!nderivy ih δ} {N Φ l l'} :
+  Lemma ilisti_cons `{!nDeriv ih δ} {N Φ l l'} :
     ninv δ N (Φ l) -∗ ilisti δ N Φ l' -∗ (l +ₗ 1) ↦ #l' =[inv_wsat' δ]=∗
       ilisti δ N Φ l.
   Proof.
@@ -76,7 +76,7 @@ Section verify.
   Qed.
 
   (** [ilisti] from a one-node loop *)
-  Lemma ilisti_loop_1 `{!nderivy ih δ} {N Φ l} :
+  Lemma ilisti_loop_1 `{!nDeriv ih δ} {N Φ l} :
     ninv δ N (Φ l) -∗ (l +ₗ 1) ↦ #l =[inv_wsat' δ]=∗
       ilisti δ N Φ l.
   Proof.
@@ -86,7 +86,7 @@ Section verify.
   Qed.
 
   (** [ilisti] from a two-node loop *)
-  Lemma ilisti_loop_2 `{!nderivy ih δ} {N Φ l l'} :
+  Lemma ilisti_loop_2 `{!nDeriv ih δ} {N Φ l l'} :
     ninv δ N (Φ l) -∗ ninv δ N (Φ l') -∗
     (l +ₗ 1) ↦ #l' -∗ (l' +ₗ 1) ↦ #l =[inv_wsat' δ]=∗
       ilisti δ N Φ l ∗ ilisti δ N Φ l'.

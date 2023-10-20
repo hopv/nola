@@ -111,13 +111,13 @@ Section conv.
   Qed.
 
   (** Introduce [▽] *)
-  Lemma ninv_tguard `{!tderivy ih δ, ! i <ⁿ L} {T v} :
+  Lemma ninv_tguard `{!tDeriv ih δ, ! i <ⁿ L} {T v} :
     inv_tok tguardN (tinvd_guard T v) -∗ tguard δ (i:=i) T v.
   Proof.
-    iIntros "#inv !>". iApply (derivy_intro (δ:=δ))=>/=. iIntros (?????).
+    iIntros "#inv !>". iApply (Deriv_intro (δ:=δ))=>/=. iIntros (?????).
     iMod (inv_tok_acc with "inv") as "/=[#T cl]"; [done|]. by iMod ("cl" with "T").
   Qed.
-  Lemma ttrans_guard_intro `{!tderivy ih δ, ! i <ⁿ j} {k T} :
+  Lemma ttrans_guard_intro `{!tDeriv ih δ, ! i <ⁿ j} {k T} :
     T ==>{_,k}(j,δ) ▽{i,nil} T.
   Proof.
     iIntros (???) "/= #?". iApply fupdw_tinv_wsat_le. iIntros (?).
@@ -134,33 +134,33 @@ Section conv.
   Qed.
 
   (** More on [▽] *)
-  Lemma tsub_guard `{!tderivy ih δ, ! j ≤ⁿ j'} {i i' T U} :
-    (∀ `{!tderivy ih δ'}, ih δ' → T ==>(S j',δ') U) →
+  Lemma tsub_guard `{!tDeriv ih δ, ! j ≤ⁿ j'} {i i' T U} :
+    (∀ `{!tDeriv ih δ'}, ih δ' → T ==>(S j',δ') U) →
     ▽{j,nil} T ⊑{i,i'}(δ) ▽{j',nil} U.
   Proof.
     move=> TU ? /=. unfold tguard. f_equiv. iIntros "T".
-    iApply (derivy_map (δ:=δ) with "[] T"). iIntros (?? IH) "/= big % %inE".
+    iApply (Deriv_map (δ:=δ) with "[] T"). iIntros (?? IH) "/= big % %inE".
     iApply fupdw_trans. assert (S j ≤ⁿ S j') by exact _.
     iMod ("big" $! _ inE) as "T". iModIntro.
     by iMod (TU _ _ IH with "T") as "$"; [solve_ndisj|].
   Qed.
-  Lemma teqv_guard `{!tderivy ih δ} {i i' j T U} :
-    (∀ `{!tderivy ih δ'}, ih δ' → T <==>(S j,δ') U) →
+  Lemma teqv_guard `{!tDeriv ih δ} {i i' j T U} :
+    (∀ `{!tDeriv ih δ'}, ih δ' → T <==>(S j,δ') U) →
     ▽{j,nil} T ≃{i,i'}(δ) ▽{j,nil} U.
   Proof.
     move=> TU. apply teqv_tsub; split; apply tsub_guard=> *; by apply TU.
   Qed.
-  Lemma tsub_guard_lev `{!tderivy ih δ} {i i' j} {T : _ j (;ᵞ)} :
+  Lemma tsub_guard_lev `{!tDeriv ih δ} {i i' j} {T : _ j (;ᵞ)} :
     ▽ T ⊑{i,i'}(δ) ▽ T.
   Proof. done. Qed.
 
   (** On [ref[ ]] *)
-  Lemma tsub_ref `{!tderivy ih δ, ! j ≤ⁿ j'} {o i i' T U} :
-    (∀ `{!tderivy ih δ'}, ih δ' → T <==>(S j',δ') U) →
+  Lemma tsub_ref `{!tDeriv ih δ, ! j ≤ⁿ j'} {o i i' T U} :
+    (∀ `{!tDeriv ih δ'}, ih δ' → T <==>(S j',δ') U) →
     ref{j,nil}[o] T ⊑{i,i'}(δ) ref{j',nil}[o] U.
   Proof.
     move=> TU ? /=. unfold tref. do 4 f_equiv. iIntros "T".
-    iApply (derivy_map (δ:=δ) with "[] T"). iIntros (?? IH) "/= big".
+    iApply (Deriv_map (δ:=δ) with "[] T"). iIntros (?? IH) "/= big".
     iApply fupdw_trans. assert (S j ≤ⁿ S j') by exact _.
     iMod "big" as (?) "(↦ & T & cl)". iModIntro.
     iMod (proj1 (TU _ _ IH) with "T") as "U"; [solve_ndisj|]. iModIntro.
@@ -168,13 +168,13 @@ Section conv.
     iMod (proj2 (TU _ _ IH) with "U") as "T"; [solve_ndisj|].
     by iMod ("cl" with "↦ T").
   Qed.
-  Lemma teqv_ref `{!tderivy ih δ} {o i i' j T U} :
-    (∀ `{!tderivy ih δ'}, ih δ' → T <==>(S j,δ') U) →
+  Lemma teqv_ref `{!tDeriv ih δ} {o i i' j T U} :
+    (∀ `{!tDeriv ih δ'}, ih δ' → T <==>(S j,δ') U) →
     ref{j,nil}[o] T ≃{i,i'}(δ) ref{j,nil}[o] U.
   Proof.
     move=> TU. apply teqv_tsub; split; apply tsub_ref=> *; split; by apply TU.
   Qed.
-  Lemma tsub_ref_lev `{!tderivy ih δ} {o i i' j} {T : _ j (;ᵞ)} :
+  Lemma tsub_ref_lev `{!tDeriv ih δ} {o i i' j} {T : _ j (;ᵞ)} :
     ref[o] T ⊑{i,i'}(δ) ref[o] T.
   Proof. done. Qed.
 

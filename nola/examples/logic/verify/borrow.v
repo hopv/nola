@@ -8,14 +8,14 @@ Section borrow.
   Context `{!nintpGS Σ}.
 
   (** Convert a nested borrow *)
-  Lemma bor_bor_conv' `{!nderivy ih δ} {α β P Q} :
+  Lemma bor_bor_conv' `{!nDeriv ih δ} {α β P Q} :
     α ⊑□ β -∗ β ⊑□ α -∗ □ conv δ P Q -∗ □ conv δ Q P -∗
     conv δ (n_bor' [] α P) (n_bor' [] β Q).
-    iIntros "#⊑ #⊑' #PQ #QP". iApply (derivy_byintp (δ:=δ))=>/=.
-    iIntros "% % % _ #→ _ b". iDestruct (bor_lft with "⊑' b") as "b".
+    iIntros "#⊑ #⊑' #PQ #QP". iApply (Deriv_byintp (δ:=δ))=>/=.
+    iIntros "% % % _ #→ b". iDestruct (bor_lft with "⊑' b") as "b".
     iApply (bor_conv with "[] [] b"); iModIntro; by iApply "→".
   Qed.
-  Lemma bor_bor_conv `{!nderivy ih δ} {α β P Q} :
+  Lemma bor_bor_conv `{!nDeriv ih δ} {α β P Q} :
     α ⊑□ β -∗ β ⊑□ α -∗ □ conv δ P Q -∗ □ conv δ Q P -∗
     bor δ α (n_bor' [] α P) -∗ bor δ β (n_bor' [] β Q).
   Proof.
