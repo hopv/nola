@@ -1,7 +1,7 @@
 (** * Syntactic type *)
 
 From nola.util Require Export prod.
-From nola.iris Require Export prophecy.
+From nola.iris Require Export proph.
 
 (** Syntactic type *)
 Inductive nsynty := Empty_setₛ | unitₛ | boolₛ | natₛ | Zₛ | Propₛ | nsyntyₛ

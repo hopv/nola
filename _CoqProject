@@ -24,7 +24,7 @@ nola/iris/na_inv.v
 nola/iris/lft.v
 nola/iris/borrow.v
 nola/iris/fborrow.v
-nola/iris/prophecy.v
+nola/iris/proph.v
 nola/iris/proph_ag.v
 nola/iris/paradox.v
 

@@ -1,6 +1,6 @@
 (** * Prophetic agreement *)
 
-From nola.iris Require Export prophecy.
+From nola.iris Require Export proph.
 From iris.bi Require Import fractional.
 From iris.base_logic.lib Require Import ghost_var.
 From iris.proofmode Require Import proofmode.
