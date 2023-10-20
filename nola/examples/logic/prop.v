@@ -80,8 +80,8 @@ Variant ncon0 : Type :=
 | (** Prophecy tokens *) nc_proph_toks (ξl : list aprvarn) (q : Qp)
 | (** Prophecy observation *) nc_proph_obs (φπ : prophn Prop)
 | (** Prophecy world satisfaction *) nc_proph_wsat
-| (** Value observer *) nc_vo (γ : gname) (X : nsynty) (x : X)
-| (** Prophecy controller *) nc_pc
+| (** Value observer *) nc_val_obs (γ : gname) (X : nsynty) (x : X)
+| (** Prophecy controller *) nc_proph_ctrl
     (γ : gname) (X : nsynty) (x : X) (ξ : prvar X).
 (** Nullary, large *)
 Variant nconl0 : Type :=
@@ -201,8 +201,8 @@ Notation "q :[ ξ ]" := (n_0 (nc_proph_tok ξ q)) : nProp_scope.
 Notation "q :∗[ ξ ]" := (n_0 (nc_proph_toks ξ q)) : nProp_scope.
 Notation ".⟨ φπ ⟩" := (n_0 (nc_proph_obs φπ)) (only parsing) : nProp_scope.
 Notation "⟨ π , φ ⟩" := (n_0 (nc_proph_obs (λ π, φ))) : nProp_scope.
-Notation n_vo γ X x := (n_0 (nc_vo γ X x)).
-Notation n_pc γ X x ξ := (n_0 (nc_pc γ X x ξ)).
+Notation n_val_obs γ X x := (n_0 (nc_val_obs γ X x)).
+Notation n_proph_ctrl γ X x ξ := (n_0 (nc_proph_ctrl γ X x ξ)).
 Notation n_inv_wsat := (n_l0 nc_inv_wsat).
 Notation n_na_inv_wsat := (n_l0 nc_na_inv_wsat).
 Notation n_borrow_wsat := (n_l0 nc_borrow_wsat).

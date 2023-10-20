@@ -33,7 +33,8 @@ Section nintp.
     | nc_fborrow_wsat => fborrow_wsat'
     | nc_proph_tok ξ q => q:[ξ] | nc_proph_toks ξl q => q:∗[ξl]
     | nc_proph_obs φπ => .⟨φπ⟩ | nc_proph_wsat => proph_wsat
-    | nc_vo γ X x => vo γ X x | nc_pc γ X x ξ => pc γ X x ξ
+    | nc_val_obs γ X x => val_obs γ X x
+    | nc_proph_ctrl γ X x ξ => proph_ctrl γ X x ξ
     end.
   Local Definition ncintpl0 (c : nconl0)
     (niS : nPropS (;ᵞ) -d> iProp Σ) : iProp Σ :=

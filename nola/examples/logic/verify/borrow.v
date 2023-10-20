@@ -45,15 +45,15 @@ Section borrow.
   (** Dereference a nested prophetic mutable reference *)
   Lemma proph_bor_bor_deref
     {γ X η ξ α β l q} {x : X} {Φ : _ → _ → nPropS (;ᵞ)} :
-    [[{ q.[α ⊓ β] ∗ vo γ (X *'ₛ prvarₛ X) (x, ξ)' ∗
+    [[{ q.[α ⊓ β] ∗ val_obs γ (X *'ₛ prvarₛ X) (x, ξ)' ∗
       bord α (∃ (x : X) ξ γ' (l' : loc),
-        n_pc γ (X *'ₛ prvarₛ X) (x, ξ)' η ∗ l ↦ #l' ∗ n_vo γ' X x ∗
-        n_bor' [] β (∃ x, n_pc γ' X x ξ ∗ ↑ˡ Φ l' x)) }]]
+        n_proph_ctrl γ (X *'ₛ prvarₛ X) (x, ξ)' η ∗ l ↦ #l' ∗ n_val_obs γ' X x ∗
+        n_bor' [] β (∃ x, n_proph_ctrl γ' X x ξ ∗ ↑ˡ Φ l' x)) }]]
       [borrow_wsatd ∗ fborrow_wsat' ∗ proph_wsat]
       !#l
     [[{ l', RET #l' ; q.[α ⊓ β] ∗ ∃ (ζ : prvar X) γ'',
-      ⟨π, π η = (π ζ, ξ)'⟩ ∗ vo γ'' X x ∗
-      bord (α ⊓ β) (∃ x, n_pc γ'' X x ζ ∗ ↑ˡ Φ l' x) }]].
+      ⟨π, π η = (π ζ, ξ)'⟩ ∗ val_obs γ'' X x ∗
+      bord (α ⊓ β) (∃ x, n_proph_ctrl γ'' X x ζ ∗ ↑ˡ Φ l' x) }]].
   Proof.
     iIntros "%Ψ [[α β][vo b]] →Ψ". iMod (bor_open with "α b") as "[o big]"=>/=.
     iDestruct "big" as (x2 ξ2 γ' l') "[pc[↦[vo' b']]]".
@@ -61,7 +61,8 @@ Section borrow.
     iDestruct (vo_pc_agree with "vo pc") as %eq. case: eq=> <-<-.
     iMod (bor_reborrow α with "β b'") as "[[β β'][b' →b']]". rewrite [β⊓_]comm.
     iMod (obor_subdiv
-      [∃ (x : X), n_pc γ (X *'ₛ prvarₛ X) (x, ξ)' η ∗ n_vo γ' X x]%n [] with
+      [∃ (x : X),
+        n_proph_ctrl γ (X *'ₛ prvarₛ X) (x, ξ)' η ∗ n_val_obs γ' X x]%n [] with
       "o [pc vo'] [//] [↦ →b']") as "[[α α'][[c _]_]]"=>/=.
     { iSplit; [|done]. iExists _. iFrame. }
     { iIntros "† [big _] _". iDestruct "big" as (x'') "[pc vo']". iModIntro.
@@ -78,7 +79,8 @@ Section borrow.
       with "[$ζ//] vo pc") as "[[ζ _][#obs →pc]]".
     { apply (proph_dep_constr (λ x, (x, ξ)')), (proph_dep_one ζ). }
     iMod (vo_pc_alloc with "ζ") as (γ'') "[vo'' pc'']".
-    iMod (obor_merge_subdiv [(_,_)';(_,_)'] [∃ x, n_pc γ'' X x ζ ∗ Φ l' x]%n []
+    iMod (obor_merge_subdiv [(_,_)';(_,_)']
+      [∃ x, n_proph_ctrl γ'' X x ζ ∗ Φ l' x]%n []
       with "[$o $o'//] [pc'' Φ] [//] [→pc vo' pc']")
       as "[[αβ[αβ' _]][[c _]_]]"=>/=.
     { iSplit; [|done]. iExists _. rewrite nintp_nlarge. iFrame. }
