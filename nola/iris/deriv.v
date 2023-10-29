@@ -1,6 +1,6 @@
 (** * [deriv]: Derivability *)
 
-From nola.util Require Export pred wft.
+From nola.util Require Export pred.
 From iris.bi Require Import lib.fixpoint.
 From iris.proofmode Require Import proofmode.
 

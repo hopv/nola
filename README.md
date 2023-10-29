@@ -56,7 +56,6 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`funext`](nola/util/funext.v) (Function extensionality)
   + [`pred`](nola/util/pred.v) (Predicates),
     [`rel`](nola/util/rel.v) (Relations),
-    [`wft`](nola/util/wft.v) (Well-founded types),
     [`list`](nola/util/list.v) (Lists),
     [`nat`](nola/util/nat.v) (Natural numbers),
     [`prod`](nola/util/prod.v) (Modified product),
