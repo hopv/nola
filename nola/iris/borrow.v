@@ -495,7 +495,7 @@ Section borrow.
     move=> ??. iIntros "[%[% l]] [[%Dm'[%[● Dm']]] W]".
     iDestruct (depo_stm_lend_agree with "● l") as %[Bm[Pm[eq ?]]].
     iDestruct (big_sepM_insert_acc with "Dm'") as "[D →Dm']".
-    { rewrite map_filter_lookup_Some. split; [done|simpl; lia]. }
+    { rewrite map_lookup_filter_Some. split; [done|simpl; lia]. }
     rewrite /depo_wsat_ret decide_True; [|done]. iDestruct "D" as "[† Pm]".
     iMod ("Pm" with "W") as "[$ Pm]".
     iDestruct (big_sepM_delete with "Pm") as "[$ Pm]"; [done|]=>/=.

@@ -46,7 +46,7 @@ End tc.
 (** ** On well-founded relations *)
 Section wf.
   (** Take any well-founded relation [R] *)
-  Context {A : Type} {R : A → A → Prop} (wfR : wf R).
+  Context {A : Type} {R : A → A → Prop} (wfR : well_founded R).
 
   (** [R] is irreflexive *)
   Lemma wf_irrefl : Irreflexive R.
@@ -59,7 +59,7 @@ Section wf.
   Qed.
 
   (** [tc R] is well-founded *)
-  Lemma tc_wf : wf (tc R).
+  Lemma tc_wf : well_founded (tc R).
   Proof.
     move=> a. elim: {a}(wfR a)=> a _ IH. apply Acc_intro=> b /tc_inv_r.
     case; [by apply IH|]=> [[c [tcRbc /IH Accc]]]. exact (Acc_inv Accc tcRbc).
@@ -67,5 +67,5 @@ Section wf.
 End wf.
 
 (** Empty relation is well-founded *)
-Lemma false_wf {A} : wf (λ _ _ : A, False).
+Lemma false_wf {A} : well_founded (λ _ _ : A, False).
 Proof. move=> a. by apply Acc_intro. Qed.
