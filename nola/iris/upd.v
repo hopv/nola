@@ -4,6 +4,18 @@ From nola Require Export prelude.
 From iris.base_logic Require Export fancy_updates.
 From iris.proofmode Require Import proofmode.
 
+(** ** On [step_fupdN] *)
+
+(** [step_fupdN] is non-expansive *)
+Lemma step_fupdN_ne `{!BiFUpd PROP} {n E E' k} {P Q : PROP} :
+  P ≡{n}≡ Q → (|={E}[E']▷=>^k P)%I ≡{n}≡ (|={E}[E']▷=>^k Q)%I.
+Proof. move=> PQ. by elim k; [done|]=>/= ? ->. Qed.
+Lemma step_fupdN_proper `{!BiFUpd PROP} {E E' k} {P Q : PROP} :
+  P ⊣⊢ Q → (|={E}[E']▷=>^k P) ⊣⊢ |={E}[E']▷=>^k Q.
+Proof.
+  move=> PQ. apply equiv_dist=> n. apply step_fupdN_ne. by rewrite PQ.
+Qed.
+
 (** ** General update *)
 
 Class GenUpd (PROP : bi) `{!BiBUpd PROP} (M : PROP → PROP) : Prop := {
@@ -188,16 +200,6 @@ Notation "|=[ W ] { E }▷=>^ n P" :=
 Section lemmas.
   Context {PROP : bi}.
   Implicit Type W P Q R : PROP.
-
-  (** [step_fupdN] is non-expansive *)
-  Lemma step_fupdN_ne `{!BiFUpd PROP} {n E E' k P Q} :
-    P ≡{n}≡ Q → (|={E}[E']▷=>^k P)%I ≡{n}≡ (|={E}[E']▷=>^k Q)%I.
-  Proof. move=> PQ. by elim k; [done|]=>/= ? ->. Qed.
-  Lemma step_fupdN_proper `{!BiFUpd PROP} {E E' k P Q} :
-    P ⊣⊢ Q → (|={E}[E']▷=>^k P) ⊣⊢ |={E}[E']▷=>^k Q.
-  Proof.
-    move=> PQ. apply equiv_dist=> n. apply step_fupdN_ne. by rewrite PQ.
-  Qed.
 
   (** [bupdw] is non-expansive *)
   #[export] Instance bupdw_ne `{!BiBUpd PROP} :
