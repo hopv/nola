@@ -78,9 +78,9 @@ Section gen_upd.
 
   Lemma gen_upd_frame_l {P Q} : P ∗ M Q ⊢ M (P ∗ Q).
   Proof. by rewrite comm gen_upd_frame_r comm. Qed.
-  #[export] Instance frame_gen_upd {p R P Q} :
-    Frame p R P Q → Frame p R (M P) (M Q) | 10.
-  Proof. rewrite /Frame=> <-. apply gen_upd_frame_l. Qed.
+  #[export] Instance frame_gen_upd `{!Frame p R P Q} :
+    Frame p R (M P) (M Q) | 10.
+  Proof. move: Frame0. rewrite /Frame=> <-. apply gen_upd_frame_l. Qed.
 
   (** Transitivity *)
 
@@ -319,15 +319,15 @@ Use [iApply fupdw_mask_intro] to introduce mask-changing update modalities")
   Proof. iIntros (?) "? $". by iApply fupd_mask_intro. Qed.
 
   (** Frame on [bupdw] *)
-  #[export] Instance frame_bupdw `{!BiBUpd PROP} {p R P Q W} :
-    Frame p R P Q → Frame p R (|=[W]=> P) (|=[W]=> Q) | 2.
+  #[export] Instance frame_bupdw `{!BiBUpd PROP, !Frame p R P Q} {W} :
+    Frame p R (|=[W]=> P) (|=[W]=> Q) | 2.
   Proof. exact _. Qed.
   Lemma bupdw_frame_r `{!BiBUpd PROP} {W P Q} : (|=[W]=> P) ∗ Q ⊢ |=[W]=> P ∗ Q.
   Proof. by iIntros "[? $]". Qed.
 
   (** Frame on [fupdw] *)
-  #[export] Instance frame_fupdw `{!BiFUpd PROP} {p R P Q W E E'} :
-    Frame p R P Q → Frame p R (|=[W]{E,E'}=> P) (|=[W]{E,E'}=> Q) | 2.
+  #[export] Instance frame_fupdw `{!BiFUpd PROP, !Frame p R P Q} {W E E'} :
+    Frame p R (|=[W]{E,E'}=> P) (|=[W]{E,E'}=> Q) | 2.
   Proof. exact _. Qed.
   Lemma fupdw_frame_r `{!BiFUpd PROP} {W E E' P Q} :
     (|=[W]{E,E'}=> P) ∗ Q ⊢ |=[W]{E,E'}=> P ∗ Q.
