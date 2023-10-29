@@ -101,22 +101,6 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
         (Shared mutable infinite list)
       - [`borrow`](nola/examples/logic/verify/borrow.v) (Borrow),
         [`fborrow`](nola/examples/logic/verify/fborrow.v) (Fractional borrow)
-  + [`type/`](nola/examples/type/) : Stratified Type System
-    * [`type`](nola/examples/type/type.v) (Type),
-      [`subst`](nola/examples/type/subst.v) (Substitution),
-      [`iris`](nola/examples/type/iris.v) (Iris preliminaries),
-      [`intp`](nola/examples/type/intp.v) (Interpretation),
-      [`deriv`](nola/examples/type/deriv.v) (Derivability)
-    * [`facts`](nola/examples/type/facts.v) (Facts),
-      [`adequacy`](nola/examples/type/adequacy.v) (Adequacy)
-    * [`rules/`](nola/examples/type/rules/) (Typing rules)
-      - [`conv`](nola/examples/type/rules/conv.v) (Type conversion),
-        [`expr`](nola/examples/type/rules/expr.v) (Expression typing),
-        [`ref`](nola/examples/type/rules/ref.v) (Expression typing for
-          references)
-    * [`verify/`](nola/examples/type/verify/) (Verification examples)
-      - [`ilist`](nola/examples/type/verify/ilist.v)
-        (Shared mutable infinite stream)
 
 ## Story
 
