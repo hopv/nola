@@ -67,6 +67,12 @@ Section gen_upd.
   #[export] Instance from_pure_gen_upd `{!FromPure a P φ} :
     FromPure a (M P) φ | 10.
   Proof. rewrite /FromPure -(from_pure _ P). apply gen_upd_intro. Qed.
+  #[export] Instance elim_modal_bupd_gen_upd {p P Q} :
+    ElimModal True p false (|==> P) P (M Q) (M Q) | 10.
+  Proof.
+    by rewrite /ElimModal bi.intuitionistically_if_elim gen_upd_frame_r
+      bi.wand_elim_r gen_upd_from_bupd gen_upd_trans.
+  Qed.
 
   (** Frame *)
 
