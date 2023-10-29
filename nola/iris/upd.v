@@ -18,7 +18,7 @@ Qed.
 
 (** ** General update *)
 
-Class GenUpd (PROP : bi) `{!BiBUpd PROP} (M : PROP → PROP) : Prop := {
+Class GenUpd `{!BiBUpd PROP} (M : PROP → PROP) : Prop := {
   gen_upd_ne :: NonExpansive M;
   gen_upd_from_bupd {P} : (|==> P) ⊢ M P;
   gen_upd_mono {P Q} : (P ⊢ Q) → M P ⊢ M Q;
@@ -27,20 +27,20 @@ Class GenUpd (PROP : bi) `{!BiBUpd PROP} (M : PROP → PROP) : Prop := {
 }.
 
 (** [bupd] and [fupd] satisfy [GenUpd] *)
-#[export] Instance gen_upd_bupd `{!BiBUpd PROP} : GenUpd PROP bupd.
+#[export] Instance gen_upd_bupd `{!BiBUpd PROP} : GenUpd (PROP:=PROP) bupd.
 Proof.
   split. { exact _. } { by iIntros "%$". } { by move=> ??->. }
   { iIntros "%>$". } { by iIntros "%%[>$$]". }
 Qed.
 #[export] Instance gen_upd_fupd `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP}
-  {E} : GenUpd PROP (fupd E E).
+  {E} : GenUpd (PROP:=PROP) (fupd E E).
 Proof.
   split. { exact _. } { by iIntros "% >$". } { by move=> ??->. }
   { iIntros "%>$". } { by iIntros "%%[>$$]". }
 Qed.
 
 Section gen_upd.
-  Context `{!BiBUpd PROP, !GenUpd PROP M}.
+  Context `{!BiBUpd PROP, !GenUpd (PROP:=PROP) M}.
 
   (** Monotonicity *)
 
@@ -473,14 +473,14 @@ Use [iMod (fupd_mask_subseteq E')] to adjust the mask of your goal to [E']")
   Qed.
 
   (** [bupdw] and [fupdw] satisfy [GenUpd] *)
-  #[export] Instance gen_upd_bupdw `{!BiBUpd PROP} {W} : GenUpd PROP (bupdw W).
+  #[export] Instance gen_upd_bupdw `{!BiBUpd PROP} {W} : GenUpd (bupdw W).
   Proof.
     split. { exact _. } { by iIntros "% >$". } { by move=> ??->. }
     { iIntros "%>$". } { by iIntros "%%[>$$]". }
   Qed.
   #[export] Instance gen_upd_fupdw
     `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {W E} :
-    GenUpd PROP (fupdw W E E).
+    GenUpd (fupdw W E E).
   Proof.
     split. { exact _. } { by iIntros "% >$". } { by move=> ??->. }
     { iIntros "%>$". } { by iIntros "%%[>$$]". }
