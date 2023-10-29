@@ -6,35 +6,29 @@ From iris.proofmode Require Import proofmode.
 
 (** ** General update *)
 
-Class GenUpd (PROP : bi) (M : PROP → PROP) : Prop := {
+Class GenUpd (PROP : bi) `{!BiBUpd PROP} (M : PROP → PROP) : Prop := {
   gen_upd_ne :: NonExpansive M;
-  gen_upd_intro {P} : P ⊢ M P;
+  gen_upd_from_bupd {P} : (|==> P) ⊢ M P;
   gen_upd_mono {P Q} : (P ⊢ Q) → M P ⊢ M Q;
   gen_upd_trans {P} : M (M P) ⊢ M P;
   gen_upd_frame_r {P Q} : M P ∗ Q ⊢ M (P ∗ Q);
 }.
 
-(** Identity, [◇], [bupd] and [fupd] satisfy [GenUpd] *)
-#[export] Instance gen_upd_id {PROP} : GenUpd PROP id.
-Proof. split; [exact _|done..]. Qed.
-#[export] Instance gen_upd_except_0 {PROP} : GenUpd PROP bi_except_0.
-Proof.
-  split. { exact _. } { by iIntros. } { by move=> ??->. }
-  { iIntros "%>$". } { by iIntros "%%[>$$]". }
-Qed.
+(** [bupd] and [fupd] satisfy [GenUpd] *)
 #[export] Instance gen_upd_bupd `{!BiBUpd PROP} : GenUpd PROP bupd.
 Proof.
   split. { exact _. } { by iIntros "%$". } { by move=> ??->. }
   { iIntros "%>$". } { by iIntros "%%[>$$]". }
 Qed.
-#[export] Instance gen_upd_fupd `{!BiFUpd PROP} {E} : GenUpd PROP (fupd E E).
+#[export] Instance gen_upd_fupd `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP}
+  {E} : GenUpd PROP (fupd E E).
 Proof.
-  split. { exact _. } { by iIntros "%$". } { by move=> ??->. }
+  split. { exact _. } { by iIntros "% >$". } { by move=> ??->. }
   { iIntros "%>$". } { by iIntros "%%[>$$]". }
 Qed.
 
 Section gen_upd.
-  Context `{!GenUpd PROP M}.
+  Context `{!BiBUpd PROP, !GenUpd PROP M}.
 
   (** Monotonicity *)
 
@@ -47,6 +41,8 @@ Section gen_upd.
 
   (** Introduce *)
 
+  Lemma gen_upd_intro {P} : P ⊢ M P.
+  Proof. rewrite -gen_upd_from_bupd. by iIntros. Qed.
   #[export] Instance from_modal_gen_upd {P} :
     FromModal True modality_id (M P) (M P) P | 10.
   Proof. move=> _. rewrite /FromModal /=. apply gen_upd_intro. Qed.
@@ -477,13 +473,14 @@ Use [iMod (fupd_mask_subseteq E')] to adjust the mask of your goal to [E']")
   (** [bupdw] and [fupdw] satisfy [GenUpd] *)
   #[export] Instance gen_upd_bupdw `{!BiBUpd PROP} {W} : GenUpd PROP (bupdw W).
   Proof.
-    split. { exact _. } { by iIntros "%$". } { by move=> ??->. }
+    split. { exact _. } { by iIntros "% >$". } { by move=> ??->. }
     { iIntros "%>$". } { by iIntros "%%[>$$]". }
   Qed.
-  #[export] Instance gen_upd_fupdw `{!BiFUpd PROP} {W E} :
+  #[export] Instance gen_upd_fupdw
+    `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {W E} :
     GenUpd PROP (fupdw W E E).
   Proof.
-    split. { exact _. } { by iIntros "%$". } { by move=> ??->. }
+    split. { exact _. } { by iIntros "% >$". } { by move=> ??->. }
     { iIntros "%>$". } { by iIntros "%%[>$$]". }
   Qed.
 
