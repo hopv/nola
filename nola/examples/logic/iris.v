@@ -92,7 +92,7 @@ Section iris.
 End iris.
 
 (** Utility *)
-Notation borrow_wsat'' := (borrow_wsat proph_wsat ∅).
+Notation borrow_wsat'' := (borrow_wsat (bupdw proph_wsat)).
 Notation fborrow_wsat' := (fborrow_wsat true).
 Notation fbor_mapsto δ α l v := (fbor δ α (λ q, l ↦{#q} v)%n).
 Notation "l ↦( δ ) [ α ] v" := (fbor_mapsto δ α l v)

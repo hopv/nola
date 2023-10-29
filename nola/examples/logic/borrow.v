@@ -113,7 +113,7 @@ Section borrow.
   (** Create borrowers and lenders *)
   Lemma borc_lend_new_list α (Pl Ql : list (nPropS (;ᵞ))) :
     ([∗ list] P ∈ Pl, ⟦ P ⟧) -∗
-    ([†α] -∗ ([∗ list] P ∈ Pl, ⟦ P ⟧) =[proph_wsat]{∅}=∗ [∗ list] Q ∈ Ql, ⟦ Q ⟧)
+    ([†α] -∗ ([∗ list] P ∈ Pl, ⟦ P ⟧) =[proph_wsat]=∗ [∗ list] Q ∈ Ql, ⟦ Q ⟧)
     =[borrow_wsatd]=∗
       ([∗ list] P ∈ Pl, borcd α (↑ˡ P)) ∗ [∗ list] Q ∈ Ql, lendd α (↑ˡ Q).
   Proof.
@@ -126,7 +126,7 @@ Section borrow.
   Qed.
   (** Simply create a borrower and a lender *)
   Lemma borc_lend_new α (P : nPropS (;ᵞ)) :
-    ⟦ P ⟧ -∗ ([†α] -∗ ⟦ P ⟧ =[proph_wsat]{∅}=∗ ⟦ P ⟧) =[borrow_wsatd]=∗
+    ⟦ P ⟧ -∗ ([†α] -∗ ⟦ P ⟧ =[proph_wsat]=∗ ⟦ P ⟧) =[borrow_wsatd]=∗
       borcd α (↑ˡ P) ∗ lendd α (↑ˡ P).
   Proof.
     iIntros "P". iMod (borc_lend_new_list α [P] [P] with "[P] []")
@@ -136,7 +136,7 @@ Section borrow.
   (** Extend a lender *)
   Lemma lend_extend {α P} (Ql : list (nPropS (;ᵞ))) :
     lendd α P -∗
-    (⟦ P ⟧ =[proph_wsat]{∅}=∗ [∗ list] Q ∈ Ql, ⟦ Q ⟧) =[borrow_wsatd]=∗
+    (⟦ P ⟧ =[proph_wsat]=∗ [∗ list] Q ∈ Ql, ⟦ Q ⟧) =[borrow_wsatd]=∗
       [∗ list] Q ∈ Ql, lendd α (↑ˡ Q).
   Proof.
     iIntros "[%P'[#→P l]] →Ql". rewrite convd_use.
@@ -148,11 +148,11 @@ Section borrow.
   Qed.
 
   (** Retrive from [lend] *)
-  Lemma lend_retrieve {E α P} :
-    [†α] -∗ lendd α P =[borrow_wsatd ∗ proph_wsat]{E}=∗ ⟦ P ⟧.
+  Lemma lend_retrieve {α P} :
+    [†α] -∗ lendd α P =[proph_wsat ∗ borrow_wsatd]=∗ ⟦ P ⟧.
   Proof.
-    iIntros "† [%[#→ l]]". rewrite convd_use.
-    iMod (lend_tok_retrieve with "† l") as "Q"; [set_solver|]. iModIntro.
+    iIntros "† [%[#→ l]]". rewrite convd_use -modw_bupdw.
+    iMod (lend_tok_retrieve with "† l") as "Q". iModIntro.
     rewrite nintpS_nintp_nlarge. by iApply "→".
   Qed.
 
@@ -165,11 +165,11 @@ Section borrow.
     iDestruct (convd_use with "QP Q") as "$". iExists _. by iFrame.
   Qed.
   (** Open a borrower *)
-  Lemma bor_open {E q α P} :
-    q.[α] -∗ bord α P =[borrow_wsatd ∗ proph_wsat]{E}=∗ obord α P q ∗ ⟦ P ⟧.
+  Lemma bor_open {q α P} :
+    q.[α] -∗ bord α P =[proph_wsat ∗ borrow_wsatd]=∗ obord α P q ∗ ⟦ P ⟧.
   Proof.
-    iIntros "α [%Q[PQ[#QP b]]]".
-    iMod (bor_tok_open with "α b") as "[o Q]"; [set_solver|]. iModIntro.
+    iIntros "α [%Q[PQ[#QP b]]]". rewrite -modw_bupdw.
+    iMod (bor_tok_open with "α b") as "[o Q]". iModIntro.
     rewrite nintpS_nintp_nlarge. iDestruct (convd_use with "QP Q") as "$".
     iExists _. by iFrame.
   Qed.
@@ -189,44 +189,28 @@ Section borrow.
     iDestruct ("→" with "P") as "$". iApply ("→'" with "Pl").
   Qed.
   (** Merge and subdivide borrowers *)
-  Lemma obor_merge_subdiv {α} Pql (Ql : list (nPropS (;ᵞ)))
-    (Φrl : list ((Qp → nPropS (;ᵞ)) *' Qp)) :
-    ([∗ list] '(P, q)' ∈ Pql, obord α P q) -∗
-    ([∗ list] Q ∈ Ql, ⟦ Q ⟧) -∗ ([∗ list] '(Φ, r)' ∈ Φrl, ⟦ Φ r ⟧) -∗
-    ([†α] -∗ ([∗ list] Q ∈ Ql, ⟦ Q ⟧) -∗ ([∗ list] '(Φ, r)' ∈ Φrl, ⟦ Φ r ⟧)
-      =[proph_wsat]{∅}=∗ [∗ list] P ∈ Pql.*1', ⟦ P ⟧)
-      =[borrow_wsatd ∗ fborrow_wsat']=∗
-      ([∗ list] q ∈ Pql.*2', q.[α]) ∗ ([∗ list] Q ∈ Ql, borcd α (↑ˡ Q)) ∗
-      [∗ list] Φ ∈ Φrl.*1', fbord α (λ r, ↑ˡ Φ r).
+  Lemma obor_merge_subdiv {α} Pql (Ql : list (nPropS (;ᵞ))) :
+    ([∗ list] '(P, q)' ∈ Pql, obord α P q) -∗ ([∗ list] Q ∈ Ql, ⟦ Q ⟧) -∗
+    ([†α] -∗ ([∗ list] Q ∈ Ql, ⟦ Q ⟧)
+      =[proph_wsat]=∗ [∗ list] P ∈ Pql.*1', ⟦ P ⟧) =[borrow_wsatd]=∗
+      ([∗ list] q ∈ Pql.*2', q.[α]) ∗ ([∗ list] Q ∈ Ql, borcd α (↑ˡ Q)).
   Proof.
-    setoid_rewrite <-nintpS_nintp. iIntros "ol Ql Φl →Pl".
+    setoid_rewrite <-nintpS_nintp. iIntros "ol Ql →Pl".
     iDestruct (obor_list with "ol") as (?<-) "[ol →]".
-    iMod (obor_tok_merge_subdiv _ (Ql ++ ((λ '(Φ, r)', Φ r) <$> Φrl))
-      with "ol [$Ql Φl] [→ →Pl]") as "[$[cl cl']]".
-    { by rewrite big_sepL_fmap. }
-    { iIntros "† [Ql Φl]". rewrite (big_sepL_fmap _ _ Φrl).
-      iMod ("→Pl" with "† Ql Φl") as "Pl". iModIntro.
+    iMod (obor_tok_merge_subdiv _ Ql with "ol Ql [→ →Pl]") as "[$ cl]".
+    { iIntros "† Ql". iMod ("→Pl" with "† Ql") as "Pl". iModIntro.
       setoid_rewrite nintpS_nintp_nlarge. by iApply "→". }
-    rewrite !big_sepL_fmap. iMod (bor_fbor_toks true with "cl'") as "fl".
-    rewrite big_sepL_fmap. iModIntro. iSplitL "cl"; iStopProof; do 3 f_equiv.
-    - iIntros "c". iExists _. iFrame "c".
-      iSplit; iModIntro; by iApply conv_refl.
-    - iIntros "f". iExists _. iFrame "f".
-      iSplit; iIntros "!> %"; iApply conv_refl.
+    iModIntro. iStopProof; do 3 f_equiv. iIntros "c". iExists _. iFrame "c".
+    iSplit; iModIntro; by iApply conv_refl.
   Qed.
   (** Subdivide borrowers *)
-  Lemma obor_subdiv {α P q} (Ql : list (nPropS (;ᵞ)))
-    (Φrl : list ((Qp → nPropS (;ᵞ)) *' Qp)) :
+  Lemma obor_subdiv {α P q} (Ql : list (nPropS (;ᵞ))) :
     obord α P q -∗ ([∗ list] Q ∈ Ql, ⟦ Q ⟧) -∗
-    ([∗ list] '(Φ, r)' ∈ Φrl, ⟦ Φ r ⟧) -∗
-    ([†α] -∗ ([∗ list] Q ∈ Ql, ⟦ Q ⟧) -∗
-      ([∗ list] '(Φ, r)' ∈ Φrl, ⟦ Φ r ⟧) =[proph_wsat]{∅}=∗ ⟦ P ⟧)
-      =[borrow_wsatd ∗ fborrow_wsat']=∗
-      q.[α] ∗ ([∗ list] Q ∈ Ql, borcd α (↑ˡ Q)) ∗
-      [∗ list] Φ ∈ Φrl.*1', fbord α (λ r, ↑ˡ Φ r).
+    ([†α] -∗ ([∗ list] Q ∈ Ql, ⟦ Q ⟧) =[proph_wsat]=∗ ⟦ P ⟧) =[borrow_wsatd]=∗
+      q.[α] ∗ ([∗ list] Q ∈ Ql, borcd α (↑ˡ Q)).
   Proof.
-    iIntros "o Ql Φl →P".
-    iMod (obor_merge_subdiv [(_,_)'] with "[o] Ql Φl [→P]") as "[[$ _]$]"=>/=;
+    iIntros "o Ql →P".
+    iMod (obor_merge_subdiv [(_,_)'] with "[o] Ql [→P]") as "[[$ _]$]"=>/=;
       by [iFrame|rewrite bi.sep_emp|].
   Qed.
   (** Simply close a borrower *)

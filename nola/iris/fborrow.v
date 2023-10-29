@@ -83,9 +83,9 @@ Section fborrow.
   Qed.
 
   (** Open [fbor_tok] *)
-  Lemma fbor_tok_take' {W E intp α q Φ} :
+  Lemma fbor_tok_take' `{!GenUpd M} {intp α q Φ} :
     □ (∀ r s, intp (Φ (r + s)%Qp) ∗-∗ intp (Φ r) ∗ intp (Φ s)) -∗
-    q.[α] -∗ fbor_tok α Φ =[fborrow_wsat true ∗ borrow_wsat W E intp]=∗
+    q.[α] -∗ fbor_tok α Φ =[fborrow_wsat true ∗ borrow_wsat M intp]=∗
       q.[α] ∗ ∃ r, bor_ctok α (Φ r).
   Proof.
     rewrite fbor_tok_unseal fborrow_wsat_unseal.
@@ -99,38 +99,37 @@ Section fborrow.
     iModIntro. iDestruct ("→α" with "α'") as "$". iSplitL "→F c".
     { iApply "→F". by iExists _. } { iExists _. by iApply bor_ctok_lft. }
   Qed.
-  Lemma fbor_tok_open' {W E intp α q Φ} :
+  Lemma fbor_tok_open' `{!GenUpd M} {intp α q Φ} :
     □ (∀ r s, intp (Φ (r + s)%Qp) ∗-∗ intp (Φ r) ∗ intp (Φ s)) -∗
-    q.[α] -∗ fbor_tok α Φ =[fborrow_wsat true ∗ borrow_wsat W E intp]=∗
+    q.[α] -∗ fbor_tok α Φ =[fborrow_wsat true ∗ borrow_wsat M intp]=∗
       ∃ r, obor_tok α (Φ r) q ∗ intp (Φ r).
   Proof.
     iIntros "fr α f". iMod (fbor_tok_take' with "fr α f") as "[α[% c]]".
     iMod (bor_ctok_open with "α c") as "?". iModIntro. by iExists _.
   Qed.
-  Lemma fbor_tok_take {c W E F intp α q Φ} : E ⊆ F →
+  Lemma fbor_tok_take `{!GenUpd M} {c intp α q Φ} :
     □ (∀ r s, intp (Φ (r + s)%Qp) ∗-∗ intp (Φ r) ∗ intp (Φ s)) -∗
-    q.[α] -∗ fbor_tok α Φ =[fborrow_wsat c ∗ borrow_wsat W E intp ∗ W]{F}=∗
-      q.[α] ∗ ∃ r, bor_ctok α (Φ r).
+    q.[α] -∗ fbor_tok α Φ -∗ modw M (fborrow_wsat c ∗ borrow_wsat M intp)
+      (q.[α] ∗ ∃ r, bor_ctok α (Φ r)).
   Proof.
-    rewrite fbor_tok_unseal fborrow_wsat_unseal=> ?.
-    iIntros "#fr α [%α'[#⊑ i]] [F BW]".
+    rewrite fbor_tok_unseal fborrow_wsat_unseal.
+    iIntros "#fr α [%α'[#⊑ i]] [F B]".
     iDestruct (sinv_acc with "i F") as "[[%r b] →F]". rewrite bor_xtok_tok.
     iMod (lft_sincl_tok_acc with "⊑ α") as (s) "[α' →α]".
-    iMod (bor_tok_open with "α' b BW") as "[[B $] [o Φ]]"; [done|].
-    rewrite -(Qp.div_2 r). iDestruct ("fr" with "Φ") as "[Φ Φ']".
+    iMod (bor_tok_open with "α' b B") as "[B [o Φ]]". rewrite -(Qp.div_2 r).
+    iDestruct ("fr" with "Φ") as "[Φ Φ']".
     iMod (obor_tok_subdiv [_;_] with "o [Φ Φ'] [] B") as "[$ [α'[c[c' _]]]]".
     { by iFrame. } { iIntros "_ [Φ[Φ' _]]". iModIntro. iApply "fr". iFrame. }
     iModIntro. iDestruct ("→α" with "α'") as "$". iSplitL "→F c".
     { iApply "→F". iExists _. by rewrite bor_ctok_xtok. }
     { iExists _. by iApply bor_ctok_lft. }
   Qed.
-  Lemma fbor_tok_open {c W E F intp α q Φ} : E ⊆ F →
+  Lemma fbor_tok_open `{!GenUpd M} {c intp α q Φ} :
     □ (∀ r s, intp (Φ (r + s)%Qp) ∗-∗ intp (Φ r) ∗ intp (Φ s)) -∗
-    q.[α] -∗ fbor_tok α Φ =[fborrow_wsat c ∗ borrow_wsat W E intp ∗ W]{F}=∗
-      ∃ r, obor_tok α (Φ r) q ∗ intp (Φ r).
+    q.[α] -∗ fbor_tok α Φ -∗ modw M (fborrow_wsat c ∗ borrow_wsat M intp)
+      (∃ r, obor_tok α (Φ r) q ∗ intp (Φ r)).
   Proof.
-    iIntros "% fr α f".
-    iMod (fbor_tok_take with "fr α f") as "[α[% c]]"; [done|].
+    iIntros "fr α f". iMod (fbor_tok_take with "fr α f") as "[α[% c]]".
     iMod (bor_ctok_open with "α c") as "?". iModIntro. by iExists _.
   Qed.
 End fborrow.
