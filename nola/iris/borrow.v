@@ -163,11 +163,6 @@ Section borrow.
     iDestruct "c" as (????) "[#? c]". iRight. iExists _, _, _, _. iFrame "c".
     by iApply lft_sincl_trans.
   Qed.
-  #[export] Instance bor_ctok_mono : Proper (flip (⊑) ==> (=) ==> (⊢)) bor_ctok.
-  Proof. move=>/= ?????<-. iApply bor_ctok_lft. by iApply lft_incl_sincl. Qed.
-  #[export] Instance bor_ctok_mono' :
-    Proper ((⊑) ==> (=) ==> flip (⊢)) bor_ctok.
-  Proof. solve_proper. Qed.
   Lemma bor_tok_lft {α α' P} : α' ⊑□ α -∗ bor_tok α P -∗ bor_tok α' P.
   Proof.
     rewrite bor_tok_unseal. iIntros "#⊑ [c|r]".
@@ -175,10 +170,6 @@ Section borrow.
     iDestruct "r" as (?????) "[#? r]". iRight. iExists _, _, _, _, _.
     iFrame "r". by iApply lft_sincl_trans.
   Qed.
-  #[export] Instance bor_tok_mono : Proper (flip (⊑) ==> (=) ==> (⊢)) bor_tok.
-  Proof. move=>/= ?????<-. iApply bor_tok_lft. by iApply lft_incl_sincl. Qed.
-  #[export] Instance bor_tok_mono' : Proper ((⊑) ==> (=) ==> flip (⊢)) bor_tok.
-  Proof. solve_proper. Qed.
   Lemma obor_tok_lft {α α' q r P} :
     α' ⊑□ α -∗ (q.[α] -∗ r.[α']) -∗ obor_tok α q P -∗ obor_tok α' r P.
   Proof.
@@ -192,11 +183,6 @@ Section borrow.
     rewrite lend_tok_unseal. iIntros "#? [%α''[#? l]]". iExists _. iFrame "l".
     by iApply lft_sincl_trans.
   Qed.
-  #[export] Instance lend_tok_mono : Proper ((⊑) ==> (=) ==> (⊢)) lend_tok.
-  Proof. move=>/= ?????<-. iApply lend_tok_lft. by iApply lft_incl_sincl. Qed.
-  #[export] Instance lend_tok_mono' :
-    Proper (flip (⊑) ==> (=) ==> flip (⊢)) lend_tok.
-  Proof. solve_proper. Qed.
 
   (** Token for [depo_stm] *)
   Local Definition depo_st_R D : depoR PROP :=
