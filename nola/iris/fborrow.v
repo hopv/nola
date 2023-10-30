@@ -102,7 +102,7 @@ Section fborrow.
   Lemma fbor_tok_open' `{!GenUpd M} {intp α q Φ} :
     □ (∀ r s, intp (Φ (r + s)%Qp) ∗-∗ intp (Φ r) ∗ intp (Φ s)) -∗
     q.[α] -∗ fbor_tok α Φ =[fborrow_wsat true ∗ borrow_wsat M intp]=∗
-      ∃ r, obor_tok α (Φ r) q ∗ intp (Φ r).
+      ∃ r, obor_tok α q (Φ r) ∗ intp (Φ r).
   Proof.
     iIntros "fr α f". iMod (fbor_tok_take' with "fr α f") as "[α[% c]]".
     iMod (bor_ctok_open with "α c") as "?". iModIntro. by iExists _.
@@ -127,7 +127,7 @@ Section fborrow.
   Lemma fbor_tok_open `{!GenUpd M} {c intp α q Φ} :
     □ (∀ r s, intp (Φ (r + s)%Qp) ∗-∗ intp (Φ r) ∗ intp (Φ s)) -∗
     q.[α] -∗ fbor_tok α Φ -∗ modw M (fborrow_wsat c ∗ borrow_wsat M intp)
-      (∃ r, obor_tok α (Φ r) q ∗ intp (Φ r)).
+      (∃ r, obor_tok α q (Φ r) ∗ intp (Φ r)).
   Proof.
     iIntros "fr α f". iMod (fbor_tok_take with "fr α f") as "[α[% c]]".
     iMod (bor_ctok_open with "α c") as "?". iModIntro. by iExists _.
