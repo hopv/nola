@@ -20,7 +20,7 @@ Definition fborrowΣ PROP : gFunctors := sinvΣ (fbor_st PROP).
 Proof. solve_inG. Qed.
 
 Section fborrow.
-  Context `{!fborrowGS PROP Σ, !borrowGS PROP Σ, !invGS_gen hlc Σ}.
+  Context `{!fborrowGS PROP Σ, !borrowGS PROP Σ}.
   Implicit Type (c : bool) (Φ : Qp → PROP).
 
   (** Fractional borrower token *)

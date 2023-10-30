@@ -361,7 +361,7 @@ End borrow.
 (** ** World satisfactions *)
 
 Section borrow.
-  Context `{!borrowGS PROP Σ, !invGS_gen hlc Σ}.
+  Context `{!borrowGS PROP Σ}.
   Implicit Type (M : iProp Σ → iProp Σ) (intp : PROP -d> iProp Σ)
     (P Q : PROP) (D : depo_st PROP) (Dm : depo_stm PROP) (Bm : bor_stm PROP)
     (Pm : lendm PROP).
@@ -801,7 +801,7 @@ Section borrow.
 End borrow.
 
 (** Allocate [borrow_wsat] *)
-Lemma borrow_wsat_alloc `{!borrowGpreS PROP Σ, !invGS_gen hlc Σ} :
+Lemma borrow_wsat_alloc `{!borrowGpreS PROP Σ} :
   ⊢ |==> ∃ _ : borrowGS PROP Σ, ∀ M intp, borrow_wsat M intp.
 Proof.
   iMod (own_alloc (● (∅ : gmapR _ _))) as (γ) "●"; [by apply auth_auth_valid|].
