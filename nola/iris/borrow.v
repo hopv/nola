@@ -594,7 +594,7 @@ Section borrow.
     apply map_filter_ext=> ?[[??]?]/=. lia.
   Qed.
   (** Retrive using [lend_dtok] *)
-  Lemma lend_dtok_retrieve `{!GenUpd M} {intp d α P} :
+  Local Lemma lend_dtok_retrieve `{!GenUpd M} {intp d α P} :
     [†α] -∗ lend_dtok d α P -∗ modw M (borrow_wsat M intp) (intp P).
   Proof.
     rewrite borrow_wsat_unseal. iIntros "† l [%Dm[● Dm]]".
