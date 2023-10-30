@@ -156,31 +156,31 @@ Section borrow.
   Proof. by rewrite bor_ctok_fake bor_ctok_tok. Qed.
 
   (** Modify the lifetime of borrower and lender tokens *)
-  Lemma bor_ctok_lft {α α' P} : α' ⊑□ α -∗ bor_ctok α P -∗ bor_ctok α' P.
+  Lemma bor_ctok_lft {α β P} : β ⊑□ α -∗ bor_ctok α P -∗ bor_ctok β P.
   Proof.
     rewrite bor_ctok_unseal. iIntros "#? [?|c]".
     { iLeft. by iApply lft_sincl_dead. }
     iDestruct "c" as (????) "[#? c]". iRight. iExists _, _, _, _. iFrame "c".
     by iApply lft_sincl_trans.
   Qed.
-  Lemma bor_tok_lft {α α' P} : α' ⊑□ α -∗ bor_tok α P -∗ bor_tok α' P.
+  Lemma bor_tok_lft {α β P} : β ⊑□ α -∗ bor_tok α P -∗ bor_tok β P.
   Proof.
     rewrite bor_tok_unseal. iIntros "#⊑ [c|r]".
     { iLeft. by iApply (bor_ctok_lft with "⊑ c"). }
     iDestruct "r" as (?????) "[#? r]". iRight. iExists _, _, _, _, _.
     iFrame "r". by iApply lft_sincl_trans.
   Qed.
-  Lemma obor_tok_lft {α α' q r P} :
-    α' ⊑□ α -∗ (q.[α] -∗ r.[α']) -∗ obor_tok α q P -∗ obor_tok α' r P.
+  Lemma obor_tok_lft {α β q r P} :
+    β ⊑□ α -∗ (q.[α] -∗ r.[β]) -∗ obor_tok α q P -∗ obor_tok β r P.
   Proof.
-    rewrite obor_tok_unseal. iIntros "#? →α'".
-    iDestruct 1 as (α'' ????) "[#?[→α o]]". iExists _, _, _, _, _. iFrame "o".
-    iSplit; [by iApply lft_sincl_trans|]. iIntros "α''". iApply "→α'".
+    rewrite obor_tok_unseal. iIntros "#? →β".
+    iDestruct 1 as (α' ????) "[#?[→α o]]". iExists _, _, _, _, _. iFrame "o".
+    iSplit; [by iApply lft_sincl_trans|]. iIntros "α'". iApply "→β".
     by iApply "→α".
   Qed.
-  Lemma lend_tok_lft {α α' P} : α ⊑□ α' -∗ lend_tok α P -∗ lend_tok α' P.
+  Lemma lend_tok_lft {α β P} : α ⊑□ β -∗ lend_tok α P -∗ lend_tok β P.
   Proof.
-    rewrite lend_tok_unseal. iIntros "#? [%α''[#? l]]". iExists _. iFrame "l".
+    rewrite lend_tok_unseal. iIntros "#? [%α'[#? l]]". iExists _. iFrame "l".
     by iApply lft_sincl_trans.
   Qed.
 
