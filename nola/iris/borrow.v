@@ -645,8 +645,7 @@ Section borrow.
   Qed.
   (** Open a closed borrower *)
   Lemma bor_ctok_open {M intp q α P} :
-    q.[α] -∗ bor_ctok α P =[borrow_wsat M intp]=∗
-      obor_tok α q P ∗ intp P.
+    q.[α] -∗ bor_ctok α P =[borrow_wsat M intp]=∗ obor_tok α q P ∗ intp P.
   Proof.
     rewrite bor_ctok_unseal. iIntros "α [†|c]".
     { by iDestruct (lft_tok_dead with "α †") as "[]". }
