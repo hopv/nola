@@ -28,6 +28,7 @@ nola/iris/lft.v
 nola/iris/borrow.v
 nola/iris/proph.v
 nola/iris/proph_ag.v
+nola/iris/pborrow.v
 nola/iris/paradox.v
 
 nola/examples/heap_lang/locations.v

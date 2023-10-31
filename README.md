@@ -78,7 +78,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`lft`](nola/iris/lft.v) (Lifetime),
     [`borrow`](nola/iris/borrow.v) (Borrowing)
   + [`proph`](nola/iris/proph.v) (Prophecy),
-    [`proph_ag`](nola/iris/proph_ag.v) (Prophetic agreement)
+    [`proph_ag`](nola/iris/proph_ag.v) (Prophetic agreement),
+    [`pborrow`](nola/iris/pborrow.v) (Prophetic borrowing)
   + [`paradox`](nola/iris/paradox.v) (Paradoxes)
 - [`examples/`](nola/examples/) : Examples
   + [`heap_lang/`](nola/examples/heap_lang/) : Variant of Iris HeapLang,
