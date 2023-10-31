@@ -70,8 +70,7 @@ Section lemmas.
     iSplit; iApply (na_ninv_convert with "[] NPQ"); iModIntro;
       iApply (Deriv_intro (δ:=δ)); by iIntros (???) "/=[$$]!>$".
   Qed.
-  Lemma na_ninv_fupd {p N P} :
-    na_ninv δ p N (|={∅}=> P) ⊣⊢ na_ninv δ p N P.
+  Lemma na_ninv_fupd {p N P} : na_ninv δ p N (|={∅}=> P) ⊣⊢ na_ninv δ p N P.
   Proof.
     iSplit; iApply na_ninv_convert; iModIntro;
       iApply (Deriv_intro (δ:=δ))=>/=; iIntros (???);

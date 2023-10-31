@@ -24,8 +24,7 @@ Section lemmas.
   Context `{!nDeriv ih δ}.
 
   (** Turn [inv_tok] into [ninv] *)
-  Local Lemma inv_tok_ninv {P : nPropS _} {N} :
-    inv_tok N P ⊢ ninv δ N (↑ˡ P).
+  Local Lemma inv_tok_ninv {P : nPropS _} {N} : inv_tok N P ⊢ ninv δ N (↑ˡ P).
   Proof.
     rewrite ninv_unseal. iIntros "#NP !>". iApply (Deriv_intro (δ:=δ))=>/=.
     iIntros (?????). rewrite -nintpS_nintp_nlarge.
@@ -55,15 +54,13 @@ Section lemmas.
     iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
     iMod ("QP" with "Q") as "P". iMod "→E∖N" as "_". iApply ("P→" with "P").
   Qed.
-  Lemma ninv_split {N P Q} :
-    ninv δ N (P ∗ Q) ⊢ ninv δ N P ∗ ninv δ N Q.
+  Lemma ninv_split {N P Q} : ninv δ N (P ∗ Q) ⊢ ninv δ N P ∗ ninv δ N Q.
   Proof.
     iIntros "#NPQ".
     iSplit; iApply (ninv_convert with "[] NPQ"); iModIntro;
       iApply (Deriv_intro (δ:=δ)); by iIntros (???) "/=[$$]!>$".
   Qed.
-  Lemma ninv_fupd {N P} :
-    ninv δ N (|={∅}=> P) ⊣⊢ ninv δ N P.
+  Lemma ninv_fupd {N P} : ninv δ N (|={∅}=> P) ⊣⊢ ninv δ N P.
   Proof.
     iSplit; iApply ninv_convert; iModIntro; iApply (Deriv_intro (δ:=δ))=>/=;
       iIntros (???); by [iIntros ">$!>$"|iIntros "$!>"; iSplitR; iIntros].
