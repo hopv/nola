@@ -644,7 +644,7 @@ Section borrow.
     apply bi.equiv_entails_1_1. by apply: big_sepM_insert_override.
   Qed.
   (** Open a closed borrower *)
-  Lemma bor_ctok_open {M intp q α P} :
+  Lemma bor_ctok_open {M intp α q P} :
     q.[α] -∗ bor_ctok α P =[borrow_wsat M intp]=∗ obor_tok α q P ∗ intp P.
   Proof.
     rewrite bor_ctok_unseal. iIntros "α [†|c]".
@@ -655,7 +655,7 @@ Section borrow.
     iApply (obor_tok_lft with "⊑ →α o").
   Qed.
   (** Open a borrower *)
-  Lemma bor_tok_open `{!GenUpd M} {intp q α P} :
+  Lemma bor_tok_open `{!GenUpd M} {intp α q P} :
     q.[α] -∗ bor_tok α P -∗
       modw M (borrow_wsat M intp) (obor_tok α q P ∗ intp P).
   Proof.
@@ -751,7 +751,7 @@ Section borrow.
       by [iFrame|rewrite bi.sep_emp|].
   Qed.
   (** Simply close a borrower *)
-  Lemma obor_tok_close `{!GenUpd M} {intp q α P} :
+  Lemma obor_tok_close `{!GenUpd M} {intp α q P} :
     obor_tok α q P -∗ intp P =[borrow_wsat M intp]=∗ q.[α] ∗ bor_ctok α P.
   Proof.
     iIntros "o P". iMod (obor_tok_subdiv [P] with "o [P] []") as "[$[$_]]"=>/=;
