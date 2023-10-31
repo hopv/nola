@@ -71,7 +71,7 @@ Section sinv.
   Proof. rewrite sinv_wsat'_unseal. exact _. Qed.
 
   (** Allocate [sinv_tok'] *)
-  Lemma sinv_alloc' {intp} P :
+  Lemma sinv_tok_alloc' {intp} P :
     sinv_wsat' intp -∗ ∃ I, ∀ i, ⌜i ∉ I⌝ ==∗
       sinv_tok' i P ∗ (intp i P -∗ sinv_wsat' intp).
   Proof.
@@ -81,16 +81,16 @@ Section sinv.
     iSplitR; [by rewrite sinv_tok'_unseal|]. iIntros "P". iExists _. iFrame "●".
     iApply (big_sepM_insert_2 with "P M").
   Qed.
-  Lemma sinv_alloc {intp} P :
+  Lemma sinv_tok_alloc {intp} P :
     sinv_wsat intp ==∗ sinv_tok P ∗ (intp P -∗ sinv_wsat intp).
   Proof.
-    iIntros "W". iDestruct (sinv_alloc' with "W") as (?) "big".
+    iIntros "W". iDestruct (sinv_tok_alloc' with "W") as (?) "big".
     iMod ("big" with "[]") as "[? $]". { iPureIntro. apply is_fresh. }
     iModIntro. by iExists _.
   Qed.
 
   (** Access via [sinv_tok] *)
-  Lemma sinv_acc' {intp i P} :
+  Lemma sinv_tok_acc' {intp i P} :
     sinv_tok' i P -∗ sinv_wsat' intp -∗
       intp i P ∗ (intp i P -∗ sinv_wsat' intp).
   Proof.
@@ -99,9 +99,9 @@ Section sinv.
     iDestruct (big_sepM_lookup_acc with "M") as "[$ →M]"; [done|]. iIntros "P".
     iExists _. iFrame "●". by iApply "→M".
   Qed.
-  Lemma sinv_acc {intp P} :
+  Lemma sinv_tok_acc {intp P} :
     sinv_tok P -∗ sinv_wsat intp -∗ intp P ∗ (intp P -∗ sinv_wsat intp).
-  Proof. iIntros "[%i i]". iApply (sinv_acc' with "i"). Qed.
+  Proof. iIntros "[%i i]". iApply (sinv_tok_acc' with "i"). Qed.
 End sinv.
 
 (** Allocate [sinv_wsat] *)

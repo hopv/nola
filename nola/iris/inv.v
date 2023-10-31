@@ -52,7 +52,7 @@ Section inv_tok.
     (inv_tok N P -∗ intp P) =[inv_wsat intp]=∗ inv_tok N P.
   Proof.
     rewrite inv_tok_unseal inv_wsat_unseal. iIntros "→P W".
-    iDestruct (sinv_alloc' with "W") as (I) "big".
+    iDestruct (sinv_tok_alloc' with "W") as (I) "big".
     iMod (own_unit (gset_disjUR positive) disabled_name) as "D".
     iMod (own_updateP with "[$]") as (x) "[X D]".
     { apply (gset_disj_alloc_empty_updateP_strong'
@@ -84,13 +84,13 @@ Section inv_tok.
   Proof.
     move=> ?. rewrite inv_tok_unseal inv_wsat_unseal. iIntros "[%i[% #i]] W".
     iMod ownE_acc as "[N cl]"; [done|].
-    iDestruct (sinv_acc' with "i W") as "[in →W]".
+    iDestruct (sinv_tok_acc' with "i W") as "[in →W]".
     rewrite {1 2}(union_difference_L {[i]} (↑N)); [|set_solver].
     rewrite ownE_op; [|set_solver]. iDestruct "N" as "[Ei EN∖i]".
     iDestruct "in" as "[[$ D]|Ei']"; last first.
     { iDestruct (ownE_singleton_twice with "[$Ei $Ei']") as "[]". }
     iModIntro. iDestruct ("→W" with "[$Ei]") as "$". iIntros "P W".
-    iDestruct (sinv_acc' with "i W") as "[[[_ D']|Ei] →W]".
+    iDestruct (sinv_tok_acc' with "i W") as "[[[_ D']|Ei] →W]".
     { iDestruct (ownD_singleton_twice with "[$D $D']") as "[]". }
     iMod ("cl" with "[$Ei $EN∖i]") as "_". iModIntro. iSplitL; [|done].
     iApply "→W". iLeft. iFrame.
