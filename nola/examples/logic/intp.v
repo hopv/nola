@@ -53,53 +53,51 @@ Section nintp.
     | nc_sep => P ∗ Q | nc_wand => P -∗ Q
     | nc_bupdw => |=[P]=> Q | nc_fupdw E E' => |=[P]{E,E'}=> Q
     end.
-  Local Definition ncintpwpw (c : nconwpw) (W : iProp Σ) (Φ : val -d> iProp Σ)
-    : iProp Σ := match c with
-    | nc_wpw s E e => wpw W s E e Φ | nc_twpw s E e => twpw W s E e Φ
+  Local Definition ncintpu
+    (c : nconu) (Φ : nconu_dom c -d> iProp Σ) : iProp Σ :=
+    match c, Φ with
+    | nc_wpw s E e, _ => wpw (Φ None) s E e (λ v, Φ (Some v))
+    | nc_twpw s E e, _ => twpw (Φ None) s E e (λ v, Φ (Some v))
+    | nc_forall _, _ => ∀ a, Φ a | nc_exist _, _ => ∃ a, Φ a
     end.
-  Local Definition ncintpg1 (c : ncong1) (P : nPropL (;ᵞ))
+  Local Definition ncintpg (c : ncong) (Φ : ncong_dom c → nPropL (;ᵞ))
     (ni : nderiv_ty Σ -d> discrete_fun (λ κ, nProp κ (;ᵞ) -d> iProp Σ))
     : nderiv_ty Σ -d> iProp Σ :=
-    λ δ, match c with
-    | nc_later => ▷ ni δ _ P
-    | nc_indir => ⸨ P ⸩(δ)
-    | nc_sinv => sinv δ P
-    | nc_inv N => ninv δ N P | nc_na_inv p N => na_ninv δ p N P
-    | nc_borc α => borc δ α P | nc_bor α => bor δ α P
-    | nc_obor α q => obor δ α q P | nc_lend α => lend δ α P
+    λ δ, match c, Φ with
+    | nc_later, _ => ▷ ni δ _ (Φ 0) | nc_indir, _ => ⸨ Φ 0 ⸩(δ)
+    | nc_sinv, _ => sinv δ (Φ 0)
+    | nc_inv N, _ => ninv δ N (Φ 0) | nc_na_inv p N, _ => na_ninv δ p N (Φ 0)
+    | nc_borc α, _ => borc δ α (Φ 0) | nc_bor α, _ => bor δ α (Φ 0)
+    | nc_obor α q, _ => obor δ α q (Φ 0) | nc_lend α, _ => lend δ α (Φ 0)
+    | nc_fbor α, _ => fbor δ α Φ
     end%I.
-  Local Definition ncintpg1f (c : ncong1f) (Φ : Qp → nPropL (;ᵞ))
-    (ni : nderiv_ty Σ -d> discrete_fun (λ κ, nProp κ (;ᵞ) -d> iProp Σ))
-    : nderiv_ty Σ -d> iProp Σ :=
-    λ δ, match c with nc_fbor α => fbor δ α Φ end.
 
-  (** [ncintp] is non-expansive *)
+  (** [ncintpl0] is non-expansive *)
   Local Instance ncintpl0_ne {c} : NonExpansive (ncintpl0 c).
   Proof. solve_proper. Qed.
+
+  (** [ncintp1] is non-expansive *)
   Local Instance ncintp1_ne {c} : NonExpansive (ncintp1 c).
   Proof. solve_proper. Qed.
-  Local Instance ncintp2_ne {c} : NonExpansive2 (ncintp2 c).
-  Proof. solve_proper. Qed.
-  Local Instance ncintpwpw_ne {c} : NonExpansive2 (ncintpwpw c).
-  Proof. move=> ???????. case c=> >; by [apply wpw_ne|apply twpw_ne]. Qed.
-
-  (** [ncintpg] is contractive *)
-  Local Instance ncintpg1_contr {c P} : Contractive (ncintpg1 c P).
-  Proof. case c=>//= ??? leq δ/=. f_contractive. apply (leq δ _ _). Qed.
-  Local Instance ncintpg1f_contr {c Φ} : Contractive (ncintpg1f c Φ).
-  Proof. by case c. Qed.
-
-  (** [ncintp] is proper *)
   Local Instance ncintp1_proper : Proper ((=) ==> (≡) ==> (≡)) ncintp1.
+  Proof. solve_proper. Qed.
+  (** [ncintp2] is non-expansive *)
+  Local Instance ncintp2_ne {c} : NonExpansive2 (ncintp2 c).
   Proof. solve_proper. Qed.
   Local Instance ncintp2_proper :
     Proper ((=) ==> (≡) ==> (≡) ==> (≡)) ncintp2.
   Proof. solve_proper. Qed.
-  Local Instance ncintpwpw_proper :
-    Proper ((=) ==> (≡) ==> (≡) ==> (≡)) ncintpwpw.
+  (** [ncintpu] is non-expansive *)
+  Local Instance ncintpu_ne {c} : NonExpansive (ncintpu c).
   Proof.
-    move=> c ?<-??????. case c=> >; by [apply wpw_proper|apply twpw_proper].
+    case c; (try solve_proper)=> ???????; [apply wpw_ne|apply twpw_ne]=> >//.
   Qed.
+  Local Instance ncintpu_proper {c} : Proper ((≡) ==> (≡)) (ncintpu c).
+  Proof. apply ne_proper, _. Qed.
+
+  (** [ncintpg] is contractive *)
+  Local Instance ncintpg_contr {c Φ} : Contractive (ncintpg c Φ).
+  Proof. case: c Φ=>// ???? eq δ /=. f_contractive. exact: eq. Qed.
 
   Section nintp.
     Context
@@ -115,14 +113,10 @@ Section nintp.
       | n_1 c P, _ => λ κS un gn, ncintp1 c (nintpS_gen P (H ‼ʰ 0) κS un gn)
       | n_2 c P Q, _ => λ κS un gn, ncintp2 c
           (nintpS_gen P (H ‼ʰ 0) κS un gn) (nintpS_gen Q (H ‼ʰ 1) κS un gn)
-      | n_cwpw c W Φ, _ => λ κS un gn, ncintpwpw c
-          (nintpS_gen W (H ‼ʰ 0) κS un gn)
-          (λ v, nintpS_gen (Φ v) (H ‼ʰ 1 ‼ʰ v) κS un gn)
-      | n_g1 c P, _ => λ _ un gn, ncintpg1 c (rew eq_nil_ug_g un gn in P) ni δ
-      | n_g1f c Φ, _ => λ _ un gn,
-          ncintpg1f c (λ q, rew eq_nil_ug_g un gn in Φ q) ni δ
-      | (∀' Φ)%n, _ => λ κS un gn, ∀ a, nintpS_gen (Φ a) (H ‼ʰ a) κS un gn
-      | (∃' Φ)%n, _ => λ κS un gn, ∃ a, nintpS_gen (Φ a) (H ‼ʰ a) κS un gn
+      | n_u c Φ, _ => λ κS un gn,
+          ncintpu c (λ a, nintpS_gen (Φ a) (H ‼ʰ a) κS un gn)
+      | n_g c Φ, _ => λ _ un gn,
+          ncintpg c (λ a, rew eq_nil_ug_g un gn in Φ a) ni δ
       | (∀: V, P)%n, _ => λ κS un gn, ∀ Φ, nintpS_gen
           (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nhgt] 0) κS eq_refl eq_refl
       | (∃: V, P)%n, _ => λ κS un gn, ∃ Φ, nintpS_gen
@@ -147,14 +141,9 @@ Section nintp.
       | n_1 c P, _ => λ un gn, ncintp1 c (nintp_gen P (H ‼ʰ 0) un gn)
       | n_2 c P Q, _ => λ un gn, ncintp2 c
           (nintp_gen P (H ‼ʰ 0) un gn) (nintp_gen Q (H ‼ʰ 1) un gn)
-      | n_cwpw c W Φ, _ => λ un gn, ncintpwpw c
-          (nintp_gen W (H ‼ʰ 0) un gn)
-          (λ v, nintp_gen (Φ v) (H ‼ʰ 1 ‼ʰ v) un gn)
-      | n_g1 c P, _ => λ un gn, ncintpg1 c (rew eq_nil_ug_g un gn in P) ni δ
-      | n_g1f c Φ, _ => λ un gn,
-          ncintpg1f c (λ q, rew eq_nil_ug_g un gn in Φ q) ni δ
-      | (∀' Φ)%n, _ => λ un gn, ∀ a, nintp_gen (Φ a) (H ‼ʰ a) un gn
-      | (∃' Φ)%n, _ => λ un gn, ∃ a, nintp_gen (Φ a) (H ‼ʰ a) un gn
+      | n_u c Φ, _ => λ un gn, ncintpu c (λ a, nintp_gen (Φ a) (H ‼ʰ a) un gn)
+      | n_g c Φ, _ => λ un gn,
+          ncintpg c (λ a, rew eq_nil_ug_g un gn in Φ a) ni δ
       | (∀: V, P)%n, _ => λ un gn, ∀ Φ,
           nintp_gen (nsubst' P un gn Φ) (H ‼ʰ[nsubst'_nhgt] 0) eq_refl eq_refl
       | (∃: V, P)%n, _ => λ un gn, ∃ Φ,
@@ -185,7 +174,7 @@ Section nintp.
   Proof.
     unfold nintpS_gen'=> i ni ni' nid δ + + + + + + +. fix FIX 4=> κ Γ P H.
     case: P H=>/=; intros; case H=>//= ?; try (by f_equiv=> >; apply FIX).
-    by apply ncintpg1_contr.
+    by apply ncintpg_contr.
   Qed.
 
   (** [nintp_gen] is contractive *)
@@ -193,7 +182,7 @@ Section nintp.
   Proof.
     unfold nintp_gen'=> i ni ni' nInvd δ + + + + + +. fix FIX 4=> κ Γ P H.
     case: P H=>/=; intros; case H=>//= ?; try (by f_equiv=> >; apply FIX);
-      try (by apply ncintpg1_contr);
+      try (by apply ncintpg_contr);
       try (f_equiv=> ?); try (f_equiv; [apply FIX|]=> ?);
       by apply nintpS_gen_contractive.
   Qed.
@@ -242,7 +231,7 @@ Section nintp.
   Context (* Iris resources *) `{!nintpGS Σ}.
   Local Existing Instance ncintp1_proper.
   Local Existing Instance ncintp2_proper.
-  Local Existing Instance ncintpwpw_proper.
+  Local Existing Instance ncintpu_proper.
 
   (** [⟦ ⟧ᶠ] coincides with [⟦ ⟧] *)
   Lemma nintp_fp_nintp {δ κ P} : ⟦ P ⟧ᶠ(δ) ⊣⊢ ⟦ P ⟧{κ}(δ).

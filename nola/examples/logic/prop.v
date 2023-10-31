@@ -1,7 +1,7 @@
 (** * [nProp]: Syntactic proposition *)
 
 From nola.examples.logic Require Export synty.
-From nola.util Require Export funext rel ctx schoice.
+From nola.util Require Export funext func rel ctx schoice.
 From nola.iris Require Export upd lft.
 From stdpp Require Export coPset namespaces.
 From iris.bi Require Import notation.
@@ -104,12 +104,19 @@ Variant ncon2 : Type :=
 | (** Basic update modality with the world satisfaction *) nc_bupdw
 | (** Fasic update modality with the world satisfaction *)
     nc_fupdw (E E' : coPset).
-(** Weakest precondition predicate with a world satisfaction *)
-Variant nconwpw : Type :=
+(** Usual *)
+Variant nconu : Type :=
 | (** Partial *) nc_wpw (s : stuckness) (E : coPset) (e : expr)
-| (** Total *) nc_twpw (s : stuckness) (E : coPset) (e : expr).
-(** Unary, guarding *)
-Variant ncong1 : Type :=
+| (** Total *) nc_twpw (s : stuckness) (E : coPset) (e : expr)
+| (** Universal quantification *) nc_forall (A : Type)
+| (** Existential quantification *) nc_exist (A : Type).
+(** Domain of [nconu] *)
+Definition nconu_dom (c : nconu) : Type := match c with
+  | nc_wpw _ _ _ | nc_twpw _ _ _ => option val
+  | nc_forall A | nc_exist A => A
+  end.
+(** Guarding *)
+Variant ncong : Type :=
 | (** Later modality *) nc_later
 | (** Indirection modality *) nc_indir
 | (** Simple invariant *) nc_sinv
@@ -119,10 +126,12 @@ Variant ncong1 : Type :=
 | (** Closed borrower *) nc_borc (α : lft)
 | (** Borrower *) nc_bor (α : lft)
 | (** Open borrower *) nc_obor (α : lft) (q : Qp)
-| (** Lender *) nc_lend (α : lft).
-(** Unary, fractional, guarding *)
-Variant ncong1f : Type :=
+| (** Lender *) nc_lend (α : lft)
 | (** Fractured borrower token *) nc_fbor (α : lft).
+(** Domain of [ncong] *)
+Definition ncong_dom (c : ncong) : Type := match c with
+  | nc_fbor _ => Qp | _ => nat
+  end.
 
 (** [nProp]: Nola syntactic proposition
   Its universe level is strictly higher than those of [V : npvar]
@@ -138,14 +147,9 @@ Inductive nProp : nkind → nctx → Type :=
 | n_l0 {Γ} (c : nconl0) : nProp nL Γ
 | n_1 {κ Γ} (c : ncon1) (P : nProp κ Γ) : nProp κ Γ
 | n_2 {κ Γ} (c : ncon2) (P Q : nProp κ Γ) : nProp κ Γ
-| n_cwpw {κ Γ} (c : nconwpw) (W : nProp κ Γ) (Φ : val → nProp κ Γ) : nProp κ Γ
-| n_g1 {κ Γᵘ Γᵍ} (c : ncong1) (P : nProp nL (;ᵞ Γᵘ ++ Γᵍ)) : nProp κ (Γᵘ;ᵞ Γᵍ)
-| n_g1f {κ Γᵘ Γᵍ} (c : ncong1f) (Φ : Qp → nProp nL (;ᵞ Γᵘ ++ Γᵍ))
+| n_u {κ Γ} (c : nconu) (P : nconu_dom c → nProp κ Γ) : nProp κ Γ
+| n_g {κ Γᵘ Γᵍ} (c : ncong) (P : ncong_dom c → nProp nL (;ᵞ Γᵘ ++ Γᵍ))
     : nProp κ (Γᵘ;ᵞ Γᵍ)
-(** Universal quantification *)
-| n_forall {κ Γ} {A : Type} (Φ : A → nProp κ Γ) : nProp κ Γ
-(** Existential quantification *)
-| n_exist {κ Γ} {A : Type} (Φ : A → nProp κ Γ) : nProp κ Γ
 
 (** Universal quantification over [A → nProp] *)
 | n_n_forall {κ Γᵘ Γᵍ} V (P : nProp κ (V :: Γᵘ;ᵞ Γᵍ)) : nProp κ (Γᵘ;ᵞ Γᵍ)
@@ -227,8 +231,8 @@ Notation "|=[ W ] { E , E' }=> P" := (n_2 (nc_fupdw E E') W P) : nProp_scope.
 Notation "|=[ W ] { E }=> P" := (n_2 (nc_fupdw E E) W P) : nProp_scope.
 Notation "P =[ W ] { E , E' }=∗ Q" := (P -∗ |=[W]{E,E'}=> Q) : nProp_scope.
 Notation "P =[ W ] { E }=∗ Q" := (P =[W]{E,E}=∗ Q) : nProp_scope.
-Notation n_wpw W s E e Φ := (n_cwpw (nc_wpw s E e) W Φ).
-Notation n_twpw W s E e Φ := (n_cwpw (nc_twpw s E e) W Φ).
+Notation n_wpw W s E e Φ := (n_u (nc_wpw s E e) (of_option W Φ)).
+Notation n_twpw W s E e Φ := (n_u (nc_twpw s E e) (of_option W Φ)).
 Notation "WP[ W ] e @ s ; E {{ Φ } }" := (n_wpw W s E e Φ) (only parsing)
   : nProp_scope.
 Notation "WP[ W ] e @ s ; E {{ v , P } }" := (n_wpw W s E e (λ v, P))
@@ -237,34 +241,38 @@ Notation "WP[ W ] e @ s ; E [{ Φ } ]" := (n_twpw W s E e Φ) (only parsing)
   : nProp_scope.
 Notation "WP[ W ] e @ s ; E [{ v , P } ]" := (n_twpw W s E e (λ v, P))
   : nProp_scope.
-Notation "∀'" := n_forall (only parsing) : nProp_scope.
-Notation "∀ x .. z , P" :=
-  (n_forall (λ x, .. (n_forall (λ z, P%n)) ..)) : nProp_scope.
-Notation "∃'" := n_exist (only parsing) : nProp_scope.
-Notation "∃ x .. z , P" :=
-  (n_exist (λ x, .. (n_exist (λ z, P%n)) ..)) : nProp_scope.
+Notation n_forall A := (n_u (nc_forall A)).
+Notation "∀'" := (n_forall _) (only parsing) : nProp_scope.
+Notation "∀ a .. z , P" :=
+  (n_forall _ (λ a, .. (n_forall _ (λ z, P%n)) ..)) : nProp_scope.
+Notation n_exist A := (n_u (nc_exist A)).
+Notation "∃'" := (n_exist _) (only parsing) : nProp_scope.
+Notation "∃ a .. z , P" :=
+  (n_exist _ (λ a, .. (n_exist _ (λ z, P%n)) ..)) : nProp_scope.
 
-Notation "▷{ Γᵘ } P" := (n_g1 (Γᵘ:=Γᵘ) nc_later P)
+Notation n_g1' Γᵘ c P := (n_g (Γᵘ:=Γᵘ) c (λ _, P%n)) (only parsing).
+Notation n_g1 c P := (n_g c (λ _, P%n)).
+Notation "▷{ Γᵘ } P" := (n_g1' Γᵘ nc_later P)
   (at level 20, right associativity, only parsing) : nProp_scope.
 Notation "▷ P" := (n_g1 nc_later P) : nProp_scope.
-Notation "○{ Γᵘ } P" := (n_g1 (Γᵘ:=Γᵘ) nc_indir P)
+Notation "○{ Γᵘ } P" := (n_g1' Γᵘ nc_indir P)
   (at level 20, right associativity, only parsing) : nProp_scope.
 Notation "○ P" := (n_g1 nc_indir P)
   (at level 20, right associativity, format "○  P") : nProp_scope.
-Notation n_inv' Γᵘ N P := (n_g1 (Γᵘ:=Γᵘ) (nc_inv N) P) (only parsing).
+Notation n_inv' Γᵘ N P := (n_g1' Γᵘ (nc_inv N) P) (only parsing).
 Notation n_inv N P := (n_inv' _ N P).
 Notation n_na_inv' Γᵘ p N P :=
-  (n_g1 (Γᵘ:=Γᵘ) (nc_na_inv p N) P) (only parsing).
+  (n_g1' Γᵘ (nc_na_inv p N) P) (only parsing).
 Notation n_na_inv p N P := (n_na_inv' _ p N P).
-Notation n_borc' Γᵘ α P := (n_g1 (Γᵘ:=Γᵘ) (nc_borc α) P) (only parsing).
+Notation n_borc' Γᵘ α P := (n_g1' Γᵘ (nc_borc α) P) (only parsing).
 Notation n_borc α P := (n_borc' _ α P).
-Notation n_bor' Γᵘ α P := (n_g1 (Γᵘ:=Γᵘ) (nc_bor α) P) (only parsing).
+Notation n_bor' Γᵘ α P := (n_g1' Γᵘ (nc_bor α) P) (only parsing).
 Notation n_bor α P := (n_bor' _ α P).
-Notation n_obor' Γᵘ α q P := (n_g1 (Γᵘ:=Γᵘ) (nc_obor α q) P) (only parsing).
+Notation n_obor' Γᵘ α q P := (n_g1' Γᵘ (nc_obor α q) P) (only parsing).
 Notation n_obor α q P := (n_obor' _ α q P).
-Notation n_lend' Γᵘ α P := (n_g1 (Γᵘ:=Γᵘ) (nc_lend α) P) (only parsing).
+Notation n_lend' Γᵘ α P := (n_g1' Γᵘ (nc_lend α) P) (only parsing).
 Notation n_lend α P := (n_lend' _ α P).
-Notation n_fbor' Γᵘ α Φ := (n_g1f (Γᵘ:=Γᵘ) (nc_fbor α) Φ) (only parsing).
+Notation n_fbor' Γᵘ α Φ := (n_g (Γᵘ:=Γᵘ) (nc_fbor α) Φ) (only parsing).
 Notation n_fbor α Φ := (n_fbor' _ α Φ).
 Notation n_fbor_mapsto α l v := (n_fbor α (λ q, l ↦{#q} v)).
 Notation "l ↦[ α ] v" := (n_fbor_mapsto α l v)
@@ -277,13 +285,13 @@ Notation "∃: V , P" := (n_n_exist V P)
   (at level 200, right associativity,
     format "'[' '[' ∃:  V ']' ,  '/' P ']'") : nProp_scope.
 Notation "rec:ˢ'" := n_recs (only parsing) : nProp_scope.
-Notation "rec:ˢ x , P" := (n_recs (λ x, P))
+Notation "rec:ˢ a , P" := (n_recs (λ a, P))
   (at level 200, right associativity,
-    format "'[' '[' rec:ˢ  x ,  '/' P ']' ']'") : nProp_scope.
+    format "'[' '[' rec:ˢ  a ,  '/' P ']' ']'") : nProp_scope.
 Notation "rec:ˡ'" := n_recl (only parsing) : nProp_scope.
-Notation "rec:ˡ x , P" := (n_recl (λ x, P))
+Notation "rec:ˡ a , P" := (n_recl (λ a, P))
   (at level 200, right associativity,
-    format "'[' '[' rec:ˡ  x ,  '/' P ']' ']'") : nProp_scope.
+    format "'[' '[' rec:ˡ  a ,  '/' P ']' ']'") : nProp_scope.
 
 Notation "¢ᵘ{ Γᵘ } P" := (n_constu (Γᵘ:=Γᵘ) P)
   (at level 20, right associativity, only parsing) : nProp_scope.
@@ -308,11 +316,9 @@ Notation "!ᵘˢ P" := (n_subus P) (at level 20, right associativity)
 Reserved Notation "↑ˡ P" (at level 20, right associativity).
 Fixpoint nlarge {κ Γ} (P : nProp κ Γ) : nPropL Γ :=
   match P with
-  | n_0 c => n_0 c | n_l0 c => n_l0 c | n_1 c P => n_1 c (↑ˡ P)
-  | n_2 c P Q => n_2 c (↑ˡ P) (↑ˡ Q)
-  | n_cwpw c W Φ => n_cwpw c (↑ˡ W) (λ v, ↑ˡ Φ v)
-  | n_g1 c P => n_g1 c P | n_g1f c Φ => n_g1f c Φ
-  | ∀' Φ => ∀ a, ↑ˡ Φ a | ∃' Φ => ∃ a, ↑ˡ Φ a
+  | n_0 c => n_0 c | n_l0 c => n_l0 c
+  | n_1 c P => n_1 c (↑ˡ P) | n_2 c P Q => n_2 c (↑ˡ P) (↑ˡ Q)
+  | n_u c Φ => n_u c (λ a, ↑ˡ Φ a) | n_g c Φ => n_g c Φ
   | ∀: V, P => ∀: V, ↑ˡ P | ∃: V, P => ∃: V, ↑ˡ P
   | rec:ˢ' Φ a => rec:ˢ' Φ a | rec:ˡ' Φ a => rec:ˡ' Φ a
   | ¢ᵘ P => ¢ᵘ ↑ˡ P | ¢ᵍ P => ¢ᵍ ↑ˡ P
