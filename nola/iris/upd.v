@@ -121,6 +121,26 @@ Section gen_upd.
   Qed.
 End gen_upd.
 
+(** Adding [◇] inside lets [M] absorb [◇] for introduceable [M] *)
+Lemma is_except_0_intro {PROP : bi} {M : PROP → PROP} {P} :
+  (∀ P, P ⊢ M P) → IsExcept0 (M (◇ P))%I.
+Proof.
+  rewrite /IsExcept0 /bi_except_0=> intro. iIntros "[?|$]". iApply intro.
+  by iLeft.
+Qed.
+#[export] Instance is_except_0_gen_upd `{!BiBUpd PROP, !GenUpd (PROP:=PROP) M}
+  {P} : IsExcept0 (M (◇ P))%I | 10.
+Proof. apply is_except_0_intro. by iIntros. Qed.
+
+(** [◇] preserves [GenUpd] *)
+#[export] Instance gen_upd_except_0 `{!BiBUpd PROP, !GenUpd (PROP:=PROP) M} :
+  GenUpd (λ P, M (◇ P))%I | 10.
+Proof.
+  split=> >. { solve_proper. }
+  { rewrite gen_upd_from_bupd. f_equiv. by iIntros. }
+  { move=> PQ. by do 2 f_equiv. } { iIntros ">>$". } { by iIntros "[?$]". }
+Qed.
+
 (** ** World satisfaction inclusion *)
 
 Class WsatIncl {PROP : bi} (W W' Wr : PROP) : Prop :=
