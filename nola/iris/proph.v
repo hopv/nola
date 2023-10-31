@@ -268,7 +268,7 @@ Qed.
 
 (** [L] can by satisfied by [:<[L]>] for valid [L] *)
 Local Lemma proph_valid_upds_sat {TY} {L : proph_log TY} :
-  .✓ L → ∀π, :<[L]> π ◁ L.
+  .✓ L → ∀ π, :<[L]> π ◁ L.
 Proof.
   rewrite /proph_sat. elim: L=>/= [|[ξ aπ] L' IH]; [done|].
   move=> [?[? /IH ?]]?. apply Forall_cons=>/=. split; [|done].
@@ -381,7 +381,7 @@ Section defs.
     own proph_name (◯ line pli.(pli_var) (aitem pli.(pli_val))).
   (** Prophecy observation *)
   Local Definition proph_obs_def (φπ : proph _ Prop) : iProp Σ :=
-    ∃L, ⌜∀π, π ◁ L → φπ π⌝ ∗ [∗ list] pli ∈ L, proph_aobs pli.
+    ∃L, ⌜∀ π, π ◁ L → φπ π⌝ ∗ [∗ list] pli ∈ L, proph_aobs pli.
   Lemma proph_obs_aux : seal proph_obs_def. Proof. by eexists. Qed.
   Definition proph_obs := proph_obs_aux.(unseal).
   Lemma proph_obs_unseal : proph_obs = proph_obs_def.
@@ -479,7 +479,7 @@ Section lemmas.
   Qed.
 
   (** On [proph_obs] *)
-  Lemma proph_obs_true {φπ} : (∀π, φπ π) → ⊢ ⟨π, φπ π⟩.
+  Lemma proph_obs_true {φπ} : (∀ π, φπ π) → ⊢ ⟨π, φπ π⟩.
   Proof. rewrite proph_obs_unseal=> ?. iExists []. by iSplit. Qed.
   Lemma proph_obs_and {φπ ψπ} : .⟨φπ⟩ -∗ .⟨ψπ⟩ -∗ ⟨π, φπ π ∧ ψπ π⟩.
   Proof.
@@ -611,7 +611,7 @@ Section lemmas.
     { by iApply big_sepL_elem_of. }
     { iPureIntro. by apply (sat .{ξ := aπ}), sim. }
   Qed.
-  Lemma proph_obs_false {φπ} : (∀π, ¬ φπ π) → .⟨φπ⟩ =[proph_wsat]=∗ False.
+  Lemma proph_obs_false {φπ} : (∀ π, ¬ φπ π) → .⟨φπ⟩ =[proph_wsat]=∗ False.
   Proof.
     iIntros (neg) "obs". iMod (proph_obs_sat with "obs") as %[? φx].
     by apply neg in φx.
