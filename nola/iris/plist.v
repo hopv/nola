@@ -17,8 +17,8 @@ Notation "[∗ plist] x ∈ xl , P" := (big_sepPL (λ _ x, P) xl)
 Section big_sepPL.
   Context {PROP : bi} {A} {F : A → Type}.
 
-  (** [big_sepPL] over [of_plist] *)
-  Lemma big_sepPL_of_plist {B}
+  (** [big_sepL] over [of_plist] as [big_sepPL] *)
+  Lemma big_sepL_of_plist {B}
     (f : ∀ a, F a → B) (Φ : B → PROP) {al} (xl : plist F al) :
     ([∗ list] y ∈ of_plist f xl, Φ y) ⊣⊢ [∗ plist] x ∈ xl, Φ (f _ x).
   Proof. move: xl. elim: al=>/=; [done|]=> ?? IH [??]. by rewrite IH. Qed.
