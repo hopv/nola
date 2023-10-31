@@ -1,6 +1,6 @@
 (** * [hgt]: General height of a tree *)
 
-From nola Require Export prelude.
+From nola Require Export func.
 Import EqNotations.
 
 (** [hgt]: General height of a tree *)
@@ -11,7 +11,7 @@ Inductive hgt : Type := Hgtᶠ {
 Arguments Hgtᶠ {A} hs : rename.
 Add Printing Constructor hgt.
 
-Definition Hgt₀ : hgt := Hgtᶠ (λ e : Empty_set, match e with end).
+Definition Hgt₀ : hgt := Hgtᶠ of_Empty_set.
 Definition Hgt₁ (h : hgt) : hgt := Hgtᶠ (λ _ : nat, h).
 Definition Hgt₂ (h₀ h₁ : hgt) : hgt :=
   Hgtᶠ (λ n, match n with 0 => h₀ | _ => h₁ end).

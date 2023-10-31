@@ -54,7 +54,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
 - [`util/`](nola/util/) : General-purpose utilities,
   extending [`stdpp`](https://gitlab.mpi-sws.org/iris/stdpp)
   + [`funext`](nola/util/funext.v) (Function extensionality)
-  + [`pred`](nola/util/pred.v) (Predicates),
+  + [`func`](nola/util/func.v) (Functions),
+    [`pred`](nola/util/pred.v) (Predicates),
     [`rel`](nola/util/rel.v) (Relations),
     [`list`](nola/util/list.v) (Lists),
     [`nat`](nola/util/nat.v) (Natural numbers),
