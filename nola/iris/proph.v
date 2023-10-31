@@ -505,8 +505,8 @@ Section lemmas.
   #[export] Instance proph_wsat_timeless : Timeless proph_wsat.
   Proof. rewrite proph_wsat_unseal. exact _. Qed.
 
-  (** Lemma for [proph_intro] *)
-  Local Lemma proph_tok_alloc {S} (ξ : aprvar TY) : S .!! ξ = None →
+  (** Lemma for [proph_alloc] *)
+  Local Lemma proph_alloc' {S} (ξ : aprvar TY) : S .!! ξ = None →
     proph_smry_tok S ==∗ proph_smry_tok (add_line ξ (fitem 1) S) ∗ 1:[ξ].
   Proof.
     rewrite proph_tok_unseal=> ?. iIntros "●".
@@ -514,13 +514,13 @@ Section lemmas.
     by apply auth_update_alloc,
       discrete_fun_insert_local_update, alloc_singleton_local_update.
   Qed.
-  (** Introduce a prophecy variable *)
-  Lemma proph_intro (X : TY) : X → ⊢ |=[proph_wsat]=> ∃ ξ : prvar X, 1:[ξ].
+  (** Allocate a new prophecy variable *)
+  Lemma proph_alloc (X : TY) : X → ⊢ |=[proph_wsat]=> ∃ ξ : prvar X, 1:[ξ].
   Proof.
     rewrite proph_wsat_unseal=> x. iIntros "[%S [[%L[% %sim]] ●]]".
     set ξ := Prvar (synty_to_inhab x) (fresh (dom (S X))).
     have ?: S .!! ξ = None. { apply (not_elem_of_dom_1 (S X)), is_fresh. }
-    iMod (proph_tok_alloc ξ with "●") as "[● ξ]"; [done|]. iModIntro.
+    iMod (proph_alloc' ξ with "●") as "[● ξ]"; [done|]. iModIntro.
     iSplitL "●"; [|iExists _; by iFrame]. iExists _. iFrame "●". iPureIntro.
     exists L. split; by [|apply add_line_fitem_sim].
   Qed.

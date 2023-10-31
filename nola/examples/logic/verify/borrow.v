@@ -74,7 +74,7 @@ Section borrow.
     iDestruct "big" as (x'2) "[pc' Φ]".
     iDestruct (vo_pc_agree with "vo' pc'") as %<-.
     iDestruct (vo_pc_agree with "vo pc") as %eq. case: eq=> <-.
-    iMod (proph_intro X x) as (ζ) "ζ".
+    iMod (proph_alloc X x) as (ζ) "ζ".
     iMod (vo_pc_preresolve (ξ:=η) (λ π, (π ζ, ξ)') [ζ : aprvarn]
       with "[$ζ//] vo pc") as "[[ζ _][#obs →pc]]".
     { apply (proph_dep_constr (λ x, (x, ξ)')), (proph_dep_one ζ). }
