@@ -41,7 +41,7 @@ Section iris.
   Definition ninv_def δ N P : iProp Σ :=
     □ ⸨ ∀ E, ⌜↑N ⊆ E⌝ → |=[n_inv_wsat]{E,E∖↑N}=>
           P ∗ (P =[n_inv_wsat]{E∖↑N,E}=∗ True) ⸩(δ).
-  Definition ninv_aux : seal ninv_def. Proof. by eexists. Qed.
+  Local Lemma ninv_aux : seal ninv_def. Proof. by eexists. Qed.
   Definition ninv := ninv_aux.(unseal).
   Lemma ninv_unseal : ninv = ninv_def. Proof. exact: seal_eq. Qed.
   #[export] Instance ninv_persistent {δ N P} : Persistent (ninv δ N P).
@@ -52,7 +52,7 @@ Section iris.
     □ ⸨ ∀ E F, ⌜↑N ⊆ E⌝ → ⌜↑N ⊆ F⌝ → n_na_own p F =[n_na_inv_wsat]{E}=∗
           n_na_own p (F∖↑N) ∗ P ∗
           (n_na_own p (F∖↑N) -∗ P =[n_na_inv_wsat]{E}=∗ n_na_own p F) ⸩(δ).
-  Definition na_ninv_aux : seal na_ninv_def. Proof. by eexists. Qed.
+  Local Lemma na_ninv_aux : seal na_ninv_def. Proof. by eexists. Qed.
   Definition na_ninv := na_ninv_aux.(unseal).
   Lemma na_ninv_unseal : na_ninv = na_ninv_def. Proof. exact: seal_eq. Qed.
   #[export] Instance na_ninv_persistent {δ p N P} :
