@@ -87,6 +87,18 @@ Section proph_ag.
     iModIntro. iLeft. iFrame.
   Qed.
 
+  (** Take out a prophecy token from [val_obs] and [proph_ctrl] *)
+  Lemma vo_pc_proph_tok {γ X x x' ξ} :
+    val_obs γ X x -∗ proph_ctrl γ X x' ξ -∗
+      1:[ξ] ∗ (1:[ξ] -∗ val_obs γ X x ∗ proph_ctrl γ X x ξ).
+  Proof.
+    rewrite val_obs_unseal proph_ctrl_unseal.
+    iIntros "vo [[vo' $]|[[% vo2] _]]"; last first.
+    { iDestruct (vo_vo2 with "vo vo2") as %[]. }
+    iDestruct (ghost_var_agree with "vo vo'") as %?. simplify_eq. iFrame "vo".
+    iIntros "ξ". iLeft. iFrame.
+  Qed.
+
   (** Resolve the prophecy of [proph_ctrl] with [val_obs],
     retaining [proph_ctrl] *)
   Lemma vo_pc_preresolve {γ X x x' ξ} aπ ηl q : aπ ./ ηl →
