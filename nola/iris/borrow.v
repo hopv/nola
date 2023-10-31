@@ -400,7 +400,7 @@ Section borrow.
     move=> ???. apply equiv_dist=> ?. f_equiv; by apply equiv_dist.
   Qed.
 
-  (** Create borrowers and lenders with a specific depth *)
+  (** Create new borrowers and lenders with a specific depth *)
   Local Lemma bor_lend_tok_new_list' `{!GenUpd M} {intp} d α Pl Ql :
     ([∗ list] P ∈ Pl, intp P) -∗
     ([†α] -∗ ([∗ list] P ∈ Pl, intp P) -∗ M ([∗ list] Q ∈ Ql, intp Q)%I)
@@ -416,7 +416,7 @@ Section borrow.
     iExists _. iFrame "●". iApply (big_sepM_insert_2 with "[Pl →Ql] Dm"). iLeft.
     iSplitL "Pl";by rewrite !big_sepM_map_by big_sepL_fmap.
   Qed.
-  (** Create borrowers and lenders *)
+  (** Create new borrowers and lenders *)
   Lemma bor_lend_tok_new_list `{!GenUpd M} {intp} α Pl Ql :
     ([∗ list] P ∈ Pl, intp P) -∗
     ([†α] -∗ ([∗ list] P ∈ Pl, intp P) -∗ M ([∗ list] Q ∈ Ql, intp Q)%I)
@@ -427,8 +427,8 @@ Section borrow.
     iModIntro. iStopProof. do 3 f_equiv. iIntros "l". rewrite lend_tok_unseal.
     iExists _. iSplit; [by iApply lft_sincl_refl|]. by iExists _.
   Qed.
-  (** Simply create a borrower and a lender *)
-  Lemma bor_lend_tok_create `{!GenUpd M} {intp} α P :
+  (** Simply create a new borrower and a new lender *)
+  Lemma bor_lend_tok_new `{!GenUpd M} {intp} α P :
     intp P =[borrow_wsat M intp]=∗ bor_ctok α P ∗ lend_tok α P.
   Proof.
     iIntros "P". iMod (bor_lend_tok_new_list α [P] [P] with "[P] []")
