@@ -257,7 +257,7 @@ Section lft.
     q.[α] ⊢ ∃ r, ([∗ list] b ∈ bl, alft_tok b r) ∗
       (([∗ list] b ∈ bl, alft_tok b r) -∗ q.[α]).
   Proof.
-    move: q. elim: bl=> /=[|b bl IH] q inc.
+    elim: bl q=> /=[|b bl IH] q inc.
     { iIntros. iExists 1%Qp. iSplit; [done|]. by iFrame. }
     iIntros "[α α']". iDestruct (IH with "α'") as (r) "[bl →α']"; [set_solver|].
     iDestruct (big_sepMS_elem_of_acc _ _ b with "α") as "[b →α]".

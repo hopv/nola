@@ -21,5 +21,5 @@ Section big_sepPL.
   Lemma big_sepL_of_plist {B}
     (f : ∀ a, F a → B) (Φ : B → PROP) {al} (xl : plist F al) :
     ([∗ list] y ∈ of_plist f xl, Φ y) ⊣⊢ [∗ plist] x ∈ xl, Φ (f _ x).
-  Proof. move: xl. elim: al=>/=; [done|]=> ?? IH [??]. by rewrite IH. Qed.
+  Proof. elim: al xl; [done|]=>/= ?? IH [??]. by rewrite IH. Qed.
 End big_sepPL.

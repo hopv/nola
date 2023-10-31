@@ -35,7 +35,7 @@ Fixpoint to_plist_repeat {A} {F : A → Type} {a : A} {n} (xl : vec (F a) n)
   match xl with [#] => () | b ::: xl => (b, to_plist_repeat xl)' end.
 Lemma to_of_plist_repeat {A F} {a : A} {n} {xl : plist F (repeat a n)} :
   to_plist_repeat (of_plist_repeat xl) = xl.
-Proof. move: xl. elim: n=>/=; [by case|]=> ? IH [??]. by rewrite IH. Qed.
+Proof. elim: n xl; [by case|]=>/= ? IH [??]. by rewrite IH. Qed.
 Lemma of_to_plist_repeat {A F} {a : A} {n} {xl : vec (F a) n} :
   of_plist_repeat (to_plist_repeat xl) = xl.
 Proof. by elim: xl=>/=; [done|]=> ???->. Qed.
@@ -52,8 +52,8 @@ Fixpoint plist_sep {A} {F : A → Type} {al bl}
 Lemma plist_app_sep {A} {F : A → Type} {al bl}
   {xl : plist F al} {yl : plist F bl} :
   plist_sep (plist_app xl yl) = (xl, yl)'.
-Proof. move: xl yl. elim: al=>/=; [by case|]=> ?? IH [??]?. by rewrite IH. Qed.
+Proof. elim: al xl yl; [by case|]=>/= ?? IH [??]?. by rewrite IH. Qed.
 Lemma plist_sep_app {A} {F : A → Type} {al bl}
   {xl : plist F (al ++ bl)} :
   plist_app (plist_sep xl).1' (plist_sep xl).2' = xl.
-Proof. move: xl. elim: al=>/=; [done|]=> ?? IH [??]. by rewrite IH. Qed.
+Proof. elim: al xl; [done|]=>/= ?? IH [??]. by rewrite IH. Qed.

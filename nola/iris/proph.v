@@ -176,7 +176,7 @@ Section lemmas.
   Lemma proph_dep_plist' {Xl : list TY} (ξl : plist prvar Xl) :
     (λ π, app_plist_prvar π ξl) ./ of_plist_prvar ξl.
   Proof.
-    move: ξl. elim: Xl=>/=; [done|]=> ?? IH [ξ ξl] ?? eqv.
+    elim: Xl ξl; [done|]=>/= ?? IH [ξ ξl] ?? eqv.
     unfold app_plist_prvar=>/=. f_equal.
     { apply (eqv ξ). set_solver. } { apply IH=> ??. apply eqv. set_solver. }
   Qed.
