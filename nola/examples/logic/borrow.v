@@ -62,10 +62,7 @@ Section borrow.
   Lemma fbor_conv {α Φ Ψ} :
     □ (∀ q, conv δ (Φ q) (Ψ q)) -∗ □ (∀ q, conv δ (Ψ q) (Φ q)) -∗
     fbor δ α Φ -∗ fbor δ α Ψ.
-  Proof.
-    iIntros "#? #? [%Φ'[#?[#? f]]]". iExists _. iFrame "f".
-    iSplit; iIntros "!> %"; by iApply conv_trans.
-  Qed.
+  Proof. iIntros "_ _ []". Qed.
 
   (** Modify tokens with lifetime inclusion *)
   Lemma borc_lft {α α' P} : α' ⊑□ α -∗ borc δ α P -∗ borc δ α' P.
@@ -90,10 +87,7 @@ Section borrow.
     iExists _. iFrame.
   Qed.
   Lemma fbor_lft {α α' Φ} : α' ⊑□ α -∗ fbor δ α Φ -∗ fbor δ α' Φ.
-  Proof.
-    iIntros "⊑ [%[?[? f]]]". iDestruct (fbor_tok_lft with "⊑ f") as "f".
-    iExists _. iFrame.
-  Qed.
+  Proof. iIntros "_ []". Qed.
 
   (** Other conversion *)
   Lemma borc_bor {α P} : borc δ α P ⊢ bor δ α P.
@@ -248,22 +242,5 @@ Section borrow.
   Proof.
     iIntros "α b". iMod (bor_open with "α b") as "[o P]".
     by iMod (obor_reborrow with "o P").
-  Qed.
-
-  (** Open a fractured borrower *)
-  Lemma fbor_open {α q Φ} :
-    □ (∀ r s, ⟦ Φ (r + s)%Qp ⟧ ∗-∗ ⟦ Φ r ⟧ ∗ ⟦ Φ s ⟧) -∗
-    q.[α] -∗ fbord α Φ =[borrow_wsatd ∗ fborrow_wsat']=∗
-      q.[α] ∗ ∃ r, borcd α (Φ r).
-  Proof.
-    iIntros "#fr α [%[#ΦΨ[#ΨΦ f]]]".
-    iMod (fbor_tok_take' with "[] α f") as "[$[% c]]"; last first.
-    { iModIntro. iExists _, _. iFrame "c". by iSplit; iModIntro. }
-    iIntros "!> %r %s". rewrite !nintpS_nintp_nlarge. iSplit.
-    - iIntros "Ψ". iDestruct (convd_use with "ΨΦ Ψ") as "Φ".
-      iDestruct ("fr" with "Φ") as "[Φ Φ']".
-      iSplitL "Φ"; by iApply (convd_use with "ΦΨ").
-    - iIntros "[Ψ Ψ']". iApply (convd_use with "ΦΨ"). iApply "fr".
-      iSplitL "Ψ"; by iApply convd_use.
   Qed.
 End borrow.

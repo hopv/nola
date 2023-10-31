@@ -30,7 +30,6 @@ Section nintp.
     | nc_steps_lb n => steps_lb n | nc_proph p pvs => proph p pvs
     | nc_lft_tok α q => q.[α] | nc_lft_dead α => [†α] | nc_lft_eter α => [∞α]
     | nc_lft_sincl α β => α ⊑□ β
-    | nc_fborrow_wsat => fborrow_wsat'
     | nc_proph_tok ξ q => q:[ξ] | nc_proph_toks ξl q => q:∗[ξl]
     | nc_proph_obs φπ => .⟨φπ⟩ | nc_proph_wsat => proph_wsat
     | nc_val_obs γ X x => val_obs γ X x

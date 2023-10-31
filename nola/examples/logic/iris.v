@@ -1,7 +1,7 @@
 (** * Iris preliminaries *)
 
 From nola.examples.logic Require Export prop.
-From nola.iris Require Export deriv wp inv na_inv borrow fborrow proph_ag.
+From nola.iris Require Export deriv wp inv na_inv borrow proph_ag.
 From iris.base_logic.lib Require Export cancelable_invariants.
 From nola.examples.heap_lang Require Export definitions.
 
@@ -21,7 +21,6 @@ Class nintpGS Σ := NintpGS {
   nintpGS_na_inv :: na_invG Σ;
   nintpGS_cinv :: cinvG Σ;
   nintpGS_borrow :: borrowGS (nPropS (;ᵞ)) Σ;
-  nintpGS_fborrow :: fborrowGS (nPropS (;ᵞ)) Σ;
   nintpGS_proph :: prophGS nsynty Σ;
   nintpGS_proph_ag :: proph_agG nsynty Σ;
   nintpGS_heap :: heapGS_gen HasNoLc Σ;
@@ -86,14 +85,11 @@ Section iris.
   Definition lend δ α P : iProp Σ :=
     ∃ Q, □ conv δ (↑ˡ Q) P ∗ lend_tok α Q.
   (** [fbor]: Modified [fbor_tok] *)
-  Definition fbor δ α Φ : iProp Σ := ∃ Ψ,
-    □ (∀ q, conv δ (Φ q) (↑ˡ Ψ q)) ∗ □ (∀ q, conv δ (↑ˡ Ψ q) (Φ q)) ∗
-    fbor_tok α Ψ.
+  Definition fbor δ (α : lft) (Φ : Qp → nPropL (;ᵞ)) : iProp Σ := False.
 End iris.
 
 (** Utility *)
 Notation borrow_wsat'' := (borrow_wsat (bupdw proph_wsat)).
-Notation fborrow_wsat' := (fborrow_wsat true).
 Notation fbor_mapsto δ α l v := (fbor δ α (λ q, l ↦{#q} v)%n).
 Notation "l ↦( δ ) [ α ] v" := (fbor_mapsto δ α l v)
   (at level 20, format "l  ↦( δ ) [ α ]  v") : bi_scope.
