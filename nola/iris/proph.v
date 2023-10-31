@@ -515,7 +515,7 @@ Section lemmas.
       discrete_fun_insert_local_update, alloc_singleton_local_update.
   Qed.
   (** Allocate a new prophecy variable *)
-  Lemma proph_alloc (X : TY) : X → ⊢ |=[proph_wsat]=> ∃ ξ : prvar X, 1:[ξ].
+  Lemma proph_alloc {X : TY} : X → ⊢ |=[proph_wsat]=> ∃ ξ : prvar X, 1:[ξ].
   Proof.
     rewrite proph_wsat_unseal=> x. iIntros "[%S [[%L[% %sim]] ●]]".
     set ξ := Prvar (synty_to_inhab x) (fresh (dom (S X))).
