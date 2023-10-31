@@ -33,10 +33,7 @@ Section lemmas.
   (** Allocate [ninv] *)
   Lemma ninv_alloc_rec (P : nPropS _) N :
     (ninv δ N (↑ˡ P) -∗ ⟦ P ⟧(δ)) =[inv_wsat' δ]=∗ ninv δ N (↑ˡ P).
-  Proof.
-    rewrite -inv_tok_ninv. iIntros "→P". iApply (inv_tok_alloc_rec with "[→P]").
-    iIntros "NP". rewrite nintpS_nintp. by iApply "→P".
-  Qed.
+  Proof. rewrite -inv_tok_ninv -nintpS_nintp. exact: inv_tok_alloc_rec. Qed.
   Lemma ninv_alloc (P : nPropS _) N :
     ⟦ P ⟧(δ) =[inv_wsat' δ]=∗ ninv δ N (↑ˡ P).
   Proof. iIntros "P". iApply (ninv_alloc_rec with "[P]"). by iIntros. Qed.

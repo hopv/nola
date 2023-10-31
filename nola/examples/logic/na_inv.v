@@ -40,9 +40,7 @@ Section lemmas.
     (na_ninv δ p N (↑ˡ P) -∗ ⟦ P ⟧(δ)) =[na_inv_wsat' δ]=∗
       na_ninv δ p N (↑ˡ P).
   Proof.
-    rewrite -na_inv_tok_ninv. iIntros "→P".
-    iApply (na_inv_tok_alloc_rec with "[→P]"). iIntros "NP".
-    rewrite nintpS_nintp. by iApply "→P".
+    rewrite -na_inv_tok_ninv -nintpS_nintp. exact: na_inv_tok_alloc_rec.
   Qed.
   Lemma na_ninv_alloc (P : nPropS _) p N :
     ⟦ P ⟧(δ) =[na_inv_wsat' δ]=∗ na_ninv δ p N (↑ˡ P).
