@@ -524,6 +524,14 @@ Section lemmas.
     iSplitL "●"; [|iExists _; by iFrame]. iExists _. iFrame "●". iPureIntro.
     exists L. split; by [|apply add_line_fitem_sim].
   Qed.
+  (** Allocate new prophecy variables *)
+  Lemma proph_alloc_list {Xl} : plist_synty Xl →
+    ⊢ |=[proph_wsat]=> ∃ ξl : plist _ Xl, 1:∗[of_plist_prvar ξl].
+  Proof.
+    elim: Xl; [move=>/= ?; by iExists ()|]=>/= ?? IH [x xl].
+    iMod (IH xl) as (ξl) "ξl". iMod (proph_alloc x) as (ξ) "ξ".
+    iModIntro. iExists (ξ, ξl)'. iFrame.
+  Qed.
 
   (** Lemmas for [proph_resolve_dep] *)
   Local Lemma proph_tok_out {S L ξ q} :
