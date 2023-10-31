@@ -62,7 +62,6 @@ Section nintp.
     λ δ, match c with
     | nc_later => ▷ ni δ _ P
     | nc_indir => ⸨ P ⸩(δ)
-    | nc_ag γ => nag γ P
     | nc_inv N => ninv δ N P | nc_na_inv p N => na_ninv δ p N P
     | nc_borc α => borc δ α P | nc_bor α => bor δ α P
     | nc_obor α q => obor δ α q P | nc_lend α => lend δ α P

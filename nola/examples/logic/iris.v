@@ -7,15 +7,8 @@ From nola.examples.heap_lang Require Export definitions.
 
 (** ** Iris resources *)
 
-(** Agreement *)
-Class agreeG A Σ := agree_inG :: inG Σ (agreeR (leibnizO A)).
-Definition agreeΣ A : gFunctors := GFunctor (agreeR (leibnizO A)).
-#[export] Instance subG_agreeΣ `{!subG (agreeΣ A) Σ} : agreeG A Σ.
-Proof. solve_inG. Qed.
-
 (** [nintpGS]: Iris resource *)
 Class nintpGS Σ := NintpGS {
-  nintpGS_agree :: agreeG (nPropL (;ᵞ)) Σ;
   nintpGS_ninv :: ninvGS (nPropS (;ᵞ)) Σ;
   nintpGS_na_ninv :: na_ninvGS (nPropS (;ᵞ)) Σ;
   nintpGS_na_inv :: na_invG Σ;
@@ -43,9 +36,6 @@ Implicit Type (P : nPropL (;ᵞ)) (N : namespace) (p : na_inv_pool_name)
 Section iris.
   Context (* Iris resources *) `{!nintpGS Σ}.
   Implicit Type (δ : nderiv_ty Σ) .
-
-  Definition nag γ P : iProp Σ :=
-    own γ (to_agree (P : leibnizO _)).
 
   (** [ninv]: [inv_tok] in the accessor style *)
   Definition ninv_def δ N P : iProp Σ :=

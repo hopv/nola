@@ -35,8 +35,6 @@ Section facts.
   Proof. by rewrite/= nintp_fp_nintp. Qed.
   Fact nintp_indir {κ δ} {P : _ (;ᵞ)} : ⟦ ○{nil} P ⟧{κ}(δ) ⊣⊢ ⸨ P ⸩(δ).
   Proof. done. Qed.
-  Fact nintp_ag {κ δ γ} {P : _ (;ᵞ)} : ⟦ n_ag γ P ⟧{κ}(δ) ⊣⊢ nag γ P.
-  Proof. done. Qed.
   Fact nintp_inv {κ δ N} {P : _ (;ᵞ)} : ⟦ n_inv N P ⟧{κ}(δ) ⊣⊢ ninv δ N P.
   Proof. done. Qed.
   Fact nintp_na_inv {κ δ p N} {P : _ (;ᵞ)} :
@@ -62,13 +60,6 @@ Section facts.
   Proof. by rewrite/= rew_eq_hwf. Qed.
   Fact nintp_subus {δ P} : ⟦ !ᵘˢ P ⟧(δ) ⊣⊢ ⟦ ↑ˡ P ⟧(δ).
   Proof. by rewrite/= nintpS_nintp_nlarge. Qed.
-
-  (** On [nag] *)
-  Lemma nag_agree {γ} {P Q : _ (;ᵞ)} : nag γ P -∗ nag γ Q -∗ ⌜P = Q⌝.
-  Proof.
-    iIntros "P Q". iCombine "P Q" as "o".
-    iDestruct (own_valid with "o") as %v. by apply to_agree_op_valid_L in v.
-  Qed.
 
   Context `{!nDeriv ih δ}.
   Implicit Type P Q : nPropL (;ᵞ).
