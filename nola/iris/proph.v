@@ -102,9 +102,13 @@ Definition proph_asn (TY : synty) := ∀ ξ : aprvar TY, ξ.(aprvar_ty).
 (** Value under a prophecy assignment *)
 Notation proph TY A := (proph_asn TY → A).
 
+(** [prvar X] entails [Inhabited X] *)
+Lemma prvar_to_inhabited {TY} {X : TY} : prvar X → Inhabited X.
+Proof. move=> ?. by apply synty_inhabited, prvar_inhab. Qed.
+
 (** [proph_asn] is inhabited *)
 #[export] Instance proph_asn_inhabited {TY} : Inhabited (proph_asn TY).
-Proof. apply populate. move=> [?[??]]. by apply synty_inhabited. Qed.
+Proof. apply populate. move=> [??]. by apply prvar_to_inhabited. Qed.
 
 (** Evaluate [plist prvar] with [proph_asn] *)
 Definition app_plist_prvar {TY} {Xl : list TY}
