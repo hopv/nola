@@ -35,7 +35,7 @@ Implicit Type (P : nPropL (;ᵞ)) (N : namespace) (p : na_inv_pool_name)
 
 Section iris.
   Context (* Iris resources *) `{!nintpGS Σ}.
-  Implicit Type (δ : nderiv_ty Σ) .
+  Implicit Type δ : nderiv_ty Σ.
 
   (** [ninv]: [inv_tok] in the accessor style *)
   Definition ninv_def δ N P : iProp Σ :=
@@ -75,7 +75,7 @@ Section iris.
   Definition lend δ α P : iProp Σ :=
     ∃ Q, □ conv δ (↑ˡ Q) P ∗ lend_tok α Q.
   (** [fbor]: Modified [fbor_tok] *)
-  Definition fbor δ (α : lft) (Φ : Qp → nPropL (;ᵞ)) : iProp Σ := False.
+  Definition fbor δ α (Φ : Qp → nPropL (;ᵞ)) : iProp Σ := False.
 End iris.
 
 (** Utility *)
