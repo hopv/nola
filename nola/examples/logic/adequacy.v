@@ -5,6 +5,7 @@ From nola.examples.heap_lang Require Export adequacy total_adequacy.
 
 (** Precursor of [nintpGS] *)
 Class nintpGpreS Σ := NintpGpreS {
+  nintpGpreS_sinv :: sinvGpreS (nPropS (;ᵞ)) Σ;
   nintpGpreS_ninv :: ninvGpreS (nPropS (;ᵞ)) Σ;
   nintpGpreS_na_ninv :: na_ninvGpreS (nPropS (;ᵞ)) Σ;
   nintpGpreS_na_inv :: na_invG Σ;
@@ -17,14 +18,14 @@ Class nintpGpreS Σ := NintpGpreS {
 
 (** [gFunctors] for [nintpGpreS] *)
 Definition nintpΣ : gFunctors :=
-  #[ninvΣ (nPropS (;ᵞ)); na_ninvΣ (nPropS (;ᵞ)); na_invΣ; cinvΣ;
-    borrowΣ (nPropS (;ᵞ)); prophΣ nsynty; proph_agΣ nsynty; heapΣ].
+  #[sinvΣ (nPropS (;ᵞ)); ninvΣ (nPropS (;ᵞ)); na_ninvΣ (nPropS (;ᵞ)); na_invΣ;
+    cinvΣ; borrowΣ (nPropS (;ᵞ)); prophΣ nsynty; proph_agΣ nsynty; heapΣ].
 #[export] Instance subG_nintpGpreS `{!subG nintpΣ Σ} : nintpGpreS Σ.
 Proof. solve_inG. Qed.
 
 (** Whole world satisfaction *)
 Definition nwsatd `{!nintpGS Σ} : iProp Σ :=
-  inv_wsatd ∗ na_inv_wsatd ∗ borrow_wsatd ∗ proph_wsat.
+  sinv_wsatd ∗ inv_wsatd ∗ na_inv_wsatd ∗ borrow_wsatd ∗ proph_wsat.
 
 (** Adequacy of [wp] over [inv_wsatd] *)
 Lemma wp_n_adequacy `{!nintpGpreS Σ} {s e σ φ} :
@@ -32,11 +33,12 @@ Lemma wp_n_adequacy `{!nintpGpreS Σ} {s e σ φ} :
   adequate s e σ (λ v _, φ v).
 Proof.
   move=> towp. apply (heap_adequacy Σ HasNoLc)=> ?.
-  iMod inv_wsat_alloc as (?) "W0". iMod na_inv_wsat_alloc as (?) "W1".
-  iMod borrow_wsat_alloc as (?) "W2". iMod proph_wsat_alloc as (?) "W3".
-  iModIntro. iDestruct (towp (NintpGS _ _ _ _ _ _ _ _)) as "big".
-  iExists nwsatd. iFrame "big". iSplitL "W0"; [done|].
-  iSplitL "W1"; [done|]. by iSplitL "W2".
+  iMod sinv_wsat_alloc as (?) "W0". iMod inv_wsat_alloc as (?) "W1".
+  iMod na_inv_wsat_alloc as (?) "W2". iMod borrow_wsat_alloc as (?) "W3".
+  iMod proph_wsat_alloc as (?) "W4". iModIntro.
+  iDestruct (towp (NintpGS _ _ _ _ _ _ _ _ _)) as "big". iExists nwsatd.
+  iFrame "big". iSplitL "W0"; [done|]. iSplitL "W1"; [done|].
+  iSplitL "W2"; [done|]. by iSplitL "W3".
 Qed.
 
 (** Adequacy of [twp] over [inv_wsatd] *)
@@ -45,9 +47,10 @@ Lemma twp_n_adequacy `{!nintpGpreS Σ} {s e σ φ} :
   sn erased_step ([e], σ).
 Proof.
   move=> totwp. apply (heap_total Σ s _ _ φ)=> ?.
-  iMod inv_wsat_alloc as (?) "W0". iMod na_inv_wsat_alloc as (?) "W1".
-  iMod borrow_wsat_alloc as (?) "W2". iMod proph_wsat_alloc as (?) "W3".
-  iModIntro. iDestruct (totwp (NintpGS _ _ _ _ _ _ _ _)) as "big".
-  iExists nwsatd. iFrame "big". iSplitL "W0"; [done|].
-  iSplitL "W1"; [done|]. by iSplitL "W2".
+  iMod sinv_wsat_alloc as (?) "W0". iMod inv_wsat_alloc as (?) "W1".
+  iMod na_inv_wsat_alloc as (?) "W2". iMod borrow_wsat_alloc as (?) "W3".
+  iMod proph_wsat_alloc as (?) "W4". iModIntro.
+  iDestruct (totwp (NintpGS _ _ _ _ _ _ _ _ _)) as "big". iExists nwsatd.
+  iFrame "big". iSplitL "W0"; [done|]. iSplitL "W1"; [done|].
+  iSplitL "W2"; [done|]. by iSplitL "W3".
 Qed.

@@ -91,7 +91,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
       [`deriv`](nola/examples/logic/deriv.v) (Derivability)
     * [`facts`](nola/examples/logic/facts.v) (Facts),
       [`adequacy`](nola/examples/logic/adequacy.v) (Adequacy)
-    * [`inv`](nola/examples/logic/inv.v) (Invariant),
+    * [`sinv`](nola/examples/logic/sinv.v) (Simple invariant),
+      [`inv`](nola/examples/logic/inv.v) (Invariant),
       [`na_inv`](nola/examples/logic/na_inv.v) (Non-atomic invariant),
       [`borrow`](nola/examples/logic/borrow.v) (Borrowing)
     * [`verify/`](nola/examples/logic/verify/) (Verification examples)

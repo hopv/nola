@@ -38,6 +38,7 @@ Section nintp.
   Local Definition ncintpl0 (c : nconl0)
     (niS : nPropS (;ᵞ) -d> iProp Σ) : iProp Σ :=
     match c with
+    | nc_sinv_wsat => sinv_wsat niS
     | nc_inv_wsat => inv_wsat niS | nc_na_inv_wsat => na_inv_wsat niS
     | nc_borrow_wsat => borrow_wsat'' niS
     end.
@@ -62,6 +63,7 @@ Section nintp.
     λ δ, match c with
     | nc_later => ▷ ni δ _ P
     | nc_indir => ⸨ P ⸩(δ)
+    | nc_sinv => sinv δ P
     | nc_inv N => ninv δ N P | nc_na_inv p N => na_ninv δ p N P
     | nc_borc α => borc δ α P | nc_bor α => bor δ α P
     | nc_obor α q => obor δ α q P | nc_lend α => lend δ α P
@@ -230,6 +232,7 @@ Notation "⟦ P ⟧ˢ ( δ )" := ⟦ P ⟧ˢ(δ, hwf)
 Notation nintpS δ P := ⟦ P ⟧ˢ(δ) (only parsing).
 
 (** Utility *)
+Notation sinv_wsat' δ := (sinv_wsat (λ P, ⟦ P ⟧ˢ(δ))).
 Notation inv_wsat' δ := (inv_wsat (λ P, ⟦ P ⟧ˢ(δ))).
 Notation na_inv_wsat' δ := (na_inv_wsat (λ P, ⟦ P ⟧ˢ(δ))).
 Notation borrow_wsat' δ := (borrow_wsat'' (λ P, ⟦ P ⟧ˢ(δ))).

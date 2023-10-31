@@ -1,7 +1,7 @@
 (** * Iris preliminaries *)
 
 From nola.examples.logic Require Export prop.
-From nola.iris Require Export deriv wp inv na_inv borrow proph_ag.
+From nola.iris Require Export deriv wp sinv inv na_inv borrow proph_ag.
 From iris.base_logic.lib Require Export cancelable_invariants.
 From nola.examples.heap_lang Require Export definitions.
 
@@ -9,6 +9,7 @@ From nola.examples.heap_lang Require Export definitions.
 
 (** [nintpGS]: Iris resource *)
 Class nintpGS Σ := NintpGS {
+  nintpGS_sinv :: sinvGS (nPropS (;ᵞ)) Σ;
   nintpGS_ninv :: ninvGS (nPropS (;ᵞ)) Σ;
   nintpGS_na_ninv :: na_ninvGS (nPropS (;ᵞ)) Σ;
   nintpGS_na_inv :: na_invG Σ;
@@ -36,6 +37,13 @@ Implicit Type (P : nPropL (;ᵞ)) (N : namespace) (p : na_inv_pool_name)
 Section iris.
   Context (* Iris resources *) `{!nintpGS Σ}.
   Implicit Type δ : nderiv_ty Σ.
+
+  (** [sinv]: [sinv_tok] in the accessor style *)
+  Definition sinv_def δ P : iProp Σ :=
+    □ ⸨ n_sinv_wsat -∗ P ∗ (P -∗ n_sinv_wsat) ⸩(δ).
+  Local Lemma sinv_aux : seal sinv_def. Proof. by eexists. Qed.
+  Definition sinv := sinv_aux.(unseal).
+  Lemma sinv_unseal : sinv = sinv_def. Proof. exact: seal_eq. Qed.
 
   (** [ninv]: [inv_tok] in the accessor style *)
   Definition ninv_def δ N P : iProp Σ :=

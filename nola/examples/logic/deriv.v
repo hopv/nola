@@ -16,10 +16,12 @@ Notation "⟦ P ⟧{ κ }" := ⟦ P ⟧{κ}(nderiv) (only parsing) : nola_scope.
 Notation "⟦ P ⟧" := ⟦ P ⟧(nderiv) : nola_scope.
 Notation "⟦ P ⟧ˢ" := ⟦ P ⟧ˢ(nderiv) : nola_scope.
 
+Notation sinv_wsatd := (sinv_wsat' nderiv).
 Notation inv_wsatd := (inv_wsat' nderiv).
 Notation na_inv_wsatd := (na_inv_wsat' nderiv).
 Notation borrow_wsatd := (borrow_wsat' nderiv).
 
+Notation sinvd := (sinv nderiv).
 Notation ninvd := (ninv nderiv).
 Notation na_ninvd := (na_ninv nderiv).
 

@@ -84,6 +84,7 @@ Variant ncon0 : Type :=
     (γ : gname) (X : nsynty) (x : X) (ξ : prvar X).
 (** Nullary, large *)
 Variant nconl0 : Type :=
+| (** Simple invariant world satisfaction *) nc_sinv_wsat
 | (** Invariant world satisfaction *) nc_inv_wsat
 | (** Non-atomic invariant world satisfaction *) nc_na_inv_wsat
 | (** Borrowing world satisfaction *) nc_borrow_wsat.
@@ -111,6 +112,7 @@ Variant nconwpw : Type :=
 Variant ncong1 : Type :=
 | (** Later modality *) nc_later
 | (** Indirection modality *) nc_indir
+| (** Simple invariant *) nc_sinv
 | (** Invariant *) nc_inv (N : namespace)
 | (** Non-atomic invariant *) nc_na_inv
     (p : na_inv_pool_name) (N : namespace)
@@ -200,6 +202,7 @@ Notation ".⟨ φπ ⟩" := (n_0 (nc_proph_obs φπ)) (only parsing) : nProp_sco
 Notation "⟨ π , φ ⟩" := (n_0 (nc_proph_obs (λ π, φ))) : nProp_scope.
 Notation n_val_obs γ X x := (n_0 (nc_val_obs γ X x)).
 Notation n_proph_ctrl γ X x ξ := (n_0 (nc_proph_ctrl γ X x ξ)).
+Notation n_sinv_wsat := (n_l0 nc_sinv_wsat).
 Notation n_inv_wsat := (n_l0 nc_inv_wsat).
 Notation n_na_inv_wsat := (n_l0 nc_na_inv_wsat).
 Notation n_borrow_wsat := (n_l0 nc_borrow_wsat).
