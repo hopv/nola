@@ -45,15 +45,15 @@ Section borrow.
   (** Dereference a nested prophetic mutable reference *)
   Lemma proph_bor_bor_deref
     {γ X η ξ α β l q} {x : X} {Φ : _ → _ → nPropS (;ᵞ)} :
-    [[{ q.[α ⊓ β] ∗ val_obs γ (X *'ₛ prvarₛ X) (x, ξ)' ∗
+    [[{ q.[α ⊓ β] ∗ val_obs γ ((x, ξ)' : (X *'ₛ prvarₛ X)) ∗
       bord α (∃ (x : X) ξ γ' (l' : loc),
-        n_proph_ctrl γ (X *'ₛ prvarₛ X) (x, ξ)' η ∗ l ↦ #l' ∗ n_val_obs γ' X x ∗
-        n_bor' [] β (∃ x, n_proph_ctrl γ' X x ξ ∗ ↑ˡ Φ l' x)) }]]
+        n_proph_ctrl γ ((x, ξ)' : (X *'ₛ prvarₛ X)) η ∗ l ↦ #l' ∗
+        n_val_obs γ' x ∗ n_bor' [] β (∃ x, n_proph_ctrl γ' x ξ ∗ ↑ˡ Φ l' x)) }]]
       [proph_wsat ∗ borrow_wsatd]
       !#l
     [[{ l', RET #l' ; q.[α ⊓ β] ∗ ∃ (ζ : prvar X) γ'',
-      ⟨π, π η = (π ζ, ξ)'⟩ ∗ val_obs γ'' X x ∗
-      bord (α ⊓ β) (∃ x, n_proph_ctrl γ'' X x ζ ∗ ↑ˡ Φ l' x) }]].
+      ⟨π, π η = (π ζ, ξ)'⟩ ∗ val_obs γ'' x ∗
+      bord (α ⊓ β) (∃ x, n_proph_ctrl γ'' x ζ ∗ ↑ˡ Φ l' x) }]].
   Proof.
     iIntros "%Ψ [[α β][vo b]] →Ψ". iMod (bor_open with "α b") as "[o big]"=>/=.
     iDestruct "big" as (x2 ξ2 γ' l') "[pc[↦[vo' b']]]".
@@ -61,7 +61,8 @@ Section borrow.
     iDestruct (vo_pc_agree with "vo pc") as %eq. case: eq=> <-<-.
     iMod (bor_reborrow α with "β b'") as "[[β β'][b' →b']]". rewrite [β⊓_]comm.
     iMod (obor_subdiv
-      [∃ x : X, n_proph_ctrl γ (X *'ₛ prvarₛ X) (x, ξ)' η ∗ n_val_obs γ' X x]%n
+      [∃ x : X,
+        n_proph_ctrl γ ((x, ξ)' : (X *'ₛ prvarₛ X)) η ∗ n_val_obs γ' x]%n
       with "o [pc vo'] [↦ →b']") as "[[α α'][c _]]"=>/=.
     { iSplit; [|done]. iExists _. iFrame. }
     { iIntros "† [big _]". iDestruct "big" as (x'') "[pc vo']". iModIntro.
@@ -79,7 +80,7 @@ Section borrow.
     { apply (proph_dep_constr (λ x, (x, ξ)')), (proph_dep_one ζ). }
     iMod (vo_pc_alloc with "ζ") as (γ'') "[vo'' pc'']".
     iMod (obor_merge_subdiv [(_,_)';(_,_)']
-      [∃ x, n_proph_ctrl γ'' X x ζ ∗ Φ l' x]%n
+      [∃ x, n_proph_ctrl γ'' x ζ ∗ Φ l' x]%n
       with "[$o $o'//] [pc'' Φ] [→pc vo' pc']") as "[[αβ[αβ' _]][c _]]"=>/=.
     { iSplit; [|done]. iExists _. rewrite nintp_nlarge. iFrame. }
     { iIntros "† [big _]". iDestruct "big" as (x'') "[pc'' Φ]".
