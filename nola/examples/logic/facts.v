@@ -8,6 +8,8 @@ Section facts.
   (** ** Behavior of [nintp] *)
   Fact nintp_pure {κ δ φ} : ⟦ ⌜φ⌝ ⟧{κ}(δ) ⊣⊢ ⌜φ⌝.
   Proof. done. Qed.
+  Fact nintp_except_0 {κ δ P} : ⟦ ◇ P ⟧{κ}(δ) ⊣⊢ ◇ ⟦ P ⟧{κ}(δ).
+  Proof. done. Qed.
   Fact nintp_persistently {κ δ P} : ⟦ □ P ⟧{κ}(δ) ⊣⊢ □ ⟦ P ⟧{κ}(δ).
   Proof. done. Qed.
   Fact nintp_plainly {κ δ P} : ⟦ ■ P ⟧{κ}(δ) ⊣⊢ ■ ⟦ P ⟧{κ}(δ).
@@ -27,6 +29,12 @@ Section facts.
   Proof. done. Qed.
   Fact nintp_wand {κ δ P Q} : ⟦ P -∗ Q ⟧{κ}(δ) ⊣⊢ (⟦ P ⟧{κ}(δ) -∗ ⟦ Q ⟧{κ}(δ)).
   Proof. done. Qed.
+  Fact nintp_bupdw {κ δ W P} :
+    ⟦ |=[W]=> P ⟧{κ}(δ) ⊣⊢ |=[⟦ W ⟧{κ}(δ)]=> ⟦ P ⟧{κ}(δ).
+  Proof. done. Qed.
+  Fact nintp_fupdw {κ δ W E E' P} :
+    ⟦ |=[W]{E,E'}=> P ⟧{κ}(δ) ⊣⊢ |=[⟦ W ⟧{κ}(δ)]{E,E'}=> ⟦ P ⟧{κ}(δ).
+  Proof. done. Qed.
   Fact nintp_forall {κ δ A Φ} : ⟦ ∀' Φ ⟧{κ}(δ) ⊣⊢ ∀ x : A, ⟦ Φ x ⟧{κ}(δ).
   Proof. done. Qed.
   Fact nintp_exist {κ δ A Φ} : ⟦ ∃' Φ ⟧{κ}(δ) ⊣⊢ ∃ x : A, ⟦ Φ x ⟧{κ}(δ).
@@ -34,11 +42,6 @@ Section facts.
   Fact nintp_later {κ δ} {P : _ (;ᵞ)} : ⟦ ▷{nil} P ⟧{κ}(δ) ⊣⊢ ▷ ⟦ P ⟧(δ).
   Proof. by rewrite/= nintp_fp_nintp. Qed.
   Fact nintp_indir {κ δ} {P : _ (;ᵞ)} : ⟦ ○{nil} P ⟧{κ}(δ) ⊣⊢ ⸨ P ⸩(δ).
-  Proof. done. Qed.
-  Fact nintp_inv {κ δ N} {P : _ (;ᵞ)} : ⟦ n_inv N P ⟧{κ}(δ) ⊣⊢ ninv δ N P.
-  Proof. done. Qed.
-  Fact nintp_na_inv {κ δ p N} {P : _ (;ᵞ)} :
-    ⟦ n_na_inv p N P ⟧{κ}(δ) ⊣⊢ na_ninv δ p N P.
   Proof. done. Qed.
   Fact nintp_wpw {κ δ W s E e Φ} :
     ⟦ WP[W] e @ s ; E {{ Φ }} ⟧{κ}(δ) ⊣⊢
