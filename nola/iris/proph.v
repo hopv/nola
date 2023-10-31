@@ -76,8 +76,6 @@ Definition aprvar_by_inhab {TY : synpty} (X : TY) (h : synpty_inhab X)
 Definition of_plist_prvar {TY : synpty} {Xl : list TY}
   : plist prvar Xl → list (aprvar TY) := of_plist Aprvar.
 
-(** [plist aprvar Xl] as [list prvar] *)
-
 (** ** Syntactic type and prophecy assignment *)
 
 (** Syntactic type *)
