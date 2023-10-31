@@ -20,8 +20,10 @@ Definition proph_agΣ TY := ghost_varΣ (anyty TY).
 #[export] Instance subG_proph_agΣ `{!subG (proph_agΣ TY) Σ} : proph_agG TY Σ.
 Proof. solve_inG. Qed.
 
+Implicit Type γ : gname.
 Section proph_ag.
   Context `{!proph_agG TY Σ, !prophGS TY Σ}.
+  Implicit Type X : TY.
 
   (** Value observer *)
   Local Definition val_obs_def γ X x : iProp Σ := ghost_var γ (1/2) (Anyty X x).
@@ -87,7 +89,7 @@ Section proph_ag.
 
   (** Resolve the prophecy of [proph_ctrl] with [val_obs],
     retaining [proph_ctrl] *)
-  Lemma vo_pc_preresolve {γ X x x'} ξ aπ ηl q : aπ ./ ηl →
+  Lemma vo_pc_preresolve {γ X x x' ξ} aπ ηl q : aπ ./ ηl →
     q:∗[ηl] -∗ val_obs γ X x -∗ proph_ctrl γ X x' ξ =[proph_wsat]=∗
       q:∗[ηl] ∗ ⟨π, π ξ = aπ π⟩ ∗ (∀ y, ⟨π, aπ π = y⟩ -∗ proph_ctrl γ X y ξ).
   Proof.
@@ -97,6 +99,14 @@ Section proph_ag.
     iMod (proph_resolve_dep with "ξ ηl") as "[$ #obs]"; [done|]. iModIntro.
     iFrame "obs". iIntros "%y obs'". iRight. iCombine "vo vo'" as "vo2".
     iSplit; [by iExists _|]. by iApply (proph_obs_impl2 with "obs obs'")=> ?->.
+  Qed.
+  Lemma vo_pc_resolve {γ X x x'} {y : X} {ξ} :
+    val_obs γ X x -∗ proph_ctrl γ X x' ξ =[proph_wsat]=∗
+      ⟨π, π ξ = y⟩ ∗ proph_ctrl γ X y ξ.
+  Proof.
+    iIntros "vo pc".
+    iMod (vo_pc_preresolve (λ _, y) [] 1 with "[//] vo pc") as "[_[$ →pc]]".
+    { done. } iModIntro. iApply "→pc". by iApply proph_obs_true.
   Qed.
 
   (** Resolve the prophecy of [proph_ctrl] *)
