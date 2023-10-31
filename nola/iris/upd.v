@@ -29,14 +29,14 @@ Class GenUpd `{!BiBUpd PROP} (M : PROP → PROP) : Prop := {
 (** [bupd] and [fupd] satisfy [GenUpd] *)
 #[export] Instance gen_upd_bupd `{!BiBUpd PROP} : GenUpd (PROP:=PROP) bupd.
 Proof.
-  split. { exact _. } { by iIntros "%$". } { by move=> ??->. }
-  { iIntros "%>$". } { by iIntros "%%[>$$]". }
+  split=> >. { exact _. } { done. } { by move=> ->. } { iIntros ">$". }
+  { by iIntros "[>$$]". }
 Qed.
 #[export] Instance gen_upd_fupd `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP}
   {E} : GenUpd (PROP:=PROP) (fupd E E).
 Proof.
-  split. { exact _. } { by iIntros "% >$". } { by move=> ??->. }
-  { iIntros "%>$". } { by iIntros "%%[>$$]". }
+  split=> >. { exact _. } { done. } { by move=> ->. } { iIntros ">$". }
+  { by iIntros "[>$$]". }
 Qed.
 
 Section gen_upd.
@@ -237,9 +237,9 @@ Section lemmas.
   #[export] Instance gen_upd_modw `{!BiBUpd PROP, !GenUpd M} {W} :
     GenUpd (modw M W) | 10.
   Proof.
-    split. { exact _. } { by iIntros "% >$$". } { by move=> ??->. }
-    { move=> ?. apply modw_compose=> ?. exact gen_upd_trans. }
-    { move=> *. apply modw_frame_r=> *. exact gen_upd_frame_r. }
+    split=> >. { exact _. } { by iIntros ">$$". } { by move=> ->. }
+    { apply modw_compose=> ?. exact gen_upd_trans. }
+    { apply modw_frame_r=> *. exact gen_upd_frame_r. }
   Qed.
 
   (** Compose [modw]s accumulating the world satisfaction *)
