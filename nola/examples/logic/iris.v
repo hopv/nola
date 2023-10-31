@@ -44,8 +44,6 @@ Section iris.
   Local Lemma ninv_aux : seal ninv_def. Proof. by eexists. Qed.
   Definition ninv := ninv_aux.(unseal).
   Lemma ninv_unseal : ninv = ninv_def. Proof. exact: seal_eq. Qed.
-  #[export] Instance ninv_persistent {δ N P} : Persistent (ninv δ N P).
-  Proof. rewrite ninv_unseal. exact _. Qed.
 
   (** [na_ninv]: [na_ninv] in the accessor style *)
   Definition na_ninv_def δ p N P : iProp Σ :=
@@ -55,9 +53,6 @@ Section iris.
   Local Lemma na_ninv_aux : seal na_ninv_def. Proof. by eexists. Qed.
   Definition na_ninv := na_ninv_aux.(unseal).
   Lemma na_ninv_unseal : na_ninv = na_ninv_def. Proof. exact: seal_eq. Qed.
-  #[export] Instance na_ninv_persistent {δ p N P} :
-    Persistent (na_ninv δ p N P).
-  Proof. rewrite na_ninv_unseal. exact _. Qed.
 
   (** [conv]: Proposition converter *)
   Definition conv δ P Q : iProp Σ := ⸨ P -∗ Q ⸩(δ).

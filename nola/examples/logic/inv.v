@@ -6,6 +6,11 @@ Implicit Type P Q : nPropL (;ᵞ).
 
 Section lemmas.
   Context `{!nintpGS Σ}.
+  Implicit Type δ : nderiv_ty Σ.
+
+  (** [ninv] is persistent *)
+  #[export] Instance ninv_persistent {δ N P} : Persistent (ninv δ N P).
+  Proof. rewrite ninv_unseal. exact _. Qed.
 
   (** Access [ninv] *)
   Lemma ninv_acc {N P E} : ↑N ⊆ E →
@@ -53,8 +58,9 @@ Section lemmas.
   Lemma ninv_split {N P Q} :
     ninv δ N (P ∗ Q) ⊢ ninv δ N P ∗ ninv δ N Q.
   Proof.
-    iIntros "#NPQ". iSplit; iApply (ninv_convert with "[] NPQ"); iModIntro;
-    iApply (Deriv_intro (δ:=δ)); by iIntros (???) "/=[$$]!>$".
+    iIntros "#NPQ".
+    iSplit; iApply (ninv_convert with "[] NPQ"); iModIntro;
+      iApply (Deriv_intro (δ:=δ)); by iIntros (???) "/=[$$]!>$".
   Qed.
   Lemma ninv_fupd {N P} :
     ninv δ N (|={∅}=> P) ⊣⊢ ninv δ N P.
@@ -74,7 +80,7 @@ Section lemmas.
     ninv δ N P -∗ ninv δ N' Q -∗ ninv δ N'' (P ∗ Q).
   Proof.
     rewrite ninv_unseal. iIntros (??) "#NP #N'Q !>".
-    iApply (Deriv_map2 (δ:=δ) with "[] NP N'Q")=>/=.
+    iApply (Deriv_map2 (ih:=ih) with "[] NP N'Q")=>/=.
     iIntros (???) "{NP}NP {N'Q}N'Q". iIntros (??).
     iMod ("NP" with "[%]") as "[$ P→]"; [set_solver|].
     iMod ("N'Q" with "[%]") as "[$ Q→]"; [set_solver|].
