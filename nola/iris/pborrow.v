@@ -13,11 +13,11 @@ Variant pbprop (TY : synty) (PROP : Type) : Type :=
 | (* For prophetic lender *) pbprop_plend
     {X : TY} (xπ : proph TY X) (Φ : X → PROP)
 | (* For prophetic reborrowing *) #[local] pbprop_preborrow
-    {X Y : TY} (γ γ' : gname) (ξ : prvar X) (f : Y → X).
+    {X Y : TY} (γ γ' γx : gname) (ξ : prvar X) (f : Y → X).
 Arguments pbprop_just {_ _} _.
 Arguments pbprop_pbor {_ _ _} _ _ _.
 Arguments pbprop_plend {_ _ _} _ _.
-Arguments pbprop_preborrow {_ _ _ _} _ _ _ _.
+Arguments pbprop_preborrow {_ _ _ _} _ _ _ _ _.
 
 (** Ghost state *)
 Class pborrowGS TY PROP Σ := PborrowGS {
@@ -155,7 +155,8 @@ Section pborrow.
     | pbprop_just P => intp P
     | pbprop_pbor γ ξ Φ => ∃ x, proph_ctrl γ x ξ ∗ intp (Φ x)
     | pbprop_plend xπ Φ => plend_body intp xπ Φ
-    | pbprop_preborrow γ γ' ξ f => ∃ y, proph_ctrl γ (f y) ξ ∗ val_obs γ' y
+    | pbprop_preborrow γ γ' γx ξ f =>
+        ∃ y, proph_ctrl γ (f y) ξ ∗ val_obs γ' y ∗ val_obs γx y
     end.
 
   (** World satisfaction *)
@@ -496,66 +497,68 @@ Section pborrow.
 
   (** Reborrow a nested prophetic borrower *)
   Lemma opbor_opbor_tok_reborrow `{!GenUpd M} {intp} {X Y : TY}
-    {α q ξ Φ β r η Ψ} y (f : Y → X) : Inj (=) (=) f →
+    {α q ξ Φ β r η Ψ} y (f : Y → X) :
     opbor_tok (X:=X) α q ξ Φ -∗ opbor_tok (X:=Y) β r η Ψ -∗ intp (Ψ y) -∗
     (∀ y', [†α] -∗ pbor_tok β η y' Ψ -∗ modw M proph_wsat (intp (Φ (f y'))))
       =[proph_wsat ∗ pborrow_wsat M intp]=∗ ∃ ζ : prvar _,
       q.[α] ∗ r.[β] ∗ ⟨π, π ξ = f (π ζ)⟩ ∗ pbor_ctok (α ⊓ β) ζ y Ψ.
   Proof.
-    rewrite opbor_tok_unseal=> injf.
+    rewrite opbor_tok_unseal.
     iIntros "[%γ[[%[vo pc]] o]] [%γ'[[%[vo' pc']] o']] Ψ →Φ".
     iMod (vo_pc_update with "vo pc") as "[vo pc]".
     iMod (vo_pc_update with "vo' pc'") as "[vo' pc']".
     iMod (obor_tok_reborrow (M:=modw M _) α with "o' [pc' Ψ]")
       as "[β[c →b']]". { iExists _. iFrame. } rewrite lft_meet_comm.
-    iMod (obor_tok_subdiv (M:=modw M _) [pbprop_preborrow γ γ' ξ f]
-      with "o [pc vo'] [→Φ →b']") as "[α[c' _]]"=>/=.
+    iMod vo_vo_alloc as (γx) "[vox vox']".
+    iMod (obor_tok_subdiv (M:=modw M _) [pbprop_preborrow γ γ' γx ξ f]
+      with "o [pc vo' vox'] [→Φ →b']") as "[α[c' _]]"=>/=.
     { iSplit; [|done]. iExists _. iFrame. }
-    { iIntros "#† [[%y'[pc vo']]_]". iExists (f y'). iFrame "pc".
+    { iIntros "#† [[%y'[pc[vo' _]]]_]". iExists (f y'). iFrame "pc".
       iApply ("→Φ" with "†"). rewrite pbor_tok_unseal. iRight. iExists _.
       iFrame "vo'". by iApply "→b'". }
     iDestruct (bor_ctok_lft with "[] c'") as "c'"; [iApply lft_sincl_meet_l|].
     iDestruct (lft_tok_combine with "α β") as (?) "[αβ →αβ]".
     rewrite (lock meet). iDestruct "αβ" as "[αβ αβ']". unlock.
     iMod (bor_ctok_open with "αβ c") as "[o[%[pc' Ψ]]]".
-    iMod (bor_ctok_open with "αβ' c'") as "[o'[%[pc vo']]]".
+    iMod (bor_ctok_open with "αβ' c'") as "[o'[%[pc[vo' vox']]]]".
+    iDestruct (vo_vo_agree with "vox vox'") as %<-.
     iDestruct (vo_pc_agree with "vo' pc'") as %<-.
-    iDestruct (vo_pc_agree with "vo pc") as %eq. apply injf in eq. rewrite -eq.
     iMod (proph_alloc y) as (ζ) "ζ". iExists ζ.
     iMod (vo_pc_preresolve (λ π, f (π ζ)) [Aprvar _ ζ] with "[$ζ //] vo pc")
       as "[[ζ _][$ →pc]]".
     { apply proph_dep_constr, proph_dep_one. }
     iMod (vo_pc_alloc with "ζ") as (γ'') "[vo'' pc'']".
     iMod (obor_tok_merge_subdiv (M:=modw M _) [(_,_)';(_,_)']
-      [pbprop_pbor γ'' ζ Ψ] with "[$o $o' //] [pc'' Ψ] [→pc vo' pc']")
+      [pbprop_pbor γ'' ζ Ψ] with "[$o $o' //] [pc'' Ψ] [→pc vo' pc' vox vox']")
       as "[[αβ[αβ' _]][c _]]"=>/=.
     { iSplit; [|done]. iExists _. iFrame. }
     { iIntros "_ [[%y'[pc'' Ψ]]_]". iMod (pc_resolve with "pc''") as "obs".
-      iMod (vo_pc_update with "vo' pc'") as "[vo' pc']". iIntros "$ !>".
-      iSplitL "pc' Ψ"; [iExists _; by iFrame|]. iSplit; [|done].
-      iExists _. iFrame "vo'". iApply "→pc".
+      iMod (vo_pc_update with "vo' pc'") as "[vo' pc']".
+      iMod (vo_vo_update with "vox vox'") as "[vox _]". iApply modw_fold.
+      iModIntro. iSplitL "pc' Ψ"; [iExists _; by iFrame|]. iSplit; [|done].
+      iExists _. iFrame "vo' vox". iApply "→pc".
       by iApply (proph_obs_impl with "obs")=> ? ->. }
     iModIntro. iDestruct ("→αβ" with "[$αβ $αβ' //]") as "[$$]".
     rewrite pbor_ctok_unseal. iRight. iExists _. iFrame.
   Qed.
   Lemma opbor_pbor_ctok_reborrow `{!GenUpd M} {intp} {X Y : TY}
-    {α q ξ Φ β r η y Ψ} (f : Y → X) : Inj (=) (=) f →
+    {α q ξ Φ β r η y Ψ} (f : Y → X) :
     opbor_tok (X:=X) α q ξ Φ -∗ r.[β] -∗ pbor_ctok (X:=Y) β η y Ψ -∗
     (∀ y', [†α] -∗ pbor_tok β η y' Ψ -∗ modw M proph_wsat (intp (Φ (f y'))))
       =[proph_wsat ∗ pborrow_wsat M intp]=∗ ∃ ζ : prvar _,
       q.[α] ∗ r.[β] ∗ ⟨π, π ξ = f (π ζ)⟩ ∗ pbor_ctok (α ⊓ β) ζ y Ψ.
   Proof.
-    iIntros (?) "Φ β c →Φ". iMod (pbor_ctok_open with "β c") as "[o Ψ]".
+    iIntros "Φ β c →Φ". iMod (pbor_ctok_open with "β c") as "[o Ψ]".
     iApply (opbor_opbor_tok_reborrow with "Φ o Ψ →Φ").
   Qed.
   Lemma opbor_pbor_tok_reborrow `{!GenUpd M} {intp} {X Y : TY}
-    {α q ξ Φ β r η y Ψ} (f : Y → X) : Inj (=) (=) f →
+    {α q ξ Φ β r η y Ψ} (f : Y → X) :
     opbor_tok (X:=X) α q ξ Φ -∗ r.[β] -∗ pbor_tok (X:=Y) β η y Ψ -∗
     (∀ y', [†α] -∗ pbor_tok β η y' Ψ -∗ modw M proph_wsat (intp (Φ (f y')))) -∗
       modw M (proph_wsat ∗ pborrow_wsat M intp) (∃ ζ : prvar _,
       q.[α] ∗ r.[β] ∗ ⟨π, π ξ = f (π ζ)⟩ ∗ pbor_ctok (α ⊓ β) ζ y Ψ).
   Proof.
-    iIntros (?) "Φ β c →Φ". iMod (pbor_tok_open with "β c") as "[o Ψ]".
+    iIntros "Φ β c →Φ". iMod (pbor_tok_open with "β c") as "[o Ψ]".
     iMod (opbor_opbor_tok_reborrow with "Φ o Ψ →Φ") as "$". by iIntros.
   Qed.
 End pborrow.
