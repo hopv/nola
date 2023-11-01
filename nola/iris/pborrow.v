@@ -137,8 +137,9 @@ Section pborrow.
     opbor_tok (X:=X) α q ξ Φ -∗ 1:[ξ] ∗ (1:[ξ] -∗ opbor_tok α q ξ Φ).
   Proof.
     rewrite opbor_tok_unseal. iIntros "[%[[%[vo pc]] o]]".
-    iDestruct (vo_pc_proph_tok with "vo pc") as "[$ →vopc]". iIntros "ξ".
-    iDestruct ("→vopc" with "ξ") as "vopc". iExists _. iFrame "o". by iExists _.
+    iDestruct (vo_pc_vo_proph with "vo pc") as "[vo[vo' $]]". iIntros "ξ".
+    iExists _. iFrame "o". iExists _. iFrame "vo".
+    iApply (vo_proph_pc with "vo' ξ").
   Qed.
 
   (** ** World satisfaction *)
