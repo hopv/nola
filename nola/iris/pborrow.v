@@ -457,15 +457,27 @@ Section pborrow.
     iExists ηl. by iDestruct "big" as "/=[[$ _][[$ _]$]]".
   Qed.
 
-  (** Close a prophetic borrower *)
+  (** Subdivide a prophetic borrower without changing the prophecy *)
+  Lemma opbor_tok_nsubdiv `{!GenUpd M} {intp X α q ξ Φ} Ψ x :
+    opbor_tok (X:=X) α q ξ Φ -∗ intp (Ψ x) -∗
+    (∀ y, [†α] -∗ intp (Ψ y) -∗ modw M proph_wsat (intp (Φ y)))
+      =[pborrow_wsat M intp]=∗ q.[α] ∗ pbor_ctok α ξ x Ψ.
+  Proof.
+    rewrite opbor_tok_unseal pbor_ctok_unseal. iIntros "[%[[%[vo pc]] o]] Ψ →Φ".
+    iMod (vo_pc_update with "vo pc") as "[vo pc]".
+    iMod (obor_tok_subdiv (M:=modw M _) [pbprop_pbor _ _ Ψ]
+      with "o [pc Ψ] [→Φ]") as "[$[c _]]"=>/=.
+    { iSplit; [|done]. iExists _. iFrame. }
+    { iIntros "† [[%[pc Ψ]]_]". iMod ("→Φ" with "† Ψ") as "Φ". iModIntro.
+      iExists _. iFrame. }
+    iModIntro. iRight. iExists _. iFrame.
+  Qed.
+  (** Simply close a prophetic borrower *)
   Lemma opbor_tok_close `{!GenUpd M} {intp X α q ξ Φ} x :
     opbor_tok (X:=X) α q ξ Φ -∗ intp (Φ x) =[pborrow_wsat M intp]=∗
       q.[α] ∗ pbor_ctok α ξ x Φ.
   Proof.
-    rewrite opbor_tok_unseal pbor_ctok_unseal. iIntros "[%[[%[vo pc]] o]] Φ".
-    iMod (vo_pc_update with "vo pc") as "[vo pc]".
-    iMod (obor_tok_close (M:=modw M _) with "o [pc Φ]") as "[$ c]".
-    { iExists _. iFrame. } iModIntro. iRight. iExists _. iFrame.
+    iIntros "o Φ". iApply (opbor_tok_nsubdiv Φ with "o Φ"). by iIntros.
   Qed.
 
   (** Resolve the prophecy of a prophetic borrower *)
