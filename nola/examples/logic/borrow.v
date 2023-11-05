@@ -128,13 +128,13 @@ Section borrow.
   Qed.
 
   (** Extend a lender *)
-  Lemma lend_extend {α P} (Ql : list (nPropS (;ᵞ))) :
+  Lemma lend_split {α P} (Ql : list (nPropS (;ᵞ))) :
     lendd α P -∗
     (⟦ P ⟧ =[proph_wsat]=∗ [∗ list] Q ∈ Ql, ⟦ Q ⟧) =[borrow_wsatd]=∗
       [∗ list] Q ∈ Ql, lendd α (↑ˡ Q).
   Proof.
     iIntros "[%P'[#→P l]] →Ql". rewrite convd_use.
-    iMod (lend_tok_extend with "l [→P →Ql]") as "ll"=>/=.
+    iMod (lend_tok_split with "l [→P →Ql]") as "ll"=>/=.
     { rewrite nintpS_nintp_nlarge. setoid_rewrite nintpS_nintp. iIntros "P'".
       iDestruct ("→P" with "P'") as "P". by iMod ("→Ql" with "P"). }
     iModIntro. iApply (big_sepL_impl with "ll"). iIntros "!> %% _ l".

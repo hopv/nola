@@ -185,12 +185,12 @@ Section pborrow.
   Qed.
 
   (** Extend a lender *)
-  Lemma nlend_tok_extend `{!GenUpd M} {intp α P} Ql :
+  Lemma nlend_tok_split `{!GenUpd M} {intp α P} Ql :
     nlend_tok α P -∗ (intp P -∗ modw M proph_wsat ([∗ list] Q ∈ Ql, intp Q))
       =[pborrow_wsat M intp]=∗ [∗ list] Q ∈ Ql, nlend_tok α Q.
   Proof.
     iIntros "l →Ql".
-    iMod (lend_tok_extend (M:=modw M _) (pbprop_just <$> Ql) with "l [→Ql]");
+    iMod (lend_tok_split (M:=modw M _) (pbprop_just <$> Ql) with "l [→Ql]");
       by rewrite !big_sepL_fmap.
   Qed.
 
@@ -322,7 +322,7 @@ Section pborrow.
   Qed.
 
   (** Extend a prophetic lender *)
-  Lemma plend_tok_extend `{!GenUpd M} {intp α X xπ Φ} Yl
+  Lemma plend_tok_split `{!GenUpd M} {intp α X xπ Φ} Yl
     (yπΨl : plist (λ Y : TY, proph TY Y *' (Y → PROP)) Yl) :
     plend_tok (X:=X) α xπ Φ -∗
     (plend_body intp xπ Φ -∗ modw M proph_wsat
@@ -330,7 +330,7 @@ Section pborrow.
       =[pborrow_wsat M intp]=∗ [∗ plist] '(yπ, Ψ)' ∈ yπΨl, plend_tok α yπ Ψ.
   Proof.
     iIntros "/=l →Ψl".
-    iMod (lend_tok_extend (M:=modw M _) (plend_list yπΨl) with "l [→Ψl]");
+    iMod (lend_tok_split (M:=modw M _) (plend_list yπΨl) with "l [→Ψl]");
       by rewrite big_sepL_of_plist.
   Qed.
 

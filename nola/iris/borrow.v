@@ -436,7 +436,7 @@ Section borrow.
   Qed.
 
   (** Extend a lender *)
-  Lemma lend_tok_extend `{!GenUpd M} {intp α P} Ql :
+  Lemma lend_tok_split `{!GenUpd M} {intp α P} Ql :
     lend_tok α P -∗ (intp P -∗ M ([∗ list] Q ∈ Ql, intp Q))
       =[borrow_wsat M intp]=∗ [∗ list] Q ∈ Ql, lend_tok α Q.
   Proof.
