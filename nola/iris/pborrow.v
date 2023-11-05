@@ -515,8 +515,8 @@ Section pborrow.
     {α q ξ Φ β r η Ψ} y (f : Y → X) :
     opbor_tok (X:=X) α q ξ Φ -∗ opbor_tok (X:=Y) β r η Ψ -∗ intp (Ψ y) -∗
     (∀ y', [†α] -∗ pbor_tok β y' η Ψ -∗ modw M proph_wsat (intp (Φ (f y'))))
-      =[proph_wsat ∗ pborrow_wsat M intp]=∗ ∃ ζ : prvar _,
-      q.[α] ∗ r.[β] ∗ ⟨π, π ξ = f (π ζ)⟩ ∗ pbor_ctok (α ⊓ β) y ζ Ψ.
+      =[proph_wsat ∗ pborrow_wsat M intp]=∗ ∃ η' : prvar _,
+      q.[α] ∗ r.[β] ∗ ⟨π, π ξ = f (π η')⟩ ∗ pbor_ctok (α ⊓ β) y η' Ψ.
   Proof.
     rewrite opbor_tok_unseal.
     iIntros "[%γ[[%[vo pc]] o]] [%γ'[[%[vo' pc']] o']] Ψ →Φ".
@@ -538,13 +538,13 @@ Section pborrow.
     iMod (bor_ctok_open with "αβ' c'") as "[o'[%[pc[vo' vox']]]]".
     iDestruct (vo_vo_agree with "vox vox'") as %<-.
     iDestruct (vo_pc_agree with "vo' pc'") as %<-.
-    iMod (proph_alloc y) as (ζ) "ζ". iExists ζ.
-    iMod (vo_pc_preresolve (λ π, f (π ζ)) [Aprvar _ ζ] with "[$ζ //] vo pc")
-      as "[[ζ _][$ →pc]]".
+    iMod (proph_alloc y) as (η') "η'". iExists η'.
+    iMod (vo_pc_preresolve (λ π, f (π η')) [Aprvar _ η'] with "[$η' //] vo pc")
+      as "[[η' _][$ →pc]]".
     { apply proph_dep_constr, proph_dep_one. }
-    iMod (vo_pc_alloc with "ζ") as (γ'') "[vo'' pc'']".
+    iMod (vo_pc_alloc with "η'") as (γ'') "[vo'' pc'']".
     iMod (obor_tok_merge_subdiv (M:=modw M _) [(_,_)';(_,_)']
-      [pbprop_pbor γ'' ζ Ψ] with "[$o $o' //] [pc'' Ψ] [→pc vo' pc' vox vox']")
+      [pbprop_pbor γ'' η' Ψ] with "[$o $o' //] [pc'' Ψ] [→pc vo' pc' vox vox']")
       as "[[αβ[αβ' _]][c _]]"=>/=.
     { iSplit; [|done]. iExists _. iFrame. }
     { iIntros "_ [[%y'[pc'' Ψ]]_]". iMod (pc_resolve with "pc''") as "obs".
@@ -560,8 +560,8 @@ Section pborrow.
     {α q ξ Φ β r y η Ψ} (f : Y → X) :
     opbor_tok (X:=X) α q ξ Φ -∗ r.[β] -∗ pbor_ctok (X:=Y) β y η Ψ -∗
     (∀ y', [†α] -∗ pbor_tok β y' η Ψ -∗ modw M proph_wsat (intp (Φ (f y'))))
-      =[proph_wsat ∗ pborrow_wsat M intp]=∗ ∃ ζ : prvar _,
-      q.[α] ∗ r.[β] ∗ ⟨π, π ξ = f (π ζ)⟩ ∗ pbor_ctok (α ⊓ β) y ζ Ψ.
+      =[proph_wsat ∗ pborrow_wsat M intp]=∗ ∃ η' : prvar _,
+      q.[α] ∗ r.[β] ∗ ⟨π, π ξ = f (π η')⟩ ∗ pbor_ctok (α ⊓ β) y η' Ψ.
   Proof.
     iIntros "Φ β c →Φ". iMod (pbor_ctok_open with "β c") as "[o Ψ]".
     iApply (opbor_opbor_tok_reborrow with "Φ o Ψ →Φ").
@@ -570,8 +570,8 @@ Section pborrow.
     {α q ξ Φ β r y η Ψ} (f : Y → X) :
     opbor_tok (X:=X) α q ξ Φ -∗ r.[β] -∗ pbor_tok (X:=Y) β y η Ψ -∗
     (∀ y', [†α] -∗ pbor_tok β y' η Ψ -∗ modw M proph_wsat (intp (Φ (f y')))) -∗
-      modw M (proph_wsat ∗ pborrow_wsat M intp) (∃ ζ : prvar _,
-      q.[α] ∗ r.[β] ∗ ⟨π, π ξ = f (π ζ)⟩ ∗ pbor_ctok (α ⊓ β) y ζ Ψ).
+      modw M (proph_wsat ∗ pborrow_wsat M intp) (∃ η' : prvar _,
+      q.[α] ∗ r.[β] ∗ ⟨π, π ξ = f (π η')⟩ ∗ pbor_ctok (α ⊓ β) y η' Ψ).
   Proof.
     iIntros "Φ β c →Φ". iMod (pbor_tok_open with "β c") as "[o Ψ]".
     iMod (opbor_opbor_tok_reborrow with "Φ o Ψ →Φ") as "$". by iIntros.
