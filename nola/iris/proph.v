@@ -119,13 +119,15 @@ Lemma prophR_unseal : prophR = prophR_def. Proof. exact: seal_eq. Qed.
 
 (** Ghost state *)
 Class prophGS TY Σ := ProphGS {
-  prophG_in :: inG Σ (prophR TY);
-  proph_name : gname
+  prophG_in : inG Σ (prophR TY);
+  proph_name : gname;
 }.
+Local Existing Instance prophG_in.
 Local Instance inG_prophR_def `{!inG Σ (prophR PROP)} :
   inG Σ (prophR_def PROP).
 Proof. rewrite -prophR_unseal. exact _. Qed.
-Class prophGpreS TY Σ := prophGpreS_in :: inG Σ (prophR TY).
+Class prophGpreS TY Σ := prophGpreS_in : inG Σ (prophR TY).
+Local Existing Instance prophGpreS_in.
 Definition prophΣ TY := GFunctor (prophR TY).
 #[export] Instance subG_prophPreG `{!subG (prophΣ TY) Σ} : prophGpreS TY Σ.
 Proof. solve_inG. Qed.
