@@ -2,7 +2,7 @@
 
 From nola.examples.logic Require Export synty.
 From nola.util Require Export funext func rel ctx schoice.
-From nola.iris Require Export upd lft.
+From nola.iris Require Export upd lft proph.
 From stdpp Require Export coPset namespaces.
 From iris.bi Require Export notation.
 From iris.base_logic Require Export lib.na_invariants.

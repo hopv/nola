@@ -13,6 +13,7 @@ nola/util/schoice.v
 nola/util/plist.v
 nola/util/hgt.v
 nola/util/ctx.v
+nola/util/proph.v
 
 nola/iris/dfrac.v
 nola/iris/gmap.v
