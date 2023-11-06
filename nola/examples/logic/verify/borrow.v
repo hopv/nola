@@ -35,7 +35,8 @@ Section borrow.
     iDestruct "big" as (l') "[↦ b']". iApply twpw_fupdw_nonval; [done|].
     wp_load. iModIntro. iMod (bor_reborrow α with "β b'") as "[β[b' →b']]".
     rewrite [_⊓_]comm.
-    iMod (obor_subdiv [] with "o [//] [↦ →b']") as "[α _]"=>/=.
+    iMod (obor_subdiv [] with "[] o [//] [↦ →b']") as "[α _]"=>/=.
+    { iApply lft_sincl_refl. }
     { iIntros "† _". iModIntro. iExists _. iFrame "↦". by iApply "→b'". }
     iModIntro. iApply "→Ψ". rewrite borc_bor. iFrame.
   Qed.
@@ -63,14 +64,13 @@ Section borrow.
     iMod (obor_subdiv
       [∃ x : X,
         n_proph_ctrl γ ((x, ξ)' : (X *'ₛ prvarₛ X)) η ∗ n_val_obs γ' x]%n
-      with "o [pc vo'] [↦ →b']") as "[[α α'][c _]]"=>/=.
-    { iSplit; [|done]. iExists _. iFrame. }
+      with "[] o [pc vo'] [↦ →b']") as "[[α α'][c _]]"=>/=.
+    { iApply lft_sincl_refl. } { iSplit; [|done]. iExists _. iFrame. }
     { iIntros "† [big _]". iDestruct "big" as (x'') "[pc vo']". iModIntro.
       iExists _, _, _, _. iFrame "↦ vo' pc". by iApply "→b'". }
-    iDestruct (borc_lft with "[] c") as "c"; [iApply lft_sincl_meet_l|].
-    iMod (borc_open with "[α β] c") as "[o big]"; [by iFrame|]=>/=.
+    iMod (borc_open with "α c") as "[o big]"=>/=.
     iDestruct "big" as (x') "[pc vo']".
-    iMod (borc_open with "[α' β'] b'") as "[o' big]"; [by iFrame|]=>/=.
+    iMod (borc_open with "[α' β] b'") as "[o' big]"; [by iFrame|]=>/=.
     iDestruct "big" as (x'2) "[pc' Φ]".
     iDestruct (vo_pc_agree with "vo' pc'") as %<-.
     iDestruct (vo_pc_agree with "vo pc") as %eq. case: eq=> <-.
@@ -79,9 +79,11 @@ Section borrow.
       with "[$ζ//] vo pc") as "[[ζ _][#obs →pc]]".
     { apply (proph_dep_constr (λ x, (x, ξ)')), (proph_dep_one ζ). }
     iMod (vo_pc_alloc with "ζ") as (γ'') "[vo'' pc'']".
-    iMod (obor_merge_subdiv [(_,_)';(_,_)']
+    iMod (obor_merge_subdiv [(_,_,_)';(_,_,_)']
       [∃ x, n_proph_ctrl γ'' x ζ ∗ Φ l' x]%n
-      with "[$o $o'//] [pc'' Φ] [→pc vo' pc']") as "[[αβ[αβ' _]][c _]]"=>/=.
+      with "[$o $o'] [pc'' Φ] [→pc vo' pc']") as "[[α[[α' β] _]][c _]]"=>/=.
+    { iSplit; [by iApply lft_sincl_meet_l|].
+      iSplit; by [iApply lft_sincl_refl|]. }
     { iSplit; [|done]. iExists _. rewrite nintp_nlarge. iFrame. }
     { iIntros "† [big _]". iDestruct "big" as (x'') "[pc'' Φ]".
       iMod (vo_pc_update with "vo' pc'") as "[vo' pc']".
@@ -89,7 +91,7 @@ Section borrow.
       - iExists x''. iFrame "vo'". iApply "→pc".
         by iApply (proph_obs_impl with "obs'")=> ?->.
       - iSplit; [|done]. iExists _. rewrite nintp_nlarge. iFrame. }
-    iModIntro. iApply "→Ψ". iFrame "αβ αβ'". iExists _, _.
+    iModIntro. iApply "→Ψ". iFrame "α α' β β'". iExists _, _.
     rewrite borc_bor. by iFrame.
   Qed.
 End borrow.

@@ -704,58 +704,62 @@ Section borrow.
   Qed.
 
   (** Lemma for [obor_tok_merge_subdiv] *)
-  Local Lemma obor_toks_dtoks_bound {α qPl} :
-    ([∗ list] '(q, P)' ∈ qPl, obor_tok α q P) ⊢ ∃ d β, α ⊑□ β ∗
-      [∗ list] '(q, P)' ∈ qPl, ∃ d' α' β',
-        ⌜d' < d ∧ β = α' ⊓ β'⌝ ∗ obor_dtok d' α α' q P.
+  Local Lemma obor_toks_dtoks_bound {αqPl β} :
+    ([∗ list] '(α, q, P)' ∈ αqPl, β ⊑□ α ∗ obor_tok α q P) ⊢ ∃ d γ, β ⊑□ γ ∗
+      [∗ list] '(α, q, P)' ∈ αqPl, ∃ d' α' γ',
+        ⌜d' < d ∧ γ = α' ⊓ γ'⌝ ∗ obor_dtok d' α α' q P.
   Proof.
-    elim: qPl=>/=.
+    elim: αqPl=>/=.
     { iIntros. iExists 0, ⊤. iSplit; [iApply lft_sincl_top|done]. }
-    move=> [P q] qPl ->. rewrite obor_tok_dtok.
-    iIntros "[[%d[%α'[#⊑ o]]] [%d'[%β[#? big]]]]".
-    iExists (S d `max` d'), (α' ⊓ β).
-    iSplitR; [by iApply lft_sincl_meet_intro|]. iSplitL "o".
+    move=> [α[P q]] αqPl ->. rewrite obor_tok_dtok.
+    iIntros "[[#βα[%d[%α'[#αα' o]]]] [%d'[%γ[#βγ big]]]]".
+    iExists (S d `max` d'), (α' ⊓ γ). iSplitR.
+    { iApply lft_sincl_meet_intro; [|done].
+      by iApply lft_sincl_trans; [|done]. } iSplitL "o".
     { iExists _, _, _. iFrame "o". iPureIntro. split; [lia|done]. }
     iClear "#". iStopProof. do 3 f_equiv.
     iDestruct 1 as (d'' α'' β' [?->]) "o". iExists _, _, _. iFrame "o".
     iPureIntro. split; [lia|]. by rewrite assoc [α' ⊓ α'']comm -assoc.
   Qed.
   (** Merge and subdivide borrowers *)
-  Lemma obor_tok_merge_subdiv `{!GenUpd M} {intp α} qPl Ql :
-    ([∗ list] '(q, P)' ∈ qPl, obor_tok α q P) -∗ ([∗ list] Q ∈ Ql, intp Q) -∗
-    ([†α] -∗ ([∗ list] Q ∈ Ql, intp Q) -∗ M ([∗ list] P ∈ qPl.*2', intp P)%I)
+  Lemma obor_tok_merge_subdiv `{!GenUpd M} {intp} αqPl Ql β :
+    ([∗ list] '(α, q, P)' ∈ αqPl, β ⊑□ α ∗ obor_tok α q P) -∗
+    ([∗ list] Q ∈ Ql, intp Q) -∗
+    ([†β] -∗ ([∗ list] Q ∈ Ql, intp Q) -∗
+      M ([∗ list] '(_, _, P)' ∈ αqPl, intp P)%I)
       =[borrow_wsat M intp]=∗
-      ([∗ list] q ∈ qPl.*1', q.[α]) ∗ [∗ list] Q ∈ Ql, bor_ctok α Q.
+      ([∗ list] '(α, q, _)' ∈ αqPl, q.[α]) ∗ [∗ list] Q ∈ Ql, bor_ctok β Q.
   Proof.
-    rewrite obor_toks_dtoks_bound. iIntros "[%d[%β[#⊑ qPl]]] Ql →P".
-    iMod (bor_lend_tok_new_list' d β Ql qPl.*2' with "Ql [→P]")
-      as "[bl ll]"=>/=.
+    rewrite/= obor_toks_dtoks_bound. iIntros "[%d[%γ[#⊑ αqPl]]] Ql →P".
+    iMod (bor_lend_tok_new_list' d γ Ql ((λ '(_, _, P)', P) <$> αqPl)
+      with "Ql [→P]") as "[bl ll]"=>/=.
     { iIntros "† Ql". iDestruct (lft_sincl_dead with "⊑ †") as "†".
-      by iMod ("→P" with "† Ql") as "$". }
+      rewrite big_sepL_fmap. iApply ("→P" with "† Ql"). }
     iSplitR "bl"; last first.
     { iModIntro. iApply (big_sepL_impl with "bl"). iIntros "!> %% _".
       by iApply bor_ctok_lft. }
-    iInduction qPl as [|[P q]qPl] "IH"=>/=; [done|].
-    iDestruct "qPl" as "[big qPl]". iDestruct "big" as (???[?->]) "o".
-    iDestruct "ll" as "[l ll]". iMod ("IH" with "qPl ll") as "$".
+    iInduction αqPl as [|[α[q P]]αqPl] "IH"=>/=; [done|].
+    iDestruct "αqPl" as "[big αqPl]". iDestruct "big" as (???[?->]) "o".
+    iDestruct "ll" as "[l ll]". iMod ("IH" with "αqPl ll") as "$".
     iMod (obor_dtok_reborrow with "o l") as "[$ _]"; [lia|done].
   Qed.
   (** Subdivide a borrower *)
-  Lemma obor_tok_subdiv `{!GenUpd M} {intp α q P} Ql :
-    obor_tok α q P -∗ ([∗ list] Q ∈ Ql, intp Q) -∗
-    ([†α] -∗ ([∗ list] Q ∈ Ql, intp Q) -∗ M (intp P))
-      =[borrow_wsat M intp]=∗ q.[α] ∗ [∗ list] Q ∈ Ql, bor_ctok α Q.
+  Lemma obor_tok_subdiv `{!GenUpd M} {intp α q P} Ql β :
+    β ⊑□ α -∗ obor_tok α q P -∗ ([∗ list] Q ∈ Ql, intp Q) -∗
+    ([†β] -∗ ([∗ list] Q ∈ Ql, intp Q) -∗ M (intp P))
+      =[borrow_wsat M intp]=∗ q.[α] ∗ [∗ list] Q ∈ Ql, bor_ctok β Q.
   Proof.
-    iIntros "o Ql →P".
-    iMod (obor_tok_merge_subdiv [(_,_)'] with "[o] Ql [→P]") as "[[$ _]$]"=>/=;
-      by [iFrame|rewrite bi.sep_emp|].
+    iIntros "⊑ o Ql →P".
+    iMod (obor_tok_merge_subdiv [(_,_,_)'] with "[⊑ o] Ql [→P]")
+      as "[[$_]$]"=>/=; by [iFrame|rewrite bi.sep_emp|].
   Qed.
   (** Simply close a borrower *)
   Lemma obor_tok_close `{!GenUpd M} {intp α q P} :
     obor_tok α q P -∗ intp P =[borrow_wsat M intp]=∗ q.[α] ∗ bor_ctok α P.
   Proof.
-    iIntros "o P". iMod (obor_tok_subdiv [P] with "o [P] []") as "[$[$_]]"=>/=;
-      by [iFrame|iIntros "_[$_]"|].
+    iIntros "o P".
+    iMod (obor_tok_subdiv [P] with "[] o [P] []") as "[$[$_]]"=>/=;
+      by [iApply lft_sincl_refl|iFrame|iIntros "_[$_]"|].
   Qed.
 
   (** Reborrow a borrower *)
