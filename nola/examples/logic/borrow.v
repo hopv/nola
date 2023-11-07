@@ -9,6 +9,11 @@ Implicit Type (P Q : nPropS (;ᵞ)) (Pl Ql : list (nPropS (;ᵞ))).
 Section borrow.
   Context `{!nintpGS Σ, !nDeriv ih δ}.
 
+  (** [fbor] is persistent *)
+  Fact fbor_persistent {α Φ} : Persistent (fbor δ α Φ).
+  Proof. exact _. Qed.
+
+  (** Lemmas for conversion *)
   Local Lemma convert_trans {P Q R : nPropS (;ᵞ)} :
     ⸨ ↑ˡ P ==∗ ↑ˡ Q ⸩(δ) -∗ ⸨ ↑ˡ Q ==∗ ↑ˡ R ⸩(δ) -∗ ⸨ ↑ˡ P ==∗ ↑ˡ R ⸩(δ).
   Proof.
@@ -53,9 +58,15 @@ Section borrow.
     iApply (convert_trans with "RP PQ").
   Qed.
   Lemma fbor_convert {α Φ Ψ} :
-    □ (∀ q, ⸨ (↑ˡ Φ q ==∗ ↑ˡ Ψ q) ∗ (↑ˡ Ψ q ==∗ ↑ˡ Φ q) ⸩(δ)) -∗
+    □ ⸨ (∀ q, ↑ˡ Φ q ==∗ ↑ˡ Ψ q) ∗ (∀ q, ↑ˡ Ψ q ==∗ ↑ˡ Φ q) ⸩(δ) -∗
     fbor δ α Φ -∗ fbor δ α Ψ.
-  Proof. iIntros "_ []". Qed.
+  Proof.
+    iIntros "#ΦΨ [%[%Φ'[⊑[#ΦΦ' s]]]]". iExists _, _. iFrame "⊑ s". iModIntro.
+    iApply (Deriv_map2 with "[] ΦΨ ΦΦ'")=>/=.
+    iIntros "% _ _ {ΦΨ}[ΦΨ ΨΦ] {ΦΦ'}[ΦΦ' Φ'Φ]". iSplitL "ΨΦ ΦΦ'".
+    - iIntros "% Ψ". iMod ("ΨΦ" with "Ψ"). by iApply "ΦΦ'".
+    - iIntros "% Φ". iMod ("Φ'Φ" with "Φ"). by iApply "ΦΨ".
+  Qed.
 
   (** Modify tokens with lifetime inclusion *)
   Lemma borc_lft {α β P} : β ⊑□ α -∗ borc δ α P -∗ borc δ β P.
@@ -80,7 +91,10 @@ Section borrow.
     iFrame.
   Qed.
   Lemma fbor_lft {α β Φ} : β ⊑□ α -∗ fbor δ α Φ -∗ fbor δ β Φ.
-  Proof. iIntros "_ []". Qed.
+  Proof.
+    iIntros "#? [%[%[#? s]]]". iExists _, _. iFrame "s".
+    by iApply lft_sincl_trans.
+  Qed.
 
   (** Other conversions *)
   Lemma borc_bor {α P} : borc δ α P ⊢ bor δ α P.
@@ -246,5 +260,40 @@ Section borrow.
   Proof.
     iIntros "α b". iMod (bor_open with "α b") as "[o P]".
     by iMod (obor_reborrow with "o P").
+  Qed.
+
+  (** Create a fractured borrow *)
+  Lemma bor_fbor {α} Φ q : bord α (Φ q) =[sinv_wsatd]=∗ fbord α Φ.
+  Proof.
+    iIntros "b W".
+    iMod (sinv_tok_alloc (∃ q, n_bor' [] α (Φ q))%n with "W") as "[s →W]"=>/=.
+    iDestruct ("→W" with "[b]") as "$". { by iExists _. }
+    iModIntro. iExists _, _. iFrame "s". iSplit. { iApply lft_sincl_refl. }
+    iModIntro. iApply (Deriv_intro (DI:=nderivsi))=>/=.
+    iIntros "% _ _"; iSplitL; by iIntros.
+  Qed.
+  (** Open a fractured borrow *)
+  Lemma fbor_open {α r Φ} :
+    r.[α] -∗ fbord α Φ -∗
+    (∀ q, ⟦ Φ q ⟧ ==∗ ⟦ Φ (q/2)%Qp ⟧ ∗ ⟦ Φ (q/2)%Qp ⟧) -∗
+    (∀ q, ⟦ Φ (q/2)%Qp ⟧ -∗ ⟦ Φ (q/2)%Qp ⟧ ==∗ ⟦ Φ q ⟧)
+      =[sinv_wsatd ∗ proph_wsat ∗ borrow_wsatd]=∗ ∃ q,
+      obord α r (Φ q) ∗ ⟦ Φ q ⟧.
+  Proof.
+    rewrite [(sinv_wsatd ∗ _)%I]comm -modw_bupdw.
+    iIntros "α [%β[%Ψ[#⊑[#ΦΨ s]]]] Φ↓ Φ↑ W".
+    iDestruct (sinv_tok_acc with "s W") as "/=[[%q b] →W]".
+    iDestruct nderiv_sound as "→". iDestruct ("→" with "ΦΨ") as "/={ΦΨ}[ΦΨ ΨΦ]".
+    setoid_rewrite nintp_nlarge.
+    iMod (lft_sincl_tok_acc with "⊑ α") as (s) "[β →α]".
+    iMod (bor_open with "β b") as "[o Ψ]". iMod ("ΨΦ" with "Ψ") as "Φ".
+    iMod ("Φ↓" with "Φ") as "[Φ Φ']". iMod ("ΦΨ" with "Φ'") as "Ψ".
+    iMod (obor_subdiv [_;_] with "[] o [$Φ $Ψ//] [Φ↑]") as "[β[c[c' _]]]"=>/=.
+    { iApply lft_sincl_refl. }
+    { iIntros "_ [Φ[Ψ _]]". iMod ("ΨΦ" with "Ψ") as "Φ'".
+      iMod ("Φ↑" with "Φ Φ'") as "Φ". by iMod ("ΦΨ" with "Φ"). }
+    iDestruct ("→W" with "[c']") as "$". { iExists _. by iApply borc_bor. }
+    iExists _. iDestruct (borc_lft with "⊑ c") as "c".
+    iDestruct ("→α" with "β") as "α". by iMod (borc_open with "α c") as "$".
   Qed.
 End borrow.
