@@ -50,7 +50,8 @@ Fixpoint nsubstlg {κ Γ Γᵍ V} (Φ : nPred V) (P : nProp κ Γ)
   | n_1 c P => λ eq, n_1 c (nsubstlg Φ P eq)
   | n_2 c P Q => λ eq, n_2 c (nsubstlg Φ P eq) (nsubstlg Φ Q eq)
   | n_u c Ψ => λ eq, n_u c (λ a, nsubstlg Φ (Ψ a) eq)
-  | n_g c Ψ => λ eq, n_g c (λ a, nsubstlg Φ (Ψ a) (eq_app_assoc_d eq))
+  | n_gl c Ψ => λ eq, n_gl c (λ a, nsubstlg Φ (Ψ a) (eq_app_assoc_d eq))
+  | n_gs c Ψ => λ eq, n_gs c (λ a, nsubstlg Φ (Ψ a) (eq_app_assoc_d eq))
   | ∀: V, P => λ eq, ∀: V, nsubstlg Φ P eq
   | ∃: V, P => λ eq, ∃: V, nsubstlg Φ P eq
   | rec:ˢ' Ψ a => λ eq, (rec:ˢ b, nsubstlg Φ (Ψ b) eq) a
@@ -98,7 +99,9 @@ Fixpoint nsubstlu {κ Γ Γᵘ V} (Φ : nPred V) (P : nProp κ Γ)
   | n_1 c P => λ eq gn, n_1 c (nsubstlu Φ P eq gn)
   | n_2 c P Q => λ eq gn, n_2 c (nsubstlu Φ P eq gn) (nsubstlu Φ Q eq gn)
   | n_u c Ψ => λ eq gn, n_u c (λ a, nsubstlu Φ (Ψ a) eq gn)
-  | n_g c Ψ => λ eq gn, n_g c (λ a, rew ctxeq_g app_nil'_d in
+  | n_gl c Ψ => λ eq gn, n_gl c (λ a, rew ctxeq_g app_nil'_d in
+      nsubstlg Φ (Ψ a) (eq_trans (app_eq_nil_d gn) eq))
+  | n_gs c Ψ => λ eq gn, n_gs c (λ a, rew ctxeq_g app_nil'_d in
       nsubstlg Φ (Ψ a) (eq_trans (app_eq_nil_d gn) eq))
   | ∀: V, P => λ eq gn, ∀: V, nsubstlu Φ P (f_equal _ eq) gn
   | ∃: V, P => λ eq gn, ∃: V, nsubstlu Φ P (f_equal _ eq) gn
@@ -143,7 +146,8 @@ Proof. exact nsubstlu_nlarge. Qed.
 
 Fixpoint nhgt {κ Γ} (P : nProp κ Γ) : hgt :=
   match P with
-  | n_0 _ | n_l0 _ | n_g _ _ | ¢ᵍ _ | %ᵍˢ _ | %ᵍˡ _ | %ᵘˢ _ | !ᵘˢ _ => Hgt₀
+  | n_0 _ | n_l0 _ | n_gl _ _ | n_gs _ _ | ¢ᵍ _ | %ᵍˢ _ | %ᵍˡ _ | %ᵘˢ _
+    | !ᵘˢ _ => Hgt₀
   | ¢ᵘ P => nhgt P | n_1 _ P | ∀: _, P | ∃: _, P => Hgt₁ (nhgt P)
   | n_2 _ P Q => Hgt₂ (nhgt P) (nhgt Q)
   | n_u _ Φ => (Hgtᶠ (λ a, nhgt (Φ a)))

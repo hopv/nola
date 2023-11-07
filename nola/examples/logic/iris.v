@@ -31,8 +31,7 @@ Notation nderiv_ty Σ := (deriv_ty (nderivs Σ)).
 Notation "⸨ P ⸩ ( δ )" := (dunwrap δ P%n)
   (format "'[' ⸨  P  ⸩ '/  ' ( δ ) ']'") : nola_scope.
 
-Implicit Type (P : nPropL (;ᵞ)) (N : namespace) (p : na_inv_pool_name)
-  (α : lft) (q : Qp).
+Implicit Type (N : namespace) (p : na_inv_pool_name) (α : lft) (q : Qp).
 
 Section iris.
   Context (* Iris resources *) `{!nintpGS Σ}.
@@ -62,23 +61,21 @@ Section iris.
   Definition na_ninv := na_ninv_aux.(unseal).
   Lemma na_ninv_unseal : na_ninv = na_ninv_def. Proof. exact: seal_eq. Qed.
 
-  (** [conv]: Proposition converter *)
-  Definition conv δ P Q : iProp Σ := ⸨ P -∗ Q ⸩(δ).
+  Implicit Type (P : nPropS (;ᵞ)).
 
   (** [borc]: Modified [bor_ctok] *)
   Definition borc δ α P : iProp Σ :=
-    ∃ Q, □ conv δ P (↑ˡ Q) ∗ □ conv δ (↑ˡ Q) P ∗ bor_ctok α Q.
+    ∃ Q, ⸨ ↑ˡ P ==∗ ↑ˡ Q ⸩(δ) ∗ ⸨ ↑ˡ Q ==∗ ↑ˡ P ⸩(δ) ∗ bor_ctok α Q.
   (** [bor]: Modified [bor_tok] *)
   Definition bor δ α P : iProp Σ :=
-    ∃ Q, □ conv δ P (↑ˡ Q) ∗ □ conv δ (↑ˡ Q) P ∗ bor_tok α Q.
+    ∃ Q, ⸨ ↑ˡ P ==∗ ↑ˡ Q ⸩(δ) ∗ ⸨ ↑ˡ Q ==∗ ↑ˡ P ⸩(δ) ∗ bor_tok α Q.
   (** [obor]: Modified [obor_tok] *)
   Definition obor δ α q P : iProp Σ :=
-    ∃ Q, □ conv δ P (↑ˡ Q) ∗ □ conv δ (↑ˡ Q) P ∗ obor_tok α q Q.
+    ∃ Q, ⸨ ↑ˡ P ==∗ ↑ˡ Q ⸩(δ) ∗ obor_tok α q Q.
   (** [lend]: Modified [lend_tok] *)
-  Definition lend δ α P : iProp Σ :=
-    ∃ Q, □ conv δ (↑ˡ Q) P ∗ lend_tok α Q.
+  Definition lend δ α P : iProp Σ := ∃ Q, ⸨ ↑ˡ Q ==∗ ↑ˡ P ⸩(δ) ∗ lend_tok α Q.
   (** [fbor]: Modified [fbor_tok] *)
-  Definition fbor δ α (Φ : Qp → nPropL (;ᵞ)) : iProp Σ := False.
+  Definition fbor δ α (Φ : Qp → nPropS (;ᵞ)) : iProp Σ := False.
 End iris.
 
 (** Utility *)

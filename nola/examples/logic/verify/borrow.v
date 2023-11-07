@@ -7,22 +7,6 @@ From iris.base_logic.lib Require Export ghost_var.
 Section borrow.
   Context `{!nintpGS Σ}.
 
-  (** Convert a nested borrow *)
-  Lemma bor_bor_conv' `{!nDeriv ih δ} {α β P Q} :
-    α ⊑□ β -∗ β ⊑□ α -∗ □ conv δ P Q -∗ □ conv δ Q P -∗
-    conv δ (n_bor' [] α P) (n_bor' [] β Q).
-    iIntros "#⊑ #⊑' #PQ #QP". iApply (Deriv_byintp (δ:=δ))=>/=.
-    iIntros "% % % _ #→ b". iDestruct (bor_lft with "⊑' b") as "b".
-    iApply (bor_conv with "[] [] b"); iModIntro; by iApply "→".
-  Qed.
-  Lemma bor_bor_conv `{!nDeriv ih δ} {α β P Q} :
-    α ⊑□ β -∗ β ⊑□ α -∗ □ conv δ P Q -∗ □ conv δ Q P -∗
-    bor δ α (n_bor' [] α P) -∗ bor δ β (n_bor' [] β Q).
-  Proof.
-    iIntros "#⊑ #⊑' #PQ #QP b". iDestruct (bor_lft with "⊑' b") as "b".
-    iApply (bor_conv with "[] [] b"); iModIntro; by iApply bor_bor_conv'.
-  Qed.
-
   (** Dereference a nested mutable reference *)
   Lemma bor_bor_deref {α β l Φ q} :
     [[{ q.[α ⊓ β] ∗
@@ -49,12 +33,12 @@ Section borrow.
     [[{ q.[α ⊓ β] ∗ val_obs γ ((x, ξ)' : (X *'ₛ prvarₛ X)) ∗
       bord α (∃ (x : X) ξ γ' (l' : loc),
         n_proph_ctrl γ ((x, ξ)' : (X *'ₛ prvarₛ X)) η ∗ l ↦ #l' ∗
-        n_val_obs γ' x ∗ n_bor' [] β (∃ x, n_proph_ctrl γ' x ξ ∗ ↑ˡ Φ l' x)) }]]
+        n_val_obs γ' x ∗ n_bor' [] β (∃ x, n_proph_ctrl γ' x ξ ∗ Φ l' x)) }]]
       [proph_wsat ∗ borrow_wsatd]
       !#l
     [[{ l', RET #l' ; q.[α ⊓ β] ∗ ∃ (ζ : prvar X) γ'',
       ⟨π, π η = (π ζ, ξ)'⟩ ∗ val_obs γ'' x ∗
-      bord (α ⊓ β) (∃ x, n_proph_ctrl γ'' x ζ ∗ ↑ˡ Φ l' x) }]].
+      bord (α ⊓ β) (∃ x, n_proph_ctrl γ'' x ζ ∗ Φ l' x) }]].
   Proof.
     iIntros "%Ψ [[α β][vo b]] →Ψ". iMod (bor_open with "α b") as "[o big]"=>/=.
     iDestruct "big" as (x2 ξ2 γ' l') "[pc[↦[vo' b']]]".
@@ -84,14 +68,14 @@ Section borrow.
       with "[$o $o'] [pc'' Φ] [→pc vo' pc']") as "[[α[[α' β] _]][c _]]"=>/=.
     { iSplit; [by iApply lft_sincl_meet_l|].
       iSplit; by [iApply lft_sincl_refl|]. }
-    { iSplit; [|done]. iExists _. rewrite nintp_nlarge. iFrame. }
+    { iSplit; [|done]. iExists _. iFrame. }
     { iIntros "† [big _]". iDestruct "big" as (x'') "[pc'' Φ]".
       iMod (vo_pc_update with "vo' pc'") as "[vo' pc']".
       iMod (pc_resolve with "pc''") as "#obs'". iModIntro. iSplitL "→pc vo'".
       - iExists x''. iFrame "vo'". iApply "→pc".
         by iApply (proph_obs_impl with "obs'")=> ?->.
-      - iSplit; [|done]. iExists _. rewrite nintp_nlarge. iFrame. }
-    iModIntro. iApply "→Ψ". iFrame "α α' β β'". iExists _, _.
-    rewrite borc_bor. by iFrame.
+      - iSplit; [|done]. iExists _. iFrame. }
+    iModIntro. iApply "→Ψ". iFrame "α α' β β'". iExists _, _. rewrite borc_bor.
+    by iFrame.
   Qed.
 End borrow.

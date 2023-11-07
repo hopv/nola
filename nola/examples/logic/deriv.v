@@ -26,7 +26,6 @@ Notation sinvd := (sinv nderiv).
 Notation ninvd := (ninv nderiv).
 Notation na_ninvd := (na_ninv nderiv).
 
-Notation convd := (conv nderiv).
 Notation borcd := (borc nderiv).
 Notation bord := (bor nderiv).
 Notation obord := (obor nderiv).
