@@ -79,7 +79,7 @@ Section pborrow.
   Definition nbor_ctok α P : iProp Σ := bor_ctok α (pbprop_just P).
   Definition nbor_tok α P : iProp Σ := bor_tok α (pbprop_just P).
   Definition onbor_tok α q P : iProp Σ := obor_tok α q (pbprop_just P).
-  Local Definition nlend_tok α P : iProp Σ := lend_tok α (pbprop_just P).
+  Definition nlend_tok α P : iProp Σ := lend_tok α (pbprop_just P).
 
   (** Prophetic borrower and lender tokens are timeless *)
   #[export] Instance pbor_ctok_timeless {α X x ξ Φ} :
