@@ -13,7 +13,7 @@ Structure synpty := Synpty {
     synpty_eqdec :: EqDecision synpty_car;
   (* Inhabitance predicate *) #[canonical=no] synpty_inhab : synpty_car → Prop;
   (* [synty_inhab] is proof-irrelevant *) #[canonical=no]
-    synpty_inhab_irrel :: ∀ X, ProofIrrel (synpty_inhab X);
+    synpty_inhab_irrel {X} :: ProofIrrel (synpty_inhab X);
 }.
 Arguments synpty_eqdec {_} _. Arguments synpty_inhab {_} _.
 Arguments synpty_inhab_irrel {_ _} _.
