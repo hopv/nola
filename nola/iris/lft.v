@@ -227,7 +227,7 @@ Section lft.
   (** Lifetime token over [⊤]/[⊓] *)
   Lemma lft_tok_top {q} : ⊢ q.[⊤].
   Proof. by apply big_sepMS_empty'. Qed.
-  Lemma lft_tok_meet {q α β} : q.[α ⊓ β] ⊣⊢ q.[α] ∗ q.[β].
+  Lemma lft_tok_meet {α β q} : q.[α ⊓ β] ⊣⊢ q.[α] ∗ q.[β].
   Proof. by apply big_sepMS_disj_union. Qed.
 
   (** Dead lifetime token over [⊤]/[⊓] *)

@@ -142,7 +142,7 @@ Section borrow.
   Qed.
 
   (** Open a closed borrower *)
-  Lemma borc_open {q α P} :
+  Lemma borc_open {α q P} :
     q.[α] -∗ borcd α P =[borrow_wsatd]=∗ obord α q P ∗ ⟦ P ⟧.
   Proof.
     iIntros "α [%Q[PQ[QP c]]]". rewrite (convert_use (P:=Q)).
@@ -150,7 +150,7 @@ Section borrow.
     iMod ("QP" with "Q") as "$". iExists _. by iFrame.
   Qed.
   (** Open a borrower *)
-  Lemma bor_open {q α P} :
+  Lemma bor_open {α q P} :
     q.[α] -∗ bord α P =[proph_wsat ∗ borrow_wsatd]=∗ obord α q P ∗ ⟦ P ⟧.
   Proof.
     iIntros "α [%Q[PQ[QP b]]]". rewrite (convert_use (P:=Q)) -modw_bupdw.
@@ -203,7 +203,7 @@ Section borrow.
       by [iFrame|rewrite bi.sep_emp|].
   Qed.
   (** Simply close a borrower *)
-  Lemma obor_close {q α P} :
+  Lemma obor_close {α q P} :
     obord α q P -∗ ⟦ P ⟧ =[borrow_wsatd]=∗ q.[α] ∗ borcd α P.
   Proof.
     iIntros "o P".
