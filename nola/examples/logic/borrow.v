@@ -127,7 +127,7 @@ Section borrow.
       as "[[$_][$_]]"; by [iFrame|iIntros|].
   Qed.
 
-  (** Extend a lender *)
+  (** Split a lender *)
   Lemma lend_split {α P} (Ql : list (nPropS (;ᵞ))) :
     lendd α P -∗
     (⟦ P ⟧ =[proph_wsat]=∗ [∗ list] Q ∈ Ql, ⟦ Q ⟧) =[borrow_wsatd]=∗

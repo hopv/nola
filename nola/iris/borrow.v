@@ -435,7 +435,7 @@ Section borrow.
       as "[[$_][$_]]"; by [iFrame|iIntros|].
   Qed.
 
-  (** Extend a lender *)
+  (** Split a lender *)
   Lemma lend_tok_split `{!GenUpd M} {intp α P} Ql :
     lend_tok α P -∗ (intp P -∗ M ([∗ list] Q ∈ Ql, intp Q))
       =[borrow_wsat M intp]=∗ [∗ list] Q ∈ Ql, lend_tok α Q.
