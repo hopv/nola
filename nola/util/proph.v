@@ -90,9 +90,6 @@ Coercion synty_ty : synpty_car >-> Sortclass.
 
 Implicit Type TY : synty.
 
-(** Product over [list TY] *)
-Definition plist_synty {TY} (Xl : list TY) : Type := plist (λ X : TY, X) Xl.
-
 (** Prophecy assignment *)
 Definition proph_asn (TY : synty) := ∀ ξ : aprvar TY, ξ.(aprvar_ty).
 
@@ -106,7 +103,7 @@ Proof. apply populate. move=> [??]. by apply prvar_to_inhabited. Qed.
 
 (** Evaluate [plist prvar] with [proph_asn] *)
 Definition app_plist_prvar {TY} {Xl : list TY}
-  (π : proph_asn TY) (ξl : plist prvar Xl) : plist_synty Xl :=
+  (π : proph_asn TY) (ξl : plist prvar Xl) : plist (synty_ty _) Xl :=
   plist_map (λ _ (ξ : prvar _), π ξ) ξl.
 
 (** ** Prophecy Dependency *)
@@ -174,8 +171,7 @@ Section lemmas.
     unfold app_plist_prvar=>/=. f_equal.
     { apply (eqv ξ). set_solver. } { apply IH=> ??. apply eqv. set_solver. }
   Qed.
-  Lemma proph_dep_plist {A} {Xl : list TY}
-    (f : plist_synty Xl → A) (ξl : plist prvar Xl) :
+  Lemma proph_dep_plist {A} {Xl : list TY} (f : _ → A) (ξl : plist prvar Xl) :
     (λ π, f (app_plist_prvar π ξl)) ./ of_plist_prvar ξl.
   Proof. apply proph_dep_constr, proph_dep_plist'. Qed.
 
