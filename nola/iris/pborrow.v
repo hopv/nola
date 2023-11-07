@@ -339,7 +339,7 @@ Section pborrow.
       by [iFrame|iIntros|].
   Qed.
 
-  (** Extend a prophetic lender *)
+  (** Split a prophetic lender *)
   Lemma plend_tok_split `{!GenUpd M} {intp α X xπ Φ} Yl
     (yπΨl : plist (λ Y, (proph_asn TY → Y) *' (Y → PROP)) Yl) :
     plend_tok (X:=X) α xπ Φ -∗
