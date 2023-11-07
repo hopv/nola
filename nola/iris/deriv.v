@@ -15,11 +15,11 @@ Arguments dunwrap {_} _.
 Add Printing Constructor dwrap.
 
 (** Notation for [dwrap] *)
-Module DerivNotation.
+Module DerivNotation'.
   Notation "⸨ J ⸩ ( δ )" := (dunwrap δ J)
     (format "'[' ⸨  J  ⸩ '/  ' ( δ ) ']'") : nola_scope.
-End DerivNotation.
-Import DerivNotation.
+End DerivNotation'.
+Import DerivNotation'.
 
 (** Make [dwrap A] [ofe] for [A : ofe] *)
 #[export] Instance dwrap_equiv `{!Equiv A} : Equiv (dwrap A)
@@ -180,6 +180,12 @@ Definition deriv_def {DI} : deriv_ty DI :=
 Lemma deriv_aux : seal (@deriv_def). Proof. by eexists. Qed.
 Definition deriv {DI} := deriv_aux.(unseal) DI.
 Lemma deriv_unseal : @deriv = @deriv_def. Proof. exact: seal_eq. Qed.
+
+(** Notation for [dwrap] *)
+Module DerivNotation.
+  Export DerivNotation'.
+  Notation "⸨ J ⸩" := ⸨ J ⸩(deriv) (format "⸨  J  ⸩") : nola_scope.
+End DerivNotation.
 
 (** [deriv] satisfies [Deriv] *)
 #[export] Instance deriv_Deriv {DI} : Deriv DI True₁ deriv.

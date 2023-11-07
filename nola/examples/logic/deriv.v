@@ -15,6 +15,7 @@ Notation nderiv_sound := (deriv_sound (DI:=nderivsi)).
 Notation "⟦ P ⟧{ κ }" := ⟦ P ⟧{κ}(nderiv) (only parsing) : nola_scope.
 Notation "⟦ P ⟧" := ⟦ P ⟧(nderiv) : nola_scope.
 Notation "⟦ P ⟧ˢ" := ⟦ P ⟧ˢ(nderiv) : nola_scope.
+Notation "⸨ P ⸩" := ⸨ P ⸩(nderiv) (format "⸨  P  ⸩") : nola_scope.
 
 Notation sinv_wsatd := (sinv_wsat' nderiv).
 Notation inv_wsatd := (inv_wsat' nderiv).
