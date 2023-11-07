@@ -58,28 +58,28 @@ Section borrow.
   Proof. iIntros "_ []". Qed.
 
   (** Modify tokens with lifetime inclusion *)
-  Lemma borc_lft {α α' P} : α' ⊑□ α -∗ borc δ α P -∗ borc δ α' P.
+  Lemma borc_lft {α β P} : β ⊑□ α -∗ borc δ α P -∗ borc δ β P.
   Proof.
     iIntros "⊑ [%[?[? c]]]". iDestruct (bor_ctok_lft with "⊑ c") as "c".
     iExists _. iFrame.
   Qed.
-  Lemma bor_lft {α α' P} : α' ⊑□ α -∗ bor δ α P -∗ bor δ α' P.
+  Lemma bor_lft {α β P} : β ⊑□ α -∗ bor δ α P -∗ bor δ β P.
   Proof.
     iIntros "⊑ [%[?[? b]]]". iDestruct (bor_tok_lft with "⊑ b") as "b".
     iExists _. iFrame.
   Qed.
-  Lemma obor_lft {α α' q r P} :
-    α' ⊑□ α -∗ (q.[α] -∗ r.[α']) -∗ obor δ α q P -∗ obor δ α' r P.
+  Lemma obor_lft {α β q r P} :
+    β ⊑□ α -∗ (q.[α] -∗ r.[β]) -∗ obor δ α q P -∗ obor δ β r P.
   Proof.
     iIntros "⊑ → [%[? o]]". iDestruct (obor_tok_lft with "⊑ → o") as "o".
     iExists _. iFrame.
   Qed.
-  Lemma lend_lft {α α' P} : α ⊑□ α' -∗ lend δ α P -∗ lend δ α' P.
+  Lemma lend_lft {α β P} : α ⊑□ β -∗ lend δ α P -∗ lend δ β P.
   Proof.
     iIntros "⊑ [%[? l]]". iDestruct (lend_tok_lft with "⊑ l") as "l". iExists _.
     iFrame.
   Qed.
-  Lemma fbor_lft {α α' Φ} : α' ⊑□ α -∗ fbor δ α Φ -∗ fbor δ α' Φ.
+  Lemma fbor_lft {α β Φ} : β ⊑□ α -∗ fbor δ α Φ -∗ fbor δ β Φ.
   Proof. iIntros "_ []". Qed.
 
   (** Other conversions *)
