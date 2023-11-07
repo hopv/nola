@@ -388,17 +388,11 @@ Section borrow.
   Proof.
     move=> ?????<-??<-??<-??<-. rewrite /depo_wsat. f_equiv; solve_proper.
   Qed.
-  #[export] Instance borrow_wsat_ne `{!GenUpd M} {n} :
-    Proper ((≡{n}≡) ==> (≡{n}≡)) (borrow_wsat M).
-  Proof.
-    rewrite borrow_wsat_unseal /borrow_wsat_def=> ???. do 6 f_equiv.
-    by apply depo_wsat_ne.
-  Qed.
+  #[export] Instance borrow_wsat_ne `{!GenUpd M} : NonExpansive (borrow_wsat M).
+  Proof. rewrite borrow_wsat_unseal. solve_proper. Qed.
   #[export] Instance borrow_wsat_proper `{!GenUpd M} :
     Proper ((≡) ==> (⊣⊢)) (borrow_wsat M).
-  Proof.
-    move=> ???. apply equiv_dist=> ?. f_equiv; by apply equiv_dist.
-  Qed.
+  Proof. apply ne_proper, _. Qed.
 
   (** Create new borrowers and lenders with a specific depth *)
   Local Lemma bor_lend_tok_new_list' `{!GenUpd M} {intp} d α Pl Ql :
