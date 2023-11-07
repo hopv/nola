@@ -428,7 +428,7 @@ Section pborrow.
     ([∗ plist] '(y, Ψ)' ∈ yΨl, intp (Ψ y)) -∗ ([∗ list] R ∈ Rl, intp R) -∗
     (∀ yl', [†β] -∗ ([∗ plist] '(y', _, Ψ)' ∈ plist_zip yl' yΨl, intp (Ψ y')) -∗
       ([∗ list] R ∈ Rl, intp R) -∗ modw M proph_wsat
-      ([∗ plist] '(_, _, ξ, Φ, f)' ∈ αqξΦfl, intp (Φ (f yl'))))
+      ([∗ plist] '(_, _, _, Φ, f)' ∈ αqξΦfl, intp (Φ (f yl'))))
       =[proph_wsat ∗ pborrow_wsat M intp]=∗ ∃ ηl,
       ([∗ plist] '(α, q, _)' ∈ αqξΦfl, q.[α]) ∗
       ([∗ plist] '(_, _, ξ, _, f)' ∈ αqξΦfl,
