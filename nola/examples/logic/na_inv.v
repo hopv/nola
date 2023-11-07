@@ -48,7 +48,7 @@ Section lemmas.
     iIntros "P". iApply (na_ninv_alloc_rec with "[P]"). by iIntros.
   Qed.
 
-  (** Transform [na_ninv] *)
+  (** Convert [na_ninv] *)
   Lemma na_ninv_convert {p N P Q} :
     □ ⸨ P ={∅}=∗ Q ∗ (Q ={∅}=∗ P) ⸩(δ) -∗ na_ninv δ p N P -∗ na_ninv δ p N Q.
   Proof.

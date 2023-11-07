@@ -38,7 +38,7 @@ Section lemmas.
     ⟦ P ⟧(δ) =[inv_wsat' δ]=∗ ninv δ N (↑ˡ P).
   Proof. iIntros "P". iApply (ninv_alloc_rec with "[P]"). by iIntros. Qed.
 
-  (** Transform [ninv] *)
+  (** Convert [ninv] *)
   Lemma ninv_convert {N P Q} :
     □ ⸨ P ={∅}=∗ Q ∗ (Q ={∅}=∗ P) ⸩(δ) -∗ ninv δ N P -∗ ninv δ N Q.
   Proof.
