@@ -131,7 +131,7 @@ Variant ncongs : Type :=
 | (** Borrower *) nc_bor (α : lft)
 | (** Open borrower *) nc_obor (α : lft) (q : Qp)
 | (** Lender *) nc_lend (α : lft)
-| (** Fractured borrower token *) nc_fbor (α : lft).
+| (** Fractured borrower *) nc_fbor (α : lft).
 (** Domain of [ncongs] *)
 Definition ncongs_dom (c : ncongs) : Type := match c with
   | nc_fbor _ => Qp | _ => nat

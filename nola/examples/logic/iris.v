@@ -74,7 +74,7 @@ Section iris.
     ∃ Q, ⸨ ↑ˡ P ==∗ ↑ˡ Q ⸩(δ) ∗ obor_tok α q Q.
   (** [lend]: Modified [lend_tok] *)
   Definition lend δ α P : iProp Σ := ∃ Q, ⸨ ↑ˡ Q ==∗ ↑ˡ P ⸩(δ) ∗ lend_tok α Q.
-  (** [fbor]: Modified [fbor_tok] *)
+  (** [fbor]: Fractured borrower *)
   Definition fbor δ α (Φ : Qp → nPropS (;ᵞ)) : iProp Σ :=
     ∃ β Ψ, α ⊑□ β ∗
       □ ⸨ (∀ q, ↑ˡ Φ q ==∗ ↑ˡ Ψ q) ∗ (∀ q, ↑ˡ Ψ q ==∗ ↑ˡ Φ q) ⸩(δ) ∗
