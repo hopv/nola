@@ -80,13 +80,13 @@ Structure synty := Synty {
   (* Pre-type *) synty_pty :> synpty;
   (* Type interpretation *) #[canonical=no] synty_ty : synty_pty → Type;
   (* [synty_inhab] ensures [Inhabited] *) #[canonical=no]
-    synty_inhabited :: ∀ X, synpty_inhab X → Inhabited (synty_ty X);
+    synty_inhabited {X} :: synpty_inhab X → Inhabited (synty_ty X);
   (* An inhabitant implies [synty_inhab] *) #[canonical=no]
-    synty_to_inhab : ∀ X, synty_ty X → synpty_inhab X;
+    synty_to_inhab {X} : synty_ty X → synpty_inhab X;
 }.
-Arguments synty_inhabited {_ _} _. Arguments synty_to_inhab {_ _} _.
-#[warnings="-uniform-inheritance"]
-Coercion synty_ty : synpty_car >-> Sortclass.
+Arguments synty_ty {_} _. Arguments synty_inhabited {_ _} _.
+Arguments synty_to_inhab {_ _} _.
+#[warnings="-uniform-inheritance"] Coercion synty_ty : synpty_car >-> Sortclass.
 
 Implicit Type TY : synty.
 
@@ -103,7 +103,7 @@ Proof. apply populate. move=> [??]. by apply prvar_to_inhabited. Qed.
 
 (** Evaluate [plist prvar] with [proph_asn] *)
 Definition app_plist_prvar {TY} {Xl : list TY}
-  (π : proph_asn TY) (ξl : plist prvar Xl) : plist (synty_ty _) Xl :=
+  (π : proph_asn TY) (ξl : plist prvar Xl) : plist synty_ty Xl :=
   plist_map (λ _ (ξ : prvar _), π ξ) ξl.
 
 (** ** Prophecy Dependency *)

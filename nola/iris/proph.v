@@ -347,7 +347,7 @@ Section lemmas.
     exists L. split; by [|apply add_line_fitem_sim].
   Qed.
   (** Allocate new prophecy variables *)
-  Lemma proph_alloc_list {Xl} : plist (synty_ty _) Xl →
+  Lemma proph_alloc_list {Xl} : plist synty_ty Xl →
     ⊢ |=[proph_wsat]=> ∃ ξl : plist _ Xl, 1:∗[of_plist_prvar ξl].
   Proof.
     elim: Xl; [move=>/= ?; by iExists ()|]=>/= ?? IH [x xl].
