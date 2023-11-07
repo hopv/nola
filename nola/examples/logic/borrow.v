@@ -59,11 +59,11 @@ Section borrow.
     □ ⸨ (∀ q, ↑ˡ Φ q ==∗ ↑ˡ Ψ q) ∗ (∀ q, ↑ˡ Ψ q ==∗ ↑ˡ Φ q) ⸩(δ) -∗
     fbor δ α Φ -∗ fbor δ α Ψ.
   Proof.
-    iIntros "#ΦΨ [%[%Φ'[⊑[#ΦΦ' s]]]]". iExists _, _. iFrame "⊑ s". iModIntro.
-    iApply (Deriv_map2 with "[] ΦΨ ΦΦ'")=>/=.
-    iIntros "% _ _ {ΦΨ}[ΦΨ ΨΦ] {ΦΦ'}[ΦΦ' Φ'Φ]". iSplitL "ΨΦ ΦΦ'".
-    - iIntros "% Ψ". iMod ("ΨΦ" with "Ψ"). by iApply "ΦΦ'".
-    - iIntros "% Φ". iMod ("Φ'Φ" with "Φ"). by iApply "ΦΨ".
+    iIntros "#ΦΨ [%[%Ω[⊑[#ΦΩ s]]]]". iExists _, _. iFrame "⊑ s". iModIntro.
+    iApply (Deriv_map2 with "[] ΦΨ ΦΩ")=>/=.
+    iIntros "% _ _ {ΦΨ}[ΦΨ ΨΦ] {ΦΩ}[ΦΩ ΩΦ]". iSplitL "ΨΦ ΦΩ".
+    - iIntros "% Ψ". iMod ("ΨΦ" with "Ψ"). by iApply "ΦΩ".
+    - iIntros "% Φ". iMod ("ΩΦ" with "Φ"). by iApply "ΦΨ".
   Qed.
 
   (** Modify tokens with lifetime inclusion *)
