@@ -95,8 +95,6 @@ Definition plist_synty {TY} (Xl : list TY) : Type := plist (λ X : TY, X) Xl.
 
 (** Prophecy assignment *)
 Definition proph_asn (TY : synty) := ∀ ξ : aprvar TY, ξ.(aprvar_ty).
-(** Value under a prophecy assignment *)
-Notation proph TY A := (proph_asn TY → A).
 
 (** [prvar X] entails [Inhabited X] *)
 Lemma prvar_to_inhabited {TY} {X : TY} : prvar X → Inhabited X.
@@ -121,7 +119,7 @@ Notation "π .≡{ φ }≡ π'" := (proph_asn_eqv φ π π')
   (at level 70, format "π  .≡{ φ }≡  π'") : nola_scope.
 
 (** Prophecy dependency *)
-Definition proph_dep {TY A} (aπ : proph TY A) (ξl: list (aprvar TY)) :=
+Definition proph_dep {TY A} (aπ : proph_asn TY → A) (ξl: list (aprvar TY)) :=
   ∀ π π', π .≡{ (.∈ ξl) }≡ π' → aπ π = aπ π'.
 Notation "aπ ./ ξl" := (proph_dep aπ ξl) (at level 70, format "aπ  ./  ξl")
   : nola_scope.
@@ -133,13 +131,13 @@ Section lemmas.
   Implicit Type (ξ η ζ : aprvar TY) (ξl ηl ζl : list (aprvar TY)).
 
   (** Monotonicity over the list set *)
-  #[export] Instance proph_dep_mono {A} (aπ : proph TY A) :
+  #[export] Instance proph_dep_mono {A} (aπ : proph_asn TY → A) :
     Proper ((⊆) ==> impl) (proph_dep aπ).
   Proof. move=>/= ?? sub dep ?? eqv. apply dep => ??. by apply eqv, sub. Qed.
-  #[export] Instance proph_dep_mono' {A} (aπ : proph TY A) :
+  #[export] Instance proph_dep_mono' {A} (aπ : proph_asn TY → A) :
     Proper (flip (⊆) ==> flip impl) (proph_dep aπ).
   Proof. solve_proper. Qed.
-  #[export] Instance proph_dep_proper {A} (aπ : proph TY A) :
+  #[export] Instance proph_dep_proper {A} (aπ : proph_asn TY → A) :
     Proper ((≡ₚ) ==> iff) (proph_dep aπ).
   Proof. move=> ?? eq. split; apply proph_dep_mono; by rewrite eq. Qed.
 
@@ -182,7 +180,7 @@ Section lemmas.
   Proof. apply proph_dep_constr, proph_dep_plist'. Qed.
 
   (** On a singleton type *)
-  Lemma proph_dep_singleton {A} (aπ : proph TY A) :
+  Lemma proph_dep_singleton {A} (aπ : proph_asn TY → A) :
     (∀ a a' : A, a = a') → aπ ./ [].
   Proof. by move=> ????. Qed.
 End lemmas.

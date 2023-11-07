@@ -11,7 +11,7 @@ Variant pbprop (TY : synty) (PROP : Type) : Type :=
 | (* For prophetic borrower *) #[local] pbprop_pbor
     {X : TY} (γ : gname) (ξ : prvar X) (Φ : X → PROP)
 | (* For prophetic lender *) pbprop_plend
-    {X : TY} (xπ : proph TY X) (Φ : X → PROP)
+    {X : TY} (xπ : proph_asn TY → X) (Φ : X → PROP)
 | (* For prophetic reborrowing *) #[local] pbprop_preborrow
     {X Y : TY} (γ γ' γx : gname) (ξ : prvar X) (f : Y → X).
 Arguments pbprop_just {_ _} _.
@@ -72,7 +72,7 @@ Section pborrow.
   Proof. exact: seal_eq. Qed.
 
   (** Prophetic lender token *)
-  Definition plend_tok {X} α (xπ : proph TY X) (Φ : X → PROP) : iProp Σ :=
+  Definition plend_tok {X} α (xπ : proph_asn TY → X) (Φ : X → PROP) : iProp Σ :=
     lend_tok α (pbprop_plend xπ Φ).
 
   (** Non-prophetic token *)
@@ -145,7 +145,8 @@ Section pborrow.
   (** ** World satisfaction *)
 
   (** Body of a prophetic lender *)
-  Definition plend_body intp {X} (xπ : proph TY X) (Φ : X → PROP) : iProp Σ :=
+  Definition plend_body intp {X}
+    (xπ : proph_asn TY → X) (Φ : X → PROP) : iProp Σ :=
     ∃ y, ⟨π, xπ π = y⟩ ∗ intp (Φ y).
   Definition plend_body' intp {X} (ξ : prvar X) (Φ : X → PROP) : iProp Σ :=
     plend_body intp (λ π, π ξ) Φ.
@@ -260,7 +261,7 @@ Section pborrow.
     (γξxΦl : plist (λ X, _ *' _ *' X *' (X → PROP)) Xl) :=
     of_plist (λ _ '(γ, ξ, x, Φ)', pbprop_pbor γ ξ Φ) γξxΦl.
   Local Definition plend_list {Xl}
-    (xπΦl : plist (λ X : TY, proph TY X *' (X → PROP)) Xl) :=
+    (xπΦl : plist (λ X : TY, (proph_asn TY → X) *' (X → PROP)) Xl) :=
     of_plist (λ _ '(xπ, Φ)', pbprop_plend xπ Φ) xπΦl.
   Local Lemma vo_pbor_alloc_list {intp Xl ξl} {xΦl : plist _ Xl} :
     1:∗[of_plist_prvar ξl] -∗ ([∗ plist] '(x, Φ)' ∈ xΦl, intp (Φ x)) ==∗ ∃ γl,
@@ -287,7 +288,7 @@ Section pborrow.
   Lemma pbor_plend_tok_new_list `{!GenUpd M} {intp} α Xl
     (xΦl : plist (λ X : TY, X *' (X → PROP)) Xl) :
     ⊢ |=[proph_wsat]=> ∃ ξl,
-      ∀ Yl (yπΨl : plist (λ Y : TY, proph TY Y *' (Y → PROP)) Yl),
+      ∀ Yl (yπΨl : plist (λ Y : TY, (proph_asn TY → Y) *' (Y → PROP)) Yl),
       let ξxΦl := plist_zip ξl xΦl in
       ([∗ plist] '(x, Φ)' ∈ xΦl, intp (Φ x)) -∗
       ([†α] -∗ ([∗ plist] '(ξ, x, Φ)' ∈ ξxΦl, plend_body' intp ξ Φ) -∗
@@ -325,7 +326,7 @@ Section pborrow.
 
   (** Extend a prophetic lender *)
   Lemma plend_tok_split `{!GenUpd M} {intp α X xπ Φ} Yl
-    (yπΨl : plist (λ Y : TY, proph TY Y *' (Y → PROP)) Yl) :
+    (yπΨl : plist (λ Y : TY, (proph_asn TY → Y) *' (Y → PROP)) Yl) :
     plend_tok (X:=X) α xπ Φ -∗
     (plend_body intp xπ Φ -∗ modw M proph_wsat
       ([∗ plist] '(yπ, Ψ)' ∈ yπΨl, plend_body intp yπ Ψ))

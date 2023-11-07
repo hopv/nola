@@ -77,7 +77,7 @@ Variant ncon0 : Type :=
 | (** Persistent lifetime inclusion *) nc_lft_sincl (α β : lft)
 | (** Prophecy token *) nc_proph_tok (ξ : aprvarn) (q : Qp)
 | (** Prophecy tokens *) nc_proph_toks (ξl : list aprvarn) (q : Qp)
-| (** Prophecy observation *) nc_proph_obs (φπ : prophn Prop)
+| (** Prophecy observation *) nc_proph_obs (φπ : proph_asnn → Prop)
 | (** Prophecy world satisfaction *) nc_proph_wsat
 | (** Value observer *) nc_val_obs {X : nsynty} (γ : gname) (x : X)
 | (** Prophecy controller *) nc_proph_ctrl {X : nsynty}
