@@ -332,9 +332,9 @@ Section pborrow.
       pbor_ctok (X:=X) α x ξ Φ ∗ plend_tok α (λ π, π ξ) Φ.
   Proof.
     iIntros "Φ".
-    iMod (pbor_plend_tok_new_list α [X] ((x, Φ)', ())') as ([ξ[]]) "big".
+    iMod (pbor_plend_tok_new_list α [X] ((x, Φ)',())') as ([ξ[]]) "big".
     iExists ξ.
-    iMod ("big" $! [X] ((_,_)', ())' with "[Φ] []") as "[[$ _][$ _]]"=>/=;
+    iMod ("big" $! [X] ((_,_)',())' with "[Φ] []") as "[[$ _][$ _]]"=>/=;
       by [iFrame|iIntros|].
   Qed.
 
@@ -473,7 +473,7 @@ Section pborrow.
       [∗ list] R ∈ Rl, nbor_ctok β R.
   Proof.
     iIntros "⊑ o Ψl Rl →Φ".
-    iMod (opbor_tok_merge_subdiv [_] _ ((_,_,_,_,_)', ())'
+    iMod (opbor_tok_merge_subdiv [_] _ ((_,_,_,_,_)',())'
       with "[$⊑ $o //] Ψl Rl [→Φ]") as (ηl) "big"=>/=.
     { iIntros (?). by rewrite bi.sep_emp. }
     iExists ηl. by iDestruct "big" as "/=[[$ _][[$ _]$]]".
