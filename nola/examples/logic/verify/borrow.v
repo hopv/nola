@@ -4,6 +4,8 @@ From nola.examples.logic Require Export borrow.
 From nola.examples.heap_lang Require Export proofmode notation.
 From iris.base_logic.lib Require Export ghost_var.
 
+Implicit Type X : nsynty.
+
 Section borrow.
   Context `{!nintpGS Σ}.
 
@@ -24,8 +26,6 @@ Section borrow.
     { iIntros "† _". iModIntro. iExists _. iFrame "↦". by iApply "→b'". }
     iModIntro. iApply "→Ψ". rewrite borc_bor. iFrame.
   Qed.
-
-  Implicit Type X : nsynty.
 
   (** Dereference a nested prophetic mutable reference *)
   Lemma proph_bor_bor_deref
