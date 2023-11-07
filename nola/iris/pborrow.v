@@ -40,7 +40,7 @@ Proof. solve_inG. Qed.
 
 Section pborrow.
   Context `{!pborrowGS TY PROP Σ}.
-  Implicit Type (M : iProp Σ → iProp Σ) (intp : PROP → iProp Σ) (X : TY)
+  Implicit Type (M : iProp Σ → iProp Σ) (intp : PROP -d> iProp Σ) (X : TY)
     (P : PROP) (Px : pbprop TY PROP).
 
   (** ** Tokens *)
@@ -152,17 +152,32 @@ Section pborrow.
     plend_body intp (λ π, π ξ) Φ.
 
   (** Interpretation of [pbprop] *)
-  Definition pbintp intp Px : iProp Σ := match Px with
+  Definition pbintp intp : _ -d> iProp Σ := λ Px, match Px with
     | pbprop_just P => intp P
     | pbprop_pbor γ ξ Φ => ∃ x, proph_ctrl γ x ξ ∗ intp (Φ x)
     | pbprop_plend xπ Φ => plend_body intp xπ Φ
     | pbprop_preborrow γ γ' γx ξ f =>
         ∃ y, proph_ctrl γ (f y) ξ ∗ val_obs γ' y ∗ val_obs γx y
-    end.
+    end%I.
 
   (** World satisfaction *)
   Definition pborrow_wsat M intp : iProp Σ :=
     borrow_wsat (modw M proph_wsat) (pbintp intp).
+
+  (** [pbintp] is non-expansive *)
+  #[export] Instance pbintp_ne {n} : Proper ((≡{n}≡) ==> (≡{n}≡)) pbintp.
+  Proof. move=> ???[]/=; unfold plend_body; solve_proper. Qed.
+  (** [pbintp] is proper *)
+  #[export] Instance pbintp_proper : Proper ((≡) ==> (≡)) pbintp.
+  Proof. move=> ???[]/=; unfold plend_body; solve_proper. Qed.
+  (** [pborrow_wsat] is non-expansive *)
+  #[export] Instance pborrow_wsat_ne `{!GenUpd M} {n} :
+    Proper ((≡{n}≡) ==> (≡{n}≡)) (pborrow_wsat M).
+  Proof. solve_proper. Qed.
+  (** [pborrow_wsat] is proper *)
+  #[export] Instance pborrow_wsat_proper `{!GenUpd M} :
+    Proper ((≡) ==> (≡)) (pborrow_wsat M).
+  Proof. solve_proper. Qed.
 
   (** ** For non-prophetic borrowing *)
 
