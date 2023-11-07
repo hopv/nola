@@ -240,8 +240,8 @@ Section borrow.
     iIntros "α c". iMod (borc_open with "α c") as "[o P]".
     by iMod (obor_reborrow with "o P").
   Qed.
-  Lemma bor_reborrow {E α q P} β :
-    q.[α] -∗ bord α P =[borrow_wsatd ∗ proph_wsat]{E}=∗
+  Lemma bor_reborrow {α q P} β :
+    q.[α] -∗ bord α P =[borrow_wsatd ∗ proph_wsat]=∗
       q.[α] ∗ borcd (α ⊓ β) P ∗ ([†β] -∗ bord α P).
   Proof.
     iIntros "α b". iMod (bor_open with "α b") as "[o P]".
