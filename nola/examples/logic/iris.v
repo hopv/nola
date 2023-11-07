@@ -77,7 +77,7 @@ Section iris.
   (** [fbor]: Fractured borrower *)
   Definition fbor δ α (Φ : Qp → nPropS (;ᵞ)) : iProp Σ :=
     ∃ β Ψ, α ⊑□ β ∗
-      □ ⸨ (∀ q, ↑ˡ Φ q ==∗ ↑ˡ Ψ q) ∗ (∀ q, ↑ˡ Ψ q ==∗ ↑ˡ Φ q) ⸩(δ) ∗
+      □ ⸨ ∀ q, ↑ˡ Φ q ==∗ ↑ˡ Ψ q ⸩(δ) ∗ □ ⸨ ∀ q, ↑ˡ Ψ q ==∗ ↑ˡ Φ q ⸩(δ) ∗
       sinv_tok (∃ q, n_bor' [] β (Ψ q))%n.
 End iris.
 
