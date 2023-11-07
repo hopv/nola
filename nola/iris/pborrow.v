@@ -40,7 +40,7 @@ Proof. solve_inG. Qed.
 
 Section pborrow.
   Context `{!pborrowGS TY PROP Σ}.
-  Implicit Type (M : iProp Σ → iProp Σ) (intp : PROP -d> iProp Σ) (X : TY)
+  Implicit Type (M : iProp Σ → iProp Σ) (intp : PROP -d> iProp Σ) (X Y : TY)
     (P : PROP) (Px : pbprop TY PROP).
 
   (** ** Tokens *)
@@ -276,7 +276,7 @@ Section pborrow.
     (γξxΦl : plist (λ X, _ *' _ *' X *' (X → PROP)) Xl) :=
     of_plist (λ _ '(γ, ξ, x, Φ)', pbprop_pbor γ ξ Φ) γξxΦl.
   Local Definition plend_list {Xl}
-    (xπΦl : plist (λ X : TY, (proph_asn TY → X) *' (X → PROP)) Xl) :=
+    (xπΦl : plist (λ X, (proph_asn TY → X) *' (X → PROP)) Xl) :=
     of_plist (λ _ '(xπ, Φ)', pbprop_plend xπ Φ) xπΦl.
   Local Lemma vo_pbor_alloc_list {intp Xl ξl} {xΦl : plist _ Xl} :
     1:∗[of_plist_prvar ξl] -∗ ([∗ plist] '(x, Φ)' ∈ xΦl, intp (Φ x)) ==∗ ∃ γl,
@@ -301,9 +301,9 @@ Section pborrow.
   Qed.
   (** Create new prophetic borrowers and lenders *)
   Lemma pbor_plend_tok_new_list `{!GenUpd M} {intp} α Xl
-    (xΦl : plist (λ X : TY, X *' (X → PROP)) Xl) :
+    (xΦl : plist (λ X, X *' (X → PROP)) Xl) :
     ⊢ |=[proph_wsat]=> ∃ ξl,
-      ∀ Yl (yπΨl : plist (λ Y : TY, (proph_asn TY → Y) *' (Y → PROP)) Yl),
+      ∀ Yl (yπΨl : plist (λ Y, (proph_asn TY → Y) *' (Y → PROP)) Yl),
       let ξxΦl := plist_zip ξl xΦl in
       ([∗ plist] '(x, Φ)' ∈ xΦl, intp (Φ x)) -∗
       ([†α] -∗ ([∗ plist] '(ξ, x, Φ)' ∈ ξxΦl, plend_body' intp ξ Φ) -∗
@@ -341,7 +341,7 @@ Section pborrow.
 
   (** Extend a prophetic lender *)
   Lemma plend_tok_split `{!GenUpd M} {intp α X xπ Φ} Yl
-    (yπΨl : plist (λ Y : TY, (proph_asn TY → Y) *' (Y → PROP)) Yl) :
+    (yπΨl : plist (λ Y, (proph_asn TY → Y) *' (Y → PROP)) Yl) :
     plend_tok (X:=X) α xπ Φ -∗
     (plend_body intp xπ Φ -∗ modw M proph_wsat
       ([∗ plist] '(yπ, Ψ)' ∈ yπΨl, plend_body intp yπ Ψ))
@@ -426,7 +426,7 @@ Section pborrow.
   Lemma opbor_tok_merge_subdiv `{!GenUpd M} {intp} Xl Yl
     (αqξΦfl : plist
       (λ X, lft *' Qp *' prvar X *' (X → PROP) *' (plist_synty Yl → X)) Xl)
-    (yΨl : plist (λ Y : TY, Y *' (Y → PROP)) Yl) Rl β :
+    (yΨl : plist (λ Y, Y *' (Y → PROP)) Yl) Rl β :
     ([∗ plist] '(α, q, ξ, Φ, _)' ∈ αqξΦfl, β ⊑□ α ∗ opbor_tok α q ξ Φ) -∗
     ([∗ plist] '(y, Ψ)' ∈ yΨl, intp (Ψ y)) -∗ ([∗ list] R ∈ Rl, intp R) -∗
     (∀ yl', [†β] -∗ ([∗ plist] '(y', _, Ψ)' ∈ plist_zip yl' yΨl, intp (Ψ y')) -∗
@@ -465,7 +465,7 @@ Section pborrow.
   Qed.
   (** Subdivide a prophetic borrower *)
   Lemma opbor_tok_subdiv `{!GenUpd M} {intp X α q ξ Φ} Yl
-    (f : plist_synty Yl → X) (yΨl : plist (λ Y : TY, Y *' (Y → PROP)) Yl) Rl β :
+    (f : plist_synty Yl → X) (yΨl : plist (λ Y, Y *' (Y → PROP)) Yl) Rl β :
     β ⊑□ α -∗ opbor_tok α q ξ Φ -∗ ([∗ plist] '(y, Ψ)' ∈ yΨl, intp (Ψ y)) -∗
     ([∗ list] R ∈ Rl, intp R) -∗
     (∀ yl', [†β] -∗ ([∗ plist] '(y', _, Ψ)' ∈ plist_zip yl' yΨl, intp (Ψ y')) -∗
@@ -534,8 +534,7 @@ Section pborrow.
   Qed.
 
   (** Reborrow a nested prophetic borrower *)
-  Lemma opbor_opbor_tok_reborrow `{!GenUpd M} {intp} {X Y : TY}
-    {α q ξ Φ β r η Ψ} y (f : Y → X) :
+  Lemma opbor_opbor_tok_reborrow `{!GenUpd M} {intp X Y α q ξ Φ β r η Ψ} y f :
     opbor_tok (X:=X) α q ξ Φ -∗ opbor_tok (X:=Y) β r η Ψ -∗ intp (Ψ y) -∗
     (∀ y', [†α] -∗ pbor_tok β y' η Ψ -∗ modw M proph_wsat (intp (Φ (f y'))))
       =[proph_wsat ∗ pborrow_wsat M intp]=∗ ∃ η' : prvar _,
@@ -579,8 +578,7 @@ Section pborrow.
     iModIntro. iDestruct ("→α'β" with "αβ") as "[$$]". rewrite pbor_ctok_unseal.
     iRight. iExists _. iFrame.
   Qed.
-  Lemma opbor_pbor_ctok_reborrow `{!GenUpd M} {intp} {X Y : TY}
-    {α q ξ Φ β r y η Ψ} (f : Y → X) :
+  Lemma opbor_pbor_ctok_reborrow `{!GenUpd M} {intp X Y α q ξ Φ β r y η Ψ} f :
     opbor_tok (X:=X) α q ξ Φ -∗ r.[β] -∗ pbor_ctok (X:=Y) β y η Ψ -∗
     (∀ y', [†α] -∗ pbor_tok β y' η Ψ -∗ modw M proph_wsat (intp (Φ (f y'))))
       =[proph_wsat ∗ pborrow_wsat M intp]=∗ ∃ η' : prvar _,
@@ -589,8 +587,7 @@ Section pborrow.
     iIntros "Φ β c →Φ". iMod (pbor_ctok_open with "β c") as "[o Ψ]".
     iApply (opbor_opbor_tok_reborrow with "Φ o Ψ →Φ").
   Qed.
-  Lemma opbor_pbor_tok_reborrow `{!GenUpd M} {intp} {X Y : TY}
-    {α q ξ Φ β r y η Ψ} (f : Y → X) :
+  Lemma opbor_pbor_tok_reborrow `{!GenUpd M} {intp X Y α q ξ Φ β r y η Ψ} f :
     opbor_tok (X:=X) α q ξ Φ -∗ r.[β] -∗ pbor_tok (X:=Y) β y η Ψ -∗
     (∀ y', [†α] -∗ pbor_tok β y' η Ψ -∗ modw M proph_wsat (intp (Φ (f y')))) -∗
       modw M (proph_wsat ∗ pborrow_wsat M intp) (∃ η' : prvar _,
