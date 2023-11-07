@@ -4,8 +4,6 @@ From nola.examples.logic Require Export deriv.
 
 Implicit Type (P Q : nPropS (;ᵞ)) (Pl Ql : list (nPropS (;ᵞ))).
 
-(** ** On borrowing *)
-
 Section borrow.
   Context `{!nintpGS Σ, !nDeriv ih δ}.
 
