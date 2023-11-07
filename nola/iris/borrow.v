@@ -398,7 +398,7 @@ Section borrow.
   Local Lemma bor_lend_tok_new_list' `{!GenUpd M} {intp} d α Pl Ql :
     ([∗ list] P ∈ Pl, intp P) -∗
     ([†α] -∗ ([∗ list] P ∈ Pl, intp P) -∗ M ([∗ list] Q ∈ Ql, intp Q)%I)
-    =[borrow_wsat M intp]=∗
+      =[borrow_wsat M intp]=∗
       ([∗ list] P ∈ Pl, bor_ctok α P) ∗ [∗ list] Q ∈ Ql, lend_dtok d α Q.
   Proof.
     rewrite borrow_wsat_unseal bor_ctok_unseal. iIntros "Pl →Ql [%Dm[● Dm]]".
@@ -414,7 +414,7 @@ Section borrow.
   Lemma bor_lend_tok_new_list `{!GenUpd M} {intp} α Pl Ql :
     ([∗ list] P ∈ Pl, intp P) -∗
     ([†α] -∗ ([∗ list] P ∈ Pl, intp P) -∗ M ([∗ list] Q ∈ Ql, intp Q)%I)
-    =[borrow_wsat M intp]=∗
+      =[borrow_wsat M intp]=∗
       ([∗ list] P ∈ Pl, bor_ctok α P) ∗ [∗ list] Q ∈ Ql, lend_tok α Q.
   Proof.
     iIntros "Pl →Ql". iMod (bor_lend_tok_new_list' 0 with "Pl →Ql") as "[$ ?]".
