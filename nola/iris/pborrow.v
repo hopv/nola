@@ -300,8 +300,7 @@ Section pborrow.
     iMod (pc_resolve with "pc") as "?". iModIntro. iExists _. iFrame.
   Qed.
   (** Create new prophetic borrowers and lenders *)
-  Lemma pbor_plend_tok_new_list `{!GenUpd M} {intp} α Xl
-    (xΦl : plist _ Xl) :
+  Lemma pbor_plend_tok_new_list `{!GenUpd M} {intp} α Xl (xΦl : plist _ Xl) :
     ⊢ |=[proph_wsat]=> ∃ ξl, ∀ Yl (yπΨl : plist (λ Y, _ *' (Y → PROP)) Yl),
       let ξxΦl := plist_zip ξl xΦl in
       ([∗ plist] '(x, Φ)' ∈ xΦl, intp (Φ x)) -∗
@@ -422,8 +421,8 @@ Section pborrow.
   Qed.
   (** Merge and subdivide prophetic borrowers *)
   Lemma opbor_tok_merge_subdiv `{!GenUpd M} {intp} Xl Yl
-    (αqξΦfl : plist (λ X, _ *' _ *' _ *' _ *' (_ → X)) Xl)
-    (yΨl : plist _ Yl) Rl β :
+    (αqξΦfl : plist (λ X, _ *' _ *' _ *' _ *' (_ → X)) Xl) (yΨl : plist _ Yl) Rl
+    β :
     ([∗ plist] '(α, q, ξ, Φ, _)' ∈ αqξΦfl, β ⊑□ α ∗ opbor_tok α q ξ Φ) -∗
     ([∗ plist] '(y, Ψ)' ∈ yΨl, intp (Ψ y)) -∗ ([∗ list] R ∈ Rl, intp R) -∗
     (∀ yl', [†β] -∗ ([∗ plist] '(y', _, Ψ)' ∈ plist_zip yl' yΨl, intp (Ψ y')) -∗
@@ -461,8 +460,8 @@ Section pborrow.
     rewrite pbor_ctok_unseal. iRight. iExists _. iFrame.
   Qed.
   (** Subdivide a prophetic borrower *)
-  Lemma opbor_tok_subdiv `{!GenUpd M} {intp X α q ξ Φ} Yl
-    (f : _ → X) (yΨl : plist _ Yl) Rl β :
+  Lemma opbor_tok_subdiv `{!GenUpd M} {intp X α q ξ Φ} Yl (f : _ → X)
+    (yΨl : plist _ Yl) Rl β :
     β ⊑□ α -∗ opbor_tok α q ξ Φ -∗ ([∗ plist] '(y, Ψ)' ∈ yΨl, intp (Ψ y)) -∗
     ([∗ list] R ∈ Rl, intp R) -∗
     (∀ yl', [†β] -∗ ([∗ plist] '(y', _, Ψ)' ∈ plist_zip yl' yΨl, intp (Ψ y')) -∗
