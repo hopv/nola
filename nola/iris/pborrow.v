@@ -148,7 +148,7 @@ Section pborrow.
   Definition plend_body intp {X}
     (xπ : proph_asn TY → X) (Φ : X → PROP) : iProp Σ :=
     ∃ y, ⟨π, xπ π = y⟩ ∗ intp (Φ y).
-  Definition plend_body' intp {X} (ξ : prvar X) (Φ : X → PROP) : iProp Σ :=
+  Definition plend_body_var intp {X} (ξ : prvar X) (Φ : X → PROP) : iProp Σ :=
     plend_body intp (λ π, π ξ) Φ.
 
   (** Interpretation of [pbprop] *)
@@ -293,7 +293,7 @@ Section pborrow.
   (** Lemma for [pbor_plend_tok_new_list] *)
   Local Lemma pbor_list_intp_to_plend {intp Xl γl} {ξxΦl : plist _ Xl} :
     ([∗ list] Px ∈ pbor_list (plist_zip γl ξxΦl), pbintp intp Px)
-      =[proph_wsat]=∗ [∗ plist] '(ξ, x, Φ)' ∈ ξxΦl, plend_body' intp ξ Φ.
+      =[proph_wsat]=∗ [∗ plist] '(ξ, x, Φ)' ∈ ξxΦl, plend_body_var intp ξ Φ.
   Proof.
     elim: Xl γl ξxΦl=>/=; [by iIntros|]=> X Xl IH [γ γl] [[ξ[x Φ]] ξxΦl].
     iIntros "[[%[pc Φ]] pborl]". iMod (IH with "pborl") as "$".
@@ -304,7 +304,7 @@ Section pborrow.
     ⊢ |=[proph_wsat]=> ∃ ξl, ∀ Yl (yπΨl : plist (λ Y, _ *' (Y → PROP)) Yl),
       let ξxΦl := plist_zip ξl xΦl in
       ([∗ plist] '(x, Φ)' ∈ xΦl, intp (Φ x)) -∗
-      ([†α] -∗ ([∗ plist] '(ξ, x, Φ)' ∈ ξxΦl, plend_body' intp ξ Φ) -∗
+      ([†α] -∗ ([∗ plist] '(ξ, x, Φ)' ∈ ξxΦl, plend_body_var intp ξ Φ) -∗
         modw M proph_wsat ([∗ plist] '(yπ, Ψ)' ∈ yπΨl, plend_body intp yπ Ψ))
         =[pborrow_wsat M intp]=∗
         ([∗ plist] '(ξ, x, Φ)' ∈ ξxΦl, pbor_ctok α x ξ Φ) ∗
