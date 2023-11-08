@@ -147,7 +147,7 @@ Section pborrow.
   (** Body of a prophetic lender *)
   Definition plend_body intp {X}
     (xπ : proph_asn TY → X) (Φ : X → PROP) : iProp Σ :=
-    ∃ y, ⟨π, xπ π = y⟩ ∗ intp (Φ y).
+    ∃ x', ⟨π, xπ π = x'⟩ ∗ intp (Φ x').
   Definition plend_body_var intp {X} (ξ : prvar X) (Φ : X → PROP) : iProp Σ :=
     plend_body intp (λ π, π ξ) Φ.
 
