@@ -191,7 +191,8 @@ Section borrow.
 
   (** Lemma for [obor_merge_subdiv] *)
   Local Lemma obor_list {αqPl β} :
-    ([∗ list] '(α, q, P)' ∈ αqPl, β ⊑□ α ∗ obord α q P) -∗ ∃ αqRl,
+    ([∗ list] '(α, q, P)' ∈ αqPl, β ⊑□ α ∗ obord α q P) ⊢
+    ∃ αqRl,
       ⌜(λ '(α, q, _)', (α, q)') <$> αqRl = (λ '(α, q, _)', (α, q)') <$> αqPl⌝ ∗
       ([∗ list] '(α, q, R)' ∈ αqRl, β ⊑□ α ∗ obor_tok α q R) ∗
       (([∗ list] '(_, _, P)' ∈ αqPl, ⟦ P ⟧) ==∗
@@ -199,11 +200,10 @@ Section borrow.
   Proof.
     elim: αqPl=>/=.
     { iIntros. iExists []=>/=. do 2 (iSplit; [done|]). by iIntros. }
-    iIntros ([α[q P]] αqPl IH) "[[⊑[%R[PR o]]] αqPl]". rewrite convert_use.
-    iDestruct (IH with "αqPl") as (αqRl ?) "[ol →']".
-    iExists ((α, q, R)' :: αqRl)=>/=. iFrame "⊑ o ol". iSplit.
-    { iPureIntro. by f_equal. } iIntros "[P Pl]".
-    iMod ("PR" with "P") as "$". iApply ("→'" with "Pl").
+    iIntros ([α[q P]] αqPl ->) "[[⊑[%R[PR o]]][%αqRl[%[ol →']]]]".
+    rewrite convert_use. iExists ((α, q, R)' :: αqRl)=>/=. iFrame "⊑ o ol".
+    iSplit. { iPureIntro. by f_equal. }
+    iIntros "[P Pl]". iMod ("PR" with "P") as "$". iApply ("→'" with "Pl").
   Qed.
   (** Merge and subdivide borrowers *)
   Lemma obor_merge_subdiv αqPl Ql β :
@@ -213,13 +213,12 @@ Section borrow.
       =[proph_wsat]=∗ [∗ list] '(_, _, P)' ∈ αqPl, ⟦ P ⟧) =[borrow_wsatd]=∗
       ([∗ list] '(α, q, _)' ∈ αqPl, q.[α]) ∗ ([∗ list] Q ∈ Ql, borcd β Q).
   Proof.
-    setoid_rewrite <-nintpS_nintp. iIntros "ol Ql →Pl".
+    rewrite obor_list /=. setoid_rewrite <-nintpS_nintp.
     rewrite -(big_sepL_fmap (λ '(α, q, _)', (α, q)') (λ _ '(α, q)', q.[α])%I).
-    iDestruct (obor_list with "ol") as (?<-) "[ol →]".
-    rewrite big_sepL_fmap.
+    iIntros "[%[<-[ol →]]] Ql →Pl". rewrite big_sepL_fmap.
     iMod (obor_tok_merge_subdiv _ Ql with "ol Ql [→ →Pl]") as "[$ cl]".
     { iIntros "† Ql". iMod ("→Pl" with "† Ql") as "Pl".
-      setoid_rewrite nintpS_nintp. by iMod ("→" with "Pl") as "$". }
+      by iMod ("→" with "Pl") as "$". }
     by setoid_rewrite borc_intro.
   Qed.
   (** Subdivide borrowers *)
