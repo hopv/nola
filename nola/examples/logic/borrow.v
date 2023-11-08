@@ -44,6 +44,14 @@ Section borrow.
     by setoid_rewrite nintp_nlarge.
   Qed.
 
+  (** Lemmas for introducing tokens *)
+  Local Lemma borc_intro {α P} : bor_ctok α P ⊢ borc δ α P.
+  Proof. iIntros "c". iExists _. iFrame "c". iSplitL; iApply convert_refl. Qed.
+  Local Lemma bor_intro {α P} : bor_tok α P ⊢ bor δ α P.
+  Proof. iIntros "b". iExists _. iFrame "b". iSplitL; iApply convert_refl. Qed.
+  Local Lemma lend_intro {α P} : lend_tok α P ⊢ lend δ α P.
+  Proof. iIntros "l". iExists _. iFrame "l". iApply convert_refl. Qed.
+
   (** Convert borrower and lender tokens *)
   Lemma borc_convert {α P Q} :
     ⸨ ↑ˡ P ==∗ ↑ˡ Q ⸩(δ) -∗ ⸨ ↑ˡ Q ==∗ ↑ˡ P ⸩(δ) -∗ borc δ α P -∗ borc δ α Q.
@@ -130,10 +138,9 @@ Section borrow.
       ([∗ list] P ∈ Pl, borcd α P) ∗ [∗ list] Q ∈ Ql, lendd α Q.
   Proof.
     iIntros "Pl →Ql". setoid_rewrite <-nintpS_nintp.
-    iMod (bor_lend_tok_new_list with "Pl [→Ql]") as "[bl ll]".
-    { iIntros "#† ?". by iApply "→Ql". } iModIntro.
-    iSplitL "bl"; iStopProof; do 3 f_equiv; iIntros "?"; iExists _; iFrame;
-      [iSplitL|idtac]; iApply convert_refl.
+    iMod (bor_lend_tok_new_list with "Pl [→Ql]") as "?".
+    { iIntros "#† ?". by iApply "→Ql". }
+    setoid_rewrite borc_intro. by setoid_rewrite lend_intro.
   Qed.
   (** Simply create a borrower and a lender *)
   Lemma borc_lend_new α (P : nPropS (;ᵞ)) :
@@ -153,8 +160,7 @@ Section borrow.
     iMod (lend_tok_split with "l [P'P →Ql]") as "ll"=>/=.
     { setoid_rewrite nintpS_nintp. iIntros "P'".
       iMod ("P'P" with "P'") as "P". by iMod ("→Ql" with "P"). }
-    iModIntro. iApply (big_sepL_impl with "ll"). iIntros "!> %% _ l".
-    iExists _. iFrame "l". iApply convert_refl.
+    by setoid_rewrite lend_intro.
   Qed.
 
   (** Retrive from [lend] *)
@@ -214,8 +220,7 @@ Section borrow.
     iMod (obor_tok_merge_subdiv _ Ql with "ol Ql [→ →Pl]") as "[$ cl]".
     { iIntros "† Ql". iMod ("→Pl" with "† Ql") as "Pl".
       setoid_rewrite nintpS_nintp. by iMod ("→" with "Pl") as "$". }
-    iModIntro. iStopProof; do 3 f_equiv. iIntros "c". iExists _. iFrame "c".
-    iSplitL; by iApply convert_refl.
+    by setoid_rewrite borc_intro.
   Qed.
   (** Subdivide borrowers *)
   Lemma obor_subdiv {α q P} Ql β :
@@ -252,11 +257,8 @@ Section borrow.
       q.[α] ∗ borcd (α ⊓ β) P ∗ ([†β] -∗ bord α P).
   Proof.
     iIntros "o P". iMod (obor_obor_tok with "o P") as "[o P]".
-    iMod (obor_tok_reborrow (intp:=λ P, ⟦ P ⟧ˢ) with "o P") as "[$[c →o]]".
-    iModIntro. iSplitL "c".
-    - iExists _. iFrame "c". iSplitL; iApply convert_refl.
-    - iIntros "†". iExists _. iDestruct ("→o" with "†") as "$".
-      iSplitL; iApply convert_refl.
+    rewrite -borc_intro -bor_intro.
+    iApply (obor_tok_reborrow (intp:=λ P, ⟦ P ⟧ˢ) with "o P").
   Qed.
   Lemma borc_reborrow {α q P} β :
     q.[α] -∗ borcd α P =[borrow_wsatd]=∗
