@@ -32,14 +32,13 @@ Section nintp.
     | nc_lft_sincl α β => α ⊑□ β
     | nc_proph_tok ξ q => q:[ξ] | nc_proph_toks ξl q => q:∗[ξl]
     | nc_proph_obs φπ => .⟨φπ⟩ | nc_proph_wsat => proph_wsat
-    | nc_val_obs γ x => val_obs γ x | nc_proph_ctrl γ x ξ => proph_ctrl γ x ξ
     end.
   Local Definition ncintpl0 (c : nconl0)
     (niS : nPropS (;ᵞ) -d> iProp Σ) : iProp Σ :=
     match c with
     | nc_sinv_wsat => sinv_wsat niS
     | nc_inv_wsat => inv_wsat niS | nc_na_inv_wsat => na_inv_wsat niS
-    | nc_borrow_wsat => borrow_wsat'' niS
+    | nc_pborrow_wsat => pborrow_wsat'' niS
     end.
   Local Definition ncintp1 (c : ncon1) (P : iProp Σ) : iProp Σ :=
     match c with
@@ -74,6 +73,10 @@ Section nintp.
     | nc_borc α, _ => borc δ α (Φ 0) | nc_bor α, _ => bor δ α (Φ 0)
     | nc_obor α q, _ => obor δ α q (Φ 0) | nc_lend α, _ => lend δ α (Φ 0)
     | nc_fbor α, _ => fbor δ α Φ
+    | nc_pborc _ α x ξ, _ => pborc δ α x ξ Φ
+    | nc_pbor _ α x ξ, _ => pbor δ α x ξ Φ
+    | nc_opbor _ α q ξ, _ => opbor δ α q ξ Φ
+    | nc_plend _ α xπ, _ => plend δ α xπ Φ
     end%I.
 
   (** [ncintpl0] is non-expansive *)
@@ -235,7 +238,7 @@ Notation nintpS δ P := ⟦ P ⟧ˢ(δ) (only parsing).
 Notation sinv_wsat' δ := (sinv_wsat (λ P, ⟦ P ⟧ˢ(δ))).
 Notation inv_wsat' δ := (inv_wsat (λ P, ⟦ P ⟧ˢ(δ))).
 Notation na_inv_wsat' δ := (na_inv_wsat (λ P, ⟦ P ⟧ˢ(δ))).
-Notation borrow_wsat' δ := (borrow_wsat'' (λ P, ⟦ P ⟧ˢ(δ))).
+Notation pborrow_wsat' δ := (pborrow_wsat'' (λ P, ⟦ P ⟧ˢ(δ))).
 
 (** ** Lemmas on [⟦ ⟧] etc. *)
 Section nintp.

@@ -78,16 +78,13 @@ Variant ncon0 : Type :=
 | (** Prophecy token *) nc_proph_tok (ξ : aprvarn) (q : Qp)
 | (** Prophecy tokens *) nc_proph_toks (ξl : list aprvarn) (q : Qp)
 | (** Prophecy observation *) nc_proph_obs (φπ : proph_asnn → Prop)
-| (** Prophecy world satisfaction *) nc_proph_wsat
-| (** Value observer *) nc_val_obs {X : nsynty} (γ : gname) (x : X)
-| (** Prophecy controller *) nc_proph_ctrl {X : nsynty}
-    (γ : gname) (x : X) (ξ : prvar X).
+| (** Prophecy world satisfaction *) nc_proph_wsat.
 (** Nullary, large *)
 Variant nconl0 : Type :=
 | (** Simple invariant world satisfaction *) nc_sinv_wsat
 | (** Invariant world satisfaction *) nc_inv_wsat
 | (** Non-atomic invariant world satisfaction *) nc_na_inv_wsat
-| (** Borrowing world satisfaction *) nc_borrow_wsat.
+| (** Prophetic borrowing world satisfaction *) nc_pborrow_wsat.
 (** Unary *)
 Variant ncon1 : Type :=
 | (** Except-0 modality *) nc_except_0
@@ -131,10 +128,20 @@ Variant ncongs : Type :=
 | (** Borrower *) nc_bor (α : lft)
 | (** Open borrower *) nc_obor (α : lft) (q : Qp)
 | (** Lender *) nc_lend (α : lft)
-| (** Fractured borrower *) nc_fbor (α : lft).
+| (** Fractured borrower *) nc_fbor (α : lft)
+| (** Prophetic closed borrower *) nc_pborc
+    (X : nsynty) (α : lft) (x : X) (ξ : prvar X)
+| (** Prophetic borrower *) nc_pbor
+    (X : nsynty) (α : lft) (x : X) (ξ : prvar X)
+| (** Prophetic open borrower *) nc_opbor
+    (X : nsynty) (α : lft) (q : Qp) (ξ : prvar X)
+| (** Prophetic lender *) nc_plend
+    (X : nsynty) (α : lft) (xπ : proph_asnn → X).
 (** Domain of [ncongs] *)
 Definition ncongs_dom (c : ncongs) : Type := match c with
-  | nc_fbor _ => Qp | _ => nat
+  | nc_fbor _ => Qp
+  | nc_pborc X _ _ _ | nc_pbor X _ _ _ | nc_opbor X _ _ _ | nc_plend X _ _ => X
+  | _ => nat
   end.
 
 (** [nProp]: Nola syntactic proposition
@@ -210,12 +217,10 @@ Notation "q :[ ξ ]" := (n_0 (nc_proph_tok ξ q)) : nProp_scope.
 Notation "q :∗[ ξ ]" := (n_0 (nc_proph_toks ξ q)) : nProp_scope.
 Notation ".⟨ φπ ⟩" := (n_0 (nc_proph_obs φπ)) (only parsing) : nProp_scope.
 Notation "⟨ π , φ ⟩" := (n_0 (nc_proph_obs (λ π, φ))) : nProp_scope.
-Notation n_val_obs γ x := (n_0 (nc_val_obs γ x)).
-Notation n_proph_ctrl γ x ξ := (n_0 (nc_proph_ctrl γ x ξ)).
 Notation n_sinv_wsat := (n_l0 nc_sinv_wsat).
 Notation n_inv_wsat := (n_l0 nc_inv_wsat).
 Notation n_na_inv_wsat := (n_l0 nc_na_inv_wsat).
-Notation n_borrow_wsat := (n_l0 nc_borrow_wsat).
+Notation n_pborrow_wsat := (n_l0 nc_pborrow_wsat).
 Notation "◇ P" := (n_1 nc_except_0 P) : nProp_scope.
 Notation "□ P" := (n_1 nc_persistently P) : nProp_scope.
 Notation "■ P" := (n_1 nc_plainly P) : nProp_scope.
@@ -283,6 +288,18 @@ Notation n_fbor α Φ := (n_fbor' _ α Φ).
 Notation n_fbor_mapsto α l v := (n_fbor α (λ q, l ↦{#q} v)).
 Notation "l ↦[ α ] v" := (n_fbor_mapsto α l v)
   (at level 20, format "l  ↦[ α ]  v") : nProp_scope.
+Notation n_pborc' Γᵘ α x ξ Φ := (n_gs (Γᵘ:=Γᵘ) (nc_pborc _ α x ξ) Φ)
+  (only parsing).
+Notation n_pborc α x ξ Φ := (n_pborc' _ α x ξ Φ).
+Notation n_pbor' Γᵘ α x ξ Φ := (n_gs (Γᵘ:=Γᵘ) (nc_pbor _ α x ξ) Φ)
+  (only parsing).
+Notation n_pbor α x ξ Φ := (n_pbor' _ α x ξ Φ).
+Notation n_opbor' Γᵘ α q ξ Φ := (n_gs (Γᵘ:=Γᵘ) (nc_opbor _ α q ξ) Φ)
+  (only parsing).
+Notation n_opbor α q ξ Φ := (n_opbor' _ α q ξ Φ).
+Notation n_plend' Γᵘ α xπ Φ := (n_gs (Γᵘ:=Γᵘ) (nc_plend _ α xπ) Φ)
+  (only parsing).
+Notation n_plend α xπ Φ := (n_plend' _ α xπ Φ).
 
 Notation "∀: V , P" := (n_n_forall V P)
   (at level 200, right associativity,

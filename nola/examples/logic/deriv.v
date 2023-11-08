@@ -20,7 +20,7 @@ Notation "⸨ P ⸩" := ⸨ P ⸩(nderiv) (format "⸨  P  ⸩") : nola_scope.
 Notation sinv_wsatd := (sinv_wsat' nderiv).
 Notation inv_wsatd := (inv_wsat' nderiv).
 Notation na_inv_wsatd := (na_inv_wsat' nderiv).
-Notation borrow_wsatd := (borrow_wsat' nderiv).
+Notation pborrow_wsatd := (pborrow_wsat' nderiv).
 
 Notation sinvd := (sinv nderiv).
 Notation ninvd := (ninv nderiv).
@@ -31,6 +31,10 @@ Notation bord := (bor nderiv).
 Notation obord := (obor nderiv).
 Notation lendd := (lend nderiv).
 Notation fbord := (fbor nderiv).
+Notation pborcd := (pborc nderiv).
+Notation pbord := (pbor nderiv).
+Notation opbord := (opbor nderiv).
+Notation plendd := (plend nderiv).
 Notation fbor_mapstod α l v := (fbor_mapsto nderiv α l v).
 Notation "l ↦[ α ] v" := (fbor_mapstod α l v)
   (at level 20, format "l  ↦[ α ]  v") : bi_scope.

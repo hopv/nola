@@ -10,22 +10,20 @@ Class nintpGpreS Σ := NintpGpreS {
   nintpGpreS_na_ninv :: na_ninvGpreS (nPropS (;ᵞ)) Σ;
   nintpGpreS_na_inv :: na_invG Σ;
   nintpGpreS_cinv :: cinvG Σ;
-  nintpGpreS_borrow :: borrowGpreS (nPropS (;ᵞ)) Σ;
-  nintpGpreS_proph :: prophGpreS nsynty Σ;
-  nintpGpreS_proph_ag :: proph_agG nsynty Σ;
+  nintpGpreS_pborrow :: pborrowGpreS nsynty (nPropS (;ᵞ)) Σ;
   nintpGpreS_heap :: heapGpreS Σ;
 }.
 
 (** [gFunctors] for [nintpGpreS] *)
 Definition nintpΣ : gFunctors :=
   #[sinvΣ (nPropS (;ᵞ)); ninvΣ (nPropS (;ᵞ)); na_ninvΣ (nPropS (;ᵞ)); na_invΣ;
-    cinvΣ; borrowΣ (nPropS (;ᵞ)); prophΣ nsynty; proph_agΣ nsynty; heapΣ].
+    cinvΣ; pborrowΣ nsynty (nPropS (;ᵞ)); heapΣ].
 #[export] Instance subG_nintpGpreS `{!subG nintpΣ Σ} : nintpGpreS Σ.
 Proof. solve_inG. Qed.
 
 (** Whole world satisfaction *)
 Definition nwsatd `{!nintpGS Σ} : iProp Σ :=
-  sinv_wsatd ∗ inv_wsatd ∗ na_inv_wsatd ∗ borrow_wsatd ∗ proph_wsat.
+  sinv_wsatd ∗ inv_wsatd ∗ na_inv_wsatd ∗ pborrow_wsatd ∗ proph_wsat.
 
 (** Adequacy of [wp] over [inv_wsatd] *)
 Lemma wp_n_adequacy `{!nintpGpreS Σ} {s e σ φ} :
@@ -34,11 +32,10 @@ Lemma wp_n_adequacy `{!nintpGpreS Σ} {s e σ φ} :
 Proof.
   move=> towp. apply (heap_adequacy Σ HasNoLc)=> ?.
   iMod sinv_wsat_alloc as (?) "W0". iMod inv_wsat_alloc as (?) "W1".
-  iMod na_inv_wsat_alloc as (?) "W2". iMod borrow_wsat_alloc as (?) "W3".
-  iMod proph_wsat_alloc as (?) "W4". iModIntro.
-  iDestruct (towp (NintpGS _ _ _ _ _ _ _ _ _)) as "big". iExists nwsatd.
-  iFrame "big". iSplitL "W0"; [done|]. iSplitL "W1"; [done|].
-  iSplitL "W2"; [done|]. by iSplitL "W3".
+  iMod na_inv_wsat_alloc as (?) "W2".
+  iMod proph_pborrow_wsat_alloc as (?) "[W W3]". iModIntro.
+  iDestruct (towp (NintpGS _ _ _ _ _ _ _)) as "big". iExists nwsatd.
+  iFrame "big W". iSplitL "W0"; [done|]. iSplitL "W1"; [done|]. by iSplitL "W2".
 Qed.
 
 (** Adequacy of [twp] over [inv_wsatd] *)
@@ -48,9 +45,8 @@ Lemma twp_n_adequacy `{!nintpGpreS Σ} {s e σ φ} :
 Proof.
   move=> totwp. apply (heap_total Σ s _ _ φ)=> ?.
   iMod sinv_wsat_alloc as (?) "W0". iMod inv_wsat_alloc as (?) "W1".
-  iMod na_inv_wsat_alloc as (?) "W2". iMod borrow_wsat_alloc as (?) "W3".
-  iMod proph_wsat_alloc as (?) "W4". iModIntro.
-  iDestruct (totwp (NintpGS _ _ _ _ _ _ _ _ _)) as "big". iExists nwsatd.
-  iFrame "big". iSplitL "W0"; [done|]. iSplitL "W1"; [done|].
-  iSplitL "W2"; [done|]. by iSplitL "W3".
+  iMod na_inv_wsat_alloc as (?) "W2".
+  iMod proph_pborrow_wsat_alloc as (?) "[W W4]". iModIntro.
+  iDestruct (totwp (NintpGS _ _ _ _ _ _ _)) as "big". iExists nwsatd.
+  iFrame "big W". iSplitL "W0"; [done|]. iSplitL "W1"; [done|]. by iSplitL "W2".
 Qed.
