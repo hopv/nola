@@ -248,7 +248,7 @@ Section borrow.
     iMod (obor_tok_subdiv [_] with "[] o [P] [PQ]") as "[α[c _]]"=>/=.
     { iApply lft_sincl_refl. } { by iFrame. }
     { iIntros "_ [P _]". by iMod ("PQ" with "P"). }
-    by iMod (bor_ctok_open with "α c") as "$".
+    iApply (bor_ctok_open with "α c").
   Qed.
   (** Reborrow a borrower *)
   Lemma obor_reborrow {α q P} β :
