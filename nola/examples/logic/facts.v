@@ -68,14 +68,12 @@ Section facts.
   Implicit Type P Q : nPropL (;ᵞ).
 
   (** Make connectives go inside the derivability *)
-  Fact Deriv_and {P Q} :
-    ⸨ P ⸩(δ) ∧ ⸨ Q ⸩(δ) -∗ ⸨ P ∧ Q ⸩(δ).
+  Fact Deriv_and {P Q} : ⸨ P ⸩(δ) ∧ ⸨ Q ⸩(δ) -∗ ⸨ P ∧ Q ⸩(δ).
   Proof.
     iIntros "PQ". iApply Deriv_byintp. iIntros (?? _) "/= #→ _".
     iSplit; iApply "→"; [iDestruct "PQ" as "[$_]"|iDestruct "PQ" as "[_$]"].
   Qed.
-  Fact Deriv_or {P Q} :
-    ⸨ P ⸩(δ) ∨ ⸨ Q ⸩(δ) -∗ ⸨ P ∨ Q ⸩(δ).
+  Fact Deriv_or {P Q} : ⸨ P ⸩(δ) ∨ ⸨ Q ⸩(δ) -∗ ⸨ P ∨ Q ⸩(δ).
   Proof.
     iIntros "[?|?]"; iApply Deriv_byintp; iIntros (?? _) "/= #→ _";
       [iLeft|iRight]; by iApply "→".
@@ -83,17 +81,15 @@ Section facts.
   Fact Deriv_forall {A} {Φ : A → nPropL (;ᵞ)} :
     (∀ a, ⸨ Φ a ⸩(δ)) -∗ ⸨ ∀' Φ ⸩(δ).
   Proof.
-    iIntros "Φ". iApply Deriv_byintp. iIntros (?? _) "/= #→ _ %".
-    iApply "→". iApply "Φ".
+    iIntros "Φ". iApply Deriv_byintp. iIntros (?? _) "/= #→ _ %". iApply "→".
+    iApply "Φ".
   Qed.
-  Fact Deriv_exist {A} {Φ : A → nPropL (;ᵞ)} :
-    (∃ a, ⸨ Φ a ⸩(δ)) -∗ ⸨ ∃' Φ ⸩(δ).
+  Fact Deriv_exist {A} {Φ : A → nPropL (;ᵞ)} : (∃ a, ⸨ Φ a ⸩(δ)) -∗ ⸨ ∃' Φ ⸩(δ).
   Proof.
     iDestruct 1 as (a) "Φ". iApply Deriv_byintp. iIntros (?? _) "/= #→ _".
     iExists a. iApply "→". iApply "Φ".
   Qed.
-  Fact Deriv_sep {P Q} :
-    ⸨ P ⸩(δ) ∗ ⸨ Q ⸩(δ) -∗ ⸨ P ∗ Q ⸩(δ).
+  Fact Deriv_sep {P Q} : ⸨ P ⸩(δ) ∗ ⸨ Q ⸩(δ) -∗ ⸨ P ∗ Q ⸩(δ).
   Proof.
     iIntros "[P Q]". iApply Deriv_byintp. iIntros (?? _) "/= #→ _".
     iSplitL "P"; by iApply "→".
@@ -105,14 +101,12 @@ Section facts.
   Qed.
   Fact Deriv_bupd {P} : (|==> ⸨ P ⸩(δ)) -∗ ⸨ |==> P ⸩(δ).
   Proof.
-    iIntros "P". iApply Deriv_byintp. iIntros (?? _) "/= #→ _".
-    by iApply "→".
+    iIntros "P". iApply Deriv_byintp. iIntros (?? _) "/= #→ _". by iApply "→".
   Qed.
   Fact Deriv_fupd {E E' P} :
     (|={E,E'}=> ⸨ P ⸩(δ)) -∗ ⸨ |={E,E'}=> P ⸩(δ).
   Proof.
-    iIntros "P". iApply Deriv_byintp. iIntros (?? _) "/= #→ _".
-    by iApply "→".
+    iIntros "P". iApply Deriv_byintp. iIntros (?? _) "/= #→ _". by iApply "→".
   Qed.
   Fact Deriv_later {P} : ▷ ⸨ P ⸩(δ) -∗ ⸨ ▷{nil} P ⸩(δ).
   Proof.
