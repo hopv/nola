@@ -30,15 +30,14 @@ Section borrow.
   Qed.
 
   (** Dereference a nested prophetic mutable reference *)
-  Lemma proph_bor_bor_deref {X η ξ α β l q} {x : X}
-    {Φ : _ → _ → nPropS (;ᵞ)} :
+  Lemma proph_bor_bor_deref {X η ξ α β l q} {x : X} {Φ : _ → _ → nPropS (;ᵞ)} :
     [[{ q.[α ⊓ β] ∗
       pbord α ((x, ξ)' : _ *'ₛ prvarₛ _) η
-        (λ '(x', ξ')', ∃ v : val, l ↦ v ∗ n_pbor' [] β x' ξ' (Φ v))%n }]]
+        (λ '(x', ξ')', ∃ l' : loc, l ↦ #l' ∗ n_pbor' [] β x' ξ' (Φ l'))%n }]]
       [proph_wsat ∗ pborrow_wsatd bupd]
       !#l
-    [[{ v, RET v; q.[α ⊓ β] ∗ ∃ ξ' : prvar X,
-      ⟨π, π η = (π ξ', ξ)'⟩ ∗ pborcd (α ⊓ β) x ξ' (Φ v) }]].
+    [[{ l', RET #l'; q.[α ⊓ β] ∗ ∃ ξ' : prvar X,
+      ⟨π, π η = (π ξ', ξ)'⟩ ∗ pborcd (α ⊓ β) x ξ' (Φ l') }]].
   Proof.
     iIntros "%Ψ [[α β] b] →Ψ".
     iMod (pbor_open (M:=bupd) with "α b") as "/=[o[%[↦ b']]]".
