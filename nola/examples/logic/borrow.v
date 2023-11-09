@@ -1,6 +1,7 @@
 (** * On the borrowing *)
 
 From nola.examples.logic Require Export deriv.
+From nola.iris Require Export list.
 
 Implicit Type (P Q : nPropS (;ᵞ)) (Pl Ql : list (nPropS (;ᵞ))) (X Y : nsynty)
   (Xl Yl : list nsynty).
@@ -210,9 +211,9 @@ Section borrow.
       ([∗ list] P ∈ Pl, borcd α P) ∗ [∗ list] Q ∈ Ql, lendd α Q.
   Proof.
     iIntros "Pl →Ql". setoid_rewrite <-nintpS_nintp.
-    iMod (nbor_nlend_tok_new_list (M:=bupd) with "Pl [→Ql]") as "?".
-    { iIntros "#† ?". by iApply "→Ql". }
-    setoid_rewrite borc_intro. by setoid_rewrite lend_intro.
+    setoid_rewrite <-borc_intro. setoid_rewrite <-lend_intro.
+    iApply (nbor_nlend_tok_new_list (M:=bupd) with "Pl [→Ql]").
+    iIntros "#† ?". by iApply "→Ql".
   Qed.
   (** Simply create a borrower and a lender *)
   Lemma borc_lend_new α (P : nPropS (;ᵞ)) :
@@ -229,10 +230,9 @@ Section borrow.
       =[pborrow_wsatd]=∗ [∗ list] Q ∈ Ql, lendd α Q.
   Proof.
     iIntros "[%R[RP l]] →Ql". rewrite !convert_use.
-    setoid_rewrite <-nintpS_nintp.
-    iMod (nlend_tok_split (M:=bupd) with "l [RP →Ql]") as "ll"=>/=.
-    { iIntros "R"=>/=. iMod ("RP" with "R") as "P". by iMod ("→Ql" with "P"). }
-    by setoid_rewrite lend_intro.
+    setoid_rewrite <-nintpS_nintp. setoid_rewrite <-lend_intro.
+    iApply (nlend_tok_split (M:=bupd) with "l [RP →Ql]").
+    iIntros "R"=>/=. iMod ("RP" with "R") as "P". by iMod ("→Ql" with "P").
   Qed.
 
   (** Retrive from [lend] *)
@@ -288,10 +288,10 @@ Section borrow.
     rewrite obor_list /=. setoid_rewrite <-nintpS_nintp.
     rewrite -(big_sepL_fmap (λ '(α, q, _)', (α, q)') (λ _ '(α, q)', q.[α])%I).
     iIntros "[%[<-[ol →]]] Ql →Pl". rewrite big_sepL_fmap.
-    iMod (onbor_tok_merge_subdiv (M:=bupd) with "ol Ql [→ →Pl]") as "[$ cl]".
-    { iIntros "† Ql". iMod ("→Pl" with "† Ql") as "Pl".
-      by iMod ("→" with "Pl") as "$". }
-    by setoid_rewrite borc_intro.
+    setoid_rewrite <-borc_intro.
+    iApply (onbor_tok_merge_subdiv (M:=bupd) with "ol Ql [→ →Pl]").
+    iIntros "† Ql". iMod ("→Pl" with "† Ql") as "Pl".
+    by iMod ("→" with "Pl") as "$".
   Qed.
   (** Subdivide borrowers *)
   Lemma obor_subdiv {α q P} Ql β :
@@ -405,8 +405,8 @@ Section borrow.
   Proof.
     iMod (pbor_plend_tok_new_list (M:=bupd) (intp:=λ P, ⟦ P ⟧ˢ)) as (?) "big".
     iModIntro. iExists _. iIntros "%% Φl →Ψl". setoid_rewrite plend_bodyd_as.
-    setoid_rewrite <-nintpS_nintp. iMod ("big" with "Φl →Ψl") as "?".
-    setoid_rewrite pborc_intro. by setoid_rewrite plend_intro.
+    setoid_rewrite <-nintpS_nintp. setoid_rewrite <-pborc_intro.
+    setoid_rewrite <-plend_intro. iApply ("big" with "Φl →Ψl").
   Qed.
   (** Simply create a prophetic borrower and a prophetic lender *)
   Lemma pborc_plend_new α X (x : X) Φ :
@@ -501,15 +501,15 @@ Section borrow.
     rewrite opbor_plist /= -bi.sep_exist_l. setoid_rewrite <-nintpS_nintp.
     rewrite -(big_sepPL_map (λ _ '(α, q, _)', (α, q)') (λ _ '(α, q)', q.[α])%I).
     iIntros "[%[->[%eq[ol →]]]] Ψl Rl →Φl". rewrite big_sepPL_map.
+    setoid_rewrite <-pborc_intro. setoid_rewrite <-borc_intro.
     iMod (opbor_tok_merge_subdiv (M:=bupd) (intp:=λ P, ⟦ P ⟧ˢ)
-      with "ol Ψl Rl [→ →Φl]") as (?) "[$[obsl ?]]".
+      with "ol Ψl Rl [→ →Φl]") as (?) "[$[obsl[bl $]]]".
     { iIntros "% † Ψl Rl". iMod ("→Φl" with "† Ψl Rl") as "Φl".
       by iMod ("→" with "Φl") as "$". }
-    iModIntro. iExists _.
-    rewrite -(big_sepPL_map (λ _ '(_, _, ξ, _, f)', (ξ, f)')
+    iModIntro. iExists _. iFrame "bl".
+    by rewrite -(big_sepPL_map (λ _ '(_, _, ξ, _, f)', (ξ, f)')
       (λ _ '(ξ, f)', ⟨π, π (Aprvar _ ξ) = f (app_plist_prvar π ηl)⟩)%I)
-      -eq big_sepPL_map. iFrame "obsl".
-    setoid_rewrite pborc_intro. by setoid_rewrite borc_intro.
+      -eq big_sepPL_map.
   Qed.
   (** Subdivide a prophetic borrower *)
   Lemma opbor_subdiv {X α q ξ Φ} Yl (f : _ → X) (yΨl : plist _ Yl) Rl β :
