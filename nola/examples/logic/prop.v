@@ -83,8 +83,7 @@ Variant ncon0 : Type :=
 Variant nconl0 : Type :=
 | (** Simple invariant world satisfaction *) nc_sinv_wsat
 | (** Invariant world satisfaction *) nc_inv_wsat
-| (** Non-atomic invariant world satisfaction *) nc_na_inv_wsat
-| (** Prophetic borrowing world satisfaction *) nc_pborrow_wsat.
+| (** Non-atomic invariant world satisfaction *) nc_na_inv_wsat.
 (** Unary *)
 Variant ncon1 : Type :=
 | (** Except-0 modality *) nc_except_0
@@ -220,7 +219,6 @@ Notation "⟨ π , φ ⟩" := (n_0 (nc_proph_obs (λ π, φ))) : nProp_scope.
 Notation n_sinv_wsat := (n_l0 nc_sinv_wsat).
 Notation n_inv_wsat := (n_l0 nc_inv_wsat).
 Notation n_na_inv_wsat := (n_l0 nc_na_inv_wsat).
-Notation n_pborrow_wsat := (n_l0 nc_pborrow_wsat).
 Notation "◇ P" := (n_1 nc_except_0 P) : nProp_scope.
 Notation "□ P" := (n_1 nc_persistently P) : nProp_scope.
 Notation "■ P" := (n_1 nc_plainly P) : nProp_scope.

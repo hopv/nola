@@ -20,7 +20,7 @@ Notation "⸨ P ⸩" := ⸨ P ⸩(nderiv) (format "⸨  P  ⸩") : nola_scope.
 Notation sinv_wsatd := (sinv_wsat' nderiv).
 Notation inv_wsatd := (inv_wsat' nderiv).
 Notation na_inv_wsatd := (na_inv_wsat' nderiv).
-Notation pborrow_wsatd := (pborrow_wsat' nderiv).
+Notation pborrow_wsatd M := (pborrow_wsat' M nderiv).
 
 Notation sinvd := (sinv nderiv).
 Notation ninvd := (ninv nderiv).
