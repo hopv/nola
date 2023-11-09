@@ -16,8 +16,9 @@ nola/util/ctx.v
 nola/util/proph.v
 
 nola/iris/dfrac.v
-nola/iris/gmap.v
 nola/iris/discrete_fun.v
+nola/iris/list.v
+nola/iris/gmap.v
 nola/iris/plist.v
 nola/iris/deriv.v
 nola/iris/upd.v
