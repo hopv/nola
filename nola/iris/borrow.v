@@ -388,12 +388,36 @@ Section borrow.
   Proof.
     move=> ?????<-??<-??<-??<-. rewrite /depo_wsat. f_equiv; solve_proper.
   Qed.
+  Local Lemma depo_wsat_ne_mod {n M M' intp d α Bm Pm} :
+    (∀ P : iProp Σ, M P ≡{n}≡ M' P) →
+    depo_wsat M intp d α Bm Pm ≡{n}≡ depo_wsat M' intp d α Bm Pm.
+  Proof. by unfold depo_wsat, depo_wsat_in, depo_wsat_dead=> ->. Qed.
+  Local Lemma depo_wsat_proper_mod {M M' intp d α Bm Pm} :
+    (∀ P : iProp Σ, M P ≡ M' P) →
+    depo_wsat M intp d α Bm Pm ≡ depo_wsat M' intp d α Bm Pm.
+  Proof.
+    move=> ?. apply equiv_dist=> ?. apply depo_wsat_ne_mod=> ?.
+    by apply equiv_dist.
+  Qed.
   #[export] Instance borrow_wsat_ne `{!NonExpansive M} :
     NonExpansive (borrow_wsat M).
   Proof. rewrite borrow_wsat_unseal. solve_proper. Qed.
   #[export] Instance borrow_wsat_proper `{!NonExpansive M} :
     Proper ((≡) ==> (⊣⊢)) (borrow_wsat M).
   Proof. apply ne_proper, _. Qed.
+  Lemma borrow_wsat_ne_mod {n M M' intp} :
+    (∀ P : iProp Σ, M P ≡{n}≡ M' P) →
+    borrow_wsat M intp ≡{n}≡ borrow_wsat M' intp.
+  Proof.
+    rewrite borrow_wsat_unseal /borrow_wsat_def=> ?. do 6 f_equiv.
+    by apply depo_wsat_ne_mod.
+  Qed.
+  Lemma borrow_wsat_proper_mod {M M' intp} :
+    (∀ P : iProp Σ, M P ≡ M' P) → borrow_wsat M intp ≡ borrow_wsat M' intp.
+  Proof.
+    move=> ?. apply equiv_dist=> ?. apply borrow_wsat_ne_mod=> ?.
+    by apply equiv_dist.
+  Qed.
 
   (** Create new borrowers and lenders with a specific depth *)
   Local Lemma bor_lend_tok_new_list' `{!GenUpd M} {intp} d α Pl Ql :

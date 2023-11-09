@@ -178,6 +178,18 @@ Section pborrow.
   #[export] Instance pborrow_wsat_proper `{!NonExpansive M} :
     Proper ((≡) ==> (≡)) (pborrow_wsat M).
   Proof. solve_proper. Qed.
+  Lemma pborrow_wsat_ne_mod {n M M' intp} :
+    (∀ P : iProp Σ, M P ≡{n}≡ M' P) →
+    pborrow_wsat M intp ≡{n}≡ pborrow_wsat M' intp.
+  Proof.
+    unfold pborrow_wsat=> ?. apply borrow_wsat_ne_mod=> ?. by apply modw_ne_mod.
+  Qed.
+  Lemma pborrow_wsat_proper_mod {M M' intp} :
+    (∀ P : iProp Σ, M P ≡ M' P) → pborrow_wsat M intp ≡ pborrow_wsat M' intp.
+  Proof.
+    move=> ?. apply equiv_dist=> ?. apply pborrow_wsat_ne_mod=> ?.
+    by apply equiv_dist.
+  Qed.
 
   (** ** For non-prophetic borrowing *)
 

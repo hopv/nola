@@ -185,13 +185,20 @@ Section lemmas.
   Lemma modw_fold M W P : (W -∗ M (W ∗ P)) ⊣⊢ modw M W P.
   Proof. done. Qed.
 
-  (** [modw] is non-expansive for non-expansive [M] *)
+  (** [modw] is non-expansive and proper *)
   #[export] Instance modw_ne `{!NonExpansive M} : NonExpansive2 (modw M) | 10.
   Proof. solve_proper. Qed.
-  (** [modw] is proper for proper [M] *)
   #[export] Instance modw_proper `{!Proper ((⊣⊢) ==> (⊣⊢)) M} :
     Proper ((⊣⊢) ==> (⊣⊢) ==> (⊣⊢)) (modw M) | 10.
   Proof. solve_proper. Qed.
+  Lemma modw_ne_mod {n M M' W P} :
+    (∀ P, M P ≡{n}≡ M' P) → modw M W P ≡{n}≡ modw M' W P.
+  Proof. by unfold modw=> ->. Qed.
+  Lemma modw_proper_mod {M M' W P} :
+    (∀ P, M P ≡ M' P) → modw M W P ≡ modw M' W P.
+  Proof.
+    move=> ?. apply equiv_dist=> ?. apply modw_ne_mod=> ?. by apply equiv_dist.
+  Qed.
 
   (** [modw] is monotone for monotone [M] *)
   #[export] Instance modw_mono `{!Proper ((⊢) ==> (⊢)) M} {W} :
