@@ -171,11 +171,11 @@ Section pborrow.
   #[export] Instance pbintp_proper : Proper ((≡) ==> (≡)) pbintp.
   Proof. apply ne_proper, _. Qed.
   (** [pborrow_wsat] is non-expansive *)
-  #[export] Instance pborrow_wsat_ne `{!GenUpd M} :
+  #[export] Instance pborrow_wsat_ne `{!NonExpansive M} :
     NonExpansive (pborrow_wsat M).
   Proof. solve_proper. Qed.
   (** [pborrow_wsat] is proper *)
-  #[export] Instance pborrow_wsat_proper `{!GenUpd M} :
+  #[export] Instance pborrow_wsat_proper `{!NonExpansive M} :
     Proper ((≡) ==> (≡)) (pborrow_wsat M).
   Proof. solve_proper. Qed.
 

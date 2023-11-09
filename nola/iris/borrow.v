@@ -383,14 +383,15 @@ Section borrow.
   Local Instance bor_wsat_ne {n} :
     Proper ((≡{n}≡) ==> (=) ==> (=) ==> (=) ==> (≡{n}≡)) bor_wsat.
   Proof. solve_proper. Qed.
-  Local Instance depo_wsat_ne `{!GenUpd M} {n} :
+  Local Instance depo_wsat_ne `{!NonExpansive M} {n} :
     Proper ((≡{n}≡) ==> (=) ==> (=) ==> (=) ==> (=) ==> (≡{n}≡)) (depo_wsat M).
   Proof.
     move=> ?????<-??<-??<-??<-. rewrite /depo_wsat. f_equiv; solve_proper.
   Qed.
-  #[export] Instance borrow_wsat_ne `{!GenUpd M} : NonExpansive (borrow_wsat M).
+  #[export] Instance borrow_wsat_ne `{!NonExpansive M} :
+    NonExpansive (borrow_wsat M).
   Proof. rewrite borrow_wsat_unseal. solve_proper. Qed.
-  #[export] Instance borrow_wsat_proper `{!GenUpd M} :
+  #[export] Instance borrow_wsat_proper `{!NonExpansive M} :
     Proper ((≡) ==> (⊣⊢)) (borrow_wsat M).
   Proof. apply ne_proper, _. Qed.
 
