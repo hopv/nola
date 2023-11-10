@@ -5,15 +5,6 @@ From iris.bi Require Import fractional.
 From iris.base_logic.lib Require Import ghost_var.
 From iris.proofmode Require Import proofmode.
 
-(** Existential type over a syntactic type *)
-#[projections(primitive)]
-Record anyty (TY : synty) := Anyty {
-  anyty_ty : TY;
-  anyty_val : anyty_ty;
-}.
-Add Printing Constructor anyty.
-Arguments Anyty {_} _ _. Arguments anyty_ty {_} _. Arguments anyty_val {_} _.
-
 (** Ghost state *)
 Class proph_agG TY Σ := proph_agG_in :: ghost_varG Σ (anyty TY).
 Definition proph_agΣ TY := ghost_varΣ (anyty TY).

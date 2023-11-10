@@ -88,6 +88,15 @@ Arguments synty_ty {_} _. Arguments synty_inhabited {_ _} _.
 Arguments synty_to_inhab {_ _} _.
 #[warnings="-uniform-inheritance"] Coercion synty_ty : synpty_car >-> Sortclass.
 
+(** Existential type over a syntactic type *)
+#[projections(primitive)]
+Record anyty (TY : synty) := Anyty {
+  anyty_ty : TY;
+  anyty_val : anyty_ty;
+}.
+Add Printing Constructor anyty.
+Arguments Anyty {_} _ _. Arguments anyty_ty {_} _. Arguments anyty_val {_} _.
+
 Implicit Type TY : synty.
 
 (** Prophecy assignment *)
