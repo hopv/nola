@@ -90,12 +90,13 @@ Arguments synty_to_inhab {_ _} _.
 
 (** Existential type over a syntactic type *)
 #[projections(primitive)]
-Record anyty (TY : synty) := Anyty {
+Record anyty (TY : synty) (F : Type → Type) := Anyty {
   anyty_ty : TY;
-  anyty_val : anyty_ty;
+  anyty_val : F anyty_ty;
 }.
 Add Printing Constructor anyty.
-Arguments Anyty {_} _ _. Arguments anyty_ty {_} _. Arguments anyty_val {_} _.
+Arguments Anyty {_ _} _ _.
+Arguments anyty_ty {_ _} _. Arguments anyty_val {_ _} _.
 
 Implicit Type TY : synty.
 

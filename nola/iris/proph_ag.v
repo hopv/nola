@@ -6,8 +6,8 @@ From iris.base_logic.lib Require Import ghost_var.
 From iris.proofmode Require Import proofmode.
 
 (** Ghost state *)
-Class proph_agG TY Σ := proph_agG_in :: ghost_varG Σ (anyty TY).
-Definition proph_agΣ TY := ghost_varΣ (anyty TY).
+Class proph_agG TY Σ := proph_agG_in :: ghost_varG Σ (anyty TY id).
+Definition proph_agΣ TY := ghost_varΣ (anyty TY id).
 #[export] Instance subG_proph_agΣ `{!subG (proph_agΣ TY) Σ} : proph_agG TY Σ.
 Proof. solve_inG. Qed.
 
