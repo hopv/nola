@@ -21,14 +21,10 @@ Implicit Type α β : lft.
 #[export] Instance lft_meet : Meet lft := disj_union.
 
 (** [⊓] is unital over [⊤], commutative, and associative *)
-Fact lft_meet_id_l : LeftId (=) ⊤ (meet (A:=lft)).
-Proof. exact _. Qed.
-Fact lft_meet_id_r : RightId (=) ⊤ (meet (A:=lft)).
-Proof. exact _. Qed.
-Fact lft_meet_comm : Comm (=) (meet (A:=lft)).
-Proof. exact _. Qed.
-Fact lft_meet_assoc : Assoc (=) (meet (A:=lft)).
-Proof. exact _. Qed.
+Fact lft_meet_id_l : LeftId (=) ⊤ (meet (A:=lft)). Proof. exact _. Qed.
+Fact lft_meet_id_r : RightId (=) ⊤ (meet (A:=lft)). Proof. exact _. Qed.
+Fact lft_meet_comm : Comm (=) (meet (A:=lft)). Proof. exact _. Qed.
+Fact lft_meet_assoc : Assoc (=) (meet (A:=lft)). Proof. exact _. Qed.
 
 (** ** Ghost state *)
 
@@ -41,15 +37,14 @@ Definition lftR := csumR
 Class lftG Σ := lftG_inG : inG Σ lftR.
 Local Existing Instance lftG_inG.
 Definition lftΣ : gFunctors := GFunctor lftR.
-#[export] Instance subG_lft `{!subG lftΣ Σ} : lftG Σ.
-Proof. solve_inG. Qed.
+#[export] Instance subG_lft `{!subG lftΣ Σ} : lftG Σ. Proof. solve_inG. Qed.
 
 (** ** Pure lifetime inclusion, as reverse set inclusion *)
 Definition lft_incl (α β : lft) : Prop := elements β ⊆ elements α.
 #[export] Instance sqsubseteq_lft : SqSubsetEq lft := lft_incl.
 
 (** Unfold [⊑] *)
-Lemma lft_incl_unfold {α β} : α ⊑ β ↔ elements β ⊆ elements α.
+Lemma lft_incl_unfold {α β} : (α ⊑ β) = (elements β ⊆ elements α).
 Proof. done. Qed.
 
 (** [⊑] is decidable *)
