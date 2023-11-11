@@ -2,9 +2,9 @@
 
 From nola Require Export prelude.
 From nola.iris Require Import dfrac.
-From iris.algebra Require Import csum dfrac.
+From iris.algebra Require Import csum.
 From iris.bi Require Import fractional.
-From iris.base_logic Require Import lib.invariants.
+From iris.base_logic Require Import own.
 From iris.proofmode Require Import proofmode.
 
 (** ** Lifetime *)

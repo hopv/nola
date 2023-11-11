@@ -1,11 +1,11 @@
 (** * Prophecy *)
 
 From nola.util Require Export proph.
-From nola.iris Require Export upd.
 From nola.util Require Import rel plist.
 From nola.iris Require Import list gmap.
 From iris.algebra Require Import gmap csum frac agree.
 From iris.bi Require Import fractional.
+From iris.base_logic Require Import own.
 From iris.proofmode Require Import proofmode.
 Import EqNotations.
 

@@ -1,7 +1,8 @@
 (** * Utility on [dfracR] *)
 
 From nola Require Export prelude.
-From iris.algebra Require Import updates dfrac.
+From iris.algebra Require Export dfrac.
+From iris.algebra Require Import updates.
 
 (** Restore a fraction out of a discarded token *)
 Lemma dfrac_restore_update : DfracDiscarded ~~>: λ a, ∃ q, a = DfracOwn q.
