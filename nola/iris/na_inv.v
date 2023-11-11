@@ -114,17 +114,32 @@ Section na_ninv.
   Proof. iIntros "?". iApply na_inv_tok_alloc_rec. by iIntros. Qed.
 
   (** Access [na_inv_tok] *)
+  Lemma na_inv_tok_acc' {intp p N E F P} : ↑N ⊆ E → ↑N ⊆ F →
+    ownE E -∗ na_own p F -∗ na_inv_tok p N P -∗ modw id (na_inv_wsat intp) (
+      ownE E ∗ na_own p (F∖↑N) ∗ intp P ∗
+      (ownE E -∗ na_own p (F∖↑N) -∗ intp P -∗ modw id (na_inv_wsat intp) (
+        (ownE E ∗ na_own p F)))).
+  Proof.
+    rewrite na_inv_tok_unseal na_inv_wsat_unseal=> ??.
+    iIntros "E F [%i[% #iP]] W".
+    iDestruct (inv_tok_acc' with "E iP W") as "[W[E∖N[bd cl]]]"; [done|].
+    iDestruct (na_body_acc with "F bd") as "[$[bd[$ →bdF]]]"; [done..|].
+    iDestruct ("cl" with "E∖N bd W") as "[$$]". iIntros "E F∖N P W".
+    iDestruct (inv_tok_acc' with "E iP W") as "[W[E∖N[bd cl]]]"; [done|].
+    iDestruct ("→bdF" with "F∖N bd P") as "[bd $]".
+    iApply ("cl" with "E∖N bd W").
+  Qed.
   Lemma na_inv_tok_acc {intp p N E F P} : ↑N ⊆ E → ↑N ⊆ F →
     na_own p F -∗ na_inv_tok p N P =[na_inv_wsat intp]{E}=∗
       na_own p (F∖↑N) ∗ intp P ∗
       (na_own p (F∖↑N) -∗ intp P =[na_inv_wsat intp]{E}=∗ na_own p F).
   Proof.
-    rewrite na_inv_tok_unseal na_inv_wsat_unseal=> ??. iIntros "F [%i[% #i]]".
-    iMod (inv_tok_acc with "i") as "[bd cl]"; [done|].
-    iDestruct (na_body_acc with "F bd") as "[$[bd[$ →bdF]]]"; [done..|].
-    iMod ("cl" with "bd") as "_". iIntros "!> F∖N P".
-    iMod (inv_tok_acc with "i") as "[bd cl]"; [done|].
-    iDestruct ("→bdF" with "F∖N bd P") as "[bd $]". by iApply "cl".
+    iIntros (NE ?) "F iP W". iMod (fupd_ownE_acc NE) as "[N cl]".
+    iDestruct (na_inv_tok_acc' with "N F iP W") as "[$[N[$[$ cl']]]]";
+      [done..|].
+    iMod ("cl" with "N") as "_". iIntros "!> F∖N P W".
+    iMod (fupd_ownE_acc NE) as "[N cl]".
+    iDestruct ("cl'" with "N F∖N P W") as "[$[N $]]". by iApply "cl".
   Qed.
 End na_ninv.
 

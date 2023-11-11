@@ -1,9 +1,8 @@
 (** * Nola later-free invariant *)
 
 From nola.iris Require Export sinv upd.
-From stdpp Require Export namespaces.
+From iris.base_logic.lib Require Export wsat invariants.
 From iris.algebra Require Import gset.
-From iris.base_logic.lib Require Import wsat invariants.
 From iris.proofmode Require Import proofmode.
 
 Implicit Type PROP : Type.
@@ -17,7 +16,7 @@ Definition ninvΣ PROP : gFunctors := sinvΣ PROP.
 Proof. solve_inG. Qed.
 
 Section inv_tok.
-  Context `{!invGS_gen hlc Σ, !ninvGS PROP Σ}.
+  Context `{!ninvGS PROP Σ, !invGS_gen hlc Σ}.
 
   (** [inv_tok]: Invariant token *)
   Local Definition inv_tok_def (N : namespace) (P : PROP) : iProp Σ :=
@@ -69,31 +68,45 @@ Section inv_tok.
   Qed.
 
   (** Access [ownE] *)
-  Local Lemma ownE_acc {N E} :
-    ↑N ⊆ E → ⊢ |={E,E∖↑N}=> ownE (↑N) ∗ (ownE (↑N) ={E∖↑N,E}=∗ True).
+  Lemma ownE_subset {E F} : F ⊆ E → ownE E ⊣⊢ ownE F ∗ ownE (E∖F).
   Proof.
-    rewrite fancy_updates.uPred_fupd_unseal /fancy_updates.uPred_fupd_def.
-    move=> ?. iIntros "[$ E]". do 2 iModIntro.
-    rewrite {1 4}(union_difference_L (↑ N) E); [|done].
-    rewrite ownE_op; [|set_solver]. iDestruct "E" as "[$$]". by iIntros "$$".
+    move=> ?. rewrite {1}(union_difference_L F E); [|done].
+    by rewrite ownE_op; [|set_solver].
   Qed.
-  (** Access [inv_tok] *)
-  Lemma inv_tok_acc {intp N E P} :
-    ↑N ⊆ E → inv_tok N P =[inv_wsat intp]{E,E∖↑N}=∗
-      intp P ∗ (intp P =[inv_wsat intp]{E∖↑N,E}=∗ True)%I.
+  (** Access [ownE] from [fupd] *)
+  Lemma fupd_ownE_acc {E F} :
+    F ⊆ E → ⊢ |={E,E∖F}=> ownE F ∗ (ownE F ={E∖F,E}=∗ True).
   Proof.
-    move=> ?. rewrite inv_tok_unseal inv_wsat_unseal. iIntros "[%i[% #i]] W".
-    iMod ownE_acc as "[N cl]"; [done|].
+    rewrite fancy_updates.uPred_fupd_unseal /fancy_updates.uPred_fupd_def=> FE.
+    rewrite (ownE_subset FE). by iIntros "[$[$$]]!>!>$[$$]!>".
+  Qed.
+
+  (** Access [inv_tok] *)
+  Lemma inv_tok_acc' {intp N E P} :
+    ↑N ⊆ E → ownE E -∗ inv_tok N P -∗ modw id (inv_wsat intp) (
+      ownE (E∖↑N) ∗ intp P ∗
+      (ownE (E∖↑N) -∗ intp P -∗ modw id (inv_wsat intp) (ownE E))).
+  Proof.
+    move=> NE. rewrite inv_tok_unseal inv_wsat_unseal (ownE_subset NE).
+    iIntros "[N $] [%i[% #i]] W".
     iDestruct (sinv_tok_acc' with "i W") as "[in →W]".
-    rewrite {1 2}(union_difference_L {[i]} (↑N)); [|set_solver].
-    rewrite ownE_op; [|set_solver]. iDestruct "N" as "[Ei EN∖i]".
+    rewrite {1 3}(union_difference_L {[i]} (↑N)); [|set_solver].
+    rewrite ownE_op; [|set_solver]. iDestruct "N" as "[Ei $]".
     iDestruct "in" as "[[$ D]|Ei']"; last first.
     { iDestruct (ownE_singleton_twice with "[$Ei $Ei']") as "[]". }
-    iModIntro. iDestruct ("→W" with "[$Ei]") as "$". iIntros "P W".
-    iDestruct (sinv_tok_acc' with "i W") as "[[[_ D']|Ei] →W]".
+    iDestruct ("→W" with "[$Ei]") as "$". iIntros "$ P W".
+    iDestruct (sinv_tok_acc' with "i W") as "[[[_ D']|$] →W]".
     { iDestruct (ownD_singleton_twice with "[$D $D']") as "[]". }
-    iMod ("cl" with "[$Ei $EN∖i]") as "_". iModIntro. iSplitL; [|done].
     iApply "→W". iLeft. iFrame.
+  Qed.
+  Lemma inv_tok_acc {intp N E P} :
+    ↑N ⊆ E → inv_tok N P =[inv_wsat intp]{E,E∖↑N}=∗
+      intp P ∗ (intp P =[inv_wsat intp]{E∖↑N,E}=∗ True).
+  Proof.
+    iIntros (NE) "iP W". iMod (fupd_ownE_acc NE) as "[N cl]".
+    iDestruct (inv_tok_acc' with "N iP W") as "[$[N∖N[$ cl']]]"; [done|].
+    iIntros "!> P W". iDestruct ("cl'" with "N∖N P W") as "[$ N]".
+    by iApply "cl".
   Qed.
 End inv_tok.
 
