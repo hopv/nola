@@ -136,10 +136,10 @@ Proof. split=> >; apply ofe_equivalence. Qed.
 Local Canonical prophO TY := discreteO (proph_car TY).
 
 (** [ProphCar] and [un_proph_car] are proper *)
-Local Instance Proph_proper {TY} :
+Local Instance ProphCar_proper {TY} :
   Proper ((≡) ==> (≡)) (ProphCar (TY:=TY)).
 Proof. solve_proper. Qed.
-Local Instance unproph_proper {TY} :
+Local Instance un_proph_car_proper {TY} :
   Proper ((≡) ==> (≡)) (un_proph_car (TY:=TY)).
 Proof. solve_proper. Qed.
 
@@ -453,8 +453,8 @@ Section lemmas.
   Qed.
 
   (** Simplify [[^op list]] over [ProphCar] *)
-  Local Lemma big_cmra_opL_Proph {A al} (F : A → proph_mapR TY) :
-    un_proph_car ([^op list] a ∈ al, ProphCar (F a)) ≡ ([^op list] a ∈ al, F a).
+  Local Lemma big_cmra_opL_ProphCar {A al} (F : A → proph_mapR TY) :
+    un_proph_car ([^op list] a ∈ al, ProphCar (F a)) = ([^op list] a ∈ al, F a).
   Proof. by elim: al=>/=; [done|]=> ?? ->. Qed.
 
   (** Lemmas for [proph_resolve_dep_upd] *)
@@ -514,7 +514,7 @@ Section lemmas.
       { apply (proph_sim_op_l val) in sim. apply sim. exists 1%Qp.
         by rewrite lookup_singleton. }
       move=> ?? eqπ. apply dep=> η el. apply eqπ. apply not_elem_of_cons.
-      move: val sim. rewrite big_cmra_opL_Proph.
+      move: val sim. rewrite big_cmra_opL_ProphCar.
       case: (big_cmra_opL_elem_of (C:=proph_mapR TY)
         (λ η, {[aprvar_id η := fitem q]}) el)=> [?->].
       rewrite assoc=> val /(proph_sim_op_l val) sim.
@@ -550,7 +550,7 @@ Section lemmas.
   Proof.
     move=> [val [L'[sim /proph_valid_sat[π /Forall_forall sat]]]]. exists π.
     apply Forall_forall. move=> [ξ xπ] el. apply sat, sim.
-    move: (val ξ.(prvar_id)). rewrite big_cmra_opL_Proph.
+    move: (val ξ.(prvar_id)). rewrite big_cmra_opL_ProphCar.
     case: (big_cmra_opL_elem_of (C:=proph_mapR TY) (λ pli,
       {[aprvar_id pli.(pli_var) := aitem pli.(pli_val)]}) el)=> [M ->]=>/=.
     rewrite lookup_op lookup_singleton.
