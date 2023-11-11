@@ -130,7 +130,7 @@ Section proph_ag.
   (** Resolve the prophecy of [proph_ctrl] with [val_obs],
     retaining [proph_ctrl] *)
   Lemma vo_pc_preresolve {X γ x x' ξ} aπ ηl q : aπ ./ ηl →
-    q:∗[ηl] -∗ val_obs (X:=X) γ x -∗ proph_ctrl (X:=X) γ x' ξ =[proph_wsat]=∗
+    q:∗[ηl] -∗ val_obs (X:=X) γ x -∗ proph_ctrl (X:=X) γ x' ξ ==∗
       q:∗[ηl] ∗ ⟨π, π ξ = aπ π⟩ ∗ (∀ y, ⟨π, aπ π = y⟩ -∗ proph_ctrl γ y ξ).
   Proof.
     iIntros "% ηl vo pc".
@@ -141,8 +141,7 @@ Section proph_ag.
     by iApply (proph_obs_impl2 with "obs obs'")=> ?->.
   Qed.
   Lemma vo_pc_resolve {X γ x x'} {y : X} {ξ} :
-    val_obs (X:=X) γ x -∗ proph_ctrl γ x' ξ =[proph_wsat]=∗
-      ⟨π, π ξ = y⟩ ∗ proph_ctrl γ y ξ.
+    val_obs (X:=X) γ x -∗ proph_ctrl γ x' ξ ==∗ ⟨π, π ξ = y⟩ ∗ proph_ctrl γ y ξ.
   Proof.
     iIntros "vo pc".
     iMod (vo_pc_preresolve (λ _, y) [] 1 with "[//] vo pc") as "[_[$ →pc]]".
@@ -150,8 +149,7 @@ Section proph_ag.
   Qed.
 
   (** Resolve the prophecy of [proph_ctrl] *)
-  Lemma pc_resolve {X γ x} ξ :
-    proph_ctrl (X:=X) γ x ξ =[proph_wsat]=∗ ⟨π, π ξ = x⟩.
+  Lemma pc_resolve {X γ x} ξ : proph_ctrl (X:=X) γ x ξ ==∗ ⟨π, π ξ = x⟩.
   Proof.
     rewrite proph_ctrl_unseal. iIntros "[[_ ξ]|[_ $]]"; [|done].
     iApply (proph_resolve with "ξ").

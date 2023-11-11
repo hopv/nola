@@ -31,7 +31,7 @@ Section nintp.
     | nc_lft_tok α q => q.[α] | nc_lft_dead α => [†α] | nc_lft_eter α => [∞α]
     | nc_lft_sincl α β => α ⊑□ β
     | nc_proph_tok ξ q => q:[ξ] | nc_proph_toks ξl q => q:∗[ξl]
-    | nc_proph_obs φπ => .⟨φπ⟩ | nc_proph_wsat => proph_wsat
+    | nc_proph_obs φπ => .⟨φπ⟩
     end.
   Local Definition ncintpl0 (c : nconl0)
     (niS : nPropS (;ᵞ) -d> iProp Σ) : iProp Σ :=

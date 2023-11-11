@@ -54,6 +54,7 @@ Add Printing Constructor aprvar.
 Arguments aprvar_ty {_}. Arguments aprvar_var {_}.
 Arguments Aprvar {_} _ _.
 Coercion Aprvar : prvar >-> aprvar.
+Notation aprvar_id ξ := ξ.(aprvar_var).(prvar_id).
 
 (** Equality decision over [aprvar] *)
 #[export] Instance aprvar_eq_dec {TY} : EqDecision (aprvar TY).

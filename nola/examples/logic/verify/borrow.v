@@ -12,8 +12,7 @@ Section borrow.
   (** Dereference a nested mutable reference *)
   Lemma bor_bor_deref {α β l Φ q} :
     [[{ q.[α ⊓ β] ∗
-      bord α (∃ l' : loc, l ↦ #l' ∗ n_bor' [] β (Φ l')) }]]
-      [proph_wsat ∗ pborrow_wsatd bupd]
+      bord α (∃ l' : loc, l ↦ #l' ∗ n_bor' [] β (Φ l')) }]][pborrow_wsatd bupd]
       !#l
     [[{ l', RET #l' ; q.[α ⊓ β] ∗ bord (α ⊓ β) (Φ l') }]].
   Proof.
@@ -34,7 +33,7 @@ Section borrow.
     [[{ q.[α ⊓ β] ∗
       pbord α ((x, ξ)' : _ *'ₛ prvarₛ _) η
         (λ '(x', ξ')', ∃ l' : loc, l ↦ #l' ∗ n_pbor' [] β x' ξ' (Φ l'))%n }]]
-      [proph_wsat ∗ pborrow_wsatd bupd]
+      [pborrow_wsatd bupd]
       !#l
     [[{ l', RET #l'; q.[α ⊓ β] ∗ ∃ ξ' : prvar X,
       ⟨π, π η = (π ξ', ξ)'⟩ ∗ pborcd (α ⊓ β) x ξ' (Φ l') }]].

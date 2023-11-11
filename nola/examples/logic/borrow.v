@@ -206,8 +206,8 @@ Section borrow.
   (** Create borrowers and lenders *)
   Lemma borc_lend_new_list `{!GenUpd M} α Pl Ql :
     ([∗ list] P ∈ Pl, ⟦ P ⟧) -∗
-    ([†α] -∗ ([∗ list] P ∈ Pl, ⟦ P ⟧) -∗
-      modw M proph_wsat ([∗ list] Q ∈ Ql, ⟦ Q ⟧)) =[pborrow_wsatd M]=∗
+    ([†α] -∗ ([∗ list] P ∈ Pl, ⟦ P ⟧) -∗ M ([∗ list] Q ∈ Ql, ⟦ Q ⟧))
+      =[pborrow_wsatd M]=∗
       ([∗ list] P ∈ Pl, borcd α P) ∗ [∗ list] Q ∈ Ql, lendd α Q.
   Proof.
     iIntros "Pl →Ql". setoid_rewrite <-nintpS_nintp.
@@ -225,8 +225,8 @@ Section borrow.
 
   (** Split a lender *)
   Lemma lend_split `{!GenUpd M} {α P} Ql :
-    lendd α P -∗ (⟦ P ⟧ -∗ modw M proph_wsat ([∗ list] Q ∈ Ql, ⟦ Q ⟧))
-      =[pborrow_wsatd M]=∗ [∗ list] Q ∈ Ql, lendd α Q.
+    lendd α P -∗ (⟦ P ⟧ -∗ M ([∗ list] Q ∈ Ql, ⟦ Q ⟧)) =[pborrow_wsatd M]=∗
+      [∗ list] Q ∈ Ql, lendd α Q.
   Proof.
     iIntros "[%R[RP l]] →Ql". rewrite !convert_use.
     setoid_rewrite <-nintpS_nintp. setoid_rewrite <-lend_intro.
@@ -236,7 +236,7 @@ Section borrow.
 
   (** Retrive from [lend] *)
   Lemma lend_retrieve `{!GenUpd M} {α P} :
-    [†α] -∗ lendd α P -∗ modw M (proph_wsat ∗ pborrow_wsatd M) ⟦ P ⟧.
+    [†α] -∗ lendd α P -∗ modw M (pborrow_wsatd M) ⟦ P ⟧.
   Proof.
     iIntros "† [%Q[QP l]]". rewrite convert_use.
     iMod (nlend_tok_retrieve with "† l") as "Q". rewrite nintpS_nintp.
@@ -253,8 +253,7 @@ Section borrow.
   Qed.
   (** Open a borrower *)
   Lemma bor_open `{!GenUpd M} {α q P} :
-    q.[α] -∗ bord α P -∗ modw M (proph_wsat ∗ pborrow_wsatd M)
-      (obord α q P ∗ ⟦ P ⟧).
+    q.[α] -∗ bord α P -∗ modw M (pborrow_wsatd M) (obord α q P ∗ ⟦ P ⟧).
   Proof.
     iIntros "α [%Q[PQ[QP b]]]". rewrite (convert_use (P:=Q)).
     iMod (nbor_tok_open with "α b") as "[o Q]". rewrite/= nintpS_nintp.
@@ -282,7 +281,7 @@ Section borrow.
   Lemma obor_merge_subdiv `{!GenUpd M} αqPl Ql β :
     ([∗ list] '(α, q, P)' ∈ αqPl, β ⊑□ α ∗ obord α q P) -∗
     ([∗ list] Q ∈ Ql, ⟦ Q ⟧) -∗
-    ([†β] -∗ ([∗ list] Q ∈ Ql, ⟦ Q ⟧) -∗ modw M proph_wsat
+    ([†β] -∗ ([∗ list] Q ∈ Ql, ⟦ Q ⟧) -∗ M
       ([∗ list] '(_, _, P)' ∈ αqPl, ⟦ P ⟧)) =[pborrow_wsatd M]=∗
       ([∗ list] '(α, q, _)' ∈ αqPl, q.[α]) ∗ ([∗ list] Q ∈ Ql, borcd β Q).
   Proof.
@@ -296,8 +295,8 @@ Section borrow.
   (** Subdivide borrowers *)
   Lemma obor_subdiv `{!GenUpd M} {α q P} Ql β :
     β ⊑□ α -∗ obord α q P -∗ ([∗ list] Q ∈ Ql, ⟦ Q ⟧) -∗
-    ([†β] -∗ ([∗ list] Q ∈ Ql, ⟦ Q ⟧) -∗ modw M proph_wsat ⟦ P ⟧)
-      =[pborrow_wsatd M]=∗ q.[α] ∗ ([∗ list] Q ∈ Ql, borcd β Q).
+    ([†β] -∗ ([∗ list] Q ∈ Ql, ⟦ Q ⟧) -∗ M ⟦ P ⟧) =[pborrow_wsatd M]=∗
+      q.[α] ∗ ([∗ list] Q ∈ Ql, borcd β Q).
   Proof.
     iIntros "⊑ o Ql →P".
     iMod (obor_merge_subdiv [(_,_,_)'] with "[⊑ o] Ql [→P]") as "[[$ _]$]"=>/=;
@@ -309,7 +308,7 @@ Section borrow.
   Proof.
     iIntros "o P".
     iMod (obor_subdiv [P] with "[] o [P] []") as "[$[$_]]"=>/=;
-      by [iApply lft_sincl_refl|iFrame|iIntros "_[$_]$"|].
+      by [iApply lft_sincl_refl|iFrame|iIntros "_[$_]"|].
   Qed.
 
   (** Lemma for [obor_reborrow] *)
@@ -339,7 +338,7 @@ Section borrow.
     by iMod (obor_reborrow with "o P").
   Qed.
   Lemma bor_reborrow `{!GenUpd M} {α q P} β :
-    q.[α] -∗ bord α P -∗ modw M (proph_wsat ∗ pborrow_wsatd M)
+    q.[α] -∗ bord α P -∗ modw M (pborrow_wsatd M)
       (q.[α] ∗ borcd (α ⊓ β) P ∗ ([†β] -∗ bord α P)).
   Proof.
     iIntros "α b". iMod (bor_open with "α b") as "[o P]".
@@ -360,8 +359,7 @@ Section borrow.
     r.[α] -∗ fbord α Φ -∗
     (∀ q, ⟦ Φ q ⟧ ==∗ ⟦ Φ (q/2)%Qp ⟧ ∗ ⟦ Φ (q/2)%Qp ⟧) -∗
     (∀ q, ⟦ Φ (q/2)%Qp ⟧ -∗ ⟦ Φ (q/2)%Qp ⟧ ==∗ ⟦ Φ q ⟧) -∗
-      modw M (sinv_wsatd ∗ proph_wsat ∗ pborrow_wsatd M) (∃ q,
-      obord α r (Φ q) ∗ ⟦ Φ q ⟧).
+      modw M (sinv_wsatd ∗ pborrow_wsatd M) (∃ q, obord α r (Φ q) ∗ ⟦ Φ q ⟧).
   Proof.
     rewrite [(sinv_wsatd ∗ _)%I]comm -modw_modw_sep.
     iIntros "α [%β[%Ψ[#⊑[#ΦΨ[#ΨΦ s]]]]] Φ↓ Φ↑ W". rewrite !aconvert_use.
@@ -395,12 +393,11 @@ Section borrow.
 
   (** Create new prophetic borrowers and lenders *)
   Lemma pborc_plend_new_list `{!GenUpd M} α Xl (xΦl : plist _ Xl) :
-    ⊢ |=[proph_wsat]=> ∃ ξl, ∀ Yl (yπΨl : plist (λ Y, _ *' (Y → _)) Yl),
+    ⊢ |==> ∃ ξl, ∀ Yl (yπΨl : plist (λ Y, _ *' (Y → _)) Yl),
       let ξxΦl := plist_zip ξl xΦl in
       ([∗ plist] '(x, Φ)' ∈ xΦl, ⟦ Φ x ⟧) -∗
-      ([†α] -∗ ([∗ plist] '(ξ, x, Φ)' ∈ ξxΦl, plend_body_vard ξ Φ) -∗
-        modw M proph_wsat ([∗ plist] '(yπ, Ψ)' ∈ yπΨl, plend_bodyd yπ Ψ))
-        =[pborrow_wsatd M]=∗
+      ([†α] -∗ ([∗ plist] '(ξ, x, Φ)' ∈ ξxΦl, plend_body_vard ξ Φ) -∗ M
+        ([∗ plist] '(yπ, Ψ)' ∈ yπΨl, plend_bodyd yπ Ψ)) =[pborrow_wsatd M]=∗
         ([∗ plist] '(ξ, x, Φ)' ∈ ξxΦl, pborcd α x ξ Φ) ∗
         ([∗ plist] '(yπ, Ψ)' ∈ yπΨl, plendd α yπ Ψ).
   Proof.
@@ -411,8 +408,7 @@ Section borrow.
   Qed.
   (** Simply create a prophetic borrower and a prophetic lender *)
   Lemma pborc_plend_new `{!GenUpd M} α X (x : X) Φ :
-    ⟦ Φ x ⟧ =[proph_wsat ∗ pborrow_wsatd M]=∗ ∃ ξ,
-      pborcd α x ξ Φ ∗ plendd α (λ π, π ξ) Φ.
+    ⟦ Φ x ⟧ =[pborrow_wsatd M]=∗ ∃ ξ, pborcd α x ξ Φ ∗ plendd α (λ π, π ξ) Φ.
   Proof.
     iIntros "Φ".
     iMod (pborc_plend_new_list α [X] ((x, Φ)',())') as ([ξ[]]) "big". iExists ξ.
@@ -424,9 +420,8 @@ Section borrow.
   Lemma plend_split `{!GenUpd M} {α X xπ} {Φ : X → _}
     Yl (yπΨl : plist (λ Y, _ *' (Y → _)) Yl) :
     plendd α xπ Φ -∗
-    (plend_bodyd xπ Φ -∗ modw M proph_wsat
-      ([∗ plist] '(yπ, Ψ)' ∈ yπΨl, plend_bodyd yπ Ψ)) =[pborrow_wsatd M]=∗
-      [∗ plist] '(yπ, Ψ)' ∈ yπΨl, plendd α yπ Ψ.
+    (plend_bodyd xπ Φ -∗ M ([∗ plist] '(yπ, Ψ)' ∈ yπΨl, plend_bodyd yπ Ψ))
+      =[pborrow_wsatd M]=∗ [∗ plist] '(yπ, Ψ)' ∈ yπΨl, plendd α yπ Ψ.
   Proof.
     iIntros "[%Ω[ΩΦ l]] →Ψl". rewrite aconvert_use.
     setoid_rewrite <-plend_intro. iApply (plend_tok_split with "l [ΩΦ →Ψl]").
@@ -437,8 +432,7 @@ Section borrow.
 
   (** Retrieve from a prophetic lender *)
   Lemma plend_retrieve `{!GenUpd M} {α X xπ} {Φ : X → _} :
-    [†α] -∗ plendd α xπ Φ -∗ modw M (proph_wsat ∗ pborrow_wsatd M)
-      (plend_bodyd xπ Φ).
+    [†α] -∗ plendd α xπ Φ -∗ modw M (pborrow_wsatd M) (plend_bodyd xπ Φ).
   Proof.
     iIntros "† [%[ΨΦ l]]". rewrite aconvert_use. setoid_rewrite <-nintpS_nintp.
     iMod (plend_tok_retrieve with "† l") as "[%[obs Ψ]]".
@@ -455,7 +449,7 @@ Section borrow.
     iMod ("ΨΦ" with "Φ") as "$". iExists _. by iFrame.
   Qed.
   Lemma pbor_open `{!GenUpd M} {α q X x ξ} {Φ : X → _} :
-    q.[α] -∗ pbord α x ξ Φ -∗ modw M (proph_wsat ∗ pborrow_wsatd M)
+    q.[α] -∗ pbord α x ξ Φ -∗ modw M (pborrow_wsatd M)
       (opbord α q ξ Φ ∗ ⟦ Φ x ⟧).
   Proof.
     iIntros "α [%[ΦΨ[ΨΦ b]]]". rewrite (aconvert_use (Φ:=Ψ)) /=.
@@ -492,9 +486,9 @@ Section borrow.
     ([∗ plist] '(α, q, ξ, Φ, _)' ∈ αqξΦfl, β ⊑□ α ∗ opbord α q ξ Φ) -∗
     ([∗ plist] '(y, Ψ)' ∈ yΨl, ⟦ Ψ y ⟧) -∗ ([∗ list] R ∈ Rl, ⟦ R ⟧) -∗
     (∀ yl', [†β] -∗ ([∗ plist] '(y', _, Ψ)' ∈ plist_zip yl' yΨl, ⟦ Ψ y' ⟧) -∗
-      ([∗ list] R ∈ Rl, ⟦ R ⟧) -∗ modw M proph_wsat
-      ([∗ plist] '(_, _, _, Φ, f)' ∈ αqξΦfl, ⟦ Φ (f yl') ⟧))
-      =[proph_wsat ∗ pborrow_wsatd M]=∗ ∃ ηl,
+      ([∗ list] R ∈ Rl, ⟦ R ⟧) -∗ M
+        ([∗ plist] '(_, _, _, Φ, f)' ∈ αqξΦfl, ⟦ Φ (f yl') ⟧))
+      =[pborrow_wsatd M]=∗ ∃ ηl,
       ([∗ plist] '(α, q, _)' ∈ αqξΦfl, q.[α]) ∗
       ([∗ plist] '(_, _, ξ, _, f)' ∈ αqξΦfl,
         ⟨π, π (Aprvar _ ξ) = f (app_plist_prvar π ηl)⟩) ∗
@@ -520,9 +514,8 @@ Section borrow.
     β ⊑□ α -∗ opbord α q ξ Φ -∗
     ([∗ plist] '(y, Ψ)' ∈ yΨl, ⟦ Ψ y ⟧) -∗ ([∗ list] R ∈ Rl, ⟦ R ⟧) -∗
     (∀ yl', [†β] -∗ ([∗ plist] '(y', _, Ψ)' ∈ plist_zip yl' yΨl, ⟦ Ψ y' ⟧) -∗
-      ([∗ list] R ∈ Rl, ⟦ R ⟧) -∗ modw M proph_wsat ⟦ Φ (f yl') ⟧)
-      =[proph_wsat ∗ pborrow_wsatd M]=∗ ∃ ηl, q.[α] ∗
-        ⟨π, π (Aprvar _ ξ) = f (app_plist_prvar π ηl)⟩ ∗
+      ([∗ list] R ∈ Rl, ⟦ R ⟧) -∗ M ⟦ Φ (f yl') ⟧) =[pborrow_wsatd M]=∗ ∃ ηl,
+      q.[α] ∗ ⟨π, π (Aprvar _ ξ) = f (app_plist_prvar π ηl)⟩ ∗
       ([∗ plist] '(η, y, Ψ)' ∈ plist_zip ηl yΨl, pborcd β y η Ψ) ∗
       [∗ list] R ∈ Rl, borcd β R.
   Proof.
@@ -535,23 +528,23 @@ Section borrow.
 
   (** Resolve the prophecy of a prophetic borrower *)
   Lemma opbor_resolve `{!GenUpd M} {X α q ξ Φ} (x : X) :
-    opbord α q ξ Φ -∗ ⟦ Φ x ⟧ =[proph_wsat ∗ pborrow_wsatd M]=∗
+    opbord α q ξ Φ -∗ ⟦ Φ x ⟧ =[pborrow_wsatd M]=∗
       q.[α] ∗ ⟨π, π ξ = x⟩ ∗ borcd α (Φ x).
   Proof.
     iIntros "o Φ".
     iMod (opbor_subdiv [] (λ _, x) () [Φ x] with "[] o [//] [Φ] []")
       as (?) "[$[$[_[$ _]]]]"=>/=;
-      by [iApply lft_sincl_refl|iFrame|iIntros "% _ _ [$ _] $"|].
+      by [iApply lft_sincl_refl|iFrame|iIntros "% _ _ [$ _]"|].
   Qed.
   Lemma pborc_resolve `{!GenUpd M} {X α q x ξ} {Φ : X → _} :
-    q.[α] -∗ pborcd α x ξ Φ =[proph_wsat ∗ pborrow_wsatd M]=∗
+    q.[α] -∗ pborcd α x ξ Φ =[pborrow_wsatd M]=∗
       q.[α] ∗ ⟨π, π ξ = x⟩ ∗ borcd α (Φ x).
   Proof.
     iIntros "α c". iMod (pborc_open with "α c") as "[o Φ]".
     iApply (opbor_resolve with "o Φ").
   Qed.
   Lemma pbor_resolve `{!GenUpd M} {X α q x ξ} {Φ : X → _} :
-    q.[α] -∗ pbord α x ξ Φ -∗ modw M (proph_wsat ∗ pborrow_wsatd M)
+    q.[α] -∗ pbord α x ξ Φ -∗ modw M (pborrow_wsatd M)
       (q.[α] ∗ ⟨π, π ξ = x⟩ ∗ borcd α (Φ x)).
   Proof.
     iIntros "α b". iMod (pbor_open with "α b") as "[o Φ]".
@@ -561,7 +554,7 @@ Section borrow.
   (** Subdivide a prophetic borrower without changing the prophecy *)
   Lemma opbor_nsubdiv `{!GenUpd M} {X α q ξ Φ} Ψ (x : X) β :
     β ⊑□ α -∗ opbord α q ξ Φ -∗ ⟦ Ψ x ⟧ -∗
-    (∀ y, [†β] -∗ ⟦ Ψ y ⟧ -∗ modw M proph_wsat ⟦ Φ y ⟧) =[pborrow_wsatd M]=∗
+    (∀ y, [†β] -∗ ⟦ Ψ y ⟧ -∗ M ⟦ Φ y ⟧) =[pborrow_wsatd M]=∗
       q.[α] ∗ pborcd β x ξ Ψ.
   Proof.
     iIntros "⊑ [%Ω[ΦΩ o]] Ψ →Φ". rewrite aconvert_use -pborc_intro.
@@ -580,8 +573,7 @@ Section borrow.
 
   (** Lemma for [opbor_opbor_reborrow] *)
   Local Lemma opbor_opbor_tok `{!GenUpd M} {Y β r η Ψ} {y : Y} :
-    opbord β r η Ψ -∗ ⟦ Ψ y ⟧ =[pborrow_wsatd M]=∗
-      opbor_tok β r η Ψ ∗ ⟦ Ψ y ⟧ˢ.
+    opbord β r η Ψ -∗ ⟦ Ψ y ⟧ =[pborrow_wsatd M]=∗ opbor_tok β r η Ψ ∗ ⟦ Ψ y ⟧ˢ.
   Proof.
     iIntros "[%Ψ'[ΨΨ' o']] Ψ". rewrite aconvert_use.
     setoid_rewrite <-nintpS_nintp.
@@ -593,9 +585,8 @@ Section borrow.
   (** Reborrow a nested prophetic borrower *)
   Lemma opbor_opbor_reborrow `{!GenUpd M} {X Y α q ξ Φ β r η Ψ} y (f : X → Y) :
     opbord α q ξ Φ -∗ opbord β r η Ψ -∗ ⟦ Ψ y ⟧ -∗
-    (∀ y', [†α] -∗ pbord β y' η Ψ -∗ modw M proph_wsat ⟦ Φ (f y') ⟧)
-      =[proph_wsat ∗ pborrow_wsatd M]=∗ ∃ η' : prvar _,
-      q.[α] ∗ r.[β] ∗ ⟨π, π ξ = f (π η')⟩ ∗ pborcd (α ⊓ β) y η' Ψ.
+    (∀ y', [†α] -∗ pbord β y' η Ψ -∗ M ⟦ Φ (f y') ⟧) =[pborrow_wsatd M]=∗ ∃ η',
+      q.[α] ∗ r.[β] ∗ ⟨π, π ξ = f (π (Aprvar _ η'))⟩ ∗ pborcd (α ⊓ β) y η' Ψ.
   Proof.
     iIntros "[%Φ'[ΦΦ' o]] o' Ψ →Φ". rewrite aconvert_use.
     iMod (opbor_opbor_tok with "o' Ψ") as "[o' Ψ]".
@@ -607,18 +598,17 @@ Section borrow.
   Qed.
   Lemma opbor_pborc_reborrow `{!GenUpd M} {X Y α q ξ Φ β r y η Ψ} (f : X → Y) :
     opbord α q ξ Φ -∗ r.[β] -∗ pborcd β y η Ψ -∗
-    (∀ y', [†α] -∗ pbord β y' η Ψ -∗ modw M proph_wsat ⟦ Φ (f y') ⟧)
-      =[proph_wsat ∗ pborrow_wsatd M]=∗ ∃ η' : prvar _,
-      q.[α] ∗ r.[β] ∗ ⟨π, π ξ = f (π η')⟩ ∗ pborcd (α ⊓ β) y η' Ψ.
+    (∀ y', [†α] -∗ pbord β y' η Ψ -∗ M ⟦ Φ (f y') ⟧) =[pborrow_wsatd M]=∗ ∃ η',
+      q.[α] ∗ r.[β] ∗ ⟨π, π ξ = f (π (Aprvar _ η'))⟩ ∗ pborcd (α ⊓ β) y η' Ψ.
   Proof.
     iIntros "o r c →Φ". iMod (pborc_open with "r c") as "[o' Ψ]".
     by iMod (opbor_opbor_reborrow with "o o' Ψ →Φ").
   Qed.
   Lemma opbor_pbor_reborrow `{!GenUpd M} {X Y α q ξ Φ β r y η Ψ} (f : X → Y) :
     opbord α q ξ Φ -∗ r.[β] -∗ pbord β y η Ψ -∗
-    (∀ y', [†α] -∗ pbord β y' η Ψ -∗ modw M proph_wsat ⟦ Φ (f y') ⟧)
-      -∗ modw M (proph_wsat ∗ pborrow_wsatd M) (∃ η' : prvar _,
-      q.[α] ∗ r.[β] ∗ ⟨π, π ξ = f (π η')⟩ ∗ pborcd (α ⊓ β) y η' Ψ).
+    (∀ y', [†α] -∗ pbord β y' η Ψ -∗ M ⟦ Φ (f y') ⟧) -∗ modw M (pborrow_wsatd M)
+      (∃ η', q.[α] ∗ r.[β] ∗ ⟨π, π ξ = f (π (Aprvar _ η'))⟩ ∗
+        pborcd (α ⊓ β) y η' Ψ).
   Proof.
     iIntros "o r b →Φ". iMod (pbor_open with "r b") as "[o' Ψ]".
     by iMod (opbor_opbor_reborrow with "o o' Ψ →Φ").

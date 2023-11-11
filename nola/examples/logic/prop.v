@@ -77,8 +77,7 @@ Variant ncon0 : Type :=
 | (** Persistent lifetime inclusion *) nc_lft_sincl (α β : lft)
 | (** Prophecy token *) nc_proph_tok (ξ : aprvarn) (q : Qp)
 | (** Prophecy tokens *) nc_proph_toks (ξl : list aprvarn) (q : Qp)
-| (** Prophecy observation *) nc_proph_obs (φπ : proph_asnn → Prop)
-| (** Prophecy world satisfaction *) nc_proph_wsat.
+| (** Prophecy observation *) nc_proph_obs (φπ : proph_asnn → Prop).
 (** Nullary, large *)
 Variant nconl0 : Type :=
 | (** Simple invariant world satisfaction *) nc_sinv_wsat
@@ -211,7 +210,6 @@ Notation "q .[ α ]" := (n_0 (nc_lft_tok α q)) : nProp_scope.
 Notation "[† α ]" := (n_0 (nc_lft_dead α)) : nProp_scope.
 Notation "[∞ α ]" := (n_0 (nc_lft_eter α)) : nProp_scope.
 Notation "α ⊑□ β" := (n_0 (nc_lft_sincl α β)) : nProp_scope.
-Notation n_proph_wsat := (n_0 nc_proph_wsat).
 Notation "q :[ ξ ]" := (n_0 (nc_proph_tok ξ q)) : nProp_scope.
 Notation "q :∗[ ξ ]" := (n_0 (nc_proph_toks ξ q)) : nProp_scope.
 Notation ".⟨ φπ ⟩" := (n_0 (nc_proph_obs φπ)) (only parsing) : nProp_scope.

@@ -23,7 +23,7 @@ Proof. solve_inG. Qed.
 
 (** Whole world satisfaction *)
 Definition nwsatd `{!nintpGS Σ} M : iProp Σ :=
-  sinv_wsatd ∗ inv_wsatd ∗ na_inv_wsatd ∗ pborrow_wsatd M ∗ proph_wsat.
+  sinv_wsatd ∗ inv_wsatd ∗ na_inv_wsatd ∗ pborrow_wsatd M.
 
 (** Adequacy of [wp] over [inv_wsatd] *)
 Lemma wp_n_adequacy `{!nintpGpreS Σ} {s e σ φ} :
@@ -33,10 +33,10 @@ Lemma wp_n_adequacy `{!nintpGpreS Σ} {s e σ φ} :
 Proof.
   move=> towp. apply (heap_adequacy Σ HasNoLc)=> ?.
   iMod sinv_wsat_alloc as (?) "W0". iMod inv_wsat_alloc as (?) "W1".
-  iMod na_inv_wsat_alloc as (?) "W2".
-  iMod proph_pborrow_wsat_alloc as (?) "[W W3]". iModIntro.
-  iDestruct (towp (NintpGS _ _ _ _ _ _ _)) as (M) "big". iExists (nwsatd M).
-  iFrame "big W". iSplitL "W0"; [done|]. iSplitL "W1"; [done|]. by iSplitL "W2".
+  iMod na_inv_wsat_alloc as (?) "W2". iMod pborrow_wsat_alloc as (?) "W3".
+  iModIntro. iDestruct (towp (NintpGS _ _ _ _ _ _ _)) as (M) "big".
+  iExists (nwsatd M). iFrame "big". iSplitL "W0"; [done|].
+  iSplitL "W1"; [done|]. by iSplitL "W2".
 Qed.
 
 (** Adequacy of [twp] over [inv_wsatd] *)
@@ -47,8 +47,8 @@ Lemma twp_n_adequacy `{!nintpGpreS Σ} {s e σ φ} :
 Proof.
   move=> totwp. apply (heap_total Σ s _ _ φ)=> ?.
   iMod sinv_wsat_alloc as (?) "W0". iMod inv_wsat_alloc as (?) "W1".
-  iMod na_inv_wsat_alloc as (?) "W2".
-  iMod proph_pborrow_wsat_alloc as (?) "[W W4]". iModIntro.
-  iDestruct (totwp (NintpGS _ _ _ _ _ _ _)) as (M) "big". iExists (nwsatd M).
-  iFrame "big W". iSplitL "W0"; [done|]. iSplitL "W1"; [done|]. by iSplitL "W2".
+  iMod na_inv_wsat_alloc as (?) "W2". iMod pborrow_wsat_alloc as (?) "W3".
+  iModIntro. iDestruct (totwp (NintpGS _ _ _ _ _ _ _)) as (M) "big".
+  iExists (nwsatd M). iFrame "big". iSplitL "W0"; [done|].
+  iSplitL "W1"; [done|]. by iSplitL "W2".
 Qed.
