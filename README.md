@@ -52,14 +52,14 @@ make viewdoc
 All the Coq code is in [`nola/`](nola/) and structured as follows:
 - [`prelude`](nola/prelude.v) : Prelude
 - [`util/`](nola/util/) : General-purpose utilities,
-  extending [`stdpp`](https://gitlab.mpi-sws.org/iris/stdpp)
+    extending [`stdpp`](https://gitlab.mpi-sws.org/iris/stdpp)
   + [`funext`](nola/util/funext.v) (Function extensionality)
   + [`func`](nola/util/func.v) (Functions),
     [`pred`](nola/util/pred.v) (Predicates),
     [`rel`](nola/util/rel.v) (Relations),
     [`list`](nola/util/list.v) (Lists),
-    [`nat`](nola/util/nat.v) (Natural numbers),
-    [`prod`](nola/util/prod.v) (Modified product),
+    [`nat`](nola/util/nat.v) (Natural numbers)
+  + [`prod`](nola/util/prod.v) (Modified product),
     [`schoice`](nola/util/schoice.v) (Variant over a list),
     [`plist`](nola/util/plist.v) (Product list)
   + [`hgt`](nola/util/hgt.v) (General height of a tree),
@@ -104,10 +104,9 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
       - [`ilist_base`](nola/examples/logic/verify/ilist_base.v),
         [`ilist`](nola/examples/logic/verify/ilist.v),
         [`na_ilist`](nola/examples/logic/verify/ilist.v)
-        (Shared mutable infinite list)
-      - [`borrow`](nola/examples/logic/verify/borrow.v) (Borrow),
-        [`fborrow`](nola/examples/logic/verify/fborrow.v) (Fractional borrow)
-  + [`type/`](nola/examples/type/) : Stratified Type System
+          (Shared mutable infinite list)
+      - [`borrow`](nola/examples/logic/verify/borrow.v) (Borrowing)
+  + [`type/`](nola/examples/type/) : Stratified type system
     * [`type`](nola/examples/type/type.v) (Type),
       [`subst`](nola/examples/type/subst.v) (Substitution),
       [`iris`](nola/examples/type/iris.v) (Iris preliminaries),
@@ -118,11 +117,11 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     * [`rules/`](nola/examples/type/rules/) (Typing rules)
       - [`conv`](nola/examples/type/rules/conv.v) (Type conversion),
         [`expr`](nola/examples/type/rules/expr.v) (Expression typing),
-        [`ref`](nola/examples/type/rules/ref.v) (Expression typing for
-          references)
+        [`ref`](nola/examples/type/rules/ref.v)
+          (Expression typing for references)
     * [`verify/`](nola/examples/type/verify/) (Verification examples)
       - [`ilist`](nola/examples/type/verify/ilist.v)
-        (Shared mutable infinite stream)
+          (Shared mutable infinite stream)
 
 ## Story
 
@@ -152,8 +151,7 @@ This is an advanced form of cancellable invariant.
 
 #### Step-Indexing
 
-All the existing separation logics with nested invariants,
-such as [iCAP](https://www.cs.au.dk/~birke/papers/icap-conf.pdf) and Iris,
+All the existing separation logics with nested invariants, such as Iris,
 resort to *step-indexing*.
 It is the technique of layering the logic world with step-indices
 `0, 1, 2, …: ℕ`, having notions more defined as the step-index grows.
