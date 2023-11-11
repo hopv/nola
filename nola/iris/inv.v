@@ -88,14 +88,14 @@ Section inv_tok.
       (ownE (E∖↑N) -∗ intp P -∗ modw id (inv_wsat intp) (ownE E))).
   Proof.
     move=> NE. rewrite inv_tok_unseal inv_wsat_unseal (ownE_subset NE).
-    iIntros "[N $] [%i[% #i]] W".
-    iDestruct (sinv_tok_acc' with "i W") as "[in →W]".
-    rewrite {1 3}(union_difference_L {[i]} (↑N)); [|set_solver].
-    rewrite ownE_op; [|set_solver]. iDestruct "N" as "[Ei $]".
-    iDestruct "in" as "[[$ D]|Ei']"; last first.
-    { iDestruct (ownE_singleton_twice with "[$Ei $Ei']") as "[]". }
-    iDestruct ("→W" with "[$Ei]") as "$". iIntros "$ P W".
-    iDestruct (sinv_tok_acc' with "i W") as "[[[_ D']|$] →W]".
+    iIntros "[N $] [%i[% #iP]] W".
+    iDestruct (sinv_tok_acc' with "iP W") as "[in →W]".
+    rewrite (ownE_subset (E:=↑N) (F:={[i]})); [|set_solver].
+    iDestruct "N" as "[i $]".
+    iDestruct "in" as "[[$ D]|i']"; last first.
+    { iDestruct (ownE_singleton_twice with "[$i $i']") as "[]". }
+    iDestruct ("→W" with "[$i]") as "$". iIntros "$ P W".
+    iDestruct (sinv_tok_acc' with "iP W") as "[[[_ D']|$] →W]".
     { iDestruct (ownD_singleton_twice with "[$D $D']") as "[]". }
     iApply "→W". iLeft. iFrame.
   Qed.
