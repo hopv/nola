@@ -64,3 +64,15 @@ nola/examples/logic/verify/ilist_base.v
 nola/examples/logic/verify/ilist.v
 nola/examples/logic/verify/na_ilist.v
 nola/examples/logic/verify/borrow.v
+
+nola/examples/type/type.v
+nola/examples/type/subst.v
+nola/examples/type/iris.v
+nola/examples/type/intp.v
+nola/examples/type/deriv.v
+nola/examples/type/facts.v
+nola/examples/type/adequacy.v
+nola/examples/type/rules/conv.v
+nola/examples/type/rules/expr.v
+nola/examples/type/rules/ref.v
+nola/examples/type/verify/ilist.v
