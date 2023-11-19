@@ -234,34 +234,34 @@ Lemma erase_state_init l n v σ:
   state_init_heap l n (erase_val v) (erase_state σ).
 Proof. by rewrite /erase_state /state_init_heap /= erase_heap_array. Qed.
 
-Definition head_steps_to_erasure_of (e1 : expr) (σ1 : state) (e2 : expr)
+Definition base_steps_to_erasure_of (e1 : expr) (σ1 : state) (e2 : expr)
            (σ2 : state) (efs : list expr) :=
   ∃ κ' e2' σ2' efs',
-    head_step e1 σ1 κ' e2' σ2' efs' ∧
+    base_step e1 σ1 κ' e2' σ2' efs' ∧
     erase_expr e2' = e2 ∧ erase_state σ2' = σ2 ∧ erase_tp efs' = efs.
 
-Lemma erased_head_step_head_step_rec f x e v σ :
-  head_steps_to_erasure_of ((rec: f x := e)%V v) σ
+Lemma erased_base_step_base_step_rec f x e v σ :
+  base_steps_to_erasure_of ((rec: f x := e)%V v) σ
     (subst' x (erase_val v)
             (subst' f (rec: f x := erase_expr e) (erase_expr e)))
     (erase_state σ) [].
 Proof. by repeat econstructor; rewrite !erase_expr_subst'. Qed.
-Lemma erased_head_step_head_step_NewProph σ :
-  head_steps_to_erasure_of NewProph σ #LitPoison (erase_state σ) [].
+Lemma erased_base_step_base_step_NewProph σ :
+  base_steps_to_erasure_of NewProph σ #LitPoison (erase_state σ) [].
 Proof. eexists _, _, _, _; split; first eapply new_proph_id_fresh; done. Qed.
-Lemma erased_head_step_head_step_AllocN n v σ l :
+Lemma erased_base_step_base_step_AllocN n v σ l :
   (0 < n)%Z →
   (∀ i : Z, (0 ≤ i)%Z → (i < n)%Z → erase_heap (heap σ) !! (l +ₗ i) = None) →
-  head_steps_to_erasure_of
+  base_steps_to_erasure_of
     (AllocN #n v) σ #l (state_init_heap l n (erase_val v) (erase_state σ)) [].
 Proof.
   eexists _, _, _, _; simpl; split;
     first econstructor; try setoid_rewrite <- lookup_erase_heap_None;
       rewrite ?erase_heap_insert /=; eauto using erase_state_init.
 Qed.
-Lemma erased_head_step_head_step_Free l v σ :
+Lemma erased_base_step_base_step_Free l v σ :
   erase_heap (heap σ) !! l = Some (Some v) →
-  head_steps_to_erasure_of (Free #l) σ #()
+  base_steps_to_erasure_of (Free #l) σ #()
    {| heap := <[l:=None]> (erase_heap (heap σ)); used_proph_id := ∅ |} [].
 Proof.
   intros Hl.
@@ -270,18 +270,18 @@ Proof.
   eexists _, _, _, _; simpl; split; first econstructor; repeat split; eauto.
   rewrite /state_upd_heap /erase_state /= erase_heap_insert_None //.
 Qed.
-Lemma erased_head_step_head_step_Load l σ v :
+Lemma erased_base_step_base_step_Load l σ v :
   erase_heap (heap σ) !! l = Some (Some v) →
-  head_steps_to_erasure_of (! #l) σ v (erase_state σ) [].
+  base_steps_to_erasure_of (! #l) σ v (erase_state σ) [].
 Proof.
   intros Hl.
   rewrite lookup_erase_heap in Hl.
   destruct (heap σ !! l) as [[|]|] eqn:?; simplify_eq/=.
   eexists _, _, _, _; simpl; split; first econstructor; eauto.
 Qed.
-Lemma erased_head_step_head_step_Xchg l v w σ :
+Lemma erased_base_step_base_step_Xchg l v w σ :
   erase_heap (heap σ) !! l = Some (Some v) →
-  head_steps_to_erasure_of (Xchg #l w) σ v
+  base_steps_to_erasure_of (Xchg #l w) σ v
    {| heap := <[l:=Some $ erase_val w]> (erase_heap (heap σ)); used_proph_id := ∅ |} [].
 Proof.
   intros Hl.
@@ -290,9 +290,9 @@ Proof.
   eexists _, _, _, _; simpl; split; first econstructor; repeat split; eauto.
   rewrite /state_upd_heap /erase_state /= erase_heap_insert_Some //.
 Qed.
-Lemma erased_head_step_head_step_Store l v w σ :
+Lemma erased_base_step_base_step_Store l v w σ :
   erase_heap (heap σ) !! l = Some (Some v) →
-  head_steps_to_erasure_of (#l <- w) σ #()
+  base_steps_to_erasure_of (#l <- w) σ #()
    {| heap := <[l:=Some $ erase_val w]> (erase_heap (heap σ)); used_proph_id := ∅ |} [].
 Proof.
   intros Hl.
@@ -301,10 +301,10 @@ Proof.
   eexists _, _, _, _; simpl; split; first econstructor; repeat split; eauto.
   rewrite /state_upd_heap /erase_state /= erase_heap_insert_Some //.
 Qed.
-Lemma erased_head_step_head_step_CmpXchg l v w σ vl :
+Lemma erased_base_step_base_step_CmpXchg l v w σ vl :
   erase_heap (heap σ) !! l = Some (Some vl) →
   vals_compare_safe vl (erase_val v) →
-  head_steps_to_erasure_of
+  base_steps_to_erasure_of
     (CmpXchg #l v w) σ
     (vl, #(bool_decide (vl = erase_val v)))%V
     (if bool_decide (vl = erase_val v)
@@ -327,9 +327,9 @@ Proof.
     rewrite !bool_decide_eq_false_2; eauto; [].
     by rewrite erase_val_inj_iff.
 Qed.
-Lemma erased_head_step_head_step_FAA l n m σ :
+Lemma erased_base_step_base_step_FAA l n m σ :
   erase_heap (heap σ) !! l = Some (Some #n) →
-  head_steps_to_erasure_of
+  base_steps_to_erasure_of
     (FAA #l #m) σ #n
     {| heap := <[l:= Some #(n + m)]> (erase_heap (heap σ));
        used_proph_id := ∅ |} [].
@@ -342,9 +342,9 @@ Proof.
 Qed.
 
 (** When the erased program makes a head step, so does the original program. *)
-Lemma erased_head_step_head_step e1 σ1 κ e2 σ2 efs:
-  head_step (erase_expr e1) (erase_state σ1) κ e2 σ2 efs →
-  head_steps_to_erasure_of e1 σ1 e2 σ2 efs.
+Lemma erased_base_step_base_step e1 σ1 κ e2 σ2 efs:
+  base_step (erase_expr e1) (erase_state σ1) κ e2 σ2 efs →
+  base_steps_to_erasure_of e1 σ1 e2 σ2 efs.
 Proof.
   intros Hhstep.
   inversion Hhstep; simplify_eq/=;
@@ -361,15 +361,15 @@ Proof.
              apply -> val_is_unboxed_erased in H
            end; simplify_eq/=;
     try (by repeat econstructor);
-  eauto using erased_head_step_head_step_rec,
-    erased_head_step_head_step_NewProph,
-    erased_head_step_head_step_AllocN,
-    erased_head_step_head_step_Free,
-    erased_head_step_head_step_Load,
-    erased_head_step_head_step_Xchg,
-    erased_head_step_head_step_Store,
-    erased_head_step_head_step_CmpXchg,
-    erased_head_step_head_step_FAA.
+  eauto using erased_base_step_base_step_rec,
+    erased_base_step_base_step_NewProph,
+    erased_base_step_base_step_AllocN,
+    erased_base_step_base_step_Free,
+    erased_base_step_base_step_Load,
+    erased_base_step_base_step_Xchg,
+    erased_base_step_base_step_Store,
+    erased_base_step_base_step_CmpXchg,
+    erased_base_step_base_step_FAA.
 Qed.
 
 Lemma fill_to_resolve e v1 v2 K e' :
@@ -394,35 +394,35 @@ Lemma projs_pure_steps (v0 v1 v2 : val) :
 Proof.
   etrans; first apply (rtc_pure_step_ctx (fill [PairLCtx _; FstCtx; FstCtx])).
   { apply rtc_once.
-    apply pure_head_step_pure_step.
+    apply pure_base_step_pure_step.
     split; first repeat econstructor.
     intros ????? Hhstep; inversion Hhstep; simplify_eq/=; eauto. }
   simpl.
   etrans; first apply (rtc_pure_step_ctx (fill [FstCtx; FstCtx])).
   { apply rtc_once.
-    apply pure_head_step_pure_step.
+    apply pure_base_step_pure_step.
     split; first repeat econstructor.
     intros ????? Hhstep; inversion Hhstep; simplify_eq/=; eauto. }
   simpl.
   etrans; first apply (rtc_pure_step_ctx (fill [FstCtx])).
   { apply rtc_once.
-    apply pure_head_step_pure_step.
+    apply pure_base_step_pure_step.
     split; first repeat econstructor.
     intros ????? Hhstep; inversion Hhstep; simplify_eq/=; eauto. }
   simpl.
   apply rtc_once.
-  apply pure_head_step_pure_step.
+  apply pure_base_step_pure_step.
   split; first repeat econstructor.
   intros ????? Hhstep; inversion Hhstep; simplify_eq/=; eauto.
 Qed.
 
-Lemma Resolve_3_vals_head_stuck v0 v1 v2 σ κ e σ' efs :
-  ¬ head_step (Resolve v0 v1 v2) σ κ e σ' efs.
+Lemma Resolve_3_vals_base_stuck v0 v1 v2 σ κ e σ' efs :
+  ¬ base_step (Resolve v0 v1 v2) σ κ e σ' efs.
 Proof.
   intros Hhstep.
   inversion Hhstep; simplify_eq/=.
   apply (eq_None_not_Some (to_val (Val v0))); last eauto.
-  by eapply val_head_stuck.
+  by eapply val_base_stuck.
 Qed.
 
 Lemma Resolve_3_vals_unsafe (v0 v1 v2 : val) σ :
@@ -435,17 +435,17 @@ Proof.
   intros ???? [K e1' e2' Hrs Hhstep]; simplify_eq/=.
   destruct K as [|Ki K _] using rev_ind.
   { simplify_eq/=.
-    eapply Resolve_3_vals_head_stuck; eauto. }
+    eapply Resolve_3_vals_base_stuck; eauto. }
   rewrite fill_app in Hrs.
   destruct Ki; simplify_eq/=.
   - rename select ectx_item into Ki.
     pose proof (fill_item_val Ki (fill K e1')) as Hnv.
     apply fill_val in Hnv as [? Hnv]; last by rewrite -Hrs; eauto.
-    by erewrite val_head_stuck in Hnv.
+    by erewrite val_base_stuck in Hnv.
   - edestruct Hvfill as [? Heq]; eauto.
-    by erewrite val_head_stuck in Heq.
+    by erewrite val_base_stuck in Heq.
   - edestruct Hvfill as [? Heq]; eauto.
-    by erewrite val_head_stuck in Heq.
+    by erewrite val_base_stuck in Heq.
 Qed.
 
 (** [(e1, σ1)] takes a [prim_step] to [(e2', σ2')] forking threads [efs']
@@ -516,7 +516,7 @@ Proof.
 Qed.
 
 Lemma prim_step_matched_by_erased_steps_ectx_item Ki K e1 e1' σ1 e2 σ2 efs κ :
-  head_step e1' (erase_state σ1) κ e2 σ2 efs →
+  base_step e1' (erase_state σ1) κ e2 σ2 efs →
   not_stuck e1 σ1 →
   erase_expr e1 = fill_item Ki (fill K e1') →
   (∀ K' e1, length K' ≤ length K →
@@ -529,7 +529,7 @@ Proof.
   destruct (decide (is_Resolve e1)); last first.
   { (** e1 is not a [Resolve] expression. *)
     eapply non_resolve_prim_step_matched_by_erased_steps_ectx_item; [|by eauto..].
-    by eapply fill_not_val, val_head_stuck. }
+    by eapply fill_not_val, val_base_stuck. }
   (** e1 is a [Resolve] expression. *)
   destruct Ki; simplify_eq/=;
     repeat
@@ -543,13 +543,13 @@ Proof.
       end; try done.
   destruct K as [|Ki K _] using rev_ind; simplify_eq/=; [|].
   { (* case where (Fst (erase_expr e1_1, erase_expr e1_2, erase_expr e1_3)) *)
-    (*      takes a head_step; it is impossible! *)
+    (*      takes a base_step; it is impossible! *)
     by inversion Hhstp; simplify_eq. }
   rewrite /erase_resolve fill_app /= in He1; simplify_eq/=.
   destruct Ki; simplify_eq/=; rewrite fill_app /=.
   destruct K as [|Ki K _] using rev_ind; simplify_eq/=; [|].
   { (* case where (erase_expr e1_1, erase_expr e1_2, erase_expr e1_3) *)
-    (*      takes a head_step; it is impossible! *)
+    (*      takes a base_step; it is impossible! *)
     inversion Hhstp. }
   rewrite fill_app /= in He1.
   destruct Ki; simplify_eq/=; rewrite fill_app /=.
@@ -577,19 +577,19 @@ Proof.
             end
         end.
       edestruct fill_to_resolve as [?|[K' [Ki HK]]]; eauto;
-        [by eapply val_head_stuck| |]; simplify_eq/=.
-      * (** e1 is of the form ([Resolve] e10 e11 v0) and e11 takes a head_step. *)
+        [by eapply val_base_stuck| |]; simplify_eq/=.
+      * (** e1 is of the form ([Resolve] e10 e11 v0) and e11 takes a base_step. *)
         inversion Hhstp'; simplify_eq.
         edestruct (IH K) as (?&?&?&?&?&Hpstp&?&?&?&?);
-          [rewrite !app_length /=; lia|done|by eapply head_step_not_stuck|];
+          [rewrite !app_length /=; lia|done|by eapply base_step_not_stuck|];
             simplify_eq/=.
-        apply head_reducible_prim_step in Hpstp; simpl in *;
-          last by rewrite /head_reducible /=; eauto 10.
-        epose (λ H, head_step_to_val _ _ _ (Val _) _ _ _ _ _ _ _ H Hpstp)
+        apply base_reducible_prim_step in Hpstp; simpl in *;
+          last by rewrite /base_reducible /=; eauto 10.
+        epose (λ H, base_step_to_val _ _ _ (Val _) _ _ _ _ _ _ _ H Hpstp)
           as Hhstv; edestruct Hhstv as [? ?%of_to_val]; [done|eauto|];
           simplify_eq.
         eexists _, _, _, _, _; repeat split;
-          first (by apply head_prim_step; econstructor; eauto); auto.
+          first (by apply base_prim_step; econstructor; eauto); auto.
         etrans.
         { by apply (rtc_pure_step_ctx
                       (fill [PairLCtx _; PairLCtx _; FstCtx; FstCtx])). }
@@ -604,7 +604,7 @@ Proof.
         simplify_eq/=.
         change (fill_item Ki) with (fill [Ki]) in Hpstp.
         rewrite -fill_app in Hpstp.
-        eapply head_reducible_prim_step_ctx in Hpstp as [e2'' [He2'' Hpstp]];
+        eapply base_reducible_prim_step_ctx in Hpstp as [e2'' [He2'' Hpstp]];
           last by eexists _; eauto.
         simplify_eq/=.
         eexists _, _, _, _, _; repeat split.
@@ -642,16 +642,16 @@ Proof.
   induction len as [m IHm]using lt_wf_ind; intros K Hlen e1 He1 He1sf;
     simplify_eq.
   destruct K as [|Ki K _] using rev_ind; simplify_eq/=.
-  { apply erased_head_step_head_step in Hhstp as (?&?&?&?&?&<-&?&<-).
+  { apply erased_base_step_base_step in Hhstp as (?&?&?&?&?&<-&?&<-).
     eexists _, _, _, _, _; repeat split;
-      first (by apply head_prim_step); auto using rtc_refl. }
+      first (by apply base_prim_step); auto using rtc_refl. }
   rewrite app_length in IHm; simpl in *.
   rewrite fill_app /=; rewrite fill_app /= in He1.
   eapply prim_step_matched_by_erased_steps_ectx_item; eauto; [].
   { intros K' **; simpl in *. apply (IHm (length K')); auto with lia. }
 Qed.
 
-Lemma head_step_erased_prim_step_CmpXchg v1 v2 σ l vl:
+Lemma base_step_erased_prim_step_CmpXchg v1 v2 σ l vl:
   heap σ !! l = Some (Some vl) →
   vals_compare_safe vl v1 →
   ∃ e2' σ2' ef', prim_step (CmpXchg #l (erase_val v1)
@@ -659,15 +659,15 @@ Lemma head_step_erased_prim_step_CmpXchg v1 v2 σ l vl:
 Proof.
   intros Hl Hv.
   destruct (bool_decide (vl = v1)) eqn:Heqvls.
-  - do 3 eexists; apply head_prim_step;
+  - do 3 eexists; apply base_prim_step;
       econstructor; [|by apply vals_compare_safe_erase|by eauto].
       by rewrite /erase_state /state_upd_heap /= lookup_erase_heap Hl.
-  - do 3 eexists; apply head_prim_step;
+  - do 3 eexists; apply base_prim_step;
         econstructor; [|by apply vals_compare_safe_erase|by eauto].
       by rewrite /erase_state /state_upd_heap /= lookup_erase_heap Hl.
 Qed.
 
-Lemma head_step_erased_prim_step_resolve e w σ :
+Lemma base_step_erased_prim_step_resolve e w σ :
   (∃ e2' σ2' ef', prim_step (erase_expr e) (erase_state σ) [] e2' σ2' ef') →
   ∃ e2' σ2' ef',
     prim_step (erase_resolve (erase_expr e) #LitPoison (erase_val w))
@@ -678,79 +678,79 @@ Proof.
     apply (fill_prim_step [PairLCtx _; PairLCtx _;FstCtx; FstCtx]).
 Qed.
 
-Lemma head_step_erased_prim_step_un_op σ op v v':
+Lemma base_step_erased_prim_step_un_op σ op v v':
   un_op_eval op v = Some v' →
   ∃ e2' σ2' ef', prim_step (UnOp op (erase_val v)) (erase_state σ) [] e2' σ2' ef'.
 Proof.
-  do 3 eexists; apply head_prim_step; econstructor.
+  do 3 eexists; apply base_prim_step; econstructor.
   apply un_op_eval_erase; eauto.
 Qed.
 
-Lemma head_step_erased_prim_step_bin_op σ op v1 v2 v':
+Lemma base_step_erased_prim_step_bin_op σ op v1 v2 v':
   bin_op_eval op v1 v2 = Some v' →
   ∃ e2' σ2' ef', prim_step (BinOp op (erase_val v1) (erase_val v2))
                            (erase_state σ) [] e2' σ2' ef'.
 Proof.
-  do 3 eexists; apply head_prim_step; econstructor.
+  do 3 eexists; apply base_prim_step; econstructor.
   apply bin_op_eval_erase; eauto.
 Qed.
 
-Lemma head_step_erased_prim_step_allocN σ l n v:
+Lemma base_step_erased_prim_step_allocN σ l n v:
   (0 < n)%Z →
   (∀ i : Z, (0 ≤ i)%Z → (i < n)%Z → heap σ !! (l +ₗ i) = None) →
   ∃ e2' σ2' ef',
     prim_step (AllocN #n (erase_val v)) (erase_state σ) [] e2' σ2' ef'.
 Proof.
-  do 3 eexists; apply head_prim_step; econstructor; eauto.
+  do 3 eexists; apply base_prim_step; econstructor; eauto.
   intros; rewrite lookup_erase_heap_None; eauto.
 Qed.
 
-Lemma head_step_erased_prim_step_free σ l v :
+Lemma base_step_erased_prim_step_free σ l v :
   heap σ !! l = Some (Some v) →
   ∃ e2' σ2' ef', prim_step (Free #l) (erase_state σ) [] e2' σ2' ef'.
 Proof.
-  intros Hw. do 3 eexists; apply head_prim_step; econstructor.
+  intros Hw. do 3 eexists; apply base_prim_step; econstructor.
   rewrite /erase_state /state_upd_heap /= lookup_erase_heap Hw; eauto.
 Qed.
 
-Lemma head_step_erased_prim_step_load σ l v:
+Lemma base_step_erased_prim_step_load σ l v:
   heap σ !! l = Some (Some v) →
   ∃ e2' σ2' ef', prim_step (! #l) (erase_state σ) [] e2' σ2' ef'.
 Proof.
-  do 3 eexists; apply head_prim_step; econstructor.
+  do 3 eexists; apply base_prim_step; econstructor.
   rewrite /erase_state /state_upd_heap /= lookup_erase_heap.
   by destruct lookup; simplify_eq.
 Qed.
 
-Lemma head_step_erased_prim_step_xchg σ l v w :
+Lemma base_step_erased_prim_step_xchg σ l v w :
   heap σ !! l = Some (Some v) →
   ∃ e2' σ2' ef', prim_step (Xchg #l (erase_val w)) (erase_state σ) [] e2' σ2' ef'.
 Proof.
-  intros Hl. do 3 eexists; apply head_prim_step; econstructor.
+  intros Hl. do 3 eexists; apply base_prim_step; econstructor.
   rewrite /erase_state /state_upd_heap /= lookup_erase_heap Hl; eauto.
 Qed.
 
-Lemma head_step_erased_prim_step_store σ l v w :
+Lemma base_step_erased_prim_step_store σ l v w :
   heap σ !! l = Some (Some v) →
   ∃ e2' σ2' ef', prim_step (#l <- erase_val w) (erase_state σ) [] e2' σ2' ef'.
 Proof.
-  intros Hw. do 3 eexists; apply head_prim_step; econstructor.
+  intros Hw. do 3 eexists; apply base_prim_step; econstructor.
   rewrite /erase_state /state_upd_heap /= lookup_erase_heap Hw; eauto.
 Qed.
 
-Lemma head_step_erased_prim_step_FAA σ l n n':
+Lemma base_step_erased_prim_step_FAA σ l n n':
   heap σ !! l = Some (Some #n) →
   ∃ e2' σ2' ef', prim_step (FAA #l #n') (erase_state σ) [] e2' σ2' ef'.
 Proof.
   intros Hl.
-  do 3 eexists; apply head_prim_step. econstructor.
+  do 3 eexists; apply base_prim_step. econstructor.
   by rewrite /erase_state /state_upd_heap /= lookup_erase_heap Hl.
 Qed.
 
-Lemma head_step_erased_prim_step_ndnat σ :
+Lemma base_step_erased_prim_step_ndnat σ :
   ∃ e2' σ2' ef', prim_step Ndnat (erase_state σ) [] e2' σ2' ef'.
 Proof.
-  do 3 eexists; apply head_prim_step. apply (NdnatS 0).
+  do 3 eexists; apply base_prim_step. apply (NdnatS 0).
 Qed.
 
 (**
@@ -758,23 +758,23 @@ Qed.
 Therefore, when resolve takes a head step, the erasure of [Resolve] takes a
 prim step inside the triple.
 *)
-Lemma head_step_erased_prim_step e1 σ1 κ e2 σ2 ef:
-  head_step e1 σ1 κ e2 σ2 ef →
+Lemma base_step_erased_prim_step e1 σ1 κ e2 σ2 ef:
+  base_step e1 σ1 κ e2 σ2 ef →
   ∃ e2' σ2' ef', prim_step (erase_expr e1) (erase_state σ1) [] e2' σ2' ef'.
 Proof.
   induction 1; simplify_eq/=;
-    eauto using head_step_erased_prim_step_CmpXchg,
-                head_step_erased_prim_step_resolve,
-                head_step_erased_prim_step_un_op,
-                head_step_erased_prim_step_bin_op,
-                head_step_erased_prim_step_allocN,
-                head_step_erased_prim_step_free,
-                head_step_erased_prim_step_load,
-                head_step_erased_prim_step_store,
-                head_step_erased_prim_step_xchg,
-                head_step_erased_prim_step_FAA,
-                head_step_erased_prim_step_ndnat;
-    by do 3 eexists; apply head_prim_step; econstructor.
+    eauto using base_step_erased_prim_step_CmpXchg,
+                base_step_erased_prim_step_resolve,
+                base_step_erased_prim_step_un_op,
+                base_step_erased_prim_step_bin_op,
+                base_step_erased_prim_step_allocN,
+                base_step_erased_prim_step_free,
+                base_step_erased_prim_step_load,
+                base_step_erased_prim_step_store,
+                base_step_erased_prim_step_xchg,
+                base_step_erased_prim_step_FAA,
+                base_step_erased_prim_step_ndnat;
+    by do 3 eexists; apply base_prim_step; econstructor.
 Qed.
 
 Lemma reducible_erased_reducible e σ :
@@ -783,7 +783,7 @@ Proof.
   intros (?&?&?&?&Hpstp); simpl in *.
   inversion Hpstp; simplify_eq/=.
   rewrite erase_ectx_expr.
-  edestruct head_step_erased_prim_step as (?&?&?&?); first done; simpl in *.
+  edestruct base_step_erased_prim_step as (?&?&?&?); first done; simpl in *.
   eexists _, _, _, _; eapply fill_prim_step; eauto.
 Qed.
 

@@ -66,7 +66,7 @@ Section atomic.
   Proof.
     rename e into e1. intros H σ1 e2 κ σ2 efs [Ks e1' e2' Hfill -> step].
     simpl in *. induction Ks as [|K Ks _] using rev_ind; simpl in Hfill.
-    - subst. inversion_clear step. by eapply (H σ1 (Val _) _ σ2 efs), head_prim_step.
+    - subst. inversion_clear step. by eapply (H σ1 (Val _) _ σ2 efs), base_prim_step.
     - rewrite fill_app. rewrite fill_app in Hfill.
       assert (∀ v, Val v = fill Ks e1' → False) as fill_absurd.
       { intros v Hv. assert (to_val (fill Ks e1') = Some v) as Htv by by rewrite -Hv.
@@ -108,9 +108,9 @@ Global Hint Extern 0 (AsRecV (RecV _ _ _) _ _ _) =>
 
 Section pure_exec.
   Local Ltac solve_exec_safe := intros; subst; do 3 eexists; econstructor; eauto.
-  Local Ltac solve_exec_puredet := simpl; intros; by inv_head_step.
+  Local Ltac solve_exec_puredet := simpl; intros; by inv_base_step.
   Local Ltac solve_pure_exec :=
-    subst; intros ?; apply nsteps_once, pure_head_step_pure_step;
+    subst; intros ?; apply nsteps_once, pure_base_step_pure_step;
       constructor; [solve_exec_safe | solve_exec_puredet].
 
   Global Instance pure_recc f x (erec : expr) :

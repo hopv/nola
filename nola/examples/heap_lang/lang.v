@@ -639,61 +639,61 @@ Proof.
   rewrite right_id insert_union_singleton_l. done.
 Qed.
 
-Inductive head_step : expr → state → list observation → expr → state → list expr → Prop :=
+Inductive base_step : expr → state → list observation → expr → state → list expr → Prop :=
   | RecS f x e σ :
-     head_step (Rec f x e) σ [] (Val $ RecV f x e) σ []
+     base_step (Rec f x e) σ [] (Val $ RecV f x e) σ []
   | PairS v1 v2 σ :
-     head_step (Pair (Val v1) (Val v2)) σ [] (Val $ PairV v1 v2) σ []
+     base_step (Pair (Val v1) (Val v2)) σ [] (Val $ PairV v1 v2) σ []
   | InjLS v σ :
-     head_step (InjL $ Val v) σ [] (Val $ InjLV v) σ []
+     base_step (InjL $ Val v) σ [] (Val $ InjLV v) σ []
   | InjRS v σ :
-     head_step (InjR $ Val v) σ [] (Val $ InjRV v) σ []
+     base_step (InjR $ Val v) σ [] (Val $ InjRV v) σ []
   | BetaS f x e1 v2 e' σ :
      e' = subst' x v2 (subst' f (RecV f x e1) e1) →
-     head_step (App (Val $ RecV f x e1) (Val v2)) σ [] e' σ []
+     base_step (App (Val $ RecV f x e1) (Val v2)) σ [] e' σ []
   | UnOpS op v v' σ :
      un_op_eval op v = Some v' →
-     head_step (UnOp op (Val v)) σ [] (Val v') σ []
+     base_step (UnOp op (Val v)) σ [] (Val v') σ []
   | BinOpS op v1 v2 v' σ :
      bin_op_eval op v1 v2 = Some v' →
-     head_step (BinOp op (Val v1) (Val v2)) σ [] (Val v') σ []
+     base_step (BinOp op (Val v1) (Val v2)) σ [] (Val v') σ []
   | IfTrueS e1 e2 σ :
-     head_step (If (Val $ LitV $ LitBool true) e1 e2) σ [] e1 σ []
+     base_step (If (Val $ LitV $ LitBool true) e1 e2) σ [] e1 σ []
   | IfFalseS e1 e2 σ :
-     head_step (If (Val $ LitV $ LitBool false) e1 e2) σ [] e2 σ []
+     base_step (If (Val $ LitV $ LitBool false) e1 e2) σ [] e2 σ []
   | FstS v1 v2 σ :
-     head_step (Fst (Val $ PairV v1 v2)) σ [] (Val v1) σ []
+     base_step (Fst (Val $ PairV v1 v2)) σ [] (Val v1) σ []
   | SndS v1 v2 σ :
-     head_step (Snd (Val $ PairV v1 v2)) σ [] (Val v2) σ []
+     base_step (Snd (Val $ PairV v1 v2)) σ [] (Val v2) σ []
   | CaseLS v e1 e2 σ :
-     head_step (Case (Val $ InjLV v) e1 e2) σ [] (App e1 (Val v)) σ []
+     base_step (Case (Val $ InjLV v) e1 e2) σ [] (App e1 (Val v)) σ []
   | CaseRS v e1 e2 σ :
-     head_step (Case (Val $ InjRV v) e1 e2) σ [] (App e2 (Val v)) σ []
+     base_step (Case (Val $ InjRV v) e1 e2) σ [] (App e2 (Val v)) σ []
   | AllocNS n v σ l :
      (0 < n)%Z →
      (∀ i, (0 ≤ i)%Z → (i < n)%Z → σ.(heap) !! (l +ₗ i) = None) →
-     head_step (AllocN (Val $ LitV $ LitInt n) (Val v)) σ
+     base_step (AllocN (Val $ LitV $ LitInt n) (Val v)) σ
                []
                (Val $ LitV $ LitLoc l) (state_init_heap l n v σ)
                []
   | FreeS l v σ :
      σ.(heap) !! l = Some $ Some v →
-     head_step (Free (Val $ LitV $ LitLoc l)) σ
+     base_step (Free (Val $ LitV $ LitLoc l)) σ
                []
                (Val $ LitV LitUnit) (state_upd_heap <[l:=None]> σ)
                []
   | LoadS l v σ :
      σ.(heap) !! l = Some $ Some v →
-     head_step (Load (Val $ LitV $ LitLoc l)) σ [] (of_val v) σ []
+     base_step (Load (Val $ LitV $ LitLoc l)) σ [] (of_val v) σ []
   | StoreS l v w σ :
      σ.(heap) !! l = Some $ Some v →
-     head_step (Store (Val $ LitV $ LitLoc l) (Val w)) σ
+     base_step (Store (Val $ LitV $ LitLoc l) (Val w)) σ
                []
                (Val $ LitV LitUnit) (state_upd_heap <[l:=Some w]> σ)
                []
   | XchgS l v1 v2 σ :
      σ.(heap) !! l = Some $ Some v1 →
-     head_step (Xchg (Val $ LitV $ LitLoc l) (Val v2)) σ
+     base_step (Xchg (Val $ LitV $ LitLoc l) (Val v2)) σ
                []
                (Val v1) (state_upd_heap <[l:=Some v2]> σ)
                []
@@ -703,30 +703,30 @@ Inductive head_step : expr → state → list observation → expr → state →
      (* Crucially, this compares the same way as [EqOp]! *)
      vals_compare_safe vl v1 →
      b = bool_decide (vl = v1) →
-     head_step (CmpXchg (Val $ LitV $ LitLoc l) (Val v1) (Val v2)) σ
+     base_step (CmpXchg (Val $ LitV $ LitLoc l) (Val v1) (Val v2)) σ
                []
                (Val $ PairV vl (LitV $ LitBool b)) (if b then state_upd_heap <[l:=Some v2]> σ else σ)
                []
   | FaaS l i1 i2 σ :
      σ.(heap) !! l = Some $ Some (LitV (LitInt i1)) →
-     head_step (FAA (Val $ LitV $ LitLoc l) (Val $ LitV $ LitInt i2)) σ
+     base_step (FAA (Val $ LitV $ LitLoc l) (Val $ LitV $ LitInt i2)) σ
                []
                (Val $ LitV $ LitInt i1) (state_upd_heap <[l:=Some $ LitV (LitInt (i1 + i2))]>σ)
                []
   | ForkS e σ:
-     head_step (Fork e) σ [] (Val $ LitV LitUnit) σ [e]
+     base_step (Fork e) σ [] (Val $ LitV LitUnit) σ [e]
   | NewProphS σ p :
      p ∉ σ.(used_proph_id) →
-     head_step NewProph σ
+     base_step NewProph σ
                []
                (Val $ LitV $ LitProphecy p) (state_upd_used_proph_id ({[ p ]} ∪.) σ)
                []
   | ResolveS p v e σ w σ' κs ts :
-     head_step e σ κs (Val v) σ' ts →
-     head_step (Resolve e (Val $ LitV $ LitProphecy p) (Val w)) σ
+     base_step e σ κs (Val v) σ' ts →
+     base_step (Resolve e (Val $ LitV $ LitProphecy p) (Val w)) σ
                (κs ++ [(p, (v, w))]) (Val v) σ' ts
   | NdnatS (n : nat) σ :
-     head_step Ndnat σ [] (Val $ LitV $ LitInt n) σ [].
+     base_step Ndnat σ [] (Val $ LitV $ LitInt n) σ [].
 
 (** Basic properties about the language *)
 Global Instance fill_item_inj Ki : Inj (=) (=) (fill_item Ki).
@@ -736,11 +736,11 @@ Lemma fill_item_val Ki e :
   is_Some (to_val (fill_item Ki e)) → is_Some (to_val e).
 Proof. intros [v ?]. induction Ki; simplify_option_eq; eauto. Qed.
 
-Lemma val_head_stuck e1 σ1 κ e2 σ2 efs : head_step e1 σ1 κ e2 σ2 efs → to_val e1 = None.
+Lemma val_base_stuck e1 σ1 κ e2 σ2 efs : base_step e1 σ1 κ e2 σ2 efs → to_val e1 = None.
 Proof. destruct 1; naive_solver. Qed.
 
-Lemma head_ctx_step_val Ki e σ1 κ e2 σ2 efs :
-  head_step (fill_item Ki e) σ1 κ e2 σ2 efs → is_Some (to_val e).
+Lemma base_ctx_step_val Ki e σ1 κ e2 σ2 efs :
+  base_step (fill_item Ki e) σ1 κ e2 σ2 efs → is_Some (to_val e).
 Proof. revert κ e2. induction Ki; inversion_clear 1; simplify_option_eq; eauto. Qed.
 
 Lemma fill_item_no_val_inj Ki1 Ki2 e1 e2 :
@@ -753,7 +753,7 @@ Qed.
 Lemma alloc_fresh v n σ :
   let l := Loc.fresh (dom σ.(heap)) in
   (0 < n)%Z →
-  head_step (AllocN ((Val $ LitV $ LitInt $ n)) (Val v)) σ []
+  base_step (AllocN ((Val $ LitV $ LitInt $ n)) (Val v)) σ []
             (Val $ LitV $ LitLoc l) (state_init_heap l n v σ) [].
 Proof.
   intros.
@@ -764,13 +764,13 @@ Qed.
 
 Lemma new_proph_id_fresh σ :
   let p := fresh σ.(used_proph_id) in
-  head_step NewProph σ [] (Val $ LitV $ LitProphecy p) (state_upd_used_proph_id ({[ p ]} ∪.) σ) [].
+  base_step NewProph σ [] (Val $ LitV $ LitProphecy p) (state_upd_used_proph_id ({[ p ]} ∪.) σ) [].
 Proof. constructor. apply is_fresh. Qed.
 
-Lemma heap_lang_mixin : EctxiLanguageMixin of_val to_val fill_item head_step.
+Lemma heap_lang_mixin : EctxiLanguageMixin of_val to_val fill_item base_step.
 Proof.
-  split; apply _ || eauto using to_of_val, of_to_val, val_head_stuck,
-    fill_item_val, fill_item_no_val_inj, head_ctx_step_val.
+  split; apply _ || eauto using to_of_val, of_to_val, val_base_stuck,
+    fill_item_val, fill_item_no_val_inj, base_ctx_step_val.
 Qed.
 End heap_lang.
 
@@ -801,8 +801,8 @@ Proof.
   by simplify_eq.
 Qed.
 
-Lemma prim_step_to_val_is_head_step e σ1 κs w σ2 efs :
-  prim_step e σ1 κs (Val w) σ2 efs → head_step e σ1 κs (Val w) σ2 efs.
+Lemma prim_step_to_val_is_base_step e σ1 κs w σ2 efs :
+  prim_step e σ1 κs (Val w) σ2 efs → base_step e σ1 κs (Val w) σ2 efs.
 Proof.
   intro H. destruct H as [K e1 e2 H1 H2].
   assert (to_val (fill K e2) = Some w) as H3; first by rewrite -H2.
@@ -811,9 +811,9 @@ Qed.
 
 (** If [e1] makes a head step to a value under some state [σ1] then any head
  step from [e1] under any other state [σ1'] must necessarily be to a value. *)
-Lemma head_step_to_val e1 σ1 κ e2 σ2 efs σ1' κ' e2' σ2' efs' :
-  head_step e1 σ1 κ e2 σ2 efs →
-  head_step e1 σ1' κ' e2' σ2' efs' → is_Some (to_val e2) → is_Some (to_val e2').
+Lemma base_step_to_val e1 σ1 κ e2 σ2 efs σ1' κ' e2' σ2' efs' :
+  base_step e1 σ1 κ e2 σ2 efs →
+  base_step e1 σ1' κ' e2' σ2' efs' → is_Some (to_val e2) → is_Some (to_val e2').
 Proof. destruct 1; inversion 1; naive_solver. Qed.
 
 Lemma irreducible_resolve e v1 v2 σ :
@@ -821,7 +821,7 @@ Lemma irreducible_resolve e v1 v2 σ :
 Proof.
   intros H κs ? σ' efs [Ks e1' e2' Hfill -> step]. simpl in *.
   induction Ks as [|K Ks _] using rev_ind; simpl in Hfill.
-  - subst e1'. inversion step. eapply H. by apply head_prim_step.
+  - subst e1'. inversion step. eapply H. by apply base_prim_step.
   - rewrite fill_app /= in Hfill.
     destruct K; (inversion Hfill; subst; clear Hfill; try
       match goal with | H : Val ?v = fill Ks ?e |- _ =>

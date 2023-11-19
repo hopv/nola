@@ -79,7 +79,7 @@ Proof.
 Qed.
 
 (** * Rules for allocation *)
-Lemma mapsto_seq_array l dq v n :
+Lemma pointsto_seq_array l dq v n :
   ([∗ list] i ∈ seq 0 n, (l +ₗ (i : nat)) ↦{dq} v) -∗
   l ↦∗{dq} replicate n v.
 Proof.
@@ -99,7 +99,7 @@ Proof.
   iIntros (Hzs Φ) "_ HΦ". iApply twp_allocN_seq; [done..|].
   iIntros (l) "Hlm". iApply "HΦ".
   iDestruct (big_sepL_sep with "Hlm") as "[Hl $]".
-  by iApply mapsto_seq_array.
+  by iApply pointsto_seq_array.
 Qed.
 Lemma wp_allocN W s E v n :
   (0 < n)%Z →

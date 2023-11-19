@@ -96,6 +96,6 @@ Section iris.
 End iris.
 
 (** Utility *)
-Notation fbor_mapsto δ α l v := (fbor δ α (λ q, l ↦{#q} v)%n).
-Notation "l ↦( δ ) [ α ] v" := (fbor_mapsto δ α l v)
+Notation fbor_pointsto δ α l v := (fbor δ α (λ q, l ↦{#q} v)%n).
+Notation "l ↦( δ ) [ α ] v" := (fbor_pointsto δ α l v)
   (at level 20, format "l  ↦( δ ) [ α ]  v") : bi_scope.

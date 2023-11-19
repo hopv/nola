@@ -24,8 +24,8 @@ Section nintp.
     match c with
     | nc_pure φ => ⌜φ⌝
     | nc_na_own p E => na_own p E | nc_cinv_own γ q => cinv_own γ q
-    | nc_mapsto l dq v => l ↦{dq} v
-    | nc_inv_mapsto_own l v J => l ↦_J v | nc_inv_mapsto l J => l ↦_J □
+    | nc_pointsto l dq v => l ↦{dq} v
+    | nc_inv_pointsto_own l v J => l ↦_J v | nc_inv_pointsto l J => l ↦_J □
     | nc_meta_token l E => meta_token l E
     | nc_steps_lb n => steps_lb n | nc_proph p pvs => proph p pvs
     | nc_lft_tok α q => q.[α] | nc_lft_dead α => [†α] | nc_lft_eter α => [∞α]

@@ -35,6 +35,6 @@ Notation pborcd := (pborc nderiv).
 Notation pbord := (pbor nderiv).
 Notation opbord := (opbor nderiv).
 Notation plendd := (plend nderiv).
-Notation fbor_mapstod α l v := (fbor_mapsto nderiv α l v).
-Notation "l ↦[ α ] v" := (fbor_mapstod α l v)
+Notation fbor_pointstod α l v := (fbor_pointsto nderiv α l v).
+Notation "l ↦[ α ] v" := (fbor_pointstod α l v)
   (at level 20, format "l  ↦[ α ]  v") : bi_scope.

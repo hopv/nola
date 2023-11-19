@@ -169,10 +169,10 @@ Proof.
 Qed.
 
 (* The stepping relation preserves closedness *)
-Lemma head_step_is_closed e1 σ1 obs e2 σ2 es :
+Lemma base_step_is_closed e1 σ1 obs e2 σ2 es :
   is_closed_expr ∅ e1 →
   map_Forall (λ _ v, from_option is_closed_val true v) σ1.(heap) →
-  head_step e1 σ1 obs e2 σ2 es →
+  base_step e1 σ1 obs e2 σ2 es →
   is_closed_expr ∅ e2 ∧ Forall (is_closed_expr ∅) es ∧
   map_Forall (λ _ v, from_option is_closed_val true v) σ2.(heap).
 Proof.

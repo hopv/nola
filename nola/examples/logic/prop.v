@@ -64,10 +64,10 @@ Variant ncon0 : Type :=
 | (** Non-atomic invariant token *) nc_na_own
     (p : na_inv_pool_name) (E : coPset)
 | (** Cancelable invariant token *) nc_cinv_own (γ : gname) (q : Qp)
-| (** Points-to token *) nc_mapsto (l : loc) (dq : dfrac) (v : val)
-| (** Owning invariant points-to token *) nc_inv_mapsto_own
+| (** Points-to token *) nc_pointsto (l : loc) (dq : dfrac) (v : val)
+| (** Owning invariant points-to token *) nc_inv_pointsto_own
     (l : loc) (v : val) (I : val → Prop)
-| (** Invariant points-to token *) nc_inv_mapsto (l : loc) (I : val → Prop)
+| (** Invariant points-to token *) nc_inv_pointsto (l : loc) (I : val → Prop)
 | (** Meta token *) nc_meta_token (l : loc) (E : coPset)
 | (** Step number token *) nc_steps_lb (n : nat)
 | (** Prophecy token *) nc_proph (p : proph_id) (pvs : list (val * val))
@@ -200,9 +200,9 @@ Notation "'True'" := ⌜True⌝ : nProp_scope.
 Notation "'False'" := ⌜False⌝ : nProp_scope.
 Notation n_na_own p E := (n_0 (nc_na_own p E)).
 Notation n_cinv_own γ q := (n_0 (nc_cinv_own γ q)).
-Notation "l ↦ dq v" := (n_0 (nc_mapsto l dq v)) : nProp_scope.
-Notation "l ↦_ I v" := (n_0 (nc_inv_mapsto_own l I v)) : nProp_scope.
-Notation "l ↦_ I □" := (n_0 (nc_inv_mapsto l I)): nProp_scope.
+Notation "l ↦ dq v" := (n_0 (nc_pointsto l dq v)) : nProp_scope.
+Notation "l ↦_ I v" := (n_0 (nc_inv_pointsto_own l I v)) : nProp_scope.
+Notation "l ↦_ I □" := (n_0 (nc_inv_pointsto l I)): nProp_scope.
 Notation n_meta_token l E := (n_0 (nc_meta_token l E)).
 Notation n_steps_lb n := (n_0 (nc_steps_lb n)).
 Notation n_proph p pvs := (n_0 (nc_proph p pvs)).
@@ -281,8 +281,8 @@ Notation n_lend' Γᵘ α P := (n_gs1 Γᵘ (nc_lend α) P) (only parsing).
 Notation n_lend α P := (n_lend' _ α P).
 Notation n_fbor' Γᵘ α Φ := (n_gs (Γᵘ:=Γᵘ) (nc_fbor α) Φ) (only parsing).
 Notation n_fbor α Φ := (n_fbor' _ α Φ).
-Notation n_fbor_mapsto α l v := (n_fbor α (λ q, l ↦{#q} v)).
-Notation "l ↦[ α ] v" := (n_fbor_mapsto α l v)
+Notation n_fbor_pointsto α l v := (n_fbor α (λ q, l ↦{#q} v)).
+Notation "l ↦[ α ] v" := (n_fbor_pointsto α l v)
   (at level 20, format "l  ↦[ α ]  v") : nProp_scope.
 Notation n_pborc' Γᵘ α x ξ Φ := (n_gs (Γᵘ:=Γᵘ) (nc_pborc _ α x ξ) Φ)
   (only parsing).

@@ -54,10 +54,10 @@ End steps.
 
 (** Since we use an [option val] instance of [gen_heap], we need to overwrite
 the notations.  That also helps for scopes and coercions. *)
-Notation "l ↦ dq v" := (mapsto (L:=loc) (V:=option val) l dq (Some v%V))
+Notation "l ↦ dq v" := (pointsto (L:=loc) (V:=option val) l dq (Some v%V))
   (at level 20, dq custom dfrac at level 1, format "l  ↦ dq  v") : bi_scope.
 
-(** The [array] connective is a version of [mapsto] that works
+(** The [array] connective is a version of [pointsto] that works
 with lists of values. *)
 
 Definition array `{!heapGS_gen hlc Σ} (l : loc) (dq : dfrac) (vs : list val) : iProp Σ :=
@@ -71,19 +71,19 @@ make setoid rewriting in the predicate [I] work we need actual definitions
 here. *)
 Section definitions.
   Context `{!heapGS_gen hlc Σ}.
-  Definition inv_mapsto_own (l : loc) (v : val) (I : val → Prop) : iProp Σ :=
-    inv_mapsto_own l (Some v) (from_option I False).
-  Definition inv_mapsto (l : loc) (I : val → Prop) : iProp Σ :=
-    inv_mapsto l (from_option I False).
+  Definition inv_pointsto_own (l : loc) (v : val) (I : val → Prop) : iProp Σ :=
+    inv_pointsto_own l (Some v) (from_option I False).
+  Definition inv_pointsto (l : loc) (I : val → Prop) : iProp Σ :=
+    inv_pointsto l (from_option I False).
 End definitions.
 
-Global Instance: Params (@inv_mapsto_own) 4 := {}.
-Global Instance: Params (@inv_mapsto) 3 := {}.
+Global Instance: Params (@inv_pointsto_own) 4 := {}.
+Global Instance: Params (@inv_pointsto) 3 := {}.
 
 Notation inv_heap_inv := (inv_heap_inv loc (option val)).
-Notation "l '↦_' I □" := (inv_mapsto l I%stdpp%type)
+Notation "l '↦_' I □" := (inv_pointsto l I%stdpp%type)
   (at level 20, I at level 9, format "l  '↦_' I  '□'") : bi_scope.
-Notation "l ↦_ I v" := (inv_mapsto_own l v I%stdpp%type)
+Notation "l ↦_ I v" := (inv_pointsto_own l v I%stdpp%type)
   (at level 20, I at level 9, format "l  ↦_ I  v") : bi_scope.
 
 Global Program Instance heapGS_irisGS' `{!heapGS_gen hlc Σ} :
