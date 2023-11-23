@@ -25,6 +25,10 @@ Section steps.
   Definition steps_lb (n : nat) : iProp Σ :=
     mono_nat_lb_own heapGS_step_name n.
 
+  Lemma steps_lb_0 :
+    ⊢ |==> steps_lb 0.
+  Proof. by apply mono_nat_lb_own_0. Qed.
+
   Lemma steps_lb_valid n m :
     steps_auth n -∗ steps_lb m -∗ ⌜m ≤ n⌝.
   Proof.
