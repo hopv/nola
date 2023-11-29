@@ -47,13 +47,6 @@ Module inv. Section inv.
   Hypothesis fupd_frame_l : ∀{E P} Q, (|={E}=> P) ∗ Q ⊢ |={E}=> P ∗ Q.
   Hypothesis fupd_mask_mono : ∀{P}, (|={∅}=> P) ⊢ |={⊤}=> P.
 
-  (** Later-free invariant *)
-  Context (inv : PROP → PROP).
-  Hypothesis inv_persistent : ∀{P}, Persistent (inv P).
-  Hypothesis inv_alloc : ∀ P, P ⊢ |={⊤}=> inv P.
-  Hypothesis inv_acc : ∀ P Q R,
-    (P ∗ Q ⊢ |={∅}=> P ∗ R) → (inv P ∗ Q ⊢ |={⊤}=> R).
-
   (** Two-state STS: [start] -> [finished],
     where the former is authoritative and the latter is persistent
 
@@ -71,43 +64,50 @@ Module inv. Section inv.
   Lemma fupd_elim_mask_mono {P Q} : (P ⊢ |={⊤}=> Q) → (|={∅}=> P) ⊢ |={⊤}=> Q.
   Proof. rewrite fupd_mask_mono. apply fupd_elim. Qed.
 
-  (** Evil invariant *)
-  Definition evil_body γ : PROP := start γ ∨ □ |={⊤}=> False.
-  Definition evil γ : PROP := inv (evil_body γ).
+  (** The bad proposition *)
+  Definition bad γ : PROP := start γ ∨ □ |={⊤}=> False.
 
-  (** Allocate [evil] *)
-  Lemma evil_alloc : ⊢ |={⊤}=> ∃ γ, evil γ.
+  (** Later-free invariant *)
+  Context (inv_bad : gname → PROP).
+  Hypothesis inv_bad_persistent : ∀{γ}, Persistent (inv_bad γ).
+  Hypothesis inv_bad_alloc : ∀{γ}, bad γ ⊢ |={⊤}=> inv_bad γ.
+  Hypothesis inv_bad_acc : ∀ {γ} Q R,
+    (bad γ ∗ Q ⊢ |={∅}=> bad γ ∗ R) → (inv_bad γ ∗ Q ⊢ |={⊤}=> R).
+
+  (** Allocate [inv_bad γ] *)
+  Lemma inv_bad_init : ⊢ |={⊤}=> ∃ γ, inv_bad γ.
   Proof.
-    iApply fupd_elim_mask_mono; [|iApply start_alloc]. iDestruct 1 as (γ) "s".
-    iApply fupd_mono; [|iApply (inv_alloc (evil_body γ))]; [|by iLeft].
-    iIntros. by iExists γ.
+    iApply fupd_elim_mask_mono; [|by iApply start_alloc].
+    iDestruct 1 as (γ) "s".
+    iApply fupd_mono; [|iApply inv_bad_alloc]; [|by iLeft]. iIntros.
+    by iExists γ.
   Qed.
 
-  (** Contradiction from [evil] and [finished] *)
-  Lemma evil_finished_no {γ} : evil γ ∗ finished γ ⊢ |={⊤}=> False.
+  (** Contradiction from [inv_bad] and [finished] *)
+  Lemma inv_bad_finished_no {γ} : inv_bad γ ∗ finished γ ⊢ |={⊤}=> False.
   Proof.
-    iIntros "P". iApply fupd_fupd. iApply (inv_acc _ (finished γ)); [|done].
+    iIntros "P". iApply fupd_fupd. iApply (inv_bad_acc (finished γ)); [|done].
     iIntros "[[s|#⊥] #f]".
     - iDestruct (start_finished_no with "[$s $f]") as "[]".
     - iApply fupd_intro. iFrame "⊥".
   Qed.
 
-  (** Contradiction from [evil] *)
-  Lemma evil_no {γ} : evil γ ⊢ |={⊤}=> False.
+  (** Contradiction from [inv_bad] *)
+  Lemma inv_bad_no {γ} : inv_bad γ ⊢ |={⊤}=> False.
   Proof.
-    iIntros "#e". iApply fupd_fupd.
-    iApply (inv_acc _ (evil γ)); [|by iFrame "e"].
-    iIntros "[[s|#⊥] #e]"; [|iApply fupd_intro; iFrame "⊥"].
+    iIntros "#i". iApply fupd_fupd.
+    iApply (inv_bad_acc (inv_bad γ)); [|by iSplit].
+    iIntros "[[s|#⊥] #f]"; [|iApply fupd_intro; by iFrame "⊥"].
     iApply fupd_elim; last first.
-    { iApply (fupd_frame_l (evil γ)). iSplit; by [iApply start_finish|]. }
-    iIntros "[#f #e]". iApply fupd_intro.
-    iDestruct (evil_finished_no with "[$e $f]") as "$".
+    { iApply (fupd_frame_l (inv_bad γ)). iSplit; by [iApply start_finish|]. }
+    iIntros "[#f #i]". iApply fupd_intro.
+    iDestruct (inv_bad_finished_no with "[$i $f]") as "$".
   Qed.
 
   (** Contradiction *)
   Lemma no : ⊢ |={⊤}=> False.
   Proof.
-    iApply fupd_elim; [|iApply evil_alloc]. iDestruct 1 as (γ) "#e".
-    by iApply evil_no.
+    iApply fupd_elim; [|by iApply inv_bad_init]. iDestruct 1 as (γ) "#e".
+    by iApply inv_bad_no.
   Qed.
 End inv. End inv.
