@@ -41,7 +41,7 @@ Section borrow.
     iIntros "%Ψ [[α β] b] →Ψ".
     iMod (pbor_open (M:=bupd) with "α b") as "/=[o[%[↦ b']]]".
     iApply twpw_fupdw_nonval; [done|]. wp_load. iModIntro.
-    iMod (opbor_pbor_reborrow (M:=bupd) (λ _, (_,_)' : _ *'ₛ _)
+    iMod (pobor_pbor_reborrow (M:=bupd) (λ _, (_,_)' : _ *'ₛ _)
       with "o β b' [↦]") as (?) "[α[β[obs c]]]".
     { iIntros "/=% _ ? !>". iExists _. iFrame. }
     iModIntro. iApply "→Ψ". iFrame "α β". iExists _. iFrame.

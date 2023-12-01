@@ -131,14 +131,14 @@ Variant ncongs : Type :=
     (X : nsynty) (α : lft) (x : X) (ξ : prvar X)
 | (** Prophetic borrower *) nc_pbor
     (X : nsynty) (α : lft) (x : X) (ξ : prvar X)
-| (** Prophetic open borrower *) nc_opbor
+| (** Prophetic open borrower *) nc_pobor
     (X : nsynty) (α : lft) (q : Qp) (ξ : prvar X)
 | (** Prophetic lender *) nc_plend
     (X : nsynty) (α : lft) (xπ : clairn X).
 (** Domain of [ncongs] *)
 Definition ncongs_dom (c : ncongs) : Type := match c with
   | nc_fbor _ => Qp
-  | nc_pborc X _ _ _ | nc_pbor X _ _ _ | nc_opbor X _ _ _ | nc_plend X _ _ => X
+  | nc_pborc X _ _ _ | nc_pbor X _ _ _ | nc_pobor X _ _ _ | nc_plend X _ _ => X
   | _ => nat
   end.
 
@@ -290,9 +290,9 @@ Notation n_pborc α x ξ Φ := (n_pborc' _ α x ξ Φ).
 Notation n_pbor' Γᵘ α x ξ Φ := (n_gs (Γᵘ:=Γᵘ) (nc_pbor _ α x ξ) Φ)
   (only parsing).
 Notation n_pbor α x ξ Φ := (n_pbor' _ α x ξ Φ).
-Notation n_opbor' Γᵘ α q ξ Φ := (n_gs (Γᵘ:=Γᵘ) (nc_opbor _ α q ξ) Φ)
+Notation n_pobor' Γᵘ α q ξ Φ := (n_gs (Γᵘ:=Γᵘ) (nc_pobor _ α q ξ) Φ)
   (only parsing).
-Notation n_opbor α q ξ Φ := (n_opbor' _ α q ξ Φ).
+Notation n_pobor α q ξ Φ := (n_pobor' _ α q ξ Φ).
 Notation n_plend' Γᵘ α xπ Φ := (n_gs (Γᵘ:=Γᵘ) (nc_plend _ α xπ) Φ)
   (only parsing).
 Notation n_plend α xπ Φ := (n_plend' _ α xπ Φ).

@@ -74,7 +74,7 @@ Section nintp.
     | nc_fbor α, _ => fbor δ α Φ
     | nc_pborc _ α x ξ, _ => pborc δ α x ξ Φ
     | nc_pbor _ α x ξ, _ => pbor δ α x ξ Φ
-    | nc_opbor _ α q ξ, _ => opbor δ α q ξ Φ
+    | nc_pobor _ α q ξ, _ => pobor δ α q ξ Φ
     | nc_plend _ α xπ, _ => plend δ α xπ Φ
     end%I.
 

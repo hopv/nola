@@ -68,9 +68,9 @@ Section iris.
   (** [bor]: Modified [nbor_tok] *)
   Definition bor δ α P : iProp Σ :=
     ∃ Q, ⸨ ↑ˡ P ==∗ ↑ˡ Q ⸩(δ) ∗ ⸨ ↑ˡ Q ==∗ ↑ˡ P ⸩(δ) ∗ nbor_tok α Q.
-  (** [obor]: Modified [onbor_tok] *)
+  (** [obor]: Modified [nobor_tok] *)
   Definition obor δ α q P : iProp Σ :=
-    ∃ Q, ⸨ ↑ˡ P ==∗ ↑ˡ Q ⸩(δ) ∗ onbor_tok α q Q.
+    ∃ Q, ⸨ ↑ˡ P ==∗ ↑ˡ Q ⸩(δ) ∗ nobor_tok α q Q.
   (** [lend]: Modified [nlend_tok] *)
   Definition lend δ α P : iProp Σ := ∃ Q, ⸨ ↑ˡ Q ==∗ ↑ˡ P ⸩(δ) ∗ nlend_tok α Q.
   (** [fbor]: Fractured borrower *)
@@ -87,9 +87,9 @@ Section iris.
   Definition pbor {X} δ α x ξ (Φ : X → nPropS (;ᵞ)) : iProp Σ :=
     ∃ Ψ, ⸨ ∀ x, ↑ˡ Φ x ==∗ ↑ˡ Ψ x ⸩(δ) ∗ ⸨ ∀ x, ↑ˡ Ψ x ==∗ ↑ˡ Φ x ⸩(δ) ∗
       pbor_tok α x ξ Ψ.
-  (** [opbor]: Modified [opbor_tok] *)
-  Definition opbor {X} δ α q ξ (Φ : X → nPropS (;ᵞ)) : iProp Σ :=
-    ∃ Ψ, ⸨ ∀ x, ↑ˡ Φ x ==∗ ↑ˡ Ψ x ⸩(δ) ∗ opbor_tok α q ξ Ψ.
+  (** [pobor]: Modified [pobor_tok] *)
+  Definition pobor {X} δ α q ξ (Φ : X → nPropS (;ᵞ)) : iProp Σ :=
+    ∃ Ψ, ⸨ ∀ x, ↑ˡ Φ x ==∗ ↑ˡ Ψ x ⸩(δ) ∗ pobor_tok α q ξ Ψ.
   (** [plend]: Modified [plend_tok] *)
   Definition plend {X} δ α xπ (Φ : X → nPropS (;ᵞ)) : iProp Σ :=
     ∃ Ψ, ⸨ ∀ x, ↑ˡ Ψ x ==∗ ↑ˡ Φ x ⸩(δ) ∗ plend_tok α xπ Ψ.
