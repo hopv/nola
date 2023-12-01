@@ -62,8 +62,7 @@ Section lemmas.
     iSplit; iApply ninv_alter; iModIntro; iApply (Deriv_intro (δ:=δ))=>/=;
       iIntros (???); by [iIntros ">$!>$"|iIntros "$!>"; iSplitR; iIntros].
   Qed.
-  Lemma ninv_add {N P Q} :
-    □ ⸨ P ⸩(δ) -∗ ninv δ N Q -∗ ninv δ N (P ∗ Q).
+  Lemma ninv_add {N P Q} : □ ⸨ P ⸩(δ) -∗ ninv δ N Q -∗ ninv δ N (P ∗ Q).
   Proof.
     iIntros "#P". iApply ninv_alter. iModIntro. iApply (Deriv_map with "[] P").
     by iIntros (???) "/=$$!>[_$]".
