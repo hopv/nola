@@ -48,8 +48,8 @@ Section lemmas.
     iIntros "P". iApply (na_ninv_alloc_rec with "[P]"). by iIntros.
   Qed.
 
-  (** Convert [na_ninv] *)
-  Lemma na_ninv_convert {p N P Q} :
+  (** Alter the content of [na_ninv] *)
+  Lemma na_ninv_alter {p N P Q} :
     □ ⸨ P ={∅}=∗ Q ∗ (Q ={∅}=∗ P) ⸩(δ) -∗ na_ninv δ p N P -∗ na_ninv δ p N Q.
   Proof.
     rewrite na_ninv_unseal. iIntros "#PQP #∝P !>".
@@ -65,19 +65,19 @@ Section lemmas.
     na_ninv δ p N (P ∗ Q) ⊢ na_ninv δ p N P ∗ na_ninv δ p N Q.
   Proof.
     iIntros "#NPQ".
-    iSplit; iApply (na_ninv_convert with "[] NPQ"); iModIntro;
+    iSplit; iApply (na_ninv_alter with "[] NPQ"); iModIntro;
       iApply (Deriv_intro (δ:=δ)); by iIntros (???) "/=[$$]!>$".
   Qed.
   Lemma na_ninv_fupd {p N P} : na_ninv δ p N (|={∅}=> P) ⊣⊢ na_ninv δ p N P.
   Proof.
-    iSplit; iApply na_ninv_convert; iModIntro;
+    iSplit; iApply na_ninv_alter; iModIntro;
       iApply (Deriv_intro (δ:=δ))=>/=; iIntros (???);
       by [iIntros ">$!>$"|iIntros "$!>"; iSplitR; iIntros].
   Qed.
   Lemma na_ninv_add {p N P Q} :
     □ ⸨ P ⸩(δ) -∗ na_ninv δ p N Q -∗ na_ninv δ p N (P ∗ Q).
   Proof.
-    iIntros "#P". iApply na_ninv_convert. iModIntro.
+    iIntros "#P". iApply na_ninv_alter. iModIntro.
     iApply (Deriv_map with "[] P"). by iIntros (???) "/=$$!>[_$]".
   Qed.
 

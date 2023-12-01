@@ -35,7 +35,7 @@ Section lemmas.
   Proof. rewrite -sinv_tok_sinv -nintpS_nintp. exact: sinv_tok_alloc. Qed.
 
   (** Transform [sinv] *)
-  Lemma sinv_convert {P Q} : □ ⸨ P -∗ Q ∗ (Q -∗ P) ⸩(δ) -∗ sinv δ P -∗ sinv δ Q.
+  Lemma sinv_alter {P Q} : □ ⸨ P -∗ Q ∗ (Q -∗ P) ⸩(δ) -∗ sinv δ P -∗ sinv δ Q.
   Proof.
     rewrite sinv_unseal. iIntros "#PQP #∝P !>".
     iApply (Deriv_map2 with "[] PQP ∝P")=>/=.
@@ -47,12 +47,12 @@ Section lemmas.
     sinv δ (P ∗ Q) ⊢ sinv δ P ∗ sinv δ Q.
   Proof.
     iIntros "#∝PQ".
-    iSplit; iApply (sinv_convert with "[] ∝PQ"); iModIntro;
+    iSplit; iApply (sinv_alter with "[] ∝PQ"); iModIntro;
       iApply (Deriv_intro (δ:=δ)); iIntros (???) "/=[$$]$".
   Qed.
   Lemma sinv_add {P Q} : □ ⸨ P ⸩(δ) -∗ sinv δ Q -∗ sinv δ (P ∗ Q).
   Proof.
-    iIntros "#P". iApply sinv_convert. iModIntro.
+    iIntros "#P". iApply sinv_alter. iModIntro.
     iApply (Deriv_map with "[] P"). iIntros (???) "/=$$[_$]".
   Qed.
 End lemmas.

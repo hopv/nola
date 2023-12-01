@@ -31,14 +31,14 @@ Section verify.
     ⟦ na_ilist p N Φ l ⟧{κ}(δ) ⊣⊢ na_ilisti δ p N Φ l.
   Proof. by rewrite/= rew_eq_hwf /=. Qed.
 
-  (** Convert the predicate of [na_ilisti] *)
-  Lemma na_ilisti_convert `{!nDeriv ih δ} {p N Φ Ψ l} :
+  (** Alter the content of the predicate of [na_ilisti] *)
+  Lemma na_ilisti_alter `{!nDeriv ih δ} {p N Φ Ψ l} :
     □ ⸨ ∀ l, (Φ l ={∅}=∗ Ψ l) ∗ (Ψ l ={∅}=∗ Φ l) ⸩(δ) -∗
     na_ilisti δ p N Φ l -∗ na_ilisti δ p N Ψ l.
   Proof.
     move: δ nDeriv0 Φ Ψ l. apply (Deriv_acc (λ _, ∀ Φ Ψ l, _ -∗ _)).
     move=> δ ? Φ Ψ l. iIntros "#sΦ↔Ψ #[ihd itl]".
-    iSplit; iApply na_ninv_convert; [|iApply "ihd"| |iApply "itl"]; iModIntro.
+    iSplit; iApply na_ninv_alter; [|iApply "ihd"| |iApply "itl"]; iModIntro.
     { iApply Deriv_map; [|done]=>/=. iIntros (δ' sys' _) "Φ↔Ψ Φ".
       iDestruct ("Φ↔Ψ" $! _) as "[ΦΨ ΨΦ]". iMod ("ΦΨ" with "Φ") as "$".
       iIntros "!> Ψ". by iApply "ΨΦ". }

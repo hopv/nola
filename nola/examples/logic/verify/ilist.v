@@ -44,14 +44,14 @@ Section verify.
   Fact ilist_ilisti {κ N Φ l δ} : ⟦ ilist N Φ l ⟧{κ}(δ) ⊣⊢ ilisti δ N Φ l.
   Proof. by rewrite/= rew_eq_hwf /=. Qed.
 
-  (** Convert the predicate of [ilisti] *)
-  Lemma ilisti_convert `{!nDeriv ih δ} {N Φ Ψ l} :
+  (** Alter the content of the predicate of [ilisti] *)
+  Lemma ilisti_alter `{!nDeriv ih δ} {N Φ Ψ l} :
     □ ⸨ ∀ l, (Φ l ={∅}=∗ Ψ l) ∗ (Ψ l ={∅}=∗ Φ l) ⸩(δ) -∗
     ilisti δ N Φ l -∗ ilisti δ N Ψ l.
   Proof.
     move: δ nDeriv0 Φ Ψ l. apply (Deriv_acc (λ _, ∀ Φ Ψ l, _ -∗ _)).
     move=> δ ? Φ Ψ l. iIntros "#? #[ihd itl]".
-    iSplit; iApply ninv_convert; [|iApply "ihd"| |iApply "itl"]; iModIntro.
+    iSplit; iApply ninv_alter; [|iApply "ihd"| |iApply "itl"]; iModIntro.
     { iApply Deriv_map; [|done]=>/=. iIntros (δ' dyd' _) "Φ↔Ψ Φ".
       iDestruct ("Φ↔Ψ" $! _) as "[ΦΨ ΨΦ]". iMod ("ΦΨ" with "Φ") as "$".
       iIntros "!> Ψ". by iApply "ΨΦ". }

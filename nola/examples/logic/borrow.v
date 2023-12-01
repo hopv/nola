@@ -61,41 +61,41 @@ Section borrow.
   Local Lemma plend_intro {X α xπ Φ} : plend_tok (X:=X) α xπ Φ ⊢ plend δ α xπ Φ.
   Proof. iIntros "l". iExists _. iFrame "l". iApply aconvert_refl. Qed.
 
-  (** Convert borrower and lender tokens *)
-  Lemma borc_convert {α P Q} :
+  (** Alter the content of borrower and lender tokens *)
+  Lemma borc_alter {α P Q} :
     ⸨ ↑ˡ P ==∗ ↑ˡ Q ⸩(δ) -∗ ⸨ ↑ˡ Q ==∗ ↑ˡ P ⸩(δ) -∗ borc δ α P -∗ borc δ α Q.
   Proof.
     iIntros "PQ QP [%R[PR[RP c]]]". iExists _. iFrame "c".
     iSplitL "QP PR";
       [iApply (convert_trans with "QP PR")|iApply (convert_trans with "RP PQ")].
   Qed.
-  Lemma bor_convert {α P Q} :
+  Lemma bor_alter {α P Q} :
     ⸨ ↑ˡ P ==∗ ↑ˡ Q ⸩(δ) -∗ ⸨ ↑ˡ Q ==∗ ↑ˡ P ⸩(δ) -∗ bor δ α P -∗ bor δ α Q.
   Proof.
     iIntros "PQ QP [%R[PR[RP b]]]". iExists _. iFrame "b".
     iSplitL "QP PR";
       [iApply (convert_trans with "QP PR")|iApply (convert_trans with "RP PQ")].
   Qed.
-  Lemma obor_convert {α q P Q} :
+  Lemma obor_alter {α q P Q} :
     ⸨ ↑ˡ Q ==∗ ↑ˡ P ⸩(δ) -∗ obor δ α q P -∗ obor δ α q Q.
   Proof.
     iIntros "QP [%R[PR o]]". iExists _. iFrame "o".
     iApply (convert_trans with "QP PR").
   Qed.
-  Lemma lend_convert {α P Q} :
+  Lemma lend_alter {α P Q} :
     ⸨ ↑ˡ P ==∗ ↑ˡ Q ⸩(δ) -∗ lend δ α P -∗ lend δ α Q.
   Proof.
     iIntros "PQ [%R[RP l]]". iExists _. iFrame "l".
     iApply (convert_trans with "RP PQ").
   Qed.
-  Lemma fbor_convert {α Φ Ψ} :
+  Lemma fbor_alter {α Φ Ψ} :
     □ ⸨ ∀ q, ↑ˡ Φ q ==∗ ↑ˡ Ψ q ⸩(δ) ∗ □ ⸨ ∀ q, ↑ˡ Ψ q ==∗ ↑ˡ Φ q ⸩(δ) ∗
     fbor δ α Φ -∗ fbor δ α Ψ.
   Proof.
     iIntros "[#ΦΨ[#ΨΦ[%[%Ω[⊑[#ΦΩ[#ΩΦ s]]]]]]]". iExists _, _. iFrame "⊑ s".
     iSplit; iModIntro; by iApply aconvert_trans.
   Qed.
-  Lemma pborc_convert {X α x ξ Φ Ψ} :
+  Lemma pborc_alter {X α x ξ Φ Ψ} :
     ⸨ ∀ x, ↑ˡ Φ x ==∗ ↑ˡ Ψ x ⸩(δ) -∗ ⸨ ∀ x, ↑ˡ Ψ x ==∗ ↑ˡ Φ x ⸩(δ) -∗
     pborc (X:=X) δ α x ξ Φ -∗ pborc δ α x ξ Ψ.
   Proof.
@@ -103,7 +103,7 @@ Section borrow.
     iSplitL "ΨΦ ΦΩ". { iApply (aconvert_trans with "ΨΦ ΦΩ"). }
     { iApply (aconvert_trans with "ΩΦ ΦΨ"). }
   Qed.
-  Lemma pbor_convert {X α x ξ Φ Ψ} :
+  Lemma pbor_alter {X α x ξ Φ Ψ} :
     ⸨ ∀ x, ↑ˡ Φ x ==∗ ↑ˡ Ψ x ⸩(δ) -∗ ⸨ ∀ x, ↑ˡ Ψ x ==∗ ↑ˡ Φ x ⸩(δ) -∗
     pbor (X:=X) δ α x ξ Φ -∗ pbor δ α x ξ Ψ.
   Proof.
@@ -111,13 +111,13 @@ Section borrow.
     iSplitL "ΨΦ ΦΩ". { iApply (aconvert_trans with "ΨΦ ΦΩ"). }
     { iApply (aconvert_trans with "ΩΦ ΦΨ"). }
   Qed.
-  Lemma opbor_convert {X α q ξ Φ Ψ} :
+  Lemma opbor_alter {X α q ξ Φ Ψ} :
     ⸨ ∀ x, ↑ˡ Ψ x ==∗ ↑ˡ Φ x ⸩(δ) -∗ opbor (X:=X) δ α q ξ Φ -∗ opbor δ α q ξ Ψ.
   Proof.
     iIntros "ΨΦ [%Ω[ΦΩ o]]". iExists _. iFrame "o".
     iApply (aconvert_trans with "ΨΦ ΦΩ").
   Qed.
-  Lemma plend_convert {X α xπ Φ Ψ} :
+  Lemma plend_alter {X α xπ Φ Ψ} :
     ⸨ ∀ x, ↑ˡ Φ x ==∗ ↑ˡ Ψ x ⸩(δ) -∗ plend (X:=X) δ α xπ Φ -∗ plend δ α xπ Ψ.
   Proof.
     iIntros "ΦΨ [%Ω[ΩΦ l]]". iExists _. iFrame "l".

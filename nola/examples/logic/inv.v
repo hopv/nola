@@ -38,8 +38,8 @@ Section lemmas.
     ⟦ P ⟧(δ) =[inv_wsat' δ]=∗ ninv δ N (↑ˡ P).
   Proof. iIntros "P". iApply (ninv_alloc_rec with "[P]"). by iIntros. Qed.
 
-  (** Convert [ninv] *)
-  Lemma ninv_convert {N P Q} :
+  (** Alter the content of [ninv] *)
+  Lemma ninv_alter {N P Q} :
     □ ⸨ P ={∅}=∗ Q ∗ (Q ={∅}=∗ P) ⸩(δ) -∗ ninv δ N P -∗ ninv δ N Q.
   Proof.
     rewrite ninv_unseal. iIntros "#PQP #∝P !>".
@@ -54,19 +54,19 @@ Section lemmas.
   Lemma ninv_split {N P Q} : ninv δ N (P ∗ Q) ⊢ ninv δ N P ∗ ninv δ N Q.
   Proof.
     iIntros "#NPQ".
-    iSplit; iApply (ninv_convert with "[] NPQ"); iModIntro;
+    iSplit; iApply (ninv_alter with "[] NPQ"); iModIntro;
       iApply (Deriv_intro (δ:=δ)); by iIntros (???) "/=[$$]!>$".
   Qed.
   Lemma ninv_fupd {N P} : ninv δ N (|={∅}=> P) ⊣⊢ ninv δ N P.
   Proof.
-    iSplit; iApply ninv_convert; iModIntro; iApply (Deriv_intro (δ:=δ))=>/=;
+    iSplit; iApply ninv_alter; iModIntro; iApply (Deriv_intro (δ:=δ))=>/=;
       iIntros (???); by [iIntros ">$!>$"|iIntros "$!>"; iSplitR; iIntros].
   Qed.
   Lemma ninv_add {N P Q} :
     □ ⸨ P ⸩(δ) -∗ ninv δ N Q -∗ ninv δ N (P ∗ Q).
   Proof.
-    iIntros "#P". iApply ninv_convert. iModIntro.
-    iApply (Deriv_map with "[] P"). by iIntros (???) "/=$$!>[_$]".
+    iIntros "#P". iApply ninv_alter. iModIntro. iApply (Deriv_map with "[] P").
+    by iIntros (???) "/=$$!>[_$]".
   Qed.
 
   (** Combine [ninv]s *)
