@@ -511,7 +511,7 @@ Section pborrow.
   (** Subdivide a prophetic borrower without changing the prophecy *)
   Lemma pobor_tok_nsubdiv `{!GenUpd M} {intp X α q ξ Φ} Ψ x β :
     β ⊑□ α -∗ pobor_tok (X:=X) α q ξ Φ -∗ intp (Ψ x) -∗
-    (∀ y, [†β] -∗ intp (Ψ y) -∗ M (intp (Φ y))) =[pborrow_wsat M intp]=∗
+    (∀ x', [†β] -∗ intp (Ψ x') -∗ M (intp (Φ x'))) =[pborrow_wsat M intp]=∗
       q.[α] ∗ pbor_ctok β x ξ Ψ.
   Proof.
     rewrite pobor_tok_unseal pbor_ctok_unseal.

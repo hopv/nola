@@ -554,7 +554,7 @@ Section borrow.
   (** Subdivide a prophetic borrower without changing the prophecy *)
   Lemma pobor_nsubdiv `{!GenUpd M} {X α q ξ Φ} Ψ (x : X) β :
     β ⊑□ α -∗ pobord α q ξ Φ -∗ ⟦ Ψ x ⟧ -∗
-    (∀ y, [†β] -∗ ⟦ Ψ y ⟧ -∗ M ⟦ Φ y ⟧) =[pborrow_wsatd M]=∗
+    (∀ x', [†β] -∗ ⟦ Ψ x' ⟧ -∗ M ⟦ Φ x' ⟧) =[pborrow_wsatd M]=∗
       q.[α] ∗ pborcd β x ξ Ψ.
   Proof.
     iIntros "⊑ [%Ω[ΦΩ o]] Ψ →Φ". rewrite aconvert_use -pborc_intro.
