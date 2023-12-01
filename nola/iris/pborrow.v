@@ -11,7 +11,7 @@ Variant pbprop (TY : synty) (PROP : Type) : Type :=
 | (* For prophetic borrower *) #[local] pbprop_pbor
     {X : TY} (γ : gname) (ξ : prvar X) (Φ : X → PROP)
 | (* For prophetic lender *) pbprop_plend
-    {X : TY} (xπ : proph_asn TY → X) (Φ : X → PROP)
+    {X : TY} (xπ : clair TY X) (Φ : X → PROP)
 | (* For prophetic reborrowing *) #[local] pbprop_preborrow
     {X Y : TY} (γ γ' γx : gname) (ξ : prvar X) (f : Y → X).
 Arguments pbprop_just {_ _} _.
@@ -72,7 +72,7 @@ Section pborrow.
   Proof. exact: seal_eq. Qed.
 
   (** Prophetic lender token *)
-  Definition plend_tok {X} α (xπ : proph_asn TY → X) (Φ : X → PROP) : iProp Σ :=
+  Definition plend_tok {X} α (xπ : clair TY X) (Φ : X → PROP) : iProp Σ :=
     lend_tok α (pbprop_plend xπ Φ).
 
   (** Non-prophetic token *)
@@ -146,7 +146,7 @@ Section pborrow.
 
   (** Body of a prophetic lender *)
   Definition plend_body intp {X}
-    (xπ : proph_asn TY → X) (Φ : X → PROP) : iProp Σ :=
+    (xπ : clair TY X) (Φ : X → PROP) : iProp Σ :=
     ∃ x', ⟨π, xπ π = x'⟩ ∗ intp (Φ x').
   Definition plend_body_var intp {X} (ξ : prvar X) (Φ : X → PROP) : iProp Σ :=
     plend_body intp (λ π, π ξ) Φ.

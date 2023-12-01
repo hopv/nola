@@ -17,7 +17,7 @@ Implicit Type (TY : synty) (q : Qp).
 #[projections(primitive)]
 Record proph_log_item TY := ProphLogItem {
   (* Prophecy variable *) pli_var : aprvar TY;
-  (* Prophetic value *) pli_val : proph_asn TY → pli_var.(aprvar_ty);
+  (* Clairvoyant value *) pli_val : clair TY pli_var.(aprvar_ty);
 }.
 Arguments pli_var {_}. Arguments pli_val {_}.
 Arguments ProphLogItem {_} _ _.
@@ -38,7 +38,7 @@ Local Definition pl_ids {TY} (L : proph_log TY) : gset positive :=
 
 (** Prophecy dependency over the complement of a list set *)
 Local Definition proph_dep_out {TY A}
-  (aπ : proph_asn TY → A) (ξl : list (aprvar TY)) :=
+  (aπ : clair TY A) (ξl : list (aprvar TY)) :=
   ∀ π π', π .≡{ (.∉ ξl) }≡ π' → aπ π = aπ π'.
 Local Notation "aπ ./~ ξl" := (proph_dep_out aπ ξl)
   (at level 70, format "aπ  ./~  ξl").
@@ -58,7 +58,7 @@ Local Notation "π ◁ L" := (proph_sat π L) (at level 70, format "π  ◁  L")
 
 (** A prophecy assignment updated at a prophecy variable *)
 Local Definition proph_upd {TY}
-  (ξ : aprvar TY) (xπ : proph_asn TY → ξ.(aprvar_ty)) π : proph_asn TY := λ η,
+  (ξ : aprvar TY) (xπ : clair TY ξ.(aprvar_ty)) π : proph_asn TY := λ η,
   match decide (ξ = η) with
   | left eq => rew[aprvar_ty] eq in xπ π
   | right _ => π η
@@ -111,7 +111,7 @@ Proof. exists (:<[L]> inhabitant). by apply proph_valid_upds_sat. Qed.
 
 (** Algebra for a prophecy variable *)
 Local Definition proph_aitemR TY :=
-  agreeR (leibnizO (anyty TY (λ A, proph_asn TY → A))).
+  agreeR (leibnizO (anyty TY (λ A, clair TY A))).
 Local Definition proph_itemR TY := csumR fracR (proph_aitemR TY).
 (** Base algebra for the prophecy machinery *)
 Local Definition proph_mapR TY := gmapR positive (proph_itemR TY).
@@ -298,7 +298,7 @@ Section defs.
   Local Definition proph_aobs pli : iProp Σ := own proph_name
     (ProphCar {[pli.(pli_var).(prvar_id) := aitem pli.(pli_val)]}).
   (** Prophecy observation *)
-  Local Definition proph_obs_def (φπ : proph_asn TY → Prop) : iProp Σ :=
+  Local Definition proph_obs_def (φπ : clair TY Prop) : iProp Σ :=
     ∃ L, ⌜∀ π, π ◁ L → φπ π⌝ ∗ [∗ list] pli ∈ L, proph_aobs pli.
   Lemma proph_obs_aux : seal proph_obs_def. Proof. by eexists. Qed.
   Definition proph_obs := proph_obs_aux.(unseal).
@@ -328,7 +328,7 @@ Qed.
 
 Section lemmas.
   Context `{!prophGS TY Σ}.
-  Implicit Type (X : TY) (φπ ψπ : proph_asn TY → Prop) (ψ : Prop).
+  Implicit Type (X : TY) (φπ ψπ : clair TY Prop) (ψ : Prop).
 
   (** [proph_tok] is timelesss and fractional *)
   #[export] Instance proph_tok_timeless {q ξ} : Timeless q:[ξ].

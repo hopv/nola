@@ -380,10 +380,10 @@ Section borrow.
   (** On prophetic borrowing *)
 
   (** Body of a prophetic lender *)
-  Definition plend_bodyd {X} (xπ : proph_asnn → X) (Φ : X → nPropS (;ᵞ))
-    : iProp Σ := ∃ y, ⟨π, xπ π = y⟩ ∗ ⟦ Φ y ⟧.
-  Definition plend_body_vard {X} (ξ : prvar X) (Φ : X → nPropS (;ᵞ))
-    : iProp Σ := plend_bodyd (λ π, π ξ) Φ.
+  Definition plend_bodyd {X} (xπ : clairn X) (Φ : X → nPropS (;ᵞ)) : iProp Σ :=
+    ∃ y, ⟨π, xπ π = y⟩ ∗ ⟦ Φ y ⟧.
+  Definition plend_body_vard {X} (ξ : prvar X) (Φ : X → nPropS (;ᵞ)) : iProp Σ
+    := plend_bodyd (λ π, π ξ) Φ.
   Local Lemma plend_bodyd_as {X xπ Φ} :
     plend_bodyd (X:=X) xπ Φ ⊣⊢ plend_body (λ P, ⟦ P ⟧ˢ) xπ Φ.
   Proof. unfold plend_body. by setoid_rewrite nintpS_nintp. Qed.

@@ -77,7 +77,7 @@ Variant ncon0 : Type :=
 | (** Persistent lifetime inclusion *) nc_lft_sincl (α β : lft)
 | (** Prophecy token *) nc_proph_tok (ξ : aprvarn) (q : Qp)
 | (** Prophecy tokens *) nc_proph_toks (ξl : list aprvarn) (q : Qp)
-| (** Prophecy observation *) nc_proph_obs (φπ : proph_asnn → Prop).
+| (** Prophecy observation *) nc_proph_obs (φπ : clairn Prop).
 (** Nullary, large *)
 Variant nconl0 : Type :=
 | (** Simple invariant world satisfaction *) nc_sinv_wsat
@@ -134,7 +134,7 @@ Variant ncongs : Type :=
 | (** Prophetic open borrower *) nc_opbor
     (X : nsynty) (α : lft) (q : Qp) (ξ : prvar X)
 | (** Prophetic lender *) nc_plend
-    (X : nsynty) (α : lft) (xπ : proph_asnn → X).
+    (X : nsynty) (α : lft) (xπ : clairn X).
 (** Domain of [ncongs] *)
 Definition ncongs_dom (c : ncongs) : Type := match c with
   | nc_fbor _ => Qp
