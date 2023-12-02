@@ -364,7 +364,7 @@ Section borrow.
     rewrite [(sinv_wsatd ∗ _)%I]comm -modw_modw_sep.
     iIntros "α [%β[%Ψ[#⊑[#ΦΨ[#ΨΦ s]]]]] Φ↓ Φ↑ W". rewrite !aconvert_use.
     iDestruct (sinv_tok_acc with "s W") as "/=[[%q b] →W]".
-    iMod (lft_sincl_tok_acc with "⊑ α") as (s) "[β →α]".
+    iMod (lft_sincl_alive_acc with "⊑ α") as (s) "[β →α]".
     iMod (bor_open with "β b") as "[o Ψ]". iMod ("ΨΦ" with "Ψ") as "Φ".
     iMod ("Φ↓" with "Φ") as "[Φ Φ']". iMod ("ΦΨ" with "Φ'") as "Ψ".
     iMod (obor_subdiv [_;_] with "[] o [$Φ $Ψ//] [Φ↑]") as "[β[c[c' _]]]"=>/=.

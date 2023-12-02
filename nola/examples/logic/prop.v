@@ -71,9 +71,9 @@ Variant ncon0 : Type :=
 | (** Meta token *) nc_meta_token (l : loc) (E : coPset)
 | (** Step number token *) nc_steps_lb (n : nat)
 | (** Prophecy token *) nc_proph (p : proph_id) (pvs : list (val * val))
-| (** Lifetime token *) nc_lft_tok (α : lft) (q : Qp)
+| (** Alive lifetime token *) nc_lft_alive (α : lft) (q : Qp)
 | (** Dead lifetime token *) nc_lft_dead (α : lft)
-| (** Eternal lifetime token *) nc_lft_eter (α : lft)
+| (** Eternal lifetime token *) nc_lft_etern (α : lft)
 | (** Persistent lifetime inclusion *) nc_lft_sincl (α β : lft)
 | (** Prophecy token *) nc_proph_tok (ξ : aprvarn) (q : Qp)
 | (** Prophecy tokens *) nc_proph_toks (ξl : list aprvarn) (q : Qp)
@@ -206,9 +206,9 @@ Notation "l ↦_ I □" := (n_0 (nc_inv_pointsto l I)): nProp_scope.
 Notation n_meta_token l E := (n_0 (nc_meta_token l E)).
 Notation n_steps_lb n := (n_0 (nc_steps_lb n)).
 Notation n_proph p pvs := (n_0 (nc_proph p pvs)).
-Notation "q .[ α ]" := (n_0 (nc_lft_tok α q)) : nProp_scope.
+Notation "q .[ α ]" := (n_0 (nc_lft_alive α q)) : nProp_scope.
 Notation "[† α ]" := (n_0 (nc_lft_dead α)) : nProp_scope.
-Notation "[∞ α ]" := (n_0 (nc_lft_eter α)) : nProp_scope.
+Notation "[∞ α ]" := (n_0 (nc_lft_etern α)) : nProp_scope.
 Notation "α ⊑□ β" := (n_0 (nc_lft_sincl α β)) : nProp_scope.
 Notation "q :[ ξ ]" := (n_0 (nc_proph_tok ξ q)) : nProp_scope.
 Notation "q :∗[ ξ ]" := (n_0 (nc_proph_toks ξ q)) : nProp_scope.

@@ -114,7 +114,7 @@ Section borrow.
 
   (** Open borrower token
 
-    It keeps a lifetime token [(r/2).[α']] at hand *)
+    It keeps an alive lifetime token [(r/2).[α']] at hand *)
   Local Definition obor_tok_def α q P : iProp Σ :=
     ∃ α' r i j d, α ⊑□ α' ∗ (r.[α'] -∗ q.[α]) ∗
       (r/2).[α'] ∗ bor_itok i j d α' (P, Open (r/2))'.
@@ -516,7 +516,7 @@ Section borrow.
       modw M (borrow_wsat_ret M intp Dm (S d) α) (intp P).
   Proof.
     move=> ?. iIntros "† B". case b=> [|q|?]/=; [done|..].
-    { iDestruct (lft_tok_dead with "B †") as "[]". }
+    { iDestruct (lft_alive_dead with "B †") as "[]". }
     iDestruct "B" as (??) "l". iApply (lend_dtok_ret_retrieve with "l"); [lia|].
     etrans; [|done]. apply lft_incl_meet_l.
   Qed.
@@ -636,12 +636,12 @@ Section borrow.
     by iApply (lend_dtok_retrieve with "† l").
   Qed.
 
-  (** [depo_wsat] with a lifetime token *)
+  (** [depo_wsat] with an alive lifetime token *)
   Local Lemma depo_wsat_tok {M intp d α Bm Pm q} :
     q.[α] -∗ depo_wsat M intp d α Bm Pm -∗
       q.[α] ∗ depo_wsat_in M intp d α Bm Pm.
   Proof.
-    iIntros "α [$|[† _]]"; [done|]. iDestruct (lft_tok_dead with "α †") as "[]".
+    iIntros "α [$|[† _]]"; [done|]. iDestruct (lft_alive_dead with "α †") as "[]".
   Qed.
 
   (** Update the borrower state to [Open q] *)
@@ -667,9 +667,9 @@ Section borrow.
     q.[α] -∗ bor_ctok α P =[borrow_wsat M intp]=∗ obor_tok α q P ∗ intp P.
   Proof.
     rewrite bor_ctok_unseal. iIntros "α [†|c]".
-    { by iDestruct (lft_tok_dead with "α †") as "[]". }
+    { by iDestruct (lft_alive_dead with "α †") as "[]". }
     iDestruct "c" as (????) "[#⊑ c]".
-    iMod (lft_sincl_tok_acc with "⊑ α") as (r) "[α' →α]".
+    iMod (lft_sincl_alive_acc with "⊑ α") as (r) "[α' →α]".
     iMod (bor_open_core with "α' c") as "[o $]". iModIntro.
     iApply (obor_tok_lft with "⊑ →α o").
   Qed.
@@ -681,7 +681,7 @@ Section borrow.
     rewrite bor_tok_unseal. iIntros "α [c|r]".
     { by iMod (bor_ctok_open with "α c"). }
     iDestruct "r" as (?????) "[#⊑ [#† r]]".
-    iMod (lft_sincl_tok_acc with "⊑ α") as (r) "[α' →α]".
+    iMod (lft_sincl_alive_acc with "⊑ α") as (r) "[α' →α]".
     iMod (bor_open_core with "α' r") as "[o [%[_ l]]]".
     iDestruct (obor_tok_lft with "⊑ →α o") as "$". iApply modw_fold.
     iApply (lend_dtok_retrieve with "[] l").

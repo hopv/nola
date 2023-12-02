@@ -369,7 +369,7 @@ Section pborrow.
       pobor_tok α q ξ Φ ∗ intp (Φ x).
   Proof.
     rewrite pbor_ctok_unseal pobor_tok_unseal. iIntros "α [†|[%[vo c]]]".
-    { iDestruct (lft_tok_dead with "α †") as "[]". }
+    { iDestruct (lft_alive_dead with "α †") as "[]". }
     iMod (bor_ctok_open with "α c") as "[o[%[pc Φ]]]". iModIntro.
     iDestruct (vo_pc_agree with "vo pc") as %<-. iFrame "Φ". iExists _.
     iFrame "o". iExists _. iFrame.
@@ -379,7 +379,7 @@ Section pborrow.
       (pobor_tok α q ξ Φ ∗ intp (Φ x)).
   Proof.
     rewrite pbor_tok_unseal pobor_tok_unseal. iIntros "α [†|[%[vo b]]]".
-    { iDestruct (lft_tok_dead with "α †") as "[]". }
+    { iDestruct (lft_alive_dead with "α †") as "[]". }
     iMod (bor_tok_open with "α b") as "[o[%[pc Φ]]]". iModIntro.
     iDestruct (vo_pc_agree with "vo pc") as %<-. iFrame "Φ". iExists _.
     iFrame "o". iExists _. iFrame.
@@ -553,7 +553,7 @@ Section pborrow.
     { iIntros "#† [[%y'[pc[vo' _]]]_]". iExists (f y'). iFrame "pc".
       iApply ("→Φ" with "†"). rewrite pbor_tok_unseal. iRight. iExists _.
       iFrame "vo'". by iApply "→b'". }
-    iDestruct (lft_tok_combine with "α' β") as (?) "[αβ →α'β]".
+    iDestruct (lft_alive_combine with "α' β") as (?) "[αβ →α'β]".
     iMod (bor_ctok_open with "αβ c") as "[o[%[pc' Ψ]]]".
     iMod (bor_ctok_open with "α c'") as "[o'[%[pc[vo' vox']]]]".
     iDestruct (vo_vo_agree with "vox vox'") as %<-.
