@@ -18,19 +18,12 @@ Section big_cmra_opL.
   Qed.
 
   (** [own] on [[^op list]] *)
-  Lemma own_big_cmra_opL_as `{!inG Σ C} {A} {γ al} (f : A → C) :
-    own γ ([^op list] a ∈ al, f a) ⊣⊢
-      own γ ε ∗ [∗ list] a ∈ al, own γ (f a).
+  Lemma big_opL_own_2 `{!inG Σ C} {A} {γ al} (f : nat → A → C) :
+    ([∗ list] k ↦ a ∈ al, own γ (f k a)) ⊢
+      |==> own γ ([^op list] k ↦ a ∈ al, f k a).
   Proof.
-    elim: al=>/=; [by rewrite right_id|]=> ?? IH. rewrite own_op IH !assoc.
-    f_equiv. by rewrite comm.
+    case al; [by apply own_unit|]=> ??. rewrite big_opL_own; by [iIntros|].
   Qed.
-  Lemma of_own_big_cmra_opL `{!inG Σ C} {A} {γ al} (f : A → C) :
-    own γ ([^op list] a ∈ al, f a) ⊢ [∗ list] a ∈ al, own γ (f a).
-  Proof. rewrite own_big_cmra_opL_as. by iIntros "[_$]". Qed.
-  Lemma to_own_big_cmra_opL `{!inG Σ C} {A} {γ al} (f : A → C) :
-    ([∗ list] a ∈ al, own γ (f a)) ⊢ |==> own γ ([^op list] a ∈ al, f a).
-  Proof. rewrite own_big_cmra_opL_as. iMod own_unit as "$". by iIntros. Qed.
 End big_cmra_opL.
 
 (** ** On [[∗ list]] *)

@@ -530,9 +530,9 @@ Section lemmas.
     1:[ξ] -∗ q:∗[ηl] ==∗ q:∗[ηl] ∗ ⟨π, π ξ = xπ π⟩.
   Proof.
     iIntros (dep) "ξ ηl". rewrite proph_tok_unseal.
-    iMod (to_own_big_cmra_opL with "ηl") as "ηl". iCombine "ξ ηl" as "ξηl".
+    iMod (big_opL_own_2 with "ηl") as "ηl". iCombine "ξ ηl" as "ξηl".
     iMod (own_update with "ξηl") as "big"; [apply (proph_resolve_dep_upd dep)|].
-    iModIntro. iDestruct "big" as "[aobs ηl]". rewrite of_own_big_cmra_opL.
+    iModIntro. iDestruct "big" as "[aobs ηl]". rewrite big_opL_own_1.
     iFrame "ηl". rewrite proph_obs_unseal. iExists [.{ξ := xπ}]. iFrame "aobs".
     iSplit; [|done]. by iPureIntro=> ? /Forall_singleton.
   Qed.
@@ -563,7 +563,7 @@ Section lemmas.
   Lemma proph_obs_sat {φπ} : .⟨φπ⟩ ⊢ ⌜∃ π, φπ π⌝.
   Proof.
     rewrite proph_obs_unseal. iDestruct 1 as (L to) "aobss".
-    iMod (to_own_big_cmra_opL with "aobss") as "aitems".
+    iMod (big_opL_own_2 with "aobss") as "aitems".
     iDestruct (own_valid with "aitems") as %val. iPureIntro.
     move: val=> /aitems_sat[π sat]. exists π. by apply to.
   Qed.
