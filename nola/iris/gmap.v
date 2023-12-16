@@ -56,13 +56,13 @@ Section gmapR.
   Context `{!EqDecision K, !Countable K} {C : cmra}.
 
   (** [lookup] is proper *)
-  #[export] Instance lookup_proper i :
-    Proper ((≡@{gmapR K C}) ==> (≡@{optionR C})) (lookup i).
+  #[export] Instance lookup_proper {i} :
+    Proper ((≡@{gmapR K C}) ==> (≡)) (lookup i).
   Proof. apply ne_proper, _. Qed.
 
   (** [singletonM] is proper *)
-  #[export] Instance singleton_proper {i : K} :
-    Proper ((≡@{C}) ==> (≡@{gmapR K C})) (singletonM i).
+  #[export] Instance singleton_proper {i} :
+    Proper ((≡) ==> (≡@{gmapR K C})) (singletonM i).
   Proof. apply ne_proper, _. Qed.
 
   (** [f <$> m] is valid if [✓ f x] is always valid *)
