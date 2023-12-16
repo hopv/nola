@@ -66,7 +66,6 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     [`ctx`](nola/util/ctx.v) (Context with unguarded/guarded variables)
   + [`proph`](nola/util/proph.v) (Prophecy)
 - [`iris/`](nola/iris) : Iris libraries
-  + [`dfrac`](nola/iris/dfrac.v) (For discardable fractions)
   + [`list`](nola/iris/list.v) (On `list`),
     [`gmap`](nola/iris/gmap.v) (On `gmap`),
     [`plist`](nola/iris/plist.v) (On `plist`)

@@ -1,8 +1,7 @@
 (** * Lifetime machinery *)
 
 From nola Require Export prelude.
-From nola.iris Require Import dfrac.
-From iris.algebra Require Import csum.
+From iris.algebra Require Import csum dfrac.
 From iris.bi Require Import fractional.
 From iris.base_logic Require Import own.
 From iris.proofmode Require Import proofmode.
@@ -203,7 +202,7 @@ Section lft.
     iIntros "∞".
     iMod (own_updateP (λ a, ∃ q, a = Cinl (DfracOwn q)) with "∞") as
       (q[?->]) "?"; [|by iExists _].
-    eapply csum_updateP_l; [exact dfrac_restore_update|]=>/= ?[?->].
+    eapply csum_updateP_l; [exact dfrac_undiscard_update|]=>/= ?[?->].
     by eexists _.
   Qed.
   Local Lemma alftl_etern_alive {al} :

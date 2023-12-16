@@ -15,7 +15,6 @@ nola/util/hgt.v
 nola/util/ctx.v
 nola/util/proph.v
 
-nola/iris/dfrac.v
 nola/iris/list.v
 nola/iris/gmap.v
 nola/iris/plist.v
