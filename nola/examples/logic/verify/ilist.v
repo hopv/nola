@@ -25,6 +25,9 @@ Notation ilistis := (ilisti nderiv).
 (** A has_multiplier of [δ] is stored at [l] *)
 Definition has_mult {κ Γ} (δ : Z) l : nProp κ Γ := ∃ k, l ↦ #(k * δ).
 
+(** Increment by load and store *)
+Definition incr_naive (δ : Z) : val := λ: "l", "l" <- !"l" + #δ;; #().
+
 (** Increment by calling [FAA] *)
 Definition incr_faa (δ : Z) : val := λ: "l", FAA "l" #δ;; #().
 
@@ -158,6 +161,22 @@ Section verify.
     iIntros "#?" (Ψ) "!> #? Ψ". wp_lam. wp_pures. wp_apply twp_ndnat; [done|].
     iIntros (?) "_". wp_alloc lk as "↦k". wp_pures.
     wp_apply (twp_siter_nd_forks with "[] [$↦k]")=>//. iIntros. by iApply "Ψ".
+  Qed.
+
+  (** [incr_naive] on [ninvd] over [has_mult] *)
+  Lemma twp_incr_naive {N E δ l} : ↑N ⊆ E →
+    [[{ ninvd N (has_mult δ l) }]][inv_wsatd]
+      incr_naive δ #l @ E
+    [[{ RET #(); True }]].
+  Proof.
+    iIntros (??) "#? Φ". wp_lam. wp_bind (!_)%E.
+    iMod (ninv_acc with "[//]") as "/=[[%k ↦] cl]"; [done|]. wp_load.
+    iModIntro. iMod ("cl" with "[↦]") as "_"; [by iExists _|]. iModIntro.
+    wp_pures. wp_bind (_<-_)%E.
+    iMod (ninv_acc with "[//]") as "/=[[% ↦] cl]"; [done|]. wp_store.
+    iModIntro. iMod ("cl" with "[↦]") as "_".
+    { iExists _. by have -> : (k * δ + δ = (k + 1) * δ)%Z by lia. }
+    iModIntro. wp_pures. by iApply "Φ".
   Qed.
 
   (** [incr_faa] on [ninvd] over [has_mult] *)
