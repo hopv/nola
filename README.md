@@ -8,11 +8,19 @@ It is fully mechanized in [Coq](https://coq.inria.fr/) with the
 The name Nola comes from *No* *la*ters and a nickname for New Orleans,
 Louisiana, US.
 
+- [Publication](#publication)
 - [Getting Started](#getting-started)
 - [Story](#story)
   + [Nested invariants](#nested-invariants)
   + [Obstacle: Laters](#obstacle-laters)
   + [Solution: Nola](#solution-nola)
+
+## Publication
+
+- Non-Step-Indexed Separation Logic with Invariants and Rust-Style Borrows.
+  Yusuke Matsushita. Ph.D. Thesis, University of Tokyo. Dec 2023.
+  [Paper](http://www.kb.is.s.u-tokyo.ac.jp/~yskm24t/papers/phd-thesis.pdf)
+  [Talk slides](http://www.kb.is.s.u-tokyo.ac.jp/~yskm24t/talks/phd-thesis-talk.pdf)
 
 ## Getting Started
 
