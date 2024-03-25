@@ -7,11 +7,11 @@ From iris.proofmode Require Import proofmode.
 
 Implicit Type PROP : Type.
 
-Class ninvGS PROP Σ := ninvGS_in : sinvGS PROP Σ.
-Local Existing Instance ninvGS_in.
-Class ninvGpreS PROP Σ := ninvGpreS_in : sinvGpreS PROP Σ.
+Class ninvGpreS PROP Σ := ninvGpreS_in : sinvGpreS (leibnizO PROP) Σ.
 Local Existing Instance ninvGpreS_in.
-Definition ninvΣ PROP : gFunctors := sinvΣ PROP.
+Class ninvGS PROP Σ := ninvGS_in : sinvGS (leibnizO PROP) Σ.
+Local Existing Instance ninvGS_in.
+Definition ninvΣ PROP : gFunctors := sinvΣ (leibnizO PROP).
 #[export] Instance subG_ninvΣ `{!subG (ninvΣ PROP) Σ} : ninvGpreS PROP Σ.
 Proof. solve_inG. Qed.
 
@@ -20,7 +20,7 @@ Section inv_tok.
 
   (** [inv_tok]: Invariant token *)
   Local Definition inv_tok_def (N : namespace) (P : PROP) : iProp Σ :=
-    ∃ i, ⌜i ∈ (↑N:coPset)⌝ ∗ sinv_tok' i P.
+    ∃ i, ⌜i ∈ (↑N:coPset)⌝ ∗ sinv_itok i P.
   Local Definition inv_tok_aux : seal inv_tok_def. Proof. by eexists. Qed.
   Definition inv_tok := inv_tok_aux.(unseal).
   Local Lemma inv_tok_unseal : inv_tok = inv_tok_def.
@@ -34,7 +34,7 @@ Section inv_tok.
 
   (** World satisfaction *)
   Local Definition inv_wsat_def (intp : PROP -d> iProp Σ) : iProp Σ :=
-    sinv_wsat' (λ i P, intp P ∗ ownD {[i]} ∨ ownE {[i]})%I.
+    sinv_iwsat (λ i P, intp P ∗ ownD {[i]} ∨ ownE {[i]})%I.
   Local Definition inv_wsat_aux : seal inv_wsat_def. Proof. by eexists. Qed.
   Definition inv_wsat := inv_wsat_aux.(unseal).
   Local Lemma inv_wsat_unseal : inv_wsat = inv_wsat_def.
@@ -51,7 +51,7 @@ Section inv_tok.
     (inv_tok N P -∗ intp P) =[inv_wsat intp]=∗ inv_tok N P.
   Proof.
     rewrite inv_tok_unseal inv_wsat_unseal. iIntros "→P W".
-    iDestruct (sinv_tok_alloc' with "W") as (I) "big".
+    iDestruct (sinv_itok_alloc with "W") as (I) "big".
     iMod (own_unit (gset_disjUR positive) disabled_name) as "D".
     iMod (own_updateP with "[$]") as (x) "[X D]".
     { apply (gset_disj_alloc_empty_updateP_strong'

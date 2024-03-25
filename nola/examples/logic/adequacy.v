@@ -5,7 +5,7 @@ From nola.examples.heap_lang Require Export adequacy total_adequacy.
 
 (** Precursor of [nintpGS] *)
 Class nintpGpreS Σ := NintpGpreS {
-  nintpGpreS_sinv :: sinvGpreS (nPropS (;ᵞ)) Σ;
+  nintpGpreS_sinv :: sinvGpreS (nPropSO (;ᵞ)) Σ;
   nintpGpreS_ninv :: ninvGpreS (nPropS (;ᵞ)) Σ;
   nintpGpreS_na_ninv :: na_ninvGpreS (nPropS (;ᵞ)) Σ;
   nintpGpreS_na_inv :: na_invG Σ;
@@ -16,7 +16,7 @@ Class nintpGpreS Σ := NintpGpreS {
 
 (** [gFunctors] for [nintpGpreS] *)
 Definition nintpΣ : gFunctors :=
-  #[sinvΣ (nPropS (;ᵞ)); ninvΣ (nPropS (;ᵞ)); na_ninvΣ (nPropS (;ᵞ)); na_invΣ;
+  #[sinvΣ (nPropSO (;ᵞ)); ninvΣ (nPropS (;ᵞ)); na_ninvΣ (nPropS (;ᵞ)); na_invΣ;
     cinvΣ; pborrowΣ nsynty (nPropS (;ᵞ)); heapΣ].
 #[export] Instance subG_nintpGpreS `{!subG nintpΣ Σ} : nintpGpreS Σ.
 Proof. solve_inG. Qed.

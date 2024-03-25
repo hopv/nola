@@ -349,7 +349,8 @@ Section borrow.
   Lemma bor_fbor {α} Φ q : bord α (Φ q) =[sinv_wsatd]=∗ fbord α Φ.
   Proof.
     iIntros "b W".
-    iMod (sinv_tok_alloc (∃ q, n_bor' [] α (Φ q))%n with "W") as "[s →W]"=>/=.
+    iMod (sinv_tok_alloc (PROP:=nPropSO _) (intp:=λ _, ⟦_⟧ˢ(_))
+      (∃ q, n_bor' [] α (Φ q))%n with "W") as "[s →W]"=>/=.
     iDestruct ("→W" with "[b]") as "$". { by iExists _. }
     iModIntro. iExists _, _. iFrame "s". iSplit. { iApply lft_sincl_refl. }
     iSplit; iModIntro; iApply aconvert_refl.

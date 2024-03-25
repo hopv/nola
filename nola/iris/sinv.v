@@ -1,113 +1,153 @@
 (** * Simple invariant *)
 
-From nola.iris Require Export upd.
-From iris.base_logic.lib Require Import ghost_map.
+From nola.iris Require Export ofe upd.
+From iris.algebra Require Import agree gmap_view.
 From iris.proofmode Require Import proofmode.
 
-Implicit Type PROP : Type.
+Implicit Type PROP : oFunctor.
 
+Class sinvGpreS PROP Σ :=
+  sinvGpreS_in : inG Σ (gmap_viewR positive (agreeR (PROP $o iProp Σ))).
+Local Existing Instance sinvGpreS_in.
 Class sinvGS PROP Σ := SinvGS {
-  sinvGS_in : ghost_mapG Σ positive (leibnizO PROP);
+  sinvGS_pre : sinvGpreS PROP Σ;
   sinv_name : gname;
 }.
-Local Existing Instance sinvGS_in.
-Class sinvGpreS PROP Σ :=
-  sinvGpreS_in : ghost_mapG Σ positive (leibnizO PROP).
-Local Existing Instance sinvGpreS_in.
-Definition sinvΣ PROP : gFunctors := ghost_mapΣ positive (leibnizO PROP).
-#[export] Instance subG_sinvΣ `{!subG (sinvΣ PROP) Σ} : sinvGpreS PROP Σ.
+Local Existing Instance sinvGS_pre.
+Definition sinvΣ PROP `{!oFunctorContractive PROP} :=
+  #[GFunctor (gmap_viewRF positive (agreeRF PROP))].
+#[export] Instance subG_sinvΣ
+  `{!oFunctorContractive PROP, !subG (sinvΣ PROP) Σ} : sinvGpreS PROP Σ.
 Proof. solve_inG. Qed.
 
 Section sinv.
   Context `{!sinvGS PROP Σ}.
+  Implicit Type P : PROP $o iProp Σ.
 
   (** Simple invariant token *)
-  Local Definition sinv_tok'_def i P : iProp Σ := i ↪[sinv_name]□ P.
-  Local Lemma sinv_tok'_aux : seal sinv_tok'_def. Proof. by eexists. Qed.
-  Definition sinv_tok' := sinv_tok'_aux.(unseal).
-  Local Lemma sinv_tok'_unseal : sinv_tok' = sinv_tok'_def.
+  Local Definition sinv_itok_def i P : iProp Σ :=
+    own sinv_name (gmap_view_frag i DfracDiscarded (to_agree P)).
+  Local Lemma sinv_itok_aux : seal sinv_itok_def. Proof. by eexists. Qed.
+  Definition sinv_itok := sinv_itok_aux.(unseal).
+  Local Lemma sinv_itok_unseal : sinv_itok = sinv_itok_def.
   Proof. exact: seal_eq. Qed.
 
   (** Simple invariant token with the index hidden *)
-  Definition sinv_tok P : iProp Σ := ∃ i, sinv_tok' i P.
+  Definition sinv_tok P : iProp Σ := ∃ i, sinv_itok i P.
 
+  (** Authoritative token *)
+  Local Definition sinv_auth_tok M :=
+    own sinv_name (gmap_view_auth (DfracOwn 1) (to_agree <$> M)).
   (** World satisfaction *)
-  Definition sinv_wsat'_def intp : iProp Σ :=
-    ∃ M, ghost_map_auth sinv_name 1 M ∗ [∗ map] i ↦ P ∈ M, intp i P.
-  Local Lemma sinv_wsat'_aux : seal sinv_wsat'_def. Proof. by eexists. Qed.
-  Definition sinv_wsat' := sinv_wsat'_aux.(unseal).
-  Local Lemma sinv_wsat'_unseal : sinv_wsat' = sinv_wsat'_def.
+  Definition sinv_iwsat_def intp : iProp Σ :=
+    ∃ M, sinv_auth_tok M ∗ [∗ map] i ↦ P ∈ M, intp i P.
+  Local Lemma sinv_iwsat_aux : seal sinv_iwsat_def. Proof. by eexists. Qed.
+  Definition sinv_iwsat := sinv_iwsat_aux.(unseal).
+  Local Lemma sinv_iwsat_unseal : sinv_iwsat = sinv_iwsat_def.
   Proof. exact: seal_eq. Qed.
 End sinv.
 (** World satisfaction whose interpretation ignores the index *)
-Notation sinv_wsat intp := (sinv_wsat' (λ _, intp)).
+Notation sinv_wsat' PROP intp := (sinv_iwsat (PROP:=PROP) (λ _, intp)).
+Notation sinv_wsat intp := (sinv_wsat' _ intp).
 
 Section sinv.
   Context `{!sinvGS PROP Σ}.
-  Implicit Type (i : positive) (P : PROP) (I : gset positive).
+  Implicit Type P : PROP $o iProp Σ.
+  Implicit Type (i : positive) (I : gset positive).
 
-  (** [sinv_tok'] and [sinv_tok] are persistent and timeless *)
-  #[export] Instance sinv_tok'_persistent {i P} : Persistent (sinv_tok' i P).
-  Proof. rewrite sinv_tok'_unseal. exact _. Qed.
-  #[export] Instance sinv_tok'_timeless {i P} : Timeless (sinv_tok' i P).
-  Proof. rewrite sinv_tok'_unseal. exact _. Qed.
+  (** [sinv_itok] and [sinv_tok] are persistent *)
+  #[export] Instance sinv_itok_persistent {i P} : Persistent (sinv_itok i P).
+  Proof. rewrite sinv_itok_unseal. exact _. Qed.
   Fact sinv_tok_persistent {P} : Persistent (sinv_tok P).
   Proof. exact _. Qed.
-  Fact sinv_tok_timeless {P} : Timeless (sinv_tok P).
+  (** [sinv_itok] and [sinv_tok] are timeless
+    if the underlying ofe is discrete *)
+  #[export] Instance sinv_itok_timeless `{!OfeDiscrete (PROP $o iProp Σ)}
+    {i P} : Timeless (sinv_itok i P).
+  Proof. rewrite sinv_itok_unseal. exact _. Qed.
+  Fact sinv_tok_timeless `{!OfeDiscrete (PROP $o iProp Σ)} {P} :
+    Timeless (sinv_tok P).
   Proof. exact _. Qed.
 
-  (** [sinv_wsat'] is non-expansive *)
-  #[export] Instance sinv_wsat'_ne {n} :
+  (** [sinv_iwsat] is non-expansive *)
+  #[export] Instance sinv_iwsat_ne {n} :
     Proper (pointwise_relation _ (pointwise_relation _ (≡{n}≡)) ==> (≡{n}≡))
-      sinv_wsat'.
-  Proof. rewrite sinv_wsat'_unseal. solve_proper. Qed.
-  #[export] Instance sinv_wsat'_proper :
-    Proper (pointwise_relation _ (pointwise_relation _ (≡)) ==> (≡)) sinv_wsat'.
-  Proof. rewrite sinv_wsat'_unseal. solve_proper. Qed.
+      sinv_iwsat.
+  Proof. rewrite sinv_iwsat_unseal. solve_proper. Qed.
+  #[export] Instance sinv_iwsat_proper :
+    Proper (pointwise_relation _ (pointwise_relation _ (≡)) ==> (≡)) sinv_iwsat.
+  Proof. rewrite sinv_iwsat_unseal. solve_proper. Qed.
 
-  (** [sinv_wsat'] is timeless if [intp] is always timeless *)
-  #[export] Instance sinv_wsat'_timeless `{!∀ i P, Timeless (intp i P)} :
-    Timeless (sinv_wsat' intp).
-  Proof. rewrite sinv_wsat'_unseal. exact _. Qed.
+  (** [sinv_iwsat] is timeless if [intp] is always timeless
+    and the underlying ofe is discrete *)
+  #[export] Instance sinv_iwsat_timeless
+    `{!OfeDiscrete (PROP $o iProp Σ), !∀ i P, Timeless (intp i P)} :
+    Timeless (sinv_iwsat intp).
+  Proof. rewrite sinv_iwsat_unseal. exact _. Qed.
 
-  (** Allocate [sinv_tok'] *)
-  Lemma sinv_tok_alloc' {intp} P :
-    sinv_wsat' intp -∗ ∃ I, ∀ i, ⌜i ∉ I⌝ ==∗
-      sinv_tok' i P ∗ (intp i P -∗ sinv_wsat' intp).
+  (** Lemma for [sinv_itok_alloc] *)
+  Local Lemma sinv_auth_tok_alloc {M i P} : i ∉ dom M →
+    sinv_auth_tok M ==∗ sinv_auth_tok (<[i:=P]> M) ∗ sinv_itok i P.
   Proof.
-    rewrite sinv_wsat'_unseal. iIntros "[%M[● M]]". iExists (dom M).
-    iIntros (i ?). iMod (ghost_map_insert_persist with "●") as "[● #i]";
-      [by apply not_elem_of_dom|]. iModIntro.
-    iSplitR; [by rewrite sinv_tok'_unseal|]. iIntros "P". iExists _. iFrame "●".
-    iApply (big_sepM_insert_2 with "P M").
+    move=> /not_elem_of_dom eq. iIntros "●". rewrite sinv_itok_unseal -own_op.
+    iApply own_update; [|done]. rewrite fmap_insert.
+    apply gmap_view_alloc; [|done..]. by rewrite lookup_fmap eq.
+  Qed.
+  (** Allocate [sinv_itok] *)
+  Lemma sinv_itok_alloc {intp} P :
+    sinv_iwsat intp -∗ ∃ I, ∀ i, ⌜i ∉ I⌝ ==∗
+      sinv_itok i P ∗ (intp i P -∗ sinv_iwsat intp).
+  Proof.
+    rewrite sinv_iwsat_unseal. iIntros "[%M[● M]]". iExists (dom M).
+    iIntros (i ?). iMod (sinv_auth_tok_alloc with "●") as "[● #i]"; [done|].
+    iModIntro. iSplitR; [by rewrite sinv_itok_unseal|]. iIntros "P". iExists _.
+    iFrame "●". iApply (big_sepM_insert_2 with "P M").
   Qed.
   Lemma sinv_tok_alloc {intp} P :
     sinv_wsat intp ==∗ sinv_tok P ∗ (intp P -∗ sinv_wsat intp).
   Proof.
-    iIntros "W". iDestruct (sinv_tok_alloc' with "W") as (?) "big".
+    iIntros "W". iDestruct (sinv_itok_alloc with "W") as (?) "big".
     iMod ("big" with "[]") as "[? $]". { iPureIntro. apply is_fresh. }
     iModIntro. by iExists _.
   Qed.
 
-  (** Access via [sinv_tok] *)
-  Lemma sinv_tok_acc' {intp i P} :
-    sinv_tok' i P -∗ sinv_wsat' intp -∗
-      intp i P ∗ (intp i P -∗ sinv_wsat' intp).
+  (** Lemma for [sinv_tok_acc'] *)
+  Local Lemma sinv_auth_tok_lookup {M i P} :
+    sinv_auth_tok M -∗ sinv_itok i P -∗ ∃ P', ⌜M !! i = Some P'⌝ ∗ P ≡ P'.
   Proof.
-    rewrite sinv_tok'_unseal sinv_wsat'_unseal. iIntros "i [%M[● M]]".
-    iDestruct (ghost_map_lookup with "● i") as %?.
-    iDestruct (big_sepM_lookup_acc with "M") as "[$ →M]"; [done|]. iIntros "P".
-    iExists _. iFrame "●". by iApply "→M".
+    rewrite sinv_itok_unseal. iIntros "● i". iCombine "● i" as "✓".
+    rewrite own_valid gmap_view_both_validI_total.
+    iDestruct "✓" as (? _ _ eq) "[_ in]". move: eq.
+    rewrite lookup_fmap. case: (M !! i); [|done]=> P' [=<-]. iExists P'.
+    iSplit; [done|]. by rewrite to_agree_includedI.
   Qed.
-  Lemma sinv_tok_acc {intp P} :
+  (** Access via [sinv_tok] *)
+  Lemma sinv_tok_acc' {intp i P} `{!NonExpansive (intp i)} :
+    sinv_itok i P -∗ sinv_iwsat intp -∗
+      intp i P ∗ (intp i P -∗ sinv_iwsat intp).
+  Proof.
+    rewrite sinv_iwsat_unseal. iIntros "i [%M[● M]]".
+    iDestruct (sinv_auth_tok_lookup with "● i") as (P' eq) "#≡".
+    iDestruct (big_sepM_lookup_acc with "M") as "[P' →M]"; [done|].
+    iRewrite "≡". iFrame "P'". iIntros "P'". iExists _. iFrame "●".
+    by iApply "→M".
+  Qed.
+  Lemma sinv_tok_acc {intp P} `{!NonExpansive intp} :
     sinv_tok P -∗ sinv_wsat intp -∗ intp P ∗ (intp P -∗ sinv_wsat intp).
   Proof. iIntros "[%i i]". iApply (sinv_tok_acc' with "i"). Qed.
 End sinv.
 
+(** Lemma for [sinv_wsat_alloc] *)
+Local Lemma sinv_auth_tok_alloc_empty `{!sinvGpreS PROP Σ} :
+  ⊢ |==> ∃ _ : sinvGS PROP Σ, sinv_auth_tok ∅.
+Proof.
+  iMod (own_alloc (gmap_view_auth (DfracOwn 1) ∅)) as (γ) "●".
+  { apply gmap_view_auth_valid. } { iModIntro. by iExists (SinvGS _ _ _ γ). }
+Qed.
 (** Allocate [sinv_wsat] *)
 Lemma sinv_wsat_alloc `{!sinvGpreS PROP Σ} :
-  ⊢ |==> ∃ _ : sinvGS PROP Σ, ∀ intp, sinv_wsat' intp.
+  ⊢ |==> ∃ _ : sinvGS PROP Σ, ∀ intp, sinv_iwsat intp.
 Proof.
-  iMod ghost_map_alloc_empty as (γ) "●". iModIntro. iExists (SinvGS _ _ _ γ).
-  iIntros. rewrite sinv_wsat'_unseal. iExists ∅. by iFrame.
+  iMod sinv_auth_tok_alloc_empty as (?) "●". iModIntro. iExists _.
+  iIntros. rewrite sinv_iwsat_unseal. iExists ∅. by iFrame.
 Qed.

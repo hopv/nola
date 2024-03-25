@@ -2,8 +2,6 @@
 
 From nola.examples.logic Require Export deriv.
 
-Implicit Type P Q : nPropL (;ᵞ).
-
 Section lemmas.
   Context `{!nintpGS Σ}.
   Implicit Type δ : nderiv_ty Σ.
@@ -27,7 +25,7 @@ Section lemmas.
   Proof.
     rewrite sinv_unseal. iIntros "#∝P !>". iApply (Deriv_intro (δ:=δ))=>/=.
     iIntros (???). rewrite -nintpS_nintp_nlarge.
-    by iApply (sinv_tok_acc with "∝P").
+    iApply (sinv_tok_acc (PROP:=nPropSO _) (intp:=λ _, ⟦_⟧ˢ(_)) with "∝P").
   Qed.
   (** Allocate [sinv] *)
   Lemma sinv_alloc (P : nPropS _) :

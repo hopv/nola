@@ -9,7 +9,7 @@ From nola.examples.heap_lang Require Export definitions.
 
 (** [nintpGS]: Iris resource *)
 Class nintpGS Σ := NintpGS {
-  nintpGS_sinv :: sinvGS (nPropS (;ᵞ)) Σ;
+  nintpGS_sinv :: sinvGS (nPropSO (;ᵞ)) Σ;
   nintpGS_ninv :: ninvGS (nPropS (;ᵞ)) Σ;
   nintpGS_na_ninv :: na_ninvGS (nPropS (;ᵞ)) Σ;
   nintpGS_na_inv :: na_invG Σ;

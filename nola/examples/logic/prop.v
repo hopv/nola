@@ -188,6 +188,12 @@ Inductive nProp : nkind → nctx → Type :=
 Notation nPropS := (nProp nS).
 Notation nPropL := (nProp nL).
 
+Local Set Warnings "-redundant-canonical-projection".
+Canonical nPropO κ Γ := leibnizO (nProp κ Γ).
+Notation nPropSO := (nPropO nS).
+Notation nPropLO := (nPropO nL).
+Local Set Warnings "redundant-canonical-projection".
+
 (** ** Notations for [nProp] connectives *)
 
 Declare Scope nProp_scope.

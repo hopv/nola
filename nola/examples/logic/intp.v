@@ -234,7 +234,7 @@ Notation "⟦ P ⟧ˢ ( δ )" := ⟦ P ⟧ˢ(δ, hwf)
 Notation nintpS δ P := ⟦ P ⟧ˢ(δ) (only parsing).
 
 (** Utility *)
-Notation sinv_wsat' δ := (sinv_wsat (λ P, ⟦ P ⟧ˢ(δ))).
+Notation sinv_wsat' δ := (sinv_wsat' (nPropSO _) (λ P, ⟦ P ⟧ˢ(δ))).
 Notation inv_wsat' δ := (inv_wsat (λ P, ⟦ P ⟧ˢ(δ))).
 Notation na_inv_wsat' δ := (na_inv_wsat (λ P, ⟦ P ⟧ˢ(δ))).
 Notation pborrow_wsat' M δ := (pborrow_wsat M (λ P, ⟦ P ⟧ˢ(δ))).
