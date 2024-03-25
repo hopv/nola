@@ -115,11 +115,11 @@ Section sinv.
   Local Lemma sinv_auth_tok_lookup {M i P} :
     sinv_auth_tok M -∗ sinv_itok i P -∗ ∃ P', ⌜M !! i = Some P'⌝ ∗ P ≡ P'.
   Proof.
-    rewrite sinv_itok_unseal. iIntros "● i". iCombine "● i" as "✓".
-    rewrite own_valid gmap_view_both_validI_total.
-    iDestruct "✓" as (? _ _ eq) "[_ in]". move: eq.
-    rewrite lookup_fmap. case: (M !! i); [|done]=> P' [=<-]. iExists P'.
-    iSplit; [done|]. by rewrite to_agree_includedI.
+    rewrite sinv_itok_unseal. iIntros "● i".
+    iDestruct (own_valid_2 with "● i") as "✓".
+    rewrite gmap_view_both_validI_total. iDestruct "✓" as (? _ _ eq) "[_ in]".
+    move: eq. rewrite lookup_fmap. case: (M !! i); [|done]=> P' [<-].
+    iExists P'. iSplit; [done|]. by rewrite to_agree_includedI.
   Qed.
   (** Access via [sinv_tok] *)
   Lemma sinv_tok_acc' {intp i P} `{!NonExpansive (intp i)} :
