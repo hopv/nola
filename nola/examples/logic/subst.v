@@ -146,9 +146,10 @@ Proof. exact nsubstlu_nlarge. Qed.
 
 Fixpoint nhgt {κ Γ} (P : nProp κ Γ) : hgt :=
   match P with
-  | n_0 _ | n_l0 _ | n_gl _ _ | n_gs _ _ | ¢ᵍ _ | %ᵍˢ _ | %ᵍˡ _ | %ᵘˢ _
+  | n_0 _ | n_l0 _ | n_gl _ _ | n_gs _ _ | %ᵍˢ _ | %ᵍˡ _ | %ᵘˢ _
     | !ᵘˢ _ => Hgt₀
-  | ¢ᵘ P => nhgt P | n_1 _ P | ∀: _, P | ∃: _, P => Hgt₁ (nhgt P)
+  | ¢ᵍ P | ¢ᵘ P => nhgt P
+  | n_1 _ P | ∀: _, P | ∃: _, P => Hgt₁ (nhgt P)
   | n_2 _ P Q => Hgt₂ (nhgt P) (nhgt Q)
   | n_u _ Φ => Hgtᶠ (λ a, nhgt (Φ a))
   | rec:ˢ' Φ a | rec:ˡ' Φ a => Hgt₁ (nhgt (Φ a))

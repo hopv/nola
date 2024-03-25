@@ -135,8 +135,9 @@ Proof. exact tsubstlu_tbump. Qed.
 
 Fixpoint thgt {i Γ} (T : type i Γ) : hgt :=
   match T with
-  | t_0 _ | ▽ _  | ref[_] _ | ¢ᵍ _ | %ᵍ _ | %ᵘ _ | !ᵘ _ => Hgt₀
-  | ¢ᵘ T => thgt T | ∀: _, T | ∃: _, T | recᵗ: _, T => Hgt₁ (thgt T)
+  | t_0 _ | ▽ _  | ref[_] _ | %ᵍ _ | %ᵘ _ | !ᵘ _ => Hgt₀
+  | ¢ᵍ T | ¢ᵘ T => thgt T
+  | ∀: _, T | ∃: _, T | recᵗ: _, T => Hgt₁ (thgt T)
   | t_2 _ T U | T →(_) U => Hgt₂ (thgt T) (thgt U)
   end.
 
