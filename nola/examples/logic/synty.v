@@ -9,8 +9,8 @@ Inductive nsynty := Empty_setₛ | unitₛ | boolₛ | natₛ | Zₛ | Propₛ |
 Implicit Type (X Y : nsynty).
 
 Notation "()ₛ" := unitₛ : nola_scope.
-Infix "*'ₛ" := prod'ₛ (at level 80, right associativity) : nola_scope.
-Infix "+ₛ" := sumₛ (at level 85, right associativity) : nola_scope.
+Infix "*'ₛ" := prod'ₛ (at level 41, right associativity) : nola_scope.
+Infix "+ₛ" := sumₛ (at level 50, left associativity) : nola_scope.
 Infix "→ₛ" := funₛ (at level 99, right associativity) : nola_scope.
 
 (** Decidable equality *)
