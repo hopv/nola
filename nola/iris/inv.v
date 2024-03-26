@@ -1,40 +1,53 @@
 (** * Nola later-free invariant *)
 
-From nola.iris Require Export sinv upd.
+From nola.iris Require Export ofe sinv upd.
 From iris.base_logic.lib Require Export wsat invariants.
 From iris.algebra Require Import gset.
 From iris.proofmode Require Import proofmode.
 
-Implicit Type PROP : Type.
+Implicit Type (PROP : oFunctor) (i : positive) (N : namespace).
 
-Class ninvGpreS PROP Σ := ninvGpreS_in : sinvGpreS (leibnizO PROP) Σ.
-Local Existing Instance ninvGpreS_in.
-Class ninvGS PROP Σ := ninvGS_in : sinvGS (leibnizO PROP) Σ.
-Local Existing Instance ninvGS_in.
-Definition ninvΣ PROP : gFunctors := sinvΣ (leibnizO PROP).
-#[export] Instance subG_ninvΣ `{!subG (ninvΣ PROP) Σ} : ninvGpreS PROP Σ.
+Class ninvGpreS PROP Σ := ninvGpreS_sinv : sinvGpreS PROP Σ.
+Local Existing Instance ninvGpreS_sinv.
+Class ninvGS PROP Σ := ninvGS_sinv : sinvGS PROP Σ.
+Local Existing Instance ninvGS_sinv.
+Definition ninvΣ PROP `{!oFunctorContractive PROP} := #[sinvΣ PROP].
+#[export] Instance subG_ninvΣ
+  `{!oFunctorContractive PROP, !subG (ninvΣ PROP) Σ} : ninvGpreS PROP Σ.
 Proof. solve_inG. Qed.
 
 Section inv_tok.
   Context `{!ninvGS PROP Σ, !invGS_gen hlc Σ}.
+  Implicit Type P : PROP $o iProp Σ.
 
   (** [inv_tok]: Invariant token *)
-  Local Definition inv_tok_def (N : namespace) (P : PROP) : iProp Σ :=
+  Local Definition inv_tok_def N P : iProp Σ :=
     ∃ i, ⌜i ∈ (↑N:coPset)⌝ ∗ sinv_itok i P.
   Local Definition inv_tok_aux : seal inv_tok_def. Proof. by eexists. Qed.
   Definition inv_tok := inv_tok_aux.(unseal).
   Local Lemma inv_tok_unseal : inv_tok = inv_tok_def.
   Proof. exact: seal_eq. Qed.
 
-  (** [inv_tok] is persistent and timeless *)
+  (** [inv_tok] is persistent *)
   #[export] Instance inv_tok_persistent {N P} : Persistent (inv_tok N P).
   Proof. rewrite inv_tok_unseal. exact _. Qed.
-  #[export] Instance inv_tok_timeless {N P} : Timeless (inv_tok N P).
+  (** [inv_tok] is timeless if the underlying ofe is discrete *)
+  #[export] Instance inv_tok_timeless `{!OfeDiscrete (PROP $o iProp Σ)} {N P} :
+    Timeless (inv_tok N P).
   Proof. rewrite inv_tok_unseal. exact _. Qed.
 
+  (** Interpretation *)
+  Local Definition inv_intp (intp : PROP $o iProp Σ → iProp Σ) i P : iProp Σ :=
+    intp P ∗ ownD {[i]} ∨ ownE {[i]}.
+
+  (** [inv_intp intp] is non-expansive when [intp] is *)
+  Local Instance inv_intp_ne `{!NonExpansive intp} {i} :
+    NonExpansive (inv_intp intp i).
+  Proof. solve_proper. Qed.
+
   (** World satisfaction *)
-  Local Definition inv_wsat_def (intp : PROP -d> iProp Σ) : iProp Σ :=
-    sinv_iwsat (λ i P, intp P ∗ ownD {[i]} ∨ ownE {[i]})%I.
+  Local Definition inv_wsat_def (intp : PROP $o iProp Σ -d> iProp Σ)
+    : iProp Σ := sinv_iwsat (inv_intp intp).
   Local Definition inv_wsat_aux : seal inv_wsat_def. Proof. by eexists. Qed.
   Definition inv_wsat := inv_wsat_aux.(unseal).
   Local Lemma inv_wsat_unseal : inv_wsat = inv_wsat_def.
@@ -42,7 +55,9 @@ Section inv_tok.
 
   (** [inv_wsat] is non-expansive *)
   #[export] Instance inv_wsat_ne : NonExpansive inv_wsat.
-  Proof. rewrite inv_wsat_unseal. solve_proper. Qed.
+  Proof.
+    rewrite inv_wsat_unseal. unfold inv_wsat_def, inv_intp. solve_proper.
+  Qed.
   #[export] Instance inv_wsat_proper : Proper ((≡) ==> (≡)) inv_wsat.
   Proof. apply ne_proper, _. Qed.
 
@@ -82,7 +97,7 @@ Section inv_tok.
   Qed.
 
   (** Access [inv_tok] *)
-  Lemma inv_tok_acc' {intp N E P} :
+  Lemma inv_tok_acc' `{!NonExpansive intp} {N E P} :
     ↑N ⊆ E → ownE E -∗ inv_tok N P -∗ modw id (inv_wsat intp) (
       ownE (E∖↑N) ∗ intp P ∗
       (ownE (E∖↑N) -∗ intp P -∗ modw id (inv_wsat intp) (ownE E))).
@@ -99,7 +114,7 @@ Section inv_tok.
     { iDestruct (ownD_singleton_twice with "[$D $D']") as "[]". }
     iApply "→W". iLeft. iFrame.
   Qed.
-  Lemma inv_tok_acc {intp N E P} :
+  Lemma inv_tok_acc `{!NonExpansive intp} {N E P} :
     ↑N ⊆ E → inv_tok N P =[inv_wsat intp]{E,E∖↑N}=∗
       intp P ∗ (intp P =[inv_wsat intp]{E∖↑N,E}=∗ True).
   Proof.

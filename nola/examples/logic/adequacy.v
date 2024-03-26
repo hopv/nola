@@ -6,8 +6,8 @@ From nola.examples.heap_lang Require Export adequacy total_adequacy.
 (** Precursor of [nintpGS] *)
 Class nintpGpreS Σ := NintpGpreS {
   nintpGpreS_sinv :: sinvGpreS (nPropSO (;ᵞ)) Σ;
-  nintpGpreS_ninv :: ninvGpreS (nPropS (;ᵞ)) Σ;
-  nintpGpreS_na_ninv :: na_ninvGpreS (nPropS (;ᵞ)) Σ;
+  nintpGpreS_ninv :: ninvGpreS (nPropSO (;ᵞ)) Σ;
+  nintpGpreS_na_ninv :: na_ninvGpreS (nPropSO (;ᵞ)) Σ;
   nintpGpreS_na_inv :: na_invG Σ;
   nintpGpreS_cinv :: cinvG Σ;
   nintpGpreS_pborrow :: pborrowGpreS nsynty (nPropS (;ᵞ)) Σ;
@@ -16,8 +16,8 @@ Class nintpGpreS Σ := NintpGpreS {
 
 (** [gFunctors] for [nintpGpreS] *)
 Definition nintpΣ : gFunctors :=
-  #[sinvΣ (nPropSO (;ᵞ)); ninvΣ (nPropS (;ᵞ)); na_ninvΣ (nPropS (;ᵞ)); na_invΣ;
-    cinvΣ; pborrowΣ nsynty (nPropS (;ᵞ)); heapΣ].
+  #[sinvΣ (nPropSO (;ᵞ)); ninvΣ (nPropSO (;ᵞ)); na_ninvΣ (nPropSO (;ᵞ));
+    na_invΣ; cinvΣ; pborrowΣ nsynty (nPropS (;ᵞ)); heapΣ].
 #[export] Instance subG_nintpGpreS `{!subG nintpΣ Σ} : nintpGpreS Σ.
 Proof. solve_inG. Qed.
 

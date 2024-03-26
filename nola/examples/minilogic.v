@@ -14,13 +14,17 @@ Inductive nProp : Type :=
 | inv (N : namespace) (P : nProp)
 | ilist (N : namespace) (Φ : loc → nProp) (l : loc).
 
+Local Set Warnings "-redundant-canonical-projection".
+Canonical nPropO := leibnizO nProp.
+Local Set Warnings "redundant-canonical-projection".
+
 (** ** Target function: Linked list mutation *)
 Definition iter : val := rec: "self" "f" "c" "l" :=
   if: !"c" = #0 then #() else
     "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (!("l" +ₗ #1)).
 
 Section iris.
-  Context `{!ninvGS nProp Σ, !heapGS_gen HasNoLc Σ}.
+  Context `{!ninvGS nPropO Σ, !heapGS_gen HasNoLc Σ}.
 
   (** ** Interpretation of [nProp] *)
   Fixpoint intp (P : nProp) : iProp Σ := match P with
@@ -52,7 +56,7 @@ Section iris.
     wp_apply "Hf"; [done|]. iIntros "_". wp_pures.
     wp_load. wp_op. have -> : (S m - 1)%Z = m by lia. wp_store.
     wp_op. wp_bind (! _)%E.
-    iMod (inv_tok_acc with "itl") as
+    iMod (inv_tok_acc (PROP:=nPropO) (intp:=intp) with "itl") as
       "/=[(%l' & ↦l' & #itlhd & #itltl) cl]"; [done|].
     wp_load. iModIntro. iMod ("cl" with "[↦l']") as "_".
     { iExists _. iFrame "↦l'". by iSplit. } iModIntro.

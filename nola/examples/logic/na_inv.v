@@ -33,7 +33,7 @@ Section lemmas.
   Proof.
     rewrite na_ninv_unseal. iIntros "#NP !>". iApply (Deriv_intro (δ:=δ))=>/=.
     iIntros (???????) "F". rewrite -nintpS_nintp_nlarge.
-    by iApply (na_inv_tok_acc with "F NP").
+    by iApply (na_inv_tok_acc (intp:=λ _, _) with "F NP").
   Qed.
   (** Allocate [na_ninv] *)
   Lemma na_ninv_alloc_rec (P : nPropS _) p N :

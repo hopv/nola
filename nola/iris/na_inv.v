@@ -1,34 +1,29 @@
 (** * For non-atomic invariants *)
 
-From nola.iris Require Export inv.
+From nola.util Require Import prod.
+From nola.iris Require Export ofe inv.
 From iris.base_logic Require Export lib.na_invariants.
 From iris.algebra Require Import gset coPset.
 From iris.proofmode Require Import proofmode.
 
-Implicit Type PROP : Type.
-Implicit Type (p : na_inv_pool_name) (i : positive).
+Implicit Type (PROP : oFunctor) (p : na_inv_pool_name) (i : positive).
 
-#[projections(primitive)]
-Record na_prop PROP := NaProp {
-  na_prop_p : na_inv_pool_name;
-  na_prop_i : positive;
-  na_prop_P : PROP;
-}.
-Arguments NaProp {_} _ _ _.
-Add Printing Constructor na_prop.
+(** Proposition data type *)
+Local Definition na_inv_prop PROP : oFunctor :=
+  leibnizO (na_inv_pool_name *' positive) * PROP.
 
-Class na_ninvGS PROP Σ := na_ninvGS_in : ninvGS (na_prop PROP) Σ.
+Class na_ninvGS PROP Σ := na_ninvGS_in : ninvGS (na_inv_prop PROP) Σ.
 Local Existing Instance na_ninvGS_in.
-Class na_ninvGpreS PROP Σ := na_ninvGpreS_in : ninvGpreS (na_prop PROP) Σ.
+Class na_ninvGpreS PROP Σ := na_ninvGpreS_in : ninvGpreS (na_inv_prop PROP) Σ.
 Local Existing Instance na_ninvGpreS_in.
-Definition na_ninvΣ PROP : gFunctors := ninvΣ (na_prop PROP).
-#[export] Instance subG_na_ninvΣ `{!subG (na_ninvΣ PROP) Σ} :
-  na_ninvGpreS PROP Σ.
+Definition na_ninvΣ PROP `{!oFunctorContractive PROP} :=
+  #[ninvΣ (na_inv_prop PROP)].
+#[export] Instance subG_na_ninvΣ
+  `{!oFunctorContractive PROP, !subG (na_ninvΣ PROP) Σ} : na_ninvGpreS PROP Σ.
 Proof. solve_inG. Qed.
 
 Section na_ninv.
   Context `{!na_ninvGS PROP Σ, !invGS_gen hlc Σ, !na_invG Σ}.
-  Implicit Type intp : PROP -d> iProp Σ.
   Local Existing Instance na_inv_inG.
 
   (** Access l of an non-atomic invariant *)
@@ -68,23 +63,35 @@ Section na_ninv.
   Qed.
 
   (** Token for a non-atomic invariant *)
-  Local Definition na_inv_tok_def p N (P : PROP) : iProp Σ :=
-    ∃ i, ⌜i ∈ (↑N:coPset)⌝ ∗ inv_tok N (NaProp p i P).
+  Local Definition na_inv_tok_def p N (P : PROP $o iProp Σ) : iProp Σ :=
+    ∃ i, ⌜i ∈ (↑N:coPset)⌝ ∗ inv_tok N ((p, i)', P).
   Local Lemma na_inv_tok_aux : seal na_inv_tok_def. Proof. by eexists. Qed.
   Definition na_inv_tok := na_inv_tok_aux.(unseal).
   Local Lemma na_inv_tok_unseal : na_inv_tok = na_inv_tok_def.
   Proof. exact: seal_eq. Qed.
 
-  (** [na_inv_tok] is persistent and timeless *)
+  (** [na_inv_tok] is persistent *)
   #[export] Instance na_inv_tok_persistent {p N P} :
     Persistent (na_inv_tok p N P).
   Proof. rewrite na_inv_tok_unseal. exact _. Qed.
-  #[export] Instance na_inv_tok_timeless {p N P} : Timeless (na_inv_tok p N P).
+  (** [na_inv_tok] is timeless if the underlying ofe is discrete *)
+  #[export] Instance na_inv_tok_timeless
+    `{!OfeDiscrete (PROP $o iProp Σ)} {p N P} : Timeless (na_inv_tok p N P).
   Proof. rewrite na_inv_tok_unseal. exact _. Qed.
 
+  (** Interpretation *)
+  Local Definition na_inv_intp (intp : PROP $o iProp Σ -d> iProp Σ)
+    : na_inv_prop PROP $o iProp Σ -d> iProp Σ :=
+    λ '((p, i)', P), na_body p i (intp P).
+
+  (** [na_inv_intp intp] is non-expansive if [intp] is *)
+  Local Instance na_inv_intp_ne `{!NonExpansive intp} :
+    NonExpansive (na_inv_intp intp).
+  Proof. move=> ?[??][??][/=??]. solve_proper. Qed.
+
   (** World satisfaction for non-atomic invariants *)
-  Local Definition na_inv_wsat_def intp : iProp Σ :=
-    inv_wsat (λ '(NaProp p i P), na_body p i (intp P)).
+  Local Definition na_inv_wsat_def (intp : PROP $o iProp Σ -d> iProp Σ)
+    : iProp Σ := inv_wsat (λ '((p, i)', P), na_body p i (intp P)).
   Local Lemma na_inv_wsat_aux : seal na_inv_wsat_def. Proof. by eexists. Qed.
   Definition na_inv_wsat := na_inv_wsat_aux.(unseal).
   Local Lemma na_inv_wsat_unseal : na_inv_wsat = na_inv_wsat_def.
@@ -93,7 +100,7 @@ Section na_ninv.
   (** [na_inv_wsat] is non-expansive *)
   #[export] Instance na_inv_wsat_ne : NonExpansive na_inv_wsat.
   Proof.
-    rewrite na_inv_wsat_unseal /na_inv_wsat_def=> ????. f_equiv. case=> >.
+    rewrite na_inv_wsat_unseal /na_inv_wsat_def=> ????. f_equiv. case=> ??.
     solve_proper.
   Qed.
   #[export] Instance na_inv_wsat_proper : Proper ((≡) ==> (≡)) inv_wsat.
@@ -114,7 +121,7 @@ Section na_ninv.
   Proof. iIntros "?". iApply na_inv_tok_alloc_rec. by iIntros. Qed.
 
   (** Access [na_inv_tok] *)
-  Lemma na_inv_tok_acc' {intp p N E F P} : ↑N ⊆ E → ↑N ⊆ F →
+  Lemma na_inv_tok_acc' `{!NonExpansive intp} {p N E F P} : ↑N ⊆ E → ↑N ⊆ F →
     ownE E -∗ na_own p F -∗ na_inv_tok p N P -∗ modw id (na_inv_wsat intp) (
       ownE E ∗ na_own p (F∖↑N) ∗ intp P ∗
       (ownE E -∗ na_own p (F∖↑N) -∗ intp P -∗ modw id (na_inv_wsat intp) (
@@ -129,7 +136,7 @@ Section na_ninv.
     iDestruct ("→bdF" with "F∖N bd P") as "[bd $]".
     iApply ("cl" with "E∖N bd W").
   Qed.
-  Lemma na_inv_tok_acc {intp p N E F P} : ↑N ⊆ E → ↑N ⊆ F →
+  Lemma na_inv_tok_acc `{!NonExpansive intp} {p N E F P} : ↑N ⊆ E → ↑N ⊆ F →
     na_own p F -∗ na_inv_tok p N P =[na_inv_wsat intp]{E}=∗
       na_own p (F∖↑N) ∗ intp P ∗
       (na_own p (F∖↑N) -∗ intp P =[na_inv_wsat intp]{E}=∗ na_own p F).

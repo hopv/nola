@@ -1,6 +1,7 @@
 (** * [type]: Syntactic type *)
 
 From nola.util Require Export ctx nat schoice.
+From nola.iris Require Export ofe.
 
 (** ** [tcon0]: Nullary type constructor *)
 Variant tcon0 : Set :=

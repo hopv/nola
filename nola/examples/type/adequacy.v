@@ -6,13 +6,13 @@ From nola.examples.heap_lang Require Export adequacy total_adequacy.
 (** [tinvGpreS']: Product of [ninvGpreS (tinvd ?) Σ] over [[o..o+i]] *)
 Fixpoint tinvGpreS' (L o : nat) Σ : Type :=
   match L with 0 => unit | S L =>
-    ninvGpreS (tinvd o) Σ *' tinvGpreS' L (S o) Σ
+    ninvGpreS (tinvdO o) Σ *' tinvGpreS' L (S o) Σ
   end.
 Arguments tinvGpreS' : simpl never.
 Existing Class tinvGpreS'.
 Notation tinvGpreS L Σ := (tinvGpreS' L 0 Σ).
 #[export] Instance tinvGpreS'_S_ninvGpreS' `{tΣ : !tinvGpreS' (S L) o Σ}
-  : ninvGpreS (tinvd o) Σ := tΣ.1'.
+  : ninvGpreS (tinvdO o) Σ := tΣ.1'.
 #[export] Instance tinvGpreS'_S_tinvGpreS' `{tΣ : !tinvGpreS' (S L) o Σ}
   : tinvGpreS' L (S o) Σ := tΣ.2'.
 
@@ -24,7 +24,7 @@ Class tintpGpreS L Σ := TintpGpreS {
 
 (** [gFunctors] for [tinvGpreS] *)
 Fixpoint tinvΣ' L o : gFunctors :=
-  match L with 0 => #[] | S L => #[ninvΣ (tinvd o); tinvΣ' L (S o)] end.
+  match L with 0 => #[] | S L => #[ninvΣ (tinvdO o); tinvΣ' L (S o)] end.
 Notation tinvΣ L := (tinvΣ' L 0).
 #[export] Instance subG_tinvGpreS' `{sΣ : !subG (tinvΣ' L o) Σ} :
   tinvGpreS' L o Σ.
@@ -45,7 +45,7 @@ Lemma tinv_wsat''_alloc `{!heapGS_gen HasNoLc Σ, tpreΣ : !tinvGpreS' L o Σ} :
   ⊢ |==> ∃ _ : tinvGS' L o Σ, ∀ intp, tinv_wsat'' L L o _ intp.
 Proof.
   move: L o tpreΣ. elim=> [|L IH] o tpreΣ. { iModIntro. by iExists (). }
-  iMod (inv_wsat_alloc (PROP:=tinvd o)) as (nΣ) "nw". iMod IH as (tΣ) "tw".
+  iMod (inv_wsat_alloc (PROP:=tinvdO o)) as (nΣ) "nw". iMod IH as (tΣ) "tw".
   iModIntro. iExists (nΣ, tΣ)'. iIntros (intp). by iSplitL "nw".
 Qed.
 Lemma tinv_wsat'_alloc `{!heapGS_gen HasNoLc Σ, !tinvGpreS L Σ} :

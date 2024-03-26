@@ -18,33 +18,37 @@ Variant tinvd i : Type :=
 Arguments tinvd_guard {_} _ _.
 Arguments tinvd_ref {_} _ _.
 
-(** [tinvGS']: Product of [ninvGS (tinvd ?) Σ] over [[o..o+i]] *)
+Local Set Warnings "-redundant-canonical-projection".
+Canonical tinvdO i := leibnizO (tinvd i).
+Local Set Warnings "redundant-canonical-projection".
+
+(** [tinvGS']: Product of [ninvGS (tinvdO ?) Σ] over [[o..L+o]] *)
 Fixpoint tinvGS' (L o : nat) Σ : Type :=
   match L with 0 => unit | S L =>
-    ninvGS (tinvd o) Σ *' tinvGS' L (S o) Σ
+    ninvGS (tinvdO o) Σ *' tinvGS' L (S o) Σ
   end.
 Arguments tinvGS' : simpl never.
 Existing Class tinvGS'.
 Notation tinvGS L Σ := (tinvGS' L 0 Σ).
-#[export] Instance tinvGS'_S_ninvGS' `{tΣ : !tinvGS' (S L) o Σ}
-  : ninvGS (tinvd o) Σ := tΣ.1'.
-#[export] Instance tinvGS'_S_tinvGS' `{tΣ : !tinvGS' (S L) o Σ}
+Definition tinvGS'_S_ninvGS' `{tΣ : !tinvGS' (S L) o Σ}
+  : ninvGS (tinvdO o) Σ := tΣ.1'.
+Definition tinvGS'_S_tinvGS' `{tΣ : !tinvGS' (S L) o Σ}
   : tinvGS' L (S o) Σ := tΣ.2'.
 
 (** Get [ninvGS] out of [tinvGS] *)
-Fixpoint tinvGS'_ninvGS {L i o Σ}
-  : tinvGS' L o Σ → i <ⁿ L → ninvGS (tinvd (i +' o)) Σ :=
-  match L with 0 => λ _ _, nlt_no0 | S _ =>
-    match i with 0 => λ _ _, _ | S _ =>
-      λ _ iL, tinvGS'_ninvGS _ (nlt_unS iL)
+Fixpoint tinvGS'_ninvGS {o Σ L i}
+  : tinvGS' L o Σ → i <ⁿ L → ninvGS (tinvdO (i +' o)) Σ :=
+  match L with 0 => λ _ _, nlt_no0 | S L =>
+    match i with 0 => λ _ _, tinvGS'_S_ninvGS' | S i =>
+      λ _ iL, tinvGS'_ninvGS tinvGS'_S_tinvGS' (nlt_unS iL)
     end
   end.
 Arguments tinvGS'_ninvGS : simpl never.
 #[export] Existing Instance tinvGS'_ninvGS.
-Definition ninvGS_rew `{nΣ : ninvGS (tinvd i) Σ} {j} (eq : i = j)
-  : ninvGS (tinvd j) Σ := rew[λ _, _] eq in nΣ.
+Definition ninvGS_rew `{nΣ : ninvGS (tinvdO i) Σ} {j} (eq : i = j)
+  : ninvGS (tinvdO j) Σ := rew[λ _, _] eq in nΣ.
 #[export] Instance tinvGS_ninvGS `{!tinvGS L Σ, ! i <ⁿ L}
-  : ninvGS (tinvd i) Σ := ninvGS_rew add'_0_r.
+  : ninvGS (tinvdO i) Σ := ninvGS_rew add'_0_r.
 
 (** ** World satisfaction for invariant *)
 Section tinv_wsat'.
@@ -52,18 +56,17 @@ Section tinv_wsat'.
 
   (** Interpretation of [tinvd] *)
   Definition tinvd_intp {i} (intp : type i (;ᵞ) -d> val -d> iProp Σ)
-    : tinvd i -d> iProp Σ :=
+    : tinvdO i -d> iProp Σ :=
     λ Tx, match Tx with
     | tinvd_guard T v => intp T v
     | tinvd_ref l T => ∃ v, l ↦ v ∗ intp T v
     end%I.
 
   (** [tinvd_intp] is non-expansive *)
-  #[export] Instance tinvd_intp_ne {n i} :
-    Proper ((≡{n}≡) ==> (=) ==> (≡{n}≡)) (tinvd_intp (i:=i)).
+  #[export] Instance tinvd_intp_ne {i} : NonExpansive2 (tinvd_intp (i:=i)).
   Proof. solve_proper. Qed.
   #[export] Instance tinvd_intp_proper {i} :
-    Proper ((≡) ==> (=) ==> (≡)) (tinvd_intp (i:=i)).
+    Proper ((≡) ==> (≡) ==> (≡)) (tinvd_intp (i:=i)).
   Proof. solve_proper. Qed.
 
   (** [tinv_wsat']: World satisfaction for invariant *)
@@ -73,7 +76,7 @@ Section tinv_wsat'.
     match M with 0 => λ _ _, True | S M =>
       match L with 0 => λ _ _, False | S L => λ _ intp,
         inv_wsat (tinvd_intp (intp 0 _)) ∗
-        tinv_wsat'' L M (S o) _ (λ i _ T, intp (S i) _ T)
+        tinv_wsat'' L M (S o) tinvGS'_S_tinvGS'  (λ i _ T, intp (S i) _ T)
       end
     end%I.
   Definition tinv_wsat' `{!tinvGS L Σ} (M : nat)
@@ -113,7 +116,7 @@ Section tinv_wsat'.
     by rewrite (proof_irrel (nlt_S _) iM).
   Qed.
   (** Key equality hack for [tinv_wsat'_inv_wsat] *)
-  Local Lemma inv_wsat_rew `{nΣ : !ninvGS (tinvd i) Σ, ! j <ⁿ M} (eq : i = j)
+  Local Lemma inv_wsat_rew `{nΣ : !ninvGS (tinvdO i) Σ, ! j <ⁿ M} (eq : i = j)
     {intp : ∀ k, k <ⁿ M → type k (;ᵞ) → val → iProp Σ} :
     inv_wsat (tinvd_intp (λ T, intp j _ (rew[λ i, _ i _] eq in T))) ⊣⊢
       inv_wsat (ninvGS0:=ninvGS_rew eq) (tinvd_intp (intp j _)).
