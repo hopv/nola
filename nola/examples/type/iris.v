@@ -27,23 +27,17 @@ Fixpoint tinvGS' (L o : nat) Σ : Type :=
   match L with 0 => unit | S L =>
     ninvGS (tinvdO o) Σ *' tinvGS' L (S o) Σ
   end.
-Arguments tinvGS' : simpl never.
 Existing Class tinvGS'.
 Notation tinvGS L Σ := (tinvGS' L 0 Σ).
-Definition tinvGS'_S_ninvGS' `{tΣ : !tinvGS' (S L) o Σ}
-  : ninvGS (tinvdO o) Σ := tΣ.1'.
-Definition tinvGS'_S_tinvGS' `{tΣ : !tinvGS' (S L) o Σ}
-  : tinvGS' L (S o) Σ := tΣ.2'.
 
 (** Get [ninvGS] out of [tinvGS] *)
 Fixpoint tinvGS'_ninvGS {o Σ L i}
   : tinvGS' L o Σ → i <ⁿ L → ninvGS (tinvdO (i +' o)) Σ :=
   match L with 0 => λ _ _, nlt_no0 | S L =>
-    match i with 0 => λ _ _, tinvGS'_S_ninvGS' | S i =>
-      λ _ iL, tinvGS'_ninvGS tinvGS'_S_tinvGS' (nlt_unS iL)
+    match i with 0 => λ '(_,_)' _, _ | S i =>
+      λ '(_,tΣ)' iL, tinvGS'_ninvGS tΣ (nlt_unS iL)
     end
   end.
-Arguments tinvGS'_ninvGS : simpl never.
 #[export] Existing Instance tinvGS'_ninvGS.
 Definition ninvGS_rew `{nΣ : ninvGS (tinvdO i) Σ} {j} (eq : i = j)
   : ninvGS (tinvdO j) Σ := rew[λ _, _] eq in nΣ.
@@ -74,9 +68,9 @@ Section tinv_wsat'.
     discrete_fun (λ i, i <ⁿ M -d> type (i +' o) (;ᵞ) -d> val -d> iProp Σ) →
     iProp Σ :=
     match M with 0 => λ _ _, True | S M =>
-      match L with 0 => λ _ _, False | S L => λ _ intp,
+      match L with 0 => λ _ _, False | S L => λ '(_,tΣ)' intp,
         inv_wsat (tinvd_intp (intp 0 _)) ∗
-        tinv_wsat'' L M (S o) tinvGS'_S_tinvGS'  (λ i _ T, intp (S i) _ T)
+        tinv_wsat'' L M (S o) tΣ (λ i _ T, intp (S i) _ T)
       end
     end%I.
   Definition tinv_wsat' `{!tinvGS L Σ} (M : nat)

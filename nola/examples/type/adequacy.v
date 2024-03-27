@@ -8,13 +8,8 @@ Fixpoint tinvGpreS' (L o : nat) Σ : Type :=
   match L with 0 => unit | S L =>
     ninvGpreS (tinvdO o) Σ *' tinvGpreS' L (S o) Σ
   end.
-Arguments tinvGpreS' : simpl never.
 Existing Class tinvGpreS'.
 Notation tinvGpreS L Σ := (tinvGpreS' L 0 Σ).
-#[export] Instance tinvGpreS'_S_ninvGpreS' `{tΣ : !tinvGpreS' (S L) o Σ}
-  : ninvGpreS (tinvdO o) Σ := tΣ.1'.
-#[export] Instance tinvGpreS'_S_tinvGpreS' `{tΣ : !tinvGpreS' (S L) o Σ}
-  : tinvGpreS' L (S o) Σ := tΣ.2'.
 
 (** Precursor of [tintpGS] *)
 Class tintpGpreS L Σ := TintpGpreS {
@@ -45,8 +40,9 @@ Lemma tinv_wsat''_alloc `{!heapGS_gen HasNoLc Σ, tpreΣ : !tinvGpreS' L o Σ} :
   ⊢ |==> ∃ _ : tinvGS' L o Σ, ∀ intp, tinv_wsat'' L L o _ intp.
 Proof.
   move: L o tpreΣ. elim=> [|L IH] o tpreΣ. { iModIntro. by iExists (). }
-  iMod (inv_wsat_alloc (PROP:=tinvdO o)) as (nΣ) "nw". iMod IH as (tΣ) "tw".
-  iModIntro. iExists (nΣ, tΣ)'. iIntros (intp). by iSplitL "nw".
+  case tpreΣ=> ??. iMod (inv_wsat_alloc (PROP:=tinvdO o)) as (nΣ) "nw".
+  iMod IH as (tΣ) "tw". iModIntro. iExists (nΣ, tΣ)'. iIntros (intp).
+  by iSplitL "nw".
 Qed.
 Lemma tinv_wsat'_alloc `{!heapGS_gen HasNoLc Σ, !tinvGpreS L Σ} :
   ⊢ |==> ∃ _ : tinvGS L Σ, ∀ intp, tinv_wsat' L intp.
