@@ -81,6 +81,7 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`deriv`](nola/iris/deriv.v) (Derivability)
   + [`upd`](nola/iris/upd.v) (Update),
     [`wp`](nola/iris/wp.v) (Weakest precondition)
+  + [`later`](nola/iris/later.v) (Later)
   + [`sinv`](nola/iris/sinv.v) (Simple invariant),
     [`inv`](nola/iris/inv.v) (Invariant),
     [`na_inv`](nola/iris/na_inv.v) (Non-atomic invariant)
@@ -94,6 +95,7 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`heap_lang/`](nola/examples/heap_lang/) : Variant of Iris HeapLang,
     with `Ndnat` (terminating infinite non-determinism) added
   + [`minilogic`](nola/examples/minilogic.v) : Minimal showcase logic
+  + [`later`](nola/examples/later.v) : Instantiating Nola with later
   + [`logic/`](nola/examples/logic/) : Showcase Logic
     * [`synty`](nola/examples/logic/synty.v) (Syntactic type),
     * [`prop`](nola/examples/logic/prop.v) (Proposition),

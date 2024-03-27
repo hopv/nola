@@ -22,6 +22,7 @@ nola/iris/plist.v
 nola/iris/deriv.v
 nola/iris/upd.v
 nola/iris/wp.v
+nola/iris/later.v
 nola/iris/sinv.v
 nola/iris/inv.v
 nola/iris/na_inv.v
@@ -47,6 +48,11 @@ nola/examples/heap_lang/proofmode.v
 nola/examples/heap_lang/adequacy.v
 nola/examples/heap_lang/total_adequacy.v
 
+<<<<<<< Updated upstream
+nola/examples/later.v
+
+=======
+>>>>>>> Stashed changes
 nola/examples/minilogic.v
 
 nola/examples/logic/synty.v
