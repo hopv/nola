@@ -55,6 +55,11 @@ Section sinv.
   Implicit Type P : PROP $o iProp Σ.
   Implicit Type (i : positive) (I : gset positive).
 
+  (** [sinv_itok] and [sinv_tok] are non-expansive *)
+  #[export] Instance sinv_itok_ne i : NonExpansive (sinv_itok i).
+  Proof. rewrite sinv_itok_unseal. solve_proper. Qed.
+  #[export] Instance sinv_tok_ne : NonExpansive sinv_tok.
+  Proof. solve_proper. Qed.
   (** [sinv_itok] and [sinv_tok] are persistent *)
   #[export] Instance sinv_itok_persistent {i P} : Persistent (sinv_itok i P).
   Proof. rewrite sinv_itok_unseal. exact _. Qed.

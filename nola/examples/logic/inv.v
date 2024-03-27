@@ -28,7 +28,7 @@ Section lemmas.
   Proof.
     rewrite ninv_unseal. iIntros "#NP !>". iApply (Deriv_intro (δ:=δ))=>/=.
     iIntros (?????). rewrite -nintpS_nintp_nlarge.
-    by iApply (inv_tok_acc (intp:=λ _, _) with "NP").
+    by iApply (inv_tok_acc (PROP:=nPropSO _) (intp:=λ _, ⟦_⟧ˢ(_)) with "NP").
   Qed.
   (** Allocate [ninv] *)
   Lemma ninv_alloc_rec (P : nPropS _) N :

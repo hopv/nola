@@ -70,6 +70,11 @@ Section na_ninv.
   Local Lemma na_inv_tok_unseal : na_inv_tok = na_inv_tok_def.
   Proof. exact: seal_eq. Qed.
 
+  (** [na_inv_tok] is non-expansive *)
+  #[export] Instance na_inv_tok_ne p N : NonExpansive (na_inv_tok p N).
+  Proof.
+    rewrite na_inv_tok_unseal /na_inv_tok_def=> ????. do 4 f_equiv. by split.
+  Qed.
   (** [na_inv_tok] is persistent *)
   #[export] Instance na_inv_tok_persistent {p N P} :
     Persistent (na_inv_tok p N P).

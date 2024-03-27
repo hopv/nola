@@ -28,6 +28,9 @@ Section inv_tok.
   Local Lemma inv_tok_unseal : inv_tok = inv_tok_def.
   Proof. exact: seal_eq. Qed.
 
+  (** [inv_tok] is non-expansive *)
+  #[export] Instance inv_tok_ne N : NonExpansive (inv_tok N).
+  Proof. rewrite inv_tok_unseal. solve_proper. Qed.
   (** [inv_tok] is persistent *)
   #[export] Instance inv_tok_persistent {N P} : Persistent (inv_tok N P).
   Proof. rewrite inv_tok_unseal. exact _. Qed.
