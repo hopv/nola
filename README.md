@@ -19,8 +19,8 @@ Louisiana, US.
 
 - Non-Step-Indexed Separation Logic with Invariants and Rust-Style Borrows.
   Yusuke Matsushita. Ph.D. Thesis, University of Tokyo. Dec 2023.
-  [Paper](http://www.kb.is.s.u-tokyo.ac.jp/~yskm24t/papers/phd-thesis.pdf)
-  [Talk slides](http://www.kb.is.s.u-tokyo.ac.jp/~yskm24t/talks/phd-thesis-talk.pdf)
+  [Paper](https://shiatsumat.github.io/papers/phd-thesis.pdf)
+  [Talk slides](https://shiatsumat.github.io/talks/phd-thesis-talk.pdf)
 
 ## Getting Started
 
