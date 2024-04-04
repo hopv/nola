@@ -25,7 +25,7 @@ Section lemmas.
   Proof.
     rewrite sinv_unseal. iIntros "#∝P !>". iApply (Deriv_intro (δ:=δ))=>/=.
     iIntros (???). rewrite -nintpS_nintp_nlarge.
-    iApply (sinv_tok_acc (PROP:=nPropSO _) (intp:=λ _, ⟦_⟧ˢ(_)) with "∝P").
+    iApply (sinv_tok_acc (intp:=λ _, ⟦_⟧ˢ(_)) with "∝P").
   Qed.
   (** Allocate [sinv] *)
   Lemma sinv_alloc (P : nPropS _) :
