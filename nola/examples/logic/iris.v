@@ -14,7 +14,7 @@ Class nintpGS Σ := NintpGS {
   nintpGS_na_ninv :: na_ninvGS (nPropSO (;ᵞ)) Σ;
   nintpGS_na_inv :: na_invG Σ;
   nintpGS_cinv :: cinvG Σ;
-  nintpGS_pborrow :: pborrowGS nsynty (nPropS (;ᵞ)) Σ;
+  nintpGS_pborrow :: pborrowGS nsynty (nPropSO (;ᵞ)) Σ;
   nintpGS_heap :: heapGS_gen HasNoLc Σ;
 }.
 Arguments NintpGS {_}.

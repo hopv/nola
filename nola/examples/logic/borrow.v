@@ -212,8 +212,8 @@ Section borrow.
   Proof.
     iIntros "Pl →Ql". setoid_rewrite <-nintpS_nintp.
     setoid_rewrite <-borc_intro. setoid_rewrite <-lend_intro.
-    iApply (nbor_nlend_tok_new_list with "Pl [→Ql]"). iIntros "#† ?".
-    by iApply "→Ql".
+    iApply (nbor_nlend_tok_new_list (PROP:=nPropSO _) with "Pl [→Ql]").
+    iIntros "#† ?". by iApply "→Ql".
   Qed.
   (** Simply create a borrower and a lender *)
   Lemma borc_lend_new `{!GenUpd M} α (P : nPropS (;ᵞ)) :
@@ -230,7 +230,7 @@ Section borrow.
   Proof.
     iIntros "[%R[RP l]] →Ql". rewrite !convert_use.
     setoid_rewrite <-nintpS_nintp. setoid_rewrite <-lend_intro.
-    iApply (nlend_tok_split with "l [RP →Ql]"). iIntros "R".
+    iApply (nlend_tok_split (intp:=λ _, ⟦_⟧ˢ) with "l [RP →Ql]"). iIntros "R".
     iMod ("RP" with "R") as "P". by iMod ("→Ql" with "P").
   Qed.
 
@@ -239,8 +239,8 @@ Section borrow.
     [†α] -∗ lendd α P -∗ modw M (pborrow_wsatd M) ⟦ P ⟧.
   Proof.
     iIntros "† [%Q[QP l]]". rewrite convert_use.
-    iMod (nlend_tok_retrieve with "† l") as "Q". rewrite nintpS_nintp.
-    iMod ("QP" with "Q") as "$". by iIntros.
+    iMod (nlend_tok_retrieve (intp:=λ _, ⟦_⟧ˢ) with "† l") as "Q".
+    rewrite nintpS_nintp. iMod ("QP" with "Q") as "$". by iIntros.
   Qed.
 
   (** Open a closed borrower *)
@@ -248,17 +248,17 @@ Section borrow.
     q.[α] -∗ borcd α P =[pborrow_wsatd M]=∗ obord α q P ∗ ⟦ P ⟧.
   Proof.
     iIntros "α [%Q[PQ[QP c]]]". rewrite (convert_use (P:=Q)).
-    iMod (nbor_ctok_open with "α c") as "[o Q]". rewrite/= nintpS_nintp.
-    iMod ("QP" with "Q") as "$". iExists _. by iFrame.
+    iMod (nbor_ctok_open (intp:=λ _, ⟦_⟧ˢ) with "α c") as "[o Q]".
+    rewrite/= nintpS_nintp. iMod ("QP" with "Q") as "$". iExists _. by iFrame.
   Qed.
   (** Open a borrower *)
   Lemma bor_open `{!GenUpd M} {α q P} :
     q.[α] -∗ bord α P -∗ modw M (pborrow_wsatd M) (obord α q P ∗ ⟦ P ⟧).
   Proof.
     iIntros "α [%Q[PQ[QP b]]]". rewrite (convert_use (P:=Q)).
-    iMod (nbor_tok_open with "α b") as "[o Q]". rewrite/= nintpS_nintp.
-    iMod ("QP" with "Q") as "$". iApply modw_fold. iModIntro. iExists _.
-    by iFrame.
+    iMod (nbor_tok_open (intp:=λ _, ⟦_⟧ˢ) with "α b") as "[o Q]".
+    rewrite/= nintpS_nintp. iMod ("QP" with "Q") as "$". iApply modw_fold.
+    iModIntro. iExists _. by iFrame.
   Qed.
 
   (** Lemma for [obor_merge_subdiv] *)
@@ -289,8 +289,9 @@ Section borrow.
     rewrite -(big_sepL_fmap (λ '(α, q, _)', (α, q)') (λ _ '(α, q)', q.[α])%I).
     iIntros "[%[<-[ol →]]] Ql →Pl". rewrite big_sepL_fmap.
     setoid_rewrite <-borc_intro.
-    iApply (nobor_tok_merge_subdiv with "ol Ql [→ →Pl]"). iIntros "† Ql".
-    iMod ("→Pl" with "† Ql") as "Pl". iMod ("→" with "Pl") as "$". by iIntros.
+    iApply (nobor_tok_merge_subdiv (PROP:=nPropSO _) with "ol Ql [→ →Pl]").
+    iIntros "† Ql". iMod ("→Pl" with "† Ql") as "Pl".
+    iMod ("→" with "Pl") as "$". by iIntros.
   Qed.
   (** Subdivide borrowers *)
   Lemma obor_subdiv `{!GenUpd M} {α q P} Ql β :
@@ -316,10 +317,11 @@ Section borrow.
     obord α q P -∗ ⟦ P ⟧ =[pborrow_wsatd M]=∗ nobor_tok α q P ∗ ⟦ P ⟧ˢ.
   Proof.
     iIntros "[%Q[PQ o]] P". rewrite convert_use -!nintpS_nintp.
-    iMod (nobor_tok_subdiv [_] with "[] o [P] [PQ]") as "[α[c _]]"=>/=.
+    iMod (nobor_tok_subdiv (intp:=λ _, ⟦_⟧ˢ) [_] with "[] o [P] [PQ]")
+      as "[α[c _]]"=>/=.
     { iApply lft_sincl_refl. } { by iFrame. }
     { iIntros "_ [P _]". iMod ("PQ" with "P") as "$". by iIntros. }
-    iApply (bor_ctok_open with "α c").
+    iApply (nbor_ctok_open (intp:=λ _, ⟦_⟧ˢ) with "α c").
   Qed.
   (** Reborrow a borrower *)
   Lemma obor_reborrow `{!GenUpd M} {α q P} β :
@@ -328,7 +330,7 @@ Section borrow.
   Proof.
     iIntros "o P". iMod (obor_nobor_tok with "o P") as "[o P]".
     rewrite -borc_intro -bor_intro.
-    iApply (nobor_tok_reborrow (intp:=λ P, ⟦ P ⟧ˢ) with "o P").
+    iApply (nobor_tok_reborrow (intp:=λ _, ⟦_⟧ˢ) with "o P").
   Qed.
   Lemma borc_reborrow `{!GenUpd M} {α q P} β :
     q.[α] -∗ borcd α P =[pborrow_wsatd M]=∗
@@ -349,7 +351,7 @@ Section borrow.
   Lemma bor_fbor {α} Φ q : bord α (Φ q) =[sinv_wsatd]=∗ fbord α Φ.
   Proof.
     iIntros "b W".
-    iMod (sinv_tok_alloc (PROP:=nPropSO _) (intp:=λ _, ⟦_⟧ˢ(_))
+    iMod (sinv_tok_alloc (PROP:=nPropSO _)
       (∃ q, n_bor' [] α (Φ q))%n with "W") as "[s →W]"=>/=.
     iDestruct ("→W" with "[b]") as "$". { by iExists _. }
     iModIntro. iExists _, _. iFrame "s". iSplit. { iApply lft_sincl_refl. }
@@ -386,10 +388,11 @@ Section borrow.
   Definition plend_body_vard {X} (ξ : prvar X) (Φ : X → nPropS (;ᵞ)) : iProp Σ
     := plend_bodyd (λ π, π ξ) Φ.
   Local Lemma plend_bodyd_as {X xπ Φ} :
-    plend_bodyd (X:=X) xπ Φ ⊣⊢ plend_body (λ P, ⟦ P ⟧ˢ) xπ Φ.
+    plend_bodyd (X:=X) xπ Φ ⊣⊢ plend_body (PROP:=nPropSO _) (λ P, ⟦ P ⟧ˢ) xπ Φ.
   Proof. unfold plend_body. by setoid_rewrite nintpS_nintp. Qed.
   Local Lemma plend_body_vard_as {X ξ Φ} :
-    plend_body_vard (X:=X) ξ Φ ⊣⊢ plend_body_var (λ P, ⟦ P ⟧ˢ) ξ Φ.
+    plend_body_vard (X:=X) ξ Φ ⊣⊢
+      plend_body_var (PROP:=nPropSO _) (λ P, ⟦ P ⟧ˢ) ξ Φ.
   Proof. exact plend_bodyd_as. Qed.
 
   (** Create new prophetic borrowers and lenders *)
@@ -402,7 +405,8 @@ Section borrow.
         ([∗ plist] '(ξ, x, Φ)' ∈ ξxΦl, pborcd α x ξ Φ) ∗
         ([∗ plist] '(yπ, Ψ)' ∈ yπΨl, plendd α yπ Ψ).
   Proof.
-    iMod (pbor_plend_tok_new_list (intp:=λ P, ⟦ P ⟧ˢ)) as (?) "big".
+    iMod (pbor_plend_tok_new_list (PROP:=nPropSO _) (intp:=λ P, ⟦ P ⟧ˢ))
+      as (?) "big".
     iModIntro. iExists _. iIntros "%% Φl →Ψl". setoid_rewrite plend_bodyd_as.
     setoid_rewrite <-nintpS_nintp. setoid_rewrite <-pborc_intro.
     setoid_rewrite <-plend_intro. iApply ("big" with "Φl →Ψl").
@@ -425,7 +429,8 @@ Section borrow.
       =[pborrow_wsatd M]=∗ [∗ plist] '(yπ, Ψ)' ∈ yπΨl, plendd α yπ Ψ.
   Proof.
     iIntros "[%Ω[ΩΦ l]] →Ψl". rewrite aconvert_use.
-    setoid_rewrite <-plend_intro. iApply (plend_tok_split with "l [ΩΦ →Ψl]").
+    setoid_rewrite <-plend_intro.
+    iApply (plend_tok_split (intp:=λ _, ⟦_⟧ˢ) with "l [ΩΦ →Ψl]").
     setoid_rewrite plend_bodyd_as. iIntros "[%[obs Ω]]".
     setoid_rewrite <-nintpS_nintp. iMod ("ΩΦ" with "Ω") as "Φ".
     iApply ("→Ψl" with "[obs Φ]"). iExists _. iFrame.
@@ -436,7 +441,7 @@ Section borrow.
     [†α] -∗ plendd α xπ Φ -∗ modw M (pborrow_wsatd M) (plend_bodyd xπ Φ).
   Proof.
     iIntros "† [%[ΨΦ l]]". rewrite aconvert_use. setoid_rewrite <-nintpS_nintp.
-    iMod (plend_tok_retrieve with "† l") as "[%[obs Ψ]]".
+    iMod (plend_tok_retrieve (intp:=λ _, ⟦_⟧ˢ) with "† l") as "[%[obs Ψ]]".
     iMod ("ΨΦ" with "Ψ") as "Φ". iApply modw_fold. rewrite plend_bodyd_as.
     iExists _. iFrame. by iIntros.
   Qed.
@@ -446,17 +451,17 @@ Section borrow.
     q.[α] -∗ pborcd α x ξ Φ =[pborrow_wsatd M]=∗ pobord α q ξ Φ ∗ ⟦ Φ x ⟧.
   Proof.
     iIntros "α [%[ΦΨ[ΨΦ c]]]". rewrite (aconvert_use (Φ:=Ψ)) /=.
-    iMod (pbor_ctok_open with "α c") as "[o Φ]". rewrite nintpS_nintp.
-    iMod ("ΨΦ" with "Φ") as "$". iExists _. by iFrame.
+    iMod (pbor_ctok_open (intp:=λ _, ⟦_⟧ˢ) with "α c") as "[o Φ]".
+    rewrite nintpS_nintp. iMod ("ΨΦ" with "Φ") as "$". iExists _. by iFrame.
   Qed.
   Lemma pbor_open `{!GenUpd M} {α q X x ξ} {Φ : X → _} :
     q.[α] -∗ pbord α x ξ Φ -∗ modw M (pborrow_wsatd M)
       (pobord α q ξ Φ ∗ ⟦ Φ x ⟧).
   Proof.
     iIntros "α [%[ΦΨ[ΨΦ b]]]". rewrite (aconvert_use (Φ:=Ψ)) /=.
-    iMod (pbor_tok_open with "α b") as "[o Φ]". rewrite nintpS_nintp.
-    iMod ("ΨΦ" with "Φ") as "$". iApply modw_fold. iExists _. iFrame.
-    by iIntros.
+    iMod (pbor_tok_open (intp:=λ _, ⟦_⟧ˢ) with "α b") as "[o Φ]".
+    rewrite nintpS_nintp. iMod ("ΨΦ" with "Φ") as "$". iApply modw_fold.
+    iExists _. iFrame. by iIntros.
   Qed.
 
   (** Lemma for [pobor_merge_subdiv] *)
@@ -500,8 +505,8 @@ Section borrow.
     rewrite -(big_sepPL_map (λ _ '(α, q, _)', (α, q)') (λ _ '(α, q)', q.[α])%I).
     iIntros "[%[->[%eq[ol →]]]] Ψl Rl →Φl". rewrite big_sepPL_map.
     setoid_rewrite <-pborc_intro. setoid_rewrite <-borc_intro.
-    iMod (pobor_tok_merge_subdiv (intp:=λ P, ⟦ P ⟧ˢ) with "ol Ψl Rl [→ →Φl]")
-      as (?) "[$[obsl[bl $]]]".
+    iMod (pobor_tok_merge_subdiv (PROP:=nPropSO _) (intp:=λ P, ⟦ P ⟧ˢ)
+      with "ol Ψl Rl [→ →Φl]") as (?) "[$[obsl[bl $]]]".
     { iIntros "% † Ψl Rl". iMod ("→Φl" with "† Ψl Rl") as "Φl".
       iMod ("→" with "Φl") as "$". by iIntros. }
     iModIntro. iExists _. iFrame "bl".
@@ -560,7 +565,8 @@ Section borrow.
   Proof.
     iIntros "⊑ [%Ω[ΦΩ o]] Ψ →Φ". rewrite aconvert_use -pborc_intro.
     setoid_rewrite <-nintpS_nintp.
-    iApply (pobor_tok_nsubdiv (intp:=λ P, ⟦ P ⟧ˢ) with "⊑ o Ψ [ΦΩ →Φ]").
+    iApply (pobor_tok_nsubdiv (PROP:=nPropSO _) (intp:=λ P, ⟦ P ⟧ˢ)
+      with "⊑ o Ψ [ΦΩ →Φ]").
     iIntros "% † Ψ". iMod ("→Φ" with "† Ψ") as "Φ". iMod ("ΦΩ" with "Φ") as "$".
     by iIntros.
   Qed.
@@ -578,10 +584,10 @@ Section borrow.
   Proof.
     iIntros "[%Ψ'[ΨΨ' o']] Ψ". rewrite aconvert_use.
     setoid_rewrite <-nintpS_nintp.
-    iMod (pobor_tok_nsubdiv (intp:=λ P, ⟦ P ⟧ˢ) with "[] o' Ψ [ΨΨ']")
-      as "[β c]". { iApply lft_sincl_refl. }
+    iMod (pobor_tok_nsubdiv (PROP:=nPropSO _) (intp:=λ P, ⟦ P ⟧ˢ)
+      with "[] o' Ψ [ΨΨ']") as "[β c]". { iApply lft_sincl_refl. }
     { iIntros "% _ Ψ". iMod ("ΨΨ'" with "Ψ") as "$". by iIntros. }
-    iApply (pbor_ctok_open with "β c").
+    iApply (pbor_ctok_open (PROP:=nPropSO _) (intp:=λ _, ⟦_⟧ˢ) with "β c").
   Qed.
   (** Reborrow a nested prophetic borrower *)
   Lemma pobor_pobor_reborrow `{!GenUpd M} {X Y α q ξ Φ β r η Ψ} y (f : X → Y) :
@@ -591,8 +597,8 @@ Section borrow.
   Proof.
     iIntros "[%Φ'[ΦΦ' o]] o' Ψ →Φ". rewrite aconvert_use.
     iMod (pobor_pobor_tok with "o' Ψ") as "[o' Ψ]".
-    iMod (pobor_pobor_tok_reborrow (intp:=λ P, ⟦ P ⟧ˢ) with "o o' Ψ [ΦΦ' →Φ]")
-      as (?) "[$[$ ?]]".
+    iMod (pobor_pobor_tok_reborrow (PROP:=nPropSO _) (intp:=λ P, ⟦ P ⟧ˢ)
+      with "o o' Ψ [ΦΦ' →Φ]") as (?) "[$[$ ?]]".
     { iIntros "% † b". rewrite pbor_intro nintpS_nintp.
       iMod ("→Φ" with "† b") as "Φ". iMod ("ΦΦ'" with "Φ") as "$". by iIntros. }
     iExists _. by rewrite pborc_intro.
