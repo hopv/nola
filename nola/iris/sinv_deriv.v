@@ -13,7 +13,7 @@ Section sinv_deriv.
     deriv_sinv_ne {δ} :: NonExpansive (deriv_sinv_intp δ);
     deriv_sinv_acsr : PROP $o iProp Σ → PROP $o iProp Σ → DER;
     deriv_sinv_mod : iProp Σ → iProp Σ;
-    deriv_sinv_gen_upd :: GenUpd deriv_sinv_mod;
+    deriv_sinv_mod_gen_upd :: GenUpd deriv_sinv_mod;
     deriv_sinv_acsr_intp {δ P Q} :
       ⟦ deriv_sinv_acsr P Q ⟧(δ) ≡
         acsr deriv_sinv_mod (deriv_sinv_intp δ P) (deriv_sinv_intp δ Q);
