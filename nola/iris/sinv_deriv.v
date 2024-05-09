@@ -7,7 +7,7 @@ Import IntpNotation DerivNotation.
 Section sinv_deriv.
   Context `{!sinvGS PROP Σ}.
 
-  (** Derivability structure for [sinv] *)
+  (** Derivability data for [sinv] *)
   Class DerivSinv (DER : derivst (iProp Σ)) := DERIV_SINV {
     deriv_sinv_intp : deriv_ty DER (iProp Σ) → PROP $o iProp Σ → iProp Σ;
     deriv_sinv_ne {δ} :: NonExpansive (deriv_sinv_intp δ);
