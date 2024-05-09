@@ -149,6 +149,15 @@ Proof.
   iIntros "∀ J J' J''". iApply Deriv_byintp. iIntros (???) "#→ _".
   iApply ("∀" with "[//] [//] [J] [J']"); by iApply "→".
 Qed.
+Lemma Deriv_mapl `{!@Deriv PROP DER ih δ} {Js J'} :
+  (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
+    ([∗ list] J ∈ Js, ⟦ J ⟧(δ')) -∗ ⟦ J' ⟧(δ')) -∗
+  ([∗ list] J ∈ Js, ⸨ J ⸩(δ)) -∗ ⸨ J' ⸩(δ).
+Proof.
+  iIntros "∀ Js". iApply Deriv_byintp. iIntros (???) "#→ _".
+  iApply "∀"; [done..|]. iInduction Js as [|J Js] "IH"=>/=; [done|].
+  iDestruct "Js" as "[J Js]". iSplitL "J"; by [iApply "→"|iApply "IH"].
+Qed.
 
 (** ** [deriv]: Derivability *)
 
