@@ -140,7 +140,7 @@ Section pborrow.
     α ⊑□ β -∗ plend_tok (X:=X) α xπ Φ -∗ plend_tok β xπ Φ.
   Proof. exact lend_tok_lft. Qed.
 
-  (** Take out a prophecy variable from an open prophetic borrower *)
+  (** Take out the full prophecy token from an open prophetic borrower *)
   Lemma pobor_proph_tok {α q X ξ Φ} :
     pobor_tok (X:=X) α q ξ Φ -∗ 1:[ξ] ∗ (1:[ξ] -∗ pobor_tok α q ξ Φ).
   Proof.
