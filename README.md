@@ -61,17 +61,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
 - [`prelude`](nola/prelude.v) : Prelude
 - [`util/`](nola/util/) : General-purpose utilities, extending
   [`stdpp`](https://gitlab.mpi-sws.org/iris/stdpp)
-  + [`funext`](nola/util/funext.v) (Function extensionality)
-  + [`func`](nola/util/func.v) (Functions),
-    [`pred`](nola/util/pred.v) (Predicates),
-    [`rel`](nola/util/rel.v) (Relations),
-    [`list`](nola/util/list.v) (Lists),
-    [`nat`](nola/util/nat.v) (Natural numbers)
   + [`prod`](nola/util/prod.v) (Modified product),
-    [`schoice`](nola/util/schoice.v) (Variant over a list),
     [`plist`](nola/util/plist.v) (Product list)
-  + [`hgt`](nola/util/hgt.v) (General height of a tree),
-    [`ctx`](nola/util/ctx.v) (Context with unguarded/guarded variables)
   + [`proph`](nola/util/proph.v) (Prophecy)
 - [`iris/`](nola/iris) : Iris libraries
   + [`ofe`](nola/iris/ofe.v) (OFEs)

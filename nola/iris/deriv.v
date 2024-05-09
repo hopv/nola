@@ -1,6 +1,6 @@
 (** * [deriv]: Derivability *)
 
-From nola.util Require Export pred.
+From nola Require Export prelude.
 From iris.bi Require Import lib.fixpoint.
 From iris.proofmode Require Import proofmode.
 
@@ -110,11 +110,12 @@ Qed.
 
 (** [Deriv] can accumulate the inductive hypothesis *)
 Lemma Deriv_acc {PROP DER ih} res :
-  (∀ δ, @Deriv PROP DER (res ∧₁ ih) δ → res δ) → ∀ δ, Deriv ih δ → res δ.
+  (∀ δ, @Deriv PROP DER (λ δ, res δ ∧ ih δ) δ → res δ) →
+    ∀ δ, Deriv ih δ → res δ.
 Proof.
   move=> to δ dyd. apply to. move: δ dyd. fix FIX 2=> δ [[dy[dyto byintp]]].
-  split. exists (Deriv (res ∧₁ ih)). split; [done|]=>/= ?. iIntros "big".
-  iApply byintp. iIntros (? dyd' ?). move: dyd'=>/dyto/FIX ?.
+  split. exists (Deriv (λ δ, res δ ∧ ih δ)). split; [done|]=>/= ?.
+  iIntros "big". iApply byintp. iIntros (? dyd' ?). move: dyd'=>/dyto/FIX ?.
   iApply "big"; iPureIntro; [done|]. split; by [apply to|].
 Qed.
 
@@ -164,7 +165,7 @@ Qed.
 (** [der_gen]: What becomes [der] by taking [bi_least_fixpoint] *)
 Definition der_gen {PROP} {DER : derivst PROP} (self : DER → PROP)
   : DER → PROP := λ J,
-  (∀ δ, ⌜@Deriv PROP DER True₁ δ⌝ → □ dsound (Dwrap self) δ -∗
+  (∀ δ, ⌜@Deriv PROP DER (λ _, True) δ⌝ → □ dsound (Dwrap self) δ -∗
     □ dtrans (Dwrap self) δ -∗ ⟦ J ⟧(δ))%I.
 #[export] Instance der_gen_mono {PROP DER} :
   BiMonoPred (A:=leibnizO _) (@der_gen PROP DER).
@@ -189,7 +190,7 @@ Module DerivNotation.
 End DerivNotation.
 
 (** [der] satisfies [Deriv] *)
-#[export] Instance der_Deriv {PROP DER} : @Deriv PROP DER True₁ der.
+#[export] Instance der_Deriv {PROP DER} : @Deriv PROP DER (λ _, True) der.
 Proof.
   rewrite der_unseal. split. eexists _. split; [done|]=>/=. iIntros (?) "big".
   rewrite least_fixpoint_unfold. iIntros (??) "#→δ #→δ'".

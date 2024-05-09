@@ -1,7 +1,7 @@
 (** * Prophecy *)
 
 From nola.util Require Export proph.
-From nola.util Require Import rel plist.
+From nola.util Require Import plist.
 From nola.iris Require Import list gmap.
 From iris.algebra Require Import gmap csum frac agree.
 From iris.bi Require Import fractional.
@@ -71,7 +71,7 @@ Local Lemma proph_upd_self {TY} {π : proph_asn TY} {ξ xπ} :
   :<[ξ := xπ]> π ξ = xπ π.
 Proof.
   unfold proph_upd. case: (decide (ξ = ξ)); [|done]=> eq.
-  by rewrite (eq_dec_refl eq).
+  by rewrite (proof_irrel eq eq_refl).
 Qed.
 Local Lemma proph_upd_ne {TY} {π : proph_asn TY} {ξ xπ η} :
   ξ ≠ η → :<[ξ := xπ]> π η = π η.
