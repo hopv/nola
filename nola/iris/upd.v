@@ -145,8 +145,8 @@ Qed.
 
 Class WsatIncl {PROP : bi} (W W' Wr : PROP) : Prop :=
   wsat_incl : W ⊣⊢ W' ∗ Wr.
-Arguments WsatIncl {_} _%I _%I _%I : simpl never.
-Arguments wsat_incl {_} _%I _%I _%I {_}.
+Arguments WsatIncl {_} _%_I _%_I _%_I : simpl never.
+Arguments wsat_incl {_} _%_I _%_I _%_I {_}.
 Hint Mode WsatIncl + ! ! - : typeclass_instances.
 
 Section wsat_incl.
