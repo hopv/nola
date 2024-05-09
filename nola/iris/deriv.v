@@ -37,66 +37,57 @@ Canonical dwrap_ofe (A : ofe) := Ofe (dwrap A) (dwrap_ofe_mixin A).
 #[export] Instance Dwrap_ne `{A : ofe} : NonExpansive (Dwrap (A:=A)).
 Proof. solve_proper. Qed.
 
-(** [derivs]: Derivation structure *)
-#[projections(primitive)]
-Structure derivs : Type := Derivs {
-  (** Data type *)
-  derivs_car :> Type;
-  (** BI logic for interpretation *)
-  #[canonical=no] derivs_bi : bi;
-}.
-Add Printing Constructor derivs.
-Implicit Type D : derivs.
+Implicit Type (JUDG : Type) (PROP : bi).
 
 (** Type for derivability *)
-Definition deriv_ty' (D : derivs) : Type := D -d> D.(derivs_bi).
-Notation deriv_ty D := (dwrap (deriv_ty' D)).
+Notation deriv_ty JUDG PROP := (dwrap (JUDG -d> PROP)).
 
-(** [derivsi]: [derivs] with interpretation *)
-Structure derivsi : Type := Derivsi {
-  derivsi_derivs :> derivs;
+(** [derivs]: Derivation structure *)
+Structure derivst (PROP : bi) : Type := Derivst {
+  derivst_judg :> Type;
   (** Interpretation parameterized over derivability candidates *)
-  #[canonical=no] derivsi_intp :
-    deriv_ty derivsi_derivs → deriv_ty' derivsi_derivs;
+  #[canonical=no] derivst_intp :
+    deriv_ty derivst_judg PROP → derivst_judg → PROP;
 }.
-Arguments derivsi_intp {D} : rename.
-Implicit Type DI : derivsi.
+Arguments derivst_judg {PROP DER} : rename.
+Arguments derivst_intp {PROP DER} : rename.
 
 (** Notation for [derivs_intp] *)
-Notation derivsi_intp' δ := (Dwrap (derivsi_intp δ)).
+Notation derivst_intp' δ := (Dwrap (derivst_intp δ)).
 Module IntpNotation.
-  Notation "⟦ J ⟧ ( δ )" := (derivsi_intp δ J)
+  Notation "⟦ J ⟧ ( δ )" := (derivst_intp δ J)
     (format "'[' ⟦  J  ⟧ '/  ' ( δ ) ']'") : nola_scope.
 End IntpNotation.
 Import IntpNotation.
 
 (** Conversion between candidates [δ], [δ'] *)
-Definition dtrans {D} (δ δ' : deriv_ty D) : D.(derivs_bi) :=
+Definition dtrans {JUDG PROP} (δ δ' : deriv_ty JUDG PROP) : PROP :=
   ∀ J, ⸨ J ⸩(δ) -∗ ⸨ J ⸩(δ').
-#[export] Instance dtrans_ne {D} : NonExpansive2 (dtrans (D:=D)).
+#[export] Instance dtrans_ne {JUDG PROP} : NonExpansive2 (@dtrans JUDG PROP).
 Proof.
   unfold dtrans=> ??? seq ?? δ'eq. do 3 f_equiv; [apply seq|apply δ'eq].
 Qed.
 
 (** Soundness of a candidate [δ] with respect the semantics by [δ'] *)
-Definition dsound {DI} (δ δ' : deriv_ty DI) : DI.(derivs_bi) :=
-  ∀ J, ⸨ J ⸩(δ) -∗ ⟦ J ⟧(δ').
+Definition dsound {PROP} {DER : derivst PROP} (δ δ' : deriv_ty DER PROP)
+  : PROP := ∀ J, ⸨ J ⸩(δ) -∗ ⟦ J ⟧(δ').
 
 (** ** [Deriv] : Derivability candidate *)
 
-Inductive Deriv DI (ih : deriv_ty DI → Prop) (δ : deriv_ty DI) : Prop := {
+Inductive Deriv {PROP} {DER : derivst PROP}
+  (ih : deriv_ty DER PROP → Prop) (δ : deriv_ty DER PROP) : Prop := {
   (** For [Deriv_intp] *)
   Deriv_byintp' :
     (* Parameterization by [Deriv'] is for strict positivity *)
-    ∃ Deriv' : _ → Prop, (∀ δ', Deriv' δ' → Deriv DI ih δ') ∧ ∀ J,
+    ∃ Deriv' : _ → Prop, (∀ δ', Deriv' δ' → Deriv ih δ') ∧ ∀ J,
       (∀ δ', ⌜Deriv' δ'⌝ → ⌜ih δ'⌝ →
         □ dsound δ δ' -∗ □ dtrans δ δ' -∗ ⟦ J ⟧(δ')) -∗ ⸨ J ⸩(δ)
 }.
 Existing Class Deriv.
 
 (** Get the candidate [⸨ J ⸩(δ)] by the interpretaion *)
-Lemma Deriv_byintp `{!Deriv DI ih δ} {J} :
-  (∀ δ', (* Take any candidate [δ'] *) ⌜Deriv DI ih δ'⌝ →
+Lemma Deriv_byintp `{!@Deriv PROP DER ih δ} {J} :
+  (∀ δ', (* Take any candidate [δ'] *) ⌜Deriv ih δ'⌝ →
     (* Get access to the inductive hypothesis *) ⌜ih δ'⌝ →
     (* Turn the base candidate into the sematics by the given candidate *)
       □ dsound δ δ' -∗
@@ -104,54 +95,54 @@ Lemma Deriv_byintp `{!Deriv DI ih δ} {J} :
     (* The semantics by the given candidate *) ⟦ J ⟧(δ'))
   -∗ (* The base candidate *) ⸨ J ⸩(δ).
 Proof.
-  have X := (@Deriv_byintp' _ ih δ). move: X=> [dy[dyto byintp]]. iIntros "→".
+  have X := (@Deriv_byintp' _ _ ih δ). move: X=> [dy[dyto byintp]]. iIntros "→".
   iApply byintp. iIntros (δ' dyd'). apply dyto in dyd'. by iApply "→".
 Qed.
 
 (** [Deriv] is monotone over the inductive hypothesis *)
-Lemma Deriv_mono `{!Deriv DI ih δ} (ih' : _ → Prop) :
-  (∀ δ', ih δ' → ih' δ') → Deriv DI ih' δ.
+Lemma Deriv_mono `{D : !@Deriv PROP DER ih δ} (ih' : _ → Prop) :
+  (∀ δ', ih δ' → ih' δ') → Deriv ih' δ.
 Proof.
-  move=> ihto. move: δ Deriv0. fix FIX 2=> δ [[dy[dyto byintp]]]. split.
-  exists (Deriv _ ih'). split; [done|]=>/= ?. iIntros "big". iApply byintp.
+  move=> ihto. move: δ D. fix FIX 2=> δ [[dy[dyto byintp]]]. split.
+  exists (Deriv ih'). split; [done|]=>/= ?. iIntros "big". iApply byintp.
   iIntros (???). iApply "big"; iPureIntro; by [apply FIX, dyto|apply ihto].
 Qed.
 
 (** [Deriv] can accumulate the inductive hypothesis *)
-Lemma Deriv_acc {DI ih} res :
-  (∀ δ, Deriv DI (res ∧₁ ih) δ → res δ) → ∀ δ, Deriv DI ih δ → res δ.
+Lemma Deriv_acc {PROP DER ih} res :
+  (∀ δ, @Deriv PROP DER (res ∧₁ ih) δ → res δ) → ∀ δ, Deriv ih δ → res δ.
 Proof.
   move=> to δ dyd. apply to. move: δ dyd. fix FIX 2=> δ [[dy[dyto byintp]]].
-  split. exists (Deriv _ (res ∧₁ ih)). split; [done|]=>/= ?. iIntros "big".
+  split. exists (Deriv (res ∧₁ ih)). split; [done|]=>/= ?. iIntros "big".
   iApply byintp. iIntros (? dyd' ?). move: dyd'=>/dyto/FIX ?.
   iApply "big"; iPureIntro; [done|]. split; by [apply to|].
 Qed.
 
 (** Introduce a candidate *)
-Lemma Deriv_intro `{!Deriv DI ih δ} {J} :
-  (∀ δ', ⌜Deriv DI ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ')) -∗ ⸨ J ⸩(δ).
+Lemma Deriv_intro `{!@Deriv PROP DER ih δ} {J} :
+  (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ')) -∗ ⸨ J ⸩(δ).
 Proof.
   iIntros "∀". iApply Deriv_byintp. iIntros (???) "_ _". by iApply "∀".
 Qed.
 
 (** Update candidates *)
-Lemma Deriv_map `{!Deriv DI ih δ} {J J'} :
-  (∀ δ', ⌜Deriv DI ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ')) -∗
+Lemma Deriv_map `{!@Deriv PROP DER ih δ} {J J'} :
+  (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ')) -∗
   ⸨ J ⸩(δ) -∗ ⸨ J' ⸩(δ).
 Proof.
   iIntros "∀ J". iApply Deriv_byintp. iIntros (???) "#→ _".
   iApply "∀"; by [| |iApply "→"].
 Qed.
-Lemma Deriv_map2 `{!Deriv DI ih δ} {J J' J''} :
-  (∀ δ', ⌜Deriv DI ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ') -∗
+Lemma Deriv_map2 `{!@Deriv PROP DER ih δ} {J J' J''} :
+  (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ') -∗
     ⟦ J'' ⟧(δ')) -∗
   ⸨ J ⸩(δ) -∗ ⸨ J' ⸩(δ) -∗ ⸨ J'' ⸩(δ).
 Proof.
   iIntros "∀ J J'". iApply Deriv_byintp. iIntros (???) "#→ _".
   iApply ("∀" with "[//] [//] [J]"); by iApply "→".
 Qed.
-Lemma Deriv_map3 `{!Deriv DI ih δ} {J J' J'' J'''} :
-  (∀ δ', ⌜Deriv DI ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ') -∗
+Lemma Deriv_map3 `{!@Deriv PROP DER ih δ} {J J' J'' J'''} :
+  (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ') -∗
     ⟦ J'' ⟧(δ') -∗ ⟦ J''' ⟧(δ')) -∗
   ⸨ J ⸩(δ) -∗ ⸨ J' ⸩(δ) -∗ ⸨ J'' ⸩(δ) -∗ ⸨ J''' ⸩(δ).
 Proof.
@@ -162,11 +153,12 @@ Qed.
 (** ** [deriv]: Derivability *)
 
 (** [deriv_gen]: What becomes [deriv] by taking [bi_least_fixpoint] *)
-Definition deriv_gen {DI} (self : deriv_ty' DI) : deriv_ty' DI := λ J,
-  (∀ δ, ⌜Deriv DI True₁ δ⌝ → □ dsound (Dwrap self) δ -∗
+Definition deriv_gen {PROP} {DER : derivst PROP} (self : DER → PROP)
+  : DER → PROP := λ J,
+  (∀ δ, ⌜@Deriv PROP DER True₁ δ⌝ → □ dsound (Dwrap self) δ -∗
     □ dtrans (Dwrap self) δ -∗ ⟦ J ⟧(δ))%I.
-#[export] Instance deriv_gen_mono {DI} :
-  BiMonoPred (A:=leibnizO _) (deriv_gen (DI:=DI)).
+#[export] Instance deriv_gen_mono {PROP DER} :
+  BiMonoPred (A:=leibnizO _) (@deriv_gen PROP DER).
 Proof.
   split; [|solve_proper]=> Φ Ψ ??. iIntros "#ΦΨ" (?) "big".
   iIntros (??) "#Ψδ #Ψδ'".
@@ -175,10 +167,10 @@ Proof.
 Qed.
 
 (** [deriv]: Derivability *)
-Definition deriv_def {DI} : deriv_ty DI :=
-    Dwrap (bi_least_fixpoint (A:=leibnizO _) deriv_gen).
+Definition deriv_def {PROP} {DER : derivst PROP} : deriv_ty DER PROP :=
+  Dwrap (bi_least_fixpoint (A:=leibnizO _) (@deriv_gen PROP DER)).
 Lemma deriv_aux : seal (@deriv_def). Proof. by eexists. Qed.
-Definition deriv {DI} := deriv_aux.(unseal) DI.
+Definition deriv {PROP DER} := deriv_aux.(unseal) PROP DER.
 Lemma deriv_unseal : @deriv = @deriv_def. Proof. exact: seal_eq. Qed.
 
 (** Notation for [dwrap] *)
@@ -188,7 +180,7 @@ Module DerivNotation.
 End DerivNotation.
 
 (** [deriv] satisfies [Deriv] *)
-#[export] Instance deriv_Deriv {DI} : Deriv DI True₁ deriv.
+#[export] Instance deriv_Deriv {PROP DER} : @Deriv PROP DER True₁ deriv.
 Proof.
   rewrite deriv_unseal. split. eexists _. split; [done|]=>/=. iIntros (?) "big".
   rewrite least_fixpoint_unfold. iIntros (??) "#→δ #→δ'".
@@ -196,7 +188,7 @@ Proof.
 Qed.
 
 (** [deriv] is sound w.r.t. the interpretation under [deriv] *)
-Lemma deriv_sound {DI} : ⊢ dsound (DI:=DI) deriv deriv.
+Lemma deriv_sound {PROP DER} : ⊢ @dsound PROP DER deriv deriv.
 Proof.
   rewrite deriv_unseal. iApply (least_fixpoint_ind (A:=leibnizO _)).
   iIntros "!> % gen". rewrite -deriv_unseal.
