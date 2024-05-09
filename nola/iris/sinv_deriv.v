@@ -20,7 +20,7 @@ Section sinv_deriv.
   }.
   Local Notation "⟦ P ⟧' ( δ )" := (deriv_sinv_intp δ P)
     (format "'[' ⟦  P  ⟧' '/  ' ( δ ) ']'") : nola_scope.
-  Local Notation "⟦ P ⟧'" := (⟦ P ⟧'(deriv)).
+  Local Notation "⟦ P ⟧'" := (⟦ P ⟧'(der)).
 
   Context `{!DerivSinv DER}.
 
@@ -40,11 +40,11 @@ Section sinv_deriv.
 
   (** Access [sinv] *)
   Lemma sinv_acc {P} :
-    sinv deriv P -∗ sinv_wsatd deriv -∗
-      deriv_sinv_mod (⟦ P ⟧' ∗ (⟦ P ⟧' -∗ deriv_sinv_mod (sinv_wsatd deriv))).
+    sinv der P -∗ sinv_wsatd der -∗
+      deriv_sinv_mod (⟦ P ⟧' ∗ (⟦ P ⟧' -∗ deriv_sinv_mod (sinv_wsatd der))).
   Proof.
     rewrite sinv_unseal. iIntros "[%Q[QPQ s]] W".
-    iDestruct (deriv_sound with "QPQ") as "QPQ". rewrite deriv_sinv_acsr_intp.
+    iDestruct (der_sound with "QPQ") as "QPQ". rewrite deriv_sinv_acsr_intp.
     iDestruct (sinv_tok_acc with "s W") as "[Q cl]".
     iMod ("QPQ" with "Q") as "[$ PQ]". iIntros "!> P".
     iMod ("PQ" with "P") as "Q". iModIntro. by iApply "cl".

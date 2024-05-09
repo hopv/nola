@@ -159,15 +159,15 @@ Proof.
   iDestruct "Js" as "[J Js]". iSplitL "J"; by [iApply "→"|iApply "IH"].
 Qed.
 
-(** ** [deriv]: Derivability *)
+(** ** [der]: Derivability *)
 
-(** [deriv_gen]: What becomes [deriv] by taking [bi_least_fixpoint] *)
-Definition deriv_gen {PROP} {DER : derivst PROP} (self : DER → PROP)
+(** [der_gen]: What becomes [der] by taking [bi_least_fixpoint] *)
+Definition der_gen {PROP} {DER : derivst PROP} (self : DER → PROP)
   : DER → PROP := λ J,
   (∀ δ, ⌜@Deriv PROP DER True₁ δ⌝ → □ dsound (Dwrap self) δ -∗
     □ dtrans (Dwrap self) δ -∗ ⟦ J ⟧(δ))%I.
-#[export] Instance deriv_gen_mono {PROP DER} :
-  BiMonoPred (A:=leibnizO _) (@deriv_gen PROP DER).
+#[export] Instance der_gen_mono {PROP DER} :
+  BiMonoPred (A:=leibnizO _) (@der_gen PROP DER).
 Proof.
   split; [|solve_proper]=> Φ Ψ ??. iIntros "#ΦΨ" (?) "big".
   iIntros (??) "#Ψδ #Ψδ'".
@@ -175,32 +175,32 @@ Proof.
     by iApply "ΦΨ".
 Qed.
 
-(** [deriv]: Derivability *)
-Definition deriv_def {PROP} {DER : derivst PROP} : deriv_ty DER PROP :=
-  Dwrap (bi_least_fixpoint (A:=leibnizO _) (@deriv_gen PROP DER)).
-Lemma deriv_aux : seal (@deriv_def). Proof. by eexists. Qed.
-Definition deriv {PROP DER} := deriv_aux.(unseal) PROP DER.
-Lemma deriv_unseal : @deriv = @deriv_def. Proof. exact: seal_eq. Qed.
+(** [der]: Derivability *)
+Definition der_def {PROP} {DER : derivst PROP} : deriv_ty DER PROP :=
+  Dwrap (bi_least_fixpoint (A:=leibnizO _) (@der_gen PROP DER)).
+Lemma der_aux : seal (@der_def). Proof. by eexists. Qed.
+Definition der {PROP DER} := der_aux.(unseal) PROP DER.
+Lemma der_unseal : @der = @der_def. Proof. exact: seal_eq. Qed.
 
 (** Notation for [dwrap] *)
 Module DerivNotation.
   Export DerivNotation'.
-  Notation "⸨ J ⸩" := ⸨ J ⸩(deriv) (format "⸨  J  ⸩") : nola_scope.
+  Notation "⸨ J ⸩" := ⸨ J ⸩(der) (format "⸨  J  ⸩") : nola_scope.
 End DerivNotation.
 
-(** [deriv] satisfies [Deriv] *)
-#[export] Instance deriv_Deriv {PROP DER} : @Deriv PROP DER True₁ deriv.
+(** [der] satisfies [Deriv] *)
+#[export] Instance der_Deriv {PROP DER} : @Deriv PROP DER True₁ der.
 Proof.
-  rewrite deriv_unseal. split. eexists _. split; [done|]=>/=. iIntros (?) "big".
+  rewrite der_unseal. split. eexists _. split; [done|]=>/=. iIntros (?) "big".
   rewrite least_fixpoint_unfold. iIntros (??) "#→δ #→δ'".
   iApply "big"; [done..| |]; iIntros "!> % ?/="; by [iApply "→δ"|iApply "→δ'"].
 Qed.
 
-(** [deriv] is sound w.r.t. the interpretation under [deriv] *)
-Lemma deriv_sound {PROP DER} : ⊢ @dsound PROP DER deriv deriv.
+(** [der] is sound w.r.t. the interpretation under [der] *)
+Lemma der_sound {PROP DER} : ⊢ @dsound PROP DER der der.
 Proof.
-  rewrite deriv_unseal. iApply (least_fixpoint_ind (A:=leibnizO _)).
-  iIntros "!> % gen". rewrite -deriv_unseal.
-  iApply ("gen" $! _ deriv_Deriv); iIntros "!> % /="; rewrite deriv_unseal.
+  rewrite der_unseal. iApply (least_fixpoint_ind (A:=leibnizO _)).
+  iIntros "!> % gen". rewrite -der_unseal.
+  iApply ("gen" $! _ der_Deriv); iIntros "!> % /="; rewrite der_unseal.
   { iIntros "[$ _]". } { iIntros "[_ $]". }
 Qed.
