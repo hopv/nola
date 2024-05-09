@@ -27,7 +27,9 @@ nola/iris/later.v
 nola/iris/sinv.v
 nola/iris/sinv_deriv.v
 nola/iris/inv.v
+nola/iris/inv_deriv.v
 nola/iris/na_inv.v
+nola/iris/na_inv_deriv.v
 nola/iris/lft.v
 nola/iris/borrow.v
 nola/iris/proph.v
