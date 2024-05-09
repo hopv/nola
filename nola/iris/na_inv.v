@@ -12,18 +12,18 @@ Implicit Type (PROP : oFunctor) (p : na_inv_pool_name) (i : positive).
 Local Definition na_inv_prop PROP : oFunctor :=
   leibnizO (na_inv_pool_name *' positive) * PROP.
 
-Class na_ninvGS PROP Σ := na_ninvGS_in : ninvGS (na_inv_prop PROP) Σ.
-Local Existing Instance na_ninvGS_in.
-Class na_ninvGpreS PROP Σ := na_ninvGpreS_in : ninvGpreS (na_inv_prop PROP) Σ.
-Local Existing Instance na_ninvGpreS_in.
-Definition na_ninvΣ PROP `{!oFunctorContractive PROP} :=
-  #[ninvΣ (na_inv_prop PROP)].
-#[export] Instance subG_na_ninvΣ
-  `{!oFunctorContractive PROP, !subG (na_ninvΣ PROP) Σ} : na_ninvGpreS PROP Σ.
+Class na_inv'GS PROP Σ := na_inv'GS_in : inv'GS (na_inv_prop PROP) Σ.
+Local Existing Instance na_inv'GS_in.
+Class na_inv'GpreS PROP Σ := na_inv'GpreS_in : inv'GpreS (na_inv_prop PROP) Σ.
+Local Existing Instance na_inv'GpreS_in.
+Definition na_inv'Σ PROP `{!oFunctorContractive PROP} :=
+  #[inv'Σ (na_inv_prop PROP)].
+#[export] Instance subG_na_inv'Σ
+  `{!oFunctorContractive PROP, !subG (na_inv'Σ PROP) Σ} : na_inv'GpreS PROP Σ.
 Proof. solve_inG. Qed.
 
-Section na_ninv.
-  Context `{!na_ninvGS PROP Σ, !invGS_gen hlc Σ, !na_invG Σ}.
+Section na_inv.
+  Context `{!na_inv'GS PROP Σ, !invGS_gen hlc Σ, !na_invG Σ}.
   Local Existing Instance na_inv_inG.
 
   (** Access l of an non-atomic invariant *)
@@ -153,11 +153,11 @@ Section na_ninv.
     iMod (fupd_ownE_acc NE) as "[N cl]".
     iDestruct ("cl'" with "N F∖N P W") as "[$[N $]]". by iApply "cl".
   Qed.
-End na_ninv.
+End na_inv.
 
 (** Allocate [na_inv_wsat] *)
-Lemma na_inv_wsat_alloc `{!na_ninvGpreS PROP Σ, !invGS_gen hlc Σ, !na_invG Σ} :
-  ⊢ |==> ∃ _ : na_ninvGS PROP Σ, ∀ intp, na_inv_wsat intp.
+Lemma na_inv_wsat_alloc `{!na_inv'GpreS PROP Σ, !invGS_gen hlc Σ, !na_invG Σ} :
+  ⊢ |==> ∃ _ : na_inv'GS PROP Σ, ∀ intp, na_inv_wsat intp.
 Proof.
   iMod inv_wsat_alloc as (?) "W". iModIntro. iExists _. iIntros (?).
   rewrite na_inv_wsat_unseal. iApply "W".

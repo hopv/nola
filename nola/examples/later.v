@@ -9,7 +9,7 @@ Definition iter : val := rec: "self" "f" "c" "l" :=
     "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (!("l" +ₗ #1)).
 
 Section iris.
-  Context `{!ninvGS (▶ ∙) Σ, !heapGS_gen HasNoLc Σ}.
+  Context `{!inv'GS (▶ ∙) Σ, !heapGS_gen HasNoLc Σ}.
   Implicit Type (N : namespace) (Φ : loc → iProp Σ) (l : loc).
 
   (** Fixed point generator of [ilist] *)

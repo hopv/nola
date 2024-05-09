@@ -24,7 +24,7 @@ Definition iter : val := rec: "self" "f" "c" "l" :=
     "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (!("l" +ₗ #1)).
 
 Section iris.
-  Context `{!ninvGS nPropO Σ, !heapGS_gen HasNoLc Σ}.
+  Context `{!inv'GS nPropO Σ, !heapGS_gen HasNoLc Σ}.
 
   (** ** Interpretation of [nProp] *)
   Fixpoint intp (P : nProp) : iProp Σ := match P with

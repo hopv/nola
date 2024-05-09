@@ -7,17 +7,17 @@ From iris.proofmode Require Import proofmode.
 
 Implicit Type (PROP : oFunctor) (i : positive) (N : namespace).
 
-Class ninvGpreS PROP Σ := ninvGpreS_sinv : sinvGpreS PROP Σ.
-Local Existing Instance ninvGpreS_sinv.
-Class ninvGS PROP Σ := ninvGS_sinv : sinvGS PROP Σ.
-Local Existing Instance ninvGS_sinv.
-Definition ninvΣ PROP `{!oFunctorContractive PROP} := #[sinvΣ PROP].
-#[export] Instance subG_ninvΣ
-  `{!oFunctorContractive PROP, !subG (ninvΣ PROP) Σ} : ninvGpreS PROP Σ.
+Class inv'GpreS PROP Σ := inv'GpreS_sinv : sinvGpreS PROP Σ.
+Local Existing Instance inv'GpreS_sinv.
+Class inv'GS PROP Σ := inv'GS_sinv : sinvGS PROP Σ.
+Local Existing Instance inv'GS_sinv.
+Definition inv'Σ PROP `{!oFunctorContractive PROP} := #[sinvΣ PROP].
+#[export] Instance subG_inv'Σ
+  `{!oFunctorContractive PROP, !subG (inv'Σ PROP) Σ} : inv'GpreS PROP Σ.
 Proof. solve_inG. Qed.
 
-Section inv_tok.
-  Context `{!ninvGS PROP Σ, !invGS_gen hlc Σ}.
+Section inv.
+  Context `{!inv'GS PROP Σ, !invGS_gen hlc Σ}.
   Implicit Type P : PROP $o iProp Σ.
 
   (** [inv_tok]: Invariant token *)
@@ -126,11 +126,11 @@ Section inv_tok.
     iIntros "!> P W". iDestruct ("cl'" with "N∖N P W") as "[$ N]".
     by iApply "cl".
   Qed.
-End inv_tok.
+End inv.
 
 (** Allocate [inv_wsat] *)
-Lemma inv_wsat_alloc `{!ninvGpreS PROP Σ, !invGS_gen hlc Σ} :
-  ⊢ |==> ∃ _ : ninvGS PROP Σ, ∀ intp, inv_wsat intp.
+Lemma inv_wsat_alloc `{!inv'GpreS PROP Σ, !invGS_gen hlc Σ} :
+  ⊢ |==> ∃ _ : inv'GS PROP Σ, ∀ intp, inv_wsat intp.
 Proof.
   iMod sinv_wsat_alloc as (?) "W". iModIntro. iExists _. iIntros (?).
   rewrite inv_wsat_unseal. iApply "W".
