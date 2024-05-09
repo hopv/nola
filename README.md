@@ -80,10 +80,13 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     [`plist`](nola/iris/plist.v) (On `plist`)
   + [`deriv`](nola/iris/deriv.v) (Derivability)
   + [`upd`](nola/iris/upd.v) (Update),
-    [`wp`](nola/iris/wp.v) (Weakest precondition)
+    [`wp`](nola/iris/wp.v) (Weakest precondition),
+    [`util`](nola/iris/util.v) (Utilities)
   + [`later`](nola/iris/later.v) (Later)
   + [`sinv`](nola/iris/sinv.v) (Simple invariant),
-    [`inv`](nola/iris/inv.v) (Invariant),
+    [`sinv_deriv`](nola/iris/sinv_deriv.v) (Simple invariant relaxed with
+      derivability)
+  + [`inv`](nola/iris/inv.v) (Invariant),
     [`na_inv`](nola/iris/na_inv.v) (Non-atomic invariant)
   + [`lft`](nola/iris/lft.v) (Lifetime),
     [`borrow`](nola/iris/borrow.v) (Borrowing)
