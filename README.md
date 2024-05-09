@@ -96,24 +96,3 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     with `Ndnat` (terminating infinite non-determinism) added
   + [`minilogic`](nola/examples/minilogic.v) : Minimal showcase logic
   + [`later`](nola/examples/later.v) : Instantiating Nola with later
-  + [`logic/`](nola/examples/logic/) : Showcase Logic
-    * [`synty`](nola/examples/logic/synty.v) (Syntactic type),
-    * [`prop`](nola/examples/logic/prop.v) (Proposition),
-      [`subst`](nola/examples/logic/subst.v) (Substitution),
-      [`iris`](nola/examples/logic/iris.v) (Iris preliminaries),
-      [`intp`](nola/examples/logic/intp.v) (Interpretation),
-      [`deriv`](nola/examples/logic/deriv.v) (Derivability)
-    * [`facts`](nola/examples/logic/facts.v) (Facts),
-      [`adequacy`](nola/examples/logic/adequacy.v) (Adequacy)
-    * [`sinv`](nola/examples/logic/sinv.v) (Simple invariant),
-      [`inv`](nola/examples/logic/inv.v) (Invariant),
-      [`na_inv`](nola/examples/logic/na_inv.v) (Non-atomic invariant),
-      [`borrow`](nola/examples/logic/borrow.v) (Borrowing)
-    * [`verify/`](nola/examples/logic/verify/) (Verification examples)
-      - [`vlist`](nola/examples/logic/verify/vlist.v) (Shared mutable list with
-        values)
-      - [`ilist_base`](nola/examples/logic/verify/ilist_base.v),
-        [`ilist`](nola/examples/logic/verify/ilist.v),
-        [`na_ilist`](nola/examples/logic/verify/ilist.v) (Shared mutable
-          infinite list)
-      - [`borrow`](nola/examples/logic/verify/borrow.v) (Borrowing)

@@ -51,21 +51,3 @@ nola/examples/heap_lang/total_adequacy.v
 nola/examples/later.v
 
 nola/examples/minilogic.v
-
-nola/examples/logic/synty.v
-nola/examples/logic/prop.v
-nola/examples/logic/subst.v
-nola/examples/logic/iris.v
-nola/examples/logic/intp.v
-nola/examples/logic/deriv.v
-nola/examples/logic/facts.v
-nola/examples/logic/adequacy.v
-nola/examples/logic/sinv.v
-nola/examples/logic/inv.v
-nola/examples/logic/na_inv.v
-nola/examples/logic/borrow.v
-nola/examples/logic/verify/vlist.v
-nola/examples/logic/verify/ilist_base.v
-nola/examples/logic/verify/ilist.v
-nola/examples/logic/verify/na_ilist.v
-nola/examples/logic/verify/borrow.v
