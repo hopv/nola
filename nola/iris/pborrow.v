@@ -85,8 +85,20 @@ Section pborrow.
   Definition nobor_tok α q P : iProp Σ := obor_tok α q (xjust P).
   Definition nlend_tok α P : iProp Σ := lend_tok α (xjust P).
 
-  (** Prophetic borrower and lender tokens are timeless
-    if the underlying ofe is discrete *)
+  (** Borrower and lender tokens are timeless if the underlying ofe is discrete
+    *)
+  Fact nborc_tok_timeless `{!OfeDiscrete (PROP $o iProp Σ)} {α P} :
+    Timeless (nborc_tok α P).
+  Proof. exact _. Qed.
+  Fact nbor_tok_timeless `{!OfeDiscrete (PROP $o iProp Σ)} {α P} :
+    Timeless (nbor_tok α P).
+  Proof. exact _. Qed.
+  Fact nobor_tok_timeless `{!OfeDiscrete (PROP $o iProp Σ)} {α q P} :
+    Timeless (nobor_tok α q P).
+  Proof. exact _. Qed.
+  Fact nlend_tok_timeless `{!OfeDiscrete (PROP $o iProp Σ)} {α P} :
+    Timeless (nlend_tok α P).
+  Proof. exact _. Qed.
   #[export] Instance pborc_tok_timeless `{!OfeDiscrete (PROP $o iProp Σ)}
     {α X x ξ Φ} :
     Timeless (pborc_tok (X:=X) α x ξ Φ).
@@ -103,6 +115,9 @@ Section pborrow.
     Timeless (plend_tok (X:=X) α xπ Φ).
   Proof. exact _. Qed.
 
+  (** Turn [nborc_tok] to [nbor_tok] *)
+  Lemma nborc_tok_tok {α P} : nborc_tok α P ⊢ nbor_tok α P.
+  Proof. exact borc_tok_tok. Qed.
   (** Turn [pborc_tok] to [pbor_tok] *)
   Lemma pborc_tok_tok {α X x ξ Φ} : pborc_tok (X:=X) α x ξ Φ ⊢ pbor_tok α x ξ Φ.
   Proof.
@@ -110,12 +125,25 @@ Section pborrow.
     by setoid_rewrite borc_tok_tok.
   Qed.
 
-  (** Fake a prophetic borrower token from the dead lifetime token *)
+  (** Fake a borrower token from the dead lifetime token *)
+  Lemma nborc_tok_fake {α P} : [†α] ⊢ nborc_tok α P.
+  Proof. exact borc_tok_fake. Qed.
+  Lemma nbor_tok_fake {α P} : [†α] ⊢ nbor_tok α P.
+  Proof. exact bor_tok_fake. Qed.
   Lemma pborc_tok_fake {α X x ξ Φ} : [†α] ⊢ pborc_tok (X:=X) α x ξ Φ.
   Proof. rewrite pborc_tok_unseal. iIntros. by iLeft. Qed.
   Lemma pbor_tok_fake {α X x ξ Φ} : [†α] ⊢ pbor_tok (X:=X) α x ξ Φ.
   Proof. rewrite pbor_tok_unseal. iIntros. by iLeft. Qed.
   (** Modify the lifetime of borrower and lender tokens *)
+  Lemma nborc_tok_lft {α β P} : β ⊑□ α -∗ nborc_tok α P -∗ nborc_tok β P.
+  Proof. exact borc_tok_lft. Qed.
+  Lemma nbor_tok_lft {α β P} : β ⊑□ α -∗ nbor_tok α P -∗ nbor_tok β P.
+  Proof. exact bor_tok_lft. Qed.
+  Lemma nobor_tok_lft {α β q r P} :
+    β ⊑□ α -∗ (q.[α] -∗ r.[β]) -∗ nobor_tok α q P -∗ nobor_tok β r P.
+  Proof. exact obor_tok_lft. Qed.
+  Lemma nlend_tok_lft {α β P} : α ⊑□ β -∗ nlend_tok α P -∗ nlend_tok β P.
+  Proof. exact lend_tok_lft. Qed.
   Lemma pborc_tok_lft {α β X x ξ Φ} :
     β ⊑□ α -∗ pborc_tok (X:=X) α x ξ Φ -∗ pborc_tok β x ξ Φ.
   Proof.
