@@ -50,12 +50,12 @@ Section pborrow.
   (** ** Tokens *)
 
   (** Prophetic borrower token *)
-  Local Definition pbor_ctok_def {X} α (x : X) (ξ : prvar X)
+  Local Definition pborc_tok_def {X} α (x : X) (ξ : prvar X)
     (Φ : X → PROP $o iProp Σ) : iProp Σ :=
-    [†α] ∨ ∃ γ, val_obs γ x ∗ bor_ctok α (xpbor X γ ξ Φ).
-  Local Lemma pbor_ctok_aux : seal (@pbor_ctok_def). Proof. by eexists. Qed.
-  Definition pbor_ctok {X} := pbor_ctok_aux.(unseal) X.
-  Local Lemma pbor_ctok_unseal : @pbor_ctok = @pbor_ctok_def.
+    [†α] ∨ ∃ γ, val_obs γ x ∗ borc_tok α (xpbor X γ ξ Φ).
+  Local Lemma pborc_tok_aux : seal (@pborc_tok_def). Proof. by eexists. Qed.
+  Definition pborc_tok {X} := pborc_tok_aux.(unseal) X.
+  Local Lemma pborc_tok_unseal : @pborc_tok = @pborc_tok_def.
   Proof. exact: seal_eq. Qed.
   Local Definition pbor_tok_def {X} α (x : X) (ξ : prvar X)
     (Φ : X → PROP $o iProp Σ) : iProp Σ :=
@@ -80,17 +80,17 @@ Section pborrow.
     : iProp Σ := lend_tok α (xplend X xπ Φ).
 
   (** Non-prophetic token *)
-  Definition nbor_ctok α P : iProp Σ := bor_ctok α (xjust P).
+  Definition nborc_tok α P : iProp Σ := borc_tok α (xjust P).
   Definition nbor_tok α P : iProp Σ := bor_tok α (xjust P).
   Definition nobor_tok α q P : iProp Σ := obor_tok α q (xjust P).
   Definition nlend_tok α P : iProp Σ := lend_tok α (xjust P).
 
   (** Prophetic borrower and lender tokens are timeless
     if the underlying ofe is discrete *)
-  #[export] Instance pbor_ctok_timeless `{!OfeDiscrete (PROP $o iProp Σ)}
+  #[export] Instance pborc_tok_timeless `{!OfeDiscrete (PROP $o iProp Σ)}
     {α X x ξ Φ} :
-    Timeless (pbor_ctok (X:=X) α x ξ Φ).
-  Proof. rewrite pbor_ctok_unseal. exact _. Qed.
+    Timeless (pborc_tok (X:=X) α x ξ Φ).
+  Proof. rewrite pborc_tok_unseal. exact _. Qed.
   #[export] Instance pbor_tok_timeless `{!OfeDiscrete (PROP $o iProp Σ)}
     {α X x ξ Φ} :
     Timeless (pbor_tok (X:=X) α x ξ Φ).
@@ -103,25 +103,25 @@ Section pborrow.
     Timeless (plend_tok (X:=X) α xπ Φ).
   Proof. exact _. Qed.
 
-  (** Turn [pbor_ctok] to [pbor_tok] *)
-  Lemma pbor_ctok_tok {α X x ξ Φ} : pbor_ctok (X:=X) α x ξ Φ ⊢ pbor_tok α x ξ Φ.
+  (** Turn [pborc_tok] to [pbor_tok] *)
+  Lemma pborc_tok_tok {α X x ξ Φ} : pborc_tok (X:=X) α x ξ Φ ⊢ pbor_tok α x ξ Φ.
   Proof.
-    rewrite pbor_ctok_unseal pbor_tok_unseal /pbor_ctok_def.
-    by setoid_rewrite bor_ctok_tok.
+    rewrite pborc_tok_unseal pbor_tok_unseal /pborc_tok_def.
+    by setoid_rewrite borc_tok_tok.
   Qed.
 
   (** Fake a prophetic borrower token from the dead lifetime token *)
-  Lemma pbor_ctok_fake {α X x ξ Φ} : [†α] ⊢ pbor_ctok (X:=X) α x ξ Φ.
-  Proof. rewrite pbor_ctok_unseal. iIntros. by iLeft. Qed.
+  Lemma pborc_tok_fake {α X x ξ Φ} : [†α] ⊢ pborc_tok (X:=X) α x ξ Φ.
+  Proof. rewrite pborc_tok_unseal. iIntros. by iLeft. Qed.
   Lemma pbor_tok_fake {α X x ξ Φ} : [†α] ⊢ pbor_tok (X:=X) α x ξ Φ.
   Proof. rewrite pbor_tok_unseal. iIntros. by iLeft. Qed.
   (** Modify the lifetime of borrower and lender tokens *)
-  Lemma pbor_ctok_lft {α β X x ξ Φ} :
-    β ⊑□ α -∗ pbor_ctok (X:=X) α x ξ Φ -∗ pbor_ctok β x ξ Φ.
+  Lemma pborc_tok_lft {α β X x ξ Φ} :
+    β ⊑□ α -∗ pborc_tok (X:=X) α x ξ Φ -∗ pborc_tok β x ξ Φ.
   Proof.
-    rewrite pbor_ctok_unseal. iIntros "#? [?|[%[vo ?]]]".
+    rewrite pborc_tok_unseal. iIntros "#? [?|[%[vo ?]]]".
     { iLeft. by iApply lft_sincl_dead. }
-    iRight. iExists _. iFrame "vo". by iApply bor_ctok_lft.
+    iRight. iExists _. iFrame "vo". by iApply borc_tok_lft.
   Qed.
   Lemma pbor_tok_lft {α β X x ξ Φ} :
     β ⊑□ α -∗ pbor_tok (X:=X) α x ξ Φ -∗ pbor_tok β x ξ Φ.
@@ -214,7 +214,7 @@ Section pborrow.
     ([∗ list] P ∈ Pl, intp P) -∗
     ([†α] -∗ ([∗ list] P ∈ Pl, intp P) -∗ M
       ([∗ list] Q ∈ Ql, intp Q)%I) =[pborrow_wsat M intp]=∗
-      ([∗ list] P ∈ Pl, nbor_ctok α P) ∗ [∗ list] Q ∈ Ql, nlend_tok α Q.
+      ([∗ list] P ∈ Pl, nborc_tok α P) ∗ [∗ list] Q ∈ Ql, nlend_tok α Q.
   Proof.
     iIntros "Pl →Ql".
     iMod (bor_lend_tok_new_list (intp:=pbintp _) α
@@ -222,7 +222,7 @@ Section pborrow.
       by rewrite !big_sepL_fmap.
   Qed.
   Lemma nbor_nlend_tok_new `{!GenUpd M} {intp} α P :
-    intp P =[pborrow_wsat M intp]=∗ nbor_ctok α P ∗ nlend_tok α P.
+    intp P =[pborrow_wsat M intp]=∗ nborc_tok α P ∗ nlend_tok α P.
   Proof.
     iIntros "P". iMod (nbor_nlend_tok_new_list α [P] [P] with "[P] []")
       as "[[$_][$_]]"; by [iFrame|iIntros|].
@@ -244,9 +244,9 @@ Section pborrow.
   Proof. exact lend_tok_retrieve. Qed.
 
   (** Open a borrower *)
-  Lemma nbor_ctok_open `{!NonExpansive intp} {M α q P} :
-    q.[α] -∗ nbor_ctok α P =[pborrow_wsat M intp]=∗ nobor_tok α q P ∗ intp P.
-  Proof. exact bor_ctok_open. Qed.
+  Lemma nborc_tok_open `{!NonExpansive intp} {M α q P} :
+    q.[α] -∗ nborc_tok α P =[pborrow_wsat M intp]=∗ nobor_tok α q P ∗ intp P.
+  Proof. exact borc_tok_open. Qed.
   Lemma nbor_tok_open `{!GenUpd M, !NonExpansive intp} {α q P} :
     q.[α] -∗ nbor_tok α P -∗ modw M (pborrow_wsat M intp)
       (nobor_tok α q P ∗ intp P).
@@ -258,7 +258,7 @@ Section pborrow.
     ([∗ list] Q ∈ Ql, intp Q) -∗
     ([†β] -∗ ([∗ list] Q ∈ Ql, intp Q) -∗ M
       ([∗ list] '(_, _, P)' ∈ αqPl, intp P)%I) =[pborrow_wsat M intp]=∗
-      ([∗ list] '(α, q, _)' ∈ αqPl, q.[α]) ∗ [∗ list] Q ∈ Ql, nbor_ctok β Q.
+      ([∗ list] '(α, q, _)' ∈ αqPl, q.[α]) ∗ [∗ list] Q ∈ Ql, nborc_tok β Q.
   Proof.
     iIntros "ol Ql →Pl".
     iMod (obor_tok_merge_subdiv (intp:=pbintp _)
@@ -268,14 +268,14 @@ Section pborrow.
   Lemma nobor_tok_subdiv `{!GenUpd M, !NonExpansive intp} {α q P} Ql β :
     β ⊑□ α -∗ nobor_tok α q P -∗ ([∗ list] Q ∈ Ql, intp Q) -∗
     ([†β] -∗ ([∗ list] Q ∈ Ql, intp Q) -∗ M (intp P))
-      =[pborrow_wsat M intp]=∗ q.[α] ∗ [∗ list] Q ∈ Ql, nbor_ctok β Q.
+      =[pborrow_wsat M intp]=∗ q.[α] ∗ [∗ list] Q ∈ Ql, nborc_tok β Q.
   Proof.
     iIntros "⊑ o Ql →P".
     iMod (nobor_tok_merge_subdiv [(_,_,_)'] with "[⊑ o] Ql [→P]")
       as "[[$ _]$]"=>/=; by [iFrame|rewrite bi.sep_emp|].
   Qed.
   Lemma nobor_tok_close `{!GenUpd M, !NonExpansive intp} {α q P} :
-    nobor_tok α q P -∗ intp P =[pborrow_wsat M intp]=∗ q.[α] ∗ nbor_ctok α P.
+    nobor_tok α q P -∗ intp P =[pborrow_wsat M intp]=∗ q.[α] ∗ nborc_tok α P.
   Proof.
     iIntros "o P".
     iMod (nobor_tok_subdiv [P] with "[] o [P] []") as "[$[$_]]"=>/=;
@@ -285,15 +285,15 @@ Section pborrow.
   (** Reborrow *)
   Lemma nobor_tok_reborrow `{!GenUpd M, !NonExpansive intp} {α q P} β :
     nobor_tok α q P -∗ intp P =[pborrow_wsat M intp]=∗
-      q.[α] ∗ nbor_ctok (α ⊓ β) P ∗ ([†β] -∗ nbor_tok α P).
+      q.[α] ∗ nborc_tok (α ⊓ β) P ∗ ([†β] -∗ nbor_tok α P).
   Proof. exact: obor_tok_reborrow. Qed.
-  Lemma nbor_ctok_reborrow `{!GenUpd M, !NonExpansive intp} {α q P} β :
-    q.[α] -∗ nbor_ctok α P =[pborrow_wsat M intp]=∗
-      q.[α] ∗ nbor_ctok (α ⊓ β) P ∗ ([†β] -∗ nbor_tok α P).
-  Proof. exact: bor_ctok_reborrow. Qed.
+  Lemma nborc_tok_reborrow `{!GenUpd M, !NonExpansive intp} {α q P} β :
+    q.[α] -∗ nborc_tok α P =[pborrow_wsat M intp]=∗
+      q.[α] ∗ nborc_tok (α ⊓ β) P ∗ ([†β] -∗ nbor_tok α P).
+  Proof. exact: borc_tok_reborrow. Qed.
   Lemma nbor_tok_reborrow `{!GenUpd M, !NonExpansive intp} {α q P} β :
     q.[α] -∗ nbor_tok α P -∗ modw M (pborrow_wsat M intp)
-      (q.[α] ∗ nbor_ctok (α ⊓ β) P ∗ ([†β] -∗ nbor_tok α P)).
+      (q.[α] ∗ nborc_tok (α ⊓ β) P ∗ ([†β] -∗ nbor_tok α P)).
   Proof. exact: bor_tok_reborrow. Qed.
 
   (** ** On prophetic borrowing *)
@@ -336,7 +336,7 @@ Section pborrow.
       ([†α] -∗ ([∗ plist] '(ξ, x, Φ)' ∈ ξxΦl, plend_body_var intp ξ Φ) -∗
         M ([∗ plist] '(yπ, Ψ)' ∈ yπΨl, plend_body intp yπ Ψ))
         =[pborrow_wsat M intp]=∗
-        ([∗ plist] '(ξ, x, Φ)' ∈ ξxΦl, pbor_ctok α x ξ Φ) ∗
+        ([∗ plist] '(ξ, x, Φ)' ∈ ξxΦl, pborc_tok α x ξ Φ) ∗
         ([∗ plist] '(yπ, Ψ)' ∈ yπΨl, plend_tok α yπ Ψ).
   Proof.
     iMod (proph_alloc_list (plist_map (λ _, fst') xΦl)) as (ξl) "ξl".
@@ -352,12 +352,12 @@ Section pborrow.
     iDestruct (big_sepPL_sep_2 with "vol bl") as "vobl".
     rewrite -(plist_zip_snd (xl:=γl) (yl:=ξxΦl)) big_sepPL_map.
     iApply (big_sepPL_impl with "vobl"). iIntros "!>" (?[?[?[??]]]) "/= [vo b]".
-    rewrite pbor_ctok_unseal. iRight. iExists _. iFrame.
+    rewrite pborc_tok_unseal. iRight. iExists _. iFrame.
   Qed.
   (** Simply create a prophetic borrower and a prophetic lender *)
   Lemma pbor_plend_tok_new `{!GenUpd M} {intp} α X x Φ :
     intp (Φ x) =[pborrow_wsat M intp]=∗ ∃ ξ,
-      pbor_ctok (X:=X) α x ξ Φ ∗ plend_tok α (λ π, π ξ) Φ.
+      pborc_tok (X:=X) α x ξ Φ ∗ plend_tok α (λ π, π ξ) Φ.
   Proof.
     iIntros "Φ".
     iMod (pbor_plend_tok_new_list α [X] ((x, Φ)',())') as ([ξ[]]) "big".
@@ -386,13 +386,13 @@ Section pborrow.
   Proof. exact: lend_tok_retrieve. Qed.
 
   (** Open a prophetic borrower *)
-  Lemma pbor_ctok_open `{!NonExpansive intp} {M α q X x ξ Φ} :
-    q.[α] -∗ pbor_ctok (X:=X) α x ξ Φ =[pborrow_wsat M intp]=∗
+  Lemma pborc_tok_open `{!NonExpansive intp} {M α q X x ξ Φ} :
+    q.[α] -∗ pborc_tok (X:=X) α x ξ Φ =[pborrow_wsat M intp]=∗
       pobor_tok α q ξ Φ ∗ intp (Φ x).
   Proof.
-    rewrite pbor_ctok_unseal pobor_tok_unseal. iIntros "α [†|[%[vo c]]]".
+    rewrite pborc_tok_unseal pobor_tok_unseal. iIntros "α [†|[%[vo c]]]".
     { iDestruct (lft_alive_dead with "α †") as "[]". }
-    iMod (bor_ctok_open (intp:=pbintp _) with "α c") as "[o[%[pc Φ]]]".
+    iMod (borc_tok_open (intp:=pbintp _) with "α c") as "[o[%[pc Φ]]]".
     iModIntro. iDestruct (vo_pc_agree with "vo pc") as %<-. iFrame "Φ".
     iExists _. iFrame "o". iExists _. iFrame.
   Qed.
@@ -459,8 +459,8 @@ Section pborrow.
       ([∗ plist] '(α, q, _)' ∈ αqξΦfl, q.[α]) ∗
       ([∗ plist] '(_, _, ξ, _, f)' ∈ αqξΦfl,
         ⟨π, π (Aprvar _ ξ) = f (app_plist_prvar π ηl)⟩) ∗
-      ([∗ plist] '(η, y, Ψ)' ∈ plist_zip ηl yΨl, pbor_ctok β y η Ψ) ∗
-      [∗ list] R ∈ Rl, nbor_ctok β R.
+      ([∗ plist] '(η, y, Ψ)' ∈ plist_zip ηl yΨl, pborc_tok β y η Ψ) ∗
+      [∗ list] R ∈ Rl, nborc_tok β R.
   Proof.
     iIntros "ol Ψl Rl →Φl".
     iMod (proph_alloc_list (plist_map (λ _, fst') yΨl)) as (ηl) "ηl".
@@ -484,7 +484,7 @@ Section pborrow.
     iFrame "αl". iDestruct (big_sepPL_sep_2 with "vol cl") as "vocl".
     rewrite -{2}(plist_zip_snd (xl:=γl') (yl:=plist_zip ηl yΨl)) big_sepPL_map.
     iApply (big_sepPL_impl with "vocl"). iIntros "!>" (?[?[?[??]]]) "/= [vo c]".
-    rewrite pbor_ctok_unseal. iRight. iExists _. iFrame.
+    rewrite pborc_tok_unseal. iRight. iExists _. iFrame.
   Qed.
   (** Subdivide a prophetic borrower *)
   Lemma pobor_tok_subdiv `{!GenUpd M, !NonExpansive intp} {X α q ξ Φ}
@@ -495,8 +495,8 @@ Section pborrow.
       ([∗ list] R ∈ Rl, intp R) -∗ M (intp (Φ (f yl'))))
       =[pborrow_wsat M intp]=∗ ∃ ηl,
       q.[α] ∗ ⟨π, π (Aprvar _ ξ) = f (app_plist_prvar π ηl)⟩ ∗
-      ([∗ plist] '(η, y, Ψ)' ∈ plist_zip ηl yΨl, pbor_ctok β y η Ψ) ∗
-      [∗ list] R ∈ Rl, nbor_ctok β R.
+      ([∗ plist] '(η, y, Ψ)' ∈ plist_zip ηl yΨl, pborc_tok β y η Ψ) ∗
+      [∗ list] R ∈ Rl, nborc_tok β R.
   Proof.
     iIntros "⊑ o Ψl Rl →Φ".
     iMod (pobor_tok_merge_subdiv [_] _ ((_,_,_,_,_)',())'
@@ -508,23 +508,23 @@ Section pborrow.
   (** Resolve the prophecy of a prophetic borrower *)
   Lemma pobor_tok_resolve `{!GenUpd M, !NonExpansive intp} {X α q ξ Φ} x :
     pobor_tok (X:=X) α q ξ Φ -∗ intp (Φ x) =[pborrow_wsat M intp]=∗
-      q.[α] ∗ ⟨π, π ξ = x⟩ ∗ nbor_ctok α (Φ x).
+      q.[α] ∗ ⟨π, π ξ = x⟩ ∗ nborc_tok α (Φ x).
   Proof.
     iIntros "o Φ".
     iMod (pobor_tok_subdiv [] (λ _, x) () [Φ x] with "[] o [//] [Φ] []")
       as (?) "[$[$[_[$ _]]]]"=>/=;
       by [iApply lft_sincl_refl|iFrame|iIntros "% _ _ [$ _]"|].
   Qed.
-  Lemma pbor_ctok_resolve `{!GenUpd M, !NonExpansive intp} {X α q x ξ Φ} :
-    q.[α] -∗ pbor_ctok (X:=X) α x ξ Φ =[pborrow_wsat M intp]=∗
-      q.[α] ∗ ⟨π, π ξ = x⟩ ∗ nbor_ctok α (Φ x).
+  Lemma pborc_tok_resolve `{!GenUpd M, !NonExpansive intp} {X α q x ξ Φ} :
+    q.[α] -∗ pborc_tok (X:=X) α x ξ Φ =[pborrow_wsat M intp]=∗
+      q.[α] ∗ ⟨π, π ξ = x⟩ ∗ nborc_tok α (Φ x).
   Proof.
-    iIntros "α c". iMod (pbor_ctok_open with "α c") as "[o Φ]".
+    iIntros "α c". iMod (pborc_tok_open with "α c") as "[o Φ]".
     iApply (pobor_tok_resolve with "o Φ").
   Qed.
   Lemma pbor_tok_resolve `{!GenUpd M, !NonExpansive intp} {X α q x ξ Φ} :
     q.[α] -∗ pbor_tok (X:=X) α x ξ Φ -∗ modw M (pborrow_wsat M intp)
-      (q.[α] ∗ ⟨π, π ξ = x⟩ ∗ nbor_ctok α (Φ x)).
+      (q.[α] ∗ ⟨π, π ξ = x⟩ ∗ nborc_tok α (Φ x)).
   Proof.
     iIntros "α b". iMod (pbor_tok_open with "α b") as "[o Φ]".
     by iMod (pobor_tok_resolve with "o Φ").
@@ -534,9 +534,9 @@ Section pborrow.
   Lemma pobor_tok_nsubdiv `{!GenUpd M, !NonExpansive intp} {X α q ξ Φ} Ψ x β :
     β ⊑□ α -∗ pobor_tok (X:=X) α q ξ Φ -∗ intp (Ψ x) -∗
     (∀ x', [†β] -∗ intp (Ψ x') -∗ M (intp (Φ x'))) =[pborrow_wsat M intp]=∗
-      q.[α] ∗ pbor_ctok β x ξ Ψ.
+      q.[α] ∗ pborc_tok β x ξ Ψ.
   Proof.
-    rewrite pobor_tok_unseal pbor_ctok_unseal.
+    rewrite pobor_tok_unseal pborc_tok_unseal.
     iIntros "⊑ [%[[%[vo pc]] o]] Ψ →Φ".
     iMod (vo_pc_update with "vo pc") as "[vo pc]".
     iMod (obor_tok_subdiv (intp:=pbintp _) [xpbor _ _ _ Ψ]
@@ -549,7 +549,7 @@ Section pborrow.
   (** Simply close a prophetic borrower *)
   Lemma pobor_tok_close `{!GenUpd M, !NonExpansive intp} {X α q ξ Φ} x :
     pobor_tok (X:=X) α q ξ Φ -∗ intp (Φ x) =[pborrow_wsat M intp]=∗
-      q.[α] ∗ pbor_ctok α x ξ Φ.
+      q.[α] ∗ pborc_tok α x ξ Φ.
   Proof.
     iIntros "o Φ". iApply (pobor_tok_nsubdiv Φ with "[] o Φ"); [|by iIntros].
     iApply lft_sincl_refl.
@@ -561,7 +561,7 @@ Section pborrow.
     pobor_tok (X:=X) α q ξ Φ -∗ pobor_tok (X:=Y) β r η Ψ -∗ intp (Ψ y) -∗
     (∀ y', [†α] -∗ pbor_tok β y' η Ψ -∗ M (intp (Φ (f y'))))
       =[pborrow_wsat M intp]=∗ ∃ η' : prvar _,
-      q.[α] ∗ r.[β] ∗ ⟨π, π ξ = f (π η')⟩ ∗ pbor_ctok (α ⊓ β) y η' Ψ.
+      q.[α] ∗ r.[β] ∗ ⟨π, π ξ = f (π η')⟩ ∗ pborc_tok (α ⊓ β) y η' Ψ.
   Proof.
     rewrite pobor_tok_unseal.
     iIntros "[%γ[[%[vo pc]] o]] [%γ'[[%[vo' pc']] o']] Ψ →Φ".
@@ -577,8 +577,8 @@ Section pborrow.
       iApply ("→Φ" with "†"). rewrite pbor_tok_unseal. iRight. iExists _.
       iFrame "vo'". by iApply "→b'". }
     iDestruct (lft_alive_combine with "α' β") as (?) "[αβ →α'β]".
-    iMod (bor_ctok_open (intp:=pbintp _) with "αβ c") as "[o[%[pc' Ψ]]]".
-    iMod (bor_ctok_open (intp:=pbintp _) with "α c'")
+    iMod (borc_tok_open (intp:=pbintp _) with "αβ c") as "[o[%[pc' Ψ]]]".
+    iMod (borc_tok_open (intp:=pbintp _) with "α c'")
       as "[o'[%[pc[vo' vox']]]]".
     iDestruct (vo_vo_agree with "vox vox'") as %<-.
     iDestruct (vo_pc_agree with "vo' pc'") as %<-.
@@ -599,17 +599,17 @@ Section pborrow.
       iSplitL "pc' Ψ"; [iExists _; by iFrame|]. iSplit; [|done]. iExists _.
       iFrame "vo' vox". iApply "→pc".
       by iApply (proph_obs_impl with "obs")=> ? ->. }
-    iModIntro. iDestruct ("→α'β" with "αβ") as "[$$]". rewrite pbor_ctok_unseal.
+    iModIntro. iDestruct ("→α'β" with "αβ") as "[$$]". rewrite pborc_tok_unseal.
     iRight. iExists _. iFrame.
   Qed.
-  Lemma pobor_pbor_ctok_reborrow `{!GenUpd M, !NonExpansive intp}
+  Lemma pobor_pborc_tok_reborrow `{!GenUpd M, !NonExpansive intp}
     {X Y α q ξ Φ β r y η Ψ} f :
-    pobor_tok (X:=X) α q ξ Φ -∗ r.[β] -∗ pbor_ctok (X:=Y) β y η Ψ -∗
+    pobor_tok (X:=X) α q ξ Φ -∗ r.[β] -∗ pborc_tok (X:=Y) β y η Ψ -∗
     (∀ y', [†α] -∗ pbor_tok β y' η Ψ -∗ M (intp (Φ (f y'))))
       =[pborrow_wsat M intp]=∗ ∃ η' : prvar _,
-      q.[α] ∗ r.[β] ∗ ⟨π, π ξ = f (π η')⟩ ∗ pbor_ctok (α ⊓ β) y η' Ψ.
+      q.[α] ∗ r.[β] ∗ ⟨π, π ξ = f (π η')⟩ ∗ pborc_tok (α ⊓ β) y η' Ψ.
   Proof.
-    iIntros "Φ β c →Φ". iMod (pbor_ctok_open with "β c") as "[o Ψ]".
+    iIntros "Φ β c →Φ". iMod (pborc_tok_open with "β c") as "[o Ψ]".
     iApply (pobor_pobor_tok_reborrow with "Φ o Ψ →Φ").
   Qed.
   Lemma pobor_pbor_tok_reborrow `{!GenUpd M, !NonExpansive intp}
@@ -617,7 +617,7 @@ Section pborrow.
     pobor_tok (X:=X) α q ξ Φ -∗ r.[β] -∗ pbor_tok (X:=Y) β y η Ψ -∗
     (∀ y', [†α] -∗ pbor_tok β y' η Ψ -∗ M (intp (Φ (f y')))) -∗
       modw M (pborrow_wsat M intp) (∃ η' : prvar _,
-      q.[α] ∗ r.[β] ∗ ⟨π, π ξ = f (π η')⟩ ∗ pbor_ctok (α ⊓ β) y η' Ψ).
+      q.[α] ∗ r.[β] ∗ ⟨π, π ξ = f (π η')⟩ ∗ pborc_tok (α ⊓ β) y η' Ψ).
   Proof.
     iIntros "Φ β c →Φ". iMod (pbor_tok_open with "β c") as "[o Ψ]".
     iMod (pobor_pobor_tok_reborrow with "Φ o Ψ →Φ") as "$". by iIntros.
