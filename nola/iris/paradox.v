@@ -157,12 +157,12 @@ Module inv_landin. Section inv_landin.
     P ∗ [[{ P }]] e @ E [[{ Ψ }]] ⊢ [[{ True }]] e @ E [[{ Ψ }]].
 
   (** Expression with a variable *)
-  Context {expr_val : Type}.
+  Context {vexpr : Type}.
   (** Substitution *)
-  Context (subst_val : expr_val → val → expr).
-  Local Coercion subst_val : expr_val >-> Funclass.
+  Context (subst_val : vexpr → val → expr).
+  Local Coercion subst_val : vexpr >-> Funclass.
 
-  Implicit Types (l : loc) (v : val) (ev : expr_val).
+  Implicit Types (l : loc) (v : val) (ev : vexpr).
 
   (** Location value *)
   Context (locval : loc → val).
@@ -175,7 +175,7 @@ Module inv_landin. Section inv_landin.
   Context (nop : expr).
   Hypothesis thoare_nop : ∀{P E}, ⊢ [[{ P }]] nop @ E [[{ λ _, P }]].
   (** Sequential execution *)
-  Context (bind : expr → expr_val → expr).
+  Context (bind : expr → vexpr → expr).
   Local Notation "e >>= ev" := (bind e ev) (at level 80, right associativity).
   Hypothesis thoare_bind : ∀{E e ev P Ψ} Φ,
     [[{ P }]] e @ E [[{ Φ }]] ∗ (∀ v, [[{ Φ v }]] ev v @ E [[{ Ψ }]]) ⊢
@@ -202,7 +202,7 @@ Module inv_landin. Section inv_landin.
   Hypothesis thoare_load : ∀{E l v}, ⊢
     [[{ l ↦ v }]] !l @ E [[{ λ v', ⌜v' = v⌝ ∗ l ↦ v }]].
   (** Function call *)
-  Context (call : expr_val).
+  Context (call : vexpr).
   Hypothesis thoare_call : ∀{E e P Ψ},
     [[{ P }]] e @ E [[{ Ψ }]] ⊢ [[{ P }]] call (λ(), e) @ E [[{ Ψ }]].
 
@@ -228,7 +228,7 @@ Module inv_landin. Section inv_landin.
 
   (** Landin's knot *)
   Definition landin_body l := l <- badfun l >> badcall l.
-  Context (landin_body' : expr_val).
+  Context (landin_body' : vexpr).
   Hypothesis landin_body_subst : ∀{l}, landin_body l = landin_body' l.
   Definition landin := ref (λ(), nop) >>= landin_body'.
 
