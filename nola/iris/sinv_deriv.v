@@ -24,7 +24,7 @@ Section sinv_deriv.
 
   Context `{!DerivSinv DER}.
 
-  (** Simple invariant *)
+  (** [sinv]: Relaxed simple invariant *)
   Local Definition sinv_def δ P : iProp Σ :=
     ∃ Q, □ ⸨ deriv_sinv_acsr P Q ⸩(δ) ∗ sinv_tok Q.
   Local Lemma sinv_aux : seal sinv_def. Proof. by eexists. Qed.
