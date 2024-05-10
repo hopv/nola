@@ -45,30 +45,28 @@ Proof. solve_inG. Qed.
 
 Section pborrow.
   Context `{!pborrowGS TY PROP Σ}.
-  Implicit Type (M : iProp Σ → iProp Σ) (intp : PROP $o iProp Σ -d> iProp Σ)
-    (X Y : TY) (Xl Yl : list TY) (P : PROP $o iProp Σ)
-    (Px : pbprop TY PROP $o iProp Σ).
+  Implicit Type (M : iProp Σ → iProp Σ) (intp : PROP $o Σ -d> iProp Σ)
+    (X Y : TY) (Xl Yl : list TY) (P : PROP $o Σ) (Px : pbprop TY PROP $o Σ).
 
   (** ** Tokens *)
 
   (** Prophetic borrower token *)
   Local Definition pborc_tok_def {X} α (x : X) (ξ : prvar X)
-    (Φ : X → PROP $o iProp Σ) : iProp Σ :=
+    (Φ : X → PROP $o Σ) : iProp Σ :=
     [†α] ∨ ∃ γ, val_obs γ x ∗ borc_tok α (xpbor X γ ξ Φ).
   Local Lemma pborc_tok_aux : seal (@pborc_tok_def). Proof. by eexists. Qed.
   Definition pborc_tok {X} := pborc_tok_aux.(unseal) X.
   Local Lemma pborc_tok_unseal : @pborc_tok = @pborc_tok_def.
   Proof. exact: seal_eq. Qed.
-  Local Definition pbor_tok_def {X} α (x : X) (ξ : prvar X)
-    (Φ : X → PROP $o iProp Σ) : iProp Σ :=
-    [†α] ∨ ∃ γ, val_obs γ x ∗ bor_tok α (xpbor X γ ξ Φ).
+  Local Definition pbor_tok_def {X} α (x : X) (ξ : prvar X) (Φ : X → PROP $o Σ)
+    : iProp Σ := [†α] ∨ ∃ γ, val_obs γ x ∗ bor_tok α (xpbor X γ ξ Φ).
   Local Lemma pbor_tok_aux : seal (@pbor_tok_def). Proof. by eexists. Qed.
   Definition pbor_tok {X} := pbor_tok_aux.(unseal) X.
   Local Lemma pbor_tok_unseal : @pbor_tok = @pbor_tok_def.
   Proof. exact: seal_eq. Qed.
 
   (** Open prophetic borrower token *)
-  Local Definition pobor_tok_def {X} α q (ξ : prvar X) (Φ : X → PROP $o iProp Σ)
+  Local Definition pobor_tok_def {X} α q (ξ : prvar X) (Φ : X → PROP $o Σ)
     : iProp Σ :=
     ∃ γ, (∃ x, val_obs γ x ∗ proph_ctrl γ x ξ) ∗
       obor_tok α q (xpbor X γ ξ Φ).
@@ -78,8 +76,8 @@ Section pborrow.
   Proof. exact: seal_eq. Qed.
 
   (** Prophetic lender token *)
-  Definition plend_tok {X} α (xπ : clair TY X) (Φ : X → PROP $o iProp Σ)
-    : iProp Σ := lend_tok α (xplend X xπ Φ).
+  Definition plend_tok {X} α (xπ : clair TY X) (Φ : X → PROP $o Σ) : iProp Σ :=
+    lend_tok α (xplend X xπ Φ).
 
   (** Non-prophetic token *)
   Definition nborc_tok α P : iProp Σ := borc_tok α (xjust P).
@@ -89,31 +87,28 @@ Section pborrow.
 
   (** Borrower and lender tokens are timeless if the underlying ofe is discrete
     *)
-  Fact nborc_tok_timeless `{!OfeDiscrete (PROP $o iProp Σ)} {α P} :
+  Fact nborc_tok_timeless `{!OfeDiscrete (PROP $o Σ)} {α P} :
     Timeless (nborc_tok α P).
   Proof. exact _. Qed.
-  Fact nbor_tok_timeless `{!OfeDiscrete (PROP $o iProp Σ)} {α P} :
+  Fact nbor_tok_timeless `{!OfeDiscrete (PROP $o Σ)} {α P} :
     Timeless (nbor_tok α P).
   Proof. exact _. Qed.
-  Fact nobor_tok_timeless `{!OfeDiscrete (PROP $o iProp Σ)} {α q P} :
+  Fact nobor_tok_timeless `{!OfeDiscrete (PROP $o Σ)} {α q P} :
     Timeless (nobor_tok α q P).
   Proof. exact _. Qed.
-  Fact nlend_tok_timeless `{!OfeDiscrete (PROP $o iProp Σ)} {α P} :
+  Fact nlend_tok_timeless `{!OfeDiscrete (PROP $o Σ)} {α P} :
     Timeless (nlend_tok α P).
   Proof. exact _. Qed.
-  #[export] Instance pborc_tok_timeless `{!OfeDiscrete (PROP $o iProp Σ)}
-    {α X x ξ Φ} :
-    Timeless (pborc_tok (X:=X) α x ξ Φ).
+  #[export] Instance pborc_tok_timeless `{!OfeDiscrete (PROP $o Σ)}
+    {α X x ξ Φ} : Timeless (pborc_tok (X:=X) α x ξ Φ).
   Proof. rewrite pborc_tok_unseal. exact _. Qed.
-  #[export] Instance pbor_tok_timeless `{!OfeDiscrete (PROP $o iProp Σ)}
-    {α X x ξ Φ} :
+  #[export] Instance pbor_tok_timeless `{!OfeDiscrete (PROP $o Σ)} {α X x ξ Φ} :
     Timeless (pbor_tok (X:=X) α x ξ Φ).
   Proof. rewrite pbor_tok_unseal. exact _. Qed.
-  #[export] Instance pobor_tok_timeless `{!OfeDiscrete (PROP $o iProp Σ)}
-    {α q X ξ Φ} :
-    Timeless (pobor_tok (X:=X) α q ξ Φ).
+  #[export] Instance pobor_tok_timeless `{!OfeDiscrete (PROP $o Σ)}
+    {α q X ξ Φ} : Timeless (pobor_tok (X:=X) α q ξ Φ).
   Proof. rewrite pobor_tok_unseal. exact _. Qed.
-  Fact plend_tok_timeless `{!OfeDiscrete (PROP $o iProp Σ)} {α X xπ Φ} :
+  Fact plend_tok_timeless `{!OfeDiscrete (PROP $o Σ)} {α X xπ Φ} :
     Timeless (plend_tok (X:=X) α xπ Φ).
   Proof. exact _. Qed.
 
@@ -183,10 +178,9 @@ Section pborrow.
   (** ** World satisfaction *)
 
   (** Body of a prophetic lender *)
-  Definition plend_body intp {X}
-    (xπ : clair TY X) (Φ : X → PROP $o iProp Σ) : iProp Σ :=
-    ∃ x', ⟨π, xπ π = x'⟩ ∗ intp (Φ x').
-  Definition plend_body_var intp {X} (ξ : prvar X) (Φ : X → PROP $o iProp Σ)
+  Definition plend_body intp {X} (xπ : clair TY X) (Φ : X → PROP $o Σ)
+    : iProp Σ := ∃ x', ⟨π, xπ π = x'⟩ ∗ intp (Φ x').
+  Definition plend_body_var intp {X} (ξ : prvar X) (Φ : X → PROP $o Σ)
     : iProp Σ := plend_body intp (λ π, π ξ) Φ.
 
   (** Interpretation of [pbprop] *)
@@ -331,11 +325,10 @@ Section pborrow.
   (** Utility *)
   Local Definition pbor_list {Xl}
     (γξxΦl : plist (λ X, _ *' _ *' X *' (X → _)) Xl)
-    : list (pbprop TY PROP $o iProp Σ) :=
+    : list (pbprop TY PROP $o Σ) :=
     of_plist (λ _ '(γ, ξ, _, Φ)', xpbor _ γ ξ Φ) γξxΦl.
-  Local Definition plend_list {Xl}
-    (xπΦl : plist (λ X, _ *' (X → _)) Xl)
-    : list (pbprop TY PROP $o iProp Σ) :=
+  Local Definition plend_list {Xl} (xπΦl : plist (λ X, _ *' (X → _)) Xl)
+    : list (pbprop TY PROP $o Σ) :=
     of_plist (λ _ '(xπ, Φ)', xplend _ xπ Φ) xπΦl.
   Local Lemma vo_pbor_alloc_list {intp Xl ξl} {xΦl : plist _ Xl} :
     1:∗[of_plist_prvar ξl] -∗ ([∗ plist] '(x, Φ)' ∈ xΦl, intp (Φ x)) ==∗ ∃ γl,

@@ -25,7 +25,7 @@ End na_inv_deriv.
 
 Section na_inv_deriv.
   Context `{!na_inv'GS PROP Σ, !invGS_gen hlc Σ, !na_invG Σ}.
-  Implicit Type P Q PQ : PROP $o iProp Σ.
+  Implicit Type P Q PQ : PROP $o Σ.
 
   (** Accessor *)
   Definition na_inv_acsr intp p N Pi : iProp Σ :=
@@ -33,8 +33,8 @@ Section na_inv_deriv.
       na_own p (F∖↑N) ∗ Pi ∗
       (na_own p (F∖↑N) -∗ Pi =[na_inv_wsat intp]{E}=∗ na_own p F) .
 
-  Context `{!NaInvPreDeriv (PROP $o iProp Σ) (JUDG : judg (iProp Σ)),
-    !Dintp JUDG (PROP $o iProp Σ) (iProp Σ)}.
+  Context `{!NaInvPreDeriv (PROP $o Σ) (JUDG : judg (iProp Σ)),
+    !Dintp JUDG (PROP $o Σ) (iProp Σ)}.
 
   (** Derivability data for [na_inv] *)
   Class NaInvDeriv :=

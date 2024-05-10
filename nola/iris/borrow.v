@@ -69,15 +69,15 @@ Proof. rewrite borrowRF_unseal. exact _. Qed.
 (** Ghost state for the borrowing machinery *)
 Class borrowGpreS PROP Σ := BorrowGpreS {
   borrowGpreS_lft :: lftG Σ;
-  borrowGpreS_borrow : inG Σ (borrowRF PROP $r iProp Σ);
+  borrowGpreS_borrow : inG Σ (borrowRF PROP $r Σ);
 }.
 Local Existing Instance borrowGpreS_borrow.
 Class borrowGS PROP Σ := BorrowGS {
   borrowGS_pre :: borrowGpreS PROP Σ;
   borrow_name : gname;
 }.
-Local Instance inG_borrow_def `{!inG Σ (borrowRF PROP $r iProp Σ)} :
-  inG Σ (borrowRF_def PROP $r iProp Σ).
+Local Instance inG_borrow_def `{!inG Σ (borrowRF PROP $r Σ)} :
+  inG Σ (borrowRF_def PROP $r Σ).
 Proof. rewrite -borrowRF_unseal. exact _. Qed.
 Definition borrowΣ PROP `{!oFunctorContractive PROP} : gFunctors :=
   #[GFunctor lftR; GFunctor (borrowRF PROP)].
@@ -89,10 +89,10 @@ Proof. solve_inG. Qed.
 
 Section borrow.
   Context `{!borrowGS PROP Σ}.
-  Implicit Type (P Q : PROP $o iProp Σ) (Pl Ql : list (PROP $o iProp Σ))
-    (D : depo_stOF PROP $o iProp Σ) (Dm : depo_stmOF PROP $o iProp Σ)
-    (B : bor_stOF PROP $o iProp Σ) (Bm : bor_stmOF PROP $o iProp Σ)
-    (Pm : lendmOF PROP $o iProp Σ).
+  Implicit Type (P Q : PROP $o Σ) (Pl Ql : list (PROP $o Σ))
+    (D : depo_stOF PROP $o Σ) (Dm : depo_stmOF PROP $o Σ)
+    (B : bor_stOF PROP $o Σ) (Bm : bor_stmOF PROP $o Σ)
+    (Pm : lendmOF PROP $o Σ).
 
   (** General borrower token *)
   Local Definition bor_itok i j d α B : iProp Σ :=
@@ -146,17 +146,17 @@ Section borrow.
 
   (** Borrower and lender tokens are timeless
     if the underlying OFE is discrete *)
-  #[export] Instance borc_tok_timeless `{!OfeDiscrete (PROP $o iProp Σ)}
-    {α P} : Timeless (borc_tok α P).
+  #[export] Instance borc_tok_timeless `{!OfeDiscrete (PROP $o Σ)} {α P} :
+    Timeless (borc_tok α P).
   Proof. rewrite borc_tok_unseal. exact _. Qed.
-  #[export] Instance bor_tok_timeless `{!OfeDiscrete (PROP $o iProp Σ)}
-    {α P} : Timeless (bor_tok α P).
+  #[export] Instance bor_tok_timeless `{!OfeDiscrete (PROP $o Σ)} {α P} :
+    Timeless (bor_tok α P).
   Proof. rewrite bor_tok_unseal. exact _. Qed.
-  #[export] Instance obor_tok_timeless `{!OfeDiscrete (PROP $o iProp Σ)}
-    {α q P} : Timeless (obor_tok α q P).
+  #[export] Instance obor_tok_timeless `{!OfeDiscrete (PROP $o Σ)} {α q P} :
+    Timeless (obor_tok α q P).
   Proof. rewrite obor_tok_unseal. exact _. Qed.
-  #[export] Instance lend_tok_timeless `{!OfeDiscrete (PROP $o iProp Σ)}
-    {α P} : Timeless (lend_tok α P).
+  #[export] Instance lend_tok_timeless `{!OfeDiscrete (PROP $o Σ)} {α P} :
+    Timeless (lend_tok α P).
   Proof. rewrite lend_tok_unseal. exact _. Qed.
 
   (** Turn [borc_tok] to [bor_tok] *)
@@ -199,7 +199,7 @@ Section borrow.
   Qed.
 
   (** Token for [depo_stm] *)
-  Local Definition depo_st_R D : depoRF PROP $r iProp Σ :=
+  Local Definition depo_st_R D : depoRF PROP $r Σ :=
     let '(e, Bm, Pm) := D in (to_agree e, Excl <$> Bm, Excl <$> Pm).
   Arguments depo_st_R _ /.
   Local Definition depo_stm_tok Dm : iProp Σ :=
@@ -377,10 +377,10 @@ End borrow.
 
 Section borrow.
   Context `{!borrowGS PROP Σ}.
-  Implicit Type (M : iProp Σ → iProp Σ) (intp : PROP $o iProp Σ -d> iProp Σ)
-    (P Q : PROP $o iProp Σ) (D : depo_stOF PROP $o iProp Σ)
-    (Dm : depo_stmOF PROP $o iProp Σ) (B : bor_stOF PROP $o iProp Σ)
-     (Bm : bor_stmOF PROP $o iProp Σ) (Pm : lendmOF PROP $o iProp Σ).
+  Implicit Type (M : iProp Σ → iProp Σ) (intp : PROP $o Σ -d> iProp Σ)
+    (P Q : PROP $o Σ) (D : depo_stOF PROP $o Σ)
+    (Dm : depo_stmOF PROP $o Σ) (B : bor_stOF PROP $o Σ)
+    (Bm : bor_stmOF PROP $o Σ) (Pm : lendmOF PROP $o Σ).
 
   (** World satisfaction for a borrower *)
   Local Definition bor_wsat intp d α B : iProp Σ :=
@@ -874,7 +874,7 @@ End borrow.
 Lemma borrow_wsat_alloc `{!borrowGpreS PROP Σ} :
   ⊢ |==> ∃ _ : borrowGS PROP Σ, ∀ M intp, borrow_wsat M intp.
 Proof.
-  iMod (own_alloc (● (∅ : gmap _ _) : borrowRF_def PROP $r iProp Σ)) as (γ) "●";
+  iMod (own_alloc (● (∅ : gmap _ _) : borrowRF_def PROP $r Σ)) as (γ) "●";
     [by apply auth_auth_valid|].
   iModIntro. iExists (BorrowGS _ _ _ γ). iIntros (??).
   rewrite borrow_wsat_unseal. iExists ∅. unfold borrow_wsat'. by iFrame.

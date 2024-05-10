@@ -24,15 +24,15 @@ End inv_deriv.
 
 Section inv_deriv.
   Context `{!inv'GS PROP Σ, !invGS_gen hlc Σ}.
-  Implicit Type P Q PQ : PROP $o iProp Σ.
+  Implicit Type P Q PQ : PROP $o Σ.
 
   (** Accessor *)
   Definition inv_acsr intp N Pi : iProp Σ :=
     ∀ E, ⌜↑N ⊆ E⌝ → |=[inv_wsat intp]{E,E∖↑N}=>
       Pi ∗ (Pi =[inv_wsat intp]{E∖↑N,E}=∗ True).
 
-  Context `{!InvPreDeriv (PROP $o iProp Σ) (JUDG : judg (iProp Σ)),
-    !Dintp JUDG (PROP $o iProp Σ) (iProp Σ)}.
+  Context `{!InvPreDeriv (PROP $o Σ) (JUDG : judg (iProp Σ)),
+    !Dintp JUDG (PROP $o Σ) (iProp Σ)}.
 
   (** Derivability data for [inv] *)
   Class InvDeriv :=

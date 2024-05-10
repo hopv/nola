@@ -19,7 +19,7 @@ Proof. solve_inG. Qed.
 
 Section inv.
   Context `{!inv'GS PROP Σ, !invGS_gen hlc Σ}.
-  Implicit Type P : PROP $o iProp Σ.
+  Implicit Type P : PROP $o Σ.
 
   (** [inv_tok]: Invariant token *)
   Local Definition inv_tok_def N P : iProp Σ :=
@@ -36,12 +36,12 @@ Section inv.
   #[export] Instance inv_tok_persistent {N P} : Persistent (inv_tok N P).
   Proof. rewrite inv_tok_unseal. exact _. Qed.
   (** [inv_tok] is timeless if the underlying ofe is discrete *)
-  #[export] Instance inv_tok_timeless `{!OfeDiscrete (PROP $o iProp Σ)} {N P} :
+  #[export] Instance inv_tok_timeless `{!OfeDiscrete (PROP $o Σ)} {N P} :
     Timeless (inv_tok N P).
   Proof. rewrite inv_tok_unseal. exact _. Qed.
 
   (** Interpretation *)
-  Local Definition inv_intp (intp : PROP $o iProp Σ → iProp Σ) i P : iProp Σ :=
+  Local Definition inv_intp (intp : PROP $o Σ → iProp Σ) i P : iProp Σ :=
     intp P ∗ ownD {[i]} ∨ ownE {[i]}.
 
   (** [inv_intp intp] is non-expansive when [intp] is *)
@@ -50,8 +50,8 @@ Section inv.
   Proof. solve_proper. Qed.
 
   (** World satisfaction *)
-  Local Definition inv_wsat_def (intp : PROP $o iProp Σ -d> iProp Σ)
-    : iProp Σ := sinv_iwsat (inv_intp intp).
+  Local Definition inv_wsat_def (intp : PROP $o Σ -d> iProp Σ) : iProp Σ :=
+    sinv_iwsat (inv_intp intp).
   Local Definition inv_wsat_aux : seal inv_wsat_def. Proof. by eexists. Qed.
   Definition inv_wsat := inv_wsat_aux.(unseal).
   Local Lemma inv_wsat_unseal : inv_wsat = inv_wsat_def.
