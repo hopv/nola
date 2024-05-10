@@ -32,7 +32,7 @@ Section inv_deriv.
   Context `{!inv'GS PROP Σ, !invGS_gen hlc Σ, !DerivInv DER}.
 
   (** [inv']: Relaxed invariant *)
-  Definition inv' δ N P : iProp Σ := □ ⸨ deriv_inv_acsr N P ⸩ δ.
+  Definition inv' δ N P : iProp Σ := □ δ ⸨ deriv_inv_acsr N P ⸩.
 
   (** [inv'] is persistent *)
   Fact inv'_persistent {δ N P} : Persistent (inv' δ N P).
