@@ -65,19 +65,47 @@ Section inv.
   #[export] Instance inv_wsat_proper : Proper ((≡) ==> (≡)) inv_wsat.
   Proof. apply ne_proper, _. Qed.
 
-  (** Allocate [inv_tok] *)
-  Lemma inv_tok_alloc_rec {intp} P N :
-    (inv_tok N P -∗ intp P) =[inv_wsat intp]=∗ inv_tok N P.
+  (** Allocate [ownD] *)
+  Lemma alloc_ownD (I : gset positive) N :
+    ⊢ |==> ∃ i, ⌜i ∉ I⌝ ∗ ⌜i ∈ (↑N:coPset)⌝ ∗ ownD {[i]}.
   Proof.
-    rewrite inv_tok_unseal inv_wsat_unseal. iIntros "→P W".
-    iDestruct (sinv_itok_alloc with "W") as (I) "big".
     iMod (own_unit (gset_disjUR positive) disabled_name) as "D".
     iMod (own_updateP with "[$]") as (x) "[X D]".
     { apply (gset_disj_alloc_empty_updateP_strong'
         (λ i, i ∉ I ∧ i ∈ (↑N:coPset)))=> J.
       case: (fresh_inv_name (I ∪ J) N)=> [i[/not_elem_of_union[??]?]].
       by exists i. }
-    iDestruct "X" as %[i[->[??]]]. iMod ("big" with "[//]") as "[#i →W]".
+    iDestruct "X" as %[i[->[??]]]. iModIntro. iExists i. iSplit; by [|iSplit].
+  Qed.
+
+  (** Access [ownE] *)
+  Local Lemma ownE_subset {E F} : F ⊆ E → ownE E ⊣⊢ ownE F ∗ ownE (E∖F).
+  Proof.
+    move=> ?. rewrite {1}(union_difference_L F E); [|done].
+    by rewrite ownE_op; [|set_solver].
+  Qed.
+  (** Access [ownE] from [fupd] *)
+  Local Lemma fupd_ownE_acc {E F} : F ⊆ E →
+    ⊢ |={E,E∖F}=> ownE F ∗ (ownE F ={E∖F,E}=∗ True).
+  Proof.
+    rewrite fancy_updates.uPred_fupd_unseal /fancy_updates.uPred_fupd_def=> FE.
+    rewrite (ownE_subset FE). by iIntros "[$[$$]]!>!>$[$$]!>".
+  Qed.
+  Local Lemma fupd_ownE_acc_in {i E F} : i ∈ F → F ⊆ E →
+    ⊢ |={E,E∖F}=> ownE {[i]} ∗ (ownE {[i]} ={E∖F,E}=∗ True).
+  Proof.
+    move=> iF FE. iMod (fupd_ownE_acc FE) as "[F cl]".
+    rewrite (ownE_subset (E:=F) (F:={[i]})); [|set_solver].
+    iDestruct "F" as "[$ F∖i]". iIntros "!> i". iApply ("cl" with "[$]").
+  Qed.
+
+  (** Allocate [inv_tok] *)
+  Lemma inv_tok_alloc_rec {intp} P N :
+    (inv_tok N P -∗ intp P) =[inv_wsat intp]=∗ inv_tok N P.
+  Proof.
+    rewrite inv_tok_unseal inv_wsat_unseal. iIntros "→P W".
+    iDestruct (sinv_itok_alloc P with "W") as (I) "big".
+    iMod (alloc_ownD I N) as (???) "D". iMod ("big" with "[//]") as "[#i →W]".
     iModIntro. iSplitL; [|iExists _; by iSplit]. iApply "→W". iLeft.
     iSplitR "D"; [|done]. iApply "→P". iExists _; by iSplit.
   Qed.
@@ -86,46 +114,37 @@ Section inv.
     iIntros "P W". iApply (inv_tok_alloc_rec with "[P] W"). by iIntros.
   Qed.
 
-  (** Access [ownE] *)
-  Lemma ownE_subset {E F} : F ⊆ E → ownE E ⊣⊢ ownE F ∗ ownE (E∖F).
+  (** Allocate [inv_tok] before storing the content *)
+  Lemma inv_tok_alloc_open `{!NonExpansive intp} {E} P N : ↑N ⊆ E →
+    ⊢ |=[inv_wsat intp]{E, E∖↑N}=> inv_tok N P ∗
+      (intp P =[inv_wsat intp]{E∖↑N, E}=∗ True).
   Proof.
-    move=> ?. rewrite {1}(union_difference_L F E); [|done].
-    by rewrite ownE_op; [|set_solver].
-  Qed.
-  (** Access [ownE] from [fupd] *)
-  Lemma fupd_ownE_acc {E F} :
-    F ⊆ E → ⊢ |={E,E∖F}=> ownE F ∗ (ownE F ={E∖F,E}=∗ True).
-  Proof.
-    rewrite fancy_updates.uPred_fupd_unseal /fancy_updates.uPred_fupd_def=> FE.
-    rewrite (ownE_subset FE). by iIntros "[$[$$]]!>!>$[$$]!>".
+    rewrite inv_tok_unseal inv_wsat_unseal=> NE. iIntros "W".
+    iDestruct (sinv_itok_alloc P with "W") as (I) "big".
+    iMod (alloc_ownD I N) as (?? iN) "D".
+    iMod ("big" with "[//]") as "[#iP →W]".
+    iMod (fupd_ownE_acc_in iN NE) as "[i cl]".
+    iDestruct ("→W" with "[$i]") as "$". iModIntro.
+    iSplit; [iExists _; by iSplit|]. iIntros "P W".
+    iDestruct (sinv_tok_acc' with "iP W") as "[[[_ D']|i] →W]".
+    { iDestruct (ownD_singleton_twice with "[$D $D']") as "[]". }
+    iMod ("cl" with "i") as "_". iModIntro. iSplit; [|done]. iApply "→W". iLeft. iFrame.
   Qed.
 
-  (** Access [inv_tok] *)
-  Lemma inv_tok_acc' `{!NonExpansive intp} {N E P} :
-    ↑N ⊆ E → ownE E -∗ inv_tok N P -∗ modw id (inv_wsat intp) (
-      ownE (E∖↑N) ∗ intp P ∗
-      (ownE (E∖↑N) -∗ intp P -∗ modw id (inv_wsat intp) (ownE E))).
-  Proof.
-    move=> NE. rewrite inv_tok_unseal inv_wsat_unseal (ownE_subset NE).
-    iIntros "[N $] [%i[% #iP]] W".
-    iDestruct (sinv_tok_acc' with "iP W") as "[in →W]".
-    rewrite (ownE_subset (E:=↑N) (F:={[i]})); [|set_solver].
-    iDestruct "N" as "[i $]".
-    iDestruct "in" as "[[$ D]|i']"; last first.
-    { iDestruct (ownE_singleton_twice with "[$i $i']") as "[]". }
-    iDestruct ("→W" with "[$i]") as "$". iIntros "$ P W".
-    iDestruct (sinv_tok_acc' with "iP W") as "[[[_ D']|$] →W]".
-    { iDestruct (ownD_singleton_twice with "[$D $D']") as "[]". }
-    iApply "→W". iLeft. iFrame.
-  Qed.
-  Lemma inv_tok_acc `{!NonExpansive intp} {N E P} :
-    ↑N ⊆ E → inv_tok N P =[inv_wsat intp]{E,E∖↑N}=∗
+  (** Access using [inv_tok] *)
+  Lemma inv_tok_acc `{!NonExpansive intp} {N E P} : ↑N ⊆ E →
+    inv_tok N P =[inv_wsat intp]{E,E∖↑N}=∗
       intp P ∗ (intp P =[inv_wsat intp]{E∖↑N,E}=∗ True).
   Proof.
-    iIntros (NE) "iP W". iMod (fupd_ownE_acc NE) as "[N cl]".
-    iDestruct (inv_tok_acc' with "N iP W") as "[$[N∖N[$ cl']]]"; [done|].
-    iIntros "!> P W". iDestruct ("cl'" with "N∖N P W") as "[$ N]".
-    by iApply "cl".
+    rewrite inv_tok_unseal inv_wsat_unseal=> NE. iIntros "[%i[%iN #iP]] W".
+    iMod (fupd_ownE_acc_in iN NE) as "[i cl]".
+    iDestruct (sinv_tok_acc' with "iP W") as "[in →W]".
+    iDestruct "in" as "[[$ D]|i']"; last first.
+    { iDestruct (ownE_singleton_twice with "[$i $i']") as "[]". }
+    iDestruct ("→W" with "[$i]") as "$". iIntros "!> P W".
+    iDestruct (sinv_tok_acc' with "iP W") as "[[[_ D']|i] →W]".
+    { iDestruct (ownD_singleton_twice with "[$D $D']") as "[]". }
+    iMod ("cl" with "i") as "_". iModIntro. iSplit; [|done]. iApply "→W". iLeft. iFrame.
   Qed.
 End inv.
 
