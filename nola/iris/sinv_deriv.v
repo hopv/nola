@@ -2,16 +2,16 @@
 
 From nola.iris Require Export util deriv sinv.
 From iris.proofmode Require Import proofmode.
-Import DerivIntpNotation DerivNotation.
+Import JudgIntpNotation DerivNotation.
 
 Section sinv_deriv.
   Context `{!sinvGS PROP Σ}.
 
   (** Derivability data for [sinv] *)
-  Class DerivSinv (DER : derivst (iProp Σ)) := DERIV_SINV {
-    deriv_sinv_intp : deriv_ty DER (iProp Σ) → PROP $o iProp Σ → iProp Σ;
+  Class DerivSinv (JUDG : judg (iProp Σ)) := DERIV_SINV {
+    deriv_sinv_intp : deriv_ty JUDG (iProp Σ) → PROP $o iProp Σ → iProp Σ;
     deriv_sinv_ne {δ} :: NonExpansive (deriv_sinv_intp δ);
-    deriv_sinv_acsr : PROP $o iProp Σ → PROP $o iProp Σ → DER;
+    deriv_sinv_acsr : PROP $o iProp Σ → PROP $o iProp Σ → JUDG;
     deriv_sinv_mod : iProp Σ → iProp Σ;
     deriv_sinv_mod_gen_upd :: GenUpd deriv_sinv_mod;
     deriv_sinv_acsr_intp {δ P Q} :
@@ -22,7 +22,7 @@ Section sinv_deriv.
     (format "'[' ⟦  P  ⟧' '/  ' ( δ ) ']'") : nola_scope.
   Local Notation "⟦ P ⟧'" := (⟦ P ⟧'(der)).
 
-  Context `{!DerivSinv DER}.
+  Context `{!DerivSinv JUDG}.
 
   (** [sinv]: Relaxed simple invariant *)
   Definition sinv δ P : iProp Σ :=
@@ -47,7 +47,7 @@ Section sinv_deriv.
     iMod ("PQ" with "P") as "Q". iModIntro. by iApply "cl".
   Qed.
 
-  Context `{!Deriv (DER:=DER) ih δ}.
+  Context `{!Deriv (JUDG:=JUDG) ih δ}.
 
   (** Turn [sinv_tok] into [sinv] *)
   Lemma sinv_tok_sinv {P} : sinv_tok P ⊢ sinv δ P.

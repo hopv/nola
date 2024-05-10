@@ -2,7 +2,7 @@
 
 From nola.iris Require Export util deriv na_inv.
 From iris.proofmode Require Import proofmode.
-Import DerivIntpNotation DerivNotation.
+Import JudgIntpNotation DerivNotation.
 
 Section na_inv_deriv.
   Context `{!na_inv'GS PROP Σ, !invGS_gen hlc Σ, !na_invG Σ}.
@@ -14,10 +14,10 @@ Section na_inv_deriv.
       (na_own p (F∖↑N) -∗ P =[na_inv_wsat intp]{E}=∗ na_own p F) .
 
   (** Derivability data for [na_inv] *)
-  Class DerivNaInv (DER : derivst (iProp Σ)) := DERIV_NA_INV {
-    deriv_na_inv_intp : deriv_ty DER (iProp Σ) → PROP $o iProp Σ → iProp Σ;
+  Class DerivNaInv (JUDG : judg (iProp Σ)) := DERIV_NA_INV {
+    deriv_na_inv_intp : deriv_ty JUDG (iProp Σ) → PROP $o iProp Σ → iProp Σ;
     deriv_na_inv_ne {δ} :: NonExpansive (deriv_na_inv_intp δ);
-    deriv_na_inv_acsr : na_inv_pool_name → namespace → PROP $o iProp Σ → DER;
+    deriv_na_inv_acsr : na_inv_pool_name → namespace → PROP $o iProp Σ → JUDG;
     deriv_na_inv_acsr_intp {δ p N P} :
       ⟦ deriv_na_inv_acsr p N P ⟧(δ) ≡
         na_inv_acsr' (deriv_na_inv_intp δ) p N (deriv_na_inv_intp δ P);
@@ -30,7 +30,7 @@ Section na_inv_deriv.
     (format "'[' ⟦  P  ⟧' '/  ' ( δ ) ']'") : nola_scope.
   Local Notation "⟦ P ⟧'" := (⟦ P ⟧'(der)).
 
-  Context `{!na_inv'GS PROP Σ, !invGS_gen hlc Σ, !na_invG Σ, !DerivNaInv DER}.
+  Context `{!na_inv'GS PROP Σ, !invGS_gen hlc Σ, !na_invG Σ, !DerivNaInv JUDG}.
 
   (** [na_inv']: Relaxed na_invariant *)
   Definition na_inv' δ p N P : iProp Σ := □ δ ⸨ deriv_na_inv_acsr p N P ⸩.
@@ -52,7 +52,7 @@ Section na_inv_deriv.
     rewrite deriv_na_inv_acsr_intp. iApply ("accP" $! _ _ NE NF with "F").
   Qed.
 
-  Context `{!Deriv (DER:=DER) ih δ}.
+  Context `{!Deriv (JUDG:=JUDG) ih δ}.
 
   (** Turn [na_inv_tok] into [na_inv'] *)
   Lemma na_inv_tok_na_inv' {p N P} : na_inv_tok p N P ⊢ na_inv' δ p N P.

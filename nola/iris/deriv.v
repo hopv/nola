@@ -14,7 +14,7 @@ Arguments Dwrap {_} _.
 Arguments dunwrap {_} _.
 Add Printing Constructor dwrap.
 
-(** Notation for [dwrap] *)
+(** Notation for derivability *)
 Module DerivNotation.
   Notation "δ ⸨ J ⸩" := (dunwrap δ J) (format "δ ⸨  '[' J  ']' ⸩", at level 2)
     : nola_scope.
@@ -37,31 +37,28 @@ Canonical dwrap_ofe (A : ofe) := Ofe (dwrap A) (dwrap_ofe_mixin A).
 #[export] Instance Dwrap_ne `{A : ofe} : NonExpansive (Dwrap (A:=A)).
 Proof. solve_proper. Qed.
 
-Implicit Type (JUDG : Type) (PROP : bi).
-
 (** Type for a derivability predicate *)
-Notation deriv_ty JUDG PROP := (dwrap (JUDG -d> PROP)).
+Notation deriv_ty JUD PROP := (dwrap (JUD -d> PROP)).
 
-(** [derivst]: Derivation structure *)
+(** [judg]: Judgment with the parameterized interpretation *)
 #[projections(primitive)]
-Structure derivst (PROP : bi) : Type := Derivst {
-  derivst_judg :> Type;
+Structure judg (PROP : bi) : Type := Judg {
+  judg_car :> Type;
   (** Interpretation parameterized over derivability candidates *)
-  #[canonical=no] derivst_intp :
-    derivst_judg → deriv_ty derivst_judg PROP → PROP;
+  #[canonical=no] judg_intp : judg_car → deriv_ty judg_car PROP → PROP;
 }.
-Arguments derivst_judg {PROP DER} : rename.
-Arguments derivst_intp {PROP DER} : rename.
+Arguments judg_car {PROP JUDG} : rename.
+Arguments judg_intp {PROP JUDG} : rename.
 
-(** Notation for [derivs_intp] *)
-Module DerivIntpNotation.
-  Notation "⟦ J ⟧" := (derivst_intp J) (format "⟦  '[' J  ']' ⟧") : nola_scope.
-End DerivIntpNotation.
-Import DerivIntpNotation.
+(** Notation for judgment semantics *)
+Module JudgIntpNotation.
+  Notation "⟦ J ⟧" := (judg_intp J) (format "⟦  '[' J  ']' ⟧") : nola_scope.
+End JudgIntpNotation.
+Import JudgIntpNotation.
 
 Section deriv.
-  Context {PROP} {DER : derivst PROP}.
-  Implicit Type (δ : deriv_ty DER PROP) (ih : deriv_ty DER PROP → Prop).
+  Context {PROP : bi} {JUDG : judg PROP}.
+  Implicit Type (δ : deriv_ty JUDG PROP) (ih : deriv_ty JUDG PROP → Prop).
 
   (** Soundness of a derivability [δ] with respect to the semantics at [δ'] *)
   Definition dsound δ δ' : PROP := ∀ J, δ ⸨ J ⸩ -∗ ⟦ J ⟧ δ'.
@@ -158,7 +155,7 @@ Section deriv.
   (** ** [der]: The best derivability predicate *)
 
   (** [der_gen]: What becomes [der] by taking [bi_least_fixpoint] *)
-  Definition der_gen (self : DER → PROP) : DER → PROP := λ J,
+  Definition der_gen (self : JUDG → PROP) : JUDG → PROP := λ J,
     (∀ δ, ⌜Deriv (λ _, True) δ⌝ → □ dsound (Dwrap self) δ -∗
       □ dtrans (Dwrap self) δ -∗ ⟦ J ⟧ δ)%I.
   #[export] Instance der_gen_mono : BiMonoPred (A:=leibnizO _) der_gen.
@@ -170,7 +167,7 @@ Section deriv.
   Qed.
 
   (** [der]: The best derivability predicate *)
-  Definition der_def : deriv_ty DER PROP :=
+  Definition der_def : deriv_ty JUDG PROP :=
     Dwrap (bi_least_fixpoint (A:=leibnizO _) der_gen).
   Lemma der_aux : seal (@der_def). Proof. by eexists. Qed.
   Definition der := der_aux.(unseal).
