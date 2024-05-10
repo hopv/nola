@@ -4,7 +4,7 @@ From iris.program_logic Require Import atomic.
 From nola.examples.heap_lang Require Export tactics derived_laws.
 From nola.examples.heap_lang Require Import notation.
 From iris.prelude Require Import options.
-Import uPred.
+Import uPred WpwNotation.
 
 Lemma tac_wp_expr_eval `{!heapGS_gen hlc Σ} W Δ s E Φ e e' :
   (∀ (e'':=e'), e = e'') →

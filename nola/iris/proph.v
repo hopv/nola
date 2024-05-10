@@ -7,7 +7,7 @@ From iris.algebra Require Import gmap csum frac agree.
 From iris.bi Require Import fractional.
 From iris.base_logic Require Import own.
 From iris.proofmode Require Import proofmode.
-Import EqNotations.
+Import EqNotations ProdNotation.
 
 Implicit Type (TY : synty) (q : Qp).
 
@@ -39,15 +39,14 @@ Local Definition pl_ids {TY} (L : proph_log TY) : gset positive :=
 (** Prophecy dependency over the complement of a list set *)
 Local Definition proph_dep_out {TY A}
   (aπ : clair TY A) (ξl : list (aprvar TY)) :=
-  ∀ π π', π .≡{ (.∉ ξl) }≡ π' → aπ π = aπ π'.
-Local Notation "aπ ./~ ξl" := (proph_dep_out aπ ξl)
-  (at level 70, format "aπ  ./~  ξl").
+  ∀ π π', proph_asn_eqv (.∉ ξl) π π' → aπ π = aπ π'.
 
 (** Validity of a prophecy log *)
 Local Fixpoint proph_log_valid {TY} (L : proph_log TY) :=
   match L with
   | [] => True
-  | .{ξ := xπ} :: L' => ξ ∉ pl_vars L' ∧ xπ ./~ pl_vars L ∧ proph_log_valid L'
+  | .{ξ := xπ} :: L' =>
+    ξ ∉ pl_vars L' ∧ proph_dep_out xπ (pl_vars L) ∧ proph_log_valid L'
   end.
 Local Notation ".✓ L" := (proph_log_valid L) (at level 20, format ".✓  L").
 
@@ -87,7 +86,7 @@ Local Notation ":<[ L ]>" := (proph_upds L) (at level 5, format ":<[ L ]>").
 
 (** Equivalence out of [L] for [proph_upds] *)
 Local Lemma proph_upds_eqv_out {TY} (L : proph_log TY) :
-  ∀ π, :<[L]> π .≡{ (.∉ pl_vars L) }≡ π.
+  ∀ π, proph_asn_eqv (.∉ pl_vars L) (:<[L]> π) π.
 Proof.
   elim L=>/= [|[??]? IH]; [done|]=> > /not_elem_of_cons [??].
   rewrite IH; [|done]. by apply proph_upd_ne.
@@ -100,8 +99,8 @@ Proof.
   rewrite /proph_sat. elim: L=>/= [|[ξ xπ] L' IH]; [done|].
   move=> [?[? /IH ?]]?. apply Forall_cons=>/=. split; [|done].
   rewrite proph_upds_eqv_out; [|done]. rewrite proph_upd_self.
-  set L := .{ξ := xπ} :: L'. have dep': xπ ./~ pl_vars L by done. symmetry.
-  apply dep', (proph_upds_eqv_out L).
+  set L := .{ξ := xπ} :: L'. have dep': proph_dep_out xπ (pl_vars L) by done.
+  symmetry. apply dep', (proph_upds_eqv_out L).
 Qed.
 (** [L] can by satisfied for valid [L] *)
 Local Lemma proph_valid_sat {TY} {L : proph_log TY} : .✓ L → ∃ π, π ◁ L.
@@ -306,15 +305,18 @@ Section defs.
   Proof. exact: seal_eq. Qed.
 End defs.
 
-Notation "q :[ ξ ]" := (proph_tok ξ q)
-  (at level 2, left associativity, format "q :[ ξ ]") : bi_scope.
-Notation proph_toks ξl q := ([∗ list] ξ ∈ ξl, q:[ξ])%I (only parsing).
-Notation "q :∗[ ξl ]" := (proph_toks ξl q)
-  (at level 2, left associativity, format "q :∗[ ξl ]") : bi_scope.
-Notation ".⟨ φπ ⟩" := (proph_obs φπ%type%stdpp)
-  (at level 1, format ".⟨ φπ ⟩") : bi_scope.
-Notation "⟨ π , φ ⟩" := (proph_obs (λ π, φ%type%stdpp))
-  (at level 1, format "⟨ π ,  φ ⟩") : bi_scope.
+Module ProphNotation.
+  Notation "q :[ ξ ]" := (proph_tok ξ q)
+    (at level 2, left associativity, format "q :[ ξ ]") : bi_scope.
+  Notation proph_toks ξl q := ([∗ list] ξ ∈ ξl, q:[ξ])%I (only parsing).
+  Notation "q :∗[ ξl ]" := (proph_toks ξl q)
+    (at level 2, left associativity, format "q :∗[ ξl ]") : bi_scope.
+  Notation ".⟨ φπ ⟩" := (proph_obs φπ%type%stdpp)
+    (at level 1, format ".⟨ φπ ⟩") : bi_scope.
+  Notation "⟨ π , φ ⟩" := (proph_obs (λ π, φ%type%stdpp))
+    (at level 1, format "⟨ π ,  φ ⟩") : bi_scope.
+End ProphNotation.
+Import ProphNotation.
 
 (** ** Lemmas *)
 
@@ -475,7 +477,7 @@ Section lemmas.
     by move=> /Cinr_included/to_agree_included ?.
   Qed.
   (** Update of [proph_resolve_dep] *)
-  Local Lemma proph_resolve_dep_upd {ηl ξ xπ q} : xπ ./ ηl →
+  Local Lemma proph_resolve_dep_upd {ηl ξ xπ q} : proph_dep xπ ηl →
     ProphCar {[aprvar_id ξ := fitem (TY:=TY) 1]} ⋅
     ([^op list] η ∈ ηl, ProphCar {[aprvar_id η := fitem q]}) ~~>
       ProphCar {[aprvar_id .{ξ := xπ}.(pli_var) := aitem .{ξ := xπ}.(pli_val)]} ⋅
@@ -526,7 +528,7 @@ Section lemmas.
         by rewrite lookup_singleton.
   Qed.
   (** Resolve a prophecy *)
-  Lemma proph_resolve_dep ηl ξ xπ q : xπ ./ ηl →
+  Lemma proph_resolve_dep ηl ξ xπ q : proph_dep xπ ηl →
     1:[ξ] -∗ q:∗[ηl] ==∗ q:∗[ηl] ∗ ⟨π, π ξ = xπ π⟩.
   Proof.
     iIntros (dep) "ξ ηl". rewrite proph_tok_unseal.

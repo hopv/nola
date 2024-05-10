@@ -4,6 +4,7 @@ From iris.proofmode Require Import proofmode.
 From iris.program_logic Require Export weakestpre adequacy.
 From nola.examples.heap_lang Require Import proofmode notation.
 From iris.prelude Require Import options.
+Import WpwNotation.
 
 Class heapGpreS Σ := HeapGpreS {
   heapGpreS_iris :: invGpreS Σ;

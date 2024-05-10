@@ -2,6 +2,7 @@
 
 From nola.examples.heap_lang Require Import notation proofmode.
 From nola.iris Require Import later inv.
+Import WpwNotation.
 
 (** ** Target function: Linked list mutation *)
 Definition iter : val := rec: "self" "f" "c" "l" :=

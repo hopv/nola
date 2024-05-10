@@ -3,17 +3,22 @@
 From nola.util Require Export plist.
 From iris.bi Require Import bi.
 From iris.proofmode Require Import proofmode.
+Import ProdNotation.
 
 Fixpoint big_sepPL {PROP : bi} {A} {F : A → Type} {al} (Φ : ∀ a, F a → PROP)
   : plist F al → PROP :=
   match al with [] => λ _, emp | _ :: _ =>
     λ '(x, xl)', Φ _ x ∗ big_sepPL Φ xl end%I.
-Notation "[∗ plist] a ; x ∈ xl , P" := (big_sepPL (λ a x, P) xl)
-  (at level 200, xl at level 10, a binder, x binder,
-    format "[∗  plist]  a ;  x  ∈  xl ,  P") : bi_scope.
-Notation "[∗ plist] x ∈ xl , P" := (big_sepPL (λ _ x, P) xl)
-  (at level 200, xl at level 10, x binder,
-    format "[∗  plist]  x  ∈  xl ,  P") : bi_scope.
+
+Module PlistNotation.
+  Notation "[∗ plist] a ; x ∈ xl , P" := (big_sepPL (λ a x, P) xl)
+    (at level 200, xl at level 10, a binder, x binder,
+      format "[∗  plist]  a ;  x  ∈  xl ,  P") : bi_scope.
+  Notation "[∗ plist] x ∈ xl , P" := (big_sepPL (λ _ x, P) xl)
+    (at level 200, xl at level 10, x binder,
+      format "[∗  plist]  x  ∈  xl ,  P") : bi_scope.
+End PlistNotation.
+Import PlistNotation.
 
 Section big_sepPL.
   Context {PROP : bi} {A} {F : A → Type}.

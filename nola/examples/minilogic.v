@@ -2,6 +2,7 @@
 
 From nola.examples.heap_lang Require Import notation proofmode.
 From nola.iris Require Import inv.
+Import WpwNotation.
 
 (** ** Syntax for separation logic propositions *)
 Inductive nProp : Type :=

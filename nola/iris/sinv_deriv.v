@@ -2,7 +2,7 @@
 
 From nola.iris Require Export util deriv sinv.
 From iris.proofmode Require Import proofmode.
-Import PintpNotation DerivNotation.
+Import OfeNotation PintpNotation DerivNotation UpdwNotation.
 
 (** Notation *)
 Notation sinv_wsatd δ := (sinv_wsat ⟦⟧(δ)).

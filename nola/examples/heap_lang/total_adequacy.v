@@ -4,6 +4,7 @@ From iris.program_logic Require Export total_adequacy.
 From nola.examples.heap_lang Require Export adequacy.
 From nola.examples.heap_lang Require Import proofmode notation.
 From iris.prelude Require Import options.
+Import WpwNotation.
 
 Definition heap_total Σ `{!heapGpreS Σ} s e σ φ :
   (∀ `{!heapGS_gen HasNoLc Σ}, ⊢ |={⊤}=> ∃ W,

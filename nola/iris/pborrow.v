@@ -2,6 +2,8 @@
 
 From nola.iris Require Export plist borrow proph_ag.
 From iris.proofmode Require Import proofmode.
+Import ProdNotation PlistNotation OfeNotation LftNotation ProphNotation
+  UpdwNotation.
 
 Implicit Type (TY : synty) (PROP : oFunctor) (α : lft) (q : Qp).
 

@@ -6,6 +6,7 @@ From nola.iris Require Export ofe lft upd.
 From iris.algebra Require Import excl agree gmap auth.
 From iris.bi.lib Require Import cmra.
 From iris.proofmode Require Import proofmode.
+Import ProdNotation OfeNotation LftNotation UpdwNotation.
 
 Implicit Type (PROP : oFunctor) (α : lft) (q : Qp).
 

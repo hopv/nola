@@ -126,14 +126,10 @@ Definition app_plist_prvar {TY} {Xl : list TY}
 Definition proph_asn_eqv {TY}
   (φ : aprvar TY → Prop) (π π' : proph_asn TY) :=
   ∀ ξ : aprvar TY, φ ξ → π ξ = π' ξ.
-Notation "π .≡{ φ }≡ π'" := (proph_asn_eqv φ π π')
-  (at level 70, format "π  .≡{ φ }≡  π'") : nola_scope.
 
 (** Prophecy dependency *)
 Definition proph_dep {TY A} (aπ : clair TY A) (ξl: list (aprvar TY)) :=
-  ∀ π π', π .≡{ (.∈ ξl) }≡ π' → aπ π = aπ π'.
-Notation "aπ ./ ξl" := (proph_dep aπ ξl) (at level 70, format "aπ  ./  ξl")
-  : nola_scope.
+  ∀ π π', proph_asn_eqv (.∈ ξl) π π' → aπ π = aπ π'.
 
 (** Lemmas *)
 
@@ -153,44 +149,45 @@ Section lemmas.
   Proof. move=> ?? eq. split; apply proph_dep_mono; by rewrite eq. Qed.
 
   (** On a constant *)
-  Lemma proph_dep_const {A} (a : A) : (λ _ : proph_asn TY, a) ./ [].
+  Lemma proph_dep_const {A} (a : A) : proph_dep (λ _ : proph_asn TY, a) [].
   Proof. done. Qed.
 
   (** On [(.$ ξ)] *)
-  Lemma proph_dep_one ξ : (λ π, π ξ) ./ [ξ].
+  Lemma proph_dep_one ξ : proph_dep (λ π, π ξ) [ξ].
   Proof. move=> ?? eqv. apply eqv. constructor. Qed.
 
   (** Construct with a function *)
   Lemma proph_dep_constr {A B} (f : A → B) aπ ξl :
-    aπ ./ ξl → (λ π, f (aπ π)) ./ ξl.
+    proph_dep aπ ξl → proph_dep (λ π, f (aπ π)) ξl.
   Proof. move=> dep ?? /dep ?. by apply (f_equal f). Qed.
   Lemma proph_dep_constr2 {A B C} (f: A → B → C) aπ bπ ξl ηl :
-    aπ ./ ξl → bπ ./ ηl → (λ π, f (aπ π) (bπ π)) ./ ξl ++ ηl.
+    proph_dep aπ ξl → proph_dep bπ ηl →
+    proph_dep (λ π, f (aπ π) (bπ π)) (ξl ++ ηl).
   Proof.
     move=> dep dep' ?? eqv.
     eapply proph_dep_mono, (.$ eqv) in dep, dep'; [|set_solver..]. by f_equal.
   Qed.
   Lemma proph_dep_constr3 {A B C D} (f: A → B → C → D) aπ bπ cπ ξl ηl ζl :
-    aπ ./ ξl → bπ ./ ηl → cπ ./ ζl →
-    (λ π, f (aπ π) (bπ π) (cπ π)) ./ ξl ++ ηl ++ ζl.
+    proph_dep aπ ξl → proph_dep bπ ηl → proph_dep cπ ζl →
+    proph_dep (λ π, f (aπ π) (bπ π) (cπ π)) (ξl ++ ηl ++ ζl).
   Proof.
     move=> dep dep' dep'' ?? eqv.
     eapply proph_dep_mono, (.$ eqv) in dep, dep', dep''; [|set_solver..].
     by f_equal.
   Qed.
   Lemma proph_dep_plist' {Xl : list TY} (ξl : plist prvar Xl) :
-    (λ π, app_plist_prvar π ξl) ./ of_plist_prvar ξl.
+    proph_dep (λ π, app_plist_prvar π ξl) (of_plist_prvar ξl).
   Proof.
     elim: Xl ξl; [done|]=>/= ?? IH [ξ ξl] ?? eqv.
     unfold app_plist_prvar=>/=. f_equal.
     { apply (eqv ξ). set_solver. } { apply IH=> ??. apply eqv. set_solver. }
   Qed.
   Lemma proph_dep_plist {A} {Xl : list TY} (f : _ → A) (ξl : plist prvar Xl) :
-    (λ π, f (app_plist_prvar π ξl)) ./ of_plist_prvar ξl.
+    proph_dep (λ π, f (app_plist_prvar π ξl)) (of_plist_prvar ξl).
   Proof. apply proph_dep_constr, proph_dep_plist'. Qed.
 
   (** On a singleton type *)
   Lemma proph_dep_singleton {A} (aπ : clair TY A) :
-    (∀ a a' : A, a = a') → aπ ./ [].
+    (∀ a a' : A, a = a') → proph_dep aπ [].
   Proof. by move=> ????. Qed.
 End lemmas.

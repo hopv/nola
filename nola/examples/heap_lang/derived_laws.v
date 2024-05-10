@@ -10,6 +10,7 @@ From iris.proofmode Require Import proofmode.
 From nola.examples.heap_lang Require Export primitive_laws.
 From nola.examples.heap_lang Require Import tactics notation.
 From iris.prelude Require Import options.
+Import WpwNotation.
 
 (** We have [FromSep] and [IntoSep] instances to split the fraction (via the
 [AsFractional] instance below), but not for splitting the list, as that would

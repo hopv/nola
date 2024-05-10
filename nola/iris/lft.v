@@ -84,8 +84,6 @@ Local Definition alft_alive `{!lftG Σ} (a : alft) (q : Qp) : iProp Σ :=
   own a (Cinl (DfracOwn q)).
 (** Alive lifetime token *)
 Notation lft_alive α q := ([∗ mset] a ∈ α, alft_alive a q)%I.
-Notation "q .[ α ]" := (lft_alive α q)
-  (format "q .[ α ]", at level 2, left associativity) : bi_scope.
 
 (** Dead atomic lifetime token *)
 Local Definition alft_dead `{!lftG Σ} (a : alft) : iProp Σ := own a (Cinr ()).
@@ -96,14 +94,20 @@ Local Lemma lft_dead_aux : seal (@lft_dead_def). Proof. by eexists. Qed.
 Definition lft_dead `{!lftG Σ} := lft_dead_aux.(unseal) _ _.
 Local Lemma lft_dead_unseal `{!lftG Σ} : @lft_dead = @lft_dead_def.
 Proof. exact: seal_eq. Qed.
-Notation "[† α ]" := (lft_dead α) (format "[† α ]") : bi_scope.
 
 (** Eternal atomic lifetime token *)
 Local Definition alft_etern `{!lftG Σ} (a : alft) : iProp Σ :=
   own a (Cinl DfracDiscarded).
 (** Eternal lifetime token *)
 Notation lft_etern α := ([∗ mset] a ∈ α, alft_etern a)%I.
-Notation "[∞ α ]" := (lft_etern α) (format "[∞ α ]") : bi_scope.
+
+Module LftNotation.
+  Notation "q .[ α ]" := (lft_alive α q)
+    (format "q .[ α ]", at level 2, left associativity) : bi_scope.
+  Notation "[† α ]" := (lft_dead α) (format "[† α ]") : bi_scope.
+  Notation "[∞ α ]" := (lft_etern α) (format "[∞ α ]") : bi_scope.
+End LftNotation.
+Import LftNotation.
 
 Section lft.
   Context `{!lftG Σ}.

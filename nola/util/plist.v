@@ -2,6 +2,7 @@
 
 From nola Require Export prod.
 From stdpp Require Import vector.
+Import ProdNotation.
 
 (** Product list *)
 Fixpoint plist {A} (F : A → Type) (al : list A) : Type :=

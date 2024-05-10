@@ -10,6 +10,7 @@ From nola.iris Require Export wp.
 From nola.examples.heap_lang Require Export class_instances definitions.
 From nola.examples.heap_lang Require Import tactics notation.
 From iris.prelude Require Import options.
+Import WpwNotation.
 
 Section lifting.
 Context `{!heapGS_gen hlc Σ}.

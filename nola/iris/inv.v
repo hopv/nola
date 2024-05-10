@@ -4,6 +4,7 @@ From nola.iris Require Export ofe sinv upd.
 From iris.base_logic.lib Require Export wsat invariants.
 From iris.algebra Require Import gset.
 From iris.proofmode Require Import proofmode.
+Import OfeNotation UpdwNotation.
 
 Implicit Type (PROP : oFunctor) (i : positive) (N : namespace).
 

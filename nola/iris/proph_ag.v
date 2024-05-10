@@ -4,6 +4,7 @@ From nola.iris Require Export proph.
 From iris.bi Require Import fractional.
 From iris.base_logic.lib Require Import ghost_var.
 From iris.proofmode Require Import proofmode.
+Import ProphNotation.
 
 (** Ghost state *)
 Class proph_agG TY Σ := proph_agG_in :: ghost_varG Σ (anyty TY id).
@@ -129,7 +130,7 @@ Section proph_ag.
 
   (** Resolve the prophecy of [proph_ctrl] with [val_obs],
     retaining [proph_ctrl] *)
-  Lemma vo_pc_preresolve {X γ x x' ξ} aπ ηl q : aπ ./ ηl →
+  Lemma vo_pc_preresolve {X γ x x' ξ} aπ ηl q : proph_dep aπ ηl →
     q:∗[ηl] -∗ val_obs (X:=X) γ x -∗ proph_ctrl (X:=X) γ x' ξ ==∗
       q:∗[ηl] ∗ ⟨π, π ξ = aπ π⟩ ∗
       (∀ x'', ⟨π, aπ π = x''⟩ -∗ proph_ctrl γ x'' ξ).

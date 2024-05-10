@@ -17,8 +17,7 @@ Add Printing Constructor dwrap.
 
 (** Notation for derivability *)
 Module DerivNotation.
-  Notation "⸨ J ⸩( δ )" := (dunwrap δ J) (format "⸨  '[' J  ']' ⸩( δ )")
-    : nola_scope.
+  Notation "⸨ J ⸩( δ )" := (dunwrap δ J) (format "⸨  '[' J  ']' ⸩( δ )").
 End DerivNotation.
 Import DerivNotation.
 
