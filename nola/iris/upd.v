@@ -18,7 +18,7 @@ Qed.
 
 (** ** General update *)
 
-Class GenUpd `{!BiBUpd PROP} (M : PROP → PROP) : Prop := {
+Class GenUpd `{!BiBUpd PROP} (M : PROP → PROP) : Prop := GEN_UPD {
   gen_upd_ne :: NonExpansive M;
   gen_upd_from_bupd {P} : (|==> P) ⊢ M P;
   gen_upd_mono {P Q} : (P ⊢ Q) → M P ⊢ M Q;
