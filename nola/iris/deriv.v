@@ -54,11 +54,11 @@ Arguments derivst_intp {PROP DER} : rename.
 
 (** Notation for [derivs_intp] *)
 Notation derivst_intp' δ := (Dwrap (derivst_intp δ)).
-Module IntpNotation.
+Module DerivIntpNotation.
   Notation "⟦ J ⟧ ( δ )" := (derivst_intp δ J)
     (format "'[' ⟦  J  ⟧ '/  ' ( δ ) ']'") : nola_scope.
-End IntpNotation.
-Import IntpNotation.
+End DerivIntpNotation.
+Import DerivIntpNotation.
 
 (** Conversion between candidates [δ], [δ'] *)
 Definition dtrans {JUDG PROP} (δ δ' : deriv_ty JUDG PROP) : PROP :=

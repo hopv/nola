@@ -2,7 +2,7 @@
 
 From nola.iris Require Export util deriv sinv.
 From iris.proofmode Require Import proofmode.
-Import IntpNotation DerivNotation.
+Import DerivIntpNotation DerivNotation.
 
 Section sinv_deriv.
   Context `{!sinvGS PROP Σ}.

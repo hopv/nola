@@ -2,7 +2,7 @@
 
 From nola.iris Require Export util deriv na_inv.
 From iris.proofmode Require Import proofmode.
-Import IntpNotation DerivNotation.
+Import DerivIntpNotation DerivNotation.
 
 Section na_inv_deriv.
   Context `{!na_inv'GS PROP Σ, !invGS_gen hlc Σ, !na_invG Σ}.
