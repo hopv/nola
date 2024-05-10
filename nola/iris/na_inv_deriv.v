@@ -13,7 +13,7 @@ Section na_inv_deriv.
       na_own p (F∖↑N) ∗ P ∗
       (na_own p (F∖↑N) -∗ P =[na_inv_wsat intp]{E}=∗ na_own p F) .
 
-  (** Derivability structure for [na_inv] *)
+  (** Derivability data for [na_inv] *)
   Class DerivNaInv (DER : derivst (iProp Σ)) := DERIV_NA_INV {
     deriv_na_inv_intp : deriv_ty DER (iProp Σ) → PROP $o iProp Σ → iProp Σ;
     deriv_na_inv_ne {δ} :: NonExpansive (deriv_na_inv_intp δ);

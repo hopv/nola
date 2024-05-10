@@ -12,7 +12,7 @@ Section inv_deriv.
     ∀ E, ⌜↑N ⊆ E⌝ → |=[inv_wsat intp]{E,E∖↑N}=>
       P ∗ (P =[inv_wsat intp]{E∖↑N,E}=∗ True).
 
-  (** Derivability structure for [inv] *)
+  (** Derivability data for [inv] *)
   Class DerivInv (DER : derivst (iProp Σ)) := DERIV_INV {
     deriv_inv_intp : deriv_ty DER (iProp Σ) → PROP $o iProp Σ → iProp Σ;
     deriv_inv_ne {δ} :: NonExpansive (deriv_inv_intp δ);
