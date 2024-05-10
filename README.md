@@ -74,7 +74,6 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`upd`](nola/iris/upd.v) (Update),
     [`wp`](nola/iris/wp.v) (Weakest precondition),
     [`util`](nola/iris/util.v) (Utilities)
-  + [`later`](nola/iris/later.v) (Later)
   + [`sinv`](nola/iris/sinv.v) (Simple invariant),
     [`sinv_deriv`](nola/iris/sinv_deriv.v) (Simple invariant relaxed with
       derivability)
