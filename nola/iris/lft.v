@@ -101,13 +101,13 @@ Local Definition alft_etern `{!lftG Σ} (a : alft) : iProp Σ :=
 (** Eternal lifetime token *)
 Notation lft_etern α := ([∗ mset] a ∈ α, alft_etern a)%I.
 
-Module LftNotation.
+Module LftNotation'.
   Notation "q .[ α ]" := (lft_alive α q)
     (format "q .[ α ]", at level 2, left associativity) : bi_scope.
   Notation "[† α ]" := (lft_dead α) (format "[† α ]") : bi_scope.
   Notation "[∞ α ]" := (lft_etern α) (format "[∞ α ]") : bi_scope.
-End LftNotation.
-Import LftNotation.
+End LftNotation'.
+Import LftNotation'.
 
 Section lft.
   Context `{!lftG Σ}.
@@ -312,7 +312,12 @@ Section lft.
   Local Lemma lft_sincl_unseal : lft_sincl = lft_sincl_def.
   Proof. exact: seal_eq. Qed.
 End lft.
-Infix "⊑□" := lft_sincl (at level 70) : bi_scope.
+
+Module LftNotation.
+  Export LftNotation'.
+  Infix "⊑□" := lft_sincl (at level 70) : bi_scope.
+End LftNotation.
+Import LftNotation.
 
 Section lft.
   Context `{!lftG Σ}.
