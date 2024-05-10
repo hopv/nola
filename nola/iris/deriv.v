@@ -43,6 +43,7 @@ Implicit Type (JUDG : Type) (PROP : bi).
 Notation deriv_ty JUDG PROP := (dwrap (JUDG -d> PROP)).
 
 (** [derivst]: Derivation structure *)
+#[projections(primitive)]
 Structure derivst (PROP : bi) : Type := Derivst {
   derivst_judg :> Type;
   (** Interpretation parameterized over derivability candidates *)
