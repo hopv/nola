@@ -5,9 +5,7 @@ From nola Require Export prelude.
 (** [prod']: Modified [prod],
   using primitive projections and right-associative notations *)
 #[projections(primitive)]
-Record prod' (A B : Type) : Type := pair' {
-  fst' : A; snd' : B;
-}.
+Record prod' (A B : Type) : Type := pair' { fst' : A; snd' : B; }.
 Arguments pair' {_ _} _ _.
 Arguments fst' {_ _} _.
 Arguments snd' {_ _} _.
