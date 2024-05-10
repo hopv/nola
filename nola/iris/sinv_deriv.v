@@ -26,7 +26,7 @@ Section sinv_deriv.
 
   (** [sinv]: Relaxed simple invariant *)
   Definition sinv δ P : iProp Σ :=
-    ∃ Q, □ ⸨ deriv_sinv_acsr P Q ⸩(δ) ∗ sinv_tok Q.
+    ∃ Q, □ ⸨ deriv_sinv_acsr P Q ⸩ δ ∗ sinv_tok Q.
 
   (** [sinv] is persistent *)
   Fact sinv_persistent {δ P} : Persistent (sinv δ P).
@@ -61,7 +61,7 @@ Section sinv_deriv.
   Proof. rewrite -sinv_tok_sinv. exact: sinv_tok_alloc. Qed.
 
   (** Convert [sinv] with [acsr] *)
-  Lemma sinv_acsr' {P Q} : □ ⸨ deriv_sinv_acsr P Q ⸩(δ) -∗ sinv δ Q -∗ sinv δ P.
+  Lemma sinv_acsr' {P Q} : □ ⸨ deriv_sinv_acsr P Q ⸩ δ -∗ sinv δ Q -∗ sinv δ P.
   Proof.
     iIntros "#QPQ [%R[#RQR $]] !>". iApply (Deriv_map2 with "[] QPQ RQR").
     iIntros (? _ _). rewrite !deriv_sinv_acsr_intp. iApply acsr_trans.

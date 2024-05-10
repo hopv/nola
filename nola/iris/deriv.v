@@ -15,11 +15,11 @@ Arguments dunwrap {_} _.
 Add Printing Constructor dwrap.
 
 (** Notation for [dwrap] *)
-Module DerivNotation'.
-  Notation "⸨ J ⸩ ( δ )" := (dunwrap δ J)
-    (format "'[' ⸨  J  ⸩ '/  ' ( δ ) ']'") : nola_scope.
-End DerivNotation'.
-Import DerivNotation'.
+Module DerivNotation.
+  Notation "⸨ J ⸩ δ" := (dunwrap δ J) (format "⸨  '[' J  ']' ⸩  δ", at level 0)
+    : nola_scope.
+End DerivNotation.
+Import DerivNotation.
 
 (** Make [dwrap A] [ofe] for [A : ofe] *)
 #[export] Instance dwrap_equiv `{!Equiv A} : Equiv (dwrap A)
@@ -48,16 +48,14 @@ Structure derivst (PROP : bi) : Type := Derivst {
   derivst_judg :> Type;
   (** Interpretation parameterized over derivability candidates *)
   #[canonical=no] derivst_intp :
-    deriv_ty derivst_judg PROP → derivst_judg → PROP;
+    derivst_judg → deriv_ty derivst_judg PROP → PROP;
 }.
 Arguments derivst_judg {PROP DER} : rename.
 Arguments derivst_intp {PROP DER} : rename.
 
 (** Notation for [derivs_intp] *)
-Notation derivst_intp' δ := (Dwrap (derivst_intp δ)).
 Module DerivIntpNotation.
-  Notation "⟦ J ⟧ ( δ )" := (derivst_intp δ J)
-    (format "'[' ⟦  J  ⟧ '/  ' ( δ ) ']'") : nola_scope.
+  Notation "⟦ J ⟧" := (derivst_intp J) (format "⟦  '[' J  ']' ⟧") : nola_scope.
 End DerivIntpNotation.
 Import DerivIntpNotation.
 
@@ -66,8 +64,8 @@ Section deriv.
   Implicit Type (δ : deriv_ty DER PROP) (ih : deriv_ty DER PROP → Prop).
 
   (** Soundness of a derivability [δ] with respect to the semantics at [δ'] *)
-  Definition dsound δ δ' : PROP := ∀ J, ⸨ J ⸩(δ) -∗ ⟦ J ⟧(δ').
-  Definition dtrans δ δ' : PROP := ∀ J, ⸨ J ⸩(δ) -∗ ⸨ J ⸩(δ').
+  Definition dsound δ δ' : PROP := ∀ J, ⸨ J ⸩ δ -∗ ⟦ J ⟧ δ'.
+  Definition dtrans δ δ' : PROP := ∀ J, ⸨ J ⸩ δ -∗ ⸨ J ⸩ δ'.
 
   (** ** [Deriv ih δ] : [δ] is a good derivability predicate
 
@@ -79,19 +77,19 @@ Section deriv.
       (* Parameterization by [Deriv'] is for strict positivity *)
       ∃ Deriv' : _ → Prop, (∀ δ', Deriv' δ' → Deriv ih δ') ∧ ∀ J,
         (∀ δ', ⌜Deriv' δ'⌝ → ⌜ih δ'⌝ →
-          □ dsound δ δ' -∗ □ dtrans δ δ' -∗ ⟦ J ⟧(δ')) -∗ ⸨ J ⸩(δ)
+          □ dsound δ δ' -∗ □ dtrans δ δ' -∗ ⟦ J ⟧ δ') -∗ ⸨ J ⸩ δ
   }.
   Existing Class Deriv.
 
-  (** Get the derivability [⸨ J ⸩(δ)] by the interpretaion *)
+  (** Get the derivability [⸨ J ⸩ δ] by the interpretaion *)
   Lemma Deriv_byintp `{!Deriv ih δ} {J} :
     ((* Take any good derivability predicate [δ'] *) ∀ δ', ⌜Deriv ih δ'⌝ →
       (* Can use the inductive hypothesis *) ⌜ih δ'⌝ →
       (* Can turn [δ] into the semantics at [δ'] *)
         □ dsound δ δ' -∗
       (* Can turn [δ] into [δ'] *) □ dtrans δ δ' -∗
-      (* The semantics at [δ'] *) ⟦ J ⟧(δ'))
-    -∗ (* The derivability at [δ] *) ⸨ J ⸩(δ).
+      (* The semantics at [δ'] *) ⟦ J ⟧ δ')
+    -∗ (* The derivability at [δ] *) ⸨ J ⸩ δ.
   Proof.
     have X := Deriv_byintp' ih δ. move: X=> [dy[dyto byintp]]. iIntros "→".
     iApply byintp. iIntros (δ' dyd'). apply dyto in dyd'. by iApply "→".
@@ -118,39 +116,39 @@ Section deriv.
 
   (** Introduce a derivability via semantics *)
   Lemma Deriv_intro `{!Deriv ih δ} {J} :
-    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ')) ⊢ ⸨ J ⸩(δ).
+    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧ δ') ⊢ ⸨ J ⸩ δ.
   Proof.
     iIntros "∀". iApply Deriv_byintp. iIntros (???) "_ _". by iApply "∀".
   Qed.
 
   (** Map derivabilities via semantics *)
   Lemma Deriv_map `{!Deriv ih δ} {J J'} :
-    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ')) -∗
-    ⸨ J ⸩(δ) -∗ ⸨ J' ⸩(δ).
+    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧ δ' -∗ ⟦ J' ⟧ δ') -∗
+    ⸨ J ⸩ δ -∗ ⸨ J' ⸩ δ.
   Proof.
     iIntros "∀ J". iApply Deriv_byintp. iIntros (???) "#→ _".
     iApply "∀"; by [| |iApply "→"].
   Qed.
   Lemma Deriv_map2 `{!Deriv ih δ} {J J' J''} :
-    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ') -∗
-      ⟦ J'' ⟧(δ')) -∗
-    ⸨ J ⸩(δ) -∗ ⸨ J' ⸩(δ) -∗ ⸨ J'' ⸩(δ).
+    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧ δ' -∗ ⟦ J' ⟧ δ' -∗
+      ⟦ J'' ⟧ δ') -∗
+    ⸨ J ⸩ δ -∗ ⸨ J' ⸩ δ -∗ ⸨ J'' ⸩ δ.
   Proof.
     iIntros "∀ J J'". iApply Deriv_byintp. iIntros (???) "#→ _".
     iApply ("∀" with "[//] [//] [J]"); by iApply "→".
   Qed.
   Lemma Deriv_map3 `{!Deriv ih δ} {J J' J'' J'''} :
-    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ') -∗
-      ⟦ J'' ⟧(δ') -∗ ⟦ J''' ⟧(δ')) -∗
-    ⸨ J ⸩(δ) -∗ ⸨ J' ⸩(δ) -∗ ⸨ J'' ⸩(δ) -∗ ⸨ J''' ⸩(δ).
+    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧ δ' -∗ ⟦ J' ⟧ δ' -∗
+      ⟦ J'' ⟧ δ' -∗ ⟦ J''' ⟧ δ') -∗
+    ⸨ J ⸩ δ -∗ ⸨ J' ⸩ δ -∗ ⸨ J'' ⸩ δ -∗ ⸨ J''' ⸩ δ.
   Proof.
     iIntros "∀ J J' J''". iApply Deriv_byintp. iIntros (???) "#→ _".
     iApply ("∀" with "[//] [//] [J] [J']"); by iApply "→".
   Qed.
   Lemma Deriv_mapl `{!Deriv ih δ} {Js J'} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
-      ([∗ list] J ∈ Js, ⟦ J ⟧(δ')) -∗ ⟦ J' ⟧(δ')) -∗
-    ([∗ list] J ∈ Js, ⸨ J ⸩(δ)) -∗ ⸨ J' ⸩(δ).
+      ([∗ list] J ∈ Js, ⟦ J ⟧ δ') -∗ ⟦ J' ⟧ δ') -∗
+    ([∗ list] J ∈ Js, ⸨ J ⸩ δ) -∗ ⸨ J' ⸩ δ.
   Proof.
     iIntros "∀ Js". iApply Deriv_byintp. iIntros (???) "#→ _".
     iApply "∀"; [done..|]. iInduction Js as [|J Js] "IH"=>/=; [done|].
@@ -162,7 +160,7 @@ Section deriv.
   (** [der_gen]: What becomes [der] by taking [bi_least_fixpoint] *)
   Definition der_gen (self : DER → PROP) : DER → PROP := λ J,
     (∀ δ, ⌜Deriv (λ _, True) δ⌝ → □ dsound (Dwrap self) δ -∗
-      □ dtrans (Dwrap self) δ -∗ ⟦ J ⟧(δ))%I.
+      □ dtrans (Dwrap self) δ -∗ ⟦ J ⟧ δ)%I.
   #[export] Instance der_gen_mono : BiMonoPred (A:=leibnizO _) der_gen.
   Proof.
     split; [|solve_proper]=> Φ Ψ ??. iIntros "#ΦΨ" (?) "big".
@@ -195,9 +193,3 @@ Section deriv.
     { iIntros "[$ _]". } { iIntros "[_ $]". }
   Qed.
 End deriv.
-
-(** Notation for [dwrap] *)
-Module DerivNotation.
-  Export DerivNotation'.
-  Notation "⸨ J ⸩" := ⸨ J ⸩(der) (format "⸨  J  ⸩") : nola_scope.
-End DerivNotation.
