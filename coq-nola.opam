@@ -1,5 +1,5 @@
 opam-version: "2.0"
-synopsis: "Nested invariants and borrows without step-indexing"
+synopsis: "Nola: Parameterization for Later-Free Invariants and Borrows"
 maintainer: "Yusuke Matsushita <ysk.m24t@gmail.com>"
 authors: ["Yusuke Matsushita <ysk.m24t@gmail.com>"]
 license: "MIT"
