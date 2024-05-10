@@ -4,39 +4,48 @@ From nola.iris Require Export util deriv sinv.
 From iris.proofmode Require Import proofmode.
 Import PintpNotation DerivNotation.
 
-(** Derivability data for [sinv] *)
-Class DerivSinv {PROP Σ} (JUDG : judg (iProp Σ)) := DERIV_SINV {
-  deriv_sinv_intp ::
-    Pintp (deriv JUDG (iProp Σ)) (PROP $o iProp Σ) (iProp Σ);
-  deriv_sinv_ne {δ} :: NonExpansive (deriv_sinv_intp δ);
-  deriv_sinv_acsr : PROP $o iProp Σ → PROP $o iProp Σ → JUDG;
-  deriv_sinv_mod : iProp Σ → iProp Σ;
-  deriv_sinv_mod_gen_upd :: GenUpd deriv_sinv_mod;
-  deriv_sinv_acsr_intp {δ P Q} :
-    ⟦ deriv_sinv_acsr P Q ⟧(δ) ≡ acsr deriv_sinv_mod ⟦ P ⟧(δ) ⟦ Q ⟧(δ);
-}.
 (** Notation *)
 Notation sinv_wsatd δ := (sinv_wsat ⟦⟧(δ)).
 
+(** Derivability pre-data for [sinv] *)
+Class SinvPreDeriv PRO JUD := sinv_jacsr : PRO → PRO → JUD.
+Hint Mode SinvPreDeriv ! - : typeclass_instances.
+
 Section sinv_deriv.
-  Context `{!sinvGS PROP Σ, !DerivSinv (PROP:=PROP) (Σ:=Σ) JUDG}.
-  Implicit Type P Q : PROP $o iProp Σ.
+  Context `{!sinvGS PROP Σ, !SinvPreDeriv (PROP $o iProp Σ) JUD}.
 
   (** [sinv]: Relaxed simple invariant *)
-  Definition sinv δ P : iProp Σ :=
-    ∃ Q, □ ⸨ deriv_sinv_acsr P Q ⸩(δ) ∗ sinv_tok Q.
+  Definition sinv (δ : deriv JUD _) (P : PROP $o iProp Σ) : iProp Σ :=
+    ∃ Q, □ ⸨ sinv_jacsr P Q ⸩(δ) ∗ sinv_tok Q.
 
   (** [sinv] is persistent *)
   Fact sinv_persistent {δ P} : Persistent (sinv δ P).
   Proof. exact _. Qed.
+End sinv_deriv.
+
+Section sinv_deriv.
+  Context `{!sinvGS PROP Σ,
+    !SinvPreDeriv (PROP $o iProp Σ) (JUDG : judg (iProp Σ)),
+    !Dintp JUDG (PROP $o iProp Σ) (iProp Σ)}.
+  Implicit Type P Q : PROP $o iProp Σ.
+
+  (** Derivability data for [sinv] *)
+  Class SinvDeriv := SINV_DERIV {
+    sinv_mod : iProp Σ → iProp Σ;
+    sinv_mod_gen_upd :: GenUpd sinv_mod;
+    sinv_jacsr_intp {δ P Q} :
+      ⟦ sinv_jacsr P Q ⟧(δ) ≡ acsr sinv_mod ⟦ P ⟧(δ) ⟦ Q ⟧(δ);
+  }.
+
+  Context `{!SinvDeriv}.
 
   (** Access [sinv] *)
   Lemma sinv_acc {P} :
-    sinv der P -∗ sinv_wsatd der -∗ deriv_sinv_mod
-      (⟦ P ⟧(der) ∗ (⟦ P ⟧(der) -∗ deriv_sinv_mod (sinv_wsatd der))).
+    sinv der P -∗ sinv_wsatd der -∗ sinv_mod
+      (⟦ P ⟧(der) ∗ (⟦ P ⟧(der) -∗ sinv_mod (sinv_wsatd der))).
   Proof.
     iIntros "[%Q[QPQ s]] W". iDestruct (der_sound with "QPQ") as "QPQ".
-    rewrite deriv_sinv_acsr_intp.
+    rewrite sinv_jacsr_intp.
     iDestruct (sinv_tok_acc with "s W") as "[Q cl]".
     iMod ("QPQ" with "Q") as "[$ PQ]". iIntros "!> P".
     iMod ("PQ" with "P") as "Q". iModIntro. by iApply "cl".
@@ -48,7 +57,7 @@ Section sinv_deriv.
   Lemma sinv_tok_sinv {P} : sinv_tok P ⊢ sinv δ P.
   Proof.
     iIntros "$ !>". iApply Deriv_intro. iIntros (? _ _).
-    rewrite deriv_sinv_acsr_intp. iApply acsr_refl.
+    rewrite sinv_jacsr_intp. iApply acsr_refl.
   Qed.
 
   (** Allocate [sinv] *)
@@ -56,16 +65,17 @@ Section sinv_deriv.
   Proof. rewrite -sinv_tok_sinv. exact: sinv_tok_alloc. Qed.
 
   (** Convert [sinv] with [acsr] *)
-  Lemma sinv_acsr' {P Q} : □ ⸨ deriv_sinv_acsr P Q ⸩(δ) -∗ sinv δ Q -∗ sinv δ P.
+  Lemma sinv_acsr' {P Q} :
+    □ ⸨ sinv_jacsr P Q ⸩(δ) -∗ sinv δ Q -∗ sinv δ P.
   Proof.
     iIntros "#QPQ [%R[#RQR $]] !>". iApply (Deriv_map2 with "[] QPQ RQR").
-    iIntros (? _ _). rewrite !deriv_sinv_acsr_intp. iApply acsr_trans.
+    iIntros (? _ _). rewrite !sinv_jacsr_intp. iApply acsr_trans.
   Qed.
   Lemma sinv_acsr {P Q} :
-    □ (∀ δ, acsr deriv_sinv_mod ⟦ P ⟧(δ) ⟦ Q ⟧(δ)) -∗ sinv δ Q -∗ sinv δ P.
+    □ (∀ δ, acsr sinv_mod ⟦ P ⟧(δ) ⟦ Q ⟧(δ)) -∗ sinv δ Q -∗ sinv δ P.
   Proof.
     iIntros "#PQP". iApply sinv_acsr'. iModIntro. iApply Deriv_intro.
-    iIntros (? _ _). rewrite deriv_sinv_acsr_intp. by iApply "PQP".
+    iIntros (? _ _). rewrite sinv_jacsr_intp. by iApply "PQP".
   Qed.
 
   (** Split [sinv] over [∗] *)

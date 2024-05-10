@@ -185,3 +185,10 @@ Section deriv.
     { iIntros "[$ _]". } { iIntros "[_ $]". }
   Qed.
 End deriv.
+
+(** ** Derivability-parameterized interpretation *)
+Class Dintp (JUD : Type) (A : ofe) (PROP : bi) := DINTP {
+  dintp :: Pintp (deriv JUD PROP) A PROP;
+  dintp_ne {δ} :: NonExpansive (dintp δ);
+}.
+Hint Mode Dintp - ! - : typeclass_instances.

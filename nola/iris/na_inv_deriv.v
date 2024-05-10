@@ -4,40 +4,44 @@ From nola.iris Require Export util deriv na_inv.
 From iris.proofmode Require Import proofmode.
 Import PintpNotation DerivNotation.
 
-Section na_inv_deriv.
-  Context `{!na_inv'GS PROP Σ, !invGS_gen hlc Σ, !na_invG Σ}.
+(** Notation *)
+Notation na_inv_wsatd δ := (na_inv_wsat ⟦⟧(δ)).
 
-  (** Accessor *)
-  Definition na_inv_acsr' intp p N P : iProp Σ :=
-    ∀ E F, ⌜↑N ⊆ E⌝ → ⌜↑N ⊆ F⌝ → na_own p F =[na_inv_wsat intp]{E}=∗
-      na_own p (F∖↑N) ∗ P ∗
-      (na_own p (F∖↑N) -∗ P =[na_inv_wsat intp]{E}=∗ na_own p F) .
-
-  (** Derivability data for [na_inv] *)
-  Class DerivNaInv (JUDG : judg (iProp Σ)) := DERIV_NA_INV {
-    deriv_na_inv_intp ::
-      Pintp (deriv JUDG (iProp Σ)) (PROP $o iProp Σ) (iProp Σ);
-    deriv_na_inv_ne {δ} :: NonExpansive (deriv_na_inv_intp δ);
-    deriv_na_inv_acsr : na_inv_pool_name → namespace → PROP $o iProp Σ → JUDG;
-    deriv_na_inv_acsr_intp {δ p N P} :
-      ⟦ deriv_na_inv_acsr p N P ⟧(δ) ≡ na_inv_acsr' ⟦⟧(δ) p N (⟦ P ⟧(δ));
-  }.
-End na_inv_deriv.
-Notation na_inv_ascr δ p N P := (na_inv_acsr' (deriv_na_inv_intp δ) p N P).
+(** Derivability pre-data for [na_inv] *)
+Class NaInvPreDeriv PRO JUD :=
+  na_inv_jacsr : na_inv_pool_name → namespace → PRO → JUD.
+Hint Mode NaInvPreDeriv ! - : typeclass_instances.
 
 Section na_inv_deriv.
-  Context `{!na_inv'GS PROP Σ, !invGS_gen hlc Σ, !na_invG Σ, !DerivNaInv JUDG}.
-  Implicit Type P Q : PROP $o iProp Σ.
+  Context `{!NaInvPreDeriv PRO JUD} {Σ : gFunctors}.
 
   (** [na_inv']: Relaxed na_invariant *)
-  Definition na_inv' δ p N P : iProp Σ := □ ⸨ deriv_na_inv_acsr p N P ⸩(δ).
+  Definition na_inv' δ p N (P : PRO) : iProp Σ := □ ⸨ na_inv_jacsr p N P ⸩(δ).
 
   (** [na_inv'] is persistent *)
   Fact na_inv'_persistent {δ p N P} : Persistent (na_inv' δ p N P).
   Proof. exact _. Qed.
+End na_inv_deriv.
 
-  (** World satisfaction *)
-  Definition na_inv_wsatd δ := na_inv_wsat (deriv_na_inv_intp δ).
+Section na_inv_deriv.
+  Context `{!na_inv'GS PROP Σ, !invGS_gen hlc Σ, !na_invG Σ}.
+  Implicit Type P Q PQ : PROP $o iProp Σ.
+
+  (** Accessor *)
+  Definition na_inv_acsr intp p N Pi : iProp Σ :=
+    ∀ E F, ⌜↑N ⊆ E⌝ → ⌜↑N ⊆ F⌝ → na_own p F =[na_inv_wsat intp]{E}=∗
+      na_own p (F∖↑N) ∗ Pi ∗
+      (na_own p (F∖↑N) -∗ Pi =[na_inv_wsat intp]{E}=∗ na_own p F) .
+
+  Context `{!NaInvPreDeriv (PROP $o iProp Σ) (JUDG : judg (iProp Σ)),
+    !Dintp JUDG (PROP $o iProp Σ) (iProp Σ)}.
+
+  (** Derivability data for [na_inv] *)
+  Class NaInvDeriv :=
+    na_inv_jacsr_intp : ∀{δ p N P},
+      ⟦ na_inv_jacsr p N P ⟧(δ) ≡ na_inv_acsr ⟦⟧(δ) p N (⟦ P ⟧(δ)).
+
+  Context `{!NaInvDeriv}.
 
   (** Access [na_inv'] *)
   Lemma na_inv'_acc {p N P E F} : ↑N ⊆ E → ↑N ⊆ F →
@@ -46,7 +50,7 @@ Section na_inv_deriv.
       (na_own p (F∖↑N) -∗ ⟦ P ⟧(der) =[na_inv_wsatd der]{E}=∗ na_own p F).
   Proof.
     iIntros (NE NF) "F accP". iDestruct (der_sound with "accP") as "accP".
-    rewrite deriv_na_inv_acsr_intp. iApply ("accP" $! _ _ NE NF with "F").
+    rewrite na_inv_jacsr_intp. iApply ("accP" $! _ _ NE NF with "F").
   Qed.
 
   Context `{!Deriv (JUDG:=JUDG) ih δ}.
@@ -55,8 +59,8 @@ Section na_inv_deriv.
   Lemma na_inv_tok_na_inv' {p N P} : na_inv_tok p N P ⊢ na_inv' δ p N P.
   Proof.
     iIntros "#i !>". iApply Deriv_intro. iIntros (? _ _).
-    rewrite deriv_na_inv_acsr_intp. iIntros (????) "F".
-    by iApply (na_inv_tok_acc with "F i").
+    rewrite na_inv_jacsr_intp. iIntros (????) "F".
+    by iApply (na_inv_tok_acc (intp:=⟦⟧(_)) with "F i").
   Qed.
 
   (** Allocate [na_inv'] *)
@@ -73,7 +77,7 @@ Section na_inv_deriv.
   Proof.
     iIntros "#QPQ #accQ !>". iApply Deriv_byintp. iIntros (? _ _) "#→ _".
     iDestruct ("→" with "accQ") as "{accQ}accQ".
-    rewrite !deriv_na_inv_acsr_intp. iIntros (?? NE NF) "F".
+    rewrite !na_inv_jacsr_intp. iIntros (?? NE NF) "F".
     iMod ("accQ" $! _ _ NE NF with "F") as "($ & Q & cl)".
     iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
     iMod ("QPQ" with "Q") as "[$ PQ]". iMod "→E∖N" as "_". iIntros "!>".
@@ -103,7 +107,7 @@ Section na_inv_deriv.
     na_inv' δ p N1 P -∗ na_inv' δ p N2 Q -∗ na_inv' δ p N PQ.
   Proof.
     iIntros (?? eq) "#i #i' !>". iApply (Deriv_map2 with "[] i i'").
-    iIntros (? _ _) "{i}i {i'}i'". rewrite !deriv_na_inv_acsr_intp.
+    iIntros (? _ _) "{i}i {i'}i'". rewrite !na_inv_jacsr_intp.
     iIntros (????) "F". rewrite eq.
     iMod ("i" with "[%] [%] F") as "(F∖N1 & $ & P→)"; [set_solver..|].
     iMod ("i'" with "[%] [%] F∖N1") as "(F∖N12 & $ & Q→)"; [set_solver..|].
