@@ -305,10 +305,10 @@ Section defs.
   Proof. exact: seal_eq. Qed.
 End defs.
 
+Notation proph_toks ξl q := ([∗ list] ξ ∈ ξl, proph_tok ξ q)%I (only parsing).
 Module ProphNotation.
   Notation "q :[ ξ ]" := (proph_tok ξ q)
     (at level 2, left associativity, format "q :[ ξ ]") : bi_scope.
-  Notation proph_toks ξl q := ([∗ list] ξ ∈ ξl, q:[ξ])%I (only parsing).
   Notation "q :∗[ ξl ]" := (proph_toks ξl q)
     (at level 2, left associativity, format "q :∗[ ξl ]") : bi_scope.
   Notation ".⟨ φπ ⟩" := (proph_obs φπ%type%stdpp)
