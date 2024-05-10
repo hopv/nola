@@ -11,9 +11,9 @@ Record prod' (A B : Type) : Type := pair' {
 Arguments pair' {_ _} _ _.
 Arguments fst' {_ _} _.
 Arguments snd' {_ _} _.
-Infix "*'" := prod' (at level 41, right associativity).
 
 Module ProdNotation.
+  Infix "*'" := prod' (at level 41, right associativity).
   Notation "( a , .. , y , z )'" := (pair' a (.. (pair' y z) ..))
     (format "( a ,  .. ,  y ,  z )'").
   Notation "p .1'" := (fst' p) (at level 2, left associativity, format "p .1'").
