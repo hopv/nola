@@ -116,7 +116,7 @@ Qed.
 
 (** Introduce a candidate *)
 Lemma Deriv_intro `{!@Deriv PROP DER ih δ} {J} :
-  (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ')) -∗ ⸨ J ⸩(δ).
+  (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ')) ⊢ ⸨ J ⸩(δ).
 Proof.
   iIntros "∀". iApply Deriv_byintp. iIntros (???) "_ _". by iApply "∀".
 Qed.
