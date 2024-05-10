@@ -60,17 +60,12 @@ Module DerivIntpNotation.
 End DerivIntpNotation.
 Import DerivIntpNotation.
 
-(** Conversion between candidates [δ], [δ'] *)
+(** Soundness of a candidate [δ] with respect the semantics by [δ'] *)
+Definition dsound {PROP} {DER : derivst PROP} (δ δ' : deriv_ty DER PROP) : PROP
+  := ∀ J, ⸨ J ⸩(δ) -∗ ⟦ J ⟧(δ').
+
 Definition dtrans {JUDG PROP} (δ δ' : deriv_ty JUDG PROP) : PROP :=
   ∀ J, ⸨ J ⸩(δ) -∗ ⸨ J ⸩(δ').
-#[export] Instance dtrans_ne {JUDG PROP} : NonExpansive2 (@dtrans JUDG PROP).
-Proof.
-  unfold dtrans=> ??? seq ?? δ'eq. do 3 f_equiv; [apply seq|apply δ'eq].
-Qed.
-
-(** Soundness of a candidate [δ] with respect the semantics by [δ'] *)
-Definition dsound {PROP} {DER : derivst PROP} (δ δ' : deriv_ty DER PROP)
-  : PROP := ∀ J, ⸨ J ⸩(δ) -∗ ⟦ J ⟧(δ').
 
 (** ** [Deriv] : Derivability candidate *)
 
