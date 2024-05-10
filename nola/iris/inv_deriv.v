@@ -2,7 +2,7 @@
 
 From nola.iris Require Export util deriv inv.
 From iris.proofmode Require Import proofmode.
-Import JudgIntpNotation DerivNotation.
+Import PintpNotation DerivNotation.
 
 Section inv_deriv.
   Context `{!inv'GS PROP Σ, !invGS_gen hlc Σ}.
@@ -14,37 +14,33 @@ Section inv_deriv.
 
   (** Derivability data for [inv] *)
   Class DerivInv (JUDG : judg (iProp Σ)) := DERIV_INV {
-    deriv_inv_intp : deriv_ty JUDG (iProp Σ) → PROP $o iProp Σ → iProp Σ;
+    deriv_inv_intp ::
+      Pintp (deriv JUDG (iProp Σ)) (PROP $o iProp Σ) (iProp Σ);
     deriv_inv_ne {δ} :: NonExpansive (deriv_inv_intp δ);
     deriv_inv_acsr : namespace → PROP $o iProp Σ → JUDG;
     deriv_inv_acsr_intp {δ N P} :
-      ⟦ deriv_inv_acsr N P ⟧(δ) ≡
-        inv_acsr' (deriv_inv_intp δ) N (deriv_inv_intp δ P);
+      ⟦ deriv_inv_acsr N P ⟧(δ) ≡ inv_acsr' ⟦⟧(δ) N ⟦ P ⟧(δ);
   }.
 End inv_deriv.
-Notation inv_ascr δ N P := (inv_acsr' (deriv_inv_intp δ) N P).
+(** Notation *)
+Notation inv_ascr δ N P := (inv_acsr' ⟦⟧(δ) N P).
+Notation inv_wsatd δ := (inv_wsat ⟦⟧(δ)).
 
 Section inv_deriv.
-  Local Notation "⟦ P ⟧' ( δ )" := (deriv_inv_intp δ P)
-    (format "'[' ⟦  P  ⟧' '/  ' ( δ ) ']'") : nola_scope.
-  Local Notation "⟦ P ⟧'" := (⟦ P ⟧'(der)).
-
   Context `{!inv'GS PROP Σ, !invGS_gen hlc Σ, !DerivInv JUDG}.
+  Implicit Type P Q : PROP $o iProp Σ.
 
   (** [inv']: Relaxed invariant *)
-  Definition inv' δ N P : iProp Σ := □ δ ⸨ deriv_inv_acsr N P ⸩.
+  Definition inv' δ N P : iProp Σ := □ ⸨ deriv_inv_acsr N P ⸩(δ).
 
   (** [inv'] is persistent *)
   Fact inv'_persistent {δ N P} : Persistent (inv' δ N P).
   Proof. exact _. Qed.
 
-  (** World satisfaction *)
-  Definition inv_wsatd δ := inv_wsat (deriv_inv_intp δ).
-
   (** Access [inv'] *)
   Lemma inv'_acc {N P E} : ↑N ⊆ E →
     inv' der N P =[inv_wsatd der]{E,E∖↑N}=∗
-      ⟦ P ⟧' ∗ (⟦ P ⟧' =[inv_wsatd der]{E∖↑N,E}=∗ True).
+      ⟦ P ⟧(der) ∗ (⟦ P ⟧(der) =[inv_wsatd der]{E∖↑N,E}=∗ True).
   Proof.
     iIntros (?) "accP". iDestruct (der_sound with "accP") as "accP".
     rewrite deriv_inv_acsr_intp. by iApply "accP".
@@ -61,15 +57,15 @@ Section inv_deriv.
 
   (** Allocate [inv'] *)
   Lemma inv'_alloc_rec P N :
-    (inv' δ N P -∗ ⟦ P ⟧'(δ)) =[inv_wsatd δ]=∗ inv' δ N P.
+    (inv' δ N P -∗ ⟦ P ⟧(δ)) =[inv_wsatd δ]=∗ inv' δ N P.
   Proof. rewrite -inv_tok_inv'. exact: inv_tok_alloc_rec. Qed.
-  Lemma inv'_alloc P N : ⟦ P ⟧'(δ) =[inv_wsatd δ]=∗ inv' δ N P.
+  Lemma inv'_alloc P N : ⟦ P ⟧(δ) =[inv_wsatd δ]=∗ inv' δ N P.
   Proof. rewrite -inv_tok_inv'. exact: inv_tok_alloc. Qed.
 
   (** Convert [inv'] with [acsr] *)
   Lemma inv'_acsr {N P Q} :
-    □ (∀ δ, acsr (fupd ∅ ∅) ⟦ P ⟧'(δ) ⟦ Q ⟧'(δ)) -∗
-    inv' δ N Q -∗ inv' δ N P.
+    □ (∀ δ, acsr (fupd ∅ ∅) ⟦ P ⟧(δ) ⟦ Q ⟧(δ)) -∗
+      inv' δ N Q -∗ inv' δ N P.
   Proof.
     iIntros "#QPQ #accQ !>". iApply Deriv_byintp. iIntros (? _ _) "#→ _".
     iDestruct ("→" with "accQ") as "{accQ}accQ". rewrite !deriv_inv_acsr_intp.
@@ -82,12 +78,12 @@ Section inv_deriv.
 
   (** Split [inv'] over [∗] *)
   Local Lemma inv'_sep' {N PQ P Q} :
-    (∀ δ, ⟦ PQ ⟧'(δ) ≡ (⟦ P ⟧'(δ) ∗ ⟦ Q ⟧'(δ))%I) → inv' δ N PQ ⊢ inv' δ N P.
+    (∀ δ, ⟦ PQ ⟧(δ) ≡ (⟦ P ⟧(δ) ∗ ⟦ Q ⟧(δ))%I) → inv' δ N PQ ⊢ inv' δ N P.
   Proof.
     iIntros (eq). iApply (inv'_acsr with "[]"). iIntros "!>" (?).
     unfold acsr. rewrite eq. iApply (acsr_sep_l (M:=fupd _ _)).
   Qed.
-  Lemma inv'_sep {N PQ P Q} : (∀ δ, ⟦ PQ ⟧'(δ) ≡ (⟦ P ⟧'(δ) ∗ ⟦ Q ⟧'(δ))%I) →
+  Lemma inv'_sep {N PQ P Q} : (∀ δ, ⟦ PQ ⟧(δ) ≡ (⟦ P ⟧(δ) ∗ ⟦ Q ⟧(δ))%I) →
     inv' δ N PQ ⊢ inv' δ N P ∗ inv' δ N Q.
   Proof.
     iIntros (eq) "#i". iSplit; [by iApply inv'_sep'|].
@@ -96,7 +92,7 @@ Section inv_deriv.
 
   (** Merge [inv']s with [∗] *)
   Lemma inv'_merge {N1 N2 N P Q PQ} : N1 ## N2 → ↑N1 ∪ ↑N2 ⊆@{coPset} ↑N →
-    (∀ δ, ⟦ PQ ⟧'(δ) ≡ (⟦ P ⟧'(δ) ∗ ⟦ Q ⟧'(δ))%I) →
+    (∀ δ, ⟦ PQ ⟧(δ) ≡ (⟦ P ⟧(δ) ∗ ⟦ Q ⟧(δ))%I) →
     inv' δ N1 P -∗ inv' δ N2 Q -∗ inv' δ N PQ.
   Proof.
     iIntros (?? eq) "#i #i' !>". iApply (Deriv_map2 with "[] i i'").

@@ -1,8 +1,9 @@
-(** * [deriv]: Derivability *)
+(** * Derivability *)
 
-From nola Require Export prelude.
+From nola.util Require Export intp.
 From iris.bi Require Import lib.fixpoint.
 From iris.proofmode Require Import proofmode.
+Import PintpNotation.
 
 (** ** Preliminaries *)
 
@@ -16,7 +17,7 @@ Add Printing Constructor dwrap.
 
 (** Notation for derivability *)
 Module DerivNotation.
-  Notation "δ ⸨ J ⸩" := (dunwrap δ J) (format "δ ⸨  '[' J  ']' ⸩", at level 2)
+  Notation "⸨ J ⸩( δ )" := (dunwrap δ J) (format "⸨  '[' J  ']' ⸩( δ )")
     : nola_scope.
 End DerivNotation.
 Import DerivNotation.
@@ -38,31 +39,25 @@ Canonical dwrap_ofe (A : ofe) := Ofe (dwrap A) (dwrap_ofe_mixin A).
 Proof. solve_proper. Qed.
 
 (** Type for a derivability predicate *)
-Notation deriv_ty JUD PROP := (dwrap (JUD -d> PROP)).
+Notation deriv JUD PROP := (dwrap (JUD -d> PROP)).
 
 (** [judg]: Judgment with the parameterized interpretation *)
 #[projections(primitive)]
 Structure judg (PROP : bi) : Type := Judg {
   judg_car :> Type;
   (** Interpretation parameterized over derivability candidates *)
-  #[canonical=no] judg_intp : judg_car → deriv_ty judg_car PROP → PROP;
+  #[canonical=no] judg_Pintp :: Pintp (deriv judg_car PROP) judg_car PROP;
 }.
 Arguments judg_car {PROP JUDG} : rename.
-Arguments judg_intp {PROP JUDG} : rename.
-
-(** Notation for judgment semantics *)
-Module JudgIntpNotation.
-  Notation "⟦ J ⟧" := (judg_intp J) (format "⟦  '[' J  ']' ⟧") : nola_scope.
-End JudgIntpNotation.
-Import JudgIntpNotation.
+Arguments judg_Pintp {PROP JUDG} : rename.
 
 Section deriv.
   Context {PROP : bi} {JUDG : judg PROP}.
-  Implicit Type (δ : deriv_ty JUDG PROP) (ih : deriv_ty JUDG PROP → Prop).
+  Implicit Type (δ : deriv JUDG PROP) (ih : deriv JUDG PROP → Prop).
 
   (** Soundness of a derivability [δ] with respect to the semantics at [δ'] *)
-  Definition dsound δ δ' : PROP := ∀ J, δ ⸨ J ⸩ -∗ ⟦ J ⟧ δ'.
-  Definition dtrans δ δ' : PROP := ∀ J, δ ⸨ J ⸩ -∗ δ' ⸨ J ⸩.
+  Definition dsound δ δ' : PROP := ∀ J, ⸨ J ⸩(δ) -∗ ⟦ J ⟧(δ').
+  Definition dtrans δ δ' : PROP := ∀ J, ⸨ J ⸩(δ) -∗ ⸨ J ⸩(δ').
 
   (** ** [Deriv ih δ] : [δ] is a good derivability predicate
 
@@ -74,19 +69,19 @@ Section deriv.
       (* Parameterization by [Deriv'] is for strict positivity *)
       ∃ Deriv' : _ → Prop, (∀ δ', Deriv' δ' → Deriv ih δ') ∧ ∀ J,
         (∀ δ', ⌜Deriv' δ'⌝ → ⌜ih δ'⌝ →
-          □ dsound δ δ' -∗ □ dtrans δ δ' -∗ ⟦ J ⟧ δ') -∗ δ ⸨ J ⸩
+          □ dsound δ δ' -∗ □ dtrans δ δ' -∗ ⟦ J ⟧(δ')) -∗ ⸨ J ⸩(δ)
   }.
   Existing Class Deriv.
 
-  (** Get the derivability [δ ⸨ J ⸩] by the interpretaion *)
+  (** Get the derivability [⸨ J ⸩(δ)] by the interpretaion *)
   Lemma Deriv_byintp `{!Deriv ih δ} {J} :
     ((* Take any good derivability predicate [δ'] *) ∀ δ', ⌜Deriv ih δ'⌝ →
       (* Can use the inductive hypothesis *) ⌜ih δ'⌝ →
       (* Can turn [δ] into the semantics at [δ'] *)
         □ dsound δ δ' -∗
       (* Can turn [δ] into [δ'] *) □ dtrans δ δ' -∗
-      (* The semantics at [δ'] *) ⟦ J ⟧ δ')
-    -∗ (* The derivability at [δ] *) δ ⸨ J ⸩.
+      (* The semantics at [δ'] *) ⟦ J ⟧(δ'))
+    -∗ (* The derivability at [δ] *) ⸨ J ⸩(δ).
   Proof.
     have X := Deriv_byintp' ih δ. move: X=> [dy[dyto byintp]]. iIntros "→".
     iApply byintp. iIntros (δ' dyd'). apply dyto in dyd'. by iApply "→".
@@ -113,39 +108,39 @@ Section deriv.
 
   (** Introduce a derivability via semantics *)
   Lemma Deriv_intro `{!Deriv ih δ} {J} :
-    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧ δ') ⊢ δ ⸨ J ⸩.
+    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ')) ⊢ ⸨ J ⸩(δ).
   Proof.
     iIntros "∀". iApply Deriv_byintp. iIntros (???) "_ _". by iApply "∀".
   Qed.
 
   (** Map derivabilities via semantics *)
   Lemma Deriv_map `{!Deriv ih δ} {J J'} :
-    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧ δ' -∗ ⟦ J' ⟧ δ') -∗
-    δ ⸨ J ⸩ -∗ δ ⸨ J' ⸩.
+    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ')) -∗
+    ⸨ J ⸩(δ) -∗ ⸨ J' ⸩(δ).
   Proof.
     iIntros "∀ J". iApply Deriv_byintp. iIntros (???) "#→ _".
     iApply "∀"; by [| |iApply "→"].
   Qed.
   Lemma Deriv_map2 `{!Deriv ih δ} {J J' J''} :
-    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧ δ' -∗ ⟦ J' ⟧ δ' -∗
-      ⟦ J'' ⟧ δ') -∗
-    δ ⸨ J ⸩ -∗ δ ⸨ J' ⸩ -∗ δ ⸨ J'' ⸩.
+    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ') -∗
+      ⟦ J'' ⟧(δ')) -∗
+    ⸨ J ⸩(δ) -∗ ⸨ J' ⸩(δ) -∗ ⸨ J'' ⸩(δ).
   Proof.
     iIntros "∀ J J'". iApply Deriv_byintp. iIntros (???) "#→ _".
     iApply ("∀" with "[//] [//] [J]"); by iApply "→".
   Qed.
   Lemma Deriv_map3 `{!Deriv ih δ} {J J' J'' J'''} :
-    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧ δ' -∗ ⟦ J' ⟧ δ' -∗
-      ⟦ J'' ⟧ δ' -∗ ⟦ J''' ⟧ δ') -∗
-    δ ⸨ J ⸩ -∗ δ ⸨ J' ⸩ -∗ δ ⸨ J'' ⸩ -∗ δ ⸨ J''' ⸩.
+    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ') -∗
+      ⟦ J'' ⟧(δ') -∗ ⟦ J''' ⟧(δ')) -∗
+    ⸨ J ⸩(δ) -∗ ⸨ J' ⸩(δ) -∗ ⸨ J'' ⸩(δ) -∗ ⸨ J''' ⸩(δ).
   Proof.
     iIntros "∀ J J' J''". iApply Deriv_byintp. iIntros (???) "#→ _".
     iApply ("∀" with "[//] [//] [J] [J']"); by iApply "→".
   Qed.
   Lemma Deriv_mapl `{!Deriv ih δ} {Js J'} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
-      ([∗ list] J ∈ Js, ⟦ J ⟧ δ') -∗ ⟦ J' ⟧ δ') -∗
-    ([∗ list] J ∈ Js, δ ⸨ J ⸩) -∗ δ ⸨ J' ⸩.
+      ([∗ list] J ∈ Js, ⟦ J ⟧(δ')) -∗ ⟦ J' ⟧(δ')) -∗
+    ([∗ list] J ∈ Js, ⸨ J ⸩(δ)) -∗ ⸨ J' ⸩(δ).
   Proof.
     iIntros "∀ Js". iApply Deriv_byintp. iIntros (???) "#→ _".
     iApply "∀"; [done..|]. iInduction Js as [|J Js] "IH"=>/=; [done|].
@@ -157,7 +152,7 @@ Section deriv.
   (** [der_gen]: What becomes [der] by taking [bi_least_fixpoint] *)
   Definition der_gen (self : JUDG → PROP) : JUDG → PROP := λ J,
     (∀ δ, ⌜Deriv (λ _, True) δ⌝ → □ dsound (Dwrap self) δ -∗
-      □ dtrans (Dwrap self) δ -∗ ⟦ J ⟧ δ)%I.
+      □ dtrans (Dwrap self) δ -∗ ⟦ J ⟧(δ))%I.
   #[export] Instance der_gen_mono : BiMonoPred (A:=leibnizO _) der_gen.
   Proof.
     split; [|solve_proper]=> Φ Ψ ??. iIntros "#ΦΨ" (?) "big".
@@ -167,7 +162,7 @@ Section deriv.
   Qed.
 
   (** [der]: The best derivability predicate *)
-  Definition der_def : deriv_ty JUDG PROP :=
+  Definition der_def : deriv JUDG PROP :=
     Dwrap (bi_least_fixpoint (A:=leibnizO _) der_gen).
   Lemma der_aux : seal (@der_def). Proof. by eexists. Qed.
   Definition der := der_aux.(unseal).
