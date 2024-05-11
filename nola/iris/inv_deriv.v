@@ -111,3 +111,5 @@ Section inv_deriv.
     iMod "cl" as "_". iMod ("Q→" with "Q") as "_". iApply ("P→" with "P").
   Qed.
 End inv_deriv.
+Arguments InvDeriv PROP Σ {_ _ _} JUDG {_ _}.
+Hint Mode InvDeriv ! - - - - - - - : typeclass_instances.

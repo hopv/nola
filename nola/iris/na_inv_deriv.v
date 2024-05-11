@@ -123,3 +123,5 @@ Section na_inv_deriv.
     iMod ("Q→" with "F∖N12 Q") as "F∖N". iApply ("P→" with "F∖N P").
   Qed.
 End na_inv_deriv.
+Arguments NaInvDeriv PROP Σ {_ _ _ _} JUDG {_ _}.
+Hint Mode NaInvDeriv ! - - - - - - - - : typeclass_instances.

@@ -91,3 +91,5 @@ Section sinv_deriv.
     iApply (sinv_sep' with "s"). iIntros (?). by rewrite eq comm.
   Qed.
 End sinv_deriv.
+Arguments SinvDeriv PROP Σ JUDG {_ _}.
+Hint Mode SinvDeriv ! - - - - : typeclass_instances.
