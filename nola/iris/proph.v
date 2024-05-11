@@ -131,7 +131,7 @@ Proof. done. Qed.
 (** Discrete [ofe] structure *)
 Local Instance proph_equivalence {TY} : Equivalence (≡@{proph_car TY}).
 Proof. split=> >; apply ofe_equivalence. Qed.
-#[warnings="-redundant-canonical-projection"]
+#[warning="-redundant-canonical-projection"]
 Local Canonical prophO TY := discreteO (proph_car TY).
 
 (** [ProphCar] and [un_proph_car] are proper *)
@@ -235,7 +235,7 @@ Proof.
     move=> [val[L[[sim sim'] ?]]]. split. { by eapply cmra_valid_op_l. }
     exists L. split; [|done]. by eapply proph_sim_op_l.
 Qed.
-#[warnings="-redundant-canonical-projection"]
+#[warning="-redundant-canonical-projection"]
 Local Canonical prophR_def TY : cmra :=
   discreteR (proph_car TY) (proph_ra_mixin TY).
 Local Lemma prophR_aux : seal prophR_def. Proof. by eexists. Qed.
@@ -258,7 +258,7 @@ Proof.
   - move=> [?]. by rewrite proph_unit proph_op proph_equiv /= left_id.
   - done.
 Qed.
-#[warnings="-redundant-canonical-projection"]
+#[warning="-redundant-canonical-projection"]
 Local Canonical prophUR TY : ucmra :=
   Ucmra (proph_car TY) (proph_ucmra_mixin TY).
 Local Instance prophR_total {TY} : CmraTotal (prophR_def TY).

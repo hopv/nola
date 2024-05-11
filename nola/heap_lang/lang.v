@@ -776,10 +776,10 @@ End heap_lang.
 
 (** Language *)
 Canonical Structure heap_ectxi_lang := EctxiLanguage heap_lang.heap_lang_mixin.
-Local Set Warnings "-redundant-canonical-projection".
+#[warning="-redundant-canonical-projection"]
 Canonical Structure heap_ectx_lang := EctxLanguageOfEctxi heap_ectxi_lang.
+#[warning="-redundant-canonical-projection"]
 Canonical Structure heap_lang := LanguageOfEctx heap_ectx_lang.
-Local Set Warnings "redundant-canonical-projection".
 
 (* Prefer heap_lang names over ectx_language names. *)
 Export heap_lang.

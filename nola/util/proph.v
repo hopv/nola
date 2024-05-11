@@ -89,7 +89,7 @@ Structure synty := Synty {
 }.
 Arguments synty_ty {_} _. Arguments synty_inhabited {_ _} _.
 Arguments synty_to_inhab {_ _} _.
-#[warnings="-uniform-inheritance"] Coercion synty_ty : synpty_car >-> Sortclass.
+#[warning="-uniform-inheritance"] Coercion synty_ty : synpty_car >-> Sortclass.
 
 Implicit Type TY : synty.
 

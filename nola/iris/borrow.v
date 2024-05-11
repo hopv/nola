@@ -24,7 +24,7 @@ Variant bor_mode : Set :=
 | #[local] Open (q : Qp) (* Open with a fraction *)
 | #[local] Rebor (α : lft) (* Reborrowed *).
 Implicit Type b : bor_mode.
-Local Set Warnings "-redundant-canonical-projection".
+#[warning="-redundant-canonical-projection"]
 Local Canonical bor_modeO := leibnizO bor_mode.
 
 (** State of a borrower *)
@@ -38,8 +38,8 @@ Local Definition lendmOF PROP := (gmapOF lend_id PROP).
 (** Kind of a deposit *)
 Local Definition depo_kind : Set := nat (* depth *) *' lft.
 Implicit Type e : depo_kind.
+#[warning="-redundant-canonical-projection"]
 Local Canonical depo_kindO := leibnizO depo_kind.
-Local Set Warnings "redundant-canonical-projection".
 
 (** State of a deposit *)
 Local Definition depo_stOF PROP : oFunctor :=

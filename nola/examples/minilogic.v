@@ -15,9 +15,7 @@ Inductive nProp : Type :=
 | inv (N : namespace) (P : nProp)
 | ilist (N : namespace) (Φ : loc → nProp) (l : loc).
 
-Local Set Warnings "-redundant-canonical-projection".
-Canonical nPropO := leibnizO nProp.
-Local Set Warnings "redundant-canonical-projection".
+#[warning="-redundant-canonical-projection"] Canonical nPropO := leibnizO nProp.
 
 (** ** Target function: Linked list mutation *)
 Definition iter : val := rec: "self" "f" "c" "l" :=
