@@ -3,9 +3,8 @@
 From nola Require Export prelude.
 From nola.util Require Import plist.
 
-(** ** Syntactic pre-type and prophecy variable *)
+(** ** Syntactic pre-type *)
 
-(** Syntactic pre-type *)
 #[projections(primitive)]
 Structure synpty := Synpty {
   (* Syntax *) synpty_car :> Type;
@@ -18,9 +17,12 @@ Structure synpty := Synpty {
 Arguments synpty_eqdec {_} _. Arguments synpty_inhab {_} _.
 Arguments synpty_inhab_irrel {_ _} _.
 
-(** Prophecy variable *)
+Implicit Type PTY : synpty.
+
+(** ** Prophecy variable *)
+
 #[projections(primitive)]
-Record prvar {TY : synpty} (A : TY) := Prvar {
+Record prvar {PTY} (A : PTY) := Prvar {
   (* Proof of inhabitance *) prvar_inhab : synpty_inhab A;
   (* Id *) prvar_id : positive;
 }.
@@ -29,25 +31,25 @@ Arguments prvar_inhab {_ _} _. Arguments prvar_id {_ _} _.
 Arguments Prvar {_ _} _ _.
 
 (** Equality decision over [prvar] *)
-#[export] Instance prvar_eq_dec {TY : synpty} (A : TY) : EqDecision (prvar A).
+#[export] Instance prvar_eq_dec {PTY} (A : PTY) : EqDecision (prvar A).
 Proof.
   move=> [h i] [h' j]. rewrite (proof_irrel h h'). case: (decide (i = j))=> ?.
   { subst. by left. } { right. by case. }
 Defined.
 
 (** Inhabitant of [prvar] by [synpty_inhab] *)
-Definition prvar_by_inhab {TY : synpty} (X : TY) (h : synpty_inhab X)
+Definition prvar_by_inhab {PTY} (X : PTY) (h : synpty_inhab X)
   : prvar X := Prvar h inhabitant.
 
 (** Negated [synpty_inhab] ensures the emptiness of [prvar] *)
-Lemma prvar_neg_inhab {TY : synpty} (X : TY) :
+Lemma prvar_neg_inhab {PTY} (X : PTY) :
   ¬ synpty_inhab X → prvar X → False.
 Proof. move=> neg [??]. by apply neg. Qed.
 
 (** Prophecy variable of any type *)
 #[projections(primitive)]
-Record aprvar (TY : synpty) := Aprvar {
-  (* Type *) aprvar_ty : TY;
+Record aprvar PTY := Aprvar {
+  (* Type *) aprvar_ty : PTY;
   (* Variable *) aprvar_var :> prvar aprvar_ty;
 }.
 Add Printing Constructor aprvar.
@@ -73,7 +75,7 @@ Definition aprvar_by_inhab {TY : synpty} (X : TY) (h : synpty_inhab X)
 Definition of_plist_prvar {TY : synpty} {Xl : list TY}
   : plist prvar Xl → list (aprvar TY) := of_plist Aprvar.
 
-(** ** Syntactic type and prophecy assignment *)
+(** ** Syntactic type *)
 
 (** Syntactic type *)
 #[projections(primitive)]
@@ -89,6 +91,8 @@ Arguments synty_ty {_} _. Arguments synty_inhabited {_ _} _.
 Arguments synty_to_inhab {_ _} _.
 #[warnings="-uniform-inheritance"] Coercion synty_ty : synpty_car >-> Sortclass.
 
+Implicit Type TY : synty.
+
 (** Existential type over a syntactic type *)
 #[projections(primitive)]
 Record anyty (TY : synty) (F : Type → Type) := Anyty {
@@ -99,10 +103,10 @@ Add Printing Constructor anyty.
 Arguments Anyty {_ _} _ _.
 Arguments anyty_ty {_ _} _. Arguments anyty_val {_ _} _.
 
-Implicit Type TY : synty.
+(** ** Prophecy assignment *)
 
 (** Prophecy assignment *)
-Definition proph_asn (TY : synty) := ∀ ξ : aprvar TY, ξ.(aprvar_ty).
+Definition proph_asn TY := ∀ ξ : aprvar TY, ξ.(aprvar_ty).
 
 (** Clairvoyant monad, i.e., reader monad over the prophecy assignment *)
 Notation clair TY A := (proph_asn TY → A).
@@ -123,8 +127,7 @@ Definition app_plist_prvar {TY} {Xl : list TY}
 (** ** Prophecy Dependency *)
 
 (** Equivalence of prophecy assignments over a set of prophecy variables *)
-Definition proph_asn_eqv {TY}
-  (φ : aprvar TY → Prop) (π π' : proph_asn TY) :=
+Definition proph_asn_eqv {TY} (φ : aprvar TY → Prop) (π π' : proph_asn TY) :=
   ∀ ξ : aprvar TY, φ ξ → π ξ = π' ξ.
 
 (** Prophecy dependency *)
@@ -149,7 +152,7 @@ Section lemmas.
   Proof. move=> ?? eq. split; apply proph_dep_mono; by rewrite eq. Qed.
 
   (** On a constant *)
-  Lemma proph_dep_const {A} (a : A) : proph_dep (λ _ : proph_asn TY, a) [].
+  Lemma proph_dep_const {A} a : @proph_dep A TY (λ _, a) [].
   Proof. done. Qed.
 
   (** On [(.$ ξ)] *)
