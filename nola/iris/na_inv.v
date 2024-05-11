@@ -2,7 +2,7 @@
 
 From nola.util Require Import prod.
 From nola.iris Require Export ofe inv.
-From iris.base_logic Require Export lib.na_invariants.
+From iris.base_logic.lib Require Export na_invariants.
 From iris.algebra Require Import gset coPset.
 From iris.proofmode Require Import proofmode.
 Import ProdNotation OfeNotation UpdwNotation.

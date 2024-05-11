@@ -1,7 +1,7 @@
 (** * On updates *)
 
 From nola Require Export prelude.
-From iris.base_logic Require Export fancy_updates.
+From iris.base_logic.lib Require Export fancy_updates.
 From iris.proofmode Require Import proofmode.
 
 (** ** On [step_fupdN] *)

@@ -3,7 +3,7 @@
 From nola Require Export prelude.
 From iris.algebra Require Import ofe cmra.
 From iris.bi Require Import bi.
-From iris.base_logic Require Import iprop.
+From iris.base_logic.lib Require Import iprop.
 
 Implicit Type PROP : bi.
 

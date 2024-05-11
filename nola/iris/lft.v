@@ -3,7 +3,7 @@
 From nola Require Export prelude.
 From iris.algebra Require Import csum dfrac.
 From iris.bi Require Import fractional.
-From iris.base_logic Require Import own.
+From iris.base_logic.lib Require Import own.
 From iris.proofmode Require Import proofmode.
 
 (** ** Lifetime *)

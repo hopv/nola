@@ -5,7 +5,7 @@ From nola.util Require Import plist.
 From nola.iris Require Import list gmap.
 From iris.algebra Require Import gmap csum frac agree.
 From iris.bi Require Import fractional.
-From iris.base_logic Require Import own.
+From iris.base_logic.lib Require Import own.
 From iris.proofmode Require Import proofmode.
 Import EqNotations ProdNotation.
 
