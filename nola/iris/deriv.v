@@ -21,24 +21,8 @@ Module DerivNotation.
 End DerivNotation.
 Import DerivNotation.
 
-(** Make [dwrap A] [ofe] for [A : ofe] *)
-#[export] Instance dwrap_equiv `{!Equiv A} : Equiv (dwrap A)
-  := λ '(Dwrap a) '(Dwrap b), a ≡ b.
-#[export] Instance dwrap_dist `{!Dist A} : Dist (dwrap A)
-  := λ n '(Dwrap a) '(Dwrap b), a ≡{n}≡ b.
-Lemma dwrap_ofe_mixin (A : ofe) : OfeMixin (dwrap A).
-Proof.
-  split; unfold equiv, dist, dwrap_equiv, dwrap_dist.
-  - move=> [?][?]. apply equiv_dist.
-  - move=> ?. split; move=> *; by [|symmetry|etrans].
-  - move=> ??[?][?]. apply dist_lt.
-Qed.
-Canonical dwrap_ofe (A : ofe) := Ofe (dwrap A) (dwrap_ofe_mixin A).
-#[export] Instance Dwrap_ne `{A : ofe} : NonExpansive (Dwrap (A:=A)).
-Proof. solve_proper. Qed.
-
 (** Type for a derivability predicate *)
-Notation deriv JUD PROP := (dwrap (JUD -d> PROP)).
+Notation deriv JUD PROP := (dwrap (JUD → PROP)).
 
 (** [judg]: Judgment with the parameterized interpretation *)
 #[projections(primitive)]
@@ -52,7 +36,7 @@ Arguments judg_Pintp {PROP JUDG} : rename.
 
 Section deriv.
   Context {PROP : bi} {JUDG : judg PROP}.
-  Implicit Type (δ : deriv JUDG PROP) (ih : deriv JUDG PROP → Prop).
+  Implicit Type (J : JUDG) (δ : deriv JUDG PROP) (ih : deriv JUDG PROP → Prop).
 
   (** Soundness of a derivability [δ] with respect to the semantics at [δ'] *)
   Definition dsound δ δ' : PROP := ∀ J, ⸨ J ⸩(δ) -∗ ⟦ J ⟧(δ').
@@ -149,9 +133,9 @@ Section deriv.
   (** ** [der]: The best derivability predicate *)
 
   (** [der_gen]: What becomes [der] by taking [bi_least_fixpoint] *)
-  Definition der_gen (self : JUDG → PROP) : JUDG → PROP := λ J,
-    (∀ δ, ⌜Deriv (λ _, True) δ⌝ → □ dsound (Dwrap self) δ -∗
-      □ dtrans (Dwrap self) δ -∗ ⟦ J ⟧(δ))%I.
+  Definition der_gen (self : JUDG → PROP) J : PROP :=
+    ∀ δ, ⌜Deriv (λ _, True) δ⌝ → □ dsound (Dwrap self) δ -∗
+      □ dtrans (Dwrap self) δ -∗ ⟦ J ⟧(δ).
   #[export] Instance der_gen_mono : BiMonoPred (A:=leibnizO _) der_gen.
   Proof.
     split; [|solve_proper]=> Φ Ψ ??. iIntros "#ΦΨ" (?) "big".
