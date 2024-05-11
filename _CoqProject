@@ -43,6 +43,6 @@ nola/examples/heap_lang/proofmode.v
 nola/examples/heap_lang/adequacy.v
 nola/examples/heap_lang/total_adequacy.v
 
+nola/examples/lock.v
 nola/examples/later.v
-
 nola/examples/minilogic.v
