@@ -65,6 +65,10 @@ Section inv_deriv.
   Proof. rewrite -inv_tok_inv'. exact: inv_tok_alloc_rec. Qed.
   Lemma inv'_alloc P N : ⟦ P ⟧(δ) =[inv_wsatd δ]=∗ inv' δ N P.
   Proof. rewrite -inv_tok_inv'. exact: inv_tok_alloc. Qed.
+  Lemma inv'_alloc_open P N E : ↑N ⊆ E →
+    ⊢ |=[inv_wsatd δ]{E, E∖↑N}=> inv' δ N P ∗
+      (⟦ P ⟧(δ) =[inv_wsatd δ]{E∖↑N, E}=∗ True).
+  Proof. rewrite -inv_tok_inv'. exact: inv_tok_alloc_open. Qed.
 
   (** Convert [inv'] with [acsr] *)
   Lemma inv'_acsr {N P Q} :

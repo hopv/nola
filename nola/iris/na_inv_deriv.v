@@ -69,6 +69,12 @@ Section na_inv_deriv.
   Proof. rewrite -na_inv_tok_na_inv'. exact: na_inv_tok_alloc_rec. Qed.
   Lemma na_inv'_alloc p P N : ⟦ P ⟧(δ) =[na_inv_wsatd δ]=∗ na_inv' δ p N P.
   Proof. rewrite -na_inv_tok_na_inv'. exact: na_inv_tok_alloc. Qed.
+  Lemma na_inv'_alloc_open p N E F P :
+    ↑N ⊆ E → ↑N ⊆ F →
+    na_own p F =[na_inv_wsatd δ]{E}=∗
+      na_own p (F∖↑N) ∗ na_inv' δ p N P ∗
+      (na_own p (F∖↑N) -∗ ⟦ P ⟧(δ) =[na_inv_wsatd δ]{E}=∗ na_own p F).
+  Proof. rewrite -na_inv_tok_na_inv'. exact: na_inv_tok_alloc_open. Qed.
 
   (** Convert [na_inv'] with [acsr] *)
   Lemma na_inv'_acsr {p N P Q} :
