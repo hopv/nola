@@ -1,8 +1,8 @@
 From iris.proofmode Require Import proofmode.
 From iris.base_logic.lib Require Import mono_nat.
 From iris.program_logic Require Export total_adequacy.
-From nola.examples.heap_lang Require Export adequacy.
-From nola.examples.heap_lang Require Import proofmode notation.
+From nola.heap_lang Require Export adequacy.
+From nola.heap_lang Require Import proofmode notation.
 From iris.prelude Require Import options.
 Import WpwNotation.
 

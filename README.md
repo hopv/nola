@@ -88,9 +88,10 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     [`proph_ag`](nola/iris/proph_ag.v) (Prophetic agreement),
     [`pborrow`](nola/iris/pborrow.v) (Prophetic borrowing)
   + [`paradox`](nola/iris/paradox.v) (Paradoxes)
-- [`examples/`](nola/examples/) : Examples
-  + [`heap_lang/`](nola/examples/heap_lang/) : Variant of Iris HeapLang,
+- [`heap_lang/`](nola/heap_lang/) : Variant of Iris HeapLang,
     with `Ndnat` (terminating infinite non-determinism) added
-  + [`lock`](nola/examples/lock.v) : Lock machinery
-  + [`minilogic`](nola/examples/minilogic.v) : Minimal showcase logic
+  + [`lib/`](nola/heap_lang/lib) : Libraries
+    * [`lock`](nola/heap_lang/lib/lock.v) (Lock machinery)
+- [`examples/`](nola/examples/) : Examples
+  + [`minilogic`](nola/examples/minilogic.v) Minimal showcase logic
   + [`later`](nola/examples/later.v) : Instantiating Nola with later

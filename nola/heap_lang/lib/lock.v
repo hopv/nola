@@ -1,6 +1,6 @@
 (** * Lock machinery *)
 
-From nola.examples.heap_lang Require Import notation proofmode.
+From nola.heap_lang Require Import notation proofmode.
 From nola.util Require Import prod.
 From nola.iris Require Import ofe inv.
 Import ProdNotation OfeNotation UpdwNotation WpwNotation.

@@ -1,5 +1,5 @@
 From iris.program_logic Require Import language.
-From nola.examples.heap_lang Require Export lang.
+From nola.heap_lang Require Export lang.
 From iris.prelude Require Import options.
 
 (** Coercions to make programs easier to type. *)

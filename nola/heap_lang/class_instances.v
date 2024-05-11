@@ -1,6 +1,6 @@
 From iris.program_logic Require Export language.
-From nola.examples.heap_lang Require Export lang.
-From nola.examples.heap_lang Require Import tactics notation.
+From nola.heap_lang Require Export lang.
+From nola.heap_lang Require Import tactics notation.
 From iris.prelude Require Import options.
 
 Global Instance into_val_val v : IntoVal (Val v) v.

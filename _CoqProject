@@ -28,21 +28,21 @@ nola/iris/proph_ag.v
 nola/iris/pborrow.v
 nola/iris/paradox.v
 
-nola/examples/heap_lang/locations.v
-nola/examples/heap_lang/lang.v
-nola/examples/heap_lang/pretty.v
-nola/examples/heap_lang/metatheory.v
-nola/examples/heap_lang/notation.v
-nola/examples/heap_lang/tactics.v
-nola/examples/heap_lang/proph_erasure.v
-nola/examples/heap_lang/class_instances.v
-nola/examples/heap_lang/definitions.v
-nola/examples/heap_lang/primitive_laws.v
-nola/examples/heap_lang/derived_laws.v
-nola/examples/heap_lang/proofmode.v
-nola/examples/heap_lang/adequacy.v
-nola/examples/heap_lang/total_adequacy.v
+nola/heap_lang/locations.v
+nola/heap_lang/lang.v
+nola/heap_lang/pretty.v
+nola/heap_lang/metatheory.v
+nola/heap_lang/notation.v
+nola/heap_lang/tactics.v
+nola/heap_lang/proph_erasure.v
+nola/heap_lang/class_instances.v
+nola/heap_lang/definitions.v
+nola/heap_lang/primitive_laws.v
+nola/heap_lang/derived_laws.v
+nola/heap_lang/proofmode.v
+nola/heap_lang/adequacy.v
+nola/heap_lang/total_adequacy.v
+nola/heap_lang/lib/lock.v
 
-nola/examples/lock.v
 nola/examples/later.v
 nola/examples/minilogic.v

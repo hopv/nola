@@ -1,5 +1,5 @@
 From stdpp Require Import fin_maps.
-From nola.examples.heap_lang Require Export lang.
+From nola.heap_lang Require Export lang.
 From iris.prelude Require Import options.
 Import heap_lang.
 

@@ -1,5 +1,5 @@
 From iris.program_logic Require Export adequacy.
-From nola.examples.heap_lang Require Export lang notation tactics.
+From nola.heap_lang Require Export lang notation tactics.
 From iris.prelude Require Import options.
 
 (** This file contains the proof that prophecies can be safely erased

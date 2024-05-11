@@ -1,6 +1,6 @@
 From stdpp Require Export pretty.
 
-From nola.examples.heap_lang Require Import lang.
+From nola.heap_lang Require Import lang.
 From iris.prelude Require Import options.
 
 (** * Pretty printing for HeapLang values *)

@@ -1,6 +1,6 @@
 (** * Example of instantiating Nola with [▶ ∙] *)
 
-From nola.examples.heap_lang Require Import notation proofmode.
+From nola.heap_lang Require Import notation proofmode.
 From nola.iris Require Import later inv.
 Import WpwNotation.
 

@@ -1,5 +1,5 @@
 From stdpp Require Import gmap stringmap.
-From nola.examples.heap_lang Require Export lang.
+From nola.heap_lang Require Export lang.
 From iris.prelude Require Import options.
 
 (* This file contains some metatheory about the heap_lang language,
