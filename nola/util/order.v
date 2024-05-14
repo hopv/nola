@@ -324,6 +324,11 @@ Module BigMJNotation.
 End BigMJNotation.
 Import BigMJNotation.
 
+Module OrderNotation.
+  Export OeqvNotation.
+  Export BigMJNotation.
+End OrderNotation.
+
 (** The big meet/join is monotone *)
 #[export] Instance big_meet_mono `{!BigMeet OT} {A} :
   AntiMono (big_meet (OT:=OT) (A:=A)) | 20.
@@ -499,8 +504,3 @@ Section gfp.
     etrans; [by apply gfp_unfold|]. apply (mono f). by apply bin_join_elim.
   Qed.
 End gfp.
-
-Module OrderNotation.
-  Export OeqvNotation.
-  Export BigMJNotation.
-End OrderNotation.
