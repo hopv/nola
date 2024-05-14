@@ -47,6 +47,14 @@ Section psg.
   Lemma Psgoidp_Psgoid {f} : Psgoidp f ⊤ ≃ Psgoid f.
   Proof. apply lfp_cong, aug_meet_top. Qed.
 
+  (** Parameterized induction principle for [Psgoidp] *)
+  Lemma Psgoidp_ind {f ih ih'} {P : OT → Prop} :
+    Psgoidp f (ih ⊓ ih') ⊑ ih → Psgoidp f ih' ⊑ ih.
+  Proof.
+    move=> ?. apply lfp_para_ind. etrans; [|done].
+    apply lfp_mono, aug_meet_nest.
+  Qed.
+
   (** ** [Psgoid' f]: Another definition of [Psgoid], the closure under the
     meet after [f] *)
   Definition Psgoid'_gen f (self : OT → Prop) o : Prop :=
