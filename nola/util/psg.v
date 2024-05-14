@@ -60,9 +60,7 @@ Section psg.
   Definition Psgoid'_gen f (self : OT → Prop) o : Prop :=
     ∃ S, S ⊑ self ∧ o ≃ [⊓] o' :: S o', f o'.
   #[export] Instance Psgoid'_gen_mono `{!BigMeet OT} {f} : Mono (Psgoid'_gen f).
-  Proof.
-    move=>/= ?? imp ? [S[??]]. exists S. split; [|done]. by etrans.
-  Qed.
+  Proof. move=>/= ????[S[??]]. exists S. split; by [etrans|]. Qed.
   Definition Psgoid' f : OT → Prop := lfp (Psgoid'_gen f).
 
   (** [Psgoid] and [Psgoid'] are equivalent *)
@@ -84,8 +82,8 @@ Section psg.
     (∃ o', self o' ∧ o ≃ f o') ∨ ∃ S, S ⊑ self ∧ o ≃ [⊓] o' :: S o', o'.
   #[export] Instance Psgoid''_gen_mono {f} : Mono (Psgoid''_gen f).
   Proof.
-    move=>/= ?? imp ?[[?[??]]|[?[??]]]; [left|right]; eexists _; (split; [|done]).
-    { by apply imp. } { by etrans. }
+    move=>/= ?? imp ?[[?[??]]|[?[??]]]; [left|right]; eexists _;
+      (split; [|done]); by [apply imp|etrans].
   Qed.
   Definition Psgoid'' f : OT → Prop := lfp (Psgoid''_gen f).
 
@@ -95,8 +93,8 @@ Section psg.
     split.
     - apply lfp_ind=> o [S[sub eq]]. apply (lfp_unfold (f:=Psgoid''_gen f)).
       right. exists (λ o', ∃ o'', S o'' ∧ o' ≃ f o''). split.
-      { move=> ?[?[??]]. apply (lfp_unfold (f:=Psgoid''_gen f)).
-        left. eexists _. split; by [apply sub|]. }
+      { move=> ?[?[??]]. apply (lfp_unfold (f:=Psgoid''_gen f)). left.
+        eexists _. split; by [apply sub|]. }
       rewrite eq. split; apply big_meet_intro=> ?.
       { move=> [?[?->]]. by apply big_meet_elim. }
       move=> ?. apply (big_meet_elim id). by eexists _.
@@ -108,9 +106,8 @@ Section psg.
       { move=> ?[?[?[??]]]. by apply Psgoid_Psgoid'. }
       rewrite eq. split; apply big_meet_intro=> o'.
       { move=> [?[?[??]]]. etrans; [|done]. by apply (big_meet_elim id). }
-      move=> el. move: (sub _ el)=> PS.
-      apply Psgoid_Psgoid', to_Psgoid in PS. etrans; [|done].
-      apply big_meet_mono; [|done]=> ?[??]. eauto.
+      move=> el. move: (sub _ el)=> PS. apply Psgoid_Psgoid', to_Psgoid in PS.
+      etrans; [|done]. apply big_meet_mono; [|done]=> ?[??]. eauto.
   Qed.
   Lemma Psgoid_Psgoid'' {f} : Psgoid f ≃ Psgoid'' f.
   Proof. by rewrite Psgoid_Psgoid' Psgoid'_Psgoid''. Qed.
