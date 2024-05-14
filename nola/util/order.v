@@ -437,8 +437,8 @@ Section lfp.
   #[export] Instance aug_meet_mono `{!BinMeet OT, !Mono f} : Mono2 (aug_meet f).
   Proof. move=> *?*. apply (mono f), mono2; by [apply _| |]. Qed.
   Lemma aug_meet_nest `{!BinMeet OT, !Mono f} {o o'} :
-    aug_meet (aug_meet f o) o' ≃ aug_meet f (o ⊓ o').
-  Proof. split=> ?; rewrite comm; apply (mono f); by rewrite assoc. Qed.
+    aug_meet (aug_meet f o') o ≃ aug_meet f (o ⊓ o').
+  Proof. split=> ?; apply (mono f); by rewrite assoc. Qed.
   Lemma aug_meet_top `{!BinMeet OT, !Mono f, !OTop OT} : aug_meet f ⊤ ≃ f.
   Proof. split=> ?; apply (mono f); by rewrite right_id. Qed.
 
@@ -491,8 +491,8 @@ Section gfp.
   #[export] Instance aug_join_mono `{!BinJoin OT, !Mono f} : Mono2 (aug_join f).
   Proof. move=> *?*. apply (mono f), mono2; by [apply _| |]. Qed.
   Lemma aug_join_nest `{!BinJoin OT, !Mono f} {o o'} :
-    aug_join (aug_join f o) o' ≃ aug_join f (o ⊔ o').
-  Proof. split=> ?; rewrite comm; apply (mono f); by rewrite assoc. Qed.
+    aug_join (aug_join f o') o ≃ aug_join f (o ⊔ o').
+  Proof. split=> ?; apply (mono f); by rewrite assoc. Qed.
   Lemma aug_join_bot `{!BinJoin OT, !Mono f, !OBot OT} : aug_join f ⊥ ≃ f.
   Proof. split=> ?; apply (mono f); by rewrite right_id. Qed.
 
