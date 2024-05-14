@@ -75,9 +75,80 @@ Proof. done. Qed.
 Class Mono {OT OT'} (f : OT → OT') := mono :: Proper ((⊑) ==> (⊑)) f.
 Arguments mono {_ _} _ {_ _ _}.
 
+Class Anti {OT OT'} (f : OT → OT') := anti :: Proper ((⊑) --> (⊑)) f.
+Arguments anti {_ _} _ {_ _ _}.
+
 Class Mono2 {OT OT' OT''} (f : OT → OT' → OT'') :=
   mono2 :: Proper ((⊑) ==> (⊑) ==> (⊑)) f.
 Arguments mono2 {_ _ _} _ {_ _ _}.
+
+Class AntiMono {OT OT' OT''} (f : OT → OT' → OT'') :=
+  antimono :: Proper ((⊑) --> (⊑) ==> (⊑)) f.
+Arguments antimono {_ _ _} _ {_ _ _}.
+
+(** Partial application *)
+#[export] Instance mono2_mono `{!@Mono2 OT OT' OT'' f} {o} : Mono (f o).
+Proof. move=> ???. by apply mono2. Qed.
+#[export] Instance antimono_mono `{!@AntiMono OT OT' OT'' f} {o} : Mono (f o).
+Proof. move=> ???. by apply antimono. Qed.
+
+(** Monotonicity implies properness *)
+#[export] Instance mono_proper `{!@Mono OT OT' f} : Proper ((≃) ==> (≃)) f.
+Proof. move=> >[??]; split; by apply mono. Qed.
+#[export] Instance anti_proper `{!@Anti OT OT' f} : Proper ((≃) ==> (≃)) f.
+Proof. move=> >[??]; split; by apply anti. Qed.
+#[export] Instance mono2_proper `{!@Mono2 OT OT' OT'' f} :
+  Proper ((≃) ==> (≃) ==> (≃)) f.
+Proof. move=> >[??]??[??]. split; by apply mono2. Qed.
+#[export] Instance antimono_proper `{!@AntiMono OT OT' OT'' f} :
+  Proper ((≃) ==> (≃) ==> (≃)) f.
+Proof. move=> >[??]??[??]. split; by apply antimono. Qed.
+
+(** ** Top and bottom *)
+
+Class OTop OT := O_TOP {
+  otop :: Top OT;
+  otop_intro {o : OT} : o ⊑ ⊤;
+}.
+Arguments O_TOP {_} _ _.
+
+Class OBot OT := O_BOT {
+  obot :: Bottom OT;
+  obot_elim {o : OT} : ⊥ ⊑ o;
+}.
+Arguments O_BOT {_} _ _.
+
+(** [nat] has the bottom *)
+#[export] Program Instance obot_nat : OBot nat := O_BOT 0 _.
+Next Obligation. move=> ?. rewrite nat_ole /bottom. lia. Qed.
+
+(** [Prop] has the top and bottom *)
+#[export] Program Instance otop_Prop : OTop Prop := O_TOP True _.
+Next Obligation. done. Qed.
+#[export] Program Instance obot_Prop : OBot Prop := O_BOT False _.
+Next Obligation. move=> ?[]. Qed.
+
+(** [()] has the top and bottom *)
+#[export] Program Instance otop_unit : OTop unit := O_TOP () _.
+Next Obligation. done. Qed.
+#[export] Program Instance obot_unit : OBot unit := O_BOT () _.
+Next Obligation. done. Qed.
+
+(** The top and bottom for a function *)
+#[export] Program Instance otop_fun `{!∀ a : A, OTop (OTF a)} :
+  OTop (∀ a, OTF a) := O_TOP (λ _, ⊤) _.
+Next Obligation. move=> *?. exact otop_intro. Qed.
+#[export] Program Instance obot_fun `{!∀ a : A, OBot (OTF a)} :
+  OBot (∀ a, OTF a) := O_BOT (λ _, ⊥) _.
+Next Obligation. move=> *?. exact obot_elim. Qed.
+
+(** [dual] flips the top and bottom *)
+#[export] Program Instance otop_dual `{!OBot OT} : OTop (dual OT) :=
+  O_TOP (Dual ⊥) _.
+Next Obligation. move=> ???. exact obot_elim. Qed.
+#[export] Program Instance obot_dual `{!OTop OT} : OBot (dual OT) :=
+  O_BOT (Dual ⊤) _.
+Next Obligation. move=> ???. exact otop_intro. Qed.
 
 (** ** Binary meet and join *)
 
@@ -97,17 +168,71 @@ Class BinJoin OT := BIN_JOIN {
 }.
 Arguments BIN_JOIN {_} _ _ _ _.
 
-(** Binary meet/join is monotone *)
-#[export] Instance bin_meet_mono `{!BinMeet OT} : Mono2 (meet (A:=OT)).
+(** The binary meet/join is monotone *)
+#[export] Instance bin_meet_mono `{!BinMeet OT} : Mono2 (meet (A:=OT)) | 20.
 Proof.
   move=> *?*. apply bin_meet_intro; (etrans; [|done]);
     [exact bin_meet_elim_1|exact bin_meet_elim_2].
 Qed.
-#[export] Instance bin_join_mono `{!BinJoin OT} : Mono2 (join (A:=OT)).
+#[export] Instance bin_join_mono `{!BinJoin OT} : Mono2 (join (A:=OT)) | 20.
 Proof.
   move=> *?*. apply bin_join_elim; (etrans; [done|]);
     [exact bin_join_intro_1|exact bin_join_intro_2].
 Qed.
+
+(** The binary meet/join is commutative *)
+#[export] Instance bin_meet_comm `{!BinMeet OT} : Comm (≃) (meet (A:=OT)) | 20.
+Proof.
+  move=> >. split; apply bin_meet_intro;
+    by [apply bin_meet_elim_2|apply bin_meet_elim_1].
+Qed.
+#[export] Instance bin_join_comm `{!BinJoin OT} : Comm (≃) (join (A:=OT)) | 20.
+Proof.
+  move=> >. split; apply bin_join_elim;
+    by [apply bin_join_intro_2|apply bin_join_intro_1].
+Qed.
+
+(** The binary meet/join is associative *)
+#[export] Instance bin_meet_assoc `{!BinMeet OT} :
+  Assoc (≃) (meet (A:=OT)) | 20.
+Proof.
+  move=> >. split; repeat apply bin_meet_intro;
+    try exact bin_meet_elim_1; try exact bin_meet_elim_2;
+    try (etrans; [exact bin_meet_elim_2|
+      try exact bin_meet_elim_1; exact bin_meet_elim_2]);
+    (etrans; [exact bin_meet_elim_1|
+      try exact bin_meet_elim_1; exact bin_meet_elim_2]).
+Qed.
+#[export] Instance bin_join_assoc `{!BinJoin OT} :
+  Assoc (≃) (join (A:=OT)) | 20.
+Proof.
+  move=> >. split; repeat apply bin_join_elim;
+    try exact bin_join_intro_1; try exact bin_join_intro_2;
+    try (etrans; last first; [exact bin_join_intro_1|
+      try exact bin_join_intro_1; exact bin_join_intro_2]);
+    (etrans; last first; [exact bin_join_intro_2|
+      try exact bin_join_intro_1; exact bin_join_intro_2]).
+Qed.
+
+(** The binary meet/join is unitary with [⊤]/[⊥] *)
+#[export] Instance bin_meet_top_l `{!BinMeet OT, !OTop OT} :
+  LeftId (≃) ⊤ (meet (A:=OT)) | 20.
+Proof.
+  move=> ?. split; [exact bin_meet_elim_2|].
+  apply bin_meet_intro; by [exact otop_intro|].
+Qed.
+#[export] Instance bin_meet_top_r `{!BinMeet OT, !OTop OT} :
+  RightId (≃) ⊤ (meet (A:=OT)) | 20.
+Proof. move=> ?. by rewrite comm left_id. Qed.
+#[export] Instance bin_join_bot_l `{!BinJoin OT, !OBot OT} :
+  LeftId (≃) ⊥ (join (A:=OT)) | 20.
+Proof.
+  move=> ?. split; [|exact bin_join_intro_2].
+  apply bin_join_elim; by [exact obot_elim|].
+Qed.
+#[export] Instance bin_join_bot_r `{!BinJoin OT, !OBot OT} :
+  RightId (≃) ⊥ (join (A:=OT)) | 20.
+Proof. move=> ?. by rewrite comm left_id. Qed.
 
 (** [nat] has the binary meet and join *)
 
@@ -199,6 +324,20 @@ Module BigMJNotation.
 End BigMJNotation.
 Import BigMJNotation.
 
+(** The big meet/join is monotone *)
+#[export] Instance big_meet_mono `{!BigMeet OT} {A} :
+  AntiMono (big_meet (OT:=OT) (A:=A)) | 20.
+Proof.
+  move=>/= ?? TS ???. apply big_meet_intro=> ? /TS ?.
+  etrans; by [apply big_meet_elim|].
+Qed.
+#[export] Instance big_join_mono `{!BigJoin OT} {A} :
+  Mono2 (big_join (OT:=OT) (A:=A)) | 20.
+Proof.
+  move=>/= ?? ST ???. apply big_join_elim=> ? /ST ?.
+  by etrans; [|by apply big_join_intro].
+Qed.
+
 (** Inducing a binary meet/join from the big meet/join *)
 
 Program Definition bin_meet_big_meet `{!BigMeet OT} : BinMeet OT :=
@@ -255,33 +394,47 @@ Next Obligation. move=> */=. by exact: (big_meet_intro (undual ∘ _)). Qed.
 
 (** ** [lfp]: Knaster-Tarski least fixed point *)
 
-Definition lfp `{!BigMeet OT} (f : OT → OT) : OT := [⊓] o :: f o ⊑ o, o.
+Local Definition lfp_def `{!BigMeet OT} (f : OT → OT) : OT :=
+  [⊓] o :: f o ⊑ o, o.
+Local Lemma lfp_aux : seal (@lfp_def). Proof. by eexists. Qed.
+Definition lfp `{!BigMeet OT} := lfp_aux.(unseal) _ _.
+Local Lemma lfp_unseal : @lfp = @lfp_def. Proof. exact: seal_eq. Qed.
 
 (** Unfold [lfp] *)
 Lemma lfp_unfold_2 `{!BigMeet OT, !Mono f} : f (lfp f) ⊑ lfp f.
 Proof.
-  apply big_meet_intro=> ??. etrans; [|done].
+  rewrite lfp_unseal. apply big_meet_intro=> ??. etrans; [|done].
   by apply (mono f), (big_meet_elim id).
 Qed.
 Lemma lfp_unfold_1 `{!BigMeet OT, !Mono f} : lfp f ⊑ f (lfp f).
-Proof. apply (big_meet_elim id), (mono f), lfp_unfold_2. Qed.
+Proof.
+  rewrite {1}lfp_unseal. apply (big_meet_elim id), (mono f), lfp_unfold_2.
+Qed.
 Lemma lfp_unfold `{!BigMeet OT, !Mono f} : lfp f ≃ f (lfp f).
 Proof. split; [apply lfp_unfold_1|apply lfp_unfold_2]. Qed.
 
 (** Basic induction principle *)
 Lemma lfp_ind `{!BigMeet OT, !Mono f} {o} : f o ⊑ o → lfp f ⊑ o.
-Proof. move=> ?. by apply (big_meet_elim id). Qed.
+Proof. rewrite lfp_unseal=> ?. by apply (big_meet_elim id). Qed.
 
 (** [lfp] is monotone *)
 Lemma lfp_mono `{!BigMeet OT, !Mono (OT:=OT) f, !Mono g} :
   f ⊑ g → lfp f ⊑ lfp g.
 Proof. move=> fg. apply lfp_ind. etrans; [apply fg|apply lfp_unfold]. Qed.
+Lemma lfp_cong `{!BigMeet OT, !Mono (OT:=OT) f, !Mono g} :
+  f ≃ g → lfp f ≃ lfp g.
+Proof. move=> [??]. split; by apply lfp_mono. Qed.
 
 (** Augmenting a function with a meet *)
-Definition aug_meet `{!BinMeet OT} {A} (f : OT → A) o o' := f (o ⊓ o').
-#[export] Instance aug_meet_mono `{!BinMeet OT, !@Mono OT OT' f} {o} :
-  Mono (aug_meet f o).
-Proof. move=> *. apply (mono f), mono2; by [apply _| |]. Qed.
+Definition aug_meet `{!BinMeet OT} {A} (f : OT → A) o o' := f (o' ⊓ o).
+#[export] Instance aug_meet_mono `{!BinMeet OT, !@Mono OT OT' f} :
+  Mono2 (aug_meet f).
+Proof. move=> *?*. apply (mono f), mono2; by [apply _| |]. Qed.
+Lemma aug_meet_nest `{!BinMeet OT, !@Mono _ OT' f} {o o'} :
+  aug_meet (aug_meet f o) o' ≃ aug_meet f (o ⊓ o').
+Proof. split=> ?; rewrite comm; apply (mono f); by rewrite assoc. Qed.
+Lemma aug_meet_top `{!BinMeet OT, !@Mono _ OT' f, !OTop OT} : aug_meet f ⊤ ≃ f.
+Proof. split=> ?; apply (mono f); by rewrite right_id. Qed.
 
 (** Parameterized induction principle *)
 Lemma lfp_para_ind `{!BinMeet OT, !BigMeet OT, !Mono f} {o} :
@@ -293,38 +446,57 @@ Qed.
 
 (** ** [gfp]: Knaster-Tarski greatest fixed point *)
 
-Definition gfp `{!BigJoin OT} (f : OT → OT) : OT := [⊔] o :: o ⊑ f o, o.
+Local Definition gfp_def `{!BigJoin OT} (f : OT → OT) : OT :=
+  [⊔] o :: o ⊑ f o, o.
+Local Lemma gfp_aux : seal (@gfp_def). Proof. by eexists. Qed.
+Definition gfp `{!BigJoin OT} := gfp_aux.(unseal) _ _.
+Local Lemma gfp_unseal : @gfp = @gfp_def. Proof. exact: seal_eq. Qed.
 
 (** Unfold [gfp] *)
 Lemma gfp_unfold_1 `{!BigJoin OT, !Mono f} : gfp f ⊑ f (gfp f).
 Proof.
-  apply big_join_elim=> ??. etrans; [done|].
+  rewrite gfp_unseal. apply big_join_elim=> ??. etrans; [done|].
   by apply (mono f), (big_join_intro id).
 Qed.
 Lemma gfp_unfold_2 `{!BigJoin OT, !Mono f} : f (gfp f) ⊑ gfp f.
-Proof. apply (big_join_intro id), (mono f), gfp_unfold_1. Qed.
+Proof.
+  rewrite {2}gfp_unseal. apply (big_join_intro id), (mono f), gfp_unfold_1.
+Qed.
 Lemma gfp_unfold `{!BigJoin OT, !Mono f} : gfp f ≃ f (gfp f).
 Proof. split; [apply gfp_unfold_1|apply gfp_unfold_2]. Qed.
 
 (** Basic coinduction principle *)
 Lemma gfp_coind `{!BigJoin OT, !Mono f} {o} : o ⊑ f o → o ⊑ gfp f.
-Proof. move=> ?. by apply (big_join_intro id). Qed.
+Proof. rewrite gfp_unseal=> ?. by apply (big_join_intro id). Qed.
 
 (** [gfp] is monotone *)
 Lemma gfp_mono `{!BigJoin OT, !Mono (OT:=OT) f, !Mono g} :
   f ⊑ g → gfp f ⊑ gfp g.
 Proof. move=> fg. apply gfp_coind. etrans; [apply gfp_unfold|apply fg]. Qed.
+Lemma gfp_cong `{!BigJoin OT, !Mono (OT:=OT) f, !Mono g} :
+  f ≃ g → gfp f ≃ gfp g.
+Proof. move=> [??]. split; by apply gfp_mono. Qed.
 
 (** Augmenting a function with a join *)
-Definition aug_join `{!BinJoin OT} {A} (f : OT → A) o o' := f (o ⊔ o').
-#[export] Instance aug_join_mono `{!BinJoin OT, !@Mono OT OT' f} {o} :
-  Mono (aug_join f o).
-Proof. move=> *. apply (mono f), mono2; by [apply _| |]. Qed.
+Definition aug_join `{!BinJoin OT} {A} (f : OT → A) o o' := f (o' ⊔ o).
+#[export] Instance aug_join_mono `{!BinJoin OT, !@Mono OT OT' f} :
+  Mono2 (aug_join f).
+Proof. move=> *?*. apply (mono f), mono2; by [apply _| |]. Qed.
+Lemma aug_join_nest `{!BinJoin OT, !@Mono _ OT' f} {o o'} :
+  aug_join (aug_join f o) o' ≃ aug_join f (o ⊔ o').
+Proof. split=> ?; rewrite comm; apply (mono f); by rewrite assoc. Qed.
+Lemma aug_join_bot `{!BinJoin OT, !@Mono _ OT' f, !OBot OT} : aug_join f ⊥ ≃ f.
+Proof. split=> ?; apply (mono f); by rewrite right_id. Qed.
 
 (** Parameterized coinduction principle *)
-Lemma gfp_para_ind `{!BinJoin OT, !BigJoin OT, !Mono f} {o} :
+Lemma gfp_para_coind `{!BinJoin OT, !BigJoin OT, !Mono f} {o} :
   o ⊑ gfp (aug_join f o) → o ⊑ gfp f.
 Proof.
   move=> to. etrans; [apply to|]. apply gfp_coind.
   etrans; [by apply gfp_unfold|]. apply (mono f). by apply bin_join_elim.
 Qed.
+
+Module OrderNotation.
+  Export OeqvNotation.
+  Export BigMJNotation.
+End OrderNotation.
