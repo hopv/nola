@@ -48,7 +48,7 @@ Section psg.
   Proof. apply lfp_cong, aug_meet_top. Qed.
 
   (** ** [Psgoid' f]: Another definition of [Psgoid], the closure under the
-    meet-[f] *)
+    meet after [f] *)
   Definition Psgoid'_gen f (self : OT → Prop) o : Prop :=
     ∃ S, S ⊑ self ∧ o ≃ [⊓] o' :: S o', f o'.
   #[export] Instance Psgoid'_gen_mono `{!BigMeet OT} {f} : Mono (Psgoid'_gen f).
