@@ -136,6 +136,16 @@ Section psg.
     move=> ?. apply (big_meet_elim id). eauto.
   Qed.
 
+  (** [Psgoid f] is proper *)
+  Lemma Psgoid_proper' {f} : Proper ((≃) ==> (⊑)) (Psgoid f).
+  Proof.
+    move=> ??? PS. apply Psgoid_Psgoid', (lfp_unfold (f:=Psgoid'_gen f)) in PS.
+    move: PS=> [?[??]]. apply Psgoid_Psgoid', (lfp_unfold (f:=Psgoid'_gen f)).
+    eexists _. split; [done|]. by etrans.
+  Qed.
+  #[export] Instance Psgoid_proper {f} : Proper ((≃) ==> (≃)) (Psgoid f).
+  Proof. move=> ???; split; by apply Psgoid_proper'. Qed.
+
   (** ** [psg]: Pseudo-gfp *)
   Definition psg f : OT := [⊓] o :: Psgoid f o, o.
 
