@@ -65,6 +65,7 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     [`plist`](nola/util/plist.v) (Product list)
   + [`proph`](nola/util/proph.v) (Prophecy)
   + [`intp`](nola/util/intp.v) (Interpretation)
+  + [`order`](nola/util/order.v) (Order theory)
 - [`iris/`](nola/iris) : Iris libraries
   + [`ofe`](nola/iris/ofe.v) (OFEs)
   + [`list`](nola/iris/list.v) (On `list`),
