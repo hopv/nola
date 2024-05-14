@@ -394,107 +394,111 @@ Next Obligation. move=> */=. by exact: (big_meet_intro (undual ∘ _)). Qed.
 
 (** ** [lfp]: Knaster-Tarski least fixed point *)
 
-Local Definition lfp_def `{!BigMeet OT} (f : OT → OT) : OT :=
-  [⊓] o :: f o ⊑ o, o.
-Local Lemma lfp_aux : seal (@lfp_def). Proof. by eexists. Qed.
-Definition lfp `{!BigMeet OT} := lfp_aux.(unseal) _ _.
-Local Lemma lfp_unseal : @lfp = @lfp_def. Proof. exact: seal_eq. Qed.
+Section lfp.
+  Context `{!BigMeet OT}.
+  Implicit Type f : OT → OT.
 
-(** Unfold [lfp] *)
-Lemma lfp_unfold_2 `{!BigMeet OT, !Mono f} : f (lfp f) ⊑ lfp f.
-Proof.
-  rewrite lfp_unseal. apply big_meet_intro=> ??. etrans; [|done].
-  by apply (mono f), (big_meet_elim id).
-Qed.
-Lemma lfp_unfold_1 `{!BigMeet OT, !Mono f} : lfp f ⊑ f (lfp f).
-Proof.
-  rewrite {1}lfp_unseal. apply (big_meet_elim id), (mono f), lfp_unfold_2.
-Qed.
-Lemma lfp_unfold `{!BigMeet OT, !Mono f} : lfp f ≃ f (lfp f).
-Proof. split; [apply lfp_unfold_1|apply lfp_unfold_2]. Qed.
+  Local Definition lfp_def (f : OT → OT) : OT :=
+    [⊓] o :: f o ⊑ o, o.
+  Local Lemma lfp_aux : seal lfp_def. Proof. by eexists. Qed.
+  Definition lfp := lfp_aux.(unseal).
+  Local Lemma lfp_unseal : lfp = lfp_def. Proof. exact: seal_eq. Qed.
 
-(** Basic induction principle *)
-Lemma lfp_ind `{!BigMeet OT, !Mono f} {o} : f o ⊑ o → lfp f ⊑ o.
-Proof. rewrite lfp_unseal=> ?. by apply (big_meet_elim id). Qed.
+  (** Unfold [lfp] *)
+  Lemma lfp_unfold_2 `{!Mono f} : f (lfp f) ⊑ lfp f.
+  Proof.
+    rewrite lfp_unseal. apply big_meet_intro=> ??. etrans; [|done].
+    by apply (mono f), (big_meet_elim id).
+  Qed.
+  Lemma lfp_unfold_1 `{!Mono f} : lfp f ⊑ f (lfp f).
+  Proof.
+    rewrite {1}lfp_unseal. apply (big_meet_elim id), (mono f), lfp_unfold_2.
+  Qed.
+  Lemma lfp_unfold `{!Mono f} : lfp f ≃ f (lfp f).
+  Proof. split; [apply lfp_unfold_1|apply lfp_unfold_2]. Qed.
 
-(** [lfp] is monotone *)
-Lemma lfp_mono `{!BigMeet OT, !Mono (OT:=OT) f, !Mono g} :
-  f ⊑ g → lfp f ⊑ lfp g.
-Proof. move=> fg. apply lfp_ind. etrans; [apply fg|apply lfp_unfold]. Qed.
-Lemma lfp_cong `{!BigMeet OT, !Mono (OT:=OT) f, !Mono g} :
-  f ≃ g → lfp f ≃ lfp g.
-Proof. move=> [??]. split; by apply lfp_mono. Qed.
+  (** Basic induction principle *)
+  Lemma lfp_ind `{!Mono f} {o} : f o ⊑ o → lfp f ⊑ o.
+  Proof. rewrite lfp_unseal=> ?. by apply (big_meet_elim id). Qed.
 
-(** Augmenting a function with a meet *)
-Definition aug_meet `{!BinMeet OT} {A} (f : OT → A) o o' := f (o' ⊓ o).
-#[export] Instance aug_meet_mono `{!BinMeet OT, !@Mono OT OT' f} :
-  Mono2 (aug_meet f).
-Proof. move=> *?*. apply (mono f), mono2; by [apply _| |]. Qed.
-Lemma aug_meet_nest `{!BinMeet OT, !@Mono _ OT' f} {o o'} :
-  aug_meet (aug_meet f o) o' ≃ aug_meet f (o ⊓ o').
-Proof. split=> ?; rewrite comm; apply (mono f); by rewrite assoc. Qed.
-Lemma aug_meet_top `{!BinMeet OT, !@Mono _ OT' f, !OTop OT} : aug_meet f ⊤ ≃ f.
-Proof. split=> ?; apply (mono f); by rewrite right_id. Qed.
+  (** [lfp] is monotone *)
+  Lemma lfp_mono `{!Mono f, !Mono g} : f ⊑ g → lfp f ⊑ lfp g.
+  Proof. move=> fg. apply lfp_ind. etrans; [apply fg|apply lfp_unfold]. Qed.
+  Lemma lfp_cong `{!Mono f, !Mono g} : f ≃ g → lfp f ≃ lfp g.
+  Proof. move=> [??]. split; by apply lfp_mono. Qed.
 
-(** Parameterized induction principle *)
-Lemma lfp_para_ind `{!BinMeet OT, !BigMeet OT, !Mono f} {o} :
-  lfp (aug_meet f o) ⊑ o → lfp f ⊑ o.
-Proof.
-  move=> to. etrans; [|apply to]. apply lfp_ind.
-  etrans; [|by apply lfp_unfold]. apply (mono f). by apply bin_meet_intro.
-Qed.
+  (** Augmenting a function with a meet *)
+  Definition aug_meet `{!BinMeet OT} (f : OT → OT) o o' := f (o' ⊓ o).
+  #[export] Instance aug_meet_mono `{!BinMeet OT, !Mono f} : Mono2 (aug_meet f).
+  Proof. move=> *?*. apply (mono f), mono2; by [apply _| |]. Qed.
+  Lemma aug_meet_nest `{!BinMeet OT, !Mono f} {o o'} :
+    aug_meet (aug_meet f o) o' ≃ aug_meet f (o ⊓ o').
+  Proof. split=> ?; rewrite comm; apply (mono f); by rewrite assoc. Qed.
+  Lemma aug_meet_top `{!BinMeet OT, !Mono f, !OTop OT} : aug_meet f ⊤ ≃ f.
+  Proof. split=> ?; apply (mono f); by rewrite right_id. Qed.
+
+  (** Parameterized induction principle *)
+  Lemma lfp_para_ind `{!BinMeet OT, !BigMeet OT, !Mono f} {o} :
+    lfp (aug_meet f o) ⊑ o → lfp f ⊑ o.
+  Proof.
+    move=> to. etrans; [|apply to]. apply lfp_ind.
+    etrans; [|by apply lfp_unfold]. apply (mono f). by apply bin_meet_intro.
+  Qed.
+End lfp.
 
 (** ** [gfp]: Knaster-Tarski greatest fixed point *)
 
-Local Definition gfp_def `{!BigJoin OT} (f : OT → OT) : OT :=
-  [⊔] o :: o ⊑ f o, o.
-Local Lemma gfp_aux : seal (@gfp_def). Proof. by eexists. Qed.
-Definition gfp `{!BigJoin OT} := gfp_aux.(unseal) _ _.
-Local Lemma gfp_unseal : @gfp = @gfp_def. Proof. exact: seal_eq. Qed.
+Section gfp.
+  Context `{!BigJoin OT}.
+  Implicit Type f : OT → OT.
 
-(** Unfold [gfp] *)
-Lemma gfp_unfold_1 `{!BigJoin OT, !Mono f} : gfp f ⊑ f (gfp f).
-Proof.
-  rewrite gfp_unseal. apply big_join_elim=> ??. etrans; [done|].
-  by apply (mono f), (big_join_intro id).
-Qed.
-Lemma gfp_unfold_2 `{!BigJoin OT, !Mono f} : f (gfp f) ⊑ gfp f.
-Proof.
-  rewrite {2}gfp_unseal. apply (big_join_intro id), (mono f), gfp_unfold_1.
-Qed.
-Lemma gfp_unfold `{!BigJoin OT, !Mono f} : gfp f ≃ f (gfp f).
-Proof. split; [apply gfp_unfold_1|apply gfp_unfold_2]. Qed.
+  Local Definition gfp_def (f : OT → OT) : OT :=
+    [⊔] o :: o ⊑ f o, o.
+  Local Lemma gfp_aux : seal gfp_def. Proof. by eexists. Qed.
+  Definition gfp := gfp_aux.(unseal).
+  Local Lemma gfp_unseal : gfp = gfp_def. Proof. exact: seal_eq. Qed.
 
-(** Basic coinduction principle *)
-Lemma gfp_coind `{!BigJoin OT, !Mono f} {o} : o ⊑ f o → o ⊑ gfp f.
-Proof. rewrite gfp_unseal=> ?. by apply (big_join_intro id). Qed.
+  (** Unfold [gfp] *)
+  Lemma gfp_unfold_1 `{!Mono f} : gfp f ⊑ f (gfp f).
+  Proof.
+    rewrite gfp_unseal. apply big_join_elim=> ??. etrans; [done|].
+    by apply (mono f), (big_join_intro id).
+  Qed.
+  Lemma gfp_unfold_2 `{!Mono f} : f (gfp f) ⊑ gfp f.
+  Proof.
+    rewrite {2}gfp_unseal. apply (big_join_intro id), (mono f), gfp_unfold_1.
+  Qed.
+  Lemma gfp_unfold `{!Mono f} : gfp f ≃ f (gfp f).
+  Proof. split; [apply gfp_unfold_1|apply gfp_unfold_2]. Qed.
 
-(** [gfp] is monotone *)
-Lemma gfp_mono `{!BigJoin OT, !Mono (OT:=OT) f, !Mono g} :
-  f ⊑ g → gfp f ⊑ gfp g.
-Proof. move=> fg. apply gfp_coind. etrans; [apply gfp_unfold|apply fg]. Qed.
-Lemma gfp_cong `{!BigJoin OT, !Mono (OT:=OT) f, !Mono g} :
-  f ≃ g → gfp f ≃ gfp g.
-Proof. move=> [??]. split; by apply gfp_mono. Qed.
+  (** Basic coinduction principle *)
+  Lemma gfp_coind `{!Mono f} {o} : o ⊑ f o → o ⊑ gfp f.
+  Proof. rewrite gfp_unseal=> ?. by apply (big_join_intro id). Qed.
 
-(** Augmenting a function with a join *)
-Definition aug_join `{!BinJoin OT} {A} (f : OT → A) o o' := f (o' ⊔ o).
-#[export] Instance aug_join_mono `{!BinJoin OT, !@Mono OT OT' f} :
-  Mono2 (aug_join f).
-Proof. move=> *?*. apply (mono f), mono2; by [apply _| |]. Qed.
-Lemma aug_join_nest `{!BinJoin OT, !@Mono _ OT' f} {o o'} :
-  aug_join (aug_join f o) o' ≃ aug_join f (o ⊔ o').
-Proof. split=> ?; rewrite comm; apply (mono f); by rewrite assoc. Qed.
-Lemma aug_join_bot `{!BinJoin OT, !@Mono _ OT' f, !OBot OT} : aug_join f ⊥ ≃ f.
-Proof. split=> ?; apply (mono f); by rewrite right_id. Qed.
+  (** [gfp] is monotone *)
+  Lemma gfp_mono `{!BigJoin OT, !Mono f, !Mono g} : f ⊑ g → gfp f ⊑ gfp g.
+  Proof. move=> fg. apply gfp_coind. etrans; [apply gfp_unfold|apply fg]. Qed.
+  Lemma gfp_cong `{!BigJoin OT, !Mono f, !Mono g} : f ≃ g → gfp f ≃ gfp g.
+  Proof. move=> [??]. split; by apply gfp_mono. Qed.
 
-(** Parameterized coinduction principle *)
-Lemma gfp_para_coind `{!BinJoin OT, !BigJoin OT, !Mono f} {o} :
-  o ⊑ gfp (aug_join f o) → o ⊑ gfp f.
-Proof.
-  move=> to. etrans; [apply to|]. apply gfp_coind.
-  etrans; [by apply gfp_unfold|]. apply (mono f). by apply bin_join_elim.
-Qed.
+  (** Augmenting a function with a join *)
+  Definition aug_join `{!BinJoin OT} f o o' := f (o' ⊔ o).
+  #[export] Instance aug_join_mono `{!BinJoin OT, !Mono f} : Mono2 (aug_join f).
+  Proof. move=> *?*. apply (mono f), mono2; by [apply _| |]. Qed.
+  Lemma aug_join_nest `{!BinJoin OT, !Mono f} {o o'} :
+    aug_join (aug_join f o) o' ≃ aug_join f (o ⊔ o').
+  Proof. split=> ?; rewrite comm; apply (mono f); by rewrite assoc. Qed.
+  Lemma aug_join_bot `{!BinJoin OT, !Mono f, !OBot OT} : aug_join f ⊥ ≃ f.
+  Proof. split=> ?; apply (mono f); by rewrite right_id. Qed.
+
+  (** Parameterized coinduction principle *)
+  Lemma gfp_para_coind `{!BinJoin OT, !BigJoin OT, !Mono f} {o} :
+    o ⊑ gfp (aug_join f o) → o ⊑ gfp f.
+  Proof.
+    move=> to. etrans; [apply to|]. apply gfp_coind.
+    etrans; [by apply gfp_unfold|]. apply (mono f). by apply bin_join_elim.
+  Qed.
+End gfp.
 
 Module OrderNotation.
   Export OeqvNotation.
