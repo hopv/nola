@@ -9,7 +9,11 @@ Implicit Type PROP : bi.
 (** ** Pre-order for [PROP] *)
 Canonical Structure biPro PROP := Proty PROP (⊢) _.
 
-(** ** [biPro] has the meet and join *)
+(** ** [biPro] has the top, bottom, meet and join *)
+#[export] Program Instance otop_bi {PROP} : Otop PROP := OTOP True%I _.
+Next Obligation. by iIntros. Qed.
+#[export] Program Instance obot_bi {PROP} : Obot PROP := OBOT False%I _.
+Next Obligation. by iIntros. Qed.
 #[export] Program Instance bin_meet_bi {PROP} : BinMeet PROP :=
   BIN_MEET (∧)%I _ _ _.
 Next Obligation. move=> *. by iIntros "[? _]". Qed.
