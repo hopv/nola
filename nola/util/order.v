@@ -9,9 +9,11 @@ Structure proty := Proty {
   #[canonical=no] ole_preorder :: PreOrder ole;
 }.
 Implicit Type (OT : proty) (A : Type).
+#[export] Typeclasses Transparent ole.
 
 (** ** [oeqv]: Equivalence w.r.t. the order *)
 Definition oeqv {OT} (o o' : OT) : Prop := o ⊑ o' ∧ o' ⊑ o.
+#[export] Typeclasses Transparent oeqv.
 
 Module OeqvNotation.
   Infix "≃" := oeqv (at level 70).
@@ -30,11 +32,11 @@ Proof.
   move=> ???[??][??]. by split; etrans.
 Qed.
 
-(** [⊑] is proper w.r.t. [≃] *)
-Local Lemma ole_proper' {OT} : Proper ((≃) ==> (≃) ==> (→)) (⊑@{OT}).
-Proof. move=> ??[??]??[??]?; etrans; by [|etrans]. Qed.
-#[export] Instance ole_proper {OT} : Proper ((≃) ==> (≃) ==> (↔)) (⊑@{OT}).
-Proof. move=> *?*. split; by apply ole_proper'. Qed.
+(** [⊑] is a subrelation of [≃] *)
+#[export] Instance oeqv_ole {OT} : subrelation (≃@{OT}) (⊑@{OT}).
+Proof. move=> ??[??]. done. Qed.
+#[export] Instance oeqv_flip_ole {OT} : subrelation (≃@{OT}) (flip (⊑@{OT})).
+Proof. move=> ??[??]. done. Qed.
 
 (** ** Canonical structures *)
 
@@ -73,24 +75,29 @@ Proof. done. Qed.
 (** ** Monotonicity *)
 
 Class Mono {OT OT'} (f : OT → OT') := mono :: Proper ((⊑) ==> (⊑)) f.
-Arguments mono {_ _} _ {_ _ _}.
-
 Class Anti {OT OT'} (f : OT → OT') := anti :: Proper ((⊑) --> (⊑)) f.
-Arguments anti {_ _} _ {_ _ _}.
-
 Class Mono2 {OT OT' OT''} (f : OT → OT' → OT'') :=
   mono2 :: Proper ((⊑) ==> (⊑) ==> (⊑)) f.
-Arguments mono2 {_ _ _} _ {_ _ _}.
-
 Class AntiMono {OT OT' OT''} (f : OT → OT' → OT'') :=
   antimono :: Proper ((⊑) --> (⊑) ==> (⊑)) f.
-Arguments antimono {_ _ _} _ {_ _ _}.
 
 (** Partial application *)
 #[export] Instance mono2_mono `{!@Mono2 OT OT' OT'' f} {o} : Mono (f o).
 Proof. move=> ???. by apply mono2. Qed.
 #[export] Instance antimono_mono `{!@AntiMono OT OT' OT'' f} {o} : Mono (f o).
 Proof. move=> ???. by apply antimono. Qed.
+
+(** Flip order *)
+#[export] Instance mono_flip `{!@Mono OT OT' f} : Proper ((⊑) --> flip (⊑)) f.
+Proof. solve_proper. Qed.
+#[export] Instance anti_flip `{!@Anti OT OT' f} : Proper ((⊑) ==> flip (⊑)) f.
+Proof. solve_proper. Qed.
+#[export] Instance mono2_flip `{!@Mono2 OT OT' OT'' f} :
+  Proper ((⊑) --> (⊑) --> flip (⊑)) f.
+Proof. solve_proper. Qed.
+#[export] Instance antimono_flip `{!@AntiMono OT OT' OT'' f} :
+  Proper ((⊑) ==> (⊑) --> flip (⊑)) f.
+Proof. solve_proper. Qed.
 
 (** Monotonicity implies properness *)
 #[export] Instance mono_proper `{!@Mono OT OT' f} : Proper ((≃) ==> (≃)) f.
@@ -103,6 +110,10 @@ Proof. move=> >[??]??[??]. split; by apply mono2. Qed.
 #[export] Instance antimono_proper `{!@AntiMono OT OT' OT'' f} :
   Proper ((≃) ==> (≃) ==> (≃)) f.
 Proof. move=> >[??]??[??]. split; by apply antimono. Qed.
+
+(** [⊑] is monotone *)
+#[export] Instance ole_mono {OT} : AntiMono (⊑@{OT}).
+Proof. move=> *?*?. etrans; by [|etrans]. Qed.
 
 (** ** Top and bottom *)
 
@@ -413,11 +424,11 @@ Section lfp.
   Lemma lfp_unfold_2 `{!Mono f} : f (lfp f) ⊑ lfp f.
   Proof.
     rewrite lfp_unseal. apply big_meet_intro=> ??. etrans; [|done].
-    by apply (mono f), (big_meet_elim id).
+    by apply mono, (big_meet_elim id).
   Qed.
   Lemma lfp_unfold_1 `{!Mono f} : lfp f ⊑ f (lfp f).
   Proof.
-    rewrite {1}lfp_unseal. apply (big_meet_elim id), (mono f), lfp_unfold_2.
+    rewrite {1}lfp_unseal. apply (big_meet_elim id), mono, lfp_unfold_2.
   Qed.
   Lemma lfp_unfold `{!Mono f} : lfp f ≃ f (lfp f).
   Proof. split; [apply lfp_unfold_1|apply lfp_unfold_2]. Qed.
@@ -435,19 +446,20 @@ Section lfp.
   (** Augmenting a function with a meet *)
   Definition aug_meet `{!BinMeet OT} (f : OT → OT) o o' := f (o' ⊓ o).
   #[export] Instance aug_meet_mono `{!BinMeet OT, !Mono f} : Mono2 (aug_meet f).
-  Proof. move=> *?*. apply (mono f), mono2; by [apply _| |]. Qed.
+  Proof. move=> *?*. by apply (mono (f:=f)), mono2. Qed.
   Lemma aug_meet_nest `{!BinMeet OT, !Mono f} {o o'} :
     aug_meet (aug_meet f o') o ≃ aug_meet f (o ⊓ o').
-  Proof. split=> ?; apply (mono f); by rewrite assoc. Qed.
+  Proof. split=> ?; apply (mono (f:=f)); by rewrite assoc. Qed.
   Lemma aug_meet_top `{!BinMeet OT, !Mono f, !OTop OT} : aug_meet f ⊤ ≃ f.
-  Proof. split=> ?; apply (mono f); by rewrite right_id. Qed.
+  Proof. split=> ?; apply (mono (f:=f)); by rewrite right_id. Qed.
 
   (** Parameterized induction principle *)
   Lemma lfp_para_ind `{!BinMeet OT, !BigMeet OT, !Mono f} {o} :
     lfp (aug_meet f o) ⊑ o → lfp f ⊑ o.
   Proof.
     move=> to. etrans; [|apply to]. apply lfp_ind.
-    etrans; [|by apply lfp_unfold]. apply (mono f). by apply bin_meet_intro.
+    etrans; [|by apply lfp_unfold]. apply (mono (f:=f)).
+    by apply bin_meet_intro.
   Qed.
 End lfp.
 
@@ -467,11 +479,11 @@ Section gfp.
   Lemma gfp_unfold_1 `{!Mono f} : gfp f ⊑ f (gfp f).
   Proof.
     rewrite gfp_unseal. apply big_join_elim=> ??. etrans; [done|].
-    by apply (mono f), (big_join_intro id).
+    by apply mono, (big_join_intro id).
   Qed.
   Lemma gfp_unfold_2 `{!Mono f} : f (gfp f) ⊑ gfp f.
   Proof.
-    rewrite {2}gfp_unseal. apply (big_join_intro id), (mono f), gfp_unfold_1.
+    rewrite {2}gfp_unseal. apply (big_join_intro id), mono, gfp_unfold_1.
   Qed.
   Lemma gfp_unfold `{!Mono f} : gfp f ≃ f (gfp f).
   Proof. split; [apply gfp_unfold_1|apply gfp_unfold_2]. Qed.
@@ -489,18 +501,18 @@ Section gfp.
   (** Augmenting a function with a join *)
   Definition aug_join `{!BinJoin OT} f o o' := f (o' ⊔ o).
   #[export] Instance aug_join_mono `{!BinJoin OT, !Mono f} : Mono2 (aug_join f).
-  Proof. move=> *?*. apply (mono f), mono2; by [apply _| |]. Qed.
+  Proof. move=> *?*. apply (mono (f:=f)), mono2; by [apply _| |]. Qed.
   Lemma aug_join_nest `{!BinJoin OT, !Mono f} {o o'} :
     aug_join (aug_join f o') o ≃ aug_join f (o ⊔ o').
-  Proof. split=> ?; apply (mono f); by rewrite assoc. Qed.
+  Proof. split=> ?; apply (mono (f:=f)); by rewrite assoc. Qed.
   Lemma aug_join_bot `{!BinJoin OT, !Mono f, !OBot OT} : aug_join f ⊥ ≃ f.
-  Proof. split=> ?; apply (mono f); by rewrite right_id. Qed.
+  Proof. split=> ?; apply (mono (f:=f)); by rewrite right_id. Qed.
 
   (** Parameterized coinduction principle *)
   Lemma gfp_para_coind `{!BinJoin OT, !BigJoin OT, !Mono f} {o} :
     o ⊑ gfp (aug_join f o) → o ⊑ gfp f.
   Proof.
     move=> to. etrans; [apply to|]. apply gfp_coind.
-    etrans; [by apply gfp_unfold|]. apply (mono f). by apply bin_join_elim.
+    etrans; [by apply gfp_unfold|]. apply (mono (f:=f)). by apply bin_join_elim.
   Qed.
 End gfp.
