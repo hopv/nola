@@ -51,8 +51,7 @@ Section psg.
   Proof. apply (mono_proper (f:=lfp)), aug_meet_top. Qed.
 
   (** Parameterized induction principle for [Psgoidp] *)
-  Lemma Psgoidp_ind {f ih ih'} {P : OT → Prop} :
-    Psgoidp f (ih ⊓ ih') ⊑ ih → Psgoidp f ih' ⊑ ih.
+  Lemma Psgoidp_ind {f ih'} ih : Psgoidp f (ih ⊓ ih') ⊑ ih → Psgoidp f ih' ⊑ ih.
   Proof.
     move=> ?. apply lfp_para_ind. etrans; [|done].
     apply (mono (f:=lfp)), aug_meet_nest.
