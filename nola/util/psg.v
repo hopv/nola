@@ -1,4 +1,3 @@
-
 (** * Pseudo-gfp *)
 
 From nola.util Require Export order.
