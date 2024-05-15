@@ -83,10 +83,14 @@ Class AntiMono {OT OT' OT''} (f : OT → OT' → OT'') :=
   antimono :: Proper ((⊑) --> (⊑) ==> (⊑)) f.
 
 (** Partial application *)
-#[export] Instance mono2_mono `{!@Mono2 OT OT' OT'' f} {o} : Mono (f o).
-Proof. move=> ???. by apply mono2. Qed.
-#[export] Instance antimono_mono `{!@AntiMono OT OT' OT'' f} {o} : Mono (f o).
-Proof. move=> ???. by apply antimono. Qed.
+#[export] Instance mono2_mono_1 `{!@Mono2 OT OT' OT'' f} : Mono f.
+Proof. unfold Mono. solve_proper. Qed.
+#[export] Instance mono2_mono_2 `{!@Mono2 OT OT' OT'' f} {o} : Mono (f o).
+Proof. unfold Mono. solve_proper. Qed.
+#[export] Instance antimono_mono_1 `{!@AntiMono OT OT' OT'' f} : Anti f.
+Proof. unfold Anti. solve_proper. Qed.
+#[export] Instance antimono_mono_2 `{!@AntiMono OT OT' OT'' f} {o} : Mono (f o).
+Proof. unfold Mono. solve_proper. Qed.
 
 (** Flip order *)
 #[export] Instance mono_flip `{!@Mono OT OT' f} : Proper ((⊑) --> flip (⊑)) f.
