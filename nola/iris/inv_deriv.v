@@ -2,7 +2,7 @@
 
 From nola.iris Require Export util deriv inv.
 From iris.proofmode Require Import proofmode.
-Import OfeNotation PintpNotation DerivNotation UpdwNotation.
+Import OfeNotation PintpNotation UpdwNotation.
 
 (** Notation *)
 Notation inv_wsatd δ := (inv_wsat ⟦⟧(δ)).
@@ -15,7 +15,7 @@ Section inv_deriv.
   Context `{!InvPreDeriv PRO JUD} {Σ : gFunctors}.
 
   (** [inv']: Relaxed invariant *)
-  Definition inv' δ N (P : PRO) : iProp Σ := □ ⸨ inv_jacsr N P ⸩(δ).
+  Definition inv' δ N (P : PRO) : iProp Σ := □ δ (inv_jacsr N P).
 
   (** [inv'] is persistent *)
   Fact inv'_persistent {δ N P} : Persistent (inv' δ N P).
@@ -54,7 +54,7 @@ Section inv_deriv.
   (** Turn [inv_tok] into [inv'] *)
   Lemma inv_tok_inv' {N P} : inv_tok N P ⊢ inv' δ N P.
   Proof.
-    iIntros "#i !>". iApply Deriv_intro. iIntros (? _ _).
+    iIntros "#i !>". iApply to_Deriv. iIntros (? _ _ _).
     rewrite inv_jacsr_intp. iIntros (??).
     by iApply (inv_tok_acc (intp:=⟦⟧(_)) with "i").
   Qed.
@@ -75,9 +75,8 @@ Section inv_deriv.
     □ (∀ δ, acsr (fupd ∅ ∅) ⟦ P ⟧(δ) ⟦ Q ⟧(δ)) -∗
       inv' δ N Q -∗ inv' δ N P.
   Proof.
-    iIntros "#QPQ #accQ !>". iApply Deriv_byintp. iIntros (? _ _) "#→ _".
-    iDestruct ("→" with "accQ") as "{accQ}accQ". rewrite !inv_jacsr_intp.
-    iIntros (? NE). iMod ("accQ" $! _ NE) as "[Q cl]".
+    iIntros "#QPQ #accQ !>". iApply to_Deriv. iIntros (? _ _ ->).
+    rewrite !inv_jacsr_intp. iIntros (? NE). iMod ("accQ" $! _ NE) as "[Q cl]".
     iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
     iMod ("QPQ" with "Q") as "($& PQ)". iMod "→E∖N" as "_". iIntros "!> P".
     iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].

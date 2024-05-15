@@ -2,7 +2,7 @@
 
 From nola.iris Require Export util deriv sinv.
 From iris.proofmode Require Import proofmode.
-Import OfeNotation PintpNotation DerivNotation UpdwNotation.
+Import OfeNotation PintpNotation UpdwNotation.
 
 (** Notation *)
 Notation sinv_wsatd δ := (sinv_wsat ⟦⟧(δ)).
@@ -15,8 +15,8 @@ Section sinv_deriv.
   Context `{!sinvGS PROP Σ, !SinvPreDeriv (PROP $o Σ) JUD}.
 
   (** [sinv]: Relaxed simple invariant *)
-  Definition sinv (δ : deriv JUD _) (P : PROP $o Σ) : iProp Σ :=
-    ∃ Q, □ ⸨ sinv_jacsr P Q ⸩(δ) ∗ sinv_tok Q.
+  Definition sinv (δ : JUD → _) (P : PROP $o Σ) : iProp Σ :=
+    ∃ Q, □ δ (sinv_jacsr P Q) ∗ sinv_tok Q.
 
   (** [sinv] is persistent *)
   Fact sinv_persistent {δ P} : Persistent (sinv δ P).
@@ -55,7 +55,7 @@ Section sinv_deriv.
   (** Turn [sinv_tok] into [sinv] *)
   Lemma sinv_tok_sinv {P} : sinv_tok P ⊢ sinv δ P.
   Proof.
-    iIntros "$ !>". iApply Deriv_intro. iIntros (? _ _).
+    iIntros "$ !>". iApply to_Deriv. iIntros (? _ _ _).
     rewrite sinv_jacsr_intp. iApply acsr_refl.
   Qed.
 
@@ -64,8 +64,7 @@ Section sinv_deriv.
   Proof. rewrite -sinv_tok_sinv. exact: sinv_tok_alloc. Qed.
 
   (** Convert [sinv] with [acsr] *)
-  Lemma sinv_acsr' {P Q} :
-    □ ⸨ sinv_jacsr P Q ⸩(δ) -∗ sinv δ Q -∗ sinv δ P.
+  Lemma sinv_acsr' {P Q} : □ δ (sinv_jacsr P Q) -∗ sinv δ Q -∗ sinv δ P.
   Proof.
     iIntros "#QPQ [%R[#RQR $]] !>". iApply (Deriv_map2 with "[] QPQ RQR").
     iIntros (? _ _). rewrite !sinv_jacsr_intp. iApply acsr_trans.
@@ -73,8 +72,8 @@ Section sinv_deriv.
   Lemma sinv_acsr {P Q} :
     □ (∀ δ, acsr sinv_mod ⟦ P ⟧(δ) ⟦ Q ⟧(δ)) -∗ sinv δ Q -∗ sinv δ P.
   Proof.
-    iIntros "#PQP". iApply sinv_acsr'. iModIntro. iApply Deriv_intro.
-    iIntros (? _ _). rewrite sinv_jacsr_intp. by iApply "PQP".
+    iIntros "#PQP". iApply sinv_acsr'. iModIntro. iApply to_Deriv.
+    iIntros (? _ _ _). rewrite sinv_jacsr_intp. by iApply "PQP".
   Qed.
 
   (** Split [sinv] over [∗] *)

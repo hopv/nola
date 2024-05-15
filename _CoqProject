@@ -9,6 +9,7 @@ nola/util/intp.v
 nola/util/order.v
 nola/util/psg.v
 
+nola/iris/order.v
 nola/iris/ofe.v
 nola/iris/list.v
 nola/iris/gmap.v

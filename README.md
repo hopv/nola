@@ -72,7 +72,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`list`](nola/iris/list.v) (On `list`),
     [`gmap`](nola/iris/gmap.v) (On `gmap`),
     [`plist`](nola/iris/plist.v) (On `plist`)
-  + [`deriv`](nola/iris/deriv.v) (Derivability)
+  + [`order`](nola/iris/order.v) (Order theory),
+    [`deriv`](nola/iris/deriv.v) (Derivability)
   + [`upd`](nola/iris/upd.v) (Update),
     [`wp`](nola/iris/wp.v) (Weakest precondition),
     [`util`](nola/iris/util.v) (Utilities)
