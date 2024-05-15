@@ -18,13 +18,13 @@ Section psg.
   Definition Psgoid f : OT → Prop := lfp (Psgoid_gen f).
 
   (** Pseudo-coinduction principle on [Psgoid] *)
-  Lemma to_Psgoid {f o} :
+  Lemma Psgoid_le {f o} :
     Psgoid f o → ([⊓] o' :: Psgoid f o' ∧ o ⊑ f o', f o') ⊑ o.
   Proof. apply (lfp_unfold (f:=Psgoid_gen f)). Qed.
-  Lemma eqv_Psgoid {f o} :
+  Lemma Psgoid_eqv {f o} :
     Psgoid f o → o ≃ [⊓] o' :: Psgoid f o' ∧ o ⊑ f o', f o'.
   Proof.
-    move=> ?. split; [|by apply to_Psgoid]. by apply big_meet_intro=> ?[??].
+    move=> ?. split; [|by apply Psgoid_le]. by apply big_meet_intro=> ?[??].
   Qed.
 
   (** ** [Psgoidp]: [Psgoid] parameterized with an inductive hypothesis [ih] *)
@@ -48,15 +48,15 @@ Section psg.
   Qed.
 
   (** Pseudo-coinduction principle on [Psgoidp] *)
-  Lemma to_Psgoidp {f ih o} :
+  Lemma Psgoidp_le {f ih o} :
     Psgoidp f ih o → ([⊓] o' :: Psgoidp f ih o' ∧ o ⊑ f o' ∧ ih o', f o') ⊑ o.
   Proof.
     move=> /(lfp_unfold_1 (f:=aug_meet _ ih)). etrans; [|done].
     by apply big_meet_mono; [|done]=>/= ?[[??]?].
   Qed.
-  Lemma eqv_Psgoidp {f ih o} :
+  Lemma Psgoidp_eqv {f ih o} :
     Psgoidp f ih o → o ≃ [⊓] o' :: Psgoidp f ih o' ∧ o ⊑ f o' ∧ ih o', f o'.
-  Proof. split; [|by apply to_Psgoidp]. by apply big_meet_intro=> ?[?[??]]. Qed.
+  Proof. split; [|by apply Psgoidp_le]. by apply big_meet_intro=> ?[?[??]]. Qed.
 
   (** ** [Psgoid' f]: Another definition of [Psgoid f], the closure under [f]
     and the meet *)
@@ -84,7 +84,7 @@ Section psg.
         apply (lfp_unfold (f:=Psgoid_gen f)).
       { unfold Psgoid_gen. etrans; [|done]. by apply big_meet_elim. }
       unfold Psgoid_gen. etrans; [|done]. apply big_meet_intro=> o' s.
-      move: (sub _ s)=> /to_Psgoid ?. etrans; [|done].
+      move: (sub _ s)=> /Psgoid_le ?. etrans; [|done].
       apply big_meet_mono; [|done]=> ?[??]. split; [done|]. etrans; [done|].
       etrans; [|done]. by apply (big_meet_elim id).
   Qed.

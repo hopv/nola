@@ -58,7 +58,7 @@ Section na_inv_deriv.
   (** Turn [na_inv_tok] into [na_inv'] *)
   Lemma na_inv_tok_na_inv' {p N P} : na_inv_tok p N P ⊢ na_inv' δ p N P.
   Proof.
-    iIntros "#i !>". iApply to_Deriv. iIntros (? _ _ _).
+    iIntros "#i !>". iApply Deriv_to. iIntros (? _ _ _).
     rewrite na_inv_jacsr_intp. iIntros (????) "F".
     by iApply (na_inv_tok_acc (intp:=⟦⟧(_)) with "F i").
   Qed.
@@ -81,7 +81,7 @@ Section na_inv_deriv.
     □ (∀ δ, acsr (fupd ∅ ∅) ⟦ P ⟧(δ) ⟦ Q ⟧(δ)) -∗
     na_inv' δ p N Q -∗ na_inv' δ p N P.
   Proof.
-    iIntros "#QPQ #accQ !>". iApply to_Deriv. iIntros (? _ _ ->).
+    iIntros "#QPQ #accQ !>". iApply Deriv_to. iIntros (? _ _ ->).
     rewrite !na_inv_jacsr_intp. iIntros (?? NE NF) "F".
     iMod ("accQ" $! _ _ NE NF with "F") as "($ & Q & cl)".
     iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].

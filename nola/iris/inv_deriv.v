@@ -54,7 +54,7 @@ Section inv_deriv.
   (** Turn [inv_tok] into [inv'] *)
   Lemma inv_tok_inv' {N P} : inv_tok N P ⊢ inv' δ N P.
   Proof.
-    iIntros "#i !>". iApply to_Deriv. iIntros (? _ _ _).
+    iIntros "#i !>". iApply Deriv_to. iIntros (? _ _ _).
     rewrite inv_jacsr_intp. iIntros (??).
     by iApply (inv_tok_acc (intp:=⟦⟧(_)) with "i").
   Qed.
@@ -75,7 +75,7 @@ Section inv_deriv.
     □ (∀ δ, acsr (fupd ∅ ∅) ⟦ P ⟧(δ) ⟦ Q ⟧(δ)) -∗
       inv' δ N Q -∗ inv' δ N P.
   Proof.
-    iIntros "#QPQ #accQ !>". iApply to_Deriv. iIntros (? _ _ ->).
+    iIntros "#QPQ #accQ !>". iApply Deriv_to. iIntros (? _ _ ->).
     rewrite !inv_jacsr_intp. iIntros (? NE). iMod ("accQ" $! _ NE) as "[Q cl]".
     iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
     iMod ("QPQ" with "Q") as "($& PQ)". iMod "→E∖N" as "_". iIntros "!> P".

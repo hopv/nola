@@ -55,7 +55,7 @@ Section sinv_deriv.
   (** Turn [sinv_tok] into [sinv] *)
   Lemma sinv_tok_sinv {P} : sinv_tok P ⊢ sinv δ P.
   Proof.
-    iIntros "$ !>". iApply to_Deriv. iIntros (? _ _ _).
+    iIntros "$ !>". iApply Deriv_to. iIntros (? _ _ _).
     rewrite sinv_jacsr_intp. iApply acsr_refl.
   Qed.
 
@@ -72,7 +72,7 @@ Section sinv_deriv.
   Lemma sinv_acsr {P Q} :
     □ (∀ δ, acsr sinv_mod ⟦ P ⟧(δ) ⟦ Q ⟧(δ)) -∗ sinv δ Q -∗ sinv δ P.
   Proof.
-    iIntros "#PQP". iApply sinv_acsr'. iModIntro. iApply to_Deriv.
+    iIntros "#PQP". iApply sinv_acsr'. iModIntro. iApply Deriv_to.
     iIntros (? _ _ _). rewrite sinv_jacsr_intp. by iApply "PQP".
   Qed.
 

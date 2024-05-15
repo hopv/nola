@@ -39,20 +39,20 @@ Section deriv.
   Proof. by apply Psgoidp_ind. Qed.
 
   (** Get the derivability [δ J] by the interpretaion *)
-  Lemma to_Deriv `{!Deriv ih δ} {J} :
+  Lemma Deriv_to `{!Deriv ih δ} {J} :
     ((* Take any good derivability predicate [δ'] *) ∀ δ', ⌜Deriv ih δ'⌝ →
       (* Can use the inductive hypothesis *) ⌜ih δ'⌝ →
       (* Can turn [δ] into the semantics at [δ'] *) ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ →
       (* The semantics at [δ'] *) ⟦ J ⟧(δ'))
     ⊢ (* The derivability at [δ] *) δ J.
   Proof.
-    iIntros "to". iApply (to_Psgoidp Deriv0). iIntros (?[?[??]]).
+    iIntros "to". iApply (Psgoidp_le Deriv0). iIntros (?[?[??]]).
     by iApply "to".
   Qed.
-  Lemma eqv_Deriv `{!Deriv ih δ} {J} :
+  Lemma Deriv_eqv `{!Deriv ih δ} {J} :
     δ J ⊣⊢ ∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ → ⟦ J ⟧(δ').
   Proof.
-    iSplit; iIntros "?"; iStopProof; [|by exact to_Deriv]. iIntros "?" (????).
+    iSplit; iIntros "?"; iStopProof; [|by exact Deriv_to]. iIntros "?" (????).
     by iStopProof.
   Qed.
 
@@ -61,14 +61,14 @@ Section deriv.
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ')) -∗
     δ J -∗ δ J'.
   Proof.
-    iIntros "∀ J". iApply to_Deriv. iIntros (??? to).
+    iIntros "∀ J". iApply Deriv_to. iIntros (??? to).
     iApply "∀"; by [| |iApply to].
   Qed.
   Lemma Deriv_map2 `{!Deriv ih δ} {J J' J''} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ') -∗ ⟦ J'' ⟧(δ')) -∗
     δ J -∗ δ J' -∗ δ J''.
   Proof.
-    iIntros "∀ J J'". iApply to_Deriv. iIntros (??? to).
+    iIntros "∀ J J'". iApply Deriv_to. iIntros (??? to).
     iApply ("∀" with "[//] [//] [J]"); by iApply to.
   Qed.
   Lemma Deriv_map3 `{!Deriv ih δ} {J J' J'' J'''} :
@@ -76,7 +76,7 @@ Section deriv.
       ⟦ J''' ⟧(δ')) -∗
     δ J -∗ δ J' -∗ δ J'' -∗ δ J'''.
   Proof.
-    iIntros "∀ J J' J''". iApply to_Deriv. iIntros (??? to).
+    iIntros "∀ J J' J''". iApply Deriv_to. iIntros (??? to).
     iApply ("∀" with "[//] [//] [J] [J']"); by iApply to.
   Qed.
   Lemma Deriv_mapl `{!Deriv ih δ} {Js J'} :
@@ -84,7 +84,7 @@ Section deriv.
       ([∗ list] J ∈ Js, ⟦ J ⟧(δ')) -∗ ⟦ J' ⟧(δ')) -∗
     ([∗ list] J ∈ Js, δ J) -∗ δ J'.
   Proof.
-    iIntros "∀ Js". iApply to_Deriv. iIntros (??? to). iApply "∀"; [done..|].
+    iIntros "∀ Js". iApply Deriv_to. iIntros (??? to). iApply "∀"; [done..|].
     iStopProof. elim: Js; [done|]=>/= ?? IH. iIntros "[J ?]".
     iSplitL "J"; by [iApply to|iApply IH].
   Qed.
