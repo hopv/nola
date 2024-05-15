@@ -140,7 +140,6 @@ End psg.
 (** ** [psg f] agrees with [gfp f] when [f] is monotone *)
 Section psg_gfp.
   Context `{!BigMeet OT, !BigJoin OT, !@Mono OT OT f}.
-  Implicit Type o : OT.
 
  (** [gfp f] lower-bounds [Psgoid f] *)
   Lemma Psgoid_gfp {o} : Psgoid f o → gfp f ⊑ o.
