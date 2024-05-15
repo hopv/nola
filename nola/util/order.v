@@ -122,48 +122,48 @@ Proof. move=> *?*?. etrans; by [|etrans]. Qed.
 
 (** ** Top and bottom *)
 
-Class OTop OT := O_TOP {
+Class Otop OT := OTOP {
   otop :: Top OT;
   otop_intro {o : OT} : o ⊑ ⊤;
 }.
-Arguments O_TOP {_} _ _.
+Arguments OTOP {_} _ _.
 
-Class OBot OT := O_BOT {
+Class Obot OT := OBOT {
   obot :: Bottom OT;
   obot_elim {o : OT} : ⊥ ⊑ o;
 }.
-Arguments O_BOT {_} _ _.
+Arguments OBOT {_} _ _.
 
 (** [nat] has the bottom *)
-#[export] Program Instance obot_nat : OBot nat := O_BOT 0 _.
+#[export] Program Instance obot_nat : Obot nat := OBOT 0 _.
 Next Obligation. move=> ?. rewrite nat_ole /bottom. lia. Qed.
 
 (** [Prop] has the top and bottom *)
-#[export] Program Instance otop_Prop : OTop Prop := O_TOP True _.
+#[export] Program Instance otop_Prop : Otop Prop := OTOP True _.
 Next Obligation. done. Qed.
-#[export] Program Instance obot_Prop : OBot Prop := O_BOT False _.
+#[export] Program Instance obot_Prop : Obot Prop := OBOT False _.
 Next Obligation. move=> ?[]. Qed.
 
 (** [()] has the top and bottom *)
-#[export] Program Instance otop_unit : OTop unit := O_TOP () _.
+#[export] Program Instance otop_unit : Otop unit := OTOP () _.
 Next Obligation. done. Qed.
-#[export] Program Instance obot_unit : OBot unit := O_BOT () _.
+#[export] Program Instance obot_unit : Obot unit := OBOT () _.
 Next Obligation. done. Qed.
 
 (** The top and bottom for a function *)
-#[export] Program Instance otop_fun `{!∀ a : A, OTop (OTF a)} :
-  OTop (∀ a, OTF a) := O_TOP (λ _, ⊤) _.
+#[export] Program Instance otop_fun `{!∀ a : A, Otop (OTF a)} :
+  Otop (∀ a, OTF a) := OTOP (λ _, ⊤) _.
 Next Obligation. move=> *?. exact otop_intro. Qed.
-#[export] Program Instance obot_fun `{!∀ a : A, OBot (OTF a)} :
-  OBot (∀ a, OTF a) := O_BOT (λ _, ⊥) _.
+#[export] Program Instance obot_fun `{!∀ a : A, Obot (OTF a)} :
+  Obot (∀ a, OTF a) := OBOT (λ _, ⊥) _.
 Next Obligation. move=> *?. exact obot_elim. Qed.
 
 (** [dual] flips the top and bottom *)
-#[export] Program Instance otop_dual `{!OBot OT} : OTop (dual OT) :=
-  O_TOP (Dual ⊥) _.
+#[export] Program Instance otop_dual `{!Obot OT} : Otop (dual OT) :=
+  OTOP (Dual ⊥) _.
 Next Obligation. move=> ???. exact obot_elim. Qed.
-#[export] Program Instance obot_dual `{!OTop OT} : OBot (dual OT) :=
-  O_BOT (Dual ⊤) _.
+#[export] Program Instance obot_dual `{!Otop OT} : Obot (dual OT) :=
+  OBOT (Dual ⊤) _.
 Next Obligation. move=> ???. exact otop_intro. Qed.
 
 (** ** Binary meet and join *)
@@ -231,22 +231,22 @@ Proof.
 Qed.
 
 (** The binary meet/join is unitary with [⊤]/[⊥] *)
-#[export] Instance bin_meet_top_l `{!BinMeet OT, !OTop OT} :
+#[export] Instance bin_meet_top_l `{!BinMeet OT, !Otop OT} :
   LeftId (≃) ⊤ (meet (A:=OT)) | 20.
 Proof.
   move=> ?. split; [exact bin_meet_elim_2|].
   apply bin_meet_intro; by [exact otop_intro|].
 Qed.
-#[export] Instance bin_meet_top_r `{!BinMeet OT, !OTop OT} :
+#[export] Instance bin_meet_top_r `{!BinMeet OT, !Otop OT} :
   RightId (≃) ⊤ (meet (A:=OT)) | 20.
 Proof. move=> ?. by rewrite comm left_id. Qed.
-#[export] Instance bin_join_bot_l `{!BinJoin OT, !OBot OT} :
+#[export] Instance bin_join_bot_l `{!BinJoin OT, !Obot OT} :
   LeftId (≃) ⊥ (join (A:=OT)) | 20.
 Proof.
   move=> ?. split; [|exact bin_join_intro_2].
   apply bin_join_elim; by [exact obot_elim|].
 Qed.
-#[export] Instance bin_join_bot_r `{!BinJoin OT, !OBot OT} :
+#[export] Instance bin_join_bot_r `{!BinJoin OT, !Obot OT} :
   RightId (≃) ⊥ (join (A:=OT)) | 20.
 Proof. move=> ?. by rewrite comm left_id. Qed.
 
@@ -456,7 +456,7 @@ Section lfp.
   Lemma aug_meet_nest `{!BinMeet OT, !Mono f} {o o'} :
     aug_meet (aug_meet f o') o ≃ aug_meet f (o ⊓ o').
   Proof. split=> ?; apply (mono (f:=f)); by rewrite assoc. Qed.
-  Lemma aug_meet_top `{!BinMeet OT, !Mono f, !OTop OT} : aug_meet f ⊤ ≃ f.
+  Lemma aug_meet_top `{!BinMeet OT, !Mono f, !Otop OT} : aug_meet f ⊤ ≃ f.
   Proof. split=> ?; apply (mono (f:=f)); by rewrite right_id. Qed.
 
   (** Parameterized induction principle *)
@@ -511,7 +511,7 @@ Section gfp.
   Lemma aug_join_nest `{!BinJoin OT, !Mono f} {o o'} :
     aug_join (aug_join f o') o ≃ aug_join f (o ⊔ o').
   Proof. split=> ?; apply (mono (f:=f)); by rewrite assoc. Qed.
-  Lemma aug_join_bot `{!BinJoin OT, !Mono f, !OBot OT} : aug_join f ⊥ ≃ f.
+  Lemma aug_join_bot `{!BinJoin OT, !Mono f, !Obot OT} : aug_join f ⊥ ≃ f.
   Proof. split=> ?; apply (mono (f:=f)); by rewrite right_id. Qed.
 
   (** Parameterized coinduction principle *)
