@@ -34,8 +34,7 @@ Section deriv.
   Proof. move=> to. move: Deriv0. by apply Psgoidp_mono. Qed.
 
   (** Parameterized induction principle for [Deriv] *)
-  Lemma Deriv_ind `{!Deriv ih' δ} ih :
-    Deriv (λ δ', ih δ' ∧ ih' δ') ⊑ ih → ih δ.
+  Lemma Deriv_ind `{!Deriv ih' δ} ih : Deriv (λ δ', ih δ' ∧ ih' δ') ⊑ ih → ih δ.
   Proof. by apply Psgoidp_ind. Qed.
 
   (** Get the derivability [δ J] by the interpretaion *)
@@ -43,8 +42,8 @@ Section deriv.
     ((* Take any good derivability predicate [δ'] *) ∀ δ', ⌜Deriv ih δ'⌝ →
       (* Can use the inductive hypothesis *) ⌜ih δ'⌝ →
       (* Can turn [δ] into the semantics at [δ'] *) ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ →
-      (* The semantics at [δ'] *) ⟦ J ⟧(δ'))
-    ⊢ (* The derivability at [δ] *) δ J.
+      (* The semantics at [δ'] *) ⟦ J ⟧(δ')) ⊢
+      (* The derivability at [δ] *) δ J.
   Proof.
     iIntros "to". iApply (Psgoidp_le Deriv0). iIntros (?[?[??]]).
     by iApply "to".
@@ -59,14 +58,14 @@ Section deriv.
   (** Map derivabilities via semantics *)
   Lemma Deriv_map `{!Deriv ih δ} {J J'} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ')) ⊢
-    δ J -∗ δ J'.
+      δ J -∗ δ J'.
   Proof.
     iIntros "∀ J". iApply Deriv_to. iIntros (??? to).
     iApply "∀"; by [| |iApply to].
   Qed.
   Lemma Deriv_map2 `{!Deriv ih δ} {J J' J''} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ') -∗ ⟦ J'' ⟧(δ')) ⊢
-    δ J -∗ δ J' -∗ δ J''.
+      δ J -∗ δ J' -∗ δ J''.
   Proof.
     iIntros "∀ J J'". iApply Deriv_to. iIntros (??? to).
     iApply ("∀" with "[//] [//] [J]"); by iApply to.
@@ -74,7 +73,7 @@ Section deriv.
   Lemma Deriv_map3 `{!Deriv ih δ} {J J' J'' J'''} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ') -∗ ⟦ J'' ⟧(δ') -∗
       ⟦ J''' ⟧(δ')) ⊢
-    δ J -∗ δ J' -∗ δ J'' -∗ δ J'''.
+      δ J -∗ δ J' -∗ δ J'' -∗ δ J'''.
   Proof.
     iIntros "∀ J J' J''". iApply Deriv_to. iIntros (??? to).
     iApply ("∀" with "[//] [//] [J] [J']"); by iApply to.
@@ -82,7 +81,7 @@ Section deriv.
   Lemma Deriv_mapl `{!Deriv ih δ} {Js J'} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
       ([∗ list] J ∈ Js, ⟦ J ⟧(δ')) -∗ ⟦ J' ⟧(δ')) ⊢
-    ([∗ list] J ∈ Js, δ J) -∗ δ J'.
+      ([∗ list] J ∈ Js, δ J) -∗ δ J'.
   Proof.
     iIntros "∀ Js". iApply Deriv_to. iIntros (??? to). iApply "∀"; [done..|].
     iStopProof. elim: Js; [done|]=>/= ?? IH. iIntros "[J ?]".
