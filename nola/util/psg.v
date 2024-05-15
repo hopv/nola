@@ -31,6 +31,10 @@ Section psg.
   Definition Psgoidp f (ih : OT → Prop) : OT → Prop :=
     lfp (aug_meet (Psgoid_gen f) ih).
 
+  (** [Psgoidp f] is monotone *)
+  #[export] Instance Psgoidp_mono {f} : Mono (Psgoidp f).
+  Proof. move=> *. by apply (mono (f:=lfp)), mono. Qed.
+
   (** Pseudo-coinduction principle on [Psgoidp] *)
   Lemma to_Psgoidp {f ih o} :
     Psgoidp f ih o → ([⊓] o' :: Psgoidp f ih o' ∧ o ⊑ f o' ∧ ih o', f o') ⊑ o.
