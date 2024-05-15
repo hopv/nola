@@ -32,7 +32,7 @@ Section psg.
   Definition Psgoidp f (ih : OT → Prop) : OT → Prop :=
     lfp (aug_meet (Psgoid_gen f) ih).
 
-  (** Pseudo-coinduction principle on [Psgoid] *)
+  (** Pseudo-coinduction principle on [Psgoidp] *)
   Lemma to_Psgoidp {f ih o} :
     Psgoidp f ih o → ([⊓] o' :: Psgoidp f ih o' ∧ o ⊑ f o' ∧ ih o', f o') ⊑ o.
   Proof.
