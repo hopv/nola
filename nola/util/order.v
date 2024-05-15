@@ -420,6 +420,13 @@ Section lfp.
   Definition lfp := lfp_aux.(unseal).
   Local Lemma lfp_unseal : lfp = lfp_def. Proof. exact: seal_eq. Qed.
 
+  (** [lfp] is monotone *)
+  #[export] Instance lfp_mono : Mono lfp.
+  Proof.
+    rewrite lfp_unseal=> ???. apply big_meet_mono; [|done]=>/= ??.
+    etrans; [|done]. done.
+  Qed.
+
   (** Unfold [lfp] *)
   Lemma lfp_unfold_2 `{!Mono f} : f (lfp f) ⊑ lfp f.
   Proof.
@@ -436,12 +443,6 @@ Section lfp.
   (** Basic induction principle *)
   Lemma lfp_ind `{!Mono f} {o} : f o ⊑ o → lfp f ⊑ o.
   Proof. rewrite lfp_unseal=> ?. by apply (big_meet_elim id). Qed.
-
-  (** [lfp] is monotone *)
-  Lemma lfp_mono `{!Mono f, !Mono g} : f ⊑ g → lfp f ⊑ lfp g.
-  Proof. move=> fg. apply lfp_ind. etrans; [apply fg|apply lfp_unfold]. Qed.
-  Lemma lfp_cong `{!Mono f, !Mono g} : f ≃ g → lfp f ≃ lfp g.
-  Proof. move=> [??]. split; by apply lfp_mono. Qed.
 
   (** Augmenting a function with a meet *)
   Definition aug_meet `{!BinMeet OT} (f : OT → OT) o o' := f (o' ⊓ o).
@@ -475,6 +476,12 @@ Section gfp.
   Definition gfp := gfp_aux.(unseal).
   Local Lemma gfp_unseal : gfp = gfp_def. Proof. exact: seal_eq. Qed.
 
+  (** [gfp] is monotone *)
+  #[export] Instance gfp_mono : Mono gfp.
+  Proof.
+    rewrite gfp_unseal=> ???. apply big_join_mono; [|done]=>/= ??. by etrans.
+  Qed.
+
   (** Unfold [gfp] *)
   Lemma gfp_unfold_1 `{!Mono f} : gfp f ⊑ f (gfp f).
   Proof.
@@ -491,12 +498,6 @@ Section gfp.
   (** Basic coinduction principle *)
   Lemma gfp_coind `{!Mono f} {o} : o ⊑ f o → o ⊑ gfp f.
   Proof. rewrite gfp_unseal=> ?. by apply (big_join_intro id). Qed.
-
-  (** [gfp] is monotone *)
-  Lemma gfp_mono `{!BigJoin OT, !Mono f, !Mono g} : f ⊑ g → gfp f ⊑ gfp g.
-  Proof. move=> fg. apply gfp_coind. etrans; [apply gfp_unfold|apply fg]. Qed.
-  Lemma gfp_cong `{!BigJoin OT, !Mono f, !Mono g} : f ≃ g → gfp f ≃ gfp g.
-  Proof. move=> [??]. split; by apply gfp_mono. Qed.
 
   (** Augmenting a function with a join *)
   Definition aug_join `{!BinJoin OT} f o o' := f (o' ⊔ o).
