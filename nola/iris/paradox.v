@@ -229,7 +229,7 @@ Module inv_landin. Section inv_landin.
   (** Landin's knot *)
   Definition landin_body l := l <- badfun l >> badcall l.
   Context (landin_body' : vexpr).
-  Hypothesis landin_body_subst : ∀{l}, landin_body l = landin_body' l.
+  Hypothesis landin_body_subst : ∀{l}, landin_body' l = landin_body l.
   Definition landin := ref (λ(), nop) >>= landin_body'.
 
   (** [badcall] terminates under [inv_bad] *)
@@ -252,7 +252,7 @@ Module inv_landin. Section inv_landin.
   Proof.
     iApply thoare_bind. iSplit; [iApply thoare_ref|]. iIntros (?).
     iApply thoare_exists. iIntros (l). iApply thoare_pure. iIntros (->).
-    rewrite -landin_body_subst. iApply (thoare_pre (bad l)).
+    rewrite landin_body_subst. iApply (thoare_pre (bad l)).
     { iIntros "$". iApply thoare_call. iApply thoare_nop. }
     iApply (thoare_pre (bad l ∗ True)); [by iIntros "$"|].
     iApply thoare_inv_bad_alloc. iApply thoare_seq.
