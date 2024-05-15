@@ -3,6 +3,7 @@
 From nola Require Export prelude.
 
 (** ** [proty]: Pre-ordered type *)
+#[projections(primitive)]
 Structure proty := Proty {
   proty_car :> Type;
   #[canonical=no] ole :: SqSubsetEq proty_car;
@@ -386,14 +387,14 @@ Next Obligation. move=>/= ???? all [?[??]]. exact: all. Qed.
   BigMeet (∀ a, OTF a) := BIG_MEET (λ _ S F a, [⊓] b :: S b, F b a) _ _.
 Next Obligation. move=> *?. exact: big_meet_elim. Qed.
 Next Obligation.
-  move=> ??????? all ?. apply big_meet_intro=> ??. by apply all.
+  move=> ??????? all o. apply big_meet_intro=> *. move: o. by apply all.
 Qed.
 
 #[export] Program Instance big_join_fun `{!∀ a : A, BigJoin (OTF a)} :
   BigJoin (∀ a, OTF a) := BIG_JOIN (λ _ S F a, [⊔] b :: S b, F b a) _ _.
 Next Obligation. move=> *?. by exact: big_join_intro. Qed.
 Next Obligation.
-  move=> ??????? all ?. apply big_join_elim=> ??. by apply all.
+  move=> ??????? all o. apply big_join_elim=> *. move: o. by apply all.
 Qed.
 
 (** The big meet and join flipped with [dual] *)
