@@ -21,7 +21,7 @@ Section psg.
   Lemma to_Psgoid {f o} :
     Psgoid f o → ([⊓] o' :: Psgoid f o' ∧ o ⊑ f o', f o') ⊑ o.
   Proof. apply (lfp_unfold (f:=Psgoid_gen f)). Qed.
-  Lemma Psgoid_eq {f o} :
+  Lemma eqv_Psgoid {f o} :
     Psgoid f o → o ≃ [⊓] o' :: Psgoid f o' ∧ o ⊑ f o', f o'.
   Proof.
     move=> ?. split; [|by apply to_Psgoid]. by apply big_meet_intro=> ?[??].
@@ -42,7 +42,7 @@ Section psg.
     move=> /(lfp_unfold_1 (f:=aug_meet _ ih)). etrans; [|done].
     by apply big_meet_mono; [|done]=>/= ?[[??]?].
   Qed.
-  Lemma Psgoidp_eq {f ih o} :
+  Lemma eqv_Psgoidp {f ih o} :
     Psgoidp f ih o → o ≃ [⊓] o' :: Psgoidp f ih o' ∧ o ⊑ f o' ∧ ih o', f o'.
   Proof. split; [|by apply to_Psgoidp]. by apply big_meet_intro=> ?[?[??]]. Qed.
 
