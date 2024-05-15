@@ -35,6 +35,18 @@ Section psg.
   #[export] Instance Psgoidp_mono {f} : Mono (Psgoidp f).
   Proof. move=> *. by apply (mono (f:=lfp)), mono. Qed.
 
+  (** [Psgoidp] on [⊤] is equivalent to [Psgoid] *)
+  Lemma Psgoidp_Psgoid {f} : Psgoidp f ⊤ ≃ Psgoid f.
+  Proof. apply (mono_proper (f:=lfp)), aug_meet_top. Qed.
+
+  (** Parameterized induction principle for [Psgoidp] *)
+  Lemma Psgoidp_ind {f ih'} ih o :
+    Psgoidp f ih' o → Psgoidp f (ih ⊓ ih') ⊑ ih → ih o.
+  Proof.
+    move=> PS ?. move: o PS. apply (lfp_para_ind (o:=ih)). etrans; [|done].
+    apply (mono (f:=lfp)), aug_meet_nest.
+  Qed.
+
   (** Pseudo-coinduction principle on [Psgoidp] *)
   Lemma to_Psgoidp {f ih o} :
     Psgoidp f ih o → ([⊓] o' :: Psgoidp f ih o' ∧ o ⊑ f o' ∧ ih o', f o') ⊑ o.
@@ -45,17 +57,6 @@ Section psg.
   Lemma eqv_Psgoidp {f ih o} :
     Psgoidp f ih o → o ≃ [⊓] o' :: Psgoidp f ih o' ∧ o ⊑ f o' ∧ ih o', f o'.
   Proof. split; [|by apply to_Psgoidp]. by apply big_meet_intro=> ?[?[??]]. Qed.
-
-  (** [Psgoidp] on [⊤] is equivalent to [Psgoid] *)
-  Lemma Psgoidp_Psgoid {f} : Psgoidp f ⊤ ≃ Psgoid f.
-  Proof. apply (mono_proper (f:=lfp)), aug_meet_top. Qed.
-
-  (** Parameterized induction principle for [Psgoidp] *)
-  Lemma Psgoidp_ind {f ih'} ih : Psgoidp f (ih ⊓ ih') ⊑ ih → Psgoidp f ih' ⊑ ih.
-  Proof.
-    move=> ?. apply lfp_para_ind. etrans; [|done].
-    apply (mono (f:=lfp)), aug_meet_nest.
-  Qed.
 
   (** ** [Psgoid' f]: Another definition of [Psgoid f], the closure under [f]
     and the meet *)
