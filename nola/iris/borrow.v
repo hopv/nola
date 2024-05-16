@@ -688,7 +688,8 @@ Section borrow.
     q.[α] -∗ depo_wsat M intp d α Bm Pm -∗
       q.[α] ∗ depo_wsat_in M intp d α Bm Pm.
   Proof.
-    iIntros "α [$|[† _]]"; [done|]. iDestruct (lft_alive_dead with "α †") as "[]".
+    iIntros "α [$|[† _]]"; [done|].
+    iDestruct (lft_alive_dead with "α †") as "[]".
   Qed.
 
   (** [bor_wsat] is non-expansive over the borrower state *)
@@ -782,7 +783,8 @@ Section borrow.
     { iApply "→Bm". iExists _. iSplit; [done|]. by iExists _, _. }
     iIntros "† big". iApply ("→Pm" with "†").
     iApply (big_sepM_insert_override_1 with "big"); [done|].
-    rewrite prod_equivI /=. iDestruct "eqv" as "[eqv _]". case B'=>/= ??. iRewrite "eqv". by iIntros.
+    rewrite prod_equivI /=. iDestruct "eqv" as "[eqv _]". case B'=>/= ??.
+    iRewrite "eqv". by iIntros.
   Qed.
 
   (** Lemma for [obor_tok_merge_subdiv] *)

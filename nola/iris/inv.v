@@ -129,7 +129,8 @@ Section inv.
     iSplit; [iExists _; by iSplit|]. iIntros "P W".
     iDestruct (sinv_tok_acc' with "iP W") as "[[[_ D']|i] →W]".
     { iDestruct (ownD_singleton_twice with "[$D $D']") as "[]". }
-    iMod ("cl" with "i") as "_". iModIntro. iSplit; [|done]. iApply "→W". iLeft. iFrame.
+    iMod ("cl" with "i") as "_". iModIntro. iSplit; [|done]. iApply "→W".
+    iLeft. iFrame.
   Qed.
 
   (** Access using [inv_tok] *)
@@ -145,7 +146,8 @@ Section inv.
     iDestruct ("→W" with "[$i]") as "$". iIntros "!> P W".
     iDestruct (sinv_tok_acc' with "iP W") as "[[[_ D']|i] →W]".
     { iDestruct (ownD_singleton_twice with "[$D $D']") as "[]". }
-    iMod ("cl" with "i") as "_". iModIntro. iSplit; [|done]. iApply "→W". iLeft. iFrame.
+    iMod ("cl" with "i") as "_". iModIntro. iSplit; [|done]. iApply "→W".
+    iLeft. iFrame.
   Qed.
 End inv.
 

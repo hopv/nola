@@ -480,8 +480,8 @@ Section lemmas.
   Local Lemma proph_resolve_dep_upd {ηl ξ xπ q} : proph_dep xπ ηl →
     ProphCar {[aprvar_id ξ := fitem (TY:=TY) 1]} ⋅
     ([^op list] η ∈ ηl, ProphCar {[aprvar_id η := fitem q]}) ~~>
-      ProphCar {[aprvar_id .{ξ := xπ}.(pli_var) := aitem .{ξ := xπ}.(pli_val)]} ⋅
-      ([^op list] η ∈ ηl, ProphCar {[aprvar_id η := fitem q]}).
+      ProphCar {[aprvar_id .{ξ := xπ}.(pli_var) := aitem .{ξ := xπ}.(pli_val)]}
+        ⋅ ([^op list] η ∈ ηl, ProphCar {[aprvar_id η := fitem q]}).
   Proof.
     move=> dep. apply cmra_total_update.
     setoid_rewrite <-cmra_discrete_valid_iff=> _ [M].
