@@ -1,6 +1,6 @@
 (** * Relaxed [sinv] with [deriv] *)
 
-From nola.bi Require Export util deriv.
+From nola.bi Require Export deriv.
 From nola.iris Require Export sinv.
 From iris.proofmode Require Import proofmode.
 Import iPropAppNotation PintpNotation UpdwNotation.

@@ -17,7 +17,6 @@ nola/bi/plist.v
 nola/bi/deriv.v
 nola/bi/upd.v
 nola/bi/wp.v
-nola/bi/util.v
 nola/bi/paradox.v
 
 nola/iris/sinv.v
