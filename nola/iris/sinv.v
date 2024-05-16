@@ -3,12 +3,12 @@
 From nola.bi Require Export ofe upd.
 From iris.algebra Require Import agree gmap_view.
 From iris.proofmode Require Import proofmode.
-Import OfeNotation.
+Import iPropAppNotation.
 
 Implicit Type PROP : oFunctor.
 
 Class sinvGpreS PROP Σ :=
-  sinvGpreS_in : inG Σ (gmap_viewR positive (agreeR (PROP $o Σ))).
+  sinvGpreS_in : inG Σ (gmap_viewR positive (agreeR (PROP $oi Σ))).
 Local Existing Instance sinvGpreS_in.
 Class sinvGS PROP Σ := SinvGS {
   sinvGS_pre : sinvGpreS PROP Σ;
@@ -23,7 +23,7 @@ Proof. solve_inG. Qed.
 
 Section sinv.
   Context `{!sinvGS PROP Σ}.
-  Implicit Type P : PROP $o Σ.
+  Implicit Type P : PROP $oi Σ.
 
   (** Simple invariant token *)
   Local Definition sinv_itok_def i P : iProp Σ :=
@@ -53,7 +53,7 @@ Notation sinv_wsat intp := (sinv_wsat' _ intp).
 
 Section sinv.
   Context `{!sinvGS PROP Σ}.
-  Implicit Type P : PROP $o Σ.
+  Implicit Type P : PROP $oi Σ.
   Implicit Type (i : positive) (I : gset positive).
 
   (** [sinv_itok] and [sinv_tok] are non-expansive *)
@@ -68,10 +68,10 @@ Section sinv.
   Proof. exact _. Qed.
   (** [sinv_itok] and [sinv_tok] are timeless
     if the underlying ofe is discrete *)
-  #[export] Instance sinv_itok_timeless `{!OfeDiscrete (PROP $o Σ)}
+  #[export] Instance sinv_itok_timeless `{!OfeDiscrete (PROP $oi Σ)}
     {i P} : Timeless (sinv_itok i P).
   Proof. rewrite sinv_itok_unseal. exact _. Qed.
-  Fact sinv_tok_timeless `{!OfeDiscrete (PROP $o Σ)} {P} :
+  Fact sinv_tok_timeless `{!OfeDiscrete (PROP $oi Σ)} {P} :
     Timeless (sinv_tok P).
   Proof. exact _. Qed.
 
@@ -87,7 +87,7 @@ Section sinv.
   (** [sinv_iwsat] is timeless if [intp] is always timeless
     and the underlying ofe is discrete *)
   #[export] Instance sinv_iwsat_timeless
-    `{!OfeDiscrete (PROP $o Σ), !∀ i P, Timeless (intp i P)} :
+    `{!OfeDiscrete (PROP $oi Σ), !∀ i P, Timeless (intp i P)} :
     Timeless (sinv_iwsat intp).
   Proof. rewrite sinv_iwsat_unseal. exact _. Qed.
 

@@ -3,7 +3,7 @@
 From nola.bi Require Export util deriv.
 From nola.iris Require Export sinv.
 From iris.proofmode Require Import proofmode.
-Import OfeNotation PintpNotation UpdwNotation.
+Import iPropAppNotation PintpNotation UpdwNotation.
 
 (** Notation *)
 Notation sinv_wsatd δ := (sinv_wsat ⟦⟧(δ)).
@@ -13,10 +13,10 @@ Class SinvPreDeriv PRO JUD := sinv_jacsr : PRO → PRO → JUD.
 Hint Mode SinvPreDeriv ! - : typeclass_instances.
 
 Section sinv_deriv.
-  Context `{!sinvGS PROP Σ, !SinvPreDeriv (PROP $o Σ) JUD}.
+  Context `{!sinvGS PROP Σ, !SinvPreDeriv (PROP $oi Σ) JUD}.
 
   (** [sinv]: Relaxed simple invariant *)
-  Definition sinv (δ : JUD → _) (P : PROP $o Σ) : iProp Σ :=
+  Definition sinv (δ : JUD → _) (P : PROP $oi Σ) : iProp Σ :=
     ∃ Q, □ δ (sinv_jacsr P Q) ∗ sinv_tok Q.
 
   (** [sinv] is persistent *)
@@ -25,9 +25,9 @@ Section sinv_deriv.
 End sinv_deriv.
 
 Section sinv_deriv.
-  Context `{!sinvGS PROP Σ, !SinvPreDeriv (PROP $o Σ) (JUDG : judg (iProp Σ)),
-    !Dintp JUDG (PROP $o Σ) (iProp Σ)}.
-  Implicit Type P Q : PROP $o Σ.
+  Context `{!sinvGS PROP Σ, !SinvPreDeriv (PROP $oi Σ) (JUDG : judg (iProp Σ)),
+    !Dintp JUDG (PROP $oi Σ) (iProp Σ)}.
+  Implicit Type P Q : PROP $oi Σ.
 
   (** Derivability data for [sinv] *)
   Class SinvDeriv := SINV_DERIV {

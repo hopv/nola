@@ -7,7 +7,7 @@ From nola.iris Require Export lft.
 From iris.algebra Require Import excl agree gmap auth.
 From iris.bi.lib Require Import cmra.
 From iris.proofmode Require Import proofmode.
-Import ProdNotation OfeNotation LftNotation UpdwNotation.
+Import ProdNotation iPropAppNotation LftNotation UpdwNotation.
 
 Implicit Type (PROP : oFunctor) (α : lft) (q : Qp).
 
@@ -70,15 +70,15 @@ Proof. rewrite borrowRF_unseal. exact _. Qed.
 (** Ghost state for the borrowing machinery *)
 Class borrowGpreS PROP Σ := BorrowGpreS {
   borrowGpreS_lft :: lftG Σ;
-  borrowGpreS_borrow : inG Σ (borrowRF PROP $r Σ);
+  borrowGpreS_borrow : inG Σ (borrowRF PROP $ri Σ);
 }.
 Local Existing Instance borrowGpreS_borrow.
 Class borrowGS PROP Σ := BorrowGS {
   borrowGS_pre :: borrowGpreS PROP Σ;
   borrow_name : gname;
 }.
-Local Instance inG_borrow_def `{!inG Σ (borrowRF PROP $r Σ)} :
-  inG Σ (borrowRF_def PROP $r Σ).
+Local Instance inG_borrow_def `{!inG Σ (borrowRF PROP $ri Σ)} :
+  inG Σ (borrowRF_def PROP $ri Σ).
 Proof. rewrite -borrowRF_unseal. exact _. Qed.
 Definition borrowΣ PROP `{!oFunctorContractive PROP} : gFunctors :=
   #[GFunctor lftR; GFunctor (borrowRF PROP)].
@@ -90,10 +90,10 @@ Proof. solve_inG. Qed.
 
 Section borrow.
   Context `{!borrowGS PROP Σ}.
-  Implicit Type (P Q : PROP $o Σ) (Pl Ql : list (PROP $o Σ))
-    (D : depo_stOF PROP $o Σ) (Dm : depo_stmOF PROP $o Σ)
-    (B : bor_stOF PROP $o Σ) (Bm : bor_stmOF PROP $o Σ)
-    (Pm : lendmOF PROP $o Σ).
+  Implicit Type (P Q : PROP $oi Σ) (Pl Ql : list (PROP $oi Σ))
+    (D : depo_stOF PROP $oi Σ) (Dm : depo_stmOF PROP $oi Σ)
+    (B : bor_stOF PROP $oi Σ) (Bm : bor_stmOF PROP $oi Σ)
+    (Pm : lendmOF PROP $oi Σ).
 
   (** General borrower token *)
   Local Definition bor_itok i j d α B : iProp Σ :=
@@ -147,16 +147,16 @@ Section borrow.
 
   (** Borrower and lender tokens are timeless
     if the underlying OFE is discrete *)
-  #[export] Instance borc_tok_timeless `{!OfeDiscrete (PROP $o Σ)} {α P} :
+  #[export] Instance borc_tok_timeless `{!OfeDiscrete (PROP $oi Σ)} {α P} :
     Timeless (borc_tok α P).
   Proof. rewrite borc_tok_unseal. exact _. Qed.
-  #[export] Instance bor_tok_timeless `{!OfeDiscrete (PROP $o Σ)} {α P} :
+  #[export] Instance bor_tok_timeless `{!OfeDiscrete (PROP $oi Σ)} {α P} :
     Timeless (bor_tok α P).
   Proof. rewrite bor_tok_unseal. exact _. Qed.
-  #[export] Instance obor_tok_timeless `{!OfeDiscrete (PROP $o Σ)} {α q P} :
+  #[export] Instance obor_tok_timeless `{!OfeDiscrete (PROP $oi Σ)} {α q P} :
     Timeless (obor_tok α q P).
   Proof. rewrite obor_tok_unseal. exact _. Qed.
-  #[export] Instance lend_tok_timeless `{!OfeDiscrete (PROP $o Σ)} {α P} :
+  #[export] Instance lend_tok_timeless `{!OfeDiscrete (PROP $oi Σ)} {α P} :
     Timeless (lend_tok α P).
   Proof. rewrite lend_tok_unseal. exact _. Qed.
 
@@ -200,7 +200,7 @@ Section borrow.
   Qed.
 
   (** Token for [depo_stm] *)
-  Local Definition depo_st_R D : depoRF PROP $r Σ :=
+  Local Definition depo_st_R D : depoRF PROP $ri Σ :=
     let '(e, Bm, Pm) := D in (to_agree e, Excl <$> Bm, Excl <$> Pm).
   Arguments depo_st_R _ /.
   Local Definition depo_stm_tok Dm : iProp Σ :=
@@ -209,7 +209,7 @@ Section borrow.
   (** Lemma for [to_bor_itoks] *)
   Local Lemma bor_insert_op {i j e B Bm} :
     Bm !! j = None →
-    (◯ {[i := (to_agree e, Excl <$> <[j:=B]> Bm, ε)]} : borrowRF_def _ $r _) ≡
+    (◯ {[i := (to_agree e, Excl <$> <[j:=B]> Bm, ε)]} : borrowRF_def _ $ri _) ≡
       ◯ {[i := (to_agree e, {[j:=Excl B]}, ε)]} ⋅
       ◯ {[i := (to_agree e, Excl <$> Bm, ε)]}.
   Proof.
@@ -232,7 +232,7 @@ Section borrow.
   (** Lemma for [to_lend_itoks] *)
   Local Lemma lend_insert_op {i k e P Pm} :
     Pm !! k = None →
-    (◯ {[i := (to_agree e, ε, Excl <$> <[k:=P]> Pm)]} : borrowRF_def _ $r _) ≡
+    (◯ {[i := (to_agree e, ε, Excl <$> <[k:=P]> Pm)]} : borrowRF_def _ $ri _) ≡
       ◯ {[i := (to_agree e, ε, {[k:=Excl P]})]} ⋅
       ◯ {[i := (to_agree e, ε, Excl <$> Pm)]}.
     move=> eq. rewrite fmap_insert -auth_frag_op. f_equiv. rewrite singleton_op.
@@ -265,8 +265,8 @@ Section borrow.
     { iModIntro. iDestruct (to_bor_itoks (d:=d) with "c") as "$".
       iApply (to_lend_itoks with "l"). }
     rewrite -auth_frag_op singleton_op fmap_insert.
-    have <- : ∀ x y, ((to_agree (d, α)', x, y) : depoRF _ $r _) ≡
-      ((to_agree (d, α)', x, ε) : depoRF _ $r _) ⋅ (to_agree (d, α)', ε, y).
+    have <- : ∀ x y, ((to_agree (d, α)', x, y) : depoRF _ $ri _) ≡
+      ((to_agree (d, α)', x, ε) : depoRF _ $ri _) ⋅ (to_agree (d, α)', ε, y).
     { split; [split|]=>/=; by
         [rewrite agree_idemp|rewrite left_id|rewrite right_id]. }
     apply auth_update_alloc, alloc_singleton_local_update.
@@ -378,10 +378,10 @@ End borrow.
 
 Section borrow.
   Context `{!borrowGS PROP Σ}.
-  Implicit Type (M : iProp Σ → iProp Σ) (intp : PROP $o Σ -d> iProp Σ)
-    (P Q : PROP $o Σ) (D : depo_stOF PROP $o Σ)
-    (Dm : depo_stmOF PROP $o Σ) (B : bor_stOF PROP $o Σ)
-    (Bm : bor_stmOF PROP $o Σ) (Pm : lendmOF PROP $o Σ).
+  Implicit Type (M : iProp Σ → iProp Σ) (intp : PROP $oi Σ -d> iProp Σ)
+    (P Q : PROP $oi Σ) (D : depo_stOF PROP $oi Σ)
+    (Dm : depo_stmOF PROP $oi Σ) (B : bor_stOF PROP $oi Σ)
+    (Bm : bor_stmOF PROP $oi Σ) (Pm : lendmOF PROP $oi Σ).
 
   (** World satisfaction for a borrower *)
   Local Definition bor_wsat intp d α B : iProp Σ :=
@@ -877,7 +877,7 @@ End borrow.
 Lemma borrow_wsat_alloc `{!borrowGpreS PROP Σ} :
   ⊢ |==> ∃ _ : borrowGS PROP Σ, ∀ M intp, borrow_wsat M intp.
 Proof.
-  iMod (own_alloc (● (∅ : gmap _ _) : borrowRF_def PROP $r Σ)) as (γ) "●";
+  iMod (own_alloc (● (∅ : gmap _ _) : borrowRF_def PROP $ri Σ)) as (γ) "●";
     [by apply auth_auth_valid|].
   iModIntro. iExists (BorrowGS _ _ _ γ). iIntros (??).
   rewrite borrow_wsat_unseal. iExists ∅. unfold borrow_wsat'. by iFrame.

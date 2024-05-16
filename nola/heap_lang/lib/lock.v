@@ -4,7 +4,7 @@ From nola.heap_lang Require Import notation proofmode.
 From nola.util Require Import prod.
 From nola.bi Require Import ofe.
 From nola.iris Require Export inv.
-Import ProdNotation OfeNotation UpdwNotation WpwNotation.
+Import ProdNotation iPropAppNotation UpdwNotation WpwNotation.
 
 (** ** Camera for the lock machinery *)
 
@@ -22,7 +22,7 @@ Proof. solve_inG. Qed.
 (** **  lock *)
 Section lock.
   Context `{!heapGS_gen hlc Σ, !lockGS PROP Σ}.
-  Implicit Types (P : PROP $o Σ) (b : bool) (l : loc) (n : nat).
+  Implicit Types (P : PROP $oi Σ) (b : bool) (l : loc) (n : nat).
 
   (** [lock_tok]: Lock token *)
   Definition lock_tok l P : iProp Σ := inv_tok nroot (l, P).
@@ -31,20 +31,20 @@ Section lock.
   Fact lock_tok_persistent {l P} : Persistent (lock_tok l P).
   Proof. exact _. Qed.
   (** [lock_tok] is timeless if the underlying OFE is discrete *)
-  Fact lock_tok_timeless `{!OfeDiscrete (PROP $o Σ)} {l P} :
+  Fact lock_tok_timeless `{!OfeDiscrete (PROP $oi Σ)} {l P} :
     Timeless (lock_tok l P).
   Proof. exact _. Qed.
 
   (** Interpretation for a lock *)
-  Local Definition lock_intp (intp : PROP $o Σ -d> iProp Σ)
-    : lock_prop PROP $o Σ -d> iProp Σ := λ '(l, P),
+  Local Definition lock_intp (intp : PROP $oi Σ -d> iProp Σ)
+    : lock_prop PROP $oi Σ -d> iProp Σ := λ '(l, P),
     (∃ b, l ↦ #b ∗ if b then True else intp P)%I.
   #[export] Instance lock_intp_ne `{!NonExpansive intp} :
     NonExpansive (lock_intp intp).
   Proof. move=> ?[??][??][/=??]. solve_proper. Qed.
 
   (** World satisfaction for the lock machinery *)
-  Local Definition lock_wsat_def (intp : PROP $o Σ -d> iProp Σ) : iProp Σ :=
+  Local Definition lock_wsat_def (intp : PROP $oi Σ -d> iProp Σ) : iProp Σ :=
     inv_wsat (lock_intp intp).
   Local Lemma lock_wsat_aux : seal lock_wsat_def. Proof. by eexists. Qed.
   Definition lock_wsat := lock_wsat_aux.(unseal).

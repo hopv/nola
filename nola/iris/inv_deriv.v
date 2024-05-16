@@ -3,7 +3,7 @@
 From nola.bi Require Export util deriv.
 From nola.iris Require Export inv.
 From iris.proofmode Require Import proofmode.
-Import OfeNotation PintpNotation UpdwNotation.
+Import iPropAppNotation PintpNotation UpdwNotation.
 
 (** Notation *)
 Notation inv_wsatd δ := (inv_wsat ⟦⟧(δ)).
@@ -25,15 +25,15 @@ End inv_deriv.
 
 Section inv_deriv.
   Context `{!inv'GS PROP Σ, !invGS_gen hlc Σ}.
-  Implicit Type P Q PQ : PROP $o Σ.
+  Implicit Type P Q PQ : PROP $oi Σ.
 
   (** Accessor *)
   Definition inv_acsr intp N Pi : iProp Σ :=
     ∀ E, ⌜↑N ⊆ E⌝ → |=[inv_wsat intp]{E,E∖↑N}=>
       Pi ∗ (Pi =[inv_wsat intp]{E∖↑N,E}=∗ True).
 
-  Context `{!InvPreDeriv (PROP $o Σ) (JUDG : judg (iProp Σ)),
-    !Dintp JUDG (PROP $o Σ) (iProp Σ)}.
+  Context `{!InvPreDeriv (PROP $oi Σ) (JUDG : judg (iProp Σ)),
+    !Dintp JUDG (PROP $oi Σ) (iProp Σ)}.
 
   (** Derivability data for [inv] *)
   Class InvDeriv :=

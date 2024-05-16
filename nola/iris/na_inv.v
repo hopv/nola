@@ -5,7 +5,7 @@ From nola.iris Require Export inv.
 From iris.base_logic.lib Require Export na_invariants.
 From iris.algebra Require Import gset coPset.
 From iris.proofmode Require Import proofmode.
-Import ProdNotation OfeNotation UpdwNotation.
+Import ProdNotation iPropAppNotation UpdwNotation.
 
 Implicit Type (PROP : oFunctor) (p : na_inv_pool_name) (i : positive).
 
@@ -66,7 +66,7 @@ Section na_inv.
     P ∗ na_lock p i ∨ na_own p {[i]}.
 
   (** Token for a non-atomic invariant *)
-  Local Definition na_inv_tok_def p N (P : PROP $o Σ) : iProp Σ :=
+  Local Definition na_inv_tok_def p N (P : PROP $oi Σ) : iProp Σ :=
     ∃ i, ⌜i ∈ (↑N:coPset)⌝ ∗ inv_tok N ((p, i)', P).
   Local Lemma na_inv_tok_aux : seal na_inv_tok_def. Proof. by eexists. Qed.
   Definition na_inv_tok := na_inv_tok_aux.(unseal).
@@ -83,13 +83,13 @@ Section na_inv.
     Persistent (na_inv_tok p N P).
   Proof. rewrite na_inv_tok_unseal. exact _. Qed.
   (** [na_inv_tok] is timeless if the underlying ofe is discrete *)
-  #[export] Instance na_inv_tok_timeless `{!OfeDiscrete (PROP $o Σ)} {p N P} :
+  #[export] Instance na_inv_tok_timeless `{!OfeDiscrete (PROP $oi Σ)} {p N P} :
     Timeless (na_inv_tok p N P).
   Proof. rewrite na_inv_tok_unseal. exact _. Qed.
 
   (** Interpretation *)
-  Local Definition na_inv_intp (intp : PROP $o Σ -d> iProp Σ)
-    : na_inv_prop PROP $o Σ -d> iProp Σ :=
+  Local Definition na_inv_intp (intp : PROP $oi Σ -d> iProp Σ)
+    : na_inv_prop PROP $oi Σ -d> iProp Σ :=
     λ '((p, i)', P), na_body p i (intp P).
 
   (** [na_inv_intp intp] is non-expansive if [intp] is *)
@@ -98,7 +98,7 @@ Section na_inv.
   Proof. move=> ?[??][??][/=??]. solve_proper. Qed.
 
   (** World satisfaction for non-atomic invariants *)
-  Local Definition na_inv_wsat_def (intp : PROP $o Σ -d> iProp Σ) : iProp Σ :=
+  Local Definition na_inv_wsat_def (intp : PROP $oi Σ -d> iProp Σ) : iProp Σ :=
     inv_wsat (na_inv_intp intp).
   Local Lemma na_inv_wsat_aux : seal na_inv_wsat_def. Proof. by eexists. Qed.
   Definition na_inv_wsat := na_inv_wsat_aux.(unseal).

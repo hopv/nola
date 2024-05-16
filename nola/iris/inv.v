@@ -5,7 +5,7 @@ From nola.iris Require Export sinv.
 From iris.base_logic.lib Require Export wsat invariants.
 From iris.algebra Require Import gset.
 From iris.proofmode Require Import proofmode.
-Import OfeNotation UpdwNotation.
+Import iPropAppNotation UpdwNotation.
 
 Implicit Type (PROP : oFunctor) (i : positive) (N : namespace).
 
@@ -20,7 +20,7 @@ Proof. solve_inG. Qed.
 
 Section inv.
   Context `{!inv'GS PROP Σ, !invGS_gen hlc Σ}.
-  Implicit Type P : PROP $o Σ.
+  Implicit Type P : PROP $oi Σ.
 
   (** [inv_tok]: Invariant token *)
   Local Definition inv_tok_def N P : iProp Σ :=
@@ -37,12 +37,12 @@ Section inv.
   #[export] Instance inv_tok_persistent {N P} : Persistent (inv_tok N P).
   Proof. rewrite inv_tok_unseal. exact _. Qed.
   (** [inv_tok] is timeless if the underlying ofe is discrete *)
-  #[export] Instance inv_tok_timeless `{!OfeDiscrete (PROP $o Σ)} {N P} :
+  #[export] Instance inv_tok_timeless `{!OfeDiscrete (PROP $oi Σ)} {N P} :
     Timeless (inv_tok N P).
   Proof. rewrite inv_tok_unseal. exact _. Qed.
 
   (** Interpretation *)
-  Local Definition inv_intp (intp : PROP $o Σ → iProp Σ) i P : iProp Σ :=
+  Local Definition inv_intp (intp : PROP $oi Σ → iProp Σ) i P : iProp Σ :=
     intp P ∗ ownD {[i]} ∨ ownE {[i]}.
 
   (** [inv_intp intp] is non-expansive when [intp] is *)
@@ -51,7 +51,7 @@ Section inv.
   Proof. solve_proper. Qed.
 
   (** World satisfaction *)
-  Local Definition inv_wsat_def (intp : PROP $o Σ -d> iProp Σ) : iProp Σ :=
+  Local Definition inv_wsat_def (intp : PROP $oi Σ -d> iProp Σ) : iProp Σ :=
     sinv_iwsat (inv_intp intp).
   Local Definition inv_wsat_aux : seal inv_wsat_def. Proof. by eexists. Qed.
   Definition inv_wsat := inv_wsat_aux.(unseal).
