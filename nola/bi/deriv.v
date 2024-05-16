@@ -1,7 +1,7 @@
 (** * Derivability *)
 
 From nola.util Require Export intp psg.
-From nola.iris Require Export order.
+From nola.bi Require Export order.
 From iris.bi Require Import bi.
 From iris.proofmode Require Import proofmode.
 Import PintpNotation.

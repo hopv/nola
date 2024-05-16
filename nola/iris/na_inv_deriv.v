@@ -1,6 +1,7 @@
 (** * Relaxed [na_inv] with [der] *)
 
-From nola.iris Require Export util deriv na_inv.
+From nola.bi Require Export util deriv.
+From nola.iris Require Export na_inv.
 From iris.proofmode Require Import proofmode.
 Import OfeNotation PintpNotation UpdwNotation.
 

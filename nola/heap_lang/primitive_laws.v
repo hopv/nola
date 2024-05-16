@@ -6,7 +6,7 @@ From iris.base_logic.lib Require Import mono_nat.
 From iris.base_logic.lib Require Export gen_heap proph_map gen_inv_heap.
 From iris.program_logic Require Export weakestpre total_weakestpre.
 From iris.program_logic Require Import ectx_lifting total_ectx_lifting.
-From nola.iris Require Export wp.
+From nola.bi Require Export wp.
 From nola.heap_lang Require Export class_instances definitions.
 From nola.heap_lang Require Import tactics notation.
 From iris.prelude Require Import options.

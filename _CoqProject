@@ -9,15 +9,17 @@ nola/util/intp.v
 nola/util/order.v
 nola/util/psg.v
 
-nola/iris/order.v
-nola/iris/ofe.v
-nola/iris/list.v
-nola/iris/gmap.v
-nola/iris/plist.v
-nola/iris/deriv.v
-nola/iris/upd.v
-nola/iris/wp.v
-nola/iris/util.v
+nola/bi/order.v
+nola/bi/ofe.v
+nola/bi/list.v
+nola/bi/gmap.v
+nola/bi/plist.v
+nola/bi/deriv.v
+nola/bi/upd.v
+nola/bi/wp.v
+nola/bi/util.v
+nola/bi/paradox.v
+
 nola/iris/sinv.v
 nola/iris/sinv_deriv.v
 nola/iris/inv.v
@@ -29,7 +31,6 @@ nola/iris/borrow.v
 nola/iris/proph.v
 nola/iris/proph_ag.v
 nola/iris/pborrow.v
-nola/iris/paradox.v
 
 nola/heap_lang/locations.v
 nola/heap_lang/lang.v

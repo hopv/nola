@@ -3,7 +3,7 @@
 From iris.proofmode Require Import proofmode.
 From iris.base_logic.lib Require Import mono_nat.
 From iris.base_logic.lib Require Export gen_heap proph_map gen_inv_heap.
-From nola.iris Require Export wp.
+From nola.bi Require Export wp.
 From nola.heap_lang Require Export class_instances.
 Import UpdwNotation WpwNotation.
 

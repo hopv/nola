@@ -67,16 +67,18 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`intp`](nola/util/intp.v) (Interpretation)
   + [`order`](nola/util/order.v) (Order theory),
     [`psg`](nola/util/psg.v) (Pseudo-gfp)
-- [`iris/`](nola/iris) : Iris libraries
-  + [`ofe`](nola/iris/ofe.v) (OFEs)
-  + [`list`](nola/iris/list.v) (On `list`),
-    [`gmap`](nola/iris/gmap.v) (On `gmap`),
-    [`plist`](nola/iris/plist.v) (On `plist`)
-  + [`order`](nola/iris/order.v) (Order theory),
-    [`deriv`](nola/iris/deriv.v) (Derivability)
-  + [`upd`](nola/iris/upd.v) (Update),
-    [`wp`](nola/iris/wp.v) (Weakest precondition),
-    [`util`](nola/iris/util.v) (Utilities)
+- [`bi/`](nola/bi) : Libraries for bunched implication logic
+  + [`ofe`](nola/bi/ofe.v) (OFEs)
+  + [`list`](nola/bi/list.v) (On `list`),
+    [`gmap`](nola/bi/gmap.v) (On `gmap`),
+    [`plist`](nola/bi/plist.v) (On `plist`)
+  + [`order`](nola/bi/order.v) (Order theory),
+    [`deriv`](nola/bi/deriv.v) (Derivability)
+  + [`upd`](nola/bi/upd.v) (Update),
+    [`wp`](nola/bi/wp.v) (Weakest precondition),
+    [`util`](nola/bi/util.v) (Utilities)
+  + [`paradox`](nola/bi/paradox.v) (Paradoxes)
+- [`iris/`](nola/iris) : Libraries for Iris base logic
   + [`sinv`](nola/iris/sinv.v) (Simple invariant),
     [`sinv_deriv`](nola/iris/sinv_deriv.v) (Simple invariant relaxed with
       derivability)
@@ -90,7 +92,6 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`proph`](nola/iris/proph.v) (Prophecy),
     [`proph_ag`](nola/iris/proph_ag.v) (Prophetic agreement),
     [`pborrow`](nola/iris/pborrow.v) (Prophetic borrowing)
-  + [`paradox`](nola/iris/paradox.v) (Paradoxes)
 - [`heap_lang/`](nola/heap_lang/) : Variant of Iris HeapLang,
     with `Ndnat` (terminating infinite non-determinism) added
   + [`lib/`](nola/heap_lang/lib) : Libraries

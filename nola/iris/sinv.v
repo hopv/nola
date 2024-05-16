@@ -1,6 +1,6 @@
 (** * Simple invariant *)
 
-From nola.iris Require Export ofe upd.
+From nola.bi Require Export ofe upd.
 From iris.algebra Require Import agree gmap_view.
 From iris.proofmode Require Import proofmode.
 Import OfeNotation.

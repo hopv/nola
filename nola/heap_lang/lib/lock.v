@@ -2,7 +2,8 @@
 
 From nola.heap_lang Require Import notation proofmode.
 From nola.util Require Import prod.
-From nola.iris Require Import ofe inv.
+From nola.bi Require Import ofe.
+From nola.iris Require Export inv.
 Import ProdNotation OfeNotation UpdwNotation WpwNotation.
 
 (** ** Camera for the lock machinery *)

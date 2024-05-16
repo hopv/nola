@@ -1,7 +1,8 @@
 (** * Example of instantiating Nola with [▶ ∙] *)
 
 From nola.heap_lang Require Import notation proofmode.
-From nola.iris Require Import ofe inv.
+From nola.bi Require Import ofe.
+From nola.iris Require Import inv.
 Import WpwNotation.
 
 (** ** Target function: Linked list mutation *)

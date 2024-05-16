@@ -1,6 +1,7 @@
 (** * Prophetic borrowing *)
 
-From nola.iris Require Export plist borrow proph_ag.
+From nola.bi Require Export plist.
+From nola.iris Require Export borrow proph_ag.
 From iris.proofmode Require Import proofmode.
 Import ProdNotation PlistNotation OfeNotation LftNotation ProphNotation
   UpdwNotation.

@@ -1,8 +1,9 @@
 (** * Borrowing machinery *)
 
 From nola.util Require Export prod.
-From nola.iris Require Import gmap.
-From nola.iris Require Export ofe lft upd.
+From nola.bi Require Import gmap.
+From nola.bi Require Export ofe upd.
+From nola.iris Require Export lft.
 From iris.algebra Require Import excl agree gmap auth.
 From iris.bi.lib Require Import cmra.
 From iris.proofmode Require Import proofmode.
