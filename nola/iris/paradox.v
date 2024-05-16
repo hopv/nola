@@ -207,8 +207,7 @@ Module inv_landin. Section inv_landin.
     [[{ P }]] e @ E [[{ Ψ }]] ⊢ [[{ P }]] call (λ(), e) @ E [[{ Ψ }]].
 
   (** Termination of [call] *)
-  Definition termin_call f : PROP :=
-    [[{ True }]] call f @ ⊤ [[{ λ _, True }]].
+  Definition termin_call f : PROP := [[{ True }]] call f @ ⊤ [[{ λ _, True }]].
   (** Bad proposition with an unguarded total Hoare triple *)
   Definition bad l : PROP := ∃ f, l ↦ f ∗ termin_call f.
 
@@ -263,7 +262,6 @@ Module inv_landin. Section inv_landin.
     iApply thoare_exists. iIntros (g).
     iApply thoare_post; [|iApply thoare_frame; by iApply thoare_store].
     iIntros (?) "[$ #i]". iSplit; [|done]. iApply thoare_call.
-    iApply (thoare_apply (inv_bad l)). iSplit; [done|].
-    iApply thoare_badcall.
+    iApply (thoare_apply (inv_bad l)). iSplit; [done|]. iApply thoare_badcall.
   Qed.
 End inv_landin. End inv_landin.
