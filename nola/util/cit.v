@@ -2,6 +2,7 @@
 
 From nola Require Export prelude.
 From nola.util Require Import rel order.
+From iris.algebra Require Export ofe.
 Import EqNotations OeqvNotation.
 
 Implicit Type S CIT : Type.
@@ -209,3 +210,140 @@ Section cit_forall2.
     move=> ???. apply cit_forall2I_forall=> ?. by apply cit_forall2_unfold.
   Qed.
 End cit_forall2.
+
+(** ** OFE on [cit_forall2] *)
+
+Section citO.
+  Context {S} {I C : S → Type} {D : S → ofe}.
+
+  (** Distance for [cit] *)
+  Local Instance cit_dist : Dist (cit S I C D) :=
+    λ n, cit_forall2 (λ _, dist n).
+
+  (** Equivalence for [cit]
+
+    Defined using [dist] to avoid UIP *)
+  Local Instance cit_equiv : Equiv (cit S I C D) :=
+    λ t t', ∀ n, cit_dist n t t'.
+
+  (** OFE mixin on [cit] *)
+  Lemma cit_ofe_mixin : OfeMixin (cit S I C D).
+  Proof.
+   split; [done|exact _|]=> ???? F ?. move: F. apply cit_forall2_mono.
+   move=> ????. by eapply dist_lt.
+  Qed.
+  (** OFE on [cit] *)
+  Canonical citO : ofe := Ofe (cit S I C D) cit_ofe_mixin.
+
+  (** OFE on [citI] *)
+  Local Instance citI_dist : Dist (citI S I C D (cit S I C D)) :=
+    λ n t t', of_citI t ≡{n}≡ of_citI t'.
+  Local Instance citI_equiv : Equiv (citI S I C D (cit S I C D)) :=
+    λ t t', of_citI t ≡ of_citI t'.
+  Lemma citI_ofe_mixin : OfeMixin (citI S I C D (cit S I C D)).
+  Proof. by apply (iso_ofe_mixin of_citI). Qed.
+  (** OFE on [citI] *)
+  Canonical citIO : ofe := Ofe (citI S I C D (cit S I C D)) citI_ofe_mixin.
+End citO.
+Arguments citO : clear implicits. Arguments citIO : clear implicits.
+
+Section citO.
+  Context {S} {I C : S → Type} {D : S → ofe}.
+  Implicit Type t : cit S I C D.
+
+  (** Rewrite [dist] and [equiv] on [cit] and [citI] *)
+  Lemma cit_dist_eq {n t t'} :
+    (t ≡{n}≡ t') = cit_forall2 (λ _, dist n) t t'.
+  Proof. done. Qed.
+  Lemma cit_equiv_eq {t t'} :
+    (t ≡ t') = ∀ n, cit_forall2 (λ _, dist n) t t'.
+  Proof. done. Qed.
+  Lemma citI_dist_eq {n} {t t' : cit' S I C D} :
+    (t ≡{n}≡ t') = cit_forall2 (λ _, dist n) (of_citI t) (of_citI t').
+  Proof. done. Qed.
+  Lemma citI_equiv_eq {t t' : cit' S I C D} :
+    (t ≡ t') = ∀ n, cit_forall2 (λ _, dist n) (of_citI t) (of_citI t').
+  Proof. done. Qed.
+
+  (** Alternative equivalence for [cit], directly defined *)
+  Definition cit_equiv_alt : cit S I C D → cit S I C D → Prop :=
+    cit_forall2 (λ _, equiv).
+
+  (** [cit_equiv_alt] is an equivalence relation *)
+  Fact cit_equiv_alt_equiv : Equivalence cit_equiv_alt.
+  Proof. exact _. Qed.
+
+  (** Convert from [cit_equiv_alt] *)
+  Lemma cit_equiv_of_alt {t t'} : cit_equiv_alt t t' → t ≡ t'.
+  Proof. move=> + ?. apply cit_forall2_mono=> ????. by apply equiv_dist. Qed.
+
+  (** Convert to [cit_equiv_alt], under UIP over [S] *)
+  Lemma cit_equiv_to_alt `{!∀ s s' : S, ProofIrrel (s = s')} {t t'} :
+    t ≡ t' → cit_equiv_alt t t'.
+  Proof.
+    move /cit_forall2_forall. apply cit_forall2_mono=> ????.
+    by apply equiv_dist.
+  Qed.
+
+  (** [cit_sel] is non-expansive *)
+  Definition cit_sel_ne {n t t'} (eqv : t ≡{n}≡ t')
+    : t.(cit_sel) = t'.(cit_sel) := (cit_forall2_unfold_1 eqv).(citf2_sel).
+  #[export] Instance cit_sel_ne' :
+    NonExpansive (cit_sel : citO S I C D → leibnizO S).
+  Proof. move=> ???. exact cit_sel_ne. Qed.
+
+  (** [cit_ikids] is non-expansive *)
+  Lemma cit_ikids_ne {n t t'} (eqv : t ≡{n}≡ t') i :
+    cit_ikids t i ≡{n}≡ cit_ikids t' (rew cit_sel_ne eqv in i).
+  Proof. apply cit_forall2_unfold, citf2_ikids. Qed.
+
+  (** [cit_ckids] is non-expansive *)
+  Lemma cit_ckids_ne {n t t'} (eqv : t ≡{n}≡ t') c :
+    t.(cit_ckids) c ≡{n}≡ t'.(cit_ckids) (rew cit_sel_ne eqv in c).
+  Proof. apply citf2_ckids. Qed.
+
+  (** [cit_data] is non-expansive *)
+  Lemma cit_data_ne {n t t'} (eqv : t ≡{n}≡ t') :
+    (rew cit_sel_ne eqv in t.(cit_data)) ≡{n}≡ t'.(cit_data).
+  Proof. exact: ((cit_forall2_unfold_1 eqv).(citf2_data) _ eq_refl). Qed.
+
+  (** [citO S I C D] is discrete if [D] is discrete *)
+  #[export] Instance citO_discrete `{∀ s, OfeDiscrete (D s)} :
+    OfeDiscrete (citO S I C D).
+  Proof.
+    move=> ?? + ?. by apply cit_forall2_mono=> ??? /discrete_0 /equiv_dist.
+  Qed.
+End citO.
+
+(** ** [cit_intp]: Interpretation over [cit] *)
+Section cit_intp.
+  Context {S} {I C : S → Type} {D : S → ofe} {A : ofe}.
+  Context (intp : ∀ s, (I s -d> A) → (C s -d> cit S I C D) → D s → A).
+
+  (** Interpretation over [cit] *)
+  Fixpoint cit_intp (t : citI S I C D _) : A :=
+    intp t.(cit_sel) (λ i, cit_intp (t.(cit_ikidsI) i))
+      t.(cit_ckids) t.(cit_data).
+End cit_intp.
+
+Section cit_intp.
+  Context {S} {I C : S → Type} {D : S → ofe} {A : ofe}.
+
+  (** [cit_intp intp] is non-expansive if [intp] is non-expansive *)
+  #[export] Instance cit_intp_ne `{!∀ s, NonExpansive3 (intp s)} :
+    NonExpansive (@cit_intp _ I C D A intp).
+  Proof.
+    move=> ? t t' /cit_forall2_unfold.
+    have E: t = to_citI (of_citI t) by done. rewrite {2}E.
+    have E': t' = to_citI (of_citI t') by done. rewrite {2}E'.
+    move: (of_citI t) (of_citI t')=> ??.
+    elim. move=> [[????]][[????]]/= ???? Hd. subst. f_equiv; [done..|].
+    exact: (Hd _ eq_refl).
+  Qed.
+  (** [cit_intp] is non-expansive over non-expansive [intp] *)
+  Lemma cit_intp_ne'
+    `{!∀ s, NonExpansive3 (intp s), !∀ s, NonExpansive3 (intp' s)} {n} :
+    (∀ s ti tc d, intp s ti tc d ≡{n}≡ intp' s ti tc d) →
+    ∀ t, @cit_intp _ I C D A intp t ≡{n}≡ cit_intp intp' t.
+  Proof. move=> eqv. elim=> */=. etrans; [|by apply eqv]. by f_equiv. Qed.
+End cit_intp.
