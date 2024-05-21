@@ -257,38 +257,44 @@ Section wpw.
   Context `{!irisGS'_gen hlc Λ Σ}.
 
   (** [wpw] is non-expansive over the world satisfaction *)
-  Lemma wpw_ne {e s E W W' Φ Ψ n} :
-    W ≡{n}≡ W' → (Φ : _ -d> _) ≡{n}≡ Ψ →
-    (WP[W] e @ s; E {{ Φ }})%I ≡{n}≡ (WP[W'] e @ s; E {{ Ψ }})%I.
+  #[export] Instance wpw_ne {n} :
+    Proper ((≡{n}≡) ==> (=) ==> (=) ==> (=) ==>
+      pointwise_relation _ (≡{n}≡) ==> (≡{n}≡)) (λ W, wpw W).
   Proof.
-    move=> ? ΦΨ.
+    move=> W W' ???<-??<-??<-?? ΦΨ.
     enough (go : (wpw W : _ -d> _ -d> _ -d> _ -d> _) ≡{n}≡ wpw W').
     { etrans; [apply go|]. by f_equiv. }
     rewrite /wp/wp' wp_unseal=> ?. apply fixpoint_ne=> ????.
     rewrite /wp_pre/=. do 13 f_equiv; [done|]. do 12 f_equiv.
     apply step_fupdN_ne. by do 3 f_equiv.
   Qed.
-  Lemma wpw_proper {e s E W W' Φ Ψ} :
-    W ⊣⊢ W' → (Φ : _ -d> _) ≡ Ψ →
-    WP[W] e @ s; E {{ Φ }} ⊣⊢ WP[W'] e @ s; E {{ Ψ }}.
-  Proof. rewrite !equiv_dist=> ???. by apply wpw_ne. Qed.
+  #[export] Instance wpw_proper :
+    Proper ((≡) ==> (=) ==> (=) ==> (=) ==>
+      pointwise_relation _ (≡) ==> (≡)) (λ W, wpw W).
+  Proof.
+    move=> ?? /equiv_dist ???<-??<-??<-???. apply equiv_dist=> ?.
+    apply wpw_ne; [done..|]=> ?. by apply equiv_dist.
+  Qed.
 
   (** [twpw] is non-expansive over the world satisfaction *)
-  Lemma twpw_ne {e s E W W' Φ Ψ n} :
-    W ≡{n}≡ W' → (Φ : _ -d> _) ≡{n}≡ Ψ →
-    (WP[W] e @ s; E [{ Φ }])%I ≡{n}≡ (WP[W'] e @ s; E [{ Ψ }])%I.
+  #[export] Instance twpw_ne {n} :
+    Proper ((≡{n}≡) ==> (=) ==> (=) ==> (=) ==>
+      pointwise_relation _ (≡{n}≡) ==> (≡{n}≡)) (λ W, twpw W).
   Proof.
-    move=> ? ΦΨ.
+    move=> W W' ???<-??<-??<-?? ΦΨ.
     enough (go : (twpw W : _ -d> _ -d> _ -d> _ -d> _) ≡{n}≡ twpw W').
     { etrans; [apply go|]. by f_equiv. }
     rewrite /twp/twp' twp_unseal=> ????.
     apply least_fixpoint_ne; [|done]=> ?[[??]?]. rewrite /twp_pre'/twp_pre/=.
     do 11 f_equiv; [done|]. by do 14 f_equiv.
   Qed.
-  Lemma twpw_proper {e s E W W' Φ Ψ} :
-    W ⊣⊢ W' → (Φ : _ -d> _) ≡ Ψ →
-    WP[W] e @ s; E [{ Φ }] ⊣⊢ WP[W'] e @ s; E [{ Ψ }].
-  Proof. rewrite !equiv_dist=> ???. by apply twpw_ne. Qed.
+  #[export] Instance twpw_proper :
+    Proper ((≡) ==> (=) ==> (=) ==> (=) ==>
+      pointwise_relation _ (≡) ==> (≡)) (λ W, twpw W).
+  Proof.
+    move=> ?? /equiv_dist ???<-??<-??<-???. apply equiv_dist=> ?.
+    apply twpw_ne; [done..|]=> ?. by apply equiv_dist.
+  Qed.
 
   (** Eliminate [fupdw] on [wpw] *)
   Lemma fupdw_wpw_nonval {e s E W Φ} : to_val e = None →
