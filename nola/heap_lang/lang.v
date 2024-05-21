@@ -775,11 +775,11 @@ Qed.
 End heap_lang.
 
 (** Language *)
-Canonical Structure heap_ectxi_lang := EctxiLanguage heap_lang.heap_lang_mixin.
+Canonical heap_ectxi_lang := EctxiLanguage heap_lang.heap_lang_mixin.
 #[warning="-redundant-canonical-projection"]
-Canonical Structure heap_ectx_lang := EctxLanguageOfEctxi heap_ectxi_lang.
+Canonical heap_ectx_lang := EctxLanguageOfEctxi heap_ectxi_lang.
 #[warning="-redundant-canonical-projection"]
-Canonical Structure heap_lang := LanguageOfEctx heap_ectx_lang.
+Canonical heap_lang := LanguageOfEctx heap_ectx_lang.
 
 (* Prefer heap_lang names over ectx_language names. *)
 Export heap_lang.

@@ -7,7 +7,7 @@ From iris.proofmode Require Import proofmode.
 Implicit Type PROP : bi.
 
 (** ** Pre-order for [PROP] *)
-Canonical Structure biPro PROP := Proty PROP (⊢) _.
+Canonical biPro PROP := Proty PROP (⊢) _.
 
 (** ** [biPro] has the top, bottom, meet and join *)
 #[export] Program Instance otop_bi {PROP} : Otop PROP := OTOP True%I _.

@@ -42,23 +42,23 @@ Proof. move=> ??[??]. done. Qed.
 (** ** Canonical structures *)
 
 (** Natural number *)
-Canonical Structure natPro : proty := Proty nat (≤) _.
+Canonical natPro : proty := Proty nat (≤) _.
 Lemma nat_ole {n m} : n ⊑ m ↔ n ≤ m.
 Proof. done. Qed.
 
 (** Proposition *)
-Program Canonical Structure PropPro : proty := Proty Prop (→) _.
+Program Canonical PropPro : proty := Proty Prop (→) _.
 Next Obligation. constructor; auto. Qed.
 Lemma Prop_ole {P Q : Prop} : P ⊑ Q ↔ (P → Q).
 Proof. done. Qed.
 
 (** Unit *)
-Canonical Structure unitPro : proty := Proty unit (λ _ _, True) _.
+Canonical unitPro : proty := Proty unit (λ _ _, True) _.
 Lemma unit_ole {u u' : ()} : u ⊑ u' ↔ True.
 Proof. done. Qed.
 
 (** Function *)
-Program Canonical Structure funPro {A} (OTF : A → proty) : proty :=
+Program Canonical funPro {A} (OTF : A → proty) : proty :=
   Proty (∀ a, OTF a) (λ f g, ∀ a, f a ⊑ g a) _.
 Next Obligation. constructor; [auto|]=> ??????. etrans; auto. Qed.
 
@@ -66,7 +66,7 @@ Next Obligation. constructor; [auto|]=> ??????. etrans; auto. Qed.
 #[projections(primitive)]
 Record dual A := Dual { undual : A }.
 Arguments Dual {_} _. Arguments undual {_} _.
-Program Canonical Structure dualPro OT : proty :=
+Program Canonical dualPro OT : proty :=
   Proty (dual OT) (λ o o', undual o' ⊑ undual o) _.
 Next Obligation. move=> ?. constructor; [auto|]=> ?????. by etrans. Qed.
 
