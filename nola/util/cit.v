@@ -344,8 +344,7 @@ Section cit_intp.
   #[export] Instance cit_intp_ne_intp `{!∀ s, NonExpansive3 (intp s)} :
     NonExpansive (@cit_intp _ I C D A intp).
   Proof. move=> ????. apply cit_intp_ne_gen; [solve_proper|done]. Qed.
-  Lemma cit_intp_ne_tree
-    `{!∀ s, NonExpansive3 (intp s)} {intp' n} :
+  Lemma cit_intp_ne_tree `{!∀ s, NonExpansive3 (intp s)} {intp' n} :
     (∀ s ti tc d, intp s ti tc d ≡{n}≡ intp' s ti tc d) →
     ∀ t, @cit_intp _ I C D A intp t ≡{n}≡ cit_intp intp' t.
   Proof.
