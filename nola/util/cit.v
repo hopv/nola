@@ -341,8 +341,7 @@ Section cit_intp.
     exact: (Hd _ eq_refl).
   Qed.
   (** [cit_intp] is non-expansive over non-expansive [intp] *)
-  Lemma cit_intp_ne'
-    `{!∀ s, NonExpansive3 (intp s), !∀ s, NonExpansive3 (intp' s)} {n} :
+  Lemma cit_intp_ne' `{!∀ s, NonExpansive3 (intp s)} {intp' n} :
     (∀ s ti tc d, intp s ti tc d ≡{n}≡ intp' s ti tc d) →
     ∀ t, @cit_intp _ I C D A intp t ≡{n}≡ cit_intp intp' t.
   Proof. move=> eqv. elim=> */=. etrans; [|by apply eqv]. by f_equiv. Qed.
