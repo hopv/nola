@@ -61,12 +61,14 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
 - [`prelude`](nola/prelude.v) : Prelude
 - [`util/`](nola/util/) : General-purpose utilities, extending
   [`stdpp`](https://gitlab.mpi-sws.org/iris/stdpp)
+  + [`rel](nola/util/rel) (Relations)
   + [`prod`](nola/util/prod.v) (Modified product),
     [`plist`](nola/util/plist.v) (Product list)
   + [`proph`](nola/util/proph.v) (Prophecy)
   + [`intp`](nola/util/intp.v) (Interpretation)
   + [`order`](nola/util/order.v) (Order theory),
     [`psg`](nola/util/psg.v) (Pseudo-gfp)
+  + [`citree`](nola/util/citree.v) (Coinductive-inductive tree)
 - [`bi/`](nola/bi) : Libraries for bunched implication logic
   + [`ofe`](nola/bi/ofe.v) (On OFE),
     [`list`](nola/bi/list.v) (On `list`),

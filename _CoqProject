@@ -2,12 +2,14 @@
 
 nola/prelude.v
 
+nola/util/rel.v
 nola/util/prod.v
 nola/util/plist.v
 nola/util/proph.v
 nola/util/intp.v
 nola/util/order.v
 nola/util/psg.v
+nola/util/cit.v
 
 nola/bi/ofe.v
 nola/bi/list.v
