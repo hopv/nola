@@ -11,14 +11,14 @@ Section citI.
   Context S (I C D : S → Type) CIT.
   Inductive citI := CitI {
     (** Selector *) cit_sel : S;
-    (** Inductive children *) cit_ikids : I cit_sel → citI;
+    (** Inductive children *) cit_ikidsI : I cit_sel → citI;
     (** Coinductive children *) cit_ckids : C cit_sel → CIT;
     (** Data *) cit_data : D cit_sel;
   }.
 End citI.
 Add Printing Constructor citI.
 Arguments CitI {_ _ _ _ _}. Arguments cit_sel {_ _ _ _ _}.
-Arguments cit_ikids {_ _ _ _ _}. Arguments cit_ckids {_ _ _ _ _}.
+Arguments cit_ikidsI {_ _ _ _ _}. Arguments cit_ckids {_ _ _ _ _}.
 Arguments cit_data {_ _ _ _ _}.
 
 (** ** [cit]: Coinductive-inductive tree *)
@@ -29,6 +29,7 @@ End cit.
 Add Printing Constructor cit.
 Arguments of_citI {_ _ _ _}. Arguments to_citI {_ _ _ _}.
 Notation Cit s ik ck d := (of_citI (CitI s ik ck d)).
+Notation cit_ikids t i := (of_citI (t.(cit_ikidsI) i)).
 #[warning="-uniform-inheritance"] Coercion to_citI : cit >-> citI.
 
 (** ** [citI_forall2]: Intermediate universal relation between [citI]s *)
@@ -36,22 +37,20 @@ Section citI_forall2.
   Context {S} {I C D D' : S → Type}.
   Context (R : ∀ s, D s → D' s → Prop)
     (CITF : cit S I C D → cit S I C D' → Prop).
-  Inductive citI_forall2 (t : cit S I C D) (t' : cit S I C D') : Prop :=
-    CitIForall2 {
-    citf_sel : t.(cit_sel) = t'.(cit_sel);
-    citf_ikids : ∀ i, citI_forall2 (of_citI (t.(cit_ikids) i))
-      (of_citI (t'.(cit_ikids) (rew citf_sel in i)));
-    citf_ckids : ∀ c, CITF
-      (t.(cit_ckids) c) (t'.(cit_ckids) (rew citf_sel in c));
-    citf_data : ∀ s eq, R s
-      (rew eq_trans citf_sel eq in t.(cit_data)) (rew eq in t'.(cit_data));
+  Inductive citI_forall2 (t : cit S I C D) (t' : cit S I C D') : Prop := Citf2 {
+    citf2_sel : t.(cit_sel) = t'.(cit_sel);
+    citf2_ikids : ∀ i, citI_forall2
+      (cit_ikids t i) (cit_ikids t' (rew citf2_sel in i));
+    citf2_ckids : ∀ c, CITF
+      (t.(cit_ckids) c) (t'.(cit_ckids) (rew citf2_sel in c));
+    citf2_data : ∀ s eq, R s
+      (rew eq_trans citf2_sel eq in t.(cit_data)) (rew eq in t'.(cit_data));
   }.
 End citI_forall2.
-Arguments CitIForall2 {_ _ _ _ _ _ _ _ _}.
-Arguments citf_sel {_ _ _ _ _ _ _ _ _}.
-Arguments citf_ikids {_ _ _ _ _ _ _ _ _}.
-Arguments citf_ckids {_ _ _ _ _ _ _ _ _}.
-Arguments citf_data {_ _ _ _ _ _ _ _ _}.
+Arguments Citf2 {_ _ _ _ _ _ _ _ _}. Arguments citf2_sel {_ _ _ _ _ _ _ _ _}.
+Arguments citf2_ikids {_ _ _ _ _ _ _ _ _}.
+Arguments citf2_ckids {_ _ _ _ _ _ _ _ _}.
+Arguments citf2_data {_ _ _ _ _ _ _ _ _}.
 
 Section citI_forall2.
   Context {S} {I C : S → Type}.
@@ -62,7 +61,7 @@ Section citI_forall2.
     Mono2 (citI_forall2 (I:=I) (C:=C) (D:=D) (D':=D')).
   Proof.
     move=>/= ?? to ?? to' ??. elim=> ?? eq ? IH ??.
-    apply (CitIForall2 eq); [done|..]=> *; by [apply to'|apply to].
+    apply (Citf2 eq); [done|..]=> *; by [apply to'|apply to].
   Qed.
   #[export] Instance citI_forall2_mono' {D D' R} :
     Mono (citI_forall2 (I:=I) (C:=C) (D:=D) (D':=D') R).
@@ -73,8 +72,7 @@ Section citI_forall2.
     `{!∀ s, @Reflexive (D s) (R s), !Reflexive CITF} :
     Reflexive (citI_forall2 (I:=I) (C:=C) (D:=D) R CITF).
   Proof.
-    case=> t. elim: t=> *. apply (CitIForall2 eq_refl); [done..|]=> ? eq.
-    by case eq.
+    case=> t. elim: t=> *. apply (Citf2 eq_refl); [done..|]=> ? eq. by case eq.
   Qed.
 
   (** Flip [citI_forall2] *)
@@ -85,7 +83,7 @@ Section citI_forall2.
     elim=> ?? eq ? IH Hc Hd.
     have E : ∀ X x, x = rew eq in rew[X] eq_sym eq in x.
     { move=> ? x. rewrite rew_compose. move: x. by case eq. }
-    apply (CitIForall2 (eq_sym eq)).
+    apply (Citf2 (eq_sym eq)).
     - move=> i. rewrite {1}(E _ i). exact: IH.
     - move=> c. rewrite {1}(E _ c). exact: Hc.
     - move=> ? eq'. suff E': eq' = eq_trans eq (eq_trans (eq_sym eq) eq').
@@ -99,10 +97,24 @@ Section citI_forall2.
       citI_forall2 (λ s, rcompose (R s) (R' s)) (rcompose CITF CITF') t t''.
   Proof.
     move=> F. move: t''. elim: F=> ?? eq ? IH ???[eq' ???].
-    apply (CitIForall2 (eq_trans eq eq')).
+    apply (Citf2 (eq_trans eq eq')).
     - move=> ?. apply IH. by rewrite -rew_compose.
     - move=> ?. eexists _. split; [done|]. by rewrite -rew_compose.
     - move=> ? eq''. eexists _. split; [|done]. by rewrite -eq_trans_assoc.
+  Qed.
+
+  (** Convert universally quantified [citI_forall2], under UIP on [S] *)
+  Lemma citI_forall2_forall `{!∀ s s' : S, ProofIrrel (s = s'), !Inhabited A}
+    {D D' R CITF t t'} :
+    (∀ a : A, citI_forall2 (I:=I) (C:=C) (D:=D) (D':=D') (R a) (CITF a) t t') →
+      citI_forall2 (λ _ d d', ∀ a, R a _ d d') (λ t t', ∀ a, CITF a t t') t t'.
+  Proof.
+    move=> Fs. induction (Fs inhabitant) as [t t' eq _ IH _ _].
+    have E: ∀ a, (Fs a).(citf2_sel) = eq by move=> ?; exact: proof_irrel.
+    apply (Citf2 eq).
+    - move=> i. apply IH=> a. rewrite -(E a). exact: (Fs a).(citf2_ikids).
+    - move=> c a. rewrite -(E a). exact: (Fs a).(citf2_ckids).
+    - move=> s eq' a. rewrite -(E a). exact: (Fs a).(citf2_data).
   Qed.
 End citI_forall2.
 
@@ -119,6 +131,17 @@ Section cit_forall2.
     cit_forall2 (I:=I) (C:=C) (D:=D) (D':=D') R t t' ↔
       citI_forall2 R (cit_forall2 R) t t'.
   Proof. split; apply (gfp_unfold (f:=citI_forall2 _)). Qed.
+  Lemma cit_forall2_unfold_1 {D D' R t t'} :
+    cit_forall2 (I:=I) (C:=C) (D:=D) (D':=D') R t t' →
+      citI_forall2 R (cit_forall2 R) t t'.
+  Proof. apply cit_forall2_unfold. Qed.
+  Lemma cit_forall2_unfold_2 {D D' R t t'} :
+    citI_forall2 R (cit_forall2 R) t t' →
+      cit_forall2 (I:=I) (C:=C) (D:=D) (D':=D') R t t'.
+  Proof. apply cit_forall2_unfold. Qed.
+  #[warning="-uniform-inheritance"]
+  Coercion cit_forall2_unfold_1 : cit_forall2 >-> citI_forall2.
+
   (** Coinduction on [cit_forall2] *)
   Lemma cit_forall2_coind {D D' R t t'}
     (CH : cit S I C D → cit S I C D' → Prop) :
@@ -178,4 +201,15 @@ Section cit_forall2.
   #[export] Instance cit_forall2_equiv `{!∀ s, @Equivalence (D s) (R s)} :
     Equivalence (cit_forall2 (I:=I) (C:=C) R).
   Proof. split; exact _. Qed.
+
+  (** Convert universally quantified [cit_forall2], under UIP on [S] *)
+  Lemma cit_forall2_forall `{!∀ s s' : S, ProofIrrel (s = s'), !Inhabited A}
+    {D D' R t t'} :
+    (∀ a : A, cit_forall2 (I:=I) (C:=C) (D:=D) (D':=D') (R a) t t') →
+      cit_forall2 (λ _ d d', ∀ a, R a _ d d') t t'.
+  Proof.
+    move=> ?.
+    apply (cit_forall2_coind (λ t t', ∀ a, cit_forall2 (R a) t t')); [done|].
+    move=> ???. apply citI_forall2_forall=> ?. by apply cit_forall2_unfold.
+  Qed.
 End cit_forall2.
