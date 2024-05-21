@@ -210,27 +210,10 @@ Section pborrow.
   (** [pbintp] is non-expansive *)
   #[export] Instance pbintp_ne : NonExpansive pbintp.
   Proof. move=> ????[[[?|[?[??]]]|[?[??]]]|?]//=; solve_proper. Qed.
-  (** [pbintp] is proper *)
-  #[export] Instance pbintp_proper : Proper ((≡) ==> (≡)) pbintp.
-  Proof. apply ne_proper, _. Qed.
   (** [pborrow_wsat] is non-expansive *)
-  #[export] Instance pborrow_wsat_ne `{!NonExpansive M} :
-    NonExpansive (pborrow_wsat M).
+  #[export] Instance pborrow_wsat_ne {n} :
+    Proper (((≡{n}≡) ==> (≡{n}≡)) ==> (≡{n}≡) ==> (≡{n}≡)) pborrow_wsat.
   Proof. solve_proper. Qed.
-  (** [pborrow_wsat] is proper *)
-  #[export] Instance pborrow_wsat_proper `{!NonExpansive M} :
-    Proper ((≡) ==> (≡)) (pborrow_wsat M).
-  Proof. solve_proper. Qed.
-  Lemma pborrow_wsat_ne_mod {n M M' intp} :
-    (∀ P : iProp Σ, M P ≡{n}≡ M' P) →
-    pborrow_wsat M intp ≡{n}≡ pborrow_wsat M' intp.
-  Proof. move=> ?. by apply borrow_wsat_ne_mod. Qed.
-  Lemma pborrow_wsat_proper_mod {M M' intp} :
-    (∀ P : iProp Σ, M P ≡ M' P) → pborrow_wsat M intp ≡ pborrow_wsat M' intp.
-  Proof.
-    move=> ?. apply equiv_dist=> ?. apply pborrow_wsat_ne_mod=> ?.
-    by apply equiv_dist.
-  Qed.
 
   (** ** For non-prophetic borrowing *)
 
