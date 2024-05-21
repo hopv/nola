@@ -93,7 +93,7 @@ Section cit_forall2I.
   Qed.
 
   (** Compose [cit_forall2I]s *)
-  Lemma cit_forall2I_trans {D D' D'' R R' CITF CITF' t t' t''} :
+  Lemma cit_forall2I_compose {D D' D'' R R' CITF CITF' t t' t''} :
     @cit_forall2I _ I C D D' R CITF t t' →
     cit_forall2I (D':=D'') R' CITF' t' t'' →
       cit_forall2I (λ s, rcompose (R s) (R' s)) (rcompose CITF CITF') t t''.
@@ -184,7 +184,7 @@ Section cit_forall2.
     apply (cit_forall2_coind (rcompose (cit_forall2 R) (cit_forall2 R'))).
     { by eexists _. }
     move=> ??[?[/cit_forall2_unfold ? /cit_forall2_unfold ?]].
-    by apply: cit_forall2I_trans.
+    by apply: cit_forall2I_compose.
   Qed.
   (** [cit_forall2] preserves the transitivity *)
   #[export] Instance cit_forall2_trans `{!∀ s, @Transitive (D s) (R s)} :
