@@ -193,7 +193,7 @@ Section pborrow.
         ∃ y, proph_ctrl γ (f y) ξ ∗ val_obs γ' y ∗ val_obs γx y
     end%I.
 
-  (** [pbintp intp] is non-expansive if [intp] is *)
+  (** [pbintp] is non-expansive *)
   #[export] Instance pbintp_intp_ne `{!NonExpansive intp} :
     NonExpansive (pbintp intp).
   Proof.
@@ -203,13 +203,12 @@ Section pborrow.
       solve_proper.
     - move=> ?? /leibniz_equiv_iff. solve_proper.
   Qed.
+  #[export] Instance pbintp_ne : NonExpansive pbintp.
+  Proof. move=> ????[[[?|[?[??]]]|[?[??]]]|?]//=; solve_proper. Qed.
 
   (** World satisfaction *)
   Definition pborrow_wsat M intp : iProp Σ := borrow_wsat M (pbintp intp).
 
-  (** [pbintp] is non-expansive *)
-  #[export] Instance pbintp_ne : NonExpansive pbintp.
-  Proof. move=> ????[[[?|[?[??]]]|[?[??]]]|?]//=; solve_proper. Qed.
   (** [pborrow_wsat] is non-expansive *)
   #[export] Instance pborrow_wsat_ne {n} :
     Proper (((≡{n}≡) ==> (≡{n}≡)) ==> (≡{n}≡) ==> (≡{n}≡)) pborrow_wsat.
