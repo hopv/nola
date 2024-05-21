@@ -329,20 +329,27 @@ End cit_intp.
 Section cit_intp.
   Context {S} {I C : S → Type} {D : S → ofe} {A : ofe}.
 
-  (** [cit_intp intp] is non-expansive if [intp] is non-expansive *)
-  #[export] Instance cit_intp_ne `{!∀ s, NonExpansive3 (intp s)} :
-    NonExpansive (@cit_intp _ I C D A intp).
+  (** [cit_intp] is non-expansive *)
+  #[export] Instance cit_intp_ne_gen {n} :
+    Proper (forall_relation (λ _, (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡))
+      ==> (≡{n}≡) ==> (≡{n}≡)) (@cit_intp _ I C D A).
   Proof.
-    move=> ? t t' /cit_forall2_unfold.
-    have E: t = to_citI (of_citI t) by done. rewrite {2}E.
-    have E': t' = to_citI (of_citI t') by done. rewrite {2}E'.
+    move=> ?? eqv t t' /cit_forall2_unfold.
+    have {2}->: t = to_citI (of_citI t) by done.
+    have {2}->: t' = to_citI (of_citI t') by done.
     move: (of_citI t) (of_citI t')=> ??.
-    elim. move=> [[????]][[????]]/= ???? Hd. subst. f_equiv; [done..|].
+    elim. move=> [[????]][[????]]/= ???? Hd. subst. apply eqv; [done..|].
     exact: (Hd _ eq_refl).
   Qed.
-  (** [cit_intp] is non-expansive over non-expansive [intp] *)
-  Lemma cit_intp_ne' `{!∀ s, NonExpansive3 (intp s)} {intp' n} :
+  #[export] Instance cit_intp_ne_intp `{!∀ s, NonExpansive3 (intp s)} :
+    NonExpansive (@cit_intp _ I C D A intp).
+  Proof. move=> ????. apply cit_intp_ne_gen; [solve_proper|done]. Qed.
+  Lemma cit_intp_ne_tree
+    `{!∀ s, NonExpansive3 (intp s)} {intp' n} :
     (∀ s ti tc d, intp s ti tc d ≡{n}≡ intp' s ti tc d) →
     ∀ t, @cit_intp _ I C D A intp t ≡{n}≡ cit_intp intp' t.
-  Proof. move=> eqv. elim=> */=. etrans; [|by apply eqv]. by f_equiv. Qed.
+  Proof.
+    move=> eqv ?. apply cit_intp_ne_gen; [|done]=> ??????????.
+    etrans; [|by apply eqv]. solve_proper.
+  Qed.
 End cit_intp.
