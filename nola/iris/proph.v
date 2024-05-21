@@ -2,7 +2,8 @@
 
 From nola.util Require Export proph.
 From nola.util Require Import plist.
-From nola.bi Require Import list gmap.
+From nola.bi Require Import gmap.
+From nola.iris Require Import list.
 From iris.algebra Require Import gmap csum frac agree.
 From iris.bi Require Import fractional.
 From iris.base_logic.lib Require Import own.

@@ -68,8 +68,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`order`](nola/util/order.v) (Order theory),
     [`psg`](nola/util/psg.v) (Pseudo-gfp)
 - [`bi/`](nola/bi) : Libraries for bunched implication logic
-  + [`ofe`](nola/bi/ofe.v) (OFEs)
-  + [`list`](nola/bi/list.v) (On `list`),
+  + [`ofe`](nola/bi/ofe.v) (On OFE),
+    [`list`](nola/bi/list.v) (On `list`),
     [`gmap`](nola/bi/gmap.v) (On `gmap`),
     [`plist`](nola/bi/plist.v) (On `plist`)
   + [`order`](nola/bi/order.v) (Order theory),
@@ -79,6 +79,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     [`util`](nola/bi/util.v) (Utilities)
   + [`paradox`](nola/bi/paradox.v) (Paradoxes)
 - [`iris/`](nola/iris) : Libraries for Iris base logic
+  + [`ofe`](nola/bi/ofe.v) (On OFE),
+    [`list`](nola/bi/list.v) (On `list`)
   + [`sinv`](nola/iris/sinv.v) (Simple invariant),
     [`sinv_deriv`](nola/iris/sinv_deriv.v) (Simple invariant relaxed with
       derivability)
