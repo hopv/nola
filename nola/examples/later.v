@@ -1,8 +1,8 @@
 (** * Example of instantiating Nola with [▶ ∙] *)
 
-From nola.heap_lang Require Import notation proofmode.
 From nola.bi Require Import ofe.
 From nola.iris Require Import inv.
+From nola.heap_lang Require Import notation proofmode.
 Import WpwNotation.
 
 (** ** Target function: Linked list mutation *)
@@ -47,15 +47,13 @@ Section iris.
     iIntros "#Hf" (Ψ). iIntros "!> [c↦ #l] HΨ".
     iInduction n as [|m] "IH" forall (l) "l".
     { wp_rec. wp_pures. wp_load. wp_pures. by iApply "HΨ". }
-    rewrite ilist_unfold. iDestruct "l" as "[ihd itl]".
-    wp_rec. wp_pures. wp_load. wp_pures.
-    wp_apply "Hf"; [done|]. iIntros "_". wp_pures.
-    wp_load. wp_op. have -> : (S m - 1)%Z = m by lia. wp_store.
-    wp_op. wp_bind (! _)%E.
+    rewrite ilist_unfold. iDestruct "l" as "[ihd itl]". wp_rec. wp_pures.
+    wp_load. wp_pures. wp_apply "Hf"; [done|]. iIntros "_". wp_pures. wp_load.
+    wp_op. have -> : (S m - 1)%Z = m by lia. wp_store. wp_op. wp_bind (! _)%E.
     iMod (inv_tok_acc (PROP:=▶ ∙) (intp:=laterl) with "itl") as
       "/=[(%l' & ↦l' & #l') cl]"; [done|].
     wp_load. iModIntro. iMod ("cl" with "[↦l']") as "_".
-    { iNext. iExists _. by iFrame "↦l'". } iModIntro.
-    by iApply ("IH" with "c↦ HΨ").
+    { iNext. iExists _. by iFrame "↦l'". }
+    iModIntro. by iApply ("IH" with "c↦ HΨ").
   Qed.
 End iris.

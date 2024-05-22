@@ -1,7 +1,7 @@
 (** * Minimal showcase logic *)
 
-From nola.heap_lang Require Import notation proofmode.
 From nola.iris Require Import inv.
+From nola.heap_lang Require Import notation proofmode.
 Import WpwNotation.
 
 (** ** Syntax for separation logic propositions *)
@@ -14,7 +14,6 @@ Inductive nProp : Type :=
 | pointsto (q : frac) (l : loc) (v : val)
 | inv (N : namespace) (P : nProp)
 | ilist (N : namespace) (Φ : loc → nProp) (l : loc).
-
 #[warning="-redundant-canonical-projection"] Canonical nPropO := leibnizO nProp.
 
 (** ** Target function: Linked list mutation *)
@@ -51,14 +50,13 @@ Section iris.
     iIntros "#Hf". iIntros (Ψ) "!> [c↦ #[ihd itl]] HΨ".
     iInduction n as [|m] "IH" forall (l) "ihd itl".
     { wp_rec. wp_pures. wp_load. wp_pures. by iApply "HΨ". }
-    wp_rec. wp_pures. wp_load. wp_pures.
-    wp_apply "Hf"; [done|]. iIntros "_". wp_pures.
-    wp_load. wp_op. have -> : (S m - 1)%Z = m by lia. wp_store.
+    wp_rec. wp_pures. wp_load. wp_pures. wp_apply "Hf"; [done|]. iIntros "_".
+    wp_pures. wp_load. wp_op. have -> : (S m - 1)%Z = m by lia. wp_store.
     wp_op. wp_bind (! _)%E.
     iMod (inv_tok_acc (PROP:=nPropO) (intp:=intp) with "itl") as
       "/=[(%l' & ↦l' & #itlhd & #itltl) cl]"; [done|].
     wp_load. iModIntro. iMod ("cl" with "[↦l']") as "_".
-    { iExists _. iFrame "↦l'". by iSplit. } iModIntro.
-    by iApply ("IH" with "c↦ HΨ").
+    { iExists _. iFrame "↦l'". by iSplit. }
+    iModIntro. by iApply ("IH" with "c↦ HΨ").
   Qed.
 End iris.
