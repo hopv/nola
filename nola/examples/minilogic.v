@@ -4,14 +4,14 @@ From nola.iris Require Import inv.
 From nola.heap_lang Require Import notation proofmode.
 Import WpwNotation.
 
+Implicit Type (N : namespace) (l : loc).
+
 (** ** Syntax for separation logic propositions *)
 Inductive nProp : Type :=
 | all {A : Type} (Φ : A → nProp) | ex {A : Type} (Φ : A → nProp)
-| and (P Q : nProp) | or (P Q : nProp) | imp (P Q : nProp)
-| pure (φ : Prop)
+| and (P Q : nProp) | or (P Q : nProp) | imp (P Q : nProp) | pure (φ : Prop)
 | sep (P Q : nProp) | wand (P Q : nProp) | pers (P : nProp)
-| bupd (P : nProp) | later (P : nProp)
-| pointsto (q : frac) (l : loc) (v : val)
+| bupd (P : nProp) | later (P : nProp) | pointsto (q : frac) (l : loc) (v : val)
 | inv (N : namespace) (P : nProp)
 | ilist (N : namespace) (Φ : loc → nProp) (l : loc).
 #[warning="-redundant-canonical-projection"] Canonical nPropO := leibnizO nProp.
@@ -34,14 +34,12 @@ Section iris.
   | pointsto q l v => l ↦{#q} v
   | inv N P => inv_tok N P
   | ilist N Φ l => inv_tok N (Φ l) ∗ inv_tok N
-      (ex (λ l' : loc, sep (pointsto 1 (l +ₗ 1) (#l')) (ilist N Φ l')))
+      (ex (λ l', sep (pointsto 1 (l +ₗ 1) (#l')) (ilist N Φ l')))
   end.
 
   (** ** Termination of [iter] *)
   Lemma twp_iter {N Φ c l} {f : val} {n : nat} :
-    (∀ l0 : loc,
-      [[{ inv_tok N (Φ l0) }]][inv_wsat intp]
-        f #l0 @ ↑N
+    (∀ l0, [[{ inv_tok N (Φ l0) }]][inv_wsat intp] f #l0 @ ↑N
       [[{ RET #(); True }]]) -∗
     [[{ c ↦ #n ∗ intp (ilist N Φ l) }]][inv_wsat intp]
       iter f #c #l @ ↑N

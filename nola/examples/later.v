@@ -5,6 +5,8 @@ From nola.iris Require Import inv.
 From nola.heap_lang Require Import notation proofmode.
 Import WpwNotation.
 
+Implicit Type (N : namespace) (l : loc).
+
 (** ** Target function: Linked list mutation *)
 Definition iter : val := rec: "self" "f" "c" "l" :=
   if: !"c" = #0 then #() else
@@ -12,7 +14,6 @@ Definition iter : val := rec: "self" "f" "c" "l" :=
 
 Section iris.
   Context `{!inv'GS (▶ ∙) Σ, !heapGS_gen hlc Σ}.
-  Implicit Type (N : namespace) (Φ : loc → iProp Σ) (l : loc).
 
   (** Fixed point generator of [ilist] *)
   Definition ilist_gen N Φ (self : loc -d> iProp Σ) : loc -d> iProp Σ :=
@@ -36,7 +37,7 @@ Section iris.
 
   (** ** Safety of [iter] *)
   Lemma wp_iter {N Φ c l} {f : val} {n : nat} :
-    (∀ l0 : loc,
+    (∀ l0,
       {{{ inv_tok N (Next (Φ l0)) }}}[inv_wsat laterl]
         f #l0 @ ↑N
       {{{ RET #(); True }}}) -∗
