@@ -369,3 +369,102 @@ Section cit_intp.
     etrans; [|by apply eqv]. solve_proper.
   Qed.
 End cit_intp.
+
+(** ** [cit_mapI]: Intermediate map over [cit'] *)
+Section cit_mapI.
+  Context {S} {I C D D' : S → Type}.
+  Context (f : ∀ s, D s → D' s) (self : cit I C D → cit I C D').
+
+  Fixpoint cit_mapI (t : cit' I C D) : cit' I C D' :=
+    CitI t.(cit_sel) (λ i, cit_mapI (t.(cit_ikidsI) i))
+      (λ c, self (t.(cit_ckids) c)) (f _ t.(cit_data)).
+End cit_mapI.
+
+(** ** [cit_map]: Map over [cit]
+
+  Unfortunately, due to the limitation of Coq's productivity checker, we cannot
+  define [cit_map] directly, and so we assume axioms for the existence of
+  [cit_map] *)
+Axiom cit_map : ∀{S I C D D'},
+  (∀ s, D s → D' s) → cit (S:=S) I C D → cit I C D'.
+Notation cit_map' f t := (Cit (cit_mapI f (cit_map f) (uncit t))).
+Axiom cit_map_unfold : ∀{S I C D D' f t},
+  @cit_map S I C D D' f t = cit_map' f t.
+
+Section cit_map.
+  Context {S} {I C : S → Type}.
+  Implicit Type D : S → ofe.
+
+  (** [cit_map] is non-expansive *)
+  #[export] Instance cit_map_ne' {D D' n} :
+    Proper (forall_relation (λ _, pointwise_relation _ (≡{n}≡)) ==>
+      pointwise_relation _ (≡{n}≡)) (@cit_map _ I C D D').
+  Proof.
+    move=> f g eqv ?.
+    apply (cit_forall2_coind (λ t t', ∃ t0,
+      t = cit_map f t0 ∧ t' = cit_map g t0)); [by eexists _|]=> _ _[[t][->->]].
+    rewrite !cit_map_unfold. elim: t=> s ? IH *.
+    apply: (Citf2 (t:=cit_map' _ (CitX s _ _ _))
+      (t':=cit_map' _ (CitX s _ _ _)) (eq_refl (x:=s)))=>/= *;
+      by [exact: IH|eexists _|subst=>/=; exact: eqv].
+  Qed.
+  #[export] Instance cit_map_ne_gen {D D' n} :
+    Proper (forall_relation (λ _, (≡{n}≡) ==> (≡{n}≡)) ==>
+      (≡{n}≡) ==> (≡{n}≡)) (@cit_map _ I C D D').
+  Proof.
+    move=> f g eqv ???.
+    apply (cit_forall2_coind (λ t t', ∃ t1 t2, t1 ≡{n}≡ t2 ∧
+      t = cit_map f t1 ∧ t' = cit_map g t2)); [by eexists _, _|].
+    move=> _ _[?[?[/cit_forall2_unfold eqv'[->->]]]]. rewrite !cit_map_unfold.
+    elim: eqv'. move=> [[????]][[s ???]]/= ?. subst=>/= ? IH Hc Hd. subst=>/=.
+    apply: (Citf2 (t:=CitX s _ _ _) (t':=CitX s _ _ _) (eq_refl (x:=s)))=>/= *.
+    { done. } { eexists _, _. split; [|done]. exact: Hc. }
+    subst=>/=. apply eqv, (Hd _ eq_refl).
+  Qed.
+  #[export] Instance cit_map_ne {D D'} `{!∀ s, NonExpansive (f s)} :
+    NonExpansive (@cit_map _ I C D D' f).
+  Proof. move=> ?. apply cit_map_ne_gen. solve_proper. Qed.
+
+  (** [cit_map] over the identity map *)
+  Lemma cit_map_id {D t} :
+    @cit_map _ I C D _ (λ _, id) t ≡ t.
+  Proof.
+    move=> ?. apply (cit_forall2_coind (λ t t', t = cit_map (λ _, id) t')).
+    { done. }
+    clear. move=> _ [t] ->. rewrite cit_map_unfold. elim: t=> s ? IH *.
+    apply: (Citf2 (t:=cit_map' _ (CitX s _ _ _))
+      (t':=CitX s _ _ _) (eq_refl (x:=s)))=>/= *; by [apply IH| |subst].
+  Qed.
+
+  (** [cit_map] over the composite map *)
+  Lemma cit_map_compose {D D' D'' f g t} :
+    cit_map (λ s d, g s (f s d)) t ≡
+      cit_map (D':=D'') g (@cit_map _ I C D D' f t).
+  Proof.
+    move=> ?. apply (cit_forall2_coind (λ t t', ∃ t0,
+      t = cit_map (λ s d, g s (f s d)) t0 ∧ t' = cit_map g (cit_map f t0))).
+    { by eexists _. }
+    clear. move=> _ _[[t][->->]]. rewrite !cit_map_unfold /=. elim: t=> s *.
+    apply: (Citf2 (t:=cit_map' _ (CitX s _ _ _))
+      (t':=cit_map' _ (cit_map' _ (CitX s _ _ _))) (eq_refl (x:=s)))=>/= *;
+      by [|eexists _|subst].
+  Qed.
+End cit_map.
+
+(** ** [citOF]: [oFunctor] for [cit] *)
+Program Definition citOF {S} I C (F : S → oFunctor) : oFunctor := {|
+  oFunctor_car A _ B _ := citO I C (λ s, (F s).(oFunctor_car) A B);
+  oFunctor_map _ _ _ _ _ _ _ _ fg :=
+    OfeMor (cit_map (λ s, oFunctor_map (F s) fg));
+|}.
+Next Obligation.
+  move=> > [[??][??]][[??][??]][/=??]?/=. apply cit_map_ne'. solve_proper.
+Qed.
+Next Obligation.
+  move=>/= *. etrans; [|exact cit_map_id]=> ?. f_equiv=> ????/=.
+  etrans; [|done]. clear. apply equiv_dist, oFunctor_map_id.
+Qed.
+Next Obligation.
+  move=>/= *. etrans; [|exact cit_map_compose]=> ?. f_equiv=> ??? eqv.
+  etrans; [|apply equiv_dist; exact: oFunctor_map_compose]. by f_equiv.
+Qed.
