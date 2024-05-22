@@ -285,6 +285,16 @@ Section citO.
     by apply equiv_dist.
   Qed.
 
+  (** [CitI] is non-expansive *)
+  #[export] Instance CitI_ne {s n} :
+    Proper (pointwise_relation _ (≡{n}≡) ==> pointwise_relation _ (≡{n}≡) ==>
+      (≡{n}≡) ==> (≡{n}≡)) (@CitI _ I C D _ s).
+  Proof.
+    move=> ti ti' eqv ??????. apply cit_forall2_unfold.
+    apply (Citf2 (t:=Cit s ti _ _) (t':=Cit s ti' _ _) eq_refl)=>/=; [|done|].
+    { move=> ?. apply cit_forall2_unfold, eqv. } { move=> ??. by subst. }
+  Qed.
+
   (** [cit_sel] is non-expansive *)
   Definition cit_sel_ne {n t t'} (eqv : t ≡{n}≡ t')
     : t.(cit_sel) = t'.(cit_sel) := (cit_forall2_unfold_1 eqv).(citf2_sel).
