@@ -337,19 +337,22 @@ Section cit_intp.
   Context {S} {I C : S → Type} {D : S → ofe} {A : ofe}.
   Context (intp : ∀ s, (I s -d> A) → (C s -d> cit I C D) → D s → A).
 
-  (** Interpretation over [cit] *)
-  Fixpoint cit_intp (t : cit' I C D) : A :=
-    intp t.(cit_sel) (λ i, cit_intp (t.(cit_ikidsI) i))
+  (** Interpretation over [cit'] *)
+  Fixpoint cit'_intp (t : cit' I C D) : A :=
+    intp t.(cit_sel) (λ i, cit'_intp (t.(cit_ikidsI) i))
       t.(cit_ckids) t.(cit_data).
+
+  (** Interpretation over [cit] *)
+  Definition cit_intp : cit I C D → A := cit'_intp.
 End cit_intp.
 
 Section cit_intp.
   Context {S} {I C : S → Type} {D : S → ofe} {A : ofe}.
 
-  (** [cit_intp] is non-expansive *)
-  #[export] Instance cit_intp_ne_gen {n} :
+  (** [cit'_intp] is non-expansive *)
+  #[export] Instance cit'_intp_ne_gen {n} :
     Proper (forall_relation (λ _, (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡))
-      ==> (≡{n}≡) ==> (≡{n}≡)) (@cit_intp _ I C D A).
+      ==> (≡{n}≡) ==> (≡{n}≡)) (@cit'_intp _ I C D A).
   Proof.
     move=> ?? eqv t t' /cit_forall2_unfold.
     have {2}->: t = uncit (Cit t) by done.
@@ -358,16 +361,27 @@ Section cit_intp.
     elim. move=> [[????]][[????]]/= ???? Hd. subst. apply eqv; [done..|].
     exact: (Hd _ eq_refl).
   Qed.
-  #[export] Instance cit_intp_ne_intp `{!∀ s, NonExpansive3 (intp s)} :
+  #[export] Instance cit_intp_ne_gen {n} :
+    Proper (forall_relation (λ _, (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡))
+      ==> (≡{n}≡) ==> (≡{n}≡)) (@cit_intp _ I C D A).
+  Proof. solve_proper. Qed.
+  #[export] Instance cit'_intp_ne `{!∀ s, NonExpansive3 (intp s)} :
+    NonExpansive (@cit'_intp _ I C D A intp).
+  Proof. move=> ????. apply cit'_intp_ne_gen; [solve_proper|done]. Qed.
+  #[export] Instance cit_intp_ne `{!∀ s, NonExpansive3 (intp s)} :
     NonExpansive (@cit_intp _ I C D A intp).
-  Proof. move=> ????. apply cit_intp_ne_gen; [solve_proper|done]. Qed.
-  Lemma cit_intp_ne_tree `{!∀ s, NonExpansive3 (intp s)} {intp' n} :
+  Proof. solve_proper. Qed.
+  Lemma cit'_intp_ne_intp `{!∀ s, NonExpansive3 (intp s)} {intp' n} :
     (∀ s ti tc d, intp s ti tc d ≡{n}≡ intp' s ti tc d) →
-    ∀ t, @cit_intp _ I C D A intp t ≡{n}≡ cit_intp intp' t.
+    ∀ t, @cit'_intp _ I C D A intp t ≡{n}≡ cit'_intp intp' t.
   Proof.
-    move=> eqv ?. apply cit_intp_ne_gen; [|done]=> ??????????.
+    move=> eqv ?. apply cit'_intp_ne_gen; [|done]=> ??????????.
     etrans; [|by apply eqv]. solve_proper.
   Qed.
+  Lemma cit_intp_ne_intp `{!∀ s, NonExpansive3 (intp s)} {intp' n} :
+    (∀ s ti tc d, intp s ti tc d ≡{n}≡ intp' s ti tc d) →
+    ∀ t, @cit_intp _ I C D A intp t ≡{n}≡ cit_intp intp' t.
+  Proof. move=> ??. by apply cit'_intp_ne_intp. Qed.
 End cit_intp.
 
 (** ** [cit_mapI]: Intermediate map over [cit'] *)
