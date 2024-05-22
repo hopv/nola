@@ -195,7 +195,7 @@ Section cit_forall2.
   Qed.
 
   (** [cit_forall2] preserves the equivalence relation *)
-  #[export] Instance cit_forall2_equiv `{!∀ s, @Equivalence (D s) (R s)} :
+  #[export] Instance cit_forall2_equivalence `{!∀ s, @Equivalence (D s) (R s)} :
     Equivalence (cit_forall2 (I:=I) (C:=C) R).
   Proof. split; exact _. Qed.
 
