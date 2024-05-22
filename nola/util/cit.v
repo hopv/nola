@@ -3,7 +3,7 @@
 From nola Require Export prelude.
 From nola.util Require Import rel order.
 From iris.algebra Require Export ofe.
-Import EqNotations OeqvNotation.
+Import EqNotations IsoNotation.
 
 Implicit Type S CIT : Type.
 

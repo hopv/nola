@@ -2,75 +2,104 @@
 
 From nola Require Export prelude.
 
+(** ** [Iso]: Isomorphic relation *)
+Class Iso (A : Type) := iso : A → A → Prop.
+
+Module IsoNotation.
+  Infix "≃" := iso (at level 70).
+  Notation "(≃)" := iso (only parsing).
+  Infix "( o ≃.)" := (iso o) (at level 70, only parsing).
+  Infix "(.≃ o )" := (λ o', o' ≃ o) (at level 70, only parsing).
+  Infix "≃@{ OT }" := (@iso OT) (at level 70, only parsing).
+  Notation "(≃@{ OT } )" := (@iso OT) (only parsing).
+End IsoNotation.
+Import IsoNotation.
+
 (** ** [proty]: Pre-ordered type *)
 #[projections(primitive)]
 Structure proty := Proty {
   proty_car :> Type;
   #[canonical=no] ole :: SqSubsetEq proty_car;
+  #[canonical=no] oeqv :: Iso proty_car;
   #[canonical=no] ole_preorder :: PreOrder ole;
+  #[canonical=no] oeqv_ole {o o' : proty_car} :
+    o ≃ o' ↔ o ⊑ o' ∧ o' ⊑ o;
 }.
+Arguments proty_car {OT} : rename.
+Arguments ole {OT} : rename. Arguments oeqv {OT} : rename.
+Arguments ole_preorder {OT} : rename. Arguments oeqv_ole {OT _ _} : rename.
+Add Printing Constructor proty.
+#[export] Typeclasses Transparent ole. #[export] Typeclasses Transparent oeqv.
+
 Implicit Type (OT : proty) (A : Type).
-#[export] Typeclasses Transparent ole.
-
-(** ** [oeqv]: Equivalence w.r.t. the order *)
-Definition oeqv {OT} (o o' : OT) : Prop := o ⊑ o' ∧ o' ⊑ o.
-#[export] Typeclasses Transparent oeqv.
-
-Module OeqvNotation.
-  Infix "≃" := oeqv (at level 70).
-  Notation "(≃)" := oeqv (only parsing).
-  Infix "( o ≃.)" := (oeqv o) (at level 70, only parsing).
-  Infix "(.≃ o )" := (λ o', o' ≃ o) (at level 70, only parsing).
-  Infix "≃@{ OT }" := (@oeqv OT) (at level 70, only parsing).
-  Notation "(≃@{ OT } )" := (@oeqv OT) (only parsing).
-End OeqvNotation.
-Import OeqvNotation.
 
 (** [≃] is an equivalence relation *)
 #[export] Instance oeqv_equivalence {OT} : Equivalence (≃@{OT}).
 Proof.
-  constructor; [done|..]. { by move=> ??[??]. }
-  move=> ???[??][??]. by split; etrans.
+  constructor; move=> >; rewrite !oeqv_ole; [done|by case|].
+  move=> [??][??]. by split; etrans.
 Qed.
 
 (** [⊑] is a subrelation of [≃] *)
-#[export] Instance oeqv_ole {OT} : subrelation (≃@{OT}) (⊑@{OT}).
-Proof. move=> ??[??]. done. Qed.
-#[export] Instance oeqv_flip_ole {OT} : subrelation (≃@{OT}) (flip (⊑@{OT})).
-Proof. move=> ??[??]. done. Qed.
+#[export] Instance oeqv_ole_1 {OT} : subrelation (≃@{OT}) (⊑@{OT}).
+Proof. move=> >. apply oeqv_ole. Qed.
+#[export] Instance oeqv_ole_2 {OT} : subrelation (≃@{OT}) (flip (⊑@{OT})).
+Proof. move=> >. apply oeqv_ole. Qed.
 
 (** ** Canonical structures *)
 
 (** Natural number *)
-Canonical natPro : proty := Proty nat (≤) _.
+Program Canonical natPro : proty := Proty nat (≤) (=) _ _.
+Next Obligation.
+  move=> >. split; [by move=> ->|]. case=> *. by apply Nat.le_antisymm.
+Qed.
 Lemma nat_ole {n m} : n ⊑ m ↔ n ≤ m.
+Proof. done. Qed.
+Lemma nat_oeqv {n m : nat} : n ≃ m ↔ n = m.
 Proof. done. Qed.
 
 (** Proposition *)
-Program Canonical PropPro : proty := Proty Prop (→) _.
+Program Canonical PropPro : proty := Proty Prop (→) (↔) _ _.
 Next Obligation. constructor; auto. Qed.
+Next Obligation. done. Qed.
 Lemma Prop_ole {P Q : Prop} : P ⊑ Q ↔ (P → Q).
+Proof. done. Qed.
+Lemma Prop_oeqv {P Q : Prop} : P ≃ Q ↔ (P ↔ Q).
 Proof. done. Qed.
 
 (** Unit *)
-Canonical unitPro : proty := Proty unit (λ _ _, True) _.
+Program Canonical unitPro : proty := Proty unit (λ _ _, True) (λ _ _, True) _ _.
+Next Obligation. done. Qed.
 Lemma unit_ole {u u' : ()} : u ⊑ u' ↔ True.
+Proof. done. Qed.
+Lemma unit_oeqv {u u' : ()} : u ≃ u' ↔ True.
 Proof. done. Qed.
 
 (** Function *)
 Program Canonical funPro {A} (OTF : A → proty) : proty :=
-  Proty (∀ a, OTF a) (λ f g, ∀ a, f a ⊑ g a) _.
+  Proty (∀ a, OTF a) (λ f g, ∀ a, f a ⊑ g a) (λ f g, ∀ a, f a ≃ g a) _ _.
 Next Obligation. constructor; [auto|]=> ??????. etrans; auto. Qed.
+Next Obligation.
+  move=> ????. split.
+  - move=> ?. split=> ?; by apply oeqv_ole.
+  - move=> [??]?. by apply oeqv_ole.
+Qed.
 
 (** Dual *)
 #[projections(primitive)]
 Record dual A := Dual { undual : A }.
 Arguments Dual {_} _. Arguments undual {_} _.
 Program Canonical dualPro OT : proty :=
-  Proty (dual OT) (λ o o', undual o' ⊑ undual o) _.
+  Proty (dual OT) (λ o o', undual o' ⊑ undual o) (λ o o', undual o' ≃ undual o)
+    _ _.
 Next Obligation. move=> ?. constructor; [auto|]=> ?????. by etrans. Qed.
+Next Obligation.
+  move=> ???. split; by [move/oeqv_ole|move=> ?; apply oeqv_ole].
+Qed.
 
 Lemma dual_ole {OT} {o o' : dual OT} : o ⊑ o' ↔ undual o' ⊑ undual o.
+Proof. done. Qed.
+Lemma dual_oeqv {OT} {o o' : dual OT} : o ≃ o' ↔ undual o' ≃ undual o.
 Proof. done. Qed.
 
 (** ** Monotonicity *)
@@ -106,15 +135,21 @@ Proof. solve_proper. Qed.
 
 (** Monotonicity implies properness *)
 #[export] Instance mono_proper `{!@Mono OT OT' f} : Proper ((≃) ==> (≃)) f.
-Proof. move=> >[??]; split; by apply mono. Qed.
+Proof. move=> > /oeqv_ole[??]. apply oeqv_ole. split; by apply mono. Qed.
 #[export] Instance anti_proper `{!@Anti OT OT' f} : Proper ((≃) ==> (≃)) f.
-Proof. move=> >[??]; split; by apply anti. Qed.
+Proof. move=> > /oeqv_ole[??]. apply oeqv_ole. split; by apply anti. Qed.
 #[export] Instance mono2_proper `{!@Mono2 OT OT' OT'' f} :
   Proper ((≃) ==> (≃) ==> (≃)) f.
-Proof. move=> >[??]??[??]. split; by apply mono2. Qed.
+Proof.
+  move=> > /oeqv_ole[??] ?? /oeqv_ole[??]. apply oeqv_ole.
+  split; by apply mono2.
+Qed.
 #[export] Instance antimono_proper `{!@AntiMono OT OT' OT'' f} :
   Proper ((≃) ==> (≃) ==> (≃)) f.
-Proof. move=> >[??]??[??]. split; by apply antimono. Qed.
+Proof.
+  move=> > /oeqv_ole[??] ?? /oeqv_ole[??]. apply oeqv_ole.
+  split; by apply antimono.
+Qed.
 
 (** [⊑] is monotone *)
 #[export] Instance ole_mono {OT} : AntiMono (⊑@{OT}).
@@ -199,12 +234,12 @@ Qed.
 (** The binary meet/join is commutative *)
 #[export] Instance bin_meet_comm `{!BinMeet OT} : Comm (≃) (meet (A:=OT)) | 20.
 Proof.
-  move=> >. split; apply bin_meet_intro;
+  move=> >. apply oeqv_ole. split; apply bin_meet_intro;
     by [apply bin_meet_elim_2|apply bin_meet_elim_1].
 Qed.
 #[export] Instance bin_join_comm `{!BinJoin OT} : Comm (≃) (join (A:=OT)) | 20.
 Proof.
-  move=> >. split; apply bin_join_elim;
+  move=> >. apply oeqv_ole. split; apply bin_join_elim;
     by [apply bin_join_intro_2|apply bin_join_intro_1].
 Qed.
 
@@ -212,7 +247,7 @@ Qed.
 #[export] Instance bin_meet_assoc `{!BinMeet OT} :
   Assoc (≃) (meet (A:=OT)) | 20.
 Proof.
-  move=> >. split; repeat apply bin_meet_intro;
+  move=> >. apply oeqv_ole. split; repeat apply bin_meet_intro;
     try exact bin_meet_elim_1; try exact bin_meet_elim_2;
     try (etrans; [exact bin_meet_elim_2|
       try exact bin_meet_elim_1; exact bin_meet_elim_2]);
@@ -222,7 +257,7 @@ Qed.
 #[export] Instance bin_join_assoc `{!BinJoin OT} :
   Assoc (≃) (join (A:=OT)) | 20.
 Proof.
-  move=> >. split; repeat apply bin_join_elim;
+  move=> >. apply oeqv_ole. split; repeat apply bin_join_elim;
     try exact bin_join_intro_1; try exact bin_join_intro_2;
     try (etrans; last first; [exact bin_join_intro_1|
       try exact bin_join_intro_1; exact bin_join_intro_2]);
@@ -234,7 +269,7 @@ Qed.
 #[export] Instance bin_meet_top_l `{!BinMeet OT, !Otop OT} :
   LeftId (≃) ⊤ (meet (A:=OT)) | 20.
 Proof.
-  move=> ?. split; [exact bin_meet_elim_2|].
+  move=> ?. apply oeqv_ole. split; [exact bin_meet_elim_2|].
   apply bin_meet_intro; by [exact otop_intro|].
 Qed.
 #[export] Instance bin_meet_top_r `{!BinMeet OT, !Otop OT} :
@@ -243,7 +278,7 @@ Proof. move=> ?. by rewrite comm left_id. Qed.
 #[export] Instance bin_join_bot_l `{!BinJoin OT, !Obot OT} :
   LeftId (≃) ⊥ (join (A:=OT)) | 20.
 Proof.
-  move=> ?. split; [|exact bin_join_intro_2].
+  move=> ?. apply oeqv_ole. split; [|exact bin_join_intro_2].
   apply bin_join_elim; by [exact obot_elim|].
 Qed.
 #[export] Instance bin_join_bot_r `{!BinJoin OT, !Obot OT} :
@@ -341,7 +376,7 @@ End BigMJNotation.
 Import BigMJNotation.
 
 Module OrderNotation.
-  Export OeqvNotation.
+  Export IsoNotation.
   Export BigMJNotation.
 End OrderNotation.
 
@@ -443,7 +478,7 @@ Section lfp.
     rewrite {1}lfp_unseal. apply (big_meet_elim id), mono, lfp_unfold_2.
   Qed.
   Lemma lfp_unfold `{!Mono f} : lfp f ≃ f (lfp f).
-  Proof. split; [apply lfp_unfold_1|apply lfp_unfold_2]. Qed.
+  Proof. apply oeqv_ole. split; [apply lfp_unfold_1|apply lfp_unfold_2]. Qed.
 
   (** Basic induction principle *)
   Lemma lfp_ind `{!Mono f} {o} : f o ⊑ o → lfp f ⊑ o.
@@ -455,16 +490,18 @@ Section lfp.
   Proof. move=> *?*. by apply (mono (f:=f)), mono2. Qed.
   Lemma aug_meet_nest `{!BinMeet OT, !Mono f} {o o'} :
     aug_meet (aug_meet f o') o ≃ aug_meet f (o ⊓ o').
-  Proof. split=> ?; apply (mono (f:=f)); by rewrite assoc. Qed.
+  Proof. apply oeqv_ole. split=> ?; apply (mono (f:=f)); by rewrite assoc. Qed.
   Lemma aug_meet_top `{!BinMeet OT, !Mono f, !Otop OT} : aug_meet f ⊤ ≃ f.
-  Proof. split=> ?; apply (mono (f:=f)); by rewrite right_id. Qed.
+  Proof.
+    apply oeqv_ole. split=> ?; apply (mono (f:=f)); by rewrite right_id.
+  Qed.
 
   (** Parameterized induction principle *)
   Lemma lfp_para_ind `{!BinMeet OT, !BigMeet OT, !Mono f} {o} :
     lfp (aug_meet f o) ⊑ o → lfp f ⊑ o.
   Proof.
     move=> to. etrans; [|apply to]. apply lfp_ind.
-    etrans; [|by apply lfp_unfold]. apply (mono (f:=f)).
+    etrans; [|by apply lfp_unfold_2]. apply (mono (f:=f)).
     by apply bin_meet_intro.
   Qed.
 End lfp.
@@ -498,7 +535,7 @@ Section gfp.
     rewrite {2}gfp_unseal. apply (big_join_intro id), mono, gfp_unfold_1.
   Qed.
   Lemma gfp_unfold `{!Mono f} : gfp f ≃ f (gfp f).
-  Proof. split; [apply gfp_unfold_1|apply gfp_unfold_2]. Qed.
+  Proof. apply oeqv_ole. split; [apply gfp_unfold_1|apply gfp_unfold_2]. Qed.
 
   (** Basic coinduction principle *)
   Lemma gfp_coind `{!Mono f} {o} : o ⊑ f o → o ⊑ gfp f.
@@ -510,15 +547,18 @@ Section gfp.
   Proof. move=> *?*. apply (mono (f:=f)), mono2; by [apply _| |]. Qed.
   Lemma aug_join_nest `{!BinJoin OT, !Mono f} {o o'} :
     aug_join (aug_join f o') o ≃ aug_join f (o ⊔ o').
-  Proof. split=> ?; apply (mono (f:=f)); by rewrite assoc. Qed.
+  Proof. apply oeqv_ole. split=> ?; apply (mono (f:=f)); by rewrite assoc. Qed.
   Lemma aug_join_bot `{!BinJoin OT, !Mono f, !Obot OT} : aug_join f ⊥ ≃ f.
-  Proof. split=> ?; apply (mono (f:=f)); by rewrite right_id. Qed.
+  Proof.
+    apply oeqv_ole. split=> ?; apply (mono (f:=f)); by rewrite right_id.
+  Qed.
 
   (** Parameterized coinduction principle *)
   Lemma gfp_para_coind `{!BinJoin OT, !BigJoin OT, !Mono f} {o} :
     o ⊑ gfp (aug_join f o) → o ⊑ gfp f.
   Proof.
     move=> to. etrans; [apply to|]. apply gfp_coind.
-    etrans; [by apply gfp_unfold|]. apply (mono (f:=f)). by apply bin_join_elim.
+    etrans; [by apply gfp_unfold_1|]. apply (mono (f:=f)).
+    by apply bin_join_elim.
   Qed.
 End gfp.
