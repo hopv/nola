@@ -49,9 +49,7 @@ Definition cip_cdom {S} (C : S → Type) (s : cip_sel S) : Type := match s with
 Definition cip_dataOF {S} (D : S → oFunctor) (s : cip_sel S) : oFunctor :=
   match s with
   | cips_all _ | cips_ex _ | cips_bin _ | cips_un _ => unitO
-  | cips_pure => PropO
-  | cips_later => laterOF ∙
-  | cips_custom s => D s
+  | cips_pure => PropO | cips_later => laterOF ∙ | cips_custom s => D s
   end.
 
 (** [cip_dataOF] is contractive *)
