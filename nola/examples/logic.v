@@ -67,7 +67,7 @@ Section iris.
   Section ilist.
     Context N (Φ : loc → ciProp Σ).
 
-    (** [ilist]: Proposition for a syntactic list *)
+    (** [ilist]: Syntactic proposition for a list *)
     Definition ilist_gen Ilist' l : ciProp Σ :=
       cip_inv N (Φ l) ∗ cip_inv N (Ilist' l).
     Definition ilist'_gen Ilist' l : ciProp Σ :=
