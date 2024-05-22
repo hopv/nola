@@ -17,7 +17,8 @@ Variant cip_binsel :=
 Variant cip_unsel :=
 | (** Plainly *) cips_plain
 | (** Persistently *) cips_pers
-| (** Basic update *) cips_bupd.
+| (** Basic update *) cips_bupd
+| (** Except-0 *) cips_except0.
 
 (** ** [cip_sel]: Selector *)
 Variant cip_sel S :=
@@ -90,6 +91,7 @@ Section ciProp.
   Definition cip_plain := cip_un cips_plain.
   Definition cip_pers := cip_un cips_pers.
   Definition cip_bupd := cip_un cips_bupd.
+  Definition cip_except0 := cip_un cips_except0.
 
   Definition cip_pure (φ : Prop) : ciProp I C D Σ :=
     CitX cips_pure nullary nullary φ.
@@ -114,6 +116,7 @@ Infix "-∗" := cip_wand : ciProp_scope.
 Notation "■ Px" := (cip_plain Px) : ciProp_scope.
 Notation "□ Px" := (cip_pers Px) : ciProp_scope.
 Notation "|==> Px" := (cip_bupd Px) : ciProp_scope.
+Notation "◇ Px" := (cip_except0 Px) : ciProp_scope.
 Notation "⌜ φ ⌝" := (cip_pure φ) : ciProp_scope.
 Notation "'True'" := (cip_pure True) : ciProp_scope.
 Notation "'False'" := (cip_pure False) : ciProp_scope.
@@ -138,6 +141,7 @@ Section iris.
     | cips_un s => λ Ps _ _, let P := Ps () in
         match s with
         | cips_plain => ■ P | cips_pers => □ P | cips_bupd => |==> P
+        | cips_except0 => ◇ P
         end
     | cips_pure => λ _ _ φ, ⌜φ⌝ | cips_later => λ _ _, laterl
     | cips_custom s => intp s
