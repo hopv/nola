@@ -468,3 +468,9 @@ Next Obligation.
   move=>/= *. etrans; [|exact cit_map_compose]=> ?. f_equiv=> ??? eqv.
   etrans; [|apply equiv_dist; exact: oFunctor_map_compose]. by f_equiv.
 Qed.
+
+#[export] Instance citOF_contractive {S I C}
+  `{!∀ s, oFunctorContractive (F s)} : oFunctorContractive (citOF (S:=S) I C F).
+Proof.
+  move=> > ? *. apply cit_map_ne'=> ??. by apply oFunctor_map_contractive.
+Qed.
