@@ -245,7 +245,7 @@ Section citO.
   (** OFE on [cit'] *)
   Canonical cit'O : ofe := Ofe (cit' I C D) cit'_ofe_mixin.
 End citO.
-Arguments citO : clear implicits. Arguments cit'O : clear implicits.
+Arguments citO {_} _ _ _. Arguments cit'O {_} _ _ _.
 
 Section citO.
   Context {S} {I C : S → Type} {D : S → ofe}.
@@ -299,7 +299,7 @@ Section citO.
   Definition cit_sel_ne {n t t'} (eqv : t ≡{n}≡ t')
     : t.(cit_sel) = t'.(cit_sel) := (cit_forall2_unfold_1 eqv).(citf2_sel).
   #[export] Instance cit_sel_ne' :
-    NonExpansive (cit_sel : citO S I C D → leibnizO S).
+    NonExpansive (cit_sel : citO I C D → leibnizO S).
   Proof. move=> ???. exact cit_sel_ne. Qed.
 
   (** [cit_ikids] is non-expansive *)
@@ -326,7 +326,7 @@ Section citO.
 
   (** [citO S I C D] is discrete if [D] is discrete *)
   #[export] Instance citO_discrete `{∀ s, OfeDiscrete (D s)} :
-    OfeDiscrete (citO S I C D).
+    OfeDiscrete (citO I C D).
   Proof.
     move=> ?? + ?. by apply cit_forall2_mono=> ??? /discrete_0 /equiv_dist.
   Qed.
