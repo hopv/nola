@@ -25,14 +25,14 @@ Arguments cit_data {_ _ _ _ _}.
 (** ** [cit]: Coinductive-inductive tree *)
 Section cit.
   Context {S} (I C D : S → Type).
-  CoInductive cit := of_citI { to_citI : citI I C D cit; }.
+  CoInductive cit := Cit { uncit : citI I C D cit; }.
 End cit.
 Add Printing Constructor cit.
-Arguments of_citI {_ _ _ _}. Arguments to_citI {_ _ _ _}.
+Arguments Cit {_ _ _ _}. Arguments uncit {_ _ _ _}.
+Notation CitX s it ik d := (Cit (CitI s it ik d)).
 Notation cit' I C D := (citI I C D (cit I C D)).
-Notation Cit s ik ck d := (of_citI (CitI s ik ck d)).
-Notation cit_ikids t i := (of_citI (t.(cit_ikidsI) i)).
-#[warning="-uniform-inheritance"] Coercion to_citI : cit >-> cit'.
+Notation cit_ikids t i := (Cit (t.(cit_ikidsI) i)).
+#[warning="-uniform-inheritance"] Coercion uncit : cit >-> cit'.
 
 (** ** [cit_forall2I]: Intermediate universal relation between [citI]s *)
 Section cit_forall2I.
@@ -235,17 +235,17 @@ Section citO.
   (** OFE on [cit] *)
   Canonical citO : ofe := Ofe (cit I C D) cit_ofe_mixin.
 
-  (** OFE on [citI] *)
-  Local Instance citI_dist : Dist (citI I C D (cit I C D)) :=
-    λ n t t', of_citI t ≡{n}≡ of_citI t'.
-  Local Instance citI_equiv : Equiv (citI I C D (cit I C D)) :=
-    λ t t', of_citI t ≡ of_citI t'.
-  Lemma citI_ofe_mixin : OfeMixin (citI I C D (cit I C D)).
-  Proof. by apply (iso_ofe_mixin of_citI). Qed.
-  (** OFE on [citI] *)
-  Canonical citIO : ofe := Ofe (citI I C D (cit I C D)) citI_ofe_mixin.
+  (** OFE on [cit'] *)
+  Local Instance cit'_dist : Dist (cit' I C D) :=
+    λ n t t', Cit t ≡{n}≡ Cit t'.
+  Local Instance cit'_equiv : Equiv (cit' I C D) :=
+    λ t t', Cit t ≡ Cit t'.
+  Lemma cit'_ofe_mixin : OfeMixin (cit' I C D).
+  Proof. by apply (iso_ofe_mixin Cit). Qed.
+  (** OFE on [cit'] *)
+  Canonical cit'O : ofe := Ofe (cit' I C D) cit'_ofe_mixin.
 End citO.
-Arguments citO : clear implicits. Arguments citIO : clear implicits.
+Arguments citO : clear implicits. Arguments cit'O : clear implicits.
 
 Section citO.
   Context {S} {I C : S → Type} {D : S → ofe}.
@@ -259,10 +259,10 @@ Section citO.
     (t ≡ t') = ∀ n, cit_forall2 (λ _, dist n) t t'.
   Proof. done. Qed.
   Lemma citI_dist_eq {n} {t t' : cit' I C D} :
-    (t ≡{n}≡ t') = cit_forall2 (λ _, dist n) (of_citI t) (of_citI t').
+    (t ≡{n}≡ t') = cit_forall2 (λ _, dist n) (Cit t) (Cit t').
   Proof. done. Qed.
   Lemma citI_equiv_eq {t t' : cit' I C D} :
-    (t ≡ t') = ∀ n, cit_forall2 (λ _, dist n) (of_citI t) (of_citI t').
+    (t ≡ t') = ∀ n, cit_forall2 (λ _, dist n) (Cit t) (Cit t').
   Proof. done. Qed.
 
   (** Alternative equivalence for [cit], directly defined *)
@@ -291,7 +291,7 @@ Section citO.
       (≡{n}≡) ==> (≡{n}≡)) (@CitI _ I C D _ s).
   Proof.
     move=> ti ti' eqv ??????. apply cit_forall2_unfold.
-    apply (Citf2 (t:=Cit s ti _ _) (t':=Cit s ti' _ _) eq_refl)=>/=; [|done|].
+    apply (Citf2 (t:=CitX s ti _ _) (t':=CitX s ti' _ _) eq_refl)=>/=; [|done|].
     { move=> ?. apply cit_forall2_unfold, eqv. } { move=> ??. by subst. }
   Qed.
 
@@ -316,6 +316,13 @@ Section citO.
   Lemma cit_data_ne {n t t'} (eqv : t ≡{n}≡ t') :
     (rew cit_sel_ne eqv in t.(cit_data)) ≡{n}≡ t'.(cit_data).
   Proof. exact: ((cit_forall2_unfold_1 eqv).(citf2_data) _ eq_refl). Qed.
+
+  (** [Cit] is non-expansive *)
+  #[export] Instance Cit_ne : NonExpansive (@Cit _ I C D).
+  Proof. solve_proper. Qed.
+  (** [uncit] is non-expansive *)
+  #[export] Instance uncit_ne : NonExpansive (@uncit _ I C D).
+  Proof. by move=> ?[?][?]. Qed.
 
   (** [citO S I C D] is discrete if [D] is discrete *)
   #[export] Instance citO_discrete `{∀ s, OfeDiscrete (D s)} :
@@ -345,9 +352,9 @@ Section cit_intp.
       ==> (≡{n}≡) ==> (≡{n}≡)) (@cit_intp _ I C D A).
   Proof.
     move=> ?? eqv t t' /cit_forall2_unfold.
-    have {2}->: t = to_citI (of_citI t) by done.
-    have {2}->: t' = to_citI (of_citI t') by done.
-    move: (of_citI t) (of_citI t')=> ??.
+    have {2}->: t = uncit (Cit t) by done.
+    have {2}->: t' = uncit (Cit t') by done.
+    move: (Cit t) (Cit t')=> ??.
     elim. move=> [[????]][[????]]/= ???? Hd. subst. apply eqv; [done..|].
     exact: (Hd _ eq_refl).
   Qed.
