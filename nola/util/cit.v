@@ -9,7 +9,7 @@ Implicit Type S CIT : Type.
 
 (** ** [citI]: Intermediate inductive tree *)
 Section citI.
-  Context S (I C D : S → Type) CIT.
+  Context {S} (I C D : S → Type) CIT.
   Inductive citI := CitI {
     (** Selector *) cit_sel : S;
     (** Inductive children *) cit_ikidsI : I cit_sel → citI;
@@ -24,12 +24,12 @@ Arguments cit_data {_ _ _ _ _}.
 
 (** ** [cit]: Coinductive-inductive tree *)
 Section cit.
-  Context S (I C D : S → Type).
-  CoInductive cit := of_citI { to_citI : citI S I C D cit; }.
+  Context {S} (I C D : S → Type).
+  CoInductive cit := of_citI { to_citI : citI I C D cit; }.
 End cit.
 Add Printing Constructor cit.
 Arguments of_citI {_ _ _ _}. Arguments to_citI {_ _ _ _}.
-Notation cit' S I C D := (citI S I C D (cit S I C D)).
+Notation cit' I C D := (citI I C D (cit I C D)).
 Notation Cit s ik ck d := (of_citI (CitI s ik ck d)).
 Notation cit_ikids t i := (of_citI (t.(cit_ikidsI) i)).
 #[warning="-uniform-inheritance"] Coercion to_citI : cit >-> cit'.
@@ -38,8 +38,8 @@ Notation cit_ikids t i := (of_citI (t.(cit_ikidsI) i)).
 Section cit_forall2I.
   Context {S} {I C D D' : S → Type}.
   Context (R : ∀ s, D s → D' s → Prop)
-    (CITF : cit S I C D → cit S I C D' → Prop).
-  Inductive cit_forall2I (t : cit S I C D) (t' : cit S I C D') : Prop := Citf2 {
+    (CITF : cit I C D → cit I C D' → Prop).
+  Inductive cit_forall2I (t : cit I C D) (t' : cit I C D') : Prop := Citf2 {
     citf2_sel : t.(cit_sel) = t'.(cit_sel);
     citf2_ikids : ∀ i, cit_forall2I
       (cit_ikids t i) (cit_ikids t' (rew citf2_sel in i));
@@ -121,7 +121,7 @@ Section cit_forall2I.
 End cit_forall2I.
 
 (** ** [cit_forall2]: Universal relation between [cit]s *)
-Definition cit_forall2 {S I C D D'} R : cit S I C D → cit S I C D' → Prop :=
+Definition cit_forall2 {S I C D D'} R : cit (S:=S) I C D → cit I C D' → Prop :=
   gfp (cit_forall2I R).
 
 Section cit_forall2.
@@ -143,7 +143,7 @@ Section cit_forall2.
 
   (** Coinduction on [cit_forall2] *)
   Lemma cit_forall2_coind {D D' R t t'}
-    (CH : cit S I C D → cit S I C D' → Prop) :
+    (CH : cit I C D → cit I C D' → Prop) :
     CH t t' → (CH ⊑ cit_forall2I R CH) → cit_forall2 R t t'.
   Proof. move=> ??. by apply (gfp_coind (o:=CH)). Qed.
 
@@ -217,39 +217,39 @@ Section citO.
   Context {S} {I C : S → Type} {D : S → ofe}.
 
   (** Distance for [cit] *)
-  Local Instance cit_dist : Dist (cit S I C D) :=
+  Local Instance cit_dist : Dist (cit I C D) :=
     λ n, cit_forall2 (λ _, dist n).
 
   (** Equivalence for [cit]
 
     Defined using [dist] to avoid UIP *)
-  Local Instance cit_equiv : Equiv (cit S I C D) :=
+  Local Instance cit_equiv : Equiv (cit I C D) :=
     λ t t', ∀ n, cit_dist n t t'.
 
   (** OFE mixin on [cit] *)
-  Lemma cit_ofe_mixin : OfeMixin (cit S I C D).
+  Lemma cit_ofe_mixin : OfeMixin (cit I C D).
   Proof.
    split; [done|exact _|]=> ???? F ?. move: F. apply cit_forall2_mono.
    move=> ????. by eapply dist_lt.
   Qed.
   (** OFE on [cit] *)
-  Canonical citO : ofe := Ofe (cit S I C D) cit_ofe_mixin.
+  Canonical citO : ofe := Ofe (cit I C D) cit_ofe_mixin.
 
   (** OFE on [citI] *)
-  Local Instance citI_dist : Dist (citI S I C D (cit S I C D)) :=
+  Local Instance citI_dist : Dist (citI I C D (cit I C D)) :=
     λ n t t', of_citI t ≡{n}≡ of_citI t'.
-  Local Instance citI_equiv : Equiv (citI S I C D (cit S I C D)) :=
+  Local Instance citI_equiv : Equiv (citI I C D (cit I C D)) :=
     λ t t', of_citI t ≡ of_citI t'.
-  Lemma citI_ofe_mixin : OfeMixin (citI S I C D (cit S I C D)).
+  Lemma citI_ofe_mixin : OfeMixin (citI I C D (cit I C D)).
   Proof. by apply (iso_ofe_mixin of_citI). Qed.
   (** OFE on [citI] *)
-  Canonical citIO : ofe := Ofe (citI S I C D (cit S I C D)) citI_ofe_mixin.
+  Canonical citIO : ofe := Ofe (citI I C D (cit I C D)) citI_ofe_mixin.
 End citO.
 Arguments citO : clear implicits. Arguments citIO : clear implicits.
 
 Section citO.
   Context {S} {I C : S → Type} {D : S → ofe}.
-  Implicit Type t : cit S I C D.
+  Implicit Type t : cit I C D.
 
   (** Rewrite [dist] and [equiv] on [cit] and [citI] *)
   Lemma cit_dist_eq {n t t'} :
@@ -258,15 +258,15 @@ Section citO.
   Lemma cit_equiv_eq {t t'} :
     (t ≡ t') = ∀ n, cit_forall2 (λ _, dist n) t t'.
   Proof. done. Qed.
-  Lemma citI_dist_eq {n} {t t' : cit' S I C D} :
+  Lemma citI_dist_eq {n} {t t' : cit' I C D} :
     (t ≡{n}≡ t') = cit_forall2 (λ _, dist n) (of_citI t) (of_citI t').
   Proof. done. Qed.
-  Lemma citI_equiv_eq {t t' : cit' S I C D} :
+  Lemma citI_equiv_eq {t t' : cit' I C D} :
     (t ≡ t') = ∀ n, cit_forall2 (λ _, dist n) (of_citI t) (of_citI t').
   Proof. done. Qed.
 
   (** Alternative equivalence for [cit], directly defined *)
-  Definition cit_equiv_alt : cit S I C D → cit S I C D → Prop :=
+  Definition cit_equiv_alt : cit I C D → cit I C D → Prop :=
     cit_forall2 (λ _, equiv).
 
   (** [cit_equiv_alt] is an equivalence relation *)
@@ -318,10 +318,10 @@ End citO.
 (** ** [cit_intp]: Interpretation over [cit] *)
 Section cit_intp.
   Context {S} {I C : S → Type} {D : S → ofe} {A : ofe}.
-  Context (intp : ∀ s, (I s -d> A) → (C s -d> cit S I C D) → D s → A).
+  Context (intp : ∀ s, (I s -d> A) → (C s -d> cit I C D) → D s → A).
 
   (** Interpretation over [cit] *)
-  Fixpoint cit_intp (t : citI S I C D _) : A :=
+  Fixpoint cit_intp (t : cit' I C D) : A :=
     intp t.(cit_sel) (λ i, cit_intp (t.(cit_ikidsI) i))
       t.(cit_ckids) t.(cit_data).
 End cit_intp.
