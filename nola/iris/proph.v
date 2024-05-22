@@ -119,8 +119,8 @@ Local Definition proph_mapR TY := gmapR positive (proph_itemR TY).
 (** Carrier of the algebra for the prophecy machinery *)
 #[projections(primitive)]
 Record proph_car TY := ProphCar { un_proph_car : proph_mapR TY }.
-Arguments ProphCar {_}. Arguments un_proph_car {_}.
 Add Printing Constructor proph_car.
+Arguments ProphCar {_}. Arguments un_proph_car {_}.
 
 (** Equivalence *)
 Local Instance proph_equiv_instance {TY} : Equiv (proph_car TY) :=

@@ -14,6 +14,7 @@ Structure synpty := Synpty {
   (* [synty_inhab] is proof-irrelevant *) #[canonical=no]
     synpty_inhab_irrel {X} :: ProofIrrel (synpty_inhab X);
 }.
+Add Printing Constructor synpty.
 Arguments synpty_eqdec {_} _. Arguments synpty_inhab {_} _.
 Arguments synpty_inhab_irrel {_ _} _.
 
@@ -87,6 +88,7 @@ Structure synty := Synty {
   (* An inhabitant implies [synty_inhab] *) #[canonical=no]
     synty_to_inhab {X} : synty_ty X → synpty_inhab X;
 }.
+Add Printing Constructor synty.
 Arguments synty_ty {_} _. Arguments synty_inhabited {_ _} _.
 Arguments synty_to_inhab {_ _} _.
 #[warning="-uniform-inheritance"] Coercion synty_ty : synpty_car >-> Sortclass.

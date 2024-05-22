@@ -6,9 +6,8 @@ From nola Require Export prelude.
   using primitive projections and right-associative notations *)
 #[projections(primitive)]
 Record prod' (A B : Type) : Type := pair' { fst' : A; snd' : B; }.
-Arguments pair' {_ _} _ _.
-Arguments fst' {_ _} _.
-Arguments snd' {_ _} _.
+Add Printing Constructor prod'.
+Arguments pair' {_ _} _ _. Arguments fst' {_ _} _. Arguments snd' {_ _} _.
 
 Module ProdNotation.
   Infix "*'" := prod' (at level 41, right associativity).

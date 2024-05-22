@@ -25,10 +25,10 @@ Structure proty := Proty {
   #[canonical=no] oeqv_ole {o o' : proty_car} :
     o ≃ o' ↔ o ⊑ o' ∧ o' ⊑ o;
 }.
+Add Printing Constructor proty.
 Arguments proty_car {OT} : rename.
 Arguments ole {OT} : rename. Arguments oeqv {OT} : rename.
 Arguments ole_preorder {OT} : rename. Arguments oeqv_ole {OT _ _} : rename.
-Add Printing Constructor proty.
 #[export] Typeclasses Transparent ole. #[export] Typeclasses Transparent oeqv.
 
 Implicit Type (OT : proty) (A : Type).
@@ -88,6 +88,7 @@ Qed.
 (** Dual *)
 #[projections(primitive)]
 Record dual A := Dual { undual : A }.
+Add Printing Constructor dual.
 Arguments Dual {_} _. Arguments undual {_} _.
 Program Canonical dualPro OT : proty :=
   Proty (dual OT) (λ o o', undual o' ⊑ undual o) (λ o o', undual o' ≃ undual o)

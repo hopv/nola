@@ -17,6 +17,7 @@ Structure judg (PROP : bi) : Type := Judg {
 }.
 Arguments judg_car {PROP JUDG} : rename.
 Arguments judg_Pintp {PROP JUDG} : rename.
+Add Printing Constructor judg.
 
 Section deriv.
   Context {PROP} {JUDG : judg PROP}.
@@ -105,4 +106,5 @@ Class Dintp (JUD : Type) (A : ofe) (PROP : bi) := DINTP {
   dintp :: Pintp (JUD → PROP) A PROP;
   dintp_ne {δ} :: NonExpansive (dintp δ);
 }.
+Add Printing Constructor Dintp.
 Hint Mode Dintp - ! - : typeclass_instances.
