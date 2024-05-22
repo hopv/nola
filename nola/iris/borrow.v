@@ -670,7 +670,7 @@ Section borrow.
   Qed.
 
   (** [bor_wsat] is non-expansive over the borrower state *)
-  Local Instance bor_wsat_st_ne `{!NonExpansive intp} {d α} :
+  Local Instance bor_wsat_ne_st `{!NonExpansive intp} {d α} :
     NonExpansive (bor_wsat intp d α).
   Proof.
     move=> ?[?[|?|?]][?[|?|?]][//=eqv /leibniz_equiv_iff].
