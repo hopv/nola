@@ -1,8 +1,7 @@
 (** * Utility on OFEs *)
 
 From nola Require Export prelude.
-From iris.algebra Require Import ofe cmra.
-From iris.base_logic.lib Require Import iprop.
+From iris.base_logic.lib Require Export iprop.
 
 (** ** Notation for functor application over [iProp Σ] *)
 Notation iProp_oapp F Σ := (oFunctor_apply F (iProp Σ)).
