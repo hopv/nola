@@ -35,6 +35,7 @@ nola/iris/borrow.v
 nola/iris/proph.v
 nola/iris/proph_ag.v
 nola/iris/pborrow.v
+nola/iris/ciprop.v
 
 nola/heap_lang/locations.v
 nola/heap_lang/lang.v
