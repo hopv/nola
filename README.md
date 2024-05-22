@@ -61,7 +61,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
 - [`prelude`](nola/prelude.v) : Prelude
 - [`util/`](nola/util/) : General-purpose utilities, extending
   [`stdpp`](https://gitlab.mpi-sws.org/iris/stdpp)
-  + [`rel`](nola/util/rel) (Relations)
+  + [`fn`](nola/util/fn) (Functions),
+    [`rel`](nola/util/rel) (Relations)
   + [`prod`](nola/util/prod.v) (Modified product),
     [`plist`](nola/util/plist.v) (Product list)
   + [`proph`](nola/util/proph.v) (Prophecy)
@@ -103,3 +104,4 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
 - [`examples/`](nola/examples/) : Examples
   + [`minilogic`](nola/examples/minilogic.v) : Minimal showcase logic
   + [`later`](nola/examples/later.v) : Instantiating Nola with later
+  + [`logic/`](nola/examples/logic/) : Showcase logic

@@ -2,6 +2,7 @@
 
 nola/prelude.v
 
+nola/util/fn.v
 nola/util/rel.v
 nola/util/prod.v
 nola/util/plist.v
@@ -53,3 +54,4 @@ nola/heap_lang/lib/lock.v
 
 nola/examples/later.v
 nola/examples/minilogic.v
+nola/examples/logic.v
