@@ -118,11 +118,11 @@ Notation "▷ P" := (cip_later P) : ciProp_scope.
 
 Section iris.
   Context {S} {I C : S → Type} {D : S → oFunctor} {Σ : gFunctors}.
-  Implicit Type (intp : ∀ s,
-    (I s -d> iProp Σ) → (C s -d> ciProp I C D Σ) → D s $oi Σ → iProp Σ).
 
   (** ** [cip_bintp]: Base interpretation for [ciProp] *)
-  Definition cip_bintp intp s
+  Definition cip_bintp
+    (intp : ∀ s, (I s -d> iProp Σ) → (C s -d> ciProp I C D Σ) →
+      D s $oi Σ → iProp Σ) s
     : (cip_idom I s -d> iProp Σ) → (cip_cdom C s -d> ciProp I C D Σ) →
         cip_dataOF D s $oi Σ → iProp Σ :=
     match s with
