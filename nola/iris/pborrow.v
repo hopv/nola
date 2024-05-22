@@ -1,6 +1,7 @@
 (** * Prophetic borrowing *)
 
 From nola.bi Require Export plist.
+From nola.bi Require Import order.
 From nola.iris Require Export borrow proph_ag.
 From iris.proofmode Require Import proofmode.
 Import ProdNotation PlistNotation iPropAppNotation LftNotation ProphNotation
@@ -213,6 +214,10 @@ Section pborrow.
   #[export] Instance pborrow_wsat_ne {n} :
     Proper (((≡{n}≡) ==> (≡{n}≡)) ==> (≡{n}≡) ==> (≡{n}≡)) pborrow_wsat.
   Proof. solve_proper. Qed.
+  (** [pborrow_wsat] is monotone over the modality *)
+  #[export] Instance pborrow_wsat_mono :
+    Mono (OT:=_ → _ : bi) (OT':=_ → _ : bi) pborrow_wsat.
+  Proof. move=> ????. by apply: borrow_wsat_mono. Qed.
 
   (** ** For non-prophetic borrowing *)
 

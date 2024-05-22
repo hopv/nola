@@ -1,8 +1,8 @@
 (** * Borrowing machinery *)
 
 From nola.util Require Export prod.
-From nola.bi Require Import gmap.
 From nola.bi Require Export upd.
+From nola.bi Require Import order gmap.
 From nola.iris Require Export ofe lft.
 From iris.algebra Require Import excl agree gmap auth.
 From iris.bi.lib Require Import cmra.
@@ -427,6 +427,20 @@ Section borrow.
   Proof.
     rewrite borrow_wsat_unseal /borrow_wsat_def /borrow_wsat'=> ??????.
     repeat f_equiv. by apply depo_wsat_ne.
+  Qed.
+
+  (** [borrow_wsat] is monotone over the modality *)
+  Local Instance depo_wsat_mono :
+    Mono (OT:=_ → _ : bi) (OT':=_ → _ → _ → _ → _ → _ : bi) depo_wsat.
+  Proof.
+    move=> ?? to ?????. unfold depo_wsat, depo_wsat_in, depo_wsat_dead.
+    repeat f_equiv; exact: to.
+  Qed.
+  #[export] Instance borrow_wsat_mono :
+    Mono (OT:=_ → _ : bi) (OT':=_ → _ : bi) borrow_wsat.
+  Proof.
+    rewrite borrow_wsat_unseal /borrow_wsat_def /borrow_wsat'=> ????.
+    repeat f_equiv. by apply: depo_wsat_mono.
   Qed.
 
   (** Create new borrowers and lenders with a specific depth *)
