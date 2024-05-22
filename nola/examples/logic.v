@@ -23,9 +23,17 @@ Definition dataOF (s : sel) : oFunctor := match s with
   | cips_inv _ => unitO
   end.
 
+(** [dataOF] is contractive *)
+#[export] Instance dataOF_contractive {s} : oFunctorContractive (dataOF s).
+Proof. by case s. Qed.
+
 (** ** [ciProp]: Proposition *)
 Notation ciProp Σ := (ciProp idom cdom dataOF Σ).
 Notation ciPropOF := (ciPropOF idom cdom dataOF).
+
+(** [ciPropOF] is contractive *)
+Fact ciPropOF_contractive : oFunctorContractive ciPropOF.
+Proof. exact _. Qed.
 
 (** ** Construct [ciProp] *)
 Section ciProp.

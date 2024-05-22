@@ -62,6 +62,11 @@ Definition ciPropOF {S} I C D : oFunctor :=
   citOF (cip_idom (S:=S) I) (cip_cdom C) (cip_dataOF D).
 Definition ciProp {S} I C D Σ : Type := ciPropOF (S:=S) I C D $oi Σ.
 
+(** [ciPropOF] is contractive *)
+Fact ciPropOF_contractive {S I C} `{∀ s, oFunctorContractive (D s)} :
+  oFunctorContractive (@ciPropOF S I C D).
+Proof. exact _. Qed.
+
 (** ** Construct [ciProp] *)
 Section ciProp.
   Context {S} {I C : S → Type} {D : S → oFunctor} {Σ : gFunctors}.
