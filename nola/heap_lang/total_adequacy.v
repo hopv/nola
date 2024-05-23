@@ -6,21 +6,14 @@ From nola.heap_lang Require Import proofmode notation.
 From iris.prelude Require Import options.
 Import WpwNotation.
 
-Definition heap_total Σ `{!heapGpreS Σ} s e σ φ :
-  (∀ `{!heapGS_gen HasNoLc Σ}, ⊢ |={⊤}=> ∃ W,
-    W ∗ (inv_heap_inv -∗ WP[W] e @ s; ⊤ [{ v, ⌜φ v⌝ }])) →
+Theorem heap_total Σ `{!heapGpreS Σ} s e σ φ :
+  (∀ `{!heapGS_gen HasNoLc Σ},
+    inv_heap_inv ={⊤}=∗ ∃ W : iProp Σ, W ∗ WP[W] e @ s; ⊤ [{ v, ⌜φ v⌝ }]) →
   sn erased_step ([e], σ).
 Proof.
-  intros Hwp; eapply (twp_total _ _); iIntros (?) "".
-  iMod (gen_heap_init σ.(heap)) as (?) "[Hh _]".
-  iMod (inv_heap_init loc (option val)) as (?) ">Hi".
-  iMod (proph_map_init [] σ.(used_proph_id)) as (?) "Hp".
-  iMod (mono_nat_own_alloc 0) as (γ) "[Hsteps _]".
-  iMod (Hwp (HeapGS _ _ _ _ _ _)) as (W) "[W Hwp]". iModIntro.
-  iExists
-    (λ σ ns κs _, (W ∗ gen_heap_interp σ.(heap) ∗
-                   proph_map_interp κs σ.(used_proph_id) ∗
-                   mono_nat_auth_own γ 1 ns)%I),
-    id, (λ _, True%I), _; iFrame.
-  by iApply "Hwp".
+  move=> big. eapply (twpw_total _ _)=> ?.
+  iMod gen_heap_init as (?) "[? _]". iMod inv_heap_init as (?) ">IHI".
+  iMod proph_map_init as (?) "?". iMod (mono_nat_own_alloc 0) as (?) "[? _]".
+  iMod (big (HeapGS _ _ _ _ _ _) with "IHI") as (?) "[??]". iModIntro.
+  iExists _, _, _, _, _. iFrame.
 Qed.

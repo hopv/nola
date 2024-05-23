@@ -2,7 +2,8 @@
 
 From nola.bi Require Export updw.
 From nola.bi Require Import util.
-From iris.program_logic Require Export weakestpre total_weakestpre.
+From iris.program_logic Require Export weakestpre total_weakestpre adequacy
+  total_adequacy.
 From iris.bi Require Import fixpoint.
 From iris.proofmode Require Import proofmode.
 Import UpdwNotation.
@@ -514,3 +515,40 @@ Section wpw.
     by iIntros "!> [$$]".
   Qed.
 End wpw.
+
+(** ** Adequacy of [wpw] *)
+Lemma wpw_strong_adequacy_gen hlc Σ Λ `{!invGpreS Σ} s es σ1 n κs t2 σ2 φ
+  num_laters_per_step :
+  (∀ `{!invGS_gen hlc Σ}, ⊢ |={⊤}=>
+      ∃ state_interp Φs fork_post state_interp_mono,
+      let _ : irisGS'_gen hlc Λ Σ := IrisG' _
+        state_interp fork_post num_laters_per_step state_interp_mono in
+      ∃ W : iProp Σ,
+      W ∗ state_interp σ1 0 κs 0 ∗
+      ([∗ list] e;Φ ∈ es;Φs, WP[W] e @ s; ⊤ {{ Φ }}) ∗
+      (∀ es' t2', ⌜t2 = es' ++ t2'⌝ -∗ ⌜length es' = length es⌝ -∗
+        ⌜∀ e2, s = NotStuck → e2 ∈ t2 → not_stuck e2 σ2⌝ -∗
+        W -∗ state_interp σ2 n [] (length t2') -∗
+        ([∗ list] e;Φ ∈ es';Φs, from_option Φ True (to_val e)) -∗
+        ([∗ list] v ∈ omap to_val t2', fork_post v) ={⊤,∅}=∗ ⌜φ⌝)) →
+  language.nsteps n (es, σ1) κs (t2, σ2) → φ.
+Proof.
+  move=> big. apply: wp_strong_adequacy_gen=> ?.
+  iMod big as (state_interp ????) "(W & st & wps & big)". iModIntro.
+  iExists (λ σ ns ks nt, W ∗ state_interp σ ns ks nt)%I, _, _, _.
+  iFrame "W st". iSplitL "wps"; [done|]. iIntros (?????) "[W st]".
+  iApply ("big" with "[%//] [%//] [%//] W st").
+Qed.
+
+(** ** Total adequacy of [twpw] *)
+Theorem twpw_total Σ Λ `{!invGpreS Σ} s e σ Φ n :
+  (∀ `{!invGS_gen HasNoLc Σ}, ⊢ |={⊤}=>
+    ∃ state_interp num_laters_per_step fork_post state_interp_mono,
+    let _ : irisGS'_gen HasNoLc Λ Σ := IrisG' _
+      state_interp fork_post num_laters_per_step state_interp_mono in
+    ∃ W : iProp Σ, W ∗ state_interp σ n [] 0 ∗ WP[W] e @ s; ⊤ [{ Φ }]) →
+  sn erased_step ([e], σ).
+Proof.
+  move=> big. apply: twp_total. iIntros (?). iMod big as (????) "[%[?[??]]]".
+  iModIntro. iExists _, _, _, _. iFrame.
+Qed.

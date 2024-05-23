@@ -20,33 +20,19 @@ Definition heapΣ : gFunctors :=
 Global Instance subG_heapGpreS {Σ} : subG heapΣ Σ → heapGpreS Σ.
 Proof. solve_inG. Qed.
 
-(* TODO: The [wp_adequacy] lemma is insufficient for a state interpretation
-with a non-constant step index function. We thus use the more general
-[wp_strong_adequacy] lemma. The proof below replicates part of the proof of
-[wp_adequacy], and it hence would make sense to see if we can prove a version
-of [wp_adequacy] for a non-constant step version. *)
-Definition heap_adequacy Σ `{!heapGpreS Σ} hlc s e σ φ :
-  (∀ `{!heapGS_gen hlc Σ}, ⊢ |={⊤}=> ∃ W,
-    W ∗ (inv_heap_inv -∗ WP[W] e @ s; ⊤ {{ v, ⌜φ v⌝ }})) →
+Theorem heap_adequacy Σ `{!heapGpreS Σ} hlc s e σ φ :
+  (∀ `{!heapGS_gen hlc Σ},
+    inv_heap_inv ={⊤}=∗ ∃ W : iProp Σ, W ∗ WP[W] e @ s; ⊤ {{ v, ⌜φ v⌝ }}) →
   adequate s e σ (λ v _, φ v).
 Proof.
-  intros Hwp.
-  apply adequate_alt; intros t2 σ2 [n [κs ?]]%erased_steps_nsteps.
-  eapply (wp_strong_adequacy_gen _ Σ _); [|done]. iIntros (Hinv).
-  iMod (gen_heap_init σ.(heap)) as (?) "[Hh _]".
-  iMod (inv_heap_init loc (option val)) as (?) ">Hi".
-  iMod (proph_map_init κs σ.(used_proph_id)) as (?) "Hp".
-  iMod (mono_nat_own_alloc) as (γ) "[Hsteps _]".
-  iMod (Hwp (HeapGS _ _ _ _ _ _)) as (W) "[W Hwp]".
-  iDestruct ("Hwp" with "Hi") as "Hwp". iModIntro.
-  iExists (λ σ ns κs nt, (W ∗ gen_heap_interp σ.(heap) ∗
-                          proph_map_interp κs σ.(used_proph_id) ∗
-                          mono_nat_auth_own γ 1 ns))%I.
-  iExists [(λ v, ⌜φ v⌝%I)], (λ _, True)%I, _ => /=.
-  iFrame. iSplitL; [iSplit; done|].
-  iIntros (es' t2' -> ? ?) " _ H _".
+  move=> big. apply adequate_alt=> ?? /erased_steps_nsteps[?[??]].
+  eapply (wpw_strong_adequacy_gen _ Σ _); [|done]=> ?.
+  iMod gen_heap_init as (?) "[? _]". iMod inv_heap_init as (?) ">IHI".
+  iMod proph_map_init as (?) "?". iMod mono_nat_own_alloc as (?) "[? _]".
+  iMod (big (HeapGS _ _ _ _ _ _) with "IHI") as (?) "[??]". iModIntro.
+  iExists _, [_], _, _, _=>/=. iFrame. iIntros (??->??) "_ _ H _".
   iApply fupd_mask_intro_discard; [done|]. iSplit; [|done].
-  iDestruct (big_sepL2_cons_inv_r with "H") as (e' ? ->) "[Hwp H]".
-  iDestruct (big_sepL2_nil_inv_r with "H") as %->.
-  iIntros (v2 t2'' [= -> <-]). by rewrite to_of_val.
+  iDestruct (big_sepL2_cons_inv_r with "H") as (?? ->) "[? H]".
+  iDestruct (big_sepL2_nil_inv_r with "H") as %->. iIntros (??[=-><-]).
+  by rewrite to_of_val.
 Qed.
