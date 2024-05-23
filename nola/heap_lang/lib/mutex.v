@@ -76,6 +76,19 @@ Section mutex.
     { by iFrame. } { iApply ("→Φ" with "l"). }
   Qed.
 
+  (** Create a new mutex with the lock acquired *)
+  Definition new_acquire_mutex : val := λ: <>, ref #true.
+  Lemma twp_new_acquire_mutex {P} :
+    [[{ True }]][mutex_wsat intp]
+      new_acquire_mutex #()
+    [[{ l, RET #l; mutex_tok l P }]].
+  Proof.
+    rewrite mutex_wsat_unseal. iIntros (Φ) "_ →Φ". wp_lam.
+    iApply twpw_fupdw_nonval; [done|]. wp_alloc l as "↦". iModIntro.
+    iMod (inv_tok_alloc (PROP:=mutex_prop _) (l, P) with "[↦]") as "l".
+    { iFrame. } { iApply ("→Φ" with "l"). }
+  Qed.
+
   (** Try to acquire the lock on the mutex *)
   Definition try_acquire_mutex : val := λ: "l", CAS "l" #false #true.
   Lemma twp_try_acquire_mutex {l P} :
