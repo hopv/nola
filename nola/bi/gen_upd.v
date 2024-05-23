@@ -158,4 +158,11 @@ Section acsr.
   Proof. by iIntros "[$$] !> $". Qed.
   Lemma acsr_sep_r {P Q} : ⊢ acsr M Q (P ∗ Q).
   Proof. by iIntros "[$$] !> $". Qed.
+
+  (** [∗-∗] into [acsr] *)
+  Lemma wand_iff_acsr {P Q} : □ (P ∗-∗ Q) ⊢ acsr M P Q.
+  Proof.
+    iIntros "#[PQ QP] Q". iDestruct ("QP" with "Q") as "$". iIntros "!> ? !>".
+    by iApply "PQ".
+  Qed.
 End acsr.
