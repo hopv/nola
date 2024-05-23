@@ -16,6 +16,7 @@ Class irisGS'_gen (hlc : has_lc) (Λ : language) Σ := IrisG' {
   state_interp'_mono σ ns κs nt:
     state_interp' σ ns κs nt ⊢ |={∅}=> state_interp' σ (S ns) κs nt
 }.
+Arguments IrisG' {_ _ _}.
 
 (** [irisGS_gen] made from [irisGS'_gen] and an extra world satisfaction *)
 Program Definition IrisW `{!irisGS'_gen hlc Λ Σ} (W : iProp Σ)
