@@ -25,6 +25,7 @@ Class GenUpd `{!BiBUpd PROP} (M : PROP → PROP) : Prop := GEN_UPD {
   gen_upd_trans {P} : M (M P) ⊢ M P;
   gen_upd_frame_r {P Q} : M P ∗ Q ⊢ M (P ∗ Q);
 }.
+Hint Mode GenUpd + - ! : typeclass_instances.
 
 (** [bupd] and [fupd] satisfy [GenUpd] *)
 #[export] Instance gen_upd_bupd `{!BiBUpd PROP} : GenUpd (PROP:=PROP) bupd.
@@ -71,7 +72,7 @@ Section gen_upd.
     ElimModal True p false (|==> P) P (M Q) (M Q) | 10.
   Proof.
     by rewrite /ElimModal bi.intuitionistically_if_elim gen_upd_frame_r
-      bi.wand_elim_r gen_upd_from_bupd gen_upd_trans.
+      bi.wand_elim_r (gen_upd_from_bupd (M:=M)) gen_upd_trans.
   Qed.
 
   (** Frame *)
@@ -137,7 +138,7 @@ Proof. apply is_except_0_intro. by iIntros. Qed.
   GenUpd (λ P, M (◇ P))%I | 10.
 Proof.
   split=> >. { solve_proper. }
-  { rewrite gen_upd_from_bupd. f_equiv. by iIntros. }
+  { rewrite (gen_upd_from_bupd (M:=M)). f_equiv. by iIntros. }
   { move=> PQ. by do 2 f_equiv. } { iIntros ">>$". } { by iIntros "[?$]". }
 Qed.
 
@@ -145,9 +146,9 @@ Qed.
 
 Class WsatIncl {PROP : bi} (W W' Wr : PROP) : Prop :=
   wsat_incl : W ⊣⊢ W' ∗ Wr.
+Hint Mode WsatIncl + ! ! - : typeclass_instances.
 Arguments WsatIncl {_} _%_I _%_I _%_I : simpl never.
 Arguments wsat_incl {_} _%_I _%_I _%_I {_}.
-Hint Mode WsatIncl + ! ! - : typeclass_instances.
 
 Section wsat_incl.
   Context {PROP : bi}.
@@ -365,7 +366,9 @@ Section lemmas.
   #[export] Instance elim_modal_bupdw_modw_gen_upd {p P Q}
     `{!BiBUpd PROP, !GenUpd M, !WsatIncl W W' Wr} :
     ElimModal True p false (|=[W']=> P) P (modw M W Q) (modw M W Q) | 10.
-  Proof. move=> ?. by rewrite bupdw_modw_gen_upd elim_modal_modw_gen_upd. Qed.
+  Proof.
+    move=> ?. by rewrite (bupdw_modw_gen_upd (M:=M)) elim_modal_modw_gen_upd.
+  Qed.
 
   (** [bupdw] is non-expansive *)
   #[export] Instance bupdw_ne `{!BiBUpd PROP} :

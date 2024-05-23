@@ -4,6 +4,7 @@ From nola Require Export prelude.
 
 (** ** [Iso]: Isomorphic relation *)
 Class Iso (A : Type) := iso : A → A → Prop.
+Hint Mode Iso ! : typeclass_instances.
 
 Module IsoNotation.
   Infix "≃" := iso (at level 70).
@@ -106,11 +107,15 @@ Proof. done. Qed.
 (** ** Monotonicity *)
 
 Class Mono {OT OT'} (f : OT → OT') := mono :: Proper ((⊑) ==> (⊑)) f.
+Hint Mode Mono - - ! : typeclass_instances.
 Class Anti {OT OT'} (f : OT → OT') := anti :: Proper ((⊑) --> (⊑)) f.
+Hint Mode Anti - - ! : typeclass_instances.
 Class Mono2 {OT OT' OT''} (f : OT → OT' → OT'') :=
   mono2 :: Proper ((⊑) ==> (⊑) ==> (⊑)) f.
+Hint Mode Mono2 - - - ! : typeclass_instances.
 Class AntiMono {OT OT' OT''} (f : OT → OT' → OT'') :=
   antimono :: Proper ((⊑) --> (⊑) ==> (⊑)) f.
+Hint Mode AntiMono - - - ! : typeclass_instances.
 
 (** Partial application *)
 #[export] Instance mono2_mono_1 `{!@Mono2 OT OT' OT'' f} : Mono f.
@@ -162,12 +167,14 @@ Class Otop OT := OTOP {
   otop :: Top OT;
   otop_intro {o : OT} : o ⊑ ⊤;
 }.
+Hint Mode Otop ! : typeclass_instances.
 Arguments OTOP {_} _ _.
 
 Class Obot OT := OBOT {
   obot :: Bottom OT;
   obot_elim {o : OT} : ⊥ ⊑ o;
 }.
+Hint Mode Obot ! : typeclass_instances.
 Arguments OBOT {_} _ _.
 
 (** [nat] has the bottom *)
@@ -210,6 +217,7 @@ Class BinMeet OT := BIN_MEET {
   bin_meet_elim_2 {o o' : OT} : o ⊓ o' ⊑ o';
   bin_meet_intro {o o' o'' : OT} : o'' ⊑ o → o'' ⊑ o' → o'' ⊑ o ⊓ o';
 }.
+Hint Mode BinMeet ! : typeclass_instances.
 Arguments BIN_MEET {_} _ _ _ _.
 
 Class BinJoin OT := BIN_JOIN {
@@ -218,6 +226,7 @@ Class BinJoin OT := BIN_JOIN {
   bin_join_intro_2 {o o' : OT} : o' ⊑ o ⊔ o';
   bin_join_elim {o o' o'' : OT} : o ⊑ o'' → o' ⊑ o'' → o ⊔ o' ⊑ o'';
 }.
+Hint Mode BinJoin ! : typeclass_instances.
 Arguments BIN_JOIN {_} _ _ _ _.
 
 (** The binary meet/join is monotone *)
@@ -356,6 +365,7 @@ Class BigMeet OT := BIG_MEET {
   big_meet_intro {A} {S : A → Prop} f {o} :
     (∀ a, S a → o ⊑ f a) → o ⊑ big_meet S f;
 }.
+Hint Mode BigMeet ! : typeclass_instances.
 Arguments BIG_MEET {_} _ _ _.
 
 Class BigJoin OT := BIG_JOIN {
@@ -364,6 +374,7 @@ Class BigJoin OT := BIG_JOIN {
   big_join_elim {A} {S : A → Prop} f {o} :
     (∀ a, S a → f a ⊑ o) → big_join S f ⊑ o;
 }.
+Hint Mode BigJoin ! : typeclass_instances.
 Arguments BIG_JOIN {_} _ _ _.
 
 Module BigMJNotation.
