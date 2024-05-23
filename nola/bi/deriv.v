@@ -4,7 +4,7 @@ From nola.util Require Export intp psg.
 From nola.bi Require Export order.
 From iris.bi Require Import bi.
 From iris.proofmode Require Import proofmode.
-Import PintpNotation IntpNotation.
+Import PintpNotation.
 
 (** ** [Dintp]: Interpretation parameterized over derivability candidates *)
 Class Dintp (JUDG : ofe) (A : ofe) (PROP : bi) := DINTP {
