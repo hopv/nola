@@ -67,9 +67,9 @@ Section inv_deriv.
   (** Turn [inv_tok] into [inv'] *)
   Lemma inv_tok_inv' {N P} : inv_tok N P ⊢ inv' δ N P.
   Proof.
-    iIntros "#i !>". iApply Deriv_to. iIntros (? _ _ _).
+    iIntros "#i !>". iApply Deriv_to. iIntros (δ' ???).
     rewrite inv_jacsr_intp. iIntros (??).
-    by iApply (inv_tok_acc (intp:=⟦⟧(_)) with "i").
+    by iApply (inv_tok_acc (intp:=⟦⟧(δ')) with "i").
   Qed.
 
   (** Allocate [inv'] *)

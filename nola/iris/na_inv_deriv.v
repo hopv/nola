@@ -71,9 +71,9 @@ Section na_inv_deriv.
   (** Turn [na_inv_tok] into [na_inv'] *)
   Lemma na_inv_tok_na_inv' {p N P} : na_inv_tok p N P ⊢ na_inv' δ p N P.
   Proof.
-    iIntros "#i !>". iApply Deriv_to. iIntros (? _ _ _).
+    iIntros "#i !>". iApply Deriv_to. iIntros (δ' ?? _).
     rewrite na_inv_jacsr_intp. iIntros (????) "F".
-    by iApply (na_inv_tok_acc (intp:=⟦⟧(_)) with "F i").
+    by iApply (na_inv_tok_acc (intp:=⟦⟧(δ')) with "F i").
   Qed.
 
   (** Allocate [na_inv'] *)

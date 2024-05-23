@@ -121,9 +121,10 @@ Section deriv.
 End deriv.
 
 (** ** Derivability-parameterized interpretation *)
-Class Dintp (JUDG : Type) (A : ofe) (PROP : bi) := DINTP {
+Class Dintp (JUDG : ofe) (A : ofe) (PROP : bi) := DINTP {
   dintp :: Pintp (JUDG → PROP) A PROP;
-  dintp_ne {δ} :: NonExpansive (dintp δ);
+  dintp_ne `{!NonExpansive δ} :: NonExpansive (dintp δ);
 }.
 Add Printing Constructor Dintp.
 Hint Mode Dintp - ! - : typeclass_instances.
+Arguments DINTP {_ _ _} _ {_}.
