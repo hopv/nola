@@ -166,3 +166,4 @@ Section acsr.
     by iApply "QP".
   Qed.
 End acsr.
+Arguments acsr : simpl never.
