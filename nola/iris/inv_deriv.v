@@ -8,8 +8,8 @@ Import iPropAppNotation PintpNotation IntpNotation UpdwNotation.
 Implicit Type PRO JUDG : ofe.
 
 (** Notation *)
-Notation inv_wsatd δ := (inv_wsat ⟦⟧(δ)).
-Notation inv_wsatdd := (inv_wsatd der).
+Notation inv_wsati δ := (inv_wsat ⟦⟧(δ)).
+Notation inv_wsatid := (inv_wsati der).
 
 (** Derivability pre-data for [inv] *)
 Class InvPreDeriv PRO JUDG := INV_PRE_DERIV {
@@ -59,8 +59,8 @@ Section inv_deriv.
 
   (** Access [inv'] *)
   Lemma inv'_acc {N P E} : ↑N ⊆ E →
-    inv' der N P =[inv_wsatdd]{E,E∖↑N}=∗
-      ⟦ P ⟧ ∗ (⟦ P ⟧ =[inv_wsatdd]{E∖↑N,E}=∗ True).
+    inv' der N P =[inv_wsatid]{E,E∖↑N}=∗
+      ⟦ P ⟧ ∗ (⟦ P ⟧ =[inv_wsatid]{E∖↑N,E}=∗ True).
   Proof.
     rewrite inv'_unseal. iIntros (?) "accP".
     iDestruct (der_sound with "accP") as "accP". rewrite inv_jacsr_intp.
@@ -79,13 +79,13 @@ Section inv_deriv.
 
   (** Allocate [inv'] *)
   Lemma inv'_alloc_rec P N :
-    (inv' δ N P -∗ ⟦ P ⟧(δ)) =[inv_wsatd δ]=∗ inv' δ N P.
+    (inv' δ N P -∗ ⟦ P ⟧(δ)) =[inv_wsati δ]=∗ inv' δ N P.
   Proof. rewrite -inv_tok_inv'. exact: inv_tok_alloc_rec. Qed.
-  Lemma inv'_alloc P N : ⟦ P ⟧(δ) =[inv_wsatd δ]=∗ inv' δ N P.
+  Lemma inv'_alloc P N : ⟦ P ⟧(δ) =[inv_wsati δ]=∗ inv' δ N P.
   Proof. rewrite -inv_tok_inv'. exact: inv_tok_alloc. Qed.
   Lemma inv'_alloc_open P N E : ↑N ⊆ E →
-    ⊢ |=[inv_wsatd δ]{E, E∖↑N}=> inv' δ N P ∗
-      (⟦ P ⟧(δ) =[inv_wsatd δ]{E∖↑N, E}=∗ True).
+    ⊢ |=[inv_wsati δ]{E, E∖↑N}=> inv' δ N P ∗
+      (⟦ P ⟧(δ) =[inv_wsati δ]{E∖↑N, E}=∗ True).
   Proof. rewrite -inv_tok_inv'. exact: inv_tok_alloc_open. Qed.
 
   (** Convert [inv'] with [acsr] *)

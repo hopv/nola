@@ -8,8 +8,8 @@ Import iPropAppNotation PintpNotation IntpNotation UpdwNotation.
 Implicit Type PRO JUDG : ofe.
 
 (** Notation *)
-Notation sinv_wsatd δ := (sinv_wsat ⟦⟧(δ)).
-Notation sinv_wsatdd := (sinv_wsatd der).
+Notation sinv_wsati δ := (sinv_wsat ⟦⟧(δ)).
+Notation sinv_wsatid := (sinv_wsati der).
 
 (** Derivability pre-data for [sinv] *)
 Class SinvPreDeriv PRO JUDG := SINV_PRE_DERIV {
@@ -57,8 +57,8 @@ Section sinv_deriv.
 
   (** Access [sinv] *)
   Lemma sinv_acc {P} :
-    sinv der P -∗ sinv_wsatdd -∗ sinv_mod
-      (⟦ P ⟧ ∗ (⟦ P ⟧ -∗ sinv_mod (sinv_wsatdd))).
+    sinv der P -∗ sinv_wsatid -∗ sinv_mod
+      (⟦ P ⟧ ∗ (⟦ P ⟧ -∗ sinv_mod (sinv_wsatid))).
   Proof.
     rewrite sinv_unseal. iIntros "[%Q[QPQ s]] W".
     iDestruct (der_sound with "QPQ") as "QPQ". rewrite sinv_jacsr_intp.
@@ -77,7 +77,7 @@ Section sinv_deriv.
   Qed.
 
   (** Allocate [sinv] *)
-  Lemma sinv_alloc P : sinv_wsatd δ ==∗ sinv δ P ∗ (⟦ P ⟧(δ) -∗ sinv_wsatd δ).
+  Lemma sinv_alloc P : sinv_wsati δ ==∗ sinv δ P ∗ (⟦ P ⟧(δ) -∗ sinv_wsati δ).
   Proof. rewrite -sinv_tok_sinv. exact: sinv_tok_alloc. Qed.
 
   (** Convert [sinv] with [acsr] *)

@@ -8,8 +8,8 @@ Import iPropAppNotation PintpNotation IntpNotation UpdwNotation.
 Implicit Type PRO JUDG : ofe.
 
 (** Notation *)
-Notation na_inv_wsatd δ := (na_inv_wsat ⟦⟧(δ)).
-Notation na_inv_wsatdd := (na_inv_wsatd der).
+Notation na_inv_wsati δ := (na_inv_wsat ⟦⟧(δ)).
+Notation na_inv_wsatid := (na_inv_wsati der).
 
 (** Derivability pre-data for [na_inv] *)
 Class NaInvPreDeriv PRO JUDG := NA_INV_PRE_DERIV {
@@ -65,9 +65,9 @@ Section na_inv_deriv.
 
   (** Access [na_inv'] *)
   Lemma na_inv'_acc {p N P E F} : ↑N ⊆ E → ↑N ⊆ F →
-    na_own p F -∗ na_inv' der p N P =[na_inv_wsatdd]{E}=∗
+    na_own p F -∗ na_inv' der p N P =[na_inv_wsatid]{E}=∗
       na_own p (F∖↑N) ∗ ⟦ P ⟧ ∗
-      (na_own p (F∖↑N) -∗ ⟦ P ⟧ =[na_inv_wsatdd]{E}=∗ na_own p F).
+      (na_own p (F∖↑N) -∗ ⟦ P ⟧ =[na_inv_wsatid]{E}=∗ na_own p F).
   Proof.
     rewrite na_inv'_unseal. iIntros (NE NF) "F accP".
     iDestruct (der_sound with "accP") as "accP". rewrite na_inv_jacsr_intp.
@@ -86,15 +86,15 @@ Section na_inv_deriv.
 
   (** Allocate [na_inv'] *)
   Lemma na_inv'_alloc_rec p P N :
-    (na_inv' δ p N P -∗ ⟦ P ⟧(δ)) =[na_inv_wsatd δ]=∗ na_inv' δ p N P.
+    (na_inv' δ p N P -∗ ⟦ P ⟧(δ)) =[na_inv_wsati δ]=∗ na_inv' δ p N P.
   Proof. rewrite -na_inv_tok_na_inv'. exact: na_inv_tok_alloc_rec. Qed.
-  Lemma na_inv'_alloc p P N : ⟦ P ⟧(δ) =[na_inv_wsatd δ]=∗ na_inv' δ p N P.
+  Lemma na_inv'_alloc p P N : ⟦ P ⟧(δ) =[na_inv_wsati δ]=∗ na_inv' δ p N P.
   Proof. rewrite -na_inv_tok_na_inv'. exact: na_inv_tok_alloc. Qed.
   Lemma na_inv'_alloc_open p N E F P :
     ↑N ⊆ E → ↑N ⊆ F →
-    na_own p F =[na_inv_wsatd δ]{E}=∗
+    na_own p F =[na_inv_wsati δ]{E}=∗
       na_own p (F∖↑N) ∗ na_inv' δ p N P ∗
-      (na_own p (F∖↑N) -∗ ⟦ P ⟧(δ) =[na_inv_wsatd δ]{E}=∗ na_own p F).
+      (na_own p (F∖↑N) -∗ ⟦ P ⟧(δ) =[na_inv_wsati δ]{E}=∗ na_own p F).
   Proof. rewrite -na_inv_tok_na_inv'. exact: na_inv_tok_alloc_open. Qed.
 
   (** Convert [na_inv'] with [acsr] *)

@@ -116,9 +116,9 @@ Section iris.
 
   (** ** Termination of [iter] *)
   Lemma twp_iter {N Φ c l} {f : val} {n : nat} :
-    (∀ l0, [[{ inv' der N (Φ l0) }]][inv_wsatdd] f #l0 @ ↑N
+    (∀ l0, [[{ inv' der N (Φ l0) }]][inv_wsatid] f #l0 @ ↑N
       [[{ RET #(); True }]]) -∗
-    [[{ c ↦ #n ∗ ⟦ ilist N Φ l ⟧ }]][inv_wsatdd]
+    [[{ c ↦ #n ∗ ⟦ ilist N Φ l ⟧ }]][inv_wsatid]
       iter f #c #l @ ↑N
     [[{ RET #(); c ↦ #0 }]].
   Proof.
