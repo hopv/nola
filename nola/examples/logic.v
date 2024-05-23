@@ -1,6 +1,7 @@
 (** * Showcase logic *)
 
 From nola.iris Require Export ciprop inv_deriv.
+From nola.bi Require Import util.
 From nola.heap_lang Require Export notation proofmode.
 Import WpwNotation iPropAppNotation PintpNotation IntpNotation.
 
@@ -106,6 +107,41 @@ Section iris.
     ∃ l', ▷ (l +ₗ 1) ↦ #l' ∗ ilist_gen N Φx Ilist' l'.
   CoFixpoint ilist' N Φx : loc → ciProp Σ := ilist'_gen N Φx ilist'.
   Definition ilist N Φx : loc → ciProp Σ := ilist_gen N Φx ilist'.
+
+  (** ** Convert the predicate of [ilist] using [acsr] *)
+  Lemma ilist'_acsr `{!Deriv ih δ} {N Φx Ψx l} :
+    □ (∀ δ' l', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
+      acsr (fupd ∅ ∅) ⟦ Φx l' ⟧(δ') ⟦ Ψx l' ⟧(δ') ∧
+      acsr (fupd ∅ ∅) ⟦ Ψx l' ⟧(δ') ⟦ Φx l' ⟧(δ')) -∗
+      ⟦ ilist' N Φx l ⟧(δ) ∗-∗ ⟦ ilist' N Ψx l ⟧(δ).
+  Proof.
+    move: l. apply Deriv_ind=> ???. iIntros "#eqv". rewrite /⟦ ⟧(_) /=.
+    iSplit; (iIntros "[%[$[ihd itl]]]"; iSplitL "ihd";
+      [iRevert "ihd"|iRevert "itl"]);
+      iApply inv'_acsr; iIntros "!>" (??[eqv ?]).
+    - iApply bi.and_elim_r. iApply "eqv"; [|done]. iPureIntro.
+      by apply Deriv_mono=> ?[??].
+    - iApply (wand_iff_acsr (M:=fupd _ _)). iModIntro. rewrite wand_iff_comm.
+      by iApply eqv.
+    - iApply bi.and_elim_l. iApply "eqv"; [|done]. iPureIntro.
+      by apply Deriv_mono=> ?[??].
+    - iApply (wand_iff_acsr (M:=fupd _ _)). iModIntro. by iApply eqv.
+  Qed.
+  Lemma ilist_acsr `{!Deriv ih δ} {N Φx Ψx l} :
+    □ (∀ δ' l', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
+      acsr (fupd ∅ ∅) ⟦ Φx l' ⟧(δ') ⟦ Ψx l' ⟧(δ') ∧
+      acsr (fupd ∅ ∅) ⟦ Ψx l' ⟧(δ') ⟦ Φx l' ⟧(δ')) -∗
+      ⟦ ilist N Φx l ⟧(δ) ∗-∗ ⟦ ilist N Ψx l ⟧(δ).
+  Proof.
+    iIntros "#eqv". rewrite /⟦ ⟧(δ) /=.
+    iSplit; (iIntros "[ihd itl]"; iSplitL "ihd"; [iRevert "ihd"|iRevert "itl"]);
+      iApply inv'_acsr; iIntros "!>" (???).
+    - iApply bi.and_elim_r. by iApply "eqv".
+    - iApply (wand_iff_acsr (M:=fupd _ _)). iModIntro. rewrite wand_iff_comm.
+      by iApply ilist'_acsr.
+    - iApply bi.and_elim_l. by iApply "eqv".
+    - iApply (wand_iff_acsr (M:=fupd _ _)). iModIntro. by iApply ilist'_acsr.
+  Qed.
 
   (** ** Termination of [iter] *)
   Lemma twp_iter {N Φx c l} {f : val} {n : nat} :
