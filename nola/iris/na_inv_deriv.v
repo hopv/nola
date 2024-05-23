@@ -100,16 +100,16 @@ Section na_inv_deriv.
   (** Convert [na_inv'] with [acsr] *)
   Lemma na_inv'_acsr {p N P Q} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → acsr (fupd ∅ ∅) ⟦ P ⟧(δ') ⟦ Q ⟧(δ')) -∗
-      na_inv' δ p N Q -∗ na_inv' δ p N P.
+      na_inv' δ p N P -∗ na_inv' δ p N Q.
   Proof.
-    rewrite na_inv'_unseal. iIntros "#QPQ #accQ !>". iApply Deriv_to.
+    rewrite na_inv'_unseal. iIntros "#PQP #accP !>". iApply Deriv_to.
     iIntros (??? ->). rewrite !na_inv_jacsr_intp. iIntros (?? NE NF) "F".
-    iMod ("accQ" $! _ _ NE NF with "F") as "($ & Q & cl)".
+    iMod ("accP" $! _ _ NE NF with "F") as "($ & P & cl)".
     iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
-    iMod ("QPQ" with "[%//] [%//] Q") as "[$ PQ]". iMod "→E∖N" as "_".
+    iMod ("PQP" with "[%//] [%//] P") as "[$ QP]". iMod "→E∖N" as "_".
     iIntros "!>". iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
-    iIntros "F∖N P". iMod ("PQ" with "P") as "Q". iMod "→E∖N" as "_".
-    iApply ("cl" with "F∖N Q").
+    iIntros "F∖N Q". iMod ("QP" with "Q") as "P". iMod "→E∖N" as "_".
+    iApply ("cl" with "F∖N P").
   Qed.
 
   (** Split [na_inv'] over [∗] *)

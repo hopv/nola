@@ -25,7 +25,7 @@ Section sinv_deriv.
 
   (** [sinv]: Relaxed simple invariant *)
   Local Definition sinv_def δ (P : PROP $oi Σ) : iProp Σ :=
-    ∃ Q, □ δ (sinv_jacsr P Q) ∗ sinv_tok Q.
+    ∃ Q, □ δ (sinv_jacsr Q P) ∗ sinv_tok Q.
   Local Lemma sinv_aux : seal sinv_def. Proof. by eexists. Qed.
   Definition sinv := sinv_aux.(unseal).
   Local Lemma sinv_unseal : sinv = sinv_def. Proof. exact: seal_eq. Qed.
@@ -81,15 +81,15 @@ Section sinv_deriv.
   Proof. rewrite -sinv_tok_sinv. exact: sinv_tok_alloc. Qed.
 
   (** Convert [sinv] with [acsr] *)
-  Lemma sinv_acsr' {P Q} : □ δ (sinv_jacsr P Q) -∗ sinv δ Q -∗ sinv δ P.
+  Lemma sinv_acsr' {P Q} : □ δ (sinv_jacsr P Q) -∗ sinv δ P -∗ sinv δ Q.
   Proof.
-    rewrite sinv_unseal. iIntros "#QPQ [%R[#RQR $]] !>".
-    iApply (Deriv_map2 with "[] QPQ RQR"). iIntros (? _ _).
+    rewrite sinv_unseal. iIntros "#PQP [%R[#RPR $]] !>".
+    iApply (Deriv_map2 with "[] RPR PQP"). iIntros (? _ _).
     rewrite !sinv_jacsr_intp. iApply (acsr_trans (M:=sinv_mod)).
   Qed.
   Lemma sinv_acsr {P Q} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → acsr sinv_mod ⟦ P ⟧(δ') ⟦ Q ⟧(δ')) -∗
-      sinv δ Q -∗ sinv δ P.
+      sinv δ P -∗ sinv δ Q.
   Proof.
     iIntros "#PQP". iApply sinv_acsr'. iModIntro. iApply Deriv_to.
     iIntros (????). rewrite sinv_jacsr_intp. by iApply "PQP".

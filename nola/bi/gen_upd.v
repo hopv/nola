@@ -133,8 +133,8 @@ Qed.
 Section acsr.
   Context `{!BiBUpd PROP}.
 
-  (** ** [acsr]: Accessor getting [P] from [Q] via the modality [M] *)
-  Definition acsr M P Q : PROP := Q -∗ M (P ∗ (P -∗ M Q))%I.
+  (** ** [acsr]: Accessor from [P] to [Q] via the modality [M] *)
+  Definition acsr M P Q : PROP := P -∗ M (Q ∗ (Q -∗ M P))%I.
 
   Context `{!GenUpd (PROP:=PROP) M}.
 
@@ -148,21 +148,21 @@ Section acsr.
   Lemma acsr_trans {P Q R} :
     acsr M P Q -∗ acsr M Q R -∗ acsr M P R.
   Proof.
-    iIntros "QPQ RQR R". iMod ("RQR" with "R") as "[Q QR]".
-    iMod ("QPQ" with "Q") as "[$ PQ]". iIntros "!> P".
-    iMod ("PQ" with "P") as "Q". by iApply "QR".
+    iIntros "PQP QRQ P". iMod ("PQP" with "P") as "[Q QP]".
+    iMod ("QRQ" with "Q") as "[$ RQ]". iIntros "!> R".
+    iMod ("RQ" with "R") as "Q". by iApply "QP".
   Qed.
 
   (** [acsr] over [∗] *)
-  Lemma acsr_sep_l {P Q} : ⊢ acsr M P (P ∗ Q).
+  Lemma acsr_sep_l {P Q} : ⊢ acsr M (P ∗ Q) P.
   Proof. by iIntros "[$$] !> $". Qed.
-  Lemma acsr_sep_r {P Q} : ⊢ acsr M Q (P ∗ Q).
+  Lemma acsr_sep_r {P Q} : ⊢ acsr M (P ∗ Q) Q.
   Proof. by iIntros "[$$] !> $". Qed.
 
   (** [∗-∗] into [acsr] *)
   Lemma wand_iff_acsr {P Q} : □ (P ∗-∗ Q) ⊢ acsr M P Q.
   Proof.
-    iIntros "#[PQ QP] Q". iDestruct ("QP" with "Q") as "$". iIntros "!> ? !>".
-    by iApply "PQ".
+    iIntros "#[PQ QP] P". iDestruct ("PQ" with "P") as "$". iIntros "!> ? !>".
+    by iApply "QP".
   Qed.
 End acsr.
