@@ -21,7 +21,8 @@ Proof. solve_inG. Qed.
 (** **  lock *)
 Section lock.
   Context `{!heapGS_gen hlc Σ, !lockGS PROP Σ}.
-  Implicit Types (P : PROP $oi Σ) (b : bool) (l : loc) (n : nat).
+  Implicit Types (intp : PROP $oi Σ → iProp Σ) (P : PROP $oi Σ) (b : bool)
+    (l : loc) (n : nat).
 
   (** [lock_tok]: Lock token *)
   Definition lock_tok l P : iProp Σ := inv_tok nroot (l, P).
@@ -73,9 +74,11 @@ Section lock.
     iModIntro. by iApply ("→Φ" with "l").
   Qed.
 
+  Context `{!NonExpansive intp}.
+
   (** Try to acquire a lock *)
   Definition try_acquire : val := λ: "l", CAS "l" #false #true.
-  Lemma twp_try_acquire `{!NonExpansive intp} {l P} :
+  Lemma twp_try_acquire {l P} :
     [[{ lock_tok l P }]][lock_wsat intp]
       try_acquire #l
     [[{ b, RET #b; if b then intp P else True }]].
@@ -95,7 +98,7 @@ Section lock.
     rec: "acquire" "n" "l" :=
       if: "n" = #0 then #false else
       if: try_acquire "l" then #true else "acquire" ("n" - #1) "l".
-  Lemma twp_acquire_loop `{!NonExpansive intp} {l P n} :
+  Lemma twp_acquire_loop {l P n} :
     [[{ lock_tok l P }]][lock_wsat intp]
       acquire_loop #n #l
     [[{ b, RET #b; if b then intp P else True }]].
@@ -109,7 +112,7 @@ Section lock.
 
   (** Release a lock *)
   Definition release : val := λ: "l", "l" <- #false.
-  Lemma twp_release `{!NonExpansive intp} {l P} :
+  Lemma twp_release {l P} :
     [[{ lock_tok l P ∗ intp P }]][lock_wsat intp]
       release #l
     [[{ RET #(); True }]].

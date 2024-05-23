@@ -26,6 +26,7 @@ Proof. solve_inG. Qed.
 Section na_inv.
   Context `{!na_inv'GS PROP Σ, !invGS_gen hlc Σ, !na_invG Σ}.
   Local Existing Instance na_inv_inG.
+  Implicit Type intp : PROP $oi Σ → iProp Σ.
 
   (** Access l of an non-atomic invariant *)
   Local Definition na_lock p i : iProp Σ := own p (ε, GSet {[i]}).
@@ -114,8 +115,10 @@ Section na_inv.
   #[export] Instance na_inv_wsat_proper : Proper ((≡) ==> (≡)) inv_wsat.
   Proof. apply ne_proper, _. Qed.
 
+  Context `{!NonExpansive intp}.
+
   (** Allocate [na_inv_tok] *)
-  Lemma na_inv_tok_alloc_rec {intp} P p N :
+  Lemma na_inv_tok_alloc_rec P p N :
     (na_inv_tok p N P -∗ intp P) =[na_inv_wsat intp]=∗ na_inv_tok p N P.
   Proof.
     rewrite na_inv_tok_unseal na_inv_wsat_unseal.
@@ -124,12 +127,12 @@ Section na_inv.
     { iModIntro. iExists _. by iSplit. }
     iIntros "i". iLeft. iFrame "l". iApply "→P". iExists _. by iSplit.
   Qed.
-  Lemma na_inv_tok_alloc {intp} P p N :
+  Lemma na_inv_tok_alloc P p N :
     intp P =[na_inv_wsat intp]=∗ na_inv_tok p N P.
   Proof. iIntros "?". iApply na_inv_tok_alloc_rec. by iIntros. Qed.
 
   (** Allocate [inv_tok] before storing the content *)
-  Lemma na_inv_tok_alloc_open `{!NonExpansive intp} {p N E F P} :
+  Lemma na_inv_tok_alloc_open {p N E F P} :
     ↑N ⊆ E → ↑N ⊆ F →
     na_own p F =[na_inv_wsat intp]{E}=∗
       na_own p (F∖↑N) ∗ na_inv_tok p N P ∗
@@ -160,7 +163,7 @@ Section na_inv.
   Qed.
 
   (** Access via [na_inv_tok] *)
-  Lemma na_inv_tok_acc `{!NonExpansive intp} {p N E F P} : ↑N ⊆ E → ↑N ⊆ F →
+  Lemma na_inv_tok_acc {p N E F P} : ↑N ⊆ E → ↑N ⊆ F →
     na_own p F -∗ na_inv_tok p N P =[na_inv_wsat intp]{E}=∗
       na_own p (F∖↑N) ∗ intp P ∗
       (na_own p (F∖↑N) -∗ intp P =[na_inv_wsat intp]{E}=∗ na_own p F).

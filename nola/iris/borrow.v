@@ -379,9 +379,9 @@ End borrow.
 Section borrow.
   Context `{!borrowGS PROP Σ}.
   Implicit Type (M : iProp Σ → iProp Σ) (intp : PROP $oi Σ -d> iProp Σ)
-    (P Q : PROP $oi Σ) (D : depo_stOF PROP $oi Σ)
-    (Dm : depo_stmOF PROP $oi Σ) (B : bor_stOF PROP $oi Σ)
-    (Bm : bor_stmOF PROP $oi Σ) (Pm : lendmOF PROP $oi Σ).
+    (P Q : PROP $oi Σ) (D : depo_stOF PROP $oi Σ) (Dm : depo_stmOF PROP $oi Σ)
+    (B : bor_stOF PROP $oi Σ) (Bm : bor_stmOF PROP $oi Σ)
+    (Pm : lendmOF PROP $oi Σ).
 
   (** World satisfaction for a borrower *)
   Local Definition bor_wsat intp d α B : iProp Σ :=
@@ -443,8 +443,10 @@ Section borrow.
     repeat f_equiv. by apply: depo_wsat_mono.
   Qed.
 
+  Context `{!GenUpd M, !NonExpansive intp}.
+
   (** Create new borrowers and lenders with a specific depth *)
-  Local Lemma bor_lend_tok_new_list' `{!GenUpd M} {intp} d α Pl Ql :
+  Local Lemma bor_lend_tok_new_list' d α Pl Ql :
     ([∗ list] P ∈ Pl, intp P) -∗
     ([†α] -∗ ([∗ list] P ∈ Pl, intp P) -∗ M ([∗ list] Q ∈ Ql, intp Q)%I)
       =[borrow_wsat M intp]=∗
@@ -459,8 +461,9 @@ Section borrow.
     iExists _. iFrame "●". iApply (big_sepM_insert_2 with "[Pl →Ql] Dm"). iLeft.
     iSplitL "Pl";by rewrite !big_sepM_map_by big_sepL_fmap.
   Qed.
+
   (** Create new borrowers and lenders *)
-  Lemma bor_lend_tok_new_list `{!GenUpd M} {intp} α Pl Ql :
+  Lemma bor_lend_tok_new_list α Pl Ql :
     ([∗ list] P ∈ Pl, intp P) -∗
     ([†α] -∗ ([∗ list] P ∈ Pl, intp P) -∗ M ([∗ list] Q ∈ Ql, intp Q)%I)
       =[borrow_wsat M intp]=∗
@@ -471,7 +474,7 @@ Section borrow.
     iExists _. iSplit; [by iApply lft_sincl_refl|]. by iExists _.
   Qed.
   (** Simply create a new borrower and a new lender *)
-  Lemma bor_lend_tok_new `{!GenUpd M} {intp} α P :
+  Lemma bor_lend_tok_new α P :
     intp P =[borrow_wsat M intp]=∗ borc_tok α P ∗ lend_tok α P.
   Proof.
     iIntros "P". iMod (bor_lend_tok_new_list α [P] [P] with "[P] []")
@@ -479,7 +482,7 @@ Section borrow.
   Qed.
 
   (** Split a lender *)
-  Lemma lend_tok_split `{!GenUpd M, !NonExpansive intp} {α P} Ql :
+  Lemma lend_tok_split {α P} Ql :
     lend_tok α P -∗ (intp P -∗ M ([∗ list] Q ∈ Ql, intp Q))
       =[borrow_wsat M intp]=∗ [∗ list] Q ∈ Ql, lend_tok α Q.
   Proof.
@@ -518,8 +521,7 @@ Section borrow.
         depo_wsat_ret M intp d' α β Bm Pm.
 
   (** Retrieve from [borrow_wsat_ret] using [lend_dtok] *)
-  Local Lemma lend_dtok_ret_retrieve `{!GenUpd M, !NonExpansive intp}
-    {Dm d d' α β P} : d ≤ d' → β ⊑ α →
+  Local Lemma lend_dtok_ret_retrieve {Dm d d' α β P} : d ≤ d' → β ⊑ α →
     lend_dtok d' β P -∗ modw M (borrow_wsat_ret M intp Dm d α) (intp P).
   Proof.
     move=> ??. iIntros "[%[% l]] [%Dm'[%[● Dm']]]".
@@ -537,8 +539,7 @@ Section borrow.
   Qed.
 
   (** Retrieve from [bor_wsat] *)
-  Local Lemma bor_wsat_retrieve `{!GenUpd M, !NonExpansive intp}
-    {Dm d α β P b} : β ⊑ α →
+  Local Lemma bor_wsat_retrieve {Dm d α β P b} : β ⊑ α →
     [†β] -∗ bor_wsat intp d β (P, b) -∗
       modw M (borrow_wsat_ret M intp Dm (S d) α) (intp P).
   Proof.
@@ -548,8 +549,7 @@ Section borrow.
     etrans; [|done]. apply lft_incl_meet_l.
   Qed.
   (** Retrieve from [bor_wsat]s *)
-  Local Lemma bor_wsats_retrieve `{!GenUpd M, !NonExpansive intp}
-    {Dm d α β Bl} : β ⊑ α →
+  Local Lemma bor_wsats_retrieve {Dm d α β Bl} : β ⊑ α →
     [†β] -∗ ([∗ list] B ∈ Bl, bor_wsat intp d β B) -∗
       modw M (borrow_wsat_ret M intp Dm (S d) α)
         ([∗ list] '(P, _) ∈ Bl, intp P)%I.
@@ -558,8 +558,7 @@ Section borrow.
     iMod (IH with "† Bl") as "$". by iApply bor_wsat_retrieve.
   Qed.
   (** Retrieve from [depo_wsat] *)
-  Local Lemma depo_wsat_retrieve `{!GenUpd M, !NonExpansive intp}
-    {Dm d α β Bm Pm} : β ⊑ α →
+  Local Lemma depo_wsat_retrieve {Dm d α β Bm Pm} : β ⊑ α →
     [†β] -∗ depo_wsat M intp d β Bm Pm -∗
       modw M (borrow_wsat_ret M intp Dm (S d) α)
         (depo_wsat_dead M intp β Pm)%I.
@@ -571,8 +570,7 @@ Section borrow.
     iDestruct ("→Pm" with "Bl") as "$". by iIntros.
   Qed.
   (** Retrieve from [depo_wsat]s *)
-  Local Lemma depo_wsats_retrieve `{!GenUpd M, !NonExpansive intp}
-    {Dm d α Dl} :
+  Local Lemma depo_wsats_retrieve {Dm d α Dl} :
     [†α] -∗ ([∗ list] D ∈ Dl,
       if decide (dep_of D = d) then let '((d', β)', Bm, Pm) := D in
         depo_wsat M intp d' β Bm Pm else emp) -∗
@@ -600,8 +598,7 @@ Section borrow.
     apply (map_filter_ext (M:=gmap _))=> ?[[??]?]/=?. lia.
   Qed.
   (** Retrieve from [borrow_wsat'] on [filter_eq] *)
-  Local Lemma borrow_wsat_eq_retrieve `{!GenUpd M, !NonExpansive intp}
-    {Dm d α} :
+  Local Lemma borrow_wsat_eq_retrieve {Dm d α} :
     [†α] -∗ borrow_wsat' M intp (filter_eq d Dm) -∗
       borrow_wsat_ret M intp Dm (S d) α -∗
       M (borrow_wsat_ret M intp Dm d α).
@@ -618,7 +615,7 @@ Section borrow.
       apply (map_filter_ext (M:=gmap _))=>/=; lia.
   Qed.
   (** Lemma for [borrow_wsat_lt_retrieve] *)
-  Local Lemma borrow_wsat_lt_S_split {M intp} d Dm :
+  Local Lemma borrow_wsat_lt_S_split d Dm :
     borrow_wsat' M intp (filter_lt (S d) Dm) ⊣⊢
       borrow_wsat' M intp (filter_eq d Dm) ∗
       borrow_wsat' M intp (filter_lt d Dm).
@@ -628,8 +625,7 @@ Section borrow.
       apply (map_filter_ext (M:=gmap _))=>/=; lia.
   Qed.
   (** Retrieve from [borrow_wsat'] on [filter_lt] *)
-  Local Lemma borrow_wsat_lt_retrieve `{!GenUpd M, !NonExpansive intp}
-    {Dm d α} :
+  Local Lemma borrow_wsat_lt_retrieve {Dm d α} :
     [†α] -∗ borrow_wsat' M intp (filter_lt d Dm) -∗
       borrow_wsat_ret M intp Dm d α -∗ M (borrow_wsat_ret M intp Dm 0 α).
   Proof.
@@ -651,7 +647,7 @@ Section borrow.
     apply map_filter_ext=> ?[[??]?]/=. lia.
   Qed.
   (** Retrive using [lend_dtok] *)
-  Local Lemma lend_dtok_retrieve `{!GenUpd M, !NonExpansive intp} {d α P} :
+  Local Lemma lend_dtok_retrieve {d α P} :
     [†α] -∗ lend_dtok d α P -∗ modw M (borrow_wsat M intp) (intp P).
   Proof.
     rewrite borrow_wsat_unseal. iIntros "† l [%Dm[● Dm]]".
@@ -666,7 +662,7 @@ Section borrow.
     case: (decide (β ⊑ α))=> ?; [|done]. iIntros. by iRight.
   Qed.
   (** Retrive using [lend_tok] *)
-  Lemma lend_tok_retrieve `{!GenUpd M, !NonExpansive intp} {α P} :
+  Lemma lend_tok_retrieve {α P} :
     [†α] -∗ lend_tok α P -∗ modw M (borrow_wsat M intp) (intp P).
   Proof.
     rewrite lend_tok_unseal. iIntros "† [%α'[⊑[%d l]]]".
@@ -675,7 +671,7 @@ Section borrow.
   Qed.
 
   (** [depo_wsat] with an alive lifetime token *)
-  Local Lemma depo_wsat_tok {M intp d α Bm Pm q} :
+  Local Lemma depo_wsat_tok {d α Bm Pm q} :
     q.[α] -∗ depo_wsat M intp d α Bm Pm -∗
       q.[α] ∗ depo_wsat_in M intp d α Bm Pm.
   Proof.
@@ -684,7 +680,7 @@ Section borrow.
   Qed.
 
   (** [bor_wsat] is non-expansive over the borrower state *)
-  Local Instance bor_wsat_ne_st `{!NonExpansive intp} {d α} :
+  Local Instance bor_wsat_ne_st {d α} :
     NonExpansive (bor_wsat intp d α).
   Proof.
     move=> ?[?[|?|?]][?[|?|?]][//=eqv /leibniz_equiv_iff].
@@ -694,7 +690,7 @@ Section borrow.
   Qed.
 
   (** Update the borrower state to [Open q] *)
-  Local Lemma bor_open_core `{!NonExpansive intp} {M i j d α P b q} :
+  Local Lemma bor_open_core {i j d α P b q} :
     q.[α] -∗ bor_itok i j d α (P, b) =[borrow_wsat M intp]=∗
       obor_tok α q P ∗ bor_wsat intp d α (P, b).
   Proof.
@@ -715,7 +711,7 @@ Section borrow.
     by iIntros.
   Qed.
   (** Open a closed borrower *)
-  Lemma borc_tok_open `{!NonExpansive intp} {M α q P} :
+  Lemma borc_tok_open {α q P} :
     q.[α] -∗ borc_tok α P =[borrow_wsat M intp]=∗ obor_tok α q P ∗ intp P.
   Proof.
     rewrite borc_tok_unseal. iIntros "α [†|c]".
@@ -726,7 +722,7 @@ Section borrow.
     iApply (obor_tok_lft with "⊑ →α o").
   Qed.
   (** Open a borrower *)
-  Lemma bor_tok_open `{!GenUpd M, !NonExpansive intp} {α q P} :
+  Lemma bor_tok_open {α q P} :
     q.[α] -∗ bor_tok α P -∗
       modw M (borrow_wsat M intp) (obor_tok α q P ∗ intp P).
   Proof.
@@ -753,7 +749,7 @@ Section borrow.
   Qed.
 
   (** Turn [obor_dtok] to a reborrower using [lend_dtok] *)
-  Local Lemma obor_dtok_reborrow `{!NonExpansive intp} {M d α α' q P β d'} :
+  Local Lemma obor_dtok_reborrow {d α α' q P β d'} :
     d < d' →
     obor_dtok d α α' q P -∗ lend_dtok d' (α' ⊓ β) P =[borrow_wsat M intp]=∗
       q.[α] ∗ ([†β] -∗ bor_tok α P).
@@ -797,7 +793,7 @@ Section borrow.
     iPureIntro. split; [lia|]. by rewrite assoc [α' ⊓ α'']comm -assoc.
   Qed.
   (** Merge and subdivide borrowers *)
-  Lemma obor_tok_merge_subdiv `{!GenUpd M, !NonExpansive intp} αqPl Ql β :
+  Lemma obor_tok_merge_subdiv αqPl Ql β :
     ([∗ list] '(α, q, P)' ∈ αqPl, β ⊑□ α ∗ obor_tok α q P) -∗
     ([∗ list] Q ∈ Ql, intp Q) -∗
     ([†β] -∗ ([∗ list] Q ∈ Ql, intp Q) -∗
@@ -819,7 +815,7 @@ Section borrow.
     iMod (obor_dtok_reborrow with "o l") as "[$ _]"; [lia|done].
   Qed.
   (** Subdivide a borrower *)
-  Lemma obor_tok_subdiv `{!GenUpd M, !NonExpansive intp} {α q P} Ql β :
+  Lemma obor_tok_subdiv {α q P} Ql β :
     β ⊑□ α -∗ obor_tok α q P -∗ ([∗ list] Q ∈ Ql, intp Q) -∗
     ([†β] -∗ ([∗ list] Q ∈ Ql, intp Q) -∗ M (intp P))
       =[borrow_wsat M intp]=∗ q.[α] ∗ [∗ list] Q ∈ Ql, borc_tok β Q.
@@ -829,7 +825,7 @@ Section borrow.
       as "[[$_]$]"=>/=; by [iFrame|rewrite bi.sep_emp|].
   Qed.
   (** Simply close a borrower *)
-  Lemma obor_tok_close `{!GenUpd M, !NonExpansive intp} {α q P} :
+  Lemma obor_tok_close {α q P} :
     obor_tok α q P -∗ intp P =[borrow_wsat M intp]=∗ q.[α] ∗ borc_tok α P.
   Proof.
     iIntros "o P".
@@ -838,7 +834,7 @@ Section borrow.
   Qed.
 
   (** Reborrow a borrower *)
-  Lemma obor_tok_reborrow `{!GenUpd M, !NonExpansive intp} {α q P} β :
+  Lemma obor_tok_reborrow {α q P} β :
     obor_tok α q P -∗ intp P =[borrow_wsat M intp]=∗
       q.[α] ∗ borc_tok (α ⊓ β) P ∗ ([†β] -∗ bor_tok α P).
   Proof.
@@ -848,14 +844,14 @@ Section borrow.
     iMod (obor_dtok_reborrow with "o l") as "[$$]"; [lia|]. iModIntro.
     iApply (borc_tok_lft with "[] b"). by iApply lft_sincl_meet_mono_l.
   Qed.
-  Lemma borc_tok_reborrow `{!GenUpd M, !NonExpansive intp} {α q P} β :
+  Lemma borc_tok_reborrow {α q P} β :
     q.[α] -∗ borc_tok α P =[borrow_wsat M intp]=∗
       q.[α] ∗ borc_tok (α ⊓ β) P ∗ ([†β] -∗ bor_tok α P).
   Proof.
     iIntros "α c". iMod (borc_tok_open with "α c") as "[o P]".
     by iMod (obor_tok_reborrow with "o P").
   Qed.
-  Lemma bor_tok_reborrow `{!GenUpd M, !NonExpansive intp} {α q P} β :
+  Lemma bor_tok_reborrow {α q P} β :
     q.[α] -∗ bor_tok α P -∗ modw M (borrow_wsat M intp)
       (q.[α] ∗ borc_tok (α ⊓ β) P ∗ ([†β] -∗ bor_tok α P)).
   Proof.
