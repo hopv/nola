@@ -53,7 +53,8 @@ nola/heap_lang/derived_laws.v
 nola/heap_lang/proofmode.v
 nola/heap_lang/adequacy.v
 nola/heap_lang/total_adequacy.v
-nola/heap_lang/lib/lock.v
+
+nola/heap_lang/lib/mutex.v
 
 nola/examples/later.v
 nola/examples/minilogic.v

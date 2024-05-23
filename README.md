@@ -103,7 +103,7 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
 - [`heap_lang/`](nola/heap_lang/) : Variant of Iris HeapLang, supporting `Ndnat`
     (infinite non-determinism) and program logic with custom world satisfactions
   + [`lib/`](nola/heap_lang/lib) : Libraries
-    * [`lock`](nola/heap_lang/lib/lock.v) (Lock machinery)
+    * [`mutex`](nola/heap_lang/lib/mutex.v) (Mutex machinery)
 - [`examples/`](nola/examples/) : Examples
   + [`minilogic`](nola/examples/minilogic.v) : Minimal showcase logic
   + [`later`](nola/examples/later.v) : Instantiating Nola with later
