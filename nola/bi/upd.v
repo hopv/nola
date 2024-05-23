@@ -1,7 +1,7 @@
 (** * On updates *)
 
 From nola Require Export prelude.
-From iris.base_logic.lib Require Export fancy_updates.
+From iris.bi Require Export bi.
 From iris.proofmode Require Import proofmode.
 
 (** ** On [step_fupdN] *)
@@ -292,7 +292,7 @@ End lemmas.
 (** Basic update with a world satisfaction *)
 Definition bupdw `{!BiBUpd PROP} (W P : PROP) : PROP := modw bupd W P.
 (** Fancy update with a world satisfaction *)
-Definition fupdw `{!BiFUpd PROP} (W : PROP) (E E' : coPset) (P : PROP) : PROP :=
+Definition fupdw `{!BiFUpd PROP} (W : PROP) E E' (P : PROP) : PROP :=
   modw (fupd E E') W P.
 
 (** *** Notation *)

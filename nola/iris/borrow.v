@@ -4,8 +4,9 @@ From nola.util Require Export prod.
 From nola.bi Require Export upd.
 From nola.bi Require Import order gmap.
 From nola.iris Require Export ofe lft.
-From iris.algebra Require Import excl agree gmap auth.
 From iris.bi.lib Require Import cmra.
+From iris.algebra Require Import excl agree gmap auth.
+From iris.base_logic.lib Require Export own.
 From iris.proofmode Require Import proofmode.
 Import ProdNotation iPropAppNotation LftNotation UpdwNotation.
 

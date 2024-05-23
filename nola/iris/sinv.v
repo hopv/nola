@@ -3,6 +3,7 @@
 From nola.bi Require Export upd.
 From nola.iris Require Export ofe.
 From iris.algebra Require Import agree gmap_view.
+From iris.base_logic.lib Require Export own.
 From iris.proofmode Require Import proofmode.
 Import iPropAppNotation.
 
