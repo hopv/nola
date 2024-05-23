@@ -23,16 +23,19 @@ Section sinv_deriv.
   Implicit Type δ : JUDG → iProp Σ.
 
   (** [sinv]: Relaxed simple invariant *)
-  Definition sinv δ (P : PROP $oi Σ) : iProp Σ :=
+  Local Definition sinv_def δ (P : PROP $oi Σ) : iProp Σ :=
     ∃ Q, □ δ (sinv_jacsr P Q) ∗ sinv_tok Q.
+  Local Lemma sinv_aux : seal sinv_def. Proof. by eexists. Qed.
+  Definition sinv := sinv_aux.(unseal).
+  Local Lemma sinv_unseal : sinv = sinv_def. Proof. exact: seal_eq. Qed.
 
   (** [sinv] is persistent *)
-  Fact sinv_persistent {δ P} : Persistent (sinv δ P).
-  Proof. exact _. Qed.
+  #[export] Instance sinv_persistent {δ P} : Persistent (sinv δ P).
+  Proof. rewrite sinv_unseal. exact _. Qed.
 
   (** [sinv] is non-expansive *)
   #[export] Instance sinv_ne `{!NonExpansive δ} : NonExpansive (sinv δ).
-  Proof. solve_proper. Qed.
+  Proof. rewrite sinv_unseal. solve_proper. Qed.
 End sinv_deriv.
 
 Section sinv_deriv.
@@ -56,8 +59,8 @@ Section sinv_deriv.
     sinv der P -∗ sinv_wsatd der -∗ sinv_mod
       (⟦ P ⟧(der) ∗ (⟦ P ⟧(der) -∗ sinv_mod (sinv_wsatd der))).
   Proof.
-    iIntros "[%Q[QPQ s]] W". iDestruct (der_sound with "QPQ") as "QPQ".
-    rewrite sinv_jacsr_intp.
+    rewrite sinv_unseal. iIntros "[%Q[QPQ s]] W".
+    iDestruct (der_sound with "QPQ") as "QPQ". rewrite sinv_jacsr_intp.
     iDestruct (sinv_tok_acc with "s W") as "[Q cl]".
     iMod ("QPQ" with "Q") as "[$ PQ]". iIntros "!> P".
     iMod ("PQ" with "P") as "Q". iModIntro. by iApply "cl".
@@ -68,7 +71,7 @@ Section sinv_deriv.
   (** Turn [sinv_tok] into [sinv] *)
   Lemma sinv_tok_sinv {P} : sinv_tok P ⊢ sinv δ P.
   Proof.
-    iIntros "$ !>". iApply Deriv_to. iIntros (? _ _ _).
+    rewrite sinv_unseal. iIntros "$ !>". iApply Deriv_to. iIntros (? _ _ _).
     rewrite sinv_jacsr_intp. iApply acsr_refl.
   Qed.
 
@@ -79,8 +82,9 @@ Section sinv_deriv.
   (** Convert [sinv] with [acsr] *)
   Lemma sinv_acsr' {P Q} : □ δ (sinv_jacsr P Q) -∗ sinv δ Q -∗ sinv δ P.
   Proof.
-    iIntros "#QPQ [%R[#RQR $]] !>". iApply (Deriv_map2 with "[] QPQ RQR").
-    iIntros (? _ _). rewrite !sinv_jacsr_intp. iApply acsr_trans.
+    rewrite sinv_unseal. iIntros "#QPQ [%R[#RQR $]] !>".
+    iApply (Deriv_map2 with "[] QPQ RQR"). iIntros (? _ _).
+    rewrite !sinv_jacsr_intp. iApply acsr_trans.
   Qed.
   Lemma sinv_acsr {P Q} :
     □ (∀ δ, acsr sinv_mod ⟦ P ⟧(δ) ⟦ Q ⟧(δ)) -∗ sinv δ Q -∗ sinv δ P.
