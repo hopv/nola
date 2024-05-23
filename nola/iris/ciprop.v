@@ -73,9 +73,9 @@ Section ciProp.
   Context {S} {I C : S → Type} {D : S → oFunctor} {Σ : gFunctors}.
   Implicit Type Px Qx : ciProp I C D Σ.
 
-  Definition cip_all {A} (Φxs : A → ciProp I C D Σ) : ciProp I C D Σ :=
+  Definition cip_all {A} (Φxs : A -d> ciProp I C D Σ) : ciProp I C D Σ :=
     CitX (cips_all A) Φxs nullary ().
-  Definition cip_ex {A} (Φxs : A → ciProp I C D Σ) : ciProp I C D Σ :=
+  Definition cip_ex {A} (Φxs : A -d> ciProp I C D Σ) : ciProp I C D Σ :=
     CitX (cips_ex A) Φxs nullary ().
 
   Definition cip_bin s Px Qx : ciProp I C D Σ :=
@@ -98,9 +98,25 @@ Section ciProp.
   Definition cip_later (P : iProp Σ) : ciProp I C D Σ :=
     CitX cips_later nullary nullary (Next P%I).
 
-  Definition cip_custom s (Φxs : I s → ciProp I C D Σ)
-    (Ψxs : C s → ciProp I C D Σ) (d : D s $oi Σ) : ciProp I C D Σ :=
+  Definition cip_custom s (Φxs : I s -d> ciProp I C D Σ)
+    (Ψxs : C s -d> ciProp I C D Σ) (d : D s $oi Σ) : ciProp I C D Σ :=
     CitX (cips_custom s) Φxs Ψxs d.
+
+  (** Non-expansiveness *)
+  #[export] Instance cip_all_ne {A} : NonExpansive (@cip_all A).
+  Proof. move=> ????. apply Cit_ne, CitI_ne; solve_proper. Qed.
+  #[export] Instance cip_ex_ne {A} : NonExpansive (@cip_ex A).
+  Proof. move=> ????. apply Cit_ne, CitI_ne; solve_proper. Qed.
+  #[export] Instance cip_bin_ne {s} : NonExpansive2 (cip_bin s).
+  Proof. move=> ???????. apply Cit_ne, CitI_ne; solve_proper. Qed.
+  #[export] Instance cip_un_ne {s} : NonExpansive (cip_un s).
+  Proof. move=> ????. apply Cit_ne, CitI_ne; solve_proper. Qed.
+  #[export] Instance cip_pure_ne : NonExpansive cip_pure.
+  Proof. move=> ????. apply Cit_ne, CitI_ne; solve_proper. Qed.
+  #[export] Instance cip_later_ne : NonExpansive cip_later.
+  Proof. move=> ????. apply Cit_ne, CitI_ne; solve_proper. Qed.
+  #[export] Instance cip_custom_ne {s} : NonExpansive3 (cip_custom s).
+  Proof. move=> ??????????. apply Cit_ne, CitI_ne; solve_proper. Qed.
 End ciProp.
 
 Declare Scope ciProp_scope.

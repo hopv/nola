@@ -40,6 +40,9 @@ Section ciProp.
   Context {Σ : gFunctors}.
   Definition cip_inv N (Px : ciProp Σ) : ciProp Σ :=
     cip_custom (cips_inv N) nullary (unary Px) ().
+
+  #[export] Instance cip_inv_ne {N} : NonExpansive (cip_inv N).
+  Proof. move=> ????. apply cip_custom_ne; solve_proper. Qed.
 End ciProp.
 
 Section iris.
