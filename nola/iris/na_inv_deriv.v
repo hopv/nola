@@ -76,11 +76,19 @@ Section na_inv_deriv.
 
   Context `{!Deriv (JUDGI:=JUDGI) ih δ}.
 
+  (** Turn [na_inv_acsr] into [na_inv'] *)
+  Lemma na_inv_acsr_inv' {p N P} :
+    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ →
+      na_inv_acsr ⟦⟧(δ') p N ⟦ P ⟧(δ')) ⊢ na_inv' δ p N P.
+  Proof.
+    rewrite na_inv'_unseal. iIntros "#big !>". iApply Deriv_to.
+    iIntros (????). rewrite na_inv_jacsr_intp. by iApply "big".
+  Qed.
+
   (** Turn [na_inv_tok] into [na_inv'] *)
   Lemma na_inv_tok_na_inv' {p N P} : na_inv_tok p N P ⊢ na_inv' δ p N P.
   Proof.
-    rewrite na_inv'_unseal. iIntros "#i !>". iApply Deriv_to. iIntros (δ' ?? _).
-    rewrite na_inv_jacsr_intp. iIntros (????) "F".
+    rewrite -na_inv_acsr_inv'. iIntros "#i !>" (δ' ???????) "F".
     by iApply (na_inv_tok_acc (intp:=⟦⟧(δ')) with "F i").
   Qed.
 
