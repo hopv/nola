@@ -43,8 +43,7 @@ Section iris.
       iter f #c #l @ ↑N
     {{{ RET #(); c ↦ #0 }}}.
   Proof.
-    iIntros "#Hf" (Ψ). iIntros "!> [c↦ #l] HΨ".
-    iInduction n as [|m] "IH" forall (l) "l".
+    iIntros "#Hf" (Ψ) "!> [c↦ #l] HΨ". iInduction n as [|m] "IH" forall (l) "l".
     { wp_rec. wp_pures. wp_load. wp_pures. by iApply "HΨ". }
     rewrite ilist_unfold. iDestruct "l" as "[ihd itl]". wp_rec. wp_pures.
     wp_load. wp_pures. wp_apply "Hf"; [done|]. iIntros "_". wp_pures. wp_load.
