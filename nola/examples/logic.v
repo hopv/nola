@@ -97,18 +97,15 @@ Definition iter : val := rec: "self" "f" "c" "l" :=
 
 Section iris.
   Context `{!inv'GS ciPropOF Σ, !heapGS_gen hlc Σ}.
+  Implicit Type Φ : loc → ciProp Σ.
 
-  Section ilist.
-    Context N (Φ : loc → ciProp Σ).
-
-    (** [ilist]: Syntactic proposition for a list *)
-    Definition ilist_gen Ilist' l : ciProp Σ :=
-      cip_inv N (Φ l) ∗ cip_inv N (Ilist' l).
-    Definition ilist'_gen Ilist' l : ciProp Σ :=
-      ∃ l', ▷ (l +ₗ 1) ↦ #l' ∗ ilist_gen Ilist' l'.
-    CoFixpoint ilist' : loc → ciProp Σ := ilist'_gen ilist'.
-    Definition ilist : loc → ciProp Σ := ilist_gen ilist'.
-  End ilist.
+  (** ** [ilist]: Syntactic proposition for a list *)
+  Definition ilist_gen N Φ Ilist' l : ciProp Σ :=
+    cip_inv N (Φ l) ∗ cip_inv N (Ilist' N Φ l).
+  Definition ilist'_gen N Φ Ilist' l : ciProp Σ :=
+    ∃ l', ▷ (l +ₗ 1) ↦ #l' ∗ ilist_gen N Φ Ilist' l'.
+  CoFixpoint ilist' N Φ : loc → ciProp Σ := ilist'_gen N Φ ilist'.
+  Definition ilist N Φ : loc → ciProp Σ := ilist_gen N Φ ilist'.
 
   (** ** Termination of [iter] *)
   Lemma twp_iter {N Φ c l} {f : val} {n : nat} :
