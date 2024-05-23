@@ -99,28 +99,29 @@ Section na_inv_deriv.
 
   (** Convert [na_inv'] with [acsr] *)
   Lemma na_inv'_acsr {p N P Q} :
-    □ (∀ δ, acsr (fupd ∅ ∅) ⟦ P ⟧(δ) ⟦ Q ⟧(δ)) -∗
-    na_inv' δ p N Q -∗ na_inv' δ p N P.
+    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → acsr (fupd ∅ ∅) ⟦ P ⟧(δ') ⟦ Q ⟧(δ')) -∗
+      na_inv' δ p N Q -∗ na_inv' δ p N P.
   Proof.
     rewrite na_inv'_unseal. iIntros "#QPQ #accQ !>". iApply Deriv_to.
-    iIntros (? _ _ ->). rewrite !na_inv_jacsr_intp. iIntros (?? NE NF) "F".
+    iIntros (??? ->). rewrite !na_inv_jacsr_intp. iIntros (?? NE NF) "F".
     iMod ("accQ" $! _ _ NE NF with "F") as "($ & Q & cl)".
     iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
-    iMod ("QPQ" with "Q") as "[$ PQ]". iMod "→E∖N" as "_". iIntros "!>".
-    iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|]. iIntros "F∖N P".
-    iMod ("PQ" with "P") as "Q". iMod "→E∖N" as "_". iApply ("cl" with "F∖N Q").
+    iMod ("QPQ" with "[%//] [%//] Q") as "[$ PQ]". iMod "→E∖N" as "_".
+    iIntros "!>". iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
+    iIntros "F∖N P". iMod ("PQ" with "P") as "Q". iMod "→E∖N" as "_".
+    iApply ("cl" with "F∖N Q").
   Qed.
 
   (** Split [na_inv'] over [∗] *)
   Local Lemma na_inv'_sep' {p N PQ P Q} :
-    (∀ δ, ⟦ PQ ⟧(δ) ≡ (⟦ P ⟧(δ) ∗ ⟦ Q ⟧(δ))%I) →
+    (∀ δ', ⟦ PQ ⟧(δ') ≡ (⟦ P ⟧(δ') ∗ ⟦ Q ⟧(δ'))%I) →
     na_inv' δ p N PQ ⊢ na_inv' δ p N P.
   Proof.
-    iIntros (eq). iApply (na_inv'_acsr with "[]"). iIntros "!>" (?).
+    iIntros (eq). iApply (na_inv'_acsr with "[]"). iIntros "!>" (???).
     unfold acsr. rewrite eq. iApply (acsr_sep_l (M:=fupd _ _)).
   Qed.
   Lemma na_inv'_sep {p N PQ P Q} :
-    (∀ δ, ⟦ PQ ⟧(δ) ≡ (⟦ P ⟧(δ) ∗ ⟦ Q ⟧(δ))%I) →
+    (∀ δ', ⟦ PQ ⟧(δ') ≡ (⟦ P ⟧(δ') ∗ ⟦ Q ⟧(δ'))%I) →
     na_inv' δ p N PQ ⊢ na_inv' δ p N P ∗ na_inv' δ p N Q.
   Proof.
     iIntros (eq) "#i". iSplit; [by iApply na_inv'_sep'|].
@@ -129,7 +130,7 @@ Section na_inv_deriv.
 
   (** Merge [na_inv']s with [∗] *)
   Lemma na_inv'_merge {p N1 N2 N P Q PQ} : N1 ## N2 → ↑N1 ∪ ↑N2 ⊆@{coPset} ↑N →
-    (∀ δ, ⟦ PQ ⟧(δ) ≡ (⟦ P ⟧(δ) ∗ ⟦ Q ⟧(δ))%I) →
+    (∀ δ', ⟦ PQ ⟧(δ') ≡ (⟦ P ⟧(δ') ∗ ⟦ Q ⟧(δ'))%I) →
     na_inv' δ p N1 P -∗ na_inv' δ p N2 Q -∗ na_inv' δ p N PQ.
   Proof.
     rewrite na_inv'_unseal. iIntros (?? eq) "#i #i' !>".

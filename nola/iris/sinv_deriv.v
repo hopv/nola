@@ -88,20 +88,21 @@ Section sinv_deriv.
     rewrite !sinv_jacsr_intp. iApply (acsr_trans (M:=sinv_mod)).
   Qed.
   Lemma sinv_acsr {P Q} :
-    □ (∀ δ, acsr sinv_mod ⟦ P ⟧(δ) ⟦ Q ⟧(δ)) -∗ sinv δ Q -∗ sinv δ P.
+    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → acsr sinv_mod ⟦ P ⟧(δ') ⟦ Q ⟧(δ')) -∗
+      sinv δ Q -∗ sinv δ P.
   Proof.
     iIntros "#PQP". iApply sinv_acsr'. iModIntro. iApply Deriv_to.
-    iIntros (? _ _ _). rewrite sinv_jacsr_intp. by iApply "PQP".
+    iIntros (????). rewrite sinv_jacsr_intp. by iApply "PQP".
   Qed.
 
   (** Split [sinv] over [∗] *)
   Local Lemma sinv_sep' {PQ P Q} :
-    (∀ δ, ⟦ PQ ⟧(δ) ≡ (⟦ P ⟧(δ) ∗ ⟦ Q ⟧(δ))%I) → sinv δ PQ ⊢ sinv δ P.
+    (∀ δ', ⟦ PQ ⟧(δ') ≡ (⟦ P ⟧(δ') ∗ ⟦ Q ⟧(δ'))%I) → sinv δ PQ ⊢ sinv δ P.
   Proof.
-    move=> eq. iApply sinv_acsr. iIntros "!>" (?). unfold acsr. rewrite eq.
+    move=> eq. iApply sinv_acsr. iIntros "!>" (???). unfold acsr. rewrite eq.
     iApply (acsr_sep_l (M:=sinv_mod)).
   Qed.
-  Lemma sinv_sep {PQ P Q} : (∀ δ, ⟦ PQ ⟧(δ) ≡ (⟦ P ⟧(δ) ∗ ⟦ Q ⟧(δ))%I) →
+  Lemma sinv_sep {PQ P Q} : (∀ δ', ⟦ PQ ⟧(δ') ≡ (⟦ P ⟧(δ') ∗ ⟦ Q ⟧(δ'))%I) →
     sinv δ PQ ⊢ sinv δ P ∗ sinv δ Q.
   Proof.
     iIntros (eq) "#s". iSplit; [by iApply sinv_sep'|].
