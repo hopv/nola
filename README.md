@@ -77,8 +77,10 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     [`plist`](nola/bi/plist.v) (On `plist`)
   + [`order`](nola/bi/order.v) (Order theory),
     [`deriv`](nola/bi/deriv.v) (Derivability)
-  + [`upd`](nola/bi/upd.v) (Update),
-    [`wp`](nola/bi/wp.v) (Weakest precondition),
+  + [`genupd`](nola/bi/genupd.v) (General update),
+    [`updw`](nola/bi/updw.v) (Update with a custom world satisfaction),
+    [`wpw`](nola/bi/wpw.v) (Weakest precondition with a custom world
+      satisfaction),
     [`util`](nola/bi/util.v) (Utilities)
   + [`paradox`](nola/bi/paradox.v) (Paradoxes)
 - [`iris/`](nola/iris) : Libraries for Iris base logic

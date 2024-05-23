@@ -1,6 +1,7 @@
-(** * Weakest precondition *)
+(** * Weakest precondition with a custom world satisfaction *)
 
-From nola.bi Require Export upd.
+From nola.bi Require Export updw.
+From nola.bi Require Import util.
 From iris.program_logic Require Export weakestpre total_weakestpre.
 From iris.bi Require Import fixpoint.
 From iris.proofmode Require Import proofmode.

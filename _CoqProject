@@ -12,14 +12,16 @@ nola/util/order.v
 nola/util/psg.v
 nola/util/cit.v
 
+nola/bi/util.v
 nola/bi/ofe.v
 nola/bi/list.v
 nola/bi/gmap.v
 nola/bi/plist.v
 nola/bi/order.v
 nola/bi/deriv.v
-nola/bi/upd.v
-nola/bi/wp.v
+nola/bi/gen_upd.v
+nola/bi/updw.v
+nola/bi/wpw.v
 nola/bi/paradox.v
 
 nola/iris/ofe.v
