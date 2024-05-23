@@ -5,12 +5,18 @@ From nola.iris Require Export sinv.
 From iris.proofmode Require Import proofmode.
 Import iPropAppNotation PintpNotation UpdwNotation.
 
+Implicit Type PRO JUDG : ofe.
+
 (** Notation *)
 Notation sinv_wsatd δ := (sinv_wsat ⟦⟧(δ)).
 
 (** Derivability pre-data for [sinv] *)
-Class SinvPreDeriv PRO JUDG := sinv_jacsr : PRO → PRO → JUDG.
+Class SinvPreDeriv PRO JUDG := SINV_PRE_DERIV {
+  sinv_jacsr : PRO → PRO → JUDG;
+  sinv_jacsr_ne :: NonExpansive2 sinv_jacsr;
+}.
 Hint Mode SinvPreDeriv ! - : typeclass_instances.
+Arguments SINV_PRE_DERIV {_ _} _ {_}.
 
 Section sinv_deriv.
   Context `{!sinvGS PROP Σ, !SinvPreDeriv (PROP $oi Σ) JUDG}.
@@ -23,6 +29,10 @@ Section sinv_deriv.
   (** [sinv] is persistent *)
   Fact sinv_persistent {δ P} : Persistent (sinv δ P).
   Proof. exact _. Qed.
+
+  (** [sinv] is non-expansive *)
+  #[export] Instance sinv_ne `{!NonExpansive δ} : NonExpansive (sinv δ).
+  Proof. solve_proper. Qed.
 End sinv_deriv.
 
 Section sinv_deriv.

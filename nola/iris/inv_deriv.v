@@ -5,12 +5,18 @@ From nola.iris Require Export inv.
 From iris.proofmode Require Import proofmode.
 Import iPropAppNotation PintpNotation UpdwNotation.
 
+Implicit Type PRO JUDG : ofe.
+
 (** Notation *)
 Notation inv_wsatd δ := (inv_wsat ⟦⟧(δ)).
 
 (** Derivability pre-data for [inv] *)
-Class InvPreDeriv PRO JUDG := inv_jacsr : namespace → PRO → JUDG.
+Class InvPreDeriv PRO JUDG := INV_PRE_DERIV {
+  inv_jacsr : namespace → PRO → JUDG;
+  inv_jacsr_ne {N} :: NonExpansive (inv_jacsr N);
+}.
 Hint Mode InvPreDeriv ! - : typeclass_instances.
+Arguments INV_PRE_DERIV {_ _} _ {_}.
 
 Section inv_deriv.
   Context `{!InvPreDeriv PRO JUDG} {Σ : gFunctors}.
@@ -22,6 +28,10 @@ Section inv_deriv.
   (** [inv'] is persistent *)
   Fact inv'_persistent {δ N P} : Persistent (inv' δ N P).
   Proof. exact _. Qed.
+
+  (** [inv'] is non-expansive *)
+  #[export] Instance inv'_ne `{!NonExpansive δ} {N} : NonExpansive (inv' δ N).
+  Proof. solve_proper. Qed.
 End inv_deriv.
 
 Section inv_deriv.

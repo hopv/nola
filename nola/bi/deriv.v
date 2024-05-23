@@ -11,13 +11,17 @@ Import PintpNotation.
 (** [judgi]: Judgment with the parameterized interpretation *)
 #[projections(primitive)]
 Structure judgi (PROP : bi) : Type := Judg {
-  judgi_car :> Type;
+  judgi_car :> ofe;
   (** Interpretation parameterized over derivability candidates *)
   #[canonical=no] judgi_Pintp :: Pintp (judgi_car → PROP) judgi_car PROP;
+  (** [judgi_Pintp] is non-expansive *)
+  #[canonical=no] judgi_Pintp_ne `{!NonExpansive δ} ::
+    NonExpansive ⟦⟧(δ)@{judgi_car};
 }.
+Add Printing Constructor judgi.
 Arguments judgi_car {PROP JUDGI} : rename.
 Arguments judgi_Pintp {PROP JUDGI} : rename.
-Add Printing Constructor judgi.
+Arguments judgi_Pintp_ne {PROP JUDGI} : rename.
 
 Section deriv.
   Context {PROP} {JUDGI : judgi PROP}.
@@ -54,6 +58,20 @@ Section deriv.
   Proof.
     iSplit; iIntros "?"; iStopProof; [|by exact Deriv_to]. iIntros "?" (????).
     by iStopProof.
+  Qed.
+  Lemma Deriv_eqv' `{!Deriv ih δ} {J} :
+    δ J ⊣⊢
+      ∀ δ' (_ : Deriv ih δ') (_ : ih δ'), ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ → ⟦ J ⟧(δ').
+  Proof.
+    rewrite Deriv_eqv. do 2 f_equiv. rewrite bi.pure_impl_forall.
+    do 2 f_equiv. exact: bi.pure_impl_forall.
+  Qed.
+
+  (** [Deriv ih δ] implies that [δ] is non-expansive *)
+  #[export] Instance Deriv_to_ne `{!Deriv ih δ} : NonExpansive δ.
+  Proof.
+    apply Deriv_ind=> ??????. rewrite !Deriv_eqv'. do 5 f_equiv. move=> [??].
+    f_equiv. by apply judgi_Pintp_ne.
   Qed.
 
   (** Map derivabilities via semantics *)

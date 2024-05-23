@@ -5,13 +5,18 @@ From nola.iris Require Export na_inv.
 From iris.proofmode Require Import proofmode.
 Import iPropAppNotation PintpNotation UpdwNotation.
 
+Implicit Type PRO JUDG : ofe.
+
 (** Notation *)
 Notation na_inv_wsatd δ := (na_inv_wsat ⟦⟧(δ)).
 
 (** Derivability pre-data for [na_inv] *)
-Class NaInvPreDeriv PRO JUDG :=
-  na_inv_jacsr : na_inv_pool_name → namespace → PRO → JUDG.
+Class NaInvPreDeriv PRO JUDG := NA_INV_PRE_DERIV {
+  na_inv_jacsr : na_inv_pool_name → namespace → PRO → JUDG;
+  na_inv_jacsr_ne {p N} :: NonExpansive (na_inv_jacsr p N);
+}.
 Hint Mode NaInvPreDeriv ! - : typeclass_instances.
+Arguments NA_INV_PRE_DERIV {_ _} _ {_}.
 
 Section na_inv_deriv.
   Context `{!NaInvPreDeriv PRO JUDG} {Σ : gFunctors}.
@@ -23,6 +28,11 @@ Section na_inv_deriv.
   (** [na_inv'] is persistent *)
   Fact na_inv'_persistent {δ p N P} : Persistent (na_inv' δ p N P).
   Proof. exact _. Qed.
+
+  (** [na_inv'] is non-expansive *)
+  #[export] Instance na_inv'_ne `{!NonExpansive δ} {p N} :
+    NonExpansive (na_inv' δ p N).
+  Proof. solve_proper. Qed.
 End na_inv_deriv.
 
 Section na_inv_deriv.
