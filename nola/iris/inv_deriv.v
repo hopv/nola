@@ -98,14 +98,15 @@ Section inv_deriv.
 
   (** Convert [inv'] with [acsr] *)
   Lemma inv'_acsr {N P Q} :
-    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → acsr (fupd ∅ ∅) ⟦ P ⟧(δ') ⟦ Q ⟧(δ')) -∗
+    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ →
+      acsr (fupd ∅ ∅) ⟦ P ⟧(δ') ⟦ Q ⟧(δ')) -∗
       inv' δ N P -∗ inv' δ N Q.
   Proof.
     rewrite inv'_unseal. iIntros "#PQP #accP !>". iApply Deriv_to.
-    iIntros (??? ->). rewrite !inv_jacsr_intp. iIntros (? NE).
+    iIntros (??? to). rewrite to !inv_jacsr_intp. iIntros (? NE).
     iMod ("accP" $! _ NE) as "[P cl]".
     iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
-    iMod ("PQP" with "[//] [//] P") as "($& QP)". iMod "→E∖N" as "_".
+    iMod ("PQP" with "[//] [//] [//] P") as "($& QP)". iMod "→E∖N" as "_".
     iIntros "!> Q". iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
     iMod ("QP" with "Q") as "P". iMod "→E∖N" as "_". iApply ("cl" with "P").
   Qed.
@@ -114,7 +115,7 @@ Section inv_deriv.
   Local Lemma inv'_sep' {N PQ P Q} :
     (∀ δ', ⟦ PQ ⟧(δ') ≡ (⟦ P ⟧(δ') ∗ ⟦ Q ⟧(δ'))%I) → inv' δ N PQ ⊢ inv' δ N P.
   Proof.
-    iIntros (eq). iApply (inv'_acsr with "[]"). iIntros "!>" (???).
+    iIntros (eq). iApply (inv'_acsr with "[]"). iIntros "!>" (????).
     unfold acsr. rewrite eq. iApply (acsr_sep_l (M:=fupd _ _)).
   Qed.
   Lemma inv'_sep {N PQ P Q} : (∀ δ', ⟦ PQ ⟧(δ') ≡ (⟦ P ⟧(δ') ∗ ⟦ Q ⟧(δ'))%I) →
@@ -130,7 +131,7 @@ Section inv_deriv.
     inv' δ N1 P -∗ inv' δ N2 Q -∗ inv' δ N PQ.
   Proof.
     rewrite inv'_unseal. iIntros (?? eq) "#i #i' !>".
-    iApply (Deriv_map2 with "[] i i'"). iIntros (? _ _) "{i}i {i'}i'".
+    iApply (Deriv_map2 with "[] i i'"). iIntros (????) "{i}i {i'}i'".
     rewrite !inv_jacsr_intp. iIntros (??). rewrite eq.
     iMod ("i" with "[%]") as "[$ P→]"; [set_solver|].
     iMod ("i'" with "[%]") as "[$ Q→]"; [set_solver|].

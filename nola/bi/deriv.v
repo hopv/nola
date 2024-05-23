@@ -80,29 +80,31 @@ Section deriv.
 
   (** Map derivabilities via semantics *)
   Lemma Deriv_map `{!Deriv ih δ} {J J'} :
-    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ')) ⊢
+    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ →
+      ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ')) ⊢
       δ J -∗ δ J'.
   Proof.
     iIntros "∀ J". iApply Deriv_to. iIntros (??? to).
     iApply "∀"; by [| |iApply to].
   Qed.
   Lemma Deriv_map2 `{!Deriv ih δ} {J J' J''} :
-    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ') -∗ ⟦ J'' ⟧(δ')) ⊢
+    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ →
+      ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ') -∗ ⟦ J'' ⟧(δ')) ⊢
       δ J -∗ δ J' -∗ δ J''.
   Proof.
     iIntros "∀ J J'". iApply Deriv_to. iIntros (??? to).
-    iApply ("∀" with "[//] [//] [J]"); by iApply to.
+    iApply ("∀" with "[//] [//] [//] [J]"); by iApply to.
   Qed.
   Lemma Deriv_map3 `{!Deriv ih δ} {J J' J'' J'''} :
-    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ') -∗ ⟦ J'' ⟧(δ') -∗
-      ⟦ J''' ⟧(δ')) ⊢
+    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ →
+      ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ') -∗ ⟦ J'' ⟧(δ') -∗ ⟦ J''' ⟧(δ')) ⊢
       δ J -∗ δ J' -∗ δ J'' -∗ δ J'''.
   Proof.
     iIntros "∀ J J' J''". iApply Deriv_to. iIntros (??? to).
-    iApply ("∀" with "[//] [//] [J] [J']"); by iApply to.
+    iApply ("∀" with "[//] [//] [//] [J] [J']"); by iApply to.
   Qed.
   Lemma Deriv_mapl `{!Deriv ih δ} {Js J'} :
-    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
+    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ →
       ([∗ list] J ∈ Js, ⟦ J ⟧(δ')) -∗ ⟦ J' ⟧(δ')) ⊢
       ([∗ list] J ∈ Js, δ J) -∗ δ J'.
   Proof.

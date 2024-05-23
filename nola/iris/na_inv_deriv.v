@@ -107,14 +107,15 @@ Section na_inv_deriv.
 
   (** Convert [na_inv'] with [acsr] *)
   Lemma na_inv'_acsr {p N P Q} :
-    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → acsr (fupd ∅ ∅) ⟦ P ⟧(δ') ⟦ Q ⟧(δ')) -∗
+    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ →
+      acsr (fupd ∅ ∅) ⟦ P ⟧(δ') ⟦ Q ⟧(δ')) -∗
       na_inv' δ p N P -∗ na_inv' δ p N Q.
   Proof.
     rewrite na_inv'_unseal. iIntros "#PQP #accP !>". iApply Deriv_to.
-    iIntros (??? ->). rewrite !na_inv_jacsr_intp. iIntros (?? NE NF) "F".
+    iIntros (??? to). rewrite to !na_inv_jacsr_intp. iIntros (?? NE NF) "F".
     iMod ("accP" $! _ _ NE NF with "F") as "($ & P & cl)".
     iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
-    iMod ("PQP" with "[//] [//] P") as "[$ QP]". iMod "→E∖N" as "_".
+    iMod ("PQP" with "[//] [//] [//] P") as "[$ QP]". iMod "→E∖N" as "_".
     iIntros "!>". iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
     iIntros "F∖N Q". iMod ("QP" with "Q") as "P". iMod "→E∖N" as "_".
     iApply ("cl" with "F∖N P").
@@ -125,7 +126,7 @@ Section na_inv_deriv.
     (∀ δ', ⟦ PQ ⟧(δ') ≡ (⟦ P ⟧(δ') ∗ ⟦ Q ⟧(δ'))%I) →
     na_inv' δ p N PQ ⊢ na_inv' δ p N P.
   Proof.
-    iIntros (eq). iApply (na_inv'_acsr with "[]"). iIntros "!>" (???).
+    iIntros (eq). iApply (na_inv'_acsr with "[]"). iIntros "!>" (????).
     unfold acsr. rewrite eq. iApply (acsr_sep_l (M:=fupd _ _)).
   Qed.
   Lemma na_inv'_sep {p N PQ P Q} :
@@ -142,7 +143,7 @@ Section na_inv_deriv.
     na_inv' δ p N1 P -∗ na_inv' δ p N2 Q -∗ na_inv' δ p N PQ.
   Proof.
     rewrite na_inv'_unseal. iIntros (?? eq) "#i #i' !>".
-    iApply (Deriv_map2 with "[] i i'"). iIntros (? _ _) "{i}i {i'}i'".
+    iApply (Deriv_map2 with "[] i i'"). iIntros (????) "{i}i {i'}i'".
     rewrite !na_inv_jacsr_intp. iIntros (????) "F". rewrite eq.
     iMod ("i" with "[%] [%] F") as "(F∖N1 & $ & P→)"; [set_solver..|].
     iMod ("i'" with "[%] [%] F∖N1") as "(F∖N12 & $ & Q→)"; [set_solver..|].
