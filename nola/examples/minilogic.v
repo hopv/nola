@@ -1,7 +1,7 @@
 (** * Minimal showcase logic *)
 
-From nola.iris Require Import inv.
-From nola.heap_lang Require Import notation proofmode.
+From nola.iris Require Export inv.
+From nola.heap_lang Require Export notation proofmode.
 Import WpwNotation.
 
 Implicit Type (N : namespace) (l : loc).

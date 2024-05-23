@@ -1,8 +1,8 @@
 (** * Example of instantiating Nola with [▶ ∙] *)
 
+From nola.iris Require Export inv.
 From nola.bi Require Import ofe.
-From nola.iris Require Import inv.
-From nola.heap_lang Require Import notation proofmode.
+From nola.heap_lang Require Export notation proofmode.
 Import WpwNotation.
 
 Implicit Type (N : namespace) (l : loc).
@@ -37,9 +37,7 @@ Section iris.
 
   (** ** Safety of [iter] *)
   Lemma wp_iter {N Φ c l} {f : val} {n : nat} :
-    (∀ l0,
-      {{{ inv_tok N (Next (Φ l0)) }}}[inv_wsat laterl]
-        f #l0 @ ↑N
+    (∀ l0, {{{ inv_tok N (Next (Φ l0)) }}}[inv_wsat laterl] f #l0 @ ↑N
       {{{ RET #(); True }}}) -∗
     {{{ c ↦ #n ∗ ilist N Φ l }}}[inv_wsat laterl]
       iter f #c #l @ ↑N

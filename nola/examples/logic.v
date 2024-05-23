@@ -1,7 +1,7 @@
 (** * Showcase logic *)
 
-From nola.iris Require Import ciprop inv_deriv.
-From nola.heap_lang Require Import notation proofmode.
+From nola.iris Require Export ciprop inv_deriv.
+From nola.heap_lang Require Export notation proofmode.
 Import WpwNotation iPropAppNotation PintpNotation.
 
 Implicit Type (N : namespace) (l : loc).
@@ -114,9 +114,7 @@ Section iris.
 
   (** ** Termination of [iter] *)
   Lemma twp_iter {N Φ c l} {f : val} {n : nat} :
-    (∀ l0 : loc,
-      [[{ inv' der N (Φ l0) }]][inv_wsatd der]
-        f #l0 @ ↑N
+    (∀ l0, [[{ inv' der N (Φ l0) }]][inv_wsatd der] f #l0 @ ↑N
       [[{ RET #(); True }]]) -∗
     [[{ c ↦ #n ∗ ⟦ ilist N Φ l ⟧(der) }]][inv_wsatd der]
       iter f #c #l @ ↑N
