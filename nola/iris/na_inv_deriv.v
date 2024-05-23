@@ -9,12 +9,12 @@ Import iPropAppNotation PintpNotation UpdwNotation.
 Notation na_inv_wsatd δ := (na_inv_wsat ⟦⟧(δ)).
 
 (** Derivability pre-data for [na_inv] *)
-Class NaInvPreDeriv PRO JUD :=
-  na_inv_jacsr : na_inv_pool_name → namespace → PRO → JUD.
+Class NaInvPreDeriv PRO JUDG :=
+  na_inv_jacsr : na_inv_pool_name → namespace → PRO → JUDG.
 Hint Mode NaInvPreDeriv ! - : typeclass_instances.
 
 Section na_inv_deriv.
-  Context `{!NaInvPreDeriv PRO JUD} {Σ : gFunctors}.
+  Context `{!NaInvPreDeriv PRO JUDG} {Σ : gFunctors}.
 
   (** [na_inv']: Relaxed na_invariant *)
   Definition na_inv' δ p N (P : PRO) : iProp Σ := □ δ (na_inv_jacsr p N P).
@@ -34,8 +34,8 @@ Section na_inv_deriv.
       na_own p (F∖↑N) ∗ Pi ∗
       (na_own p (F∖↑N) -∗ Pi =[na_inv_wsat intp]{E}=∗ na_own p F) .
 
-  Context `{!NaInvPreDeriv (PROP $oi Σ) (JUDG : judg (iProp Σ)),
-    !Dintp JUDG (PROP $oi Σ) (iProp Σ)}.
+  Context `{!NaInvPreDeriv (PROP $oi Σ) (JUDGI : judgi (iProp Σ)),
+    !Dintp JUDGI (PROP $oi Σ) (iProp Σ)}.
 
   (** Derivability data for [na_inv] *)
   Class NaInvDeriv :=
@@ -54,7 +54,7 @@ Section na_inv_deriv.
     rewrite na_inv_jacsr_intp. iApply ("accP" $! _ _ NE NF with "F").
   Qed.
 
-  Context `{!Deriv (JUDG:=JUDG) ih δ}.
+  Context `{!Deriv (JUDGI:=JUDGI) ih δ}.
 
   (** Turn [na_inv_tok] into [na_inv'] *)
   Lemma na_inv_tok_na_inv' {p N P} : na_inv_tok p N P ⊢ na_inv' δ p N P.
@@ -123,5 +123,5 @@ Section na_inv_deriv.
     iMod ("Q→" with "F∖N12 Q") as "F∖N". iApply ("P→" with "F∖N P").
   Qed.
 End na_inv_deriv.
-Arguments NaInvDeriv PROP Σ {_ _ _ _} JUDG {_ _}.
+Arguments NaInvDeriv PROP Σ {_ _ _ _} JUDGI {_ _}.
 Hint Mode NaInvDeriv ! - - - - - - - - : typeclass_instances.

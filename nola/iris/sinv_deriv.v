@@ -9,14 +9,14 @@ Import iPropAppNotation PintpNotation UpdwNotation.
 Notation sinv_wsatd δ := (sinv_wsat ⟦⟧(δ)).
 
 (** Derivability pre-data for [sinv] *)
-Class SinvPreDeriv PRO JUD := sinv_jacsr : PRO → PRO → JUD.
+Class SinvPreDeriv PRO JUDG := sinv_jacsr : PRO → PRO → JUDG.
 Hint Mode SinvPreDeriv ! - : typeclass_instances.
 
 Section sinv_deriv.
-  Context `{!sinvGS PROP Σ, !SinvPreDeriv (PROP $oi Σ) JUD}.
+  Context `{!sinvGS PROP Σ, !SinvPreDeriv (PROP $oi Σ) JUDG}.
 
   (** [sinv]: Relaxed simple invariant *)
-  Definition sinv (δ : JUD → _) (P : PROP $oi Σ) : iProp Σ :=
+  Definition sinv (δ : JUDG → _) (P : PROP $oi Σ) : iProp Σ :=
     ∃ Q, □ δ (sinv_jacsr P Q) ∗ sinv_tok Q.
 
   (** [sinv] is persistent *)
@@ -25,8 +25,9 @@ Section sinv_deriv.
 End sinv_deriv.
 
 Section sinv_deriv.
-  Context `{!sinvGS PROP Σ, !SinvPreDeriv (PROP $oi Σ) (JUDG : judg (iProp Σ)),
-    !Dintp JUDG (PROP $oi Σ) (iProp Σ)}.
+  Context `{!sinvGS PROP Σ,
+    !SinvPreDeriv (PROP $oi Σ) (JUDGI : judgi (iProp Σ)),
+    !Dintp JUDGI (PROP $oi Σ) (iProp Σ)}.
   Implicit Type P Q : PROP $oi Σ.
 
   (** Derivability data for [sinv] *)
@@ -51,7 +52,7 @@ Section sinv_deriv.
     iMod ("PQ" with "P") as "Q". iModIntro. by iApply "cl".
   Qed.
 
-  Context `{!Deriv (JUDG:=JUDG) ih δ}.
+  Context `{!Deriv (JUDGI:=JUDGI) ih δ}.
 
   (** Turn [sinv_tok] into [sinv] *)
   Lemma sinv_tok_sinv {P} : sinv_tok P ⊢ sinv δ P.
@@ -91,5 +92,5 @@ Section sinv_deriv.
     iApply (sinv_sep' with "s"). iIntros (?). by rewrite eq comm.
   Qed.
 End sinv_deriv.
-Arguments SinvDeriv PROP Σ JUDG {_ _}.
+Arguments SinvDeriv PROP Σ JUDGI {_ _}.
 Hint Mode SinvDeriv ! - - - - : typeclass_instances.

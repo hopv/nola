@@ -8,25 +8,25 @@ Import PintpNotation.
 
 (** ** Derivability *)
 
-(** [judg]: Judgment with the parameterized interpretation *)
+(** [judgi]: Judgment with the parameterized interpretation *)
 #[projections(primitive)]
-Structure judg (PROP : bi) : Type := Judg {
-  judg_car :> Type;
+Structure judgi (PROP : bi) : Type := Judg {
+  judgi_car :> Type;
   (** Interpretation parameterized over derivability candidates *)
-  #[canonical=no] judg_Pintp :: Pintp (judg_car → PROP) judg_car PROP;
+  #[canonical=no] judgi_Pintp :: Pintp (judgi_car → PROP) judgi_car PROP;
 }.
-Arguments judg_car {PROP JUDG} : rename.
-Arguments judg_Pintp {PROP JUDG} : rename.
-Add Printing Constructor judg.
+Arguments judgi_car {PROP JUDGI} : rename.
+Arguments judgi_Pintp {PROP JUDGI} : rename.
+Add Printing Constructor judgi.
 
 Section deriv.
-  Context {PROP} {JUDG : judg PROP}.
-  Implicit Type (J : JUDG) (δ : JUDG → PROP) (ih : (JUDG → PROP) → Prop).
+  Context {PROP} {JUDGI : judgi PROP}.
+  Implicit Type (J : JUDGI) (δ : JUDGI → PROP) (ih : (JUDGI → PROP) → Prop).
 
   (** ** [Deriv ih δ] : [δ] is a good derivability predicate
 
     [ih] is the inductive hypothesis, used for parameterized induction *)
-  Definition Deriv ih δ := Psgoidp (OT:=JUDG → PROP) pintp ih δ.
+  Definition Deriv ih δ := Psgoidp (OT:=JUDGI → PROP) pintp ih δ.
   Existing Class Deriv.
 
   (** [Deriv] is monotone over the inductive hypothesis *)
@@ -90,7 +90,7 @@ Section deriv.
   Qed.
 
   (** ** [der]: The best derivability predicate *)
-  Definition der : JUDG → PROP := psg (OT:=JUDG → PROP) pintp.
+  Definition der : JUDGI → PROP := psg (OT:=JUDGI → PROP) pintp.
 
   (** [der] satisfies [Deriv] *)
   #[export] Instance der_Deriv : Deriv (λ _, True) der.
@@ -98,12 +98,12 @@ Section deriv.
 
   (** [der] is sound w.r.t. the semantics at [der] *)
   Lemma der_sound {J} : der J ⊢ ⟦ J ⟧(der).
-  Proof. move: J. exact (psg_post (OT:=JUDG → PROP)). Qed.
+  Proof. move: J. exact (psg_post (OT:=JUDGI → PROP)). Qed.
 End deriv.
 
 (** ** Derivability-parameterized interpretation *)
-Class Dintp (JUD : Type) (A : ofe) (PROP : bi) := DINTP {
-  dintp :: Pintp (JUD → PROP) A PROP;
+Class Dintp (JUDG : Type) (A : ofe) (PROP : bi) := DINTP {
+  dintp :: Pintp (JUDG → PROP) A PROP;
   dintp_ne {δ} :: NonExpansive (dintp δ);
 }.
 Add Printing Constructor Dintp.

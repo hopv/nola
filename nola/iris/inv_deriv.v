@@ -9,11 +9,11 @@ Import iPropAppNotation PintpNotation UpdwNotation.
 Notation inv_wsatd δ := (inv_wsat ⟦⟧(δ)).
 
 (** Derivability pre-data for [inv] *)
-Class InvPreDeriv PRO JUD := inv_jacsr : namespace → PRO → JUD.
+Class InvPreDeriv PRO JUDG := inv_jacsr : namespace → PRO → JUDG.
 Hint Mode InvPreDeriv ! - : typeclass_instances.
 
 Section inv_deriv.
-  Context `{!InvPreDeriv PRO JUD} {Σ : gFunctors}.
+  Context `{!InvPreDeriv PRO JUDG} {Σ : gFunctors}.
 
   (** [inv']: Relaxed invariant *)
   Definition inv' δ N (P : PRO) : iProp Σ := □ δ (inv_jacsr N P).
@@ -32,8 +32,8 @@ Section inv_deriv.
     ∀ E, ⌜↑N ⊆ E⌝ → |=[inv_wsat intp]{E,E∖↑N}=>
       Pi ∗ (Pi =[inv_wsat intp]{E∖↑N,E}=∗ True).
 
-  Context `{!InvPreDeriv (PROP $oi Σ) (JUDG : judg (iProp Σ)),
-    !Dintp JUDG (PROP $oi Σ) (iProp Σ)}.
+  Context `{!InvPreDeriv (PROP $oi Σ) (JUDGI : judgi (iProp Σ)),
+    !Dintp JUDGI (PROP $oi Σ) (iProp Σ)}.
 
   (** Derivability data for [inv] *)
   Class InvDeriv :=
@@ -50,7 +50,7 @@ Section inv_deriv.
     rewrite inv_jacsr_intp. by iApply "accP".
   Qed.
 
-  Context `{!Deriv (JUDG:=JUDG) ih δ}.
+  Context `{!Deriv (JUDGI:=JUDGI) ih δ}.
 
   (** Turn [inv_tok] into [inv'] *)
   Lemma inv_tok_inv' {N P} : inv_tok N P ⊢ inv' δ N P.
@@ -111,5 +111,5 @@ Section inv_deriv.
     iMod "cl" as "_". iMod ("Q→" with "Q") as "_". iApply ("P→" with "P").
   Qed.
 End inv_deriv.
-Arguments InvDeriv PROP Σ {_ _ _} JUDG {_ _}.
+Arguments InvDeriv PROP Σ {_ _ _} JUDGI {_ _}.
 Hint Mode InvDeriv ! - - - - - - - : typeclass_instances.
