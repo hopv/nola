@@ -80,14 +80,14 @@ Section iris.
 
   Context `{!invGS_gen hlc Σ}.
 
-  (** ** [jintp]: Judgment interpretation *)
-  Definition jintp δ (J : judg Σ) := match J with
+  (** ** [judg_intp]: Judgment interpretation *)
+  Definition judg_intp δ (J : judg Σ) := match J with
     | (N, Px) => inv_acsr ⟦⟧(δ) N ⟦ Px ⟧(δ)
     end.
-  Local Instance jintp_ne `{!NonExpansive δ} : NonExpansive (jintp δ).
+  Local Instance judg_intp_ne `{!NonExpansive δ} : NonExpansive (judg_intp δ).
   Proof. move=> ?[??][??][/=??]. solve_proper. Qed.
   #[export] Instance judg_dintp : Dintp (judg Σ) (judg Σ) (iProp Σ) :=
-    DINTP jintp.
+    DINTP judg_intp.
   Canonical judgJ : judgi (iProp Σ) := Judgi (judg Σ).
 
   #[export] Instance judg_inv_deriv : InvDeriv ciPropOF Σ judgJ.
