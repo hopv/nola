@@ -298,6 +298,10 @@ Section wpw.
     apply twpw_ne; [done..|]=> ?. by apply equiv_dist.
   Qed.
 
+  (** Turn [twpw] into [wpw] *)
+  Lemma twpw_wpw {e s E W Φ} : WP[W] e @ s; E [{ Φ }] ⊢ WP[W] e @ s; E {{ Φ }}.
+  Proof. iIntros "?". by iApply twp_wp. Qed.
+
   (** Eliminate [fupdw] on [wpw] *)
   Lemma fupdw_wpw_nonval {e s E W Φ} : to_val e = None →
     (|=[W]{E}=> WP[W] e @ s; E {{ Φ }}) ⊢ WP[W] e @ s; E {{ Φ }}.
