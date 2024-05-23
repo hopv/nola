@@ -2,7 +2,7 @@
 
 From nola.iris Require Export ciprop inv_deriv.
 From nola.heap_lang Require Export notation proofmode.
-Import WpwNotation iPropAppNotation PintpNotation.
+Import WpwNotation iPropAppNotation PintpNotation IntpNotation.
 
 Implicit Type (N : namespace) (l : loc).
 
@@ -114,9 +114,9 @@ Section iris.
 
   (** ** Termination of [iter] *)
   Lemma twp_iter {N Φ c l} {f : val} {n : nat} :
-    (∀ l0, [[{ inv' der N (Φ l0) }]][inv_wsatd der] f #l0 @ ↑N
+    (∀ l0, [[{ inv' der N (Φ l0) }]][inv_wsatdd] f #l0 @ ↑N
       [[{ RET #(); True }]]) -∗
-    [[{ c ↦ #n ∗ ⟦ ilist N Φ l ⟧(der) }]][inv_wsatd der]
+    [[{ c ↦ #n ∗ ⟦ ilist N Φ l ⟧ }]][inv_wsatdd]
       iter f #c #l @ ↑N
     [[{ RET #(); c ↦ #0 }]].
   Proof.

@@ -128,3 +128,7 @@ Class Dintp (JUDG : ofe) (A : ofe) (PROP : bi) := DINTP {
 Add Printing Constructor Dintp.
 Hint Mode Dintp - ! - : typeclass_instances.
 Arguments DINTP {_ _ _} _ {_}.
+
+(** [Intp] with [der] *)
+#[export] Instance dintp_intp `{!Dintp (JUDGI : judgi PROP) A PROP} :
+  Intp A PROP := ⟦⟧(der).

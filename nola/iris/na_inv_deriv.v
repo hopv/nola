@@ -3,12 +3,13 @@
 From nola.bi Require Export deriv.
 From nola.iris Require Export na_inv.
 From iris.proofmode Require Import proofmode.
-Import iPropAppNotation PintpNotation UpdwNotation.
+Import iPropAppNotation PintpNotation IntpNotation UpdwNotation.
 
 Implicit Type PRO JUDG : ofe.
 
 (** Notation *)
 Notation na_inv_wsatd δ := (na_inv_wsat ⟦⟧(δ)).
+Notation na_inv_wsatdd := (na_inv_wsatd der).
 
 (** Derivability pre-data for [na_inv] *)
 Class NaInvPreDeriv PRO JUDG := NA_INV_PRE_DERIV {
@@ -64,9 +65,9 @@ Section na_inv_deriv.
 
   (** Access [na_inv'] *)
   Lemma na_inv'_acc {p N P E F} : ↑N ⊆ E → ↑N ⊆ F →
-    na_own p F -∗ na_inv' der p N P =[na_inv_wsatd der]{E}=∗
-      na_own p (F∖↑N) ∗ ⟦ P ⟧(der) ∗
-      (na_own p (F∖↑N) -∗ ⟦ P ⟧(der) =[na_inv_wsatd der]{E}=∗ na_own p F).
+    na_own p F -∗ na_inv' der p N P =[na_inv_wsatdd]{E}=∗
+      na_own p (F∖↑N) ∗ ⟦ P ⟧ ∗
+      (na_own p (F∖↑N) -∗ ⟦ P ⟧ =[na_inv_wsatdd]{E}=∗ na_own p F).
   Proof.
     rewrite na_inv'_unseal. iIntros (NE NF) "F accP".
     iDestruct (der_sound with "accP") as "accP". rewrite na_inv_jacsr_intp.
