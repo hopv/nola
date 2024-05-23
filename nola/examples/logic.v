@@ -6,26 +6,22 @@ Import WpwNotation iPropAppNotation PintpNotation IntpNotation.
 
 Implicit Type (N : namespace) (l : loc).
 
-(** ** [sel]: Selector *)
+(** ** Preliminaries *)
+
+(** [sel]: Selector *)
 Variant sel :=
 | (** Invariant *) cips_inv (N : namespace).
-
-(** ** [idom]: Domain for inductive parts *)
+(** [idom]: Domain for inductive parts *)
 Definition idom (_ : sel) : Type := Empty_set.
-
-(** ** [cdom]: Domain for coinductive parts *)
+(** [cdom]: Domain for coinductive parts *)
 Definition cdom (s : sel) : Type := match s with
   | cips_inv _ => unit
   end.
-
-(** ** [dataOF]: Data [oFunctor] *)
-Definition dataOF (s : sel) : oFunctor := match s with
-  | cips_inv _ => unitO
-  end.
-
+(** [dataOF]: Data [oFunctor] *)
+Definition dataOF (_ : sel) : oFunctor := unitO.
 (** [dataOF] is contractive *)
-#[export] Instance dataOF_contractive {s} : oFunctorContractive (dataOF s).
-Proof. by case s. Qed.
+Fact dataOF_contractive {s} : oFunctorContractive (dataOF s).
+Proof. exact _. Qed.
 
 (** ** [ciProp]: Proposition *)
 Notation ciProp Σ := (ciProp idom cdom dataOF Σ).
