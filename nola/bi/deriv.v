@@ -4,25 +4,28 @@ From nola.util Require Export intp psg.
 From nola.bi Require Export order.
 From iris.bi Require Import bi.
 From iris.proofmode Require Import proofmode.
-Import PintpNotation.
+Import PintpNotation IntpNotation.
 
-(** ** Derivability *)
+(** ** [Dintp]: Interpretation parameterized over derivability candidates *)
+Class Dintp (JUDG : ofe) (A : ofe) (PROP : bi) := DINTP {
+  dintp :: Pintp (JUDG → PROP) A PROP;
+  dintp_ne `{!NonExpansive δ} :: NonExpansive (dintp δ);
+}.
+Add Printing Constructor Dintp.
+Hint Mode Dintp - ! - : typeclass_instances.
+Arguments DINTP {_ _ _} _ {_}.
 
-(** [judgi]: Judgment with the parameterized interpretation *)
+(** ** [judgi]: Judgment with the parameterized interpretation *)
 #[projections(primitive)]
 Structure judgi (PROP : bi) : Type := Judgi {
   judgi_car :> ofe;
   (** Interpretation parameterized over derivability candidates *)
-  #[canonical=no] judgi_Pintp :: Pintp (judgi_car → PROP) judgi_car PROP;
-  (** [judgi_Pintp] is non-expansive *)
-  #[canonical=no] judgi_Pintp_ne `{!NonExpansive δ} ::
-    NonExpansive ⟦⟧(δ)@{judgi_car};
+  #[canonical=no] judgi_Dintp :: Dintp judgi_car judgi_car PROP;
 }.
 Add Printing Constructor judgi.
-Arguments Judgi {_} _ _ {_}.
+Arguments Judgi {_} _ {_}.
 Arguments judgi_car {PROP JUDGI} : rename.
-Arguments judgi_Pintp {PROP JUDGI} : rename.
-Arguments judgi_Pintp_ne {PROP JUDGI} : rename.
+Arguments judgi_Dintp {PROP JUDGI} : rename.
 
 Section deriv.
   Context {PROP} {JUDGI : judgi PROP}.
@@ -72,7 +75,7 @@ Section deriv.
   #[export] Instance Deriv_to_ne `{!Deriv ih δ} : NonExpansive δ.
   Proof.
     apply Deriv_ind=> ??????. rewrite !Deriv_eqv'. do 5 f_equiv. move=> [??].
-    f_equiv. by apply judgi_Pintp_ne.
+    solve_proper.
   Qed.
 
   (** Map derivabilities via semantics *)
@@ -111,6 +114,10 @@ Section deriv.
   (** ** [der]: The best derivability predicate *)
   Definition der : JUDGI → PROP := psg (OT:=JUDGI → PROP) pintp.
 
+  (** [Intp] with [der] for [Dintp] *)
+  #[export] Instance Dintp_Intp `{!Dintp (JUDGI : judgi PROP) A PROP} :
+    Intp A PROP := ⟦⟧(der).
+
   (** [der] satisfies [Deriv] *)
   #[export] Instance der_Deriv : Deriv (λ _, True) der.
   Proof. apply Psgoidp_Psgoid, psg_Psgoid. Qed.
@@ -119,16 +126,3 @@ Section deriv.
   Lemma der_sound {J} : der J ⊢ ⟦ J ⟧(der).
   Proof. move: J. exact (psg_post (OT:=JUDGI → PROP)). Qed.
 End deriv.
-
-(** ** Derivability-parameterized interpretation *)
-Class Dintp (JUDG : ofe) (A : ofe) (PROP : bi) := DINTP {
-  dintp :: Pintp (JUDG → PROP) A PROP;
-  dintp_ne `{!NonExpansive δ} :: NonExpansive (dintp δ);
-}.
-Add Printing Constructor Dintp.
-Hint Mode Dintp - ! - : typeclass_instances.
-Arguments DINTP {_ _ _} _ {_}.
-
-(** [Intp] with [der] *)
-#[export] Instance dintp_intp `{!Dintp (JUDGI : judgi PROP) A PROP} :
-  Intp A PROP := ⟦⟧(der).

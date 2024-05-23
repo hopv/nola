@@ -86,7 +86,9 @@ Section iris.
     end.
   Local Instance jintp_ne `{!NonExpansive δ} : NonExpansive (jintp δ).
   Proof. move=> ?[??][??][/=??]. solve_proper. Qed.
-  Canonical judgJ : judgi (iProp Σ) := Judgi _ jintp.
+  #[export] Instance judg_dintp : Dintp (judg Σ) (judg Σ) (iProp Σ) :=
+    DINTP jintp.
+  Canonical judgJ : judgi (iProp Σ) := Judgi (judg Σ).
 
   #[export] Instance judg_inv_deriv : InvDeriv ciPropOF Σ judgJ.
   Proof. done. Qed.
