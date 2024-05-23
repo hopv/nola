@@ -179,3 +179,4 @@ Section iris.
     NonExpansive (cip_intp intp).
   Proof. exact _. Qed.
 End iris.
+Arguments cip_intp {_ _ _ _ _} _ _ /.

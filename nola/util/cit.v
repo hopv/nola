@@ -345,6 +345,7 @@ Section cit_intp.
   (** Interpretation over [cit] *)
   Definition cit_intp : cit I C D → A := cit'_intp.
 End cit_intp.
+Arguments cit_intp {_ _ _ _ _} _ _ /.
 
 Section cit_intp.
   Context {S} {I C : S → Type} {D : S → ofe} {A : ofe}.
