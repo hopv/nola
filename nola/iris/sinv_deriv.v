@@ -14,9 +14,10 @@ Hint Mode SinvPreDeriv ! - : typeclass_instances.
 
 Section sinv_deriv.
   Context `{!sinvGS PROP Σ, !SinvPreDeriv (PROP $oi Σ) JUDG}.
+  Implicit Type δ : JUDG → iProp Σ.
 
   (** [sinv]: Relaxed simple invariant *)
-  Definition sinv (δ : JUDG → _) (P : PROP $oi Σ) : iProp Σ :=
+  Definition sinv δ (P : PROP $oi Σ) : iProp Σ :=
     ∃ Q, □ δ (sinv_jacsr P Q) ∗ sinv_tok Q.
 
   (** [sinv] is persistent *)
@@ -28,7 +29,7 @@ Section sinv_deriv.
   Context `{!sinvGS PROP Σ,
     !SinvPreDeriv (PROP $oi Σ) (JUDGI : judgi (iProp Σ)),
     !Dintp JUDGI (PROP $oi Σ) (iProp Σ)}.
-  Implicit Type P Q : PROP $oi Σ.
+  Implicit Type (δ : JUDGI → iProp Σ) (P Q : PROP $oi Σ).
 
   (** Derivability data for [sinv] *)
   Class SinvDeriv := SINV_DERIV {

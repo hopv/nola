@@ -14,6 +14,7 @@ Hint Mode InvPreDeriv ! - : typeclass_instances.
 
 Section inv_deriv.
   Context `{!InvPreDeriv PRO JUDG} {Σ : gFunctors}.
+  Implicit Type δ : JUDG → iProp Σ.
 
   (** [inv']: Relaxed invariant *)
   Definition inv' δ N (P : PRO) : iProp Σ := □ δ (inv_jacsr N P).
@@ -34,6 +35,7 @@ Section inv_deriv.
 
   Context `{!InvPreDeriv (PROP $oi Σ) (JUDGI : judgi (iProp Σ)),
     !Dintp JUDGI (PROP $oi Σ) (iProp Σ)}.
+  Implicit Type δ : JUDGI → iProp Σ.
 
   (** Derivability data for [inv] *)
   Class InvDeriv :=

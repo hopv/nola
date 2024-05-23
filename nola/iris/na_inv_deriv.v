@@ -15,6 +15,7 @@ Hint Mode NaInvPreDeriv ! - : typeclass_instances.
 
 Section na_inv_deriv.
   Context `{!NaInvPreDeriv PRO JUDG} {Σ : gFunctors}.
+  Implicit Type δ : JUDG → iProp Σ.
 
   (** [na_inv']: Relaxed na_invariant *)
   Definition na_inv' δ p N (P : PRO) : iProp Σ := □ δ (na_inv_jacsr p N P).
@@ -36,6 +37,7 @@ Section na_inv_deriv.
 
   Context `{!NaInvPreDeriv (PROP $oi Σ) (JUDGI : judgi (iProp Σ)),
     !Dintp JUDGI (PROP $oi Σ) (iProp Σ)}.
+  Implicit Type δ : JUDGI → iProp Σ.
 
   (** Derivability data for [na_inv] *)
   Class NaInvDeriv :=
