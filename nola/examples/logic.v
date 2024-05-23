@@ -43,7 +43,7 @@ End ciProp.
 
 (** ** [judg]: Judgment *)
 Definition judg Σ : ofe := prodO (leibnizO namespace) (ciProp Σ).
-Definition inv_jacsr {Σ} N P : judg Σ := (N, P).
+Definition inv_jacsr {Σ} N Px : judg Σ := (N, Px).
 #[export] Instance inv_jacsr_ne {Σ N} : NonExpansive (@inv_jacsr Σ N).
 Proof. done. Qed.
 
@@ -97,21 +97,21 @@ Definition iter : val := rec: "self" "f" "c" "l" :=
 
 Section iris.
   Context `{!inv'GS ciPropOF Σ, !heapGS_gen hlc Σ}.
-  Implicit Type Φ : loc → ciProp Σ.
+  Implicit Type Φx : loc → ciProp Σ.
 
   (** ** [ilist]: Syntactic proposition for a list *)
-  Definition ilist_gen N Φ Ilist' l : ciProp Σ :=
-    cip_inv N (Φ l) ∗ cip_inv N (Ilist' N Φ l).
-  Definition ilist'_gen N Φ Ilist' l : ciProp Σ :=
-    ∃ l', ▷ (l +ₗ 1) ↦ #l' ∗ ilist_gen N Φ Ilist' l'.
-  CoFixpoint ilist' N Φ : loc → ciProp Σ := ilist'_gen N Φ ilist'.
-  Definition ilist N Φ : loc → ciProp Σ := ilist_gen N Φ ilist'.
+  Definition ilist_gen N Φx Ilist' l : ciProp Σ :=
+    cip_inv N (Φx l) ∗ cip_inv N (Ilist' N Φx l).
+  Definition ilist'_gen N Φx Ilist' l : ciProp Σ :=
+    ∃ l', ▷ (l +ₗ 1) ↦ #l' ∗ ilist_gen N Φx Ilist' l'.
+  CoFixpoint ilist' N Φx : loc → ciProp Σ := ilist'_gen N Φx ilist'.
+  Definition ilist N Φx : loc → ciProp Σ := ilist_gen N Φx ilist'.
 
   (** ** Termination of [iter] *)
-  Lemma twp_iter {N Φ c l} {f : val} {n : nat} :
-    (∀ l0, [[{ inv' der N (Φ l0) }]][inv_wsatid] f #l0 @ ↑N
+  Lemma twp_iter {N Φx c l} {f : val} {n : nat} :
+    (∀ l0, [[{ inv' der N (Φx l0) }]][inv_wsatid] f #l0 @ ↑N
       [[{ RET #(); True }]]) -∗
-    [[{ c ↦ #n ∗ ⟦ ilist N Φ l ⟧ }]][inv_wsatid]
+    [[{ c ↦ #n ∗ ⟦ ilist N Φx l ⟧ }]][inv_wsatid]
       iter f #c #l @ ↑N
     [[{ RET #(); c ↦ #0 }]].
   Proof.

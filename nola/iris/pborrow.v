@@ -48,7 +48,7 @@ Proof. solve_inG. Qed.
 Section pborrow.
   Context `{!pborrowGS TY PROP Σ, !GenUpd (PROP:=iProp Σ) M}.
   Implicit Type (intp : PROP $oi Σ -d> iProp Σ) (X Y : TY) (Xl Yl : list TY)
-    (P : PROP $oi Σ) (Px : pbprop TY PROP $oi Σ).
+    (P : PROP $oi Σ) (Pb : pbprop TY PROP $oi Σ).
 
   (** ** Tokens *)
 
@@ -186,7 +186,7 @@ Section pborrow.
     : iProp Σ := plend_body intp (λ π, π ξ) Φ.
 
   (** Interpretation of [pbprop] *)
-  Definition pbintp intp : _ -d> iProp Σ := λ Px, match Px with
+  Definition pbintp intp : _ -d> iProp Σ := λ Pb, match Pb with
     | xjust P => intp P
     | xpbor _ γ ξ Φ => ∃ x, proph_ctrl γ x ξ ∗ intp (Φ x)
     | xplend _ xπ Φ => plend_body intp xπ Φ
@@ -324,7 +324,7 @@ Section pborrow.
     1:∗[of_plist_prvar ξl] -∗ ([∗ plist] '(x, Φ)' ∈ xΦl, intp (Φ x)) ==∗ ∃ γl,
       let γξxΦl := plist_zip γl (plist_zip ξl xΦl) in
       ([∗ plist] '(γ, _, x, _)' ∈ γξxΦl, val_obs γ x) ∗
-      ([∗ list] Px ∈ pbor_list γξxΦl, pbintp intp Px).
+      ([∗ list] Pb ∈ pbor_list γξxΦl, pbintp intp Pb).
   Proof.
     elim: Xl ξl xΦl=>/=; [iIntros; by iExists ()|]=> X Xl IH [ξ ξl] [[x Φ] xΦl].
     iIntros "[ξ ξl] [Φ Φl]". iMod (IH with "ξl Φl") as (γl) "[vol pborl]".
@@ -334,7 +334,7 @@ Section pborrow.
 
   (** Lemma for [pbor_plend_tok_new_list] *)
   Local Lemma pbor_list_intp_to_plend {Xl γl} {ξxΦl : plist _ Xl} :
-    ([∗ list] Px ∈ pbor_list (plist_zip γl ξxΦl), pbintp intp Px) ==∗
+    ([∗ list] Pb ∈ pbor_list (plist_zip γl ξxΦl), pbintp intp Pb) ==∗
       [∗ plist] '(ξ, x, Φ)' ∈ ξxΦl, plend_body_var intp ξ Φ.
   Proof.
     elim: Xl γl ξxΦl=>/=; [by iIntros|]=> X Xl IH [γ γl] [[ξ[x Φ]] ξxΦl].
@@ -428,9 +428,9 @@ Section pborrow.
       r:∗[of_plist_prvar ηl] ∗
       ([∗ plist] '(_, _, ξ, _, f)' ∈ αqξΦfl,
         ⟨π, π (Aprvar _ ξ) = f (app_plist_prvar π ηl)⟩) ∗
-      ([∗ list] '(α, q, Px)' ∈
+      ([∗ list] '(α, q, Pb)' ∈
         of_plist (λ _ '(γ, α, q, ξ, Φ, _)', (α, q, xpbor _ γ ξ Φ)') γαqξΦfl,
-        β ⊑□ α ∗ obor_tok α q Px) ∗
+        β ⊑□ α ∗ obor_tok α q Pb) ∗
       ∀ yl', ⟨π, app_plist_prvar π ηl = yl'⟩ -∗
         [∗ plist] '(γ, _, _, ξ, _, f)' ∈ γαqξΦfl, proph_ctrl γ (f yl') ξ.
   Proof.
@@ -446,7 +446,7 @@ Section pborrow.
     by iApply (proph_obs_impl with "obs")=> ? ->.
   Qed.
   Local Lemma pbor_list_intp_to_obs_intp {Yl γl' ηl} {yΨl : plist _ Yl} :
-    ([∗ list] Qx ∈ pbor_list (plist_zip γl' (plist_zip ηl yΨl)), pbintp intp Qx)
+    ([∗ list] Qb ∈ pbor_list (plist_zip γl' (plist_zip ηl yΨl)), pbintp intp Qb)
       ==∗ ∃ yl', ⟨π, app_plist_prvar π ηl = yl'⟩ ∗
       [∗ plist] '(y', _, Ψ)' ∈ plist_zip yl' yΨl, intp (Ψ y').
   Proof.
