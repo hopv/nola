@@ -10,7 +10,7 @@ Import PintpNotation.
 
 (** [judgi]: Judgment with the parameterized interpretation *)
 #[projections(primitive)]
-Structure judgi (PROP : bi) : Type := Judg {
+Structure judgi (PROP : bi) : Type := Judgi {
   judgi_car :> ofe;
   (** Interpretation parameterized over derivability candidates *)
   #[canonical=no] judgi_Pintp :: Pintp (judgi_car → PROP) judgi_car PROP;
@@ -19,6 +19,7 @@ Structure judgi (PROP : bi) : Type := Judg {
     NonExpansive ⟦⟧(δ)@{judgi_car};
 }.
 Add Printing Constructor judgi.
+Arguments Judgi {_} _ _ {_}.
 Arguments judgi_car {PROP JUDGI} : rename.
 Arguments judgi_Pintp {PROP JUDGI} : rename.
 Arguments judgi_Pintp_ne {PROP JUDGI} : rename.
