@@ -59,8 +59,8 @@ Section iris.
   Implicit Type δ : judg Σ → iProp Σ.
 
   (** ** [bintp]: Base interpretation *)
-  Definition bintp δ s : (idom s -d> iProp Σ) → (cdom s -d> ciProp Σ) →
-    dataOF s $oi Σ → iProp Σ :=
+  Definition bintp δ s :
+    (idom s -d> iProp Σ) → (cdom s -d> ciProp Σ) → dataOF s $oi Σ → iProp Σ :=
     match s with
     | cips_inv N => λ _ Pxs _, inv' δ N (Pxs ())
     end.
