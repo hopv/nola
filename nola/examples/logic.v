@@ -115,7 +115,7 @@ Section iris.
       iter f #c #l @ ↑N
     [[{ RET #(); c ↦ #0 }]].
   Proof.
-    iIntros "#Hf" (Ψ) "!> /=[c↦ #[ihd itl]] HΨ".
+    unfold intp. iIntros "#Hf" (Ψ) "!> /=[c↦ #[ihd itl]] HΨ".
     iInduction n as [|m] "IH" forall (l) "ihd itl".
     { wp_rec. wp_pures. wp_load. wp_pures. by iApply "HΨ". }
     wp_rec. wp_pures. wp_load. wp_pures. wp_apply "Hf"; [done|]. iIntros "_".

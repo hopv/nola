@@ -11,7 +11,6 @@ Module IntpNotation.
   Notation "⟦ a ⟧" := (intp a) (format "⟦  '[' a  ']' ⟧").
   Notation "⟦ a ⟧@{ A }" := (intp (A:=A) a) (only parsing).
 End IntpNotation.
-Arguments intp {_ _ _} _ /.
 
 (** ** [Pintp]: Parameterized interpretation *)
 Class Pintp (X A B : Type) := pintp : X → A → B.
@@ -22,4 +21,3 @@ Module PintpNotation.
   Notation "⟦ a ⟧( x )" := (pintp x a) (format "⟦  '[' a  ']' ⟧( x )").
   Notation "⟦ a ⟧( x )@{ A }" := (pintp (A:=A) x a) (only parsing).
 End PintpNotation.
-Arguments pintp {_ _ _ _} _ _ /.
