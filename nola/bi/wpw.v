@@ -435,7 +435,7 @@ Section wpw.
     { by iMod ("wp" with "W") as ">[$$]". }
     iFrame "W". iIntros "!>" (?????) "Wst".
     iMod ("wp" with "Wst") as "[$ big]". iIntros "!>" (?? efs ?) "£".
-    iDestruct ("big" with "[%//] £") as "big".
+    iDestruct ("big" with "[//] £") as "big".
     iApply (step_fupdN_wand with "big"). iIntros "!> >[[W $] [wp wps]]".
     iMod ("IH" with "wp W") as "[W $]". iInduction efs as [|??] "?"; by iFrame.
   Qed.
@@ -456,7 +456,7 @@ Section wpw.
     { iIntros "W". by iMod ("Ψ→" with "twp W") as ">[$$]". }
     iIntros "$ !>" (????) "Wst". iMod ("twp" with "[$Wst]") as "[$ big]".
     iIntros "!>" (?????).
-    iMod ("big" with "[%//]") as "[$ [[W $] [[big _] bigs]]]".
+    iMod ("big" with "[//]") as "[$ [[W $] [[big _] bigs]]]".
     iMod ("big" with "[//] W") as "[$$]".
     by iDestruct (big_sepL_and with "bigs") as "[_ $]".
   Qed.
@@ -475,7 +475,7 @@ Section wpw.
     iMod (fupd_mask_subseteq E) as "cl"; [done|].
     iMod ("∝" with "W") as "[W' →W]". iMod "cl" as "_".
     iMod ("wp" with "[$W' $X]") as "[% big]". iModIntro. iSplit; [done|].
-    iIntros (????) "£". iDestruct ("big" with "[%//] £") as "big".
+    iIntros (????) "£". iDestruct ("big" with "[//] £") as "big".
     iApply (step_fupdN_wand with "big"). iIntros "!> >[[W' $] [wp wps]]".
     iMod (fupd_mask_subseteq E) as "cl"; [done|].
     iMod ("→W" with "W'") as "$". iMod "cl" as "_". iModIntro.
@@ -500,9 +500,8 @@ Section wpw.
     iIntros (????) "[W X]". iMod (fupd_mask_subseteq E) as "cl"; [done|].
     iMod ("∝" with "W") as "[W' →W]". iMod "cl" as "_".
     iMod ("twp" with "[$W' $X]") as "[% big]". iModIntro. iSplit; [done|].
-    iIntros (?????).
-    iMod ("big" with "[%//]") as (?) "[[W' $] [[twp _] twps]]".
-    iDestruct ("twp" with "[%//]") as "$".
+    iIntros (?????). iMod ("big" with "[//]") as (?) "[[W' $] [[twp _] twps]]".
+    iDestruct ("twp" with "[//]") as "$".
     iMod (fupd_mask_subseteq E) as "cl"; [done|]. iMod ("→W" with "W'") as "$".
     iMod "cl" as "_". iModIntro. iSplit; [done|].
     iApply (big_sepL_impl with "twps"). iIntros "!>" (???) "[→ _]".
@@ -537,7 +536,7 @@ Proof.
   iMod big as (state_interp ????) "(W & st & wps & big)". iModIntro.
   iExists (λ σ ns ks nt, W ∗ state_interp σ ns ks nt)%I, _, _, _.
   iFrame "W st". iSplitL "wps"; [done|]. iIntros (?????) "[W st]".
-  iApply ("big" with "[%//] [%//] [%//] W st").
+  iApply ("big" with "[//] [//] [//] W st").
 Qed.
 
 (** ** Total adequacy of [twpw] *)

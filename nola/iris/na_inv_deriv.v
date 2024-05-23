@@ -114,7 +114,7 @@ Section na_inv_deriv.
     iIntros (??? ->). rewrite !na_inv_jacsr_intp. iIntros (?? NE NF) "F".
     iMod ("accP" $! _ _ NE NF with "F") as "($ & P & cl)".
     iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
-    iMod ("PQP" with "[%//] [%//] P") as "[$ QP]". iMod "→E∖N" as "_".
+    iMod ("PQP" with "[//] [//] P") as "[$ QP]". iMod "→E∖N" as "_".
     iIntros "!>". iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
     iIntros "F∖N Q". iMod ("QP" with "Q") as "P". iMod "→E∖N" as "_".
     iApply ("cl" with "F∖N P").
