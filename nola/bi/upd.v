@@ -444,8 +444,8 @@ Section lemmas.
     FromModal True modality_id (|=[W]{E}=> P) (|=[W]{E}=> P) P.
   Proof. apply from_modal_modw. iIntros. by iModIntro. Qed.
   #[export] Instance from_modal_fupdw_wrong_mask `{!BiFUpd PROP} {W E E' P} :
-    FromModal
-      (pm_error "Only non-mask-changing update modalities can be introduced directly.
+    FromModal (pm_error
+      "Only non-mask-changing update modalities can be introduced directly.
 Use [iApply fupdw_mask_intro] to introduce mask-changing update modalities")
       modality_id (|=[W]{E,E'}=> P) (|=[W]{E,E'}=> P) P | 100.
   Proof. by case. Qed.
