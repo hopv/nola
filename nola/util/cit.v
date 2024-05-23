@@ -466,10 +466,10 @@ Section cit_map.
 End cit_map.
 
 (** ** [citOF]: [oFunctor] for [cit] *)
-Program Definition citOF {S} I C (F : S → oFunctor) : oFunctor := {|
-  oFunctor_car A _ B _ := citO I C (λ s, (F s).(oFunctor_car) A B);
+Program Definition citOF {S} I C (D : S → oFunctor) : oFunctor := {|
+  oFunctor_car A _ B _ := citO I C (λ s, (D s).(oFunctor_car) A B);
   oFunctor_map _ _ _ _ _ _ _ _ fg :=
-    OfeMor (cit_map (λ s, oFunctor_map (F s) fg));
+    OfeMor (cit_map (λ s, oFunctor_map (D s) fg));
 |}.
 Next Obligation.
   move=> > [[??][??]][[??][??]][/=??]?/=. apply cit_map_ne'. solve_proper.
@@ -484,7 +484,7 @@ Next Obligation.
 Qed.
 
 #[export] Instance citOF_contractive {S I C}
-  `{!∀ s, oFunctorContractive (F s)} : oFunctorContractive (citOF (S:=S) I C F).
+  `{!∀ s, oFunctorContractive (D s)} : oFunctorContractive (citOF (S:=S) I C D).
 Proof.
   move=> > ? *. apply cit_map_ne'=> ??. by apply oFunctor_map_contractive.
 Qed.
