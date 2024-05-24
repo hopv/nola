@@ -31,6 +31,9 @@ Section deriv.
   Context {PROP} {JUDGI : judgi PROP}.
   Implicit Type (J : JUDGI) (δ : JUDGI → PROP) (ih : (JUDGI → PROP) → Prop).
 
+  (** ** [dinto δ δ']: [δ] can be turned into the semantics at [δ'] *)
+  Definition dinto δ δ' := ∀ J, δ J ⊢ ⟦ J ⟧(δ').
+
   (** ** [Deriv ih δ] : [δ] is a good derivability predicate
 
     [ih] is the inductive hypothesis, used for parameterized induction *)
@@ -50,7 +53,7 @@ Section deriv.
   Lemma Deriv_to `{!Deriv ih δ} {J} :
     ((* Take any good derivability predicate [δ'] *) ∀ δ', ⌜Deriv ih δ'⌝ →
       (* Can use the inductive hypothesis *) ⌜ih δ'⌝ →
-      (* Can turn [δ] into the semantics at [δ'] *) ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ →
+      (* Can turn [δ] into the semantics at [δ'] *) ⌜dinto δ δ'⌝ →
       (* The semantics at [δ'] *) ⟦ J ⟧(δ')) ⊢
       (* The derivability at [δ] *) δ J.
   Proof.
@@ -58,14 +61,13 @@ Section deriv.
     by iApply "to".
   Qed.
   Lemma Deriv_eqv `{!Deriv ih δ} {J} :
-    δ J ⊣⊢ ∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ → ⟦ J ⟧(δ').
+    δ J ⊣⊢ ∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ → ⟦ J ⟧(δ').
   Proof.
     iSplit; iIntros "?"; iStopProof; [|by exact Deriv_to]. iIntros "?" (????).
     by iStopProof.
   Qed.
   Lemma Deriv_eqv' `{!Deriv ih δ} {J} :
-    δ J ⊣⊢
-      ∀ δ' (_ : Deriv ih δ') (_ : ih δ'), ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ → ⟦ J ⟧(δ').
+    δ J ⊣⊢ ∀ δ' (_ : Deriv ih δ') (_ : ih δ'), ⌜dinto δ δ'⌝ → ⟦ J ⟧(δ').
   Proof.
     rewrite Deriv_eqv. do 2 f_equiv. rewrite bi.pure_impl_forall.
     do 2 f_equiv. exact: bi.pure_impl_forall.
@@ -80,14 +82,13 @@ Section deriv.
 
   (** Map derivabilities via semantics *)
   Lemma Deriv_map `{!Deriv ih δ} {J J'} :
-    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ →
-      ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ')) ⊢
+    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ → ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ')) ⊢
       δ J -∗ δ J'.
   Proof.
     iIntros "∀ J". iApply Deriv_to. iIntros (??? to). rewrite to. by iApply "∀".
   Qed.
   Lemma Deriv_map2 `{!Deriv ih δ} {J J' J''} :
-    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ →
+    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
       ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ') -∗ ⟦ J'' ⟧(δ')) ⊢
       δ J -∗ δ J' -∗ δ J''.
   Proof.
@@ -95,7 +96,7 @@ Section deriv.
     iApply ("∀" with "[//] [//] [//] J J'").
   Qed.
   Lemma Deriv_map3 `{!Deriv ih δ} {J J' J'' J'''} :
-    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ →
+    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
       ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ') -∗ ⟦ J'' ⟧(δ') -∗ ⟦ J''' ⟧(δ')) ⊢
       δ J -∗ δ J' -∗ δ J'' -∗ δ J'''.
   Proof.
@@ -103,7 +104,7 @@ Section deriv.
     iApply ("∀" with "[//] [//] [//] J J' J''").
   Qed.
   Lemma Deriv_mapl `{!Deriv ih δ} {Js J'} :
-    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ →
+    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
       ([∗ list] J ∈ Js, ⟦ J ⟧(δ')) -∗ ⟦ J' ⟧(δ')) ⊢
       ([∗ list] J ∈ Js, δ J) -∗ δ J'.
   Proof.

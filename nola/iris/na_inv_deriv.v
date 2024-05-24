@@ -78,7 +78,7 @@ Section na_inv_deriv.
 
   (** Turn [na_inv_acsr] into [na_inv'] *)
   Lemma na_inv_acsr_inv' {p N P} :
-    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ →
+    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
       na_inv_acsr ⟦⟧(δ') p N ⟦ P ⟧(δ')) ⊢ na_inv' δ p N P.
   Proof.
     rewrite na_inv'_unseal. iIntros "#big !>". iApply Deriv_to.
@@ -107,7 +107,7 @@ Section na_inv_deriv.
 
   (** Convert [na_inv'] with [acsr] *)
   Lemma na_inv'_acsr {p N P Q} :
-    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ →
+    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
       acsr (fupd ∅ ∅) ⟦ P ⟧(δ') ⟦ Q ⟧(δ')) -∗
       na_inv' δ p N P -∗ na_inv' δ p N Q.
   Proof.

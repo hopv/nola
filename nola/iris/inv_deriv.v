@@ -71,7 +71,7 @@ Section inv_deriv.
 
   (** Turn [inv_acsr] into [inv'] *)
   Lemma inv_acsr_inv' {N P} :
-    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ →
+    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
       inv_acsr ⟦⟧(δ') N ⟦ P ⟧(δ')) ⊢ inv' δ N P.
   Proof.
     rewrite inv'_unseal. iIntros "#big !>". iApply Deriv_to. iIntros (????).
@@ -98,7 +98,7 @@ Section inv_deriv.
 
   (** Convert [inv'] with [acsr] *)
   Lemma inv'_acsr {N P Q} :
-    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ →
+    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
       acsr (fupd ∅ ∅) ⟦ P ⟧(δ') ⟦ Q ⟧(δ')) -∗
       inv' δ N P -∗ inv' δ N Q.
   Proof.

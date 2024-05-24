@@ -82,7 +82,7 @@ Section sinv_deriv.
 
   (** Convert [sinv] with [acsr] *)
   Lemma sinv_acsr {P Q} :
-    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ →
+    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
       acsr sinv_mod ⟦ P ⟧(δ') ⟦ Q ⟧(δ')) -∗
       sinv δ P -∗ sinv δ Q.
   Proof.
