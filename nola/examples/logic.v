@@ -2,7 +2,7 @@
 
 From nola.iris Require Export ciprop inv_deriv.
 From nola.bi Require Import util.
-From nola.heap_lang Require Export notation proofmode.
+From nola.heap_lang Require Export notation proofmode lib.mutex.
 Import WpwNotation iPropAppNotation PintpNotation IntpNotation.
 
 Implicit Type (N : namespace) (l : loc).
@@ -11,12 +11,14 @@ Implicit Type (N : namespace) (l : loc).
 
 (** [sel]: Selector *)
 Variant sel :=
-| (** Invariant *) cips_inv (N : namespace).
+| (** Invariant *) cips_inv (N : namespace)
+| (** Mutex *) cips_mutex (l : loc).
 (** [idom]: Domain for inductive parts *)
 Definition idom (_ : sel) : Type := Empty_set.
 (** [cdom]: Domain for coinductive parts *)
 Definition cdom (s : sel) : Type := match s with
   | cips_inv _ => unit
+  | cips_mutex _ => unit
   end.
 (** [dataOF]: Data [oFunctor] *)
 Definition dataOF (_ : sel) : oFunctor := unitO.
@@ -37,22 +39,31 @@ Section ciProp.
   Context {Σ : gFunctors}.
   Definition cip_inv N (Px : ciProp Σ) : ciProp Σ :=
     cip_custom (cips_inv N) nullary (unary Px) ().
+  Definition cip_mutex l (Px : ciProp Σ) : ciProp Σ :=
+    cip_custom (cips_mutex l) nullary (unary Px) ().
 
   #[export] Instance cip_inv_ne {N} : NonExpansive (cip_inv N).
   Proof. move=> ????. apply cip_custom_ne; solve_proper. Qed.
 End ciProp.
 
+From iris.algebra Require Import ofe.
 (** ** [judg]: Judgment *)
-Definition judg Σ : ofe := prodO (leibnizO namespace) (ciProp Σ).
-Definition inv_jacsr {Σ} N Px : judg Σ := (N, Px).
+Definition judg Σ : ofe :=
+  (leibnizO namespace * ciProp Σ + ciProp Σ * ciProp Σ)%type.
+Definition inv_jacsr {Σ} N Px : judg Σ := inl (N, Px).
+Definition mutex_jiff {Σ} Px Qx : judg Σ := inr (Px, Qx).
 #[export] Instance inv_jacsr_ne {Σ N} : NonExpansive (@inv_jacsr Σ N).
-Proof. done. Qed.
+Proof. move=> ????. exact: inl_ne. Qed.
+#[export] Instance mutex_jiff_ne {Σ} : NonExpansive2 (@mutex_jiff Σ).
+Proof. move=> ???????. exact: inr_ne. Qed.
 
 #[export] Instance judg_inv_pre_deriv {Σ} :
   InvPreDeriv (ciProp Σ) (judg Σ) := INV_PRE_DERIV inv_jacsr.
+#[export] Instance judg_mutex_pre_deriv {Σ} :
+  MutexPreDeriv (ciProp Σ) (judg Σ) := MUTEX_PRE_DERIV mutex_jiff.
 
 Section iris.
-  Context `{!inv'GS ciPropOF Σ}.
+  Context `{!inv'GS ciPropOF Σ, !mutexGS ciPropOF Σ}.
   Implicit Type δ : judg Σ → iProp Σ.
 
   (** ** [bintp]: Base interpretation *)
@@ -60,6 +71,7 @@ Section iris.
     (idom s -d> iProp Σ) → (cdom s -d> ciProp Σ) → dataOF s $oi Σ → iProp Σ :=
     match s with
     | cips_inv N => λ _ Pxs _, inv' δ N (Pxs ())
+    | cips_mutex l => λ _ Pxs _, mutex δ l (Pxs ())
     end.
 
   (** [bintp] is non-expansive *)
@@ -75,19 +87,25 @@ Section iris.
   Fact ciProp_intp_ne `{!NonExpansive δ} : NonExpansive ⟦⟧(δ)@{ciProp Σ}.
   Proof. exact _. Qed.
 
-  Context `{!invGS_gen hlc Σ}.
+  Context `{!heapGS_gen hlc Σ}.
 
   (** ** [judg_intp]: Judgment interpretation *)
   Definition judg_intp δ (J : judg Σ) := match J with
-    | (N, Px) => inv_acsr ⟦⟧(δ) N ⟦ Px ⟧(δ)
-    end.
+    | inl (N, Px) => inv_acsr ⟦⟧(δ) N ⟦ Px ⟧(δ)
+    | inr (Px, Qx) =>
+        (⟦ Px ⟧(δ) ={⊤}=∗ ⟦ Qx ⟧(δ)) ∧ (⟦ Qx ⟧(δ) ={⊤}=∗ ⟦ Px ⟧(δ))
+    end%I.
   Local Instance judg_intp_ne `{!NonExpansive δ} : NonExpansive (judg_intp δ).
-  Proof. move=> ?[??][??][/=/leibniz_equiv_iff-> ?]. solve_proper. Qed.
+  Proof.
+    move=> ???[[??][??][/=/leibniz_equiv_iff-> ?]|[??][??][/=??]]; solve_proper.
+  Qed.
   #[export] Instance judg_dintp : Dintp (judg Σ) (judg Σ) (iProp Σ) :=
     DINTP judg_intp.
   Canonical judgJ : judgi (iProp Σ) := Judgi (judg Σ).
 
   #[export] Instance judg_inv_deriv : InvDeriv ciPropOF Σ judgJ.
+  Proof. done. Qed.
+  #[export] Instance judg_mutex_deriv : MutexDeriv ciPropOF Σ judgJ.
   Proof. done. Qed.
 End iris.
 
@@ -97,7 +115,7 @@ Definition iter : val := rec: "self" "f" "c" "l" :=
     "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (!("l" +ₗ #1)).
 
 Section iris.
-  Context `{!inv'GS ciPropOF Σ, !heapGS_gen hlc Σ}.
+  Context `{!inv'GS ciPropOF Σ, !mutexGS ciPropOF Σ, !heapGS_gen hlc Σ}.
   Implicit Type Φx : loc → ciProp Σ.
 
   (** ** [ilist]: Syntactic proposition for a list *)
