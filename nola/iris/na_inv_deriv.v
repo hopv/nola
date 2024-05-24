@@ -5,14 +5,12 @@ From nola.iris Require Export na_inv.
 From iris.proofmode Require Import proofmode.
 Import iPropAppNotation PintpNotation IntpNotation UpdwNotation.
 
-Implicit Type PRO JUDG : ofe.
-
 (** Notation *)
 Notation na_inv_wsati δ := (na_inv_wsat ⟦⟧(δ)).
 Notation na_inv_wsatid := (na_inv_wsati der).
 
 (** Derivability pre-data for [na_inv] *)
-Class NaInvPreDeriv PRO JUDG := NA_INV_PRE_DERIV {
+Class NaInvPreDeriv (PRO JUDG : ofe) := NA_INV_PRE_DERIV {
   na_inv_jacsr : na_inv_pool_name → namespace → PRO → JUDG;
   na_inv_jacsr_ne {p N} :: NonExpansive (na_inv_jacsr p N);
 }.

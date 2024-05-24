@@ -5,14 +5,12 @@ From nola.iris Require Export sinv.
 From iris.proofmode Require Import proofmode.
 Import iPropAppNotation PintpNotation IntpNotation UpdwNotation.
 
-Implicit Type PRO JUDG : ofe.
-
 (** Notation *)
 Notation sinv_wsati δ := (sinv_wsat ⟦⟧(δ)).
 Notation sinv_wsatid := (sinv_wsati der).
 
 (** Derivability pre-data for [sinv] *)
-Class SinvPreDeriv PRO JUDG := SINV_PRE_DERIV {
+Class SinvPreDeriv (PRO JUDG : ofe) := SINV_PRE_DERIV {
   sinv_jacsr : PRO → PRO → JUDG;
   sinv_jacsr_ne :: NonExpansive2 sinv_jacsr;
 }.
