@@ -58,7 +58,7 @@ Section na_inv_deriv.
   (** Derivability data for [na_inv] *)
   Class NaInvDeriv :=
     na_inv_jacsr_intp : ∀{δ p N P},
-      ⟦ na_inv_jacsr p N P ⟧(δ) ≡ na_inv_acsr ⟦⟧(δ) p N (⟦ P ⟧(δ)).
+      ⟦ na_inv_jacsr p N P ⟧(δ) ⊣⊢ na_inv_acsr ⟦⟧(δ) p N (⟦ P ⟧(δ)).
 
   Context `{!NaInvDeriv}.
 

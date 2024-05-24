@@ -52,7 +52,8 @@ Section inv_deriv.
 
   (** Derivability data for [inv] *)
   Class InvDeriv :=
-    inv_jacsr_intp : ∀{δ N P}, ⟦ inv_jacsr N P ⟧(δ) ≡ inv_acsr ⟦⟧(δ) N ⟦ P ⟧(δ).
+    inv_jacsr_intp : ∀{δ N P},
+      ⟦ inv_jacsr N P ⟧(δ) ⊣⊢ inv_acsr ⟦⟧(δ) N ⟦ P ⟧(δ).
 
   Context `{!InvDeriv}.
 

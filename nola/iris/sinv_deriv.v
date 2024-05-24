@@ -49,7 +49,7 @@ Section sinv_deriv.
     sinv_mod : iProp Σ → iProp Σ;
     sinv_mod_gen_upd :: GenUpd sinv_mod;
     sinv_jacsr_intp {δ P Q} :
-      ⟦ sinv_jacsr P Q ⟧(δ) ≡ acsr sinv_mod ⟦ P ⟧(δ) ⟦ Q ⟧(δ);
+      ⟦ sinv_jacsr P Q ⟧(δ) ⊣⊢ acsr sinv_mod ⟦ P ⟧(δ) ⟦ Q ⟧(δ);
   }.
 
   Context `{!SinvDeriv}.
