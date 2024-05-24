@@ -67,10 +67,9 @@ Section deriv.
     by iStopProof.
   Qed.
   Lemma Deriv_eqv' `{!Deriv ih δ} {J} :
-    δ J ⊣⊢ ∀ δ' (_ : Deriv ih δ') (_ : ih δ'), ⌜dinto δ δ'⌝ → ⟦ J ⟧(δ').
+    δ J ⊣⊢ ∀ δ' (_ : Deriv ih δ') (_ : ih δ') (_ : dinto δ δ'), ⟦ J ⟧(δ').
   Proof.
-    rewrite Deriv_eqv. do 2 f_equiv. rewrite bi.pure_impl_forall.
-    do 2 f_equiv. exact: bi.pure_impl_forall.
+    rewrite Deriv_eqv. repeat (do 2 f_equiv; rewrite bi.pure_impl_forall).
   Qed.
 
   (** [Deriv ih δ] implies that [δ] is non-expansive *)
