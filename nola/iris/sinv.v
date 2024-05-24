@@ -42,16 +42,16 @@ Section sinv.
   Local Definition sinv_auth_tok M :=
     own sinv_name (gmap_view_auth (DfracOwn 1) (to_agree <$> M)).
   (** World satisfaction *)
-  Definition sinv_iwsat_def intp : iProp Σ :=
-    ∃ M, sinv_auth_tok M ∗ [∗ map] i ↦ P ∈ M, intp i P.
+  Definition sinv_iwsat_def ip : iProp Σ :=
+    ∃ M, sinv_auth_tok M ∗ [∗ map] i ↦ P ∈ M, ip i P.
   Local Lemma sinv_iwsat_aux : seal sinv_iwsat_def. Proof. by eexists. Qed.
   Definition sinv_iwsat := sinv_iwsat_aux.(unseal).
   Local Lemma sinv_iwsat_unseal : sinv_iwsat = sinv_iwsat_def.
   Proof. exact: seal_eq. Qed.
 End sinv.
 (** World satisfaction whose interpretation ignores the index *)
-Notation sinv_wsat' PROP intp := (sinv_iwsat (PROP:=PROP) (λ _, intp)).
-Notation sinv_wsat intp := (sinv_wsat' _ intp).
+Notation sinv_wsat' PROP ip := (sinv_iwsat (PROP:=PROP) (λ _, ip)).
+Notation sinv_wsat ip := (sinv_wsat' _ ip).
 
 Section sinv.
   Context `{!sinvGS PROP Σ}.
@@ -86,11 +86,11 @@ Section sinv.
     Proper (pointwise_relation _ (pointwise_relation _ (≡)) ==> (≡)) sinv_iwsat.
   Proof. rewrite sinv_iwsat_unseal. solve_proper. Qed.
 
-  (** [sinv_iwsat] is timeless if [intp] is always timeless
+  (** [sinv_iwsat] is timeless if [ip] is always timeless
     and the underlying ofe is discrete *)
   #[export] Instance sinv_iwsat_timeless
-    `{!OfeDiscrete (PROP $oi Σ), !∀ i P, Timeless (intp i P)} :
-    Timeless (sinv_iwsat intp).
+    `{!OfeDiscrete (PROP $oi Σ), !∀ i P, Timeless (ip i P)} :
+    Timeless (sinv_iwsat ip).
   Proof. rewrite sinv_iwsat_unseal. exact _. Qed.
 
   (** Lemma for [sinv_itok_alloc] *)
@@ -102,17 +102,17 @@ Section sinv.
     apply gmap_view_alloc; [|done..]. by rewrite lookup_fmap eq.
   Qed.
   (** Allocate [sinv_itok] *)
-  Lemma sinv_itok_alloc {intp} P :
-    sinv_iwsat intp -∗ ∃ I, ∀ i, ⌜i ∉ I⌝ ==∗
-      sinv_itok i P ∗ (intp i P -∗ sinv_iwsat intp).
+  Lemma sinv_itok_alloc {ip} P :
+    sinv_iwsat ip -∗ ∃ I, ∀ i, ⌜i ∉ I⌝ ==∗
+      sinv_itok i P ∗ (ip i P -∗ sinv_iwsat ip).
   Proof.
     rewrite sinv_iwsat_unseal. iIntros "[%M[● M]]". iExists (dom M).
     iIntros (i ?). iMod (sinv_auth_tok_alloc with "●") as "[● #i]"; [done|].
     iModIntro. iSplitR; [by rewrite sinv_itok_unseal|]. iIntros "P". iExists _.
     iFrame "●". iApply (big_sepM_insert_2 with "P M").
   Qed.
-  Lemma sinv_tok_alloc {intp} P :
-    sinv_wsat intp ==∗ sinv_tok P ∗ (intp P -∗ sinv_wsat intp).
+  Lemma sinv_tok_alloc {ip} P :
+    sinv_wsat ip ==∗ sinv_tok P ∗ (ip P -∗ sinv_wsat ip).
   Proof.
     iIntros "W". iDestruct (sinv_itok_alloc with "W") as (?) "big".
     iMod ("big" with "[]") as "[? $]". { iPureIntro. apply is_fresh. }
@@ -130,9 +130,8 @@ Section sinv.
     iExists P'. iSplit; [done|]. by rewrite to_agree_includedI.
   Qed.
   (** Access via [sinv_tok] *)
-  Lemma sinv_tok_acc' {intp i P} `{!NonExpansive (intp i)} :
-    sinv_itok i P -∗ sinv_iwsat intp -∗
-      intp i P ∗ (intp i P -∗ sinv_iwsat intp).
+  Lemma sinv_tok_acc' {ip i P} `{!NonExpansive (ip i)} :
+    sinv_itok i P -∗ sinv_iwsat ip -∗ ip i P ∗ (ip i P -∗ sinv_iwsat ip).
   Proof.
     rewrite sinv_iwsat_unseal. iIntros "i [%M[● M]]".
     iDestruct (sinv_auth_tok_lookup with "● i") as (P' eq) "#≡".
@@ -140,8 +139,8 @@ Section sinv.
     iRewrite "≡". iFrame "P'". iIntros "P'". iExists _. iFrame "●".
     by iApply "→M".
   Qed.
-  Lemma sinv_tok_acc {intp P} `{!NonExpansive intp} :
-    sinv_tok P -∗ sinv_wsat intp -∗ intp P ∗ (intp P -∗ sinv_wsat intp).
+  Lemma sinv_tok_acc {ip P} `{!NonExpansive ip} :
+    sinv_tok P -∗ sinv_wsat ip -∗ ip P ∗ (ip P -∗ sinv_wsat ip).
   Proof. iIntros "[%i i]". iApply (sinv_tok_acc' with "i"). Qed.
 End sinv.
 
@@ -154,7 +153,7 @@ Proof.
 Qed.
 (** Allocate [sinv_wsat] *)
 Lemma sinv_wsat_alloc `{!sinvGpreS PROP Σ} :
-  ⊢ |==> ∃ _ : sinvGS PROP Σ, ∀ intp, sinv_iwsat intp.
+  ⊢ |==> ∃ _ : sinvGS PROP Σ, ∀ ip, sinv_iwsat ip.
 Proof.
   iMod sinv_auth_tok_alloc_empty as (?) "●". iModIntro. iExists _.
   iIntros. rewrite sinv_iwsat_unseal. iExists ∅. by iFrame.

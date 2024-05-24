@@ -51,7 +51,7 @@ Section iris.
     wp_rec. wp_pures. wp_load. wp_pures. wp_apply "Hf"; [done|]. iIntros "_".
     wp_pures. wp_load. wp_op. have -> : (S m - 1)%Z = m by lia. wp_store.
     wp_op. wp_bind (! _)%E.
-    iMod (inv_tok_acc (PROP:=nPropO) (intp:=intp) with "itl") as
+    iMod (inv_tok_acc (PROP:=nPropO) (ip:=intp) with "itl") as
       "/=[(%l' & ↦l' & #itlhd & #itltl) cl]"; [done|].
     wp_load. iModIntro. iMod ("cl" with "[↦l']") as "_".
     { iExists _. iFrame "↦l'". by iSplit. }

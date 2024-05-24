@@ -23,7 +23,7 @@ Proof. solve_inG. Qed.
 (** ** Mutex *)
 Section mutex.
   Context `{!heapGS_gen hlc Σ, !mutexGS PROP Σ}.
-  Implicit Types (intp : PROP $oi Σ → iProp Σ) (P : PROP $oi Σ).
+  Implicit Types (ip : PROP $oi Σ → iProp Σ) (P : PROP $oi Σ).
 
   (** [mutex_tok]: Mutex token *)
   Definition mutex_tok l P : iProp Σ := inv_tok nroot (l, P).
@@ -37,16 +37,16 @@ Section mutex.
   Proof. exact _. Qed.
 
   (** Interpretation for a mutex *)
-  Local Definition mutex_intp (intp : PROP $oi Σ -d> iProp Σ)
+  Local Definition mutex_intp (ip : PROP $oi Σ -d> iProp Σ)
     : mutex_prop PROP $oi Σ -d> iProp Σ := λ '(l, P),
-    (∃ b, l ↦ #b ∗ if b then True else intp P)%I.
-  #[export] Instance mutex_intp_ne `{!NonExpansive intp} :
-    NonExpansive (mutex_intp intp).
+    (∃ b, l ↦ #b ∗ if b then True else ip P)%I.
+  #[export] Instance mutex_intp_ne `{!NonExpansive ip} :
+    NonExpansive (mutex_intp ip).
   Proof. move=> ?[??][??][/=??]. solve_proper. Qed.
 
   (** World satisfaction for the mutex machinery *)
-  Local Definition mutex_wsat_def (intp : PROP $oi Σ -d> iProp Σ) : iProp Σ :=
-    inv_wsat (mutex_intp intp).
+  Local Definition mutex_wsat_def (ip : PROP $oi Σ -d> iProp Σ) : iProp Σ :=
+    inv_wsat (mutex_intp ip).
   Local Lemma mutex_wsat_aux : seal mutex_wsat_def. Proof. by eexists. Qed.
   Definition mutex_wsat := mutex_wsat_aux.(unseal).
   Local Lemma mutex_wsat_unseal : mutex_wsat = mutex_wsat_def.
@@ -61,12 +61,12 @@ Section mutex.
   #[export] Instance mutex_wsat_proper : Proper ((≡) ==> (≡)) mutex_wsat.
   Proof. apply ne_proper, _. Qed.
 
-  Context `{!NonExpansive intp}.
+  Context `{!NonExpansive ip}.
 
   (** Create a new mutex *)
   Definition new_mutex : val := λ: <>, ref #false.
   Lemma twp_new_mutex {P} :
-    [[{ intp P }]][mutex_wsat intp]
+    [[{ ip P }]][mutex_wsat ip]
       new_mutex #()
     [[{ l, RET #l; mutex_tok l P }]].
   Proof.
@@ -79,7 +79,7 @@ Section mutex.
   (** Create a new mutex with the lock acquired *)
   Definition new_acquire_mutex : val := λ: <>, ref #true.
   Lemma twp_new_acquire_mutex {P} :
-    [[{ True }]][mutex_wsat intp]
+    [[{ True }]][mutex_wsat ip]
       new_acquire_mutex #()
     [[{ l, RET #l; mutex_tok l P }]].
   Proof.
@@ -92,13 +92,13 @@ Section mutex.
   (** Try to acquire the lock on the mutex *)
   Definition try_acquire_mutex : val := λ: "l", CAS "l" #false #true.
   Lemma twp_try_acquire_mutex {l P} :
-    [[{ mutex_tok l P }]][mutex_wsat intp]
+    [[{ mutex_tok l P }]][mutex_wsat ip]
       try_acquire_mutex #l
-    [[{ b, RET #b; if b then intp P else True }]].
+    [[{ b, RET #b; if b then ip P else True }]].
   Proof.
     rewrite mutex_wsat_unseal. iIntros (Φ) "l →Φ". wp_lam.
     wp_bind (CmpXchg _ _ _).
-    iMod (inv_tok_acc (intp:=mutex_intp _) with "l") as "[[%b[↦ big]]cl]";
+    iMod (inv_tok_acc (ip:=mutex_intp _) with "l") as "[[%b[↦ big]]cl]";
       [done|]; case b.
     - wp_cmpxchg_fail. iModIntro. iMod ("cl" with "[$↦//]") as "_". iModIntro.
       wp_pures. by iApply "→Φ".
@@ -112,9 +112,9 @@ Section mutex.
       if: "n" = #0 then #false else
       if: try_acquire_mutex "l" then #true else "self" ("n" - #1) "l".
   Lemma twp_try_acquire_loop_mutex {l P n} :
-    [[{ mutex_tok l P }]][mutex_wsat intp]
+    [[{ mutex_tok l P }]][mutex_wsat ip]
       try_acquire_loop_mutex #n #l
-    [[{ b, RET #b; if b then intp P else True }]].
+    [[{ b, RET #b; if b then ip P else True }]].
   Proof.
     iIntros (Φ) "#l →Φ". iInduction n as [|n] "IH".
     { wp_lam. wp_pures. by iApply "→Φ". }
@@ -126,12 +126,12 @@ Section mutex.
   (** Release the lock on the mutex *)
   Definition release_mutex : val := λ: "l", "l" <- #false.
   Lemma twp_release_mutex {l P} :
-    [[{ mutex_tok l P ∗ intp P }]][mutex_wsat intp]
+    [[{ mutex_tok l P ∗ ip P }]][mutex_wsat ip]
       release_mutex #l
     [[{ RET #(); True }]].
   Proof.
     rewrite mutex_wsat_unseal. iIntros (Φ) "[#l P] →Φ". wp_lam.
-    iMod (inv_tok_acc (intp:=mutex_intp _) with "l") as "[[%[↦ _]]cl]"; [done|].
+    iMod (inv_tok_acc (ip:=mutex_intp _) with "l") as "[[%[↦ _]]cl]"; [done|].
     wp_store. iModIntro. iMod ("cl" with "[$]") as "_". iModIntro.
     by iApply "→Φ".
   Qed.

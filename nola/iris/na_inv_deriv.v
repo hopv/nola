@@ -45,10 +45,10 @@ Section na_inv_deriv.
   Implicit Type P Q PQ : PROP $oi Σ.
 
   (** Accessor *)
-  Definition na_inv_acsr intp p N Pi : iProp Σ :=
-    ∀ E F, ⌜↑N ⊆ E⌝ → ⌜↑N ⊆ F⌝ → na_own p F =[na_inv_wsat intp]{E}=∗
+  Definition na_inv_acsr ip p N Pi : iProp Σ :=
+    ∀ E F, ⌜↑N ⊆ E⌝ → ⌜↑N ⊆ F⌝ → na_own p F =[na_inv_wsat ip]{E}=∗
       na_own p (F∖↑N) ∗ Pi ∗
-      (na_own p (F∖↑N) -∗ Pi =[na_inv_wsat intp]{E}=∗ na_own p F) .
+      (na_own p (F∖↑N) -∗ Pi =[na_inv_wsat ip]{E}=∗ na_own p F) .
 
   Context `{!NaInvPreDeriv (PROP $oi Σ) (JUDGI : judgi (iProp Σ)),
     !Dintp JUDGI (PROP $oi Σ) (iProp Σ)}.
@@ -87,7 +87,7 @@ Section na_inv_deriv.
   Lemma na_inv_tok_na_inv' {p N P} : na_inv_tok p N P ⊢ na_inv' δ p N P.
   Proof.
     rewrite -na_inv_acsr_inv'. iIntros "#i !>" (δ' ???????) "F".
-    by iApply (na_inv_tok_acc (intp:=⟦⟧(δ')) with "F i").
+    by iApply (na_inv_tok_acc (ip:=⟦⟧(δ')) with "F i").
   Qed.
 
   (** Allocate [na_inv'] *)

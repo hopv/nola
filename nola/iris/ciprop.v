@@ -143,7 +143,7 @@ Section iris.
 
   (** ** [cip_bintp]: Base interpretation for [ciProp] *)
   Definition cip_bintp
-    (intp : ∀ s, (I s -d> iProp Σ) → (C s -d> ciProp I C D Σ) →
+    (ip : ∀ s, (I s -d> iProp Σ) → (C s -d> ciProp I C D Σ) →
       D s $oi Σ → iProp Σ) s
     : (cip_idom I s -d> iProp Σ) → (cip_cdom C s -d> ciProp I C D Σ) →
         cip_dataOF D s $oi Σ → iProp Σ :=
@@ -160,23 +160,21 @@ Section iris.
         | cips_except0 => ◇ P
         end
     | cips_pure => λ _ _ φ, ⌜φ⌝ | cips_later => λ _ _, laterl
-    | cips_custom s => intp s
+    | cips_custom s => ip s
     end%I.
 
   (** [cip_bintp] is non-expansive *)
-  #[export] Instance cip_bintp_ne `{!∀ s, NonExpansive3 (intp s)} {s} :
-    NonExpansive3 (cip_bintp intp s).
+  #[export] Instance cip_bintp_ne `{!∀ s, NonExpansive3 (ip s)} {s} :
+    NonExpansive3 (cip_bintp ip s).
   Proof.
     case s=>/=; try solve_proper. move=> ???????. by apply laterl_ne.
   Qed.
 
   (** ** [cip_intp]: Interpretation of [ciProp] *)
-  Definition cip_intp intp : ciProp I C D Σ → iProp Σ :=
-    cit_intp (cip_bintp intp).
+  Definition cip_intp ip : ciProp I C D Σ → iProp Σ := cit_intp (cip_bintp ip).
 
-  (** [cip_intp intp] is non-expansive if [intp] is *)
-  Fact cip_intp_ne `{!∀ s, NonExpansive3 (intp s)} :
-    NonExpansive (cip_intp intp).
+  (** [cip_intp ip] is non-expansive if [ip] is *)
+  Fact cip_intp_ne `{!∀ s, NonExpansive3 (ip s)} : NonExpansive (cip_intp ip).
   Proof. exact _. Qed.
 End iris.
 Arguments cip_intp {_ _ _ _ _} _ _ /.

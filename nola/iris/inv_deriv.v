@@ -41,9 +41,9 @@ Section inv_deriv.
   Implicit Type P Q PQ : PROP $oi Σ.
 
   (** Accessor *)
-  Definition inv_acsr intp N Pi : iProp Σ :=
-    ∀ E, ⌜↑N ⊆ E⌝ → |=[inv_wsat intp]{E,E∖↑N}=>
-      Pi ∗ (Pi =[inv_wsat intp]{E∖↑N,E}=∗ True).
+  Definition inv_acsr ip N Pi : iProp Σ :=
+    ∀ E, ⌜↑N ⊆ E⌝ → |=[inv_wsat ip]{E,E∖↑N}=>
+      Pi ∗ (Pi =[inv_wsat ip]{E∖↑N,E}=∗ True).
 
   Context `{!InvPreDeriv (PROP $oi Σ) (JUDGI : judgi (iProp Σ)),
     !Dintp JUDGI (PROP $oi Σ) (iProp Σ)}.
@@ -80,7 +80,7 @@ Section inv_deriv.
   Lemma inv_tok_inv' {N P} : inv_tok N P ⊢ inv' δ N P.
   Proof.
     rewrite -inv_acsr_inv'. iIntros "#i !>" (δ' ?????).
-    by iApply (inv_tok_acc (intp:=⟦⟧(δ')) with "i").
+    by iApply (inv_tok_acc (ip:=⟦⟧(δ')) with "i").
   Qed.
 
   (** Allocate [inv'] *)

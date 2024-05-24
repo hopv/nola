@@ -335,11 +335,11 @@ End citO.
 (** ** [cit_intp]: Interpretation over [cit] *)
 Section cit_intp.
   Context {S} {I C : S → Type} {D : S → ofe} {A : ofe}.
-  Context (intp : ∀ s, (I s -d> A) → (C s -d> cit I C D) → D s → A).
+  Context (ip : ∀ s, (I s -d> A) → (C s -d> cit I C D) → D s → A).
 
   (** Interpretation over [cit'] *)
   Fixpoint cit'_intp (t : cit' I C D) : A :=
-    intp t.(cit_sel) (λ i, cit'_intp (t.(cit_ikidsI) i))
+    ip t.(cit_sel) (λ i, cit'_intp (t.(cit_ikidsI) i))
       t.(cit_ckids) t.(cit_data).
 
   (** Interpretation over [cit] *)
@@ -366,22 +366,22 @@ Section cit_intp.
     Proper (forall_relation (λ _, (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡))
       ==> (≡{n}≡) ==> (≡{n}≡)) (@cit_intp _ I C D A).
   Proof. solve_proper. Qed.
-  #[export] Instance cit'_intp_ne `{!∀ s, NonExpansive3 (intp s)} :
-    NonExpansive (@cit'_intp _ I C D A intp).
+  #[export] Instance cit'_intp_ne `{!∀ s, NonExpansive3 (ip s)} :
+    NonExpansive (@cit'_intp _ I C D A ip).
   Proof. move=> ????. apply cit'_intp_ne_gen; [solve_proper|done]. Qed.
-  #[export] Instance cit_intp_ne `{!∀ s, NonExpansive3 (intp s)} :
-    NonExpansive (@cit_intp _ I C D A intp).
+  #[export] Instance cit_intp_ne `{!∀ s, NonExpansive3 (ip s)} :
+    NonExpansive (@cit_intp _ I C D A ip).
   Proof. solve_proper. Qed.
-  Lemma cit'_intp_ne_intp `{!∀ s, NonExpansive3 (intp s)} {intp' n} :
-    (∀ s ti tc d, intp s ti tc d ≡{n}≡ intp' s ti tc d) →
-    ∀ t, @cit'_intp _ I C D A intp t ≡{n}≡ cit'_intp intp' t.
+  Lemma cit'_intp_ne_intp `{!∀ s, NonExpansive3 (ip s)} {ip' n} :
+    (∀ s ti tc d, ip s ti tc d ≡{n}≡ ip' s ti tc d) →
+    ∀ t, @cit'_intp _ I C D A ip t ≡{n}≡ cit'_intp ip' t.
   Proof.
     move=> eqv ?. apply cit'_intp_ne_gen; [|done]=> ??????????.
     etrans; [|by apply eqv]. solve_proper.
   Qed.
-  Lemma cit_intp_ne_intp `{!∀ s, NonExpansive3 (intp s)} {intp' n} :
-    (∀ s ti tc d, intp s ti tc d ≡{n}≡ intp' s ti tc d) →
-    ∀ t, @cit_intp _ I C D A intp t ≡{n}≡ cit_intp intp' t.
+  Lemma cit_intp_ne_intp `{!∀ s, NonExpansive3 (ip s)} {ip' n} :
+    (∀ s ti tc d, ip s ti tc d ≡{n}≡ ip' s ti tc d) →
+    ∀ t, @cit_intp _ I C D A ip t ≡{n}≡ cit_intp ip' t.
   Proof. move=> ??. by apply cit'_intp_ne_intp. Qed.
 End cit_intp.
 
