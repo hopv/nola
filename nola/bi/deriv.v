@@ -109,6 +109,14 @@ Section deriv.
     iIntros "∀ Js". iApply Deriv_to. iIntros (??? to). iApply "∀"; [done..|].
     iStopProof. elim: Js; [done|]=>/= ?? ->. by rewrite to.
   Qed.
+  Lemma Deriv_all `{!Deriv ih δ} {A Jf J'} :
+    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
+      (∀ a : A, ⟦ Jf a ⟧(δ')) -∗ ⟦ J' ⟧(δ')) ⊢
+      (∀ a, δ (Jf a)) -∗ δ J'.
+  Proof.
+    iIntros "∀ Jf". iApply Deriv_to. iIntros (????). iApply "∀"; [done..|].
+    iStopProof. by do 2 f_equiv.
+  Qed.
 
   (** ** [der]: The best derivability predicate *)
   Definition der : JUDGI → PROP := psg (OT:=JUDGI → PROP) pintp.
