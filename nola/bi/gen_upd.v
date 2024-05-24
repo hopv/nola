@@ -138,7 +138,7 @@ Section acsr.
 
   Context `{!GenUpd (PROP:=PROP) M}.
 
-  (** [acsr] is proper *)
+  (** [acsr] is non-expansive *)
   #[export] Instance acsr_ne : NonExpansive2 (acsr M).
   Proof. solve_proper. Qed.
 
