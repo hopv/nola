@@ -84,24 +84,23 @@ Section deriv.
       ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ')) ⊢
       δ J -∗ δ J'.
   Proof.
-    iIntros "∀ J". iApply Deriv_to. iIntros (??? to).
-    iApply "∀"; by [| |iApply to].
+    iIntros "∀ J". iApply Deriv_to. iIntros (??? to). rewrite to. by iApply "∀".
   Qed.
   Lemma Deriv_map2 `{!Deriv ih δ} {J J' J''} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ →
       ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ') -∗ ⟦ J'' ⟧(δ')) ⊢
       δ J -∗ δ J' -∗ δ J''.
   Proof.
-    iIntros "∀ J J'". iApply Deriv_to. iIntros (??? to).
-    iApply ("∀" with "[//] [//] [//] [J]"); by iApply to.
+    iIntros "∀ J J'". iApply Deriv_to. iIntros (??? to). rewrite !to.
+    iApply ("∀" with "[//] [//] [//] J J'").
   Qed.
   Lemma Deriv_map3 `{!Deriv ih δ} {J J' J'' J'''} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ →
       ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ') -∗ ⟦ J'' ⟧(δ') -∗ ⟦ J''' ⟧(δ')) ⊢
       δ J -∗ δ J' -∗ δ J'' -∗ δ J'''.
   Proof.
-    iIntros "∀ J J' J''". iApply Deriv_to. iIntros (??? to).
-    iApply ("∀" with "[//] [//] [//] [J] [J']"); by iApply to.
+    iIntros "∀ J J' J''". iApply Deriv_to. iIntros (??? to). rewrite !to.
+    iApply ("∀" with "[//] [//] [//] J J' J''").
   Qed.
   Lemma Deriv_mapl `{!Deriv ih δ} {Js J'} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜∀ J, δ J ⊢ ⟦ J ⟧(δ')⌝ →
@@ -109,8 +108,7 @@ Section deriv.
       ([∗ list] J ∈ Js, δ J) -∗ δ J'.
   Proof.
     iIntros "∀ Js". iApply Deriv_to. iIntros (??? to). iApply "∀"; [done..|].
-    iStopProof. elim: Js; [done|]=>/= ?? IH. iIntros "[J ?]".
-    iSplitL "J"; by [iApply to|iApply IH].
+    iStopProof. elim: Js; [done|]=>/= ?? ->. by rewrite to.
   Qed.
 
   (** ** [der]: The best derivability predicate *)
