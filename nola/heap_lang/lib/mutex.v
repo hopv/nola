@@ -2,8 +2,10 @@
 
 From nola.heap_lang Require Import notation proofmode.
 From nola.util Require Import prod.
+From nola.bi Require Export deriv.
 From nola.iris Require Export ofe inv.
-Import ProdNotation iPropAppNotation UpdwNotation WpwNotation.
+Import ProdNotation iPropAppNotation UpdwNotation WpwNotation PintpNotation
+  IntpNotation.
 
 Implicit Type (b : bool) (l : loc) (n : nat).
 
@@ -22,7 +24,7 @@ Proof. solve_inG. Qed.
 
 (** ** Mutex *)
 Section mutex.
-  Context `{!heapGS_gen hlc Σ, !mutexGS PROP Σ}.
+  Context `{!mutexGS PROP Σ, !heapGS_gen hlc Σ}.
   Implicit Types (ip : PROP $oi Σ → iProp Σ) (P : PROP $oi Σ).
 
   (** [mutex_tok]: Mutex token *)
@@ -137,3 +139,128 @@ Section mutex.
     by iApply "→Φ".
   Qed.
 End mutex.
+
+(** ** Relax a mutex with derivability *)
+
+(** Notation *)
+Notation mutex_wsati δ := (mutex_wsat ⟦⟧(δ)).
+Notation mutex_wsatid := (mutex_wsati der).
+
+(** Derivability pre-data for [mutex] *)
+Class MutexPreDeriv (PRO JUDG : ofe) := MUTEX_PRE_DERIV {
+  mutex_jiff : PRO → PRO → JUDG;
+  mutex_jiff_ne :: NonExpansive2 mutex_jiff;
+}.
+Hint Mode MutexPreDeriv ! - : typeclass_instances.
+Arguments MUTEX_PRE_DERIV {_ _} _ {_}.
+
+Section mutex_deriv.
+  Context `{!mutexGS PROP Σ, !MutexPreDeriv (PROP $oi Σ) JUDG}.
+  Implicit Type δ : JUDG → iProp Σ.
+
+  (** [mutex]: Relaxed simple invariant *)
+  Local Definition mutex_def δ l P : iProp Σ :=
+    ∃ Q, □ δ (mutex_jiff P Q) ∗ mutex_tok l Q.
+  Local Lemma mutex_aux : seal mutex_def. Proof. by eexists. Qed.
+  Definition mutex := mutex_aux.(unseal).
+  Local Lemma mutex_unseal : mutex = mutex_def. Proof. exact: seal_eq. Qed.
+
+  (** [mutex] is persistent *)
+  #[export] Instance mutex_persistent {δ l P} : Persistent (mutex δ l P).
+  Proof. rewrite mutex_unseal. exact _. Qed.
+
+  (** [mutex] is non-expansive *)
+  #[export] Instance mutex_ne `{!NonExpansive δ} {l} : NonExpansive (mutex δ l).
+  Proof. rewrite mutex_unseal. solve_proper. Qed.
+End mutex_deriv.
+Notation mutexd := (mutex der).
+
+Section mutex_deriv.
+  Context `{!mutexGS PROP Σ, !heapGS_gen hlc Σ,
+    !MutexPreDeriv (PROP $oi Σ) (JUDGI : judgi (iProp Σ)),
+    !Dintp JUDGI (PROP $oi Σ) (iProp Σ)}.
+  Implicit Type (δ : JUDGI → iProp Σ) (P Q : PROP $oi Σ).
+
+  (** Derivability data for [mutex] *)
+  Class MutexDeriv :=
+    mutex_jiff_intp : ∀{δ P Q},
+      ⟦ mutex_jiff P Q ⟧(δ) ⊣⊢
+        ((⟦ P ⟧(δ) ={⊤}=∗ ⟦ Q ⟧(δ)) ∧ (⟦ Q ⟧(δ) ={⊤}=∗ ⟦ P ⟧(δ))).
+
+  Context `{!MutexDeriv}.
+
+  (** Unfold [mutexd] *)
+  Lemma mutexd_unfold {l P} :
+    mutexd l P ⊢
+      ∃ Q, □ ((⟦ P ⟧ ={⊤}=∗ ⟦ Q ⟧) ∧ (⟦ Q ⟧ ={⊤}=∗ ⟦ P ⟧)) ∗ mutex_tok l Q.
+  Proof.
+    rewrite mutex_unseal /mutex_def.
+    do 2 f_equiv. by rewrite der_sound mutex_jiff_intp.
+  Qed.
+
+  (** Wrapper lemmas *)
+  Lemma twp_try_acquire_mutexd {l P} :
+    [[{ mutexd l P }]][mutex_wsatid]
+      try_acquire_mutex #l
+    [[{ b, RET #b; if b then ⟦ P ⟧ else True }]].
+  Proof.
+    setoid_rewrite mutexd_unfold. iIntros (?) "[%Q[#[_ QP]l]] →Φ".
+    iApply twp_fupd. wp_apply (twp_try_acquire_mutex_tok (ip:=⟦⟧) with "l").
+    iIntros ([|]) "Q"; iApply "→Φ"; by [iApply "QP"|].
+  Qed.
+  Lemma twp_try_acquire_loop_mutexd {l P n} :
+    [[{ mutexd l P }]][mutex_wsatid]
+      try_acquire_loop_mutex #n #l
+    [[{ b, RET #b; if b then ⟦ P ⟧ else True }]].
+  Proof.
+    setoid_rewrite mutexd_unfold. iIntros (?) "[%Q[#[_ QP]l]] →Φ".
+    iApply twp_fupd.
+    wp_apply (twp_try_acquire_loop_mutex_tok (ip:=⟦⟧) with "l").
+    iIntros ([|]) "Q"; iApply "→Φ"; by [iApply "QP"|].
+  Qed.
+  Lemma twp_release_mutexd {l P} :
+    [[{ mutexd l P ∗ ⟦ P ⟧ }]][mutex_wsatid]
+      release_mutex #l
+    [[{ RET #(); True }]].
+  Proof.
+    setoid_rewrite mutexd_unfold. iIntros (?) "[[%Q[#[PQ _]l]] P] →Φ".
+    iApply fupd_twp. iMod ("PQ" with "P") as "Q". iModIntro.
+    by wp_apply (twp_release_mutex_tok (ip:=⟦⟧) with "[$]").
+  Qed.
+
+  Context `{!Deriv (JUDGI:=JUDGI) ih δ}.
+
+  (** Turn [mutex_tok] into [mutex] *)
+  Lemma mutex_tok_mutex {l P} : mutex_tok l P ⊢ mutex δ l P.
+  Proof.
+    rewrite mutex_unseal. iIntros "$ !>". iApply Deriv_to.
+    iIntros (????). rewrite mutex_jiff_intp. iSplit; by iIntros.
+  Qed.
+
+  (** Wrapper lemmas *)
+  Lemma twp_new_mutex {P} :
+    [[{ ⟦ P ⟧(δ) }]][mutex_wsati δ]
+      new_mutex #()
+    [[{ l, RET #l; mutex δ l P }]].
+  Proof. setoid_rewrite <-mutex_tok_mutex. exact twp_new_mutex_tok. Qed.
+  Lemma twp_new_acquire_mutex {P} :
+    [[{ True }]][mutex_wsati δ]
+      new_acquire_mutex #()
+    [[{ l, RET #l; mutex δ l P }]].
+  Proof. setoid_rewrite <-mutex_tok_mutex. exact twp_new_acquire_mutex_tok. Qed.
+
+  (** Convert [mutex] *)
+  Lemma mutex_conv {l P Q} :
+    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
+      (⟦ P ⟧(δ') ={⊤}=∗ ⟦ Q ⟧(δ')) ∧ (⟦ Q ⟧(δ') ={⊤}=∗ ⟦ P ⟧(δ'))) -∗
+      mutex δ l P -∗ mutex δ l Q.
+  Proof.
+    rewrite mutex_unseal. iIntros "#big [%R[#conv $]] !>". iApply Deriv_to.
+    iIntros (??? to). rewrite to !mutex_jiff_intp.
+    iDestruct "conv" as "[PR RP]". iSplit.
+    - iIntros "Q". iMod ("big" with "[//] [//] [//] Q"). by iApply "PR".
+    - iIntros "R". iMod ("RP" with "R") as "P". by iApply "big".
+  Qed.
+End mutex_deriv.
+Arguments MutexDeriv PROP Σ {_ _} JUDGI {_ _}.
+Hint Mode MutexDeriv ! - - - - - - : typeclass_instances.
