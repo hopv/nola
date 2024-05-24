@@ -146,7 +146,7 @@ Section iris.
 
   (** ** Termination of [iter] *)
   Lemma twp_iter {N Φx c l} {f : val} {n : nat} :
-    (∀ l0, [[{ inv' der N (Φx l0) }]][inv_wsatid] f #l0 @ ↑N
+    (∀ l0, [[{ invd N (Φx l0) }]][inv_wsatid] f #l0 @ ↑N
       [[{ RET #(); True }]]) -∗
     [[{ c ↦ #n ∗ ⟦ ilist N Φx l ⟧ }]][inv_wsatid]
       iter f #c #l @ ↑N
@@ -158,7 +158,7 @@ Section iris.
     wp_rec. wp_pures. wp_load. wp_pures. wp_apply "Hf"; [done|]. iIntros "_".
     wp_pures. wp_load. wp_op. have -> : (S m - 1)%Z = m by lia. wp_store.
     wp_op. wp_bind (! _)%E.
-    iMod (inv'_acc with "itl") as "/=[(%l' & >↦l' & #itlhd & #itltl) cl]/=";
+    iMod (invd_acc with "itl") as "/=[(%l' & >↦l' & #itlhd & #itltl) cl]/=";
       [done|].
     wp_load. iModIntro. iMod ("cl" with "[↦l']") as "_".
     { iExists _. iFrame "↦l'". by iSplit. }

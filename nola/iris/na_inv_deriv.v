@@ -39,6 +39,7 @@ Section na_inv_deriv.
     NonExpansive (na_inv' δ p N).
   Proof. rewrite na_inv'_unseal. solve_proper. Qed.
 End na_inv_deriv.
+Notation na_invd := (na_inv' der).
 
 Section na_inv_deriv.
   Context `{!na_inv'GS PROP Σ, !invGS_gen hlc Σ, !na_invG Σ}.
@@ -61,9 +62,9 @@ Section na_inv_deriv.
 
   Context `{!NaInvDeriv}.
 
-  (** Access [na_inv'] *)
-  Lemma na_inv'_acc {p N P E F} : ↑N ⊆ E → ↑N ⊆ F →
-    na_own p F -∗ na_inv' der p N P =[na_inv_wsatid]{E}=∗
+  (** Access [na_invd] *)
+  Lemma na_invd_acc {p N P E F} : ↑N ⊆ E → ↑N ⊆ F →
+    na_own p F -∗ na_invd p N P =[na_inv_wsatid]{E}=∗
       na_own p (F∖↑N) ∗ ⟦ P ⟧ ∗
       (na_own p (F∖↑N) -∗ ⟦ P ⟧ =[na_inv_wsatid]{E}=∗ na_own p F).
   Proof.

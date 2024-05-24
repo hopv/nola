@@ -35,6 +35,7 @@ Section inv_deriv.
   #[export] Instance inv'_ne `{!NonExpansive δ} {N} : NonExpansive (inv' δ N).
   Proof. rewrite inv'_unseal. solve_proper. Qed.
 End inv_deriv.
+Notation invd := (inv' der).
 
 Section inv_deriv.
   Context `{!inv'GS PROP Σ, !invGS_gen hlc Σ}.
@@ -56,8 +57,8 @@ Section inv_deriv.
   Context `{!InvDeriv}.
 
   (** Access [inv'] *)
-  Lemma inv'_acc {N P E} : ↑N ⊆ E →
-    inv' der N P =[inv_wsatid]{E,E∖↑N}=∗
+  Lemma invd_acc {N P E} : ↑N ⊆ E →
+    invd N P =[inv_wsatid]{E,E∖↑N}=∗
       ⟦ P ⟧ ∗ (⟦ P ⟧ =[inv_wsatid]{E∖↑N,E}=∗ True).
   Proof.
     rewrite inv'_unseal. iIntros (?) "accP".

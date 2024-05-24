@@ -36,6 +36,7 @@ Section sinv_deriv.
   #[export] Instance sinv_ne `{!NonExpansive δ} : NonExpansive (sinv δ).
   Proof. rewrite sinv_unseal. solve_proper. Qed.
 End sinv_deriv.
+Notation sinvd := (sinv der).
 
 Section sinv_deriv.
   Context `{!sinvGS PROP Σ,
@@ -55,7 +56,7 @@ Section sinv_deriv.
 
   (** Access [sinv] *)
   Lemma sinv_acc {P} :
-    sinv der P -∗ sinv_wsatid -∗ sinv_mod
+    sinvd P -∗ sinv_wsatid -∗ sinv_mod
       (⟦ P ⟧ ∗ (⟦ P ⟧ -∗ sinv_mod (sinv_wsatid))).
   Proof.
     rewrite sinv_unseal. iIntros "[%Q[QPQ s]] W".
