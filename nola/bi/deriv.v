@@ -27,12 +27,12 @@ Arguments Judgi {_} _ {_}.
 Arguments judgi_car {PROP JUDGI} : rename.
 Arguments judgi_Dintp {PROP JUDGI} : rename.
 
+(** ** [dinto δ δ']: [δ] can be turned into the semantics at [δ'] *)
+Notation dinto δ δ' := (∀ J, δ J ⊢ ⟦ J ⟧(δ')) (only parsing).
+
 Section deriv.
   Context {PROP} {JUDGI : judgi PROP}.
   Implicit Type (J : JUDGI) (δ : JUDGI → PROP) (ih : (JUDGI → PROP) → Prop).
-
-  (** ** [dinto δ δ']: [δ] can be turned into the semantics at [δ'] *)
-  Definition dinto δ δ' := ∀ J, δ J ⊢ ⟦ J ⟧(δ').
 
   (** ** [Deriv ih δ] : [δ] is a good derivability predicate
 
@@ -63,8 +63,7 @@ Section deriv.
   Lemma Deriv_eqv `{!Deriv ih δ} {J} :
     δ J ⊣⊢ ∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ → ⟦ J ⟧(δ').
   Proof.
-    iSplit; iIntros "?"; iStopProof; [|by exact Deriv_to]. iIntros "?" (????).
-    by iStopProof.
+    iSplit; iIntros "?"; [|iStopProof; by exact Deriv_to]. by iIntros (??? ->).
   Qed.
   Lemma Deriv_eqv' `{!Deriv ih δ} {J} :
     δ J ⊣⊢ ∀ δ' (_ : Deriv ih δ') (_ : ih δ') (_ : dinto δ δ'), ⟦ J ⟧(δ').
