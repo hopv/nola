@@ -82,7 +82,7 @@ Section iris.
     | (N, Px) => inv_acsr ⟦⟧(δ) N ⟦ Px ⟧(δ)
     end.
   Local Instance judg_intp_ne `{!NonExpansive δ} : NonExpansive (judg_intp δ).
-  Proof. move=> ?[??][??][/=??]. solve_proper. Qed.
+  Proof. move=> ?[??][??][/=/leibniz_equiv_iff-> ?]. solve_proper. Qed.
   #[export] Instance judg_dintp : Dintp (judg Σ) (judg Σ) (iProp Σ) :=
     DINTP judg_intp.
   Canonical judgJ : judgi (iProp Σ) := Judgi (judg Σ).
