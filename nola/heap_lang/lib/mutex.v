@@ -65,7 +65,7 @@ Section mutex.
 
   (** Create a new mutex *)
   Definition new_mutex : val := λ: <>, ref #false.
-  Lemma twp_new_mutex {P} :
+  Lemma twp_new_mutex_tok {P} :
     [[{ ip P }]][mutex_wsat ip]
       new_mutex #()
     [[{ l, RET #l; mutex_tok l P }]].
@@ -78,7 +78,7 @@ Section mutex.
 
   (** Create a new mutex with the lock acquired *)
   Definition new_acquire_mutex : val := λ: <>, ref #true.
-  Lemma twp_new_acquire_mutex {P} :
+  Lemma twp_new_acquire_mutex_tok {P} :
     [[{ True }]][mutex_wsat ip]
       new_acquire_mutex #()
     [[{ l, RET #l; mutex_tok l P }]].
@@ -91,7 +91,7 @@ Section mutex.
 
   (** Try to acquire the lock on the mutex *)
   Definition try_acquire_mutex : val := λ: "l", CAS "l" #false #true.
-  Lemma twp_try_acquire_mutex {l P} :
+  Lemma twp_try_acquire_mutex_tok {l P} :
     [[{ mutex_tok l P }]][mutex_wsat ip]
       try_acquire_mutex #l
     [[{ b, RET #b; if b then ip P else True }]].
@@ -111,21 +111,22 @@ Section mutex.
     rec: "self" "n" "l" :=
       if: "n" = #0 then #false else
       if: try_acquire_mutex "l" then #true else "self" ("n" - #1) "l".
-  Lemma twp_try_acquire_loop_mutex {l P n} :
+  Lemma twp_try_acquire_loop_mutex_tok {l P n} :
     [[{ mutex_tok l P }]][mutex_wsat ip]
       try_acquire_loop_mutex #n #l
     [[{ b, RET #b; if b then ip P else True }]].
   Proof.
     iIntros (Φ) "#l →Φ". iInduction n as [|n] "IH".
     { wp_lam. wp_pures. by iApply "→Φ". }
-    wp_lam. wp_pures. wp_apply (twp_try_acquire_mutex with "l"). iIntros ([|]).
+    wp_lam. wp_pures. wp_apply (twp_try_acquire_mutex_tok with "l").
+    iIntros ([|]).
     - iIntros "?". wp_pures. iModIntro. by iApply "→Φ".
     - iIntros "_". wp_pures. have ->: (S n - 1)%Z = n by lia. by iApply "IH".
   Qed.
 
   (** Release the lock on the mutex *)
   Definition release_mutex : val := λ: "l", "l" <- #false.
-  Lemma twp_release_mutex {l P} :
+  Lemma twp_release_mutex_tok {l P} :
     [[{ mutex_tok l P ∗ ip P }]][mutex_wsat ip]
       release_mutex #l
     [[{ RET #(); True }]].
