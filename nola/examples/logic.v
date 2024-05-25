@@ -5,7 +5,7 @@ From nola.bi Require Import util.
 From nola.heap_lang Require Export notation proofmode lib.mutex.
 Import WpwNotation iPropAppNotation PintpNotation IntpNotation.
 
-Implicit Type (N : namespace) (l : loc).
+Implicit Type (N : namespace) (l : loc) (b : bool).
 
 (** ** Preliminaries *)
 
@@ -178,5 +178,63 @@ Section verify.
     wp_load. iModIntro. iMod ("cl" with "[↦l']") as "_".
     { iExists _. iFrame "↦l'". by iSplit. }
     iModIntro. by iApply ("IH" with "c↦ →Ψ").
+  Qed.
+End verify.
+
+(** ** Target function: Linked list mutation over a mutex *)
+Definition iter_mlist : val := rec: "self" "f" "k" "c" "l" :=
+  if: !"c" = #0 then #true else
+    if: try_acquire_loop_mutex "k" "l" then
+      "f" "l";; let: "l'" := !("l" +ₗ #1) in release_mutex "l";;
+      "c" <- !"c" - #1;; "self" "f" "k" "c" "l'"
+    else #false.
+
+Section verify.
+  Context `{!inv'GS ciPropOF Σ, !mutexGS ciPropOF Σ, !heapGS_gen hlc Σ}.
+  Implicit Type Φx : loc → ciProp Σ.
+
+  (** ** [mlist]: Syntactic proposition for a list with a mutex *)
+  Definition mlist_gen Φx Mlist' l : ciProp Σ :=
+    cip_mutex l (Mlist' Φx l).
+  Definition mlist'_gen Φx Mlist' l : ciProp Σ :=
+    Φx l ∗ ∃ l', ▷ (l +ₗ 1) ↦ #l' ∗ mlist_gen Φx Mlist' l'.
+  CoFixpoint mlist' Φx : loc → ciProp Σ := mlist'_gen Φx mlist'.
+  Definition mlist Φx : loc → ciProp Σ := mlist_gen Φx mlist'.
+
+  (** ** Convert the predicate of [mlist] using [mod_iff] *)
+  Lemma mlist_iff `{!Deriv ih δ} {Φx Ψx l} :
+    □ (∀ δ' l', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
+      mod_iff (fupd ⊤ ⊤) ⟦ Φx l' ⟧(δ') ⟦ Ψx l' ⟧(δ')) -∗
+      ⟦ mlist Φx l ⟧(δ) ∗-∗ ⟦ mlist Ψx l ⟧(δ).
+  Proof.
+    rewrite !/⟦ mlist _ _ ⟧(_) /=. move: l. apply Deriv_ind=> ???.
+    iIntros "#eqv". iApply mutex_iff. iIntros "!>" (??[IH ?]?).
+    rewrite !/⟦ mlist' _ _ ⟧(_) /=.
+    have ?: Deriv ih δ'. { by apply Deriv_mono=> ?[??]. }
+    iSplit; (iIntros "[hd[%[$ mtl]]]"; iSplitL "hd"; [by iApply "eqv"|]);
+      iModIntro; iRevert "mtl"; [iApply bi.and_elim_l|iApply bi.and_elim_r];
+      by iApply IH.
+  Qed.
+
+  (** ** Termination of [iter_mlist] *)
+  Lemma twp_iter_mlist {Φx c l} {f : val} {k n : nat} :
+    (∀ l0, [[{ ⟦ Φx l0 ⟧ }]][mutex_wsatid] f #l0
+      [[{ RET #(); ⟦ Φx l0 ⟧ }]]) -∗
+    [[{ c ↦ #n ∗ ⟦ mlist Φx l ⟧ }]][mutex_wsatid]
+      iter_mlist f #k #c #l
+    [[{ b, RET #b; if b then c ↦ #0 else ∃ n', c ↦ #n' }]].
+  Proof.
+    rewrite !/⟦ mlist _ _ ⟧ /=. iIntros "#f" (Ψ) "!> [c↦ #ml] →Ψ".
+    iInduction n as [|m] "IH" forall (l) "ml".
+    { wp_rec. wp_load. wp_pures. by iApply "→Ψ". }
+    wp_rec. wp_load. wp_pures.
+    wp_apply (twp_try_acquire_loop_mutexd with "ml"). iIntros ([|]); last first.
+    { iIntros (?). wp_pure. iModIntro. iApply "→Ψ". by iExists _. }
+    rewrite !/⟦ mlist' _ _ ⟧ /=. iIntros "[Φ[%[>↦ #mtl]]]". wp_pure.
+    wp_apply ("f" with "Φ"). iIntros "Φ". wp_load. wp_pures.
+    wp_apply (twp_release_mutexd with "[Φ ↦]").
+    { iSplit; [done|]. rewrite !/⟦ mlist' _ _ ⟧ /=. by iFrame. }
+    iIntros "_". wp_load. wp_store. have -> : (S m - 1)%Z = m by lia.
+    by iApply ("IH" with "c↦ →Ψ").
   Qed.
 End verify.
