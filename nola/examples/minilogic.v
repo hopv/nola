@@ -47,10 +47,9 @@ Section verify.
   Proof.
     iIntros "#f" (Ψ) "!> /=[c↦ #[ihd itl]] →Ψ".
     iInduction n as [|m] "IH" forall (l) "ihd itl".
-    { wp_rec. wp_pures. wp_load. wp_pures. by iApply "→Ψ". }
-    wp_rec. wp_pures. wp_load. wp_pures. wp_apply "f"; [done|]. iIntros "_".
-    wp_pures. wp_load. wp_op. have -> : (S m - 1)%Z = m by lia. wp_store.
-    wp_op. wp_bind (! _)%E.
+    { wp_rec. wp_load. wp_pures. by iApply "→Ψ". }
+    wp_rec. wp_load. wp_pures. wp_apply "f"; [done|]. iIntros "_".
+    wp_load. wp_store. wp_op. wp_bind (! _)%E. have -> : (S m - 1)%Z = m by lia.
     iMod (inv_tok_acc (PROP:=nPropO) (ip:=intp) with "itl") as
       "/=[(%l' & ↦l' & #itlhd & #itltl) cl]"; [done|].
     wp_load. iModIntro. iMod ("cl" with "[↦l']") as "_".
