@@ -444,7 +444,7 @@ Section borrow.
     repeat f_equiv. by apply: depo_wsat_mono.
   Qed.
 
-  Context `{!GenUpd M, !NonExpansive ip}.
+  Context `{!GenUpd M, !GenUpdBupd M, !NonExpansive ip}.
 
   (** Create new borrowers and lenders with a specific depth *)
   Local Lemma bor_lend_tok_new_list' d α Pl Ql :

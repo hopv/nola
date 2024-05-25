@@ -2,6 +2,7 @@
 
 From nola Require Export prelude.
 From iris.bi Require Export bi.
+From iris.proofmode Require Import proofmode.
 
 Section util.
   Context {PROP : bi}.
@@ -23,3 +24,11 @@ Section util.
     move=> PQ. apply equiv_dist=> n. apply step_fupdN_ne. by rewrite PQ.
   Qed.
 End util.
+
+(** Adding [◇] inside lets [M] absorb [◇] for introduceable [M] *)
+Lemma is_except_0_intro {PROP : bi} {M : PROP → PROP} {P} :
+  (∀ P, P ⊢ M P) → IsExcept0 (M (◇ P))%I.
+Proof.
+  rewrite /IsExcept0 /bi_except_0=> intro. iIntros "[?|$]". iApply intro.
+  by iLeft.
+Qed.

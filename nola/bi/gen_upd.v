@@ -1,38 +1,45 @@
 (** * General update *)
 
 From nola Require Export prelude.
+From nola.bi Require Import util.
 From iris.bi Require Export bi.
 From iris.proofmode Require Import proofmode.
 
-(** ** [GenUpd]: General update *)
+(** ** [GenUpd]: General update, i.e., monad strong w.r.t. [∗] *)
 
-Class GenUpd `{!BiBUpd PROP} (M : PROP → PROP) : Prop := GEN_UPD {
+Class GenUpd {PROP : bi} (M : PROP → PROP) : Prop := GEN_UPD {
   gen_upd_ne :: NonExpansive M;
-  gen_upd_from_bupd {P} : (|==> P) ⊢ M P;
   gen_upd_mono {P Q} : (P ⊢ Q) → M P ⊢ M Q;
+  gen_upd_intro {P} : P ⊢ M P;
   gen_upd_trans {P} : M (M P) ⊢ M P;
   gen_upd_frame_r {P Q} : M P ∗ Q ⊢ M (P ∗ Q);
 }.
-Hint Mode GenUpd + - ! : typeclass_instances.
+Hint Mode GenUpd + ! : typeclass_instances.
 
-(** [bupd] and [fupd] satisfy [GenUpd] *)
-#[export] Instance gen_upd_bupd `{!BiBUpd PROP} : GenUpd (PROP:=PROP) bupd.
+(** Instances of [GenUpd] *)
+#[export] Instance id_gen_upd {PROP} : GenUpd (PROP:=PROP) id.
+Proof. split; [exact _|done..]. Qed.
+#[export] Instance except_0_gen_upd {PROP} : GenUpd (PROP:=PROP) bi_except_0.
 Proof.
-  split=> >. { exact _. } { done. } { by move=> ->. } { iIntros ">$". }
+  split=> >. { exact _. } { by move=> ->. } { by iIntros. } { iIntros ">$". }
   { by iIntros "[>$$]". }
 Qed.
-#[export] Instance gen_upd_fupd `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP}
-  {E} : GenUpd (PROP:=PROP) (fupd E E).
+#[export] Instance bupd_gen_upd `{!BiBUpd PROP} : GenUpd (PROP:=PROP) bupd.
 Proof.
-  split=> >. { exact _. } { done. } { by move=> ->. } { iIntros ">$". }
+  split=> >. { exact _. } { by move=> ->. } { by iIntros. } { iIntros ">$". }
   { by iIntros "[>$$]". }
+Qed.
+#[export] Instance fupd_gen_upd `{!BiFUpd PROP} {E} :
+  GenUpd (PROP:=PROP) (fupd E E).
+Proof.
+  split=> >. { exact _. } { by move=> ->. } { by iIntros "? !>". }
+  { iIntros ">$". } { by iIntros "[>$$]". }
 Qed.
 
 Section gen_upd.
-  Context `{!BiBUpd PROP, !GenUpd (PROP:=PROP) M}.
+  Context `{!GenUpd (PROP:=PROP) M}.
 
   (** Monotonicity *)
-
   #[export] Instance gen_upd_mono' : Proper ((⊢) ==> (⊢)) M | 10.
   Proof. move=> ??. apply gen_upd_mono. Qed.
   #[export] Instance gen_upd_flip_mono' : Proper (flip (⊢) ==> flip (⊢)) M | 10.
@@ -41,9 +48,6 @@ Section gen_upd.
   Proof. apply ne_proper, _. Qed.
 
   (** Introduce *)
-
-  Lemma gen_upd_intro {P} : P ⊢ M P.
-  Proof. rewrite -gen_upd_from_bupd. by iIntros. Qed.
   #[export] Instance from_modal_gen_upd {P} :
     FromModal True modality_id (M P) (M P) P | 10.
   Proof. move=> _. rewrite /FromModal /=. apply gen_upd_intro. Qed.
@@ -56,15 +60,8 @@ Section gen_upd.
   #[export] Instance from_pure_gen_upd `{!FromPure a P φ} :
     FromPure a (M P) φ | 10.
   Proof. rewrite /FromPure -(from_pure _ P). apply gen_upd_intro. Qed.
-  #[export] Instance elim_modal_gen_upd_from_bupd {p P Q} :
-    ElimModal True p false (|==> P) P (M Q) (M Q) | 10.
-  Proof.
-    by rewrite /ElimModal bi.intuitionistically_if_elim gen_upd_frame_r
-      bi.wand_elim_r (gen_upd_from_bupd (M:=M)) gen_upd_trans.
-  Qed.
 
   (** Frame *)
-
   Lemma gen_upd_frame_l {P Q} : P ∗ M Q ⊢ M (P ∗ Q).
   Proof. by rewrite comm gen_upd_frame_r comm. Qed.
   #[export] Instance frame_gen_upd `{!Frame p R P Q} :
@@ -72,7 +69,6 @@ Section gen_upd.
   Proof. move: Frame0. rewrite /Frame=> <-. apply gen_upd_frame_l. Qed.
 
   (** Transitivity *)
-
   #[export] Instance elim_modal_gen_upd {p P Q} :
     ElimModal True p false (M P) P (M Q) (M Q) | 10.
   Proof.
@@ -83,7 +79,6 @@ Section gen_upd.
   Proof. by rewrite /AddModal gen_upd_frame_r bi.wand_elim_r gen_upd_trans. Qed.
 
   (** More instances *)
-
   #[export] Instance from_sep_gen_upd `{!FromSep P Q Q'} :
     FromSep (M P) (M Q) (M Q') | 10.
   Proof. rewrite /FromSep -(from_sep P). by iIntros "[>$ >$]". Qed.
@@ -108,30 +103,55 @@ Section gen_upd.
   Proof.
     rewrite /IntoForall (into_forall P). iIntros "Φ %". iMod "Φ". iApply "Φ".
   Qed.
+
+  (** [GenUpd] [M] after [◇] absorbs [◇] *)
+  #[export] Instance gen_upd_except_0_is_except_0 {P} :
+    IsExcept0 (M (◇ P))%I | 10.
+  Proof. apply is_except_0_intro. by iIntros. Qed.
+
+  (** [◇] preserves [GenUpd] *)
+  #[export] Instance gen_upd_except_0 : GenUpd (λ P, M (◇ P))%I | 10.
+  Proof.
+    split=> >. { solve_proper. } { solve_proper. } { by iIntros. }
+    { iIntros ">>$". } { by iIntros "[?$]". }
+  Qed.
 End gen_upd.
 
-(** Adding [◇] inside lets [M] absorb [◇] for introduceable [M] *)
-Lemma is_except_0_intro {PROP : bi} {M : PROP → PROP} {P} :
-  (∀ P, P ⊢ M P) → IsExcept0 (M (◇ P))%I.
-Proof.
-  rewrite /IsExcept0 /bi_except_0=> intro. iIntros "[?|$]". iApply intro.
-  by iLeft.
-Qed.
-#[export] Instance is_except_0_gen_upd `{!BiBUpd PROP, !GenUpd (PROP:=PROP) M}
-  {P} : IsExcept0 (M (◇ P))%I | 10.
-Proof. apply is_except_0_intro. by iIntros. Qed.
+(** ** [GenUpdBupd]: General update subsuming [bupd] *)
 
-(** [◇] preserves [GenUpd] *)
-#[export] Instance gen_upd_except_0 `{!BiBUpd PROP, !GenUpd (PROP:=PROP) M} :
-  GenUpd (λ P, M (◇ P))%I | 10.
-Proof.
-  split=> >. { solve_proper. }
-  { rewrite (gen_upd_from_bupd (M:=M)). f_equiv. by iIntros. }
-  { move=> PQ. by do 2 f_equiv. } { iIntros ">>$". } { by iIntros "[?$]". }
-Qed.
+Class GenUpdBupd `{!BiBUpd PROP} M `{!@GenUpd PROP M} : Prop :=
+  gen_upd_from_bupd : ∀{P}, (|==> P) ⊢ M P.
+Hint Mode GenUpdBupd + - ! - : typeclass_instances.
+
+(** [bupd] and [fupd] satisfy [GenUpd] *)
+#[export] Instance bupd_gen_upd_b `{!BiBUpd PROP} :
+  GenUpdBupd (PROP:=PROP) bupd.
+Proof. by move=> ?. Qed.
+#[export] Instance fupd_gen_upd_b
+  `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {E} :
+  GenUpdBupd (PROP:=PROP) (fupd E E).
+Proof. by iIntros (?) ">?". Qed.
+
+Section gen_upd_b.
+  Context `{!BiBUpd PROP, !GenUpd (PROP:=PROP) M, !GenUpdBupd M}.
+
+  (** Eliminate [bupd] *)
+  #[export] Instance elim_modal_gen_upd_from_bupd {p P Q} :
+    ElimModal True p false (|==> P) P (M Q) (M Q) | 10.
+  Proof.
+  by rewrite /ElimModal bi.intuitionistically_if_elim gen_upd_frame_r
+    bi.wand_elim_r (gen_upd_from_bupd (M:=M)) gen_upd_trans.
+  Qed.
+
+  (** [◇] preserves [GenUpd] *)
+  #[export] Instance gen_upd_b_except_0 : GenUpdBupd (λ P, M (◇ P))%I | 10.
+  Proof.
+    move=> ?. rewrite (gen_upd_from_bupd (M:=M)). f_equiv. by iIntros.
+  Qed.
+End gen_upd_b.
 
 Section mod_acsr.
-  Context `{!BiBUpd PROP}.
+  Context {PROP : bi}.
 
   (** ** [mod_acsr]: Accessor from [P] to [Q] via the modality [M] *)
   Definition mod_acsr M P Q : PROP := P -∗ M (Q ∗ (Q -∗ M P))%I.

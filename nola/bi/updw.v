@@ -123,14 +123,16 @@ Section lemmas.
     (∀ P Q, M P ∗ Q ⊢ M (P ∗ Q)) → Q ∗ modw M W P ⊢ modw M W (Q ∗ P).
   Proof. rewrite !(comm _ Q). apply modw_frame_r. Qed.
 
-  (** [modw] preserves [GenUpd] *)
-  #[export] Instance gen_upd_modw `{!BiBUpd PROP, !GenUpd M} {W} :
-    GenUpd (modw M W) | 10.
+  (** [modw] preserves [GenUpd] and [GenUpdBupd] *)
+  #[export] Instance gen_upd_modw `{!GenUpd M} {W} : GenUpd (modw M W) | 10.
   Proof.
-    split=> >. { exact _. } { by iIntros ">$$". } { by move=> ->. }
+    split=> >. { exact _. } { by move=> ->. } { by iIntros "$$". }
     { apply modw_compose=> ?. exact gen_upd_trans. }
     { apply modw_frame_r=> *. exact gen_upd_frame_r. }
   Qed.
+  #[export] Instance gen_upd_b_modw
+    `{!BiBUpd PROP, !GenUpd M, !GenUpdBupd M} {W} : GenUpdBupd (modw M W) | 10.
+  Proof. by iIntros (?) ">$$". Qed.
 
   (** Compose [modw]s accumulating the world satisfaction *)
   Lemma modw_modw_sep `{!Proper ((⊣⊢) ==> (⊣⊢)) M} {W W' P} :
@@ -206,16 +208,20 @@ Section lemmas.
   Context {PROP : bi}.
   Implicit Type (M : PROP → PROP) (W P Q R : PROP).
 
-  (** [bupdw W] and [fupdw W E E] satisfy [GenUpd] *)
-  #[export] Instance gen_upd_bupdw `{!BiBUpd PROP} {W} : GenUpd (bupdw W).
+  (** [bupdw W] and [fupdw W E E] satisfy [GenUpd] and [GenUpdW] *)
+  #[export] Instance bupdw_gen_upd `{!BiBUpd PROP} {W} : GenUpd (bupdw W).
   Proof. exact _. Qed.
-  #[export] Instance gen_upd_fupdw
+  #[export] Instance fupdw_gen_upd `{!BiFUpd PROP} {W E} : GenUpd (fupdw W E E).
+  Proof. exact _. Qed.
+  #[export] Instance bupdw_gen_upd_B `{!BiBUpd PROP} {W} : GenUpdBupd (bupdw W).
+  Proof. exact gen_upd_b_modw. Qed.
+  #[export] Instance fupdw_gen_upd_B
     `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {W E} :
-    GenUpd (fupdw W E E).
-  Proof. exact _. Qed.
+    GenUpdBupd (fupdw W E E).
+  Proof. exact gen_upd_b_modw. Qed.
 
-  (** For [modw M] on [GenUpd] [M] *)
-  Lemma bupdw_modw_gen_upd `{!BiBUpd PROP, !GenUpd M} {W P} :
+  (** For [modw M] on [GenUpdBupd] [M] *)
+  Lemma bupdw_modw_gen_upd `{!BiBUpd PROP, !GenUpd M, !GenUpdBupd M} {W P} :
     (|=[W]=> P) ⊢ modw M W P.
   Proof. rewrite /bupdw /modw. f_equiv. apply gen_upd_from_bupd. Qed.
   #[export] Instance elim_modal_modw_gen_upd {p P Q}
@@ -226,7 +232,7 @@ Section lemmas.
       bi.wand_elim_r (modw_incl_gen_upd (W:=W)) gen_upd_trans.
   Qed.
   #[export] Instance elim_modal_bupdw_modw_gen_upd {p P Q}
-    `{!BiBUpd PROP, !GenUpd M, !WsatIncl W W' Wr} :
+    `{!BiBUpd PROP, !GenUpd M, !GenUpdBupd M, !WsatIncl W W' Wr} :
     ElimModal True p false (|=[W']=> P) P (modw M W Q) (modw M W Q) | 10.
   Proof.
     move=> ?. by rewrite (bupdw_modw_gen_upd (M:=M)) elim_modal_modw_gen_upd.

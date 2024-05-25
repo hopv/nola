@@ -46,7 +46,7 @@ Definition pborrowΣ TY PROP `{!oFunctorContractive PROP} :=
 Proof. solve_inG. Qed.
 
 Section pborrow.
-  Context `{!pborrowGS TY PROP Σ, !GenUpd (PROP:=iProp Σ) M}.
+  Context `{!pborrowGS TY PROP Σ, !GenUpd (PROP:=iProp Σ) M, !GenUpdBupd M}.
   Implicit Type (ip : PROP $oi Σ -d> iProp Σ) (X Y : TY) (Xl Yl : list TY)
     (P : PROP $oi Σ) (Pb : pbprop TY PROP $oi Σ).
 
@@ -219,7 +219,7 @@ Section pborrow.
     Mono (OT:=_ → _ : bi) (OT':=_ → _ : bi) pborrow_wsat.
   Proof. move=> ????. by apply: borrow_wsat_mono. Qed.
 
-  Context `{!GenUpd M, !NonExpansive ip}.
+  Context `{!NonExpansive ip}.
 
   (** ** For non-prophetic borrowing *)
 
