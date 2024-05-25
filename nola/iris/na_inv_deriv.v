@@ -104,10 +104,10 @@ Section na_inv_deriv.
       (na_own p (F∖↑N) -∗ ⟦ P ⟧(δ) =[na_inv_wsati δ]{E}=∗ na_own p F).
   Proof. rewrite -na_inv_tok_na_inv'. exact: na_inv_tok_alloc_open. Qed.
 
-  (** Convert [na_inv'] with [acsr] *)
+  (** Convert [na_inv'] with [mod_acsr] *)
   Lemma na_inv'_acsr {p N P Q} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      acsr (fupd ∅ ∅) ⟦ P ⟧(δ') ⟦ Q ⟧(δ')) -∗
+      mod_acsr (fupd ∅ ∅) ⟦ P ⟧(δ') ⟦ Q ⟧(δ')) -∗
       na_inv' δ p N P -∗ na_inv' δ p N Q.
   Proof.
     rewrite na_inv'_unseal. iIntros "#PQP #accP !>". iApply Deriv_to.
@@ -126,7 +126,7 @@ Section na_inv_deriv.
     na_inv' δ p N PQ ⊢ na_inv' δ p N P.
   Proof.
     iIntros (eq). iApply (na_inv'_acsr with "[]"). iIntros "!>" (????).
-    unfold acsr. rewrite eq. iApply (acsr_sep_l (M:=fupd _ _)).
+    rewrite /mod_acsr eq. iApply (mod_acsr_sep_l (M:=fupd _ _)).
   Qed.
   Lemma na_inv'_sep {p N PQ P Q} :
     (∀ δ', ⟦ PQ ⟧(δ') ≡ (⟦ P ⟧(δ') ∗ ⟦ Q ⟧(δ'))%I) →

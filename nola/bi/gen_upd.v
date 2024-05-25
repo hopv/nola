@@ -130,40 +130,40 @@ Proof.
   { move=> PQ. by do 2 f_equiv. } { iIntros ">>$". } { by iIntros "[?$]". }
 Qed.
 
-Section acsr.
+Section mod_acsr.
   Context `{!BiBUpd PROP}.
 
-  (** ** [acsr]: Accessor from [P] to [Q] via the modality [M] *)
-  Definition acsr M P Q : PROP := P -∗ M (Q ∗ (Q -∗ M P))%I.
+  (** ** [mod_acsr]: Accessor from [P] to [Q] via the modality [M] *)
+  Definition mod_acsr M P Q : PROP := P -∗ M (Q ∗ (Q -∗ M P))%I.
 
   Context `{!GenUpd (PROP:=PROP) M}.
 
-  (** [acsr] is non-expansive *)
-  #[export] Instance acsr_ne : NonExpansive2 (acsr M).
+  (** [mod_acsr] is non-expansive *)
+  #[export] Instance mod_acsr_ne : NonExpansive2 (mod_acsr M).
   Proof. solve_proper. Qed.
 
-  (** [acsr] is reflexive and transitive *)
-  Lemma acsr_refl {P} : ⊢ acsr M P P.
+  (** [mod_acsr] is reflexive and transitive *)
+  Lemma mod_acsr_refl {P} : ⊢ mod_acsr M P P.
   Proof. by iIntros "$ !> $". Qed.
-  Lemma acsr_trans {P Q R} :
-    acsr M P Q -∗ acsr M Q R -∗ acsr M P R.
+  Lemma mod_acsr_trans {P Q R} :
+    mod_acsr M P Q -∗ mod_acsr M Q R -∗ mod_acsr M P R.
   Proof.
     iIntros "PQP QRQ P". iMod ("PQP" with "P") as "[Q QP]".
     iMod ("QRQ" with "Q") as "[$ RQ]". iIntros "!> R".
     iMod ("RQ" with "R") as "Q". by iApply "QP".
   Qed.
 
-  (** [acsr] over [∗] *)
-  Lemma acsr_sep_l {P Q} : ⊢ acsr M (P ∗ Q) P.
+  (** [mod_acsr] over [∗] *)
+  Lemma mod_acsr_sep_l {P Q} : ⊢ mod_acsr M (P ∗ Q) P.
   Proof. by iIntros "[$$] !> $". Qed.
-  Lemma acsr_sep_r {P Q} : ⊢ acsr M (P ∗ Q) Q.
+  Lemma mod_acsr_sep_r {P Q} : ⊢ mod_acsr M (P ∗ Q) Q.
   Proof. by iIntros "[$$] !> $". Qed.
 
-  (** [∗-∗] into [acsr] *)
-  Lemma wand_iff_acsr {P Q} : □ (P ∗-∗ Q) ⊢ acsr M P Q.
+  (** [∗-∗] into [mod_acsr] *)
+  Lemma wand_iff_mod_acsr {P Q} : □ (P ∗-∗ Q) ⊢ mod_acsr M P Q.
   Proof.
     iIntros "#[PQ QP] P". iDestruct ("PQ" with "P") as "$". iIntros "!> ? !>".
     by iApply "QP".
   Qed.
-End acsr.
-Arguments acsr : simpl never.
+End mod_acsr.
+Arguments mod_acsr : simpl never.
