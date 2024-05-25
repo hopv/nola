@@ -118,6 +118,22 @@ Section deriv.
     iStopProof. by do 2 f_equiv.
   Qed.
 
+  (** Derivability preserves persistence *)
+  #[export] Instance Deriv_persistent `{!Deriv ih δ, BiPersistentlyForall PROP}
+    `{Sem : ∀ δ', Deriv ih δ' → ih δ' → dinto δ δ' → Persistent ⟦ J ⟧(δ')} :
+    Persistent (δ J).
+  Proof.
+    rewrite Deriv_eqv'. repeat apply bi.forall_persistent=> ?. exact: Sem.
+  Qed.
+
+  (** Derivability preserves timelessness *)
+  #[export] Instance Deriv_timeless `{!Deriv ih δ}
+    `{Sem : ∀ δ', Deriv ih δ' → ih δ' → dinto δ δ' → Timeless ⟦ J ⟧(δ')} :
+    Timeless (δ J).
+  Proof.
+    rewrite Deriv_eqv'. repeat apply bi.forall_timeless=> ?. exact: Sem.
+  Qed.
+
   (** ** [der]: The best derivability predicate *)
   Definition der : JUDGI → PROP := psg (OT:=JUDGI → PROP) pintp.
 
