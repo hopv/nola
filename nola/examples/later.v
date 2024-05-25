@@ -43,15 +43,15 @@ Section verify.
       iter_ilist f #c #l @ ↑N
     {{{ RET #(); c ↦ #0 }}}.
   Proof.
-    iIntros "#Hf" (Ψ) "!> [c↦ #l] HΨ". iInduction n as [|m] "IH" forall (l) "l".
-    { wp_rec. wp_pures. wp_load. wp_pures. by iApply "HΨ". }
+    iIntros "#f" (Ψ) "!> [c↦ #l] →Ψ". iInduction n as [|m] "IH" forall (l) "l".
+    { wp_rec. wp_pures. wp_load. wp_pures. by iApply "→Ψ". }
     rewrite ilist_unfold. iDestruct "l" as "[ihd itl]". wp_rec. wp_pures.
-    wp_load. wp_pures. wp_apply "Hf"; [done|]. iIntros "_". wp_pures. wp_load.
+    wp_load. wp_pures. wp_apply "f"; [done|]. iIntros "_". wp_pures. wp_load.
     wp_op. have -> : (S m - 1)%Z = m by lia. wp_store. wp_op. wp_bind (! _)%E.
     iMod (inv_tok_acc (PROP:=▶ ∙) (ip:=laterl) with "itl") as
       "/=[(%l' & ↦l' & #l') cl]"; [done|].
     wp_load. iModIntro. iMod ("cl" with "[↦l']") as "_".
     { iNext. iExists _. by iFrame "↦l'". }
-    iModIntro. by iApply ("IH" with "c↦ HΨ").
+    iModIntro. by iApply ("IH" with "c↦ →Ψ").
   Qed.
 End verify.
