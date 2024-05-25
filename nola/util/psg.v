@@ -126,15 +126,18 @@ Section psg.
   Proof. move=> ???; split; by apply Psgoid_proper'. Qed.
 
   (** ** [psg]: Pseudo-gfp *)
-  Definition psg f : OT := [⊓] o :: Psgoid f o, o.
+  Definition psg_def f : OT := [⊓] o :: Psgoid f o, o.
+  Lemma psg_aux : seal psg_def. Proof. by eexists _. Qed.
+  Definition psg := psg_aux.(unseal).
+  Lemma psg_unseal : psg = psg_def. Proof. exact: seal_eq. Qed.
 
   (** [psg f] is [Psgoid f] *)
   Lemma psg_Psgoid {f} : Psgoid f (psg f).
-  Proof. by apply Psgoid_big_meet. Qed.
+  Proof. rewrite psg_unseal. by apply Psgoid_big_meet. Qed.
 
   (** [psg f] lower-bounds [Psgoid f] *)
   Lemma psg_Psgoid_lb {f o} : Psgoid f o → psg f ⊑ o.
-  Proof. exact (big_meet_elim id). Qed.
+  Proof. rewrite psg_unseal. exact (big_meet_elim id). Qed.
 
   (** [psg f] is a post-fixpoint *)
   Lemma psg_post {f} : psg f ⊑ f (psg f).
