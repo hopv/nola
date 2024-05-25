@@ -116,7 +116,7 @@ Definition iter : val := rec: "self" "f" "c" "l" :=
 
 Section verify.
   Context `{!inv'GS ciPropOF Σ, !mutexGS ciPropOF Σ, !heapGS_gen hlc Σ}.
-  Implicit Type Φx : loc → ciProp Σ.
+  Implicit Type Φx Ψx : loc → ciProp Σ.
 
   (** ** [ilist]: Syntactic proposition for a list *)
   Definition ilist_gen N Φx Ilist' l : ciProp Σ :=
@@ -127,24 +127,25 @@ Section verify.
   Definition ilist N Φx : loc → ciProp Σ := ilist_gen N Φx ilist'.
 
   (** ** Convert the predicate of [ilist] using [mod_acsr] *)
-  Lemma ilist'_acsr `{!Deriv ih δ} {N Φx Ψx l} :
+  Local Lemma inv'_acsr_iff `{!Deriv ih δ} {N Φx Ψx l} :
     □ (∀ δ' l', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
       mod_acsr (fupd ∅ ∅) ⟦ Φx l' ⟧(δ') ⟦ Ψx l' ⟧(δ') ∧
-      mod_acsr (fupd ∅ ∅) ⟦ Ψx l' ⟧(δ') ⟦ Φx l' ⟧(δ')) -∗
-      ⟦ ilist' N Φx l ⟧(δ) ∗-∗ ⟦ ilist' N Ψx l ⟧(δ).
+      mod_acsr (fupd ∅ ∅) ⟦ Ψx l' ⟧(δ') ⟦ Φx l' ⟧(δ')) ⊢
+      inv' δ N (Φx l) ∗-∗ inv' δ N (Ψx l).
   Proof.
-    move: l. apply Deriv_ind=> ???. iIntros "#eqv".
-    rewrite !/⟦ ilist' _ _ _ ⟧(_) /=.
-    iSplit; (iIntros "[%[$[ihd itl]]]"; iSplitL "ihd";
-      [iRevert "ihd"|iRevert "itl"]);
-      iApply inv'_acsr; iIntros "!>" (??[eqv ?]?).
-    - iApply bi.and_elim_l. iApply "eqv"; [|done..]. iPureIntro.
-      by apply Deriv_mono=> ?[??].
-    - iApply (wand_iff_mod_acsr (M:=fupd _ _)). iModIntro. by iApply eqv.
-    - iApply bi.and_elim_r. iApply "eqv"; [|done]. iPureIntro.
-      by apply Deriv_mono=> ?[??].
-    - iApply (wand_iff_mod_acsr (M:=fupd _ _)). iModIntro.
-      rewrite wand_iff_comm. by iApply eqv.
+    iIntros "#big". iSplit; iApply inv'_acsr; iIntros "!>" (????);
+      [iApply bi.and_elim_l|iApply bi.and_elim_r]; by iApply "big".
+  Qed.
+  Local Lemma inv'_ilist'_iff `{!Deriv ih δ} {N Φx Ψx l} :
+    □ (∀ δ' l', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
+      inv' δ' N (Φx l') ∗-∗ inv' δ' N (Ψx l')) -∗
+      inv' δ N (ilist' N Φx l) ∗-∗ inv' δ N (ilist' N Ψx l).
+  Proof.
+    move: l. apply Deriv_ind=> δ' ??. iIntros "#eqv".
+    iSplit; iApply inv'_acsr; iIntros "!>" (??[IH ?]?);
+      rewrite -(wand_iff_mod_acsr (M:=fupd _ _)) !/⟦ ilist' _ _ _ ⟧(_);
+      (iModIntro; iSplit; iIntros "/=[%[$[ihd ?]]]"; (iSplit; [|by iApply IH]));
+      iApply ("eqv" with "[%] [//] ihd"); by apply Deriv_mono=> ?[??].
   Qed.
   Lemma ilist_acsr `{!Deriv ih δ} {N Φx Ψx l} :
     □ (∀ δ' l', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
@@ -153,14 +154,10 @@ Section verify.
       ⟦ ilist N Φx l ⟧(δ) ∗-∗ ⟦ ilist N Ψx l ⟧(δ).
   Proof.
     iIntros "#eqv". rewrite /⟦ ⟧(δ) /=.
-    iSplit; (iIntros "[ihd itl]"; iSplitL "ihd"; [iRevert "ihd"|iRevert "itl"]);
-      iApply inv'_acsr; iIntros "!>" (????).
-    - iApply bi.and_elim_l. by iApply "eqv".
-    - iApply (wand_iff_mod_acsr (M:=fupd _ _)). iModIntro.
-      by iApply ilist'_acsr.
-    - iApply bi.and_elim_r. by iApply "eqv".
-    - iApply (wand_iff_mod_acsr (M:=fupd _ _)). iModIntro.
-      rewrite wand_iff_comm. by iApply ilist'_acsr.
+    iSplit; (iIntros "[ihd itl]"; iSplitL "ihd";
+      [by iApply (inv'_acsr_iff (Φx:=Φx))|]);
+      iApply (inv'_ilist'_iff with "[] itl"); iIntros "!>" (????);
+      [iApply bi.wand_iff_sym|]; by iApply inv'_acsr_iff.
   Qed.
 
   (** ** Termination of [iter] *)
