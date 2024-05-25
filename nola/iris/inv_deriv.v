@@ -116,7 +116,7 @@ Section inv_deriv.
     (∀ δ', ⟦ PQ ⟧(δ') ≡ (⟦ P ⟧(δ') ∗ ⟦ Q ⟧(δ'))%I) → inv' δ N PQ ⊢ inv' δ N P.
   Proof.
     iIntros (eq). iApply (inv'_acsr with "[]"). iIntros "!>" (????).
-    rewrite /mod_acsr eq. iApply (mod_acsr_sep_l (M:=fupd _ _)).
+    rewrite eq. iApply (mod_acsr_sep_l (M:=fupd _ _)).
   Qed.
   Lemma inv'_sep {N PQ P Q} : (∀ δ', ⟦ PQ ⟧(δ') ≡ (⟦ P ⟧(δ') ∗ ⟦ Q ⟧(δ'))%I) →
     inv' δ N PQ ⊢ inv' δ N P ∗ inv' δ N Q.

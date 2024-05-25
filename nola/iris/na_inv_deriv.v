@@ -126,7 +126,7 @@ Section na_inv_deriv.
     na_inv' δ p N PQ ⊢ na_inv' δ p N P.
   Proof.
     iIntros (eq). iApply (na_inv'_acsr with "[]"). iIntros "!>" (????).
-    rewrite /mod_acsr eq. iApply (mod_acsr_sep_l (M:=fupd _ _)).
+    rewrite eq. iApply (mod_acsr_sep_l (M:=fupd _ _)).
   Qed.
   Lemma na_inv'_sep {p N PQ P Q} :
     (∀ δ', ⟦ PQ ⟧(δ') ≡ (⟦ P ⟧(δ') ∗ ⟦ Q ⟧(δ'))%I) →

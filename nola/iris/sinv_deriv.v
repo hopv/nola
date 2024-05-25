@@ -95,7 +95,7 @@ Section sinv_deriv.
   Local Lemma sinv_sep' {PQ P Q} :
     (∀ δ', ⟦ PQ ⟧(δ') ≡ (⟦ P ⟧(δ') ∗ ⟦ Q ⟧(δ'))%I) → sinv δ PQ ⊢ sinv δ P.
   Proof.
-    move=> eq. iApply sinv_acsr. iIntros "!>" (????). rewrite /mod_acsr eq.
+    move=> eq. iApply sinv_acsr. iIntros "!>" (????). rewrite eq.
     iApply (mod_acsr_sep_l (M:=sinv_mod)).
   Qed.
   Lemma sinv_sep {PQ P Q} : (∀ δ', ⟦ PQ ⟧(δ') ≡ (⟦ P ⟧(δ') ∗ ⟦ Q ⟧(δ'))%I) →

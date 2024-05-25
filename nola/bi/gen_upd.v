@@ -136,11 +136,23 @@ Section mod_acsr.
   (** ** [mod_acsr]: Accessor from [P] to [Q] via the modality [M] *)
   Definition mod_acsr M P Q : PROP := P -∗ M (Q ∗ (Q -∗ M P))%I.
 
-  Context `{!GenUpd (PROP:=PROP) M}.
-
   (** [mod_acsr] is non-expansive *)
-  #[export] Instance mod_acsr_ne : NonExpansive2 (mod_acsr M).
-  Proof. solve_proper. Qed.
+  #[export] Instance mod_acsr_ne_gen {n} :
+    Proper (((≡{n}≡) ==> (≡{n}≡)) ==> (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡)) mod_acsr.
+  Proof.
+    move=> ?? eqv ??????. unfold mod_acsr. f_equiv=>//. apply eqv.
+    do 2 f_equiv=>//. by apply eqv.
+  Qed.
+  Fact mod_acsr_ne `{!NonExpansive M} : NonExpansive2 (mod_acsr M).
+  Proof. exact _. Qed.
+  #[export] Instance mod_acsr_proper :
+    Proper (((≡) ==> (≡)) ==> (≡) ==> (≡) ==> (≡)) mod_acsr.
+  Proof.
+    move=> ?? eqv ??????. unfold mod_acsr. f_equiv=>//. apply eqv.
+    do 2 f_equiv=>//. by apply eqv.
+  Qed.
+
+  Context `{!GenUpd (PROP:=PROP) M}.
 
   (** [mod_acsr] is reflexive and transitive *)
   Lemma mod_acsr_refl {P} : ⊢ mod_acsr M P P.
