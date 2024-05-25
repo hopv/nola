@@ -248,7 +248,7 @@ Section mutex_deriv.
   Proof. setoid_rewrite <-mutex_tok_mutex. exact twp_new_acquire_mutex_tok. Qed.
 
   (** Convert [mutex] with [mod_iff] *)
-  Lemma mutex_iff {l P Q} :
+  Lemma mutex_iff' {l P Q} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
       mod_iff (fupd ⊤ ⊤) ⟦ P ⟧(δ') ⟦ Q ⟧(δ')) -∗
       mutex δ l P -∗ mutex δ l Q.
@@ -256,6 +256,14 @@ Section mutex_deriv.
     rewrite mutex_unseal. iIntros "#big [%R[#iff $]] !>". iApply Deriv_to.
     iIntros (??? to). rewrite to !mutex_jiff_intp.
     iApply (mod_iff_trans with "[] iff"). iApply mod_iff_sym. by iApply "big".
+  Qed.
+  Lemma mutex_iff {l P Q} :
+    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
+      mod_iff (fupd ⊤ ⊤) ⟦ P ⟧(δ') ⟦ Q ⟧(δ')) -∗
+      mutex δ l P ∗-∗ mutex δ l Q.
+  Proof.
+    iIntros "big"; iSplit; iApply mutex_iff'; [done|]. iStopProof. do 6 f_equiv.
+    apply mod_iff_sym.
   Qed.
 End mutex_deriv.
 Arguments MutexDeriv PROP Σ {_ _} JUDGI {_ _}.
