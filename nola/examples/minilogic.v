@@ -21,7 +21,7 @@ Definition iter : val := rec: "self" "f" "c" "l" :=
   if: !"c" = #0 then #() else
     "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (!("l" +ₗ #1)).
 
-Section iris.
+Section verify.
   Context `{!inv'GS nPropO Σ, !heapGS_gen hlc Σ}.
 
   (** ** Interpretation of [nProp] *)
@@ -57,4 +57,4 @@ Section iris.
     { iExists _. iFrame "↦l'". by iSplit. }
     iModIntro. by iApply ("IH" with "c↦ HΨ").
   Qed.
-End iris.
+End verify.

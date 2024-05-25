@@ -62,7 +62,7 @@ Proof. move=> ???????. exact: inr_ne. Qed.
 #[export] Instance judg_mutex_pre_deriv {Σ} :
   MutexPreDeriv (ciProp Σ) (judg Σ) := MUTEX_PRE_DERIV mutex_jiff.
 
-Section iris.
+Section intp.
   Context `{!inv'GS ciPropOF Σ, !mutexGS ciPropOF Σ}.
   Implicit Type δ : judg Σ → iProp Σ.
 
@@ -107,14 +107,14 @@ Section iris.
   Proof. done. Qed.
   #[export] Instance judg_mutex_deriv : MutexDeriv ciPropOF Σ judgJ.
   Proof. done. Qed.
-End iris.
+End intp.
 
 (** ** Target function: Linked list mutation *)
 Definition iter : val := rec: "self" "f" "c" "l" :=
   if: !"c" = #0 then #() else
     "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (!("l" +ₗ #1)).
 
-Section iris.
+Section verify.
   Context `{!inv'GS ciPropOF Σ, !mutexGS ciPropOF Σ, !heapGS_gen hlc Σ}.
   Implicit Type Φx : loc → ciProp Σ.
 
@@ -183,4 +183,4 @@ Section iris.
     { iExists _. iFrame "↦l'". by iSplit. }
     iModIntro. by iApply ("IH" with "c↦ HΨ").
   Qed.
-End iris.
+End verify.

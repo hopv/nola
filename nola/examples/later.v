@@ -12,7 +12,7 @@ Definition iter : val := rec: "self" "f" "c" "l" :=
   if: !"c" = #0 then #() else
     "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (!("l" +ₗ #1)).
 
-Section iris.
+Section verify.
   Context `{!inv'GS (▶ ∙) Σ, !heapGS_gen hlc Σ}.
 
   (** Fixed point generator of [ilist] *)
@@ -54,4 +54,4 @@ Section iris.
     { iNext. iExists _. by iFrame "↦l'". }
     iModIntro. by iApply ("IH" with "c↦ HΨ").
   Qed.
-End iris.
+End verify.
