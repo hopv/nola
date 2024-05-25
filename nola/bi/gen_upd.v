@@ -199,3 +199,44 @@ Section mod_acsr.
   Qed.
 End mod_acsr.
 Arguments mod_acsr : simpl never.
+
+Section mod_iff.
+  Context {PROP : bi}.
+
+  (** ** [mod_iff]: Equivalence of [P] and [Q] under the modality [M] *)
+  Definition mod_iff M P Q : PROP := ((P -∗ M Q) ∧ (Q -∗ M P))%I.
+
+  (** [mod_iff] is non-expansive *)
+  #[export] Instance mod_iff_ne_gen {n} :
+    Proper (((≡{n}≡) ==> (≡{n}≡)) ==> (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡)) mod_iff.
+  Proof.
+    move=> ?? eqv ??????. unfold mod_iff. do 2 f_equiv=>//; by apply eqv.
+  Qed.
+  Fact mod_iff_ne `{!NonExpansive M} : NonExpansive2 (mod_iff M).
+  Proof. exact _. Qed.
+  #[export] Instance mod_iff_proper :
+    Proper (((≡) ==> (≡)) ==> (≡) ==> (≡) ==> (≡)) mod_iff.
+  Proof.
+    move=> ?? eqv ??????. unfold mod_iff. do 2 f_equiv=>//; by apply eqv.
+  Qed.
+
+  Context `{!GenUpd (PROP:=PROP) M}.
+
+  (** [mod_iff] is reflexive, symmetric and transitive *)
+  Lemma mod_iff_refl {P} : ⊢ mod_iff M P P.
+  Proof. iSplit; by iIntros. Qed.
+  Lemma mod_iff_sym {P Q} : mod_iff M P Q ⊢ mod_iff M Q P.
+  Proof. by rewrite /mod_iff bi.and_comm. Qed.
+  Lemma mod_iff_trans {P Q R} :
+    mod_iff M P Q -∗ mod_iff M Q R -∗ mod_iff M P R.
+  Proof.
+    iIntros "PQ QR". iSplit.
+    - iIntros "P". iMod ("PQ" with "P"). by iApply "QR".
+    - iIntros "R". iMod ("QR" with "R"). by iApply "PQ".
+  Qed.
+
+  (** [∗-∗] into [mod_iff] *)
+  Lemma wand_iff_mod_iff {P Q} : P ∗-∗ Q ⊢ mod_iff M P Q.
+  Proof. iIntros "PQ". iSplit; iIntros "? !>"; by iApply "PQ". Qed.
+End mod_iff.
+Arguments mod_iff : simpl never.

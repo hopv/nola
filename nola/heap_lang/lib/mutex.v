@@ -184,18 +184,16 @@ Section mutex_deriv.
   (** Derivability data for [mutex] *)
   Class MutexDeriv :=
     mutex_jiff_intp : ∀{δ P Q},
-      ⟦ mutex_jiff P Q ⟧(δ) ⊣⊢
-        ((⟦ P ⟧(δ) ={⊤}=∗ ⟦ Q ⟧(δ)) ∧ (⟦ Q ⟧(δ) ={⊤}=∗ ⟦ P ⟧(δ))).
+      ⟦ mutex_jiff P Q ⟧(δ) ⊣⊢ mod_iff (fupd ⊤ ⊤) ⟦ P ⟧(δ) ⟦ Q ⟧(δ).
 
   Context `{!MutexDeriv}.
 
   (** Unfold [mutexd] *)
   Lemma mutexd_unfold {l P} :
-    mutexd l P ⊢
-      ∃ Q, □ ((⟦ P ⟧ ={⊤}=∗ ⟦ Q ⟧) ∧ (⟦ Q ⟧ ={⊤}=∗ ⟦ P ⟧)) ∗ mutex_tok l Q.
+    mutexd l P ⊢ ∃ Q, □ mod_iff (fupd ⊤ ⊤) ⟦ P ⟧ ⟦ Q ⟧ ∗ mutex_tok l Q.
   Proof.
-    rewrite mutex_unseal /mutex_def.
-    do 2 f_equiv. by rewrite der_sound mutex_jiff_intp.
+    rewrite mutex_unseal /mutex_def. do 2 f_equiv.
+    by rewrite der_sound mutex_jiff_intp.
   Qed.
 
   (** Wrapper lemmas *)
@@ -249,17 +247,15 @@ Section mutex_deriv.
     [[{ l, RET #l; mutex δ l P }]].
   Proof. setoid_rewrite <-mutex_tok_mutex. exact twp_new_acquire_mutex_tok. Qed.
 
-  (** Convert [mutex] *)
-  Lemma mutex_conv {l P Q} :
+  (** Convert [mutex] with [mod_iff] *)
+  Lemma mutex_iff {l P Q} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      (⟦ P ⟧(δ') ={⊤}=∗ ⟦ Q ⟧(δ')) ∧ (⟦ Q ⟧(δ') ={⊤}=∗ ⟦ P ⟧(δ'))) -∗
+      mod_iff (fupd ⊤ ⊤) ⟦ P ⟧(δ') ⟦ Q ⟧(δ')) -∗
       mutex δ l P -∗ mutex δ l Q.
   Proof.
-    rewrite mutex_unseal. iIntros "#big [%R[#conv $]] !>". iApply Deriv_to.
+    rewrite mutex_unseal. iIntros "#big [%R[#iff $]] !>". iApply Deriv_to.
     iIntros (??? to). rewrite to !mutex_jiff_intp.
-    iDestruct "conv" as "[PR RP]". iSplit.
-    - iIntros "Q". iMod ("big" with "[//] [//] [//] Q"). by iApply "PR".
-    - iIntros "R". iMod ("RP" with "R") as "P". by iApply "big".
+    iApply (mod_iff_trans with "[] iff"). iApply mod_iff_sym. by iApply "big".
   Qed.
 End mutex_deriv.
 Arguments MutexDeriv PROP Σ {_ _} JUDGI {_ _}.
