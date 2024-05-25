@@ -17,7 +17,7 @@ Inductive nProp : Type :=
 #[warning="-redundant-canonical-projection"] Canonical nPropO := leibnizO nProp.
 
 (** ** Target function: Linked list mutation *)
-Definition iter : val := rec: "self" "f" "c" "l" :=
+Definition iter_ilist : val := rec: "self" "f" "c" "l" :=
   if: !"c" = #0 then #() else
     "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (!("l" +ₗ #1)).
 
@@ -38,11 +38,11 @@ Section verify.
   end.
 
   (** ** Termination of [iter] *)
-  Lemma twp_iter {N Φ c l} {f : val} {n : nat} :
+  Lemma twp_iter_list {N Φ c l} {f : val} {n : nat} :
     (∀ l0, [[{ inv_tok N (Φ l0) }]][inv_wsat intp] f #l0 @ ↑N
       [[{ RET #(); True }]]) -∗
     [[{ c ↦ #n ∗ intp (ilist N Φ l) }]][inv_wsat intp]
-      iter f #c #l @ ↑N
+      iter_ilist f #c #l @ ↑N
     [[{ RET #(); c ↦ #0 }]].
   Proof.
     iIntros "#Hf" (Ψ) "!> /=[c↦ #[ihd itl]] HΨ".

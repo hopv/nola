@@ -8,7 +8,7 @@ Import WpwNotation.
 Implicit Type (N : namespace) (l : loc).
 
 (** ** Target function: Linked list mutation *)
-Definition iter : val := rec: "self" "f" "c" "l" :=
+Definition iter_ilist : val := rec: "self" "f" "c" "l" :=
   if: !"c" = #0 then #() else
     "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (!("l" +ₗ #1)).
 
@@ -36,11 +36,11 @@ Section verify.
   Proof. rewrite ilist_unfold. exact _. Qed.
 
   (** ** Safety of [iter] *)
-  Lemma wp_iter {N Φ c l} {f : val} {n : nat} :
+  Lemma wp_iter_list {N Φ c l} {f : val} {n : nat} :
     (∀ l0, {{{ inv_tok N (Next (Φ l0)) }}}[inv_wsat laterl] f #l0 @ ↑N
       {{{ RET #(); True }}}) -∗
     {{{ c ↦ #n ∗ ilist N Φ l }}}[inv_wsat laterl]
-      iter f #c #l @ ↑N
+      iter_ilist f #c #l @ ↑N
     {{{ RET #(); c ↦ #0 }}}.
   Proof.
     iIntros "#Hf" (Ψ) "!> [c↦ #l] HΨ". iInduction n as [|m] "IH" forall (l) "l".

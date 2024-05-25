@@ -110,7 +110,7 @@ Section intp.
 End intp.
 
 (** ** Target function: Linked list mutation *)
-Definition iter : val := rec: "self" "f" "c" "l" :=
+Definition iter_ilist : val := rec: "self" "f" "c" "l" :=
   if: !"c" = #0 then #() else
     "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (!("l" +ₗ #1)).
 
@@ -161,11 +161,11 @@ Section verify.
   Qed.
 
   (** ** Termination of [iter] *)
-  Lemma twp_iter {N Φx c l} {f : val} {n : nat} :
+  Lemma twp_iter_list {N Φx c l} {f : val} {n : nat} :
     (∀ l0, [[{ invd N (Φx l0) }]][inv_wsatid] f #l0 @ ↑N
       [[{ RET #(); True }]]) -∗
     [[{ c ↦ #n ∗ ⟦ ilist N Φx l ⟧ }]][inv_wsatid]
-      iter f #c #l @ ↑N
+      iter_ilist f #c #l @ ↑N
     [[{ RET #(); c ↦ #0 }]].
   Proof.
     unfold intp. iIntros "#Hf" (Ψ) "!> /=[c↦ #[ihd itl]] HΨ".
