@@ -399,7 +399,7 @@ Section pborrow_deriv.
         ([∗ plist] '(yπ, Ψ)' ∈ yπΨl, plend δ α yπ Ψ).
   Proof.
     iMod (pborc_plend_tok_new_list (M:=M) (ip:=⟦⟧(_))) as (?) "big". iModIntro.
-    iExists _. iIntros "%%". setoid_rewrite <-pborc_tok_pborc.
+    iExists _. iIntros (??). setoid_rewrite <-pborc_tok_pborc.
     setoid_rewrite <-plend_tok_plend. iApply "big".
   Qed.
   (** Simply create a prophetic borrower and a prophetic lender *)
