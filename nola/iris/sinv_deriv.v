@@ -1,4 +1,4 @@
-(** * Relaxed [sinv] with [deriv] *)
+(** * Simple invariant machinery relaxed with derivability *)
 
 From nola.bi Require Export deriv.
 From nola.iris Require Export sinv.
