@@ -127,7 +127,7 @@ Section verify.
 
   (** ** Convert the predicate of [ilist] using [mod_acsr] *)
   Local Lemma inv'_acsr_iff `{!Deriv ih δ} {N Φx Ψx l} :
-    □ (∀ δ' l', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
+    □ (∀ l' δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
       mod_acsr (fupd ∅ ∅) ⟦ Φx l' ⟧(δ') ⟦ Ψx l' ⟧(δ') ∧
       mod_acsr (fupd ∅ ∅) ⟦ Ψx l' ⟧(δ') ⟦ Φx l' ⟧(δ')) ⊢
       inv' δ N (Φx l) ∗-∗ inv' δ N (Ψx l).
@@ -136,7 +136,7 @@ Section verify.
       [iApply bi.and_elim_l|iApply bi.and_elim_r]; by iApply "big".
   Qed.
   Local Lemma inv'_ilist'_iff `{!Deriv ih δ} {N Φx Ψx l} :
-    □ (∀ δ' l', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
+    □ (∀ l' δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
       inv' δ' N (Φx l') ∗-∗ inv' δ' N (Ψx l')) -∗
       inv' δ N (ilist' N Φx l) ∗-∗ inv' δ N (ilist' N Ψx l).
   Proof.
@@ -147,7 +147,7 @@ Section verify.
       iApply ("eqv" with "[%] [//] ihd"); by apply Deriv_mono=> ?[??].
   Qed.
   Lemma ilist_acsr `{!Deriv ih δ} {N Φx Ψx l} :
-    □ (∀ δ' l', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
+    □ (∀ l' δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
       mod_acsr (fupd ∅ ∅) ⟦ Φx l' ⟧(δ') ⟦ Ψx l' ⟧(δ') ∧
       mod_acsr (fupd ∅ ∅) ⟦ Ψx l' ⟧(δ') ⟦ Φx l' ⟧(δ')) -∗
       ⟦ ilist N Φx l ⟧(δ) ∗-∗ ⟦ ilist N Ψx l ⟧(δ).
@@ -161,7 +161,7 @@ Section verify.
 
   (** ** Termination of [iter] *)
   Lemma twp_iter_list {N Φx c l} {f : val} {n : nat} :
-    (∀ l0, [[{ invd N (Φx l0) }]][inv_wsatid] f #l0 @ ↑N
+    (∀ l', [[{ invd N (Φx l') }]][inv_wsatid] f #l' @ ↑N
       [[{ RET #(); True }]]) -∗
     [[{ c ↦ #n ∗ ⟦ ilist N Φx l ⟧ }]][inv_wsatid]
       iter_ilist f #c #l @ ↑N
@@ -202,7 +202,7 @@ Section verify.
 
   (** ** Convert the predicate of [mlist] using [mod_iff] *)
   Lemma mlist_iff `{!Deriv ih δ} {Φx Ψx l} :
-    □ (∀ δ' l', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
+    □ (∀ l' δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
       mod_iff (fupd ⊤ ⊤) ⟦ Φx l' ⟧(δ') ⟦ Ψx l' ⟧(δ')) -∗
       ⟦ mlist Φx l ⟧(δ) ∗-∗ ⟦ mlist Ψx l ⟧(δ).
   Proof.
@@ -217,8 +217,8 @@ Section verify.
 
   (** ** Termination of [iter_mlist] *)
   Lemma twp_iter_mlist {Φx c l} {f : val} {k n : nat} :
-    (∀ l0, [[{ ⟦ Φx l0 ⟧ }]][mutex_wsatid] f #l0
-      [[{ RET #(); ⟦ Φx l0 ⟧ }]]) -∗
+    (∀ l', [[{ ⟦ Φx l' ⟧ }]][mutex_wsatid] f #l'
+      [[{ RET #(); ⟦ Φx l' ⟧ }]]) -∗
     [[{ c ↦ #n ∗ ⟦ mlist Φx l ⟧ }]][mutex_wsatid]
       iter_mlist f #k #c #l
     [[{ b, RET #b; if b then c ↦ #0 else ∃ n', c ↦ #n' }]].
