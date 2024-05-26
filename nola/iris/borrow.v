@@ -146,8 +146,8 @@ Section borrow.
   Local Lemma lend_tok_unseal : lend_tok = lend_tok_def.
   Proof. exact: seal_eq. Qed.
 
-  (** Borrower and lender tokens are timeless
-    if the underlying OFE is discrete *)
+  (** Borrower and lender tokens are timeless if the underlying OFE is discrete
+    *)
   #[export] Instance borc_tok_timeless `{!OfeDiscrete (PROP $oi Σ)} {α P} :
     Timeless (borc_tok α P).
   Proof. rewrite borc_tok_unseal. exact _. Qed.
