@@ -11,7 +11,9 @@ Notation inv_wsatid := (inv_wsati der).
 
 (** Derivability pre-data for [inv] *)
 Class InvPreDeriv (PRO JUDG : ofe) := INV_PRE_DERIV {
+  (** Accessor judgment *)
   inv_jacsr : namespace → PRO → JUDG;
+  (** [inv_jacsr] is non-expansive *)
   inv_jacsr_ne {N} :: NonExpansive (inv_jacsr N);
 }.
 Hint Mode InvPreDeriv ! - : typeclass_instances.
@@ -41,7 +43,7 @@ Section inv_deriv.
   Context `{!inv'GS PROP Σ, !invGS_gen hlc Σ}.
   Implicit Type P Q PQ : PROP $oi Σ.
 
-  (** Accessor *)
+  (** Accessor to the invariant body *)
   Definition inv_acsr ip N Pi : iProp Σ :=
     ∀ E, ⌜↑N ⊆ E⌝ → |=[inv_wsat ip]{E,E∖↑N}=>
       Pi ∗ (Pi =[inv_wsat ip]{E∖↑N,E}=∗ True).
@@ -52,6 +54,7 @@ Section inv_deriv.
 
   (** Derivability data for [inv] *)
   Class InvDeriv :=
+    (** Interpreting [inv_jacsr] *)
     inv_jacsr_intp : ∀{δ N P},
       ⟦ inv_jacsr N P ⟧(δ) ⊣⊢ inv_acsr ⟦⟧(δ) N ⟦ P ⟧(δ).
 

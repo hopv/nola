@@ -11,7 +11,9 @@ Notation sinv_wsatid := (sinv_wsati der).
 
 (** Derivability pre-data for [sinv] *)
 Class SinvPreDeriv (PRO JUDG : ofe) := SINV_PRE_DERIV {
+  (** Accessor judgment *)
   sinv_jacsr : PRO → PRO → JUDG;
+  (** [sinv_jacsr] is non-expansive *)
   sinv_jacsr_ne :: NonExpansive2 sinv_jacsr;
 }.
 Hint Mode SinvPreDeriv ! - : typeclass_instances.
@@ -46,8 +48,11 @@ Section sinv_deriv.
 
   (** Derivability data for [sinv] *)
   Class SinvDeriv := SINV_DERIV {
+    (** Modality for accessing the simple invariant *)
     sinv_mod : iProp Σ → iProp Σ;
+    (** [sinv_mod] is [GenUpd] *)
     sinv_mod_gen_upd :: GenUpd sinv_mod;
+    (** Interpreting [sinv_jacsr] *)
     sinv_jacsr_intp {δ P Q} :
       ⟦ sinv_jacsr P Q ⟧(δ) ⊣⊢ mod_acsr sinv_mod ⟦ P ⟧(δ) ⟦ Q ⟧(δ);
   }.

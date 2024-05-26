@@ -11,7 +11,9 @@ Notation na_inv_wsatid := (na_inv_wsati der).
 
 (** Derivability pre-data for [na_inv] *)
 Class NaInvPreDeriv (PRO JUDG : ofe) := NA_INV_PRE_DERIV {
+  (** Accessor judgment *)
   na_inv_jacsr : na_inv_pool_name → namespace → PRO → JUDG;
+  (** [na_inv_jacsr] is non-expansive *)
   na_inv_jacsr_ne {p N} :: NonExpansive (na_inv_jacsr p N);
 }.
 Hint Mode NaInvPreDeriv ! - : typeclass_instances.
@@ -57,6 +59,7 @@ Section na_inv_deriv.
 
   (** Derivability data for [na_inv] *)
   Class NaInvDeriv :=
+    (** Interpreting [na_inv_jacsr] *)
     na_inv_jacsr_intp : ∀{δ p N P},
       ⟦ na_inv_jacsr p N P ⟧(δ) ⊣⊢ na_inv_acsr ⟦⟧(δ) p N (⟦ P ⟧(δ)).
 
