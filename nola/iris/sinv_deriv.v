@@ -41,8 +41,7 @@ End sinv_deriv.
 Notation sinvd := (sinv der).
 
 Section sinv_deriv.
-  Context `{!sinvGS PROP Σ,
-    !SinvPreDeriv (PROP $oi Σ) (JUDGI : judgi (iProp Σ)),
+  Context `{!SinvPreDeriv (PROP $oi Σ) (JUDGI : judgi (iProp Σ)),
     !Dintp JUDGI (PROP $oi Σ) (iProp Σ)}.
   Implicit Type (δ : JUDGI → iProp Σ) (P Q : PROP $oi Σ).
 
@@ -57,7 +56,7 @@ Section sinv_deriv.
       ⟦ sinv_jacsr P Q ⟧(δ) ⊣⊢ mod_acsr sinv_mod ⟦ P ⟧(δ) ⟦ Q ⟧(δ);
   }.
 
-  Context `{!SinvDeriv}.
+  Context `{!sinvGS PROP Σ, !SinvDeriv}.
 
   (** Access [sinv] *)
   Lemma sinv_acc {P} :
