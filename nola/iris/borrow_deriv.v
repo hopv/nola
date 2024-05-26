@@ -85,7 +85,7 @@ Section borrow_deriv.
   !Deriv (JUDGI:=JUDGI) ih δ}.
   Implicit Type (P Q : PROP $oi Σ) (δ : JUDGI → iProp Σ).
 
-  (** Lemmas for conversion *)
+  (** Lemmas for [borrow_jto] *)
   Lemma borrow_jto_refl {P} : ⊢ δ (borrow_jto P P).
   Proof.
     iApply Deriv_to. iIntros (????). rewrite borrow_jto_intp. by iIntros "$".
@@ -142,7 +142,7 @@ Section borrow_deriv.
     iApply (borrow_jto_trans' with "PQ RP").
   Qed.
 
-  (** Modify the lifetime of [borc], [bor], [obor] and [lend] *)
+  (** Modify the lifetime of borrower and lender propositions *)
   Lemma borc_lft {α β P} : β ⊑□ α -∗ borc δ α P -∗ borc δ β P.
   Proof.
     rewrite borc_unseal. iIntros "⊑ [%[?[? c]]]".
