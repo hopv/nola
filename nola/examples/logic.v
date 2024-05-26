@@ -92,8 +92,7 @@ Section intp.
   (** ** [judg_intp]: Judgment interpretation *)
   Definition judg_intp δ (J : judg Σ) := match J with
     | inl (N, Px) => inv_acsr ⟦⟧(δ) N ⟦ Px ⟧(δ)
-    | inr (Px, Qx) =>
-        (⟦ Px ⟧(δ) ={⊤}=∗ ⟦ Qx ⟧(δ)) ∧ (⟦ Qx ⟧(δ) ={⊤}=∗ ⟦ Px ⟧(δ))
+    | inr (Px, Qx) => mod_iff (fupd ⊤ ⊤) ⟦ Px ⟧(δ) ⟦ Qx ⟧(δ)
     end%I.
   Local Instance judg_intp_ne `{!NonExpansive δ} : NonExpansive (judg_intp δ).
   Proof.
