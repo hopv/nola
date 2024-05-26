@@ -81,7 +81,7 @@ Hint Mode BorrowDeriv ! - - - - : typeclass_instances.
 Section borrow_deriv.
   Context `{!borrowGS PROP Σ,
   !BorrowPreDeriv (PROP $oi Σ) (JUDGI : judgi (iProp Σ)),
-  !Dintp JUDGI (PROP $oi Σ) (iProp Σ), BorrowDeriv PROP Σ JUDGI,
+  !Dintp JUDGI (PROP $oi Σ) (iProp Σ), !BorrowDeriv PROP Σ JUDGI,
   !Deriv (JUDGI:=JUDGI) ih δ}.
   Implicit Type (P Q : PROP $oi Σ) (δ : JUDGI → iProp Σ).
 
@@ -207,7 +207,7 @@ End borrow_deriv.
 Section borrow_deriv.
   Context `{!borrowGS PROP Σ,
   !BorrowPreDeriv (PROP $oi Σ) (JUDGI : judgi (iProp Σ)),
-  !Dintp JUDGI (PROP $oi Σ) (iProp Σ), BorrowDeriv PROP Σ JUDGI,
+  !Dintp JUDGI (PROP $oi Σ) (iProp Σ), !BorrowDeriv PROP Σ JUDGI,
   !GenUpd (PROP:=iProp Σ) M, !GenUpdBupd M}.
   Implicit Type (P Q : PROP $oi Σ).
 
