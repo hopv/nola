@@ -94,14 +94,14 @@ Section borrow_deriv.
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ → ⟦ P ⟧(δ') ==∗ ⟦ Q ⟧(δ')) -∗
     δ (borrow_jto Q R) -∗ δ (borrow_jto P R).
   Proof.
-    iIntros "big". iApply Deriv_map. iIntros (δ' ???). rewrite !borrow_jto_intp.
+    iIntros "big". iApply Deriv_map. iIntros (????). rewrite !borrow_jto_intp.
     iIntros "QR P". iMod ("big" with "[//] [//] [//] P"). by iApply "QR".
   Qed.
   Lemma borrow_jto_trans' {P Q R} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ → ⟦ Q ⟧(δ') ==∗ ⟦ R ⟧(δ')) -∗
     δ (borrow_jto P Q) -∗ δ (borrow_jto P R).
   Proof.
-    iIntros "big". iApply Deriv_map. iIntros (δ' ???). rewrite !borrow_jto_intp.
+    iIntros "big". iApply Deriv_map. iIntros (????). rewrite !borrow_jto_intp.
     iIntros "PQ P". iMod ("PQ" with "P"). by iApply "big".
   Qed.
   Lemma der_borrow_jto {P Q} :
