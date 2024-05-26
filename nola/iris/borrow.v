@@ -188,9 +188,9 @@ Section borrow.
   Proof. rewrite bor_tok_unseal. iIntros. by iLeft. Qed.
 
   (** Fake a borrower token from the dead lifetime token *)
-  Lemma borc_tok_fake {α P} : [†α] ⊢ borc_tok α P.
+  Lemma borc_tok_fake {α} P : [†α] ⊢ borc_tok α P.
   Proof. rewrite borc_tok_unseal. iIntros. by iLeft. Qed.
-  Lemma bor_tok_fake {α P} : [†α] ⊢ bor_tok α P.
+  Lemma bor_tok_fake {α} P : [†α] ⊢ bor_tok α P.
   Proof. by rewrite borc_tok_fake borc_tok_bor_tok. Qed.
 
   (** Modify the lifetime of borrower and lender tokens *)

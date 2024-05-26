@@ -160,14 +160,15 @@ Section pborrow.
   Qed.
 
   (** Fake a borrower token from the dead lifetime token *)
-  Lemma nborc_tok_fake {α P} : [†α] ⊢ nborc_tok α P.
-  Proof. exact borc_tok_fake. Qed.
-  Lemma nbor_tok_fake {α P} : [†α] ⊢ nbor_tok α P.
-  Proof. exact bor_tok_fake. Qed.
-  Lemma pborc_tok_fake {X α x ξ Φ} : [†α] ⊢ pborc_tok (X:=X) α x ξ Φ.
+  Lemma nborc_tok_fake {α} P : [†α] ⊢ nborc_tok α P.
+  Proof. exact: borc_tok_fake. Qed.
+  Lemma nbor_tok_fake {α} P : [†α] ⊢ nbor_tok α P.
+  Proof. exact: bor_tok_fake. Qed.
+  Lemma pborc_tok_fake {X α} x ξ Φ : [†α] ⊢ pborc_tok (X:=X) α x ξ Φ.
   Proof. rewrite pborc_tok_unseal. iIntros. by iLeft. Qed.
-  Lemma pbor_tok_fake {X α x ξ Φ} : [†α] ⊢ pbor_tok (X:=X) α x ξ Φ.
+  Lemma pbor_tok_fake {X α} x ξ Φ : [†α] ⊢ pbor_tok (X:=X) α x ξ Φ.
   Proof. rewrite pbor_tok_unseal. iIntros. by iLeft. Qed.
+
   (** Modify the lifetime of borrower and lender tokens *)
   Lemma nborc_tok_lft {α β P} : β ⊑□ α -∗ nborc_tok α P -∗ nborc_tok β P.
   Proof. exact borc_tok_lft. Qed.
