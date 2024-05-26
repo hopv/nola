@@ -260,21 +260,21 @@ Section pborrow.
   (** ** For non-prophetic borrowing *)
 
   (** Create new borrowers and lenders *)
-  Lemma nbor_nlend_tok_new_list α Pl Ql :
+  Lemma nborc_nlend_tok_new_list α Pl Ql :
     ([∗ list] P ∈ Pl, ip P) -∗
     ([†α] -∗ ([∗ list] P ∈ Pl, ip P) -∗ M
       ([∗ list] Q ∈ Ql, ip Q)%I) =[pborrow_wsat M ip]=∗
       ([∗ list] P ∈ Pl, nborc_tok α P) ∗ [∗ list] Q ∈ Ql, nlend_tok α Q.
   Proof.
     iIntros "Pl →Ql".
-    iMod (bor_lend_tok_new_list (M:=M) (ip:=pbintp _) α
+    iMod (borc_lend_tok_new_list (M:=M) (ip:=pbintp _) α
       ((λ P, xjust P) <$> Pl) ((λ Q, xjust Q) <$> Ql) with "[Pl] [→Ql]");
       by rewrite !big_sepL_fmap.
   Qed.
-  Lemma nbor_nlend_tok_new α P :
+  Lemma nborc_nlend_tok_new α P :
     ip P =[pborrow_wsat M ip]=∗ nborc_tok α P ∗ nlend_tok α P.
   Proof.
-    iIntros "P". iMod (nbor_nlend_tok_new_list α [P] [P] with "[P] []")
+    iIntros "P". iMod (nborc_nlend_tok_new_list α [P] [P] with "[P] []")
       as "[[$_][$_]]"; by [iFrame|iIntros|].
   Qed.
 
@@ -367,7 +367,7 @@ Section pborrow.
     iFrame "vo vol pborl". iExists _. iFrame.
   Qed.
 
-  (** Lemma for [pbor_plend_tok_new_list] *)
+  (** Lemma for [pborc_plend_tok_new_list] *)
   Local Lemma pbor_list_intp_to_plend {Xl γl} {ξxΦl : plist _ Xl} :
     ([∗ list] Pb ∈ pbor_list (plist_zip γl ξxΦl), pbintp ip Pb) ==∗
       [∗ plist] '(ξ, x, Φ)' ∈ ξxΦl, plend_body_var ip ξ Φ.
@@ -377,7 +377,7 @@ Section pborrow.
     iMod (pc_resolve with "pc") as "?". iModIntro. iExists _. iFrame.
   Qed.
   (** Create new prophetic borrowers and lenders *)
-  Lemma pbor_plend_tok_new_list Xl α (xΦl : plist _ Xl) :
+  Lemma pborc_plend_tok_new_list Xl α (xΦl : plist _ Xl) :
     ⊢ |==> ∃ ξl, ∀ Yl (yπΨl : plist (λ Y, _ *' (Y → _)) Yl),
       let ξxΦl := plist_zip ξl xΦl in
       ([∗ plist] '(x, Φ)' ∈ xΦl, ip (Φ x)) -∗
@@ -391,8 +391,8 @@ Section pborrow.
     iModIntro. iExists ξl. iIntros (??) "Φl →Ψl".
     set ξxΦl := plist_zip ξl xΦl.
     iMod (vo_pbor_alloc_list with "ξl Φl") as (γl) "[vol pborl]".
-    iMod (bor_lend_tok_new_list (M:=M) α _ (plend_list yπΨl) with "pborl [→Ψl]")
-      as "[bl ll]".
+    iMod (borc_lend_tok_new_list (M:=M) α _ (plend_list yπΨl)
+      with "pborl [→Ψl]") as "[bl ll]".
     { iStopProof. f_equiv. iIntros "→Ψl pborl".
       iMod (pbor_list_intp_to_plend with "pborl"). rewrite big_sepL_of_plist.
       by iApply "→Ψl". }
@@ -403,12 +403,12 @@ Section pborrow.
     rewrite pborc_tok_unseal. iRight. iExists _. iFrame.
   Qed.
   (** Simply create a prophetic borrower and a prophetic lender *)
-  Lemma pbor_plend_tok_new X α x Φ :
+  Lemma pborc_plend_tok_new X α x Φ :
     ip (Φ x) =[pborrow_wsat M ip]=∗ ∃ ξ,
       pborc_tok (X:=X) α x ξ Φ ∗ plend_tok α (λ π, π ξ) Φ.
   Proof.
     iIntros "Φ".
-    iMod (pbor_plend_tok_new_list [X] α ((x, Φ)',())') as ([ξ[]]) "big".
+    iMod (pborc_plend_tok_new_list [X] α ((x, Φ)',())') as ([ξ[]]) "big".
     iExists ξ.
     iMod ("big" $! [X] ((_,_)',())' with "[Φ] []") as "[[$ _][$ _]]"=>/=;
       by [iFrame|iIntros|].

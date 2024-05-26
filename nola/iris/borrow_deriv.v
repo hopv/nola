@@ -196,12 +196,12 @@ Section borrow_deriv.
       ([∗ list] P ∈ Pl, borc δ α P) ∗ [∗ list] Q ∈ Ql, lend δ α Q.
   Proof.
     setoid_rewrite <-borc_tok_borc. setoid_rewrite <-lend_tok_lend.
-    exact: bor_lend_tok_new_list.
+    exact: borc_lend_tok_new_list.
   Qed.
   (** Simply create a borrower and a lender *)
   Lemma borc_lend_new α P :
     ⟦ P ⟧(δ) =[borrow_wsati M δ]=∗ borc δ α P ∗ lend δ α P.
-  Proof. rewrite -borc_tok_borc -lend_tok_lend. exact: bor_lend_tok_new. Qed.
+  Proof. rewrite -borc_tok_borc -lend_tok_lend. exact: borc_lend_tok_new. Qed.
 End borrow_deriv.
 
 Section borrow_deriv.
