@@ -75,7 +75,7 @@ Module inv_fupd. Section inv_fupd.
   Context (inv_bad : gname → PROP).
   Hypothesis inv_bad_persistent : ∀{γ}, Persistent (inv_bad γ).
   Hypothesis inv_bad_alloc : ∀{γ}, bad γ ⊢ |={⊤}=> inv_bad γ.
-  Hypothesis inv_bad_acc : ∀ {γ} Q R,
+  Hypothesis inv_bad_acc : ∀{γ} Q R,
     (bad γ ∗ Q ⊢ |={∅}=> bad γ ∗ R) → (inv_bad γ ∗ Q ⊢ |={⊤}=> R).
 
   (** Allocate [inv_bad γ] *)
