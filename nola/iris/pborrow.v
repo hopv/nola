@@ -52,6 +52,12 @@ Section pborrow.
 
   (** ** Tokens *)
 
+  (** Non-prophetic tokens *)
+  Definition nborc_tok α P : iProp Σ := borc_tok α (xjust P).
+  Definition nbor_tok α P : iProp Σ := bor_tok α (xjust P).
+  Definition nobor_tok α q P : iProp Σ := obor_tok α q (xjust P).
+  Definition nlend_tok α P : iProp Σ := lend_tok α (xjust P).
+
   (** Prophetic borrower token *)
   Local Definition pborc_tok_def {X} α (x : X) (ξ : prvar X)
     (Φ : X → PROP $oi Σ) : iProp Σ :=
@@ -80,12 +86,6 @@ Section pborrow.
   (** Prophetic lender token *)
   Definition plend_tok {X} α (xπ : clair TY X) (Φ : X → PROP $oi Σ) : iProp Σ :=
     lend_tok α (xplend X xπ Φ).
-
-  (** Non-prophetic token *)
-  Definition nborc_tok α P : iProp Σ := borc_tok α (xjust P).
-  Definition nbor_tok α P : iProp Σ := bor_tok α (xjust P).
-  Definition nobor_tok α q P : iProp Σ := obor_tok α q (xjust P).
-  Definition nlend_tok α P : iProp Σ := lend_tok α (xjust P).
 
   (** Borrower and lender tokens are timeless if the underlying ofe is discrete
     *)
