@@ -184,14 +184,14 @@ Section borrow.
   Proof. rewrite lend_tok_unseal. exact _. Qed.
 
   (** Turn [borc_tok] to [bor_tok] *)
-  Lemma borc_tok_tok {α P} : borc_tok α P ⊢ bor_tok α P.
+  Lemma borc_tok_bor_tok {α P} : borc_tok α P ⊢ bor_tok α P.
   Proof. rewrite bor_tok_unseal. iIntros. by iLeft. Qed.
 
   (** Fake a borrower token from the dead lifetime token *)
   Lemma borc_tok_fake {α P} : [†α] ⊢ borc_tok α P.
   Proof. rewrite borc_tok_unseal. iIntros. by iLeft. Qed.
   Lemma bor_tok_fake {α P} : [†α] ⊢ bor_tok α P.
-  Proof. by rewrite borc_tok_fake borc_tok_tok. Qed.
+  Proof. by rewrite borc_tok_fake borc_tok_bor_tok. Qed.
 
   (** Modify the lifetime of borrower and lender tokens *)
   Lemma borc_tok_lft {α β P} : β ⊑□ α -∗ borc_tok α P -∗ borc_tok β P.

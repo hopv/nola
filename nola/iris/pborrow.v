@@ -149,13 +149,14 @@ Section pborrow.
   Proof. exact _. Qed.
 
   (** Turn [nborc_tok] to [nbor_tok] *)
-  Lemma nborc_tok_tok {α P} : nborc_tok α P ⊢ nbor_tok α P.
-  Proof. exact borc_tok_tok. Qed.
+  Lemma nborc_tok_nbor_tok {α P} : nborc_tok α P ⊢ nbor_tok α P.
+  Proof. exact borc_tok_bor_tok. Qed.
   (** Turn [pborc_tok] to [pbor_tok] *)
-  Lemma pborc_tok_tok {X α x ξ Φ} : pborc_tok (X:=X) α x ξ Φ ⊢ pbor_tok α x ξ Φ.
+  Lemma pborc_tok_pbor_tok {X α x ξ Φ} :
+    pborc_tok (X:=X) α x ξ Φ ⊢ pbor_tok α x ξ Φ.
   Proof.
     rewrite pborc_tok_unseal pbor_tok_unseal /pborc_tok_def.
-    by setoid_rewrite borc_tok_tok.
+    by setoid_rewrite borc_tok_bor_tok.
   Qed.
 
   (** Fake a borrower token from the dead lifetime token *)

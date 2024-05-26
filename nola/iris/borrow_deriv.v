@@ -179,7 +179,7 @@ Section borrow_deriv.
   Lemma borc_bor {α P} : borc δ α P ⊢ bor δ α P.
   Proof.
     rewrite borc_unseal bor_unseal. iIntros "[%[$[$?]]]".
-    by rewrite borc_tok_tok.
+    by rewrite borc_tok_bor_tok.
   Qed.
   Lemma borc_fake {α} P : [†α] ⊢ borc δ α P.
   Proof. by rewrite borc_tok_fake borc_tok_borc. Qed.
