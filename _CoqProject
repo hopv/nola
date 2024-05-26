@@ -38,6 +38,7 @@ nola/iris/borrow_deriv.v
 nola/iris/proph.v
 nola/iris/proph_ag.v
 nola/iris/pborrow.v
+nola/iris/pborrow_deriv.v
 nola/iris/ciprop.v
 
 nola/heap_lang/locations.v
