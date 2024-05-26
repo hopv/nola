@@ -227,8 +227,7 @@ Section mod_iff.
   Proof. iSplit; by iIntros. Qed.
   Lemma mod_iff_sym {P Q} : mod_iff M P Q ⊢ mod_iff M Q P.
   Proof. by rewrite /mod_iff bi.and_comm. Qed.
-  Lemma mod_iff_trans {P Q R} :
-    mod_iff M P Q -∗ mod_iff M Q R -∗ mod_iff M P R.
+  Lemma mod_iff_trans {P Q R} : mod_iff M P Q -∗ mod_iff M Q R -∗ mod_iff M P R.
   Proof.
     iIntros "PQ QR". iSplit.
     - iIntros "P". iMod ("PQ" with "P"). by iApply "QR".
