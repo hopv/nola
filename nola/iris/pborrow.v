@@ -370,7 +370,7 @@ Section pborrow.
   (** Lemma for [pborc_plend_tok_new_list] *)
   Local Lemma pbor_list_intp_to_plend {Xl γl} {ξxΦl : plist _ Xl} :
     ([∗ list] Pb ∈ pbor_list (plist_zip γl ξxΦl), pbintp ip Pb) ==∗
-      [∗ plist] '(ξ, x, Φ)' ∈ ξxΦl, plend_body_var ip ξ Φ.
+      [∗ plist] '(ξ, _, Φ)' ∈ ξxΦl, plend_body_var ip ξ Φ.
   Proof.
     elim: Xl γl ξxΦl=>/=; [by iIntros|]=> X Xl IH [γ γl] [[ξ[x Φ]] ξxΦl].
     iIntros "[[%[pc Φ]] pborl]". iMod (IH with "pborl") as "$".
@@ -381,7 +381,7 @@ Section pborrow.
     ⊢ |==> ∃ ξl, ∀ Yl (yπΨl : plist (λ Y, _ *' (Y → _)) Yl),
       let ξxΦl := plist_zip ξl xΦl in
       ([∗ plist] '(x, Φ)' ∈ xΦl, ip (Φ x)) -∗
-      ([†α] -∗ ([∗ plist] '(ξ, x, Φ)' ∈ ξxΦl, plend_body_var ip ξ Φ) -∗
+      ([†α] -∗ ([∗ plist] '(ξ, _, Φ)' ∈ ξxΦl, plend_body_var ip ξ Φ) -∗
         M ([∗ plist] '(yπ, Ψ)' ∈ yπΨl, plend_body ip yπ Ψ))
         =[pborrow_wsat M ip]=∗
         ([∗ plist] '(ξ, x, Φ)' ∈ ξxΦl, pborc_tok α x ξ Φ) ∗
