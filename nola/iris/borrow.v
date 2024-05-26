@@ -146,6 +146,28 @@ Section borrow.
   Local Lemma lend_tok_unseal : lend_tok = lend_tok_def.
   Proof. exact: seal_eq. Qed.
 
+  (** Borrower and lender tokens are non-expansive *)
+  Local Instance bor_itok_ne {i j d α} : NonExpansive (bor_itok i j d α).
+  Proof.
+    unfold bor_itok=> ????. do 2 f_equiv. apply singleton_ne.
+    do 2 apply pair_ne=>//. apply singleton_ne. by f_equiv.
+  Qed.
+  #[export] Instance borc_tok_ne {α} : NonExpansive (borc_tok α).
+  Proof. rewrite borc_tok_unseal. solve_proper. Qed.
+  #[export] Instance bor_tok_ne {α} : NonExpansive (bor_tok α).
+  Proof. rewrite bor_tok_unseal. solve_proper. Qed.
+  #[export] Instance obor_tok_ne {α q} : NonExpansive (obor_tok α q).
+  Proof. rewrite obor_tok_unseal. solve_proper. Qed.
+  Local Instance lend_itok_ne {i k d α} : NonExpansive (lend_itok i k d α).
+  Proof.
+    unfold lend_itok=> ????. do 2 f_equiv. apply singleton_ne.
+    apply pair_ne=>//. apply singleton_ne. by f_equiv.
+  Qed.
+  Local Instance lend_dtok_ne {d α} : NonExpansive (lend_dtok d α).
+  Proof. solve_proper. Qed.
+  #[export] Instance lend_tok_ne {α} : NonExpansive (lend_tok α).
+  Proof. rewrite lend_tok_unseal. solve_proper. Qed.
+
   (** Borrower and lender tokens are timeless if the underlying OFE is discrete
     *)
   #[export] Instance borc_tok_timeless `{!OfeDiscrete (PROP $oi Σ)} {α P} :

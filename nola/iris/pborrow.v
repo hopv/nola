@@ -60,21 +60,22 @@ Section pborrow.
 
   (** Prophetic borrower token *)
   Local Definition pborc_tok_def {X} α (x : X) (ξ : prvar X)
-    (Φ : X → PROP $oi Σ) : iProp Σ :=
+    (Φ : X -d> PROP $oi Σ) : iProp Σ :=
     [†α] ∨ ∃ γ, val_obs γ x ∗ borc_tok α (xpbor X γ ξ Φ).
   Local Lemma pborc_tok_aux : seal (@pborc_tok_def). Proof. by eexists. Qed.
   Definition pborc_tok {X} := pborc_tok_aux.(unseal) X.
   Local Lemma pborc_tok_unseal : @pborc_tok = @pborc_tok_def.
   Proof. exact: seal_eq. Qed.
-  Local Definition pbor_tok_def {X} α (x : X) (ξ : prvar X) (Φ : X → PROP $oi Σ)
-    : iProp Σ := [†α] ∨ ∃ γ, val_obs γ x ∗ bor_tok α (xpbor X γ ξ Φ).
+  Local Definition pbor_tok_def {X} α (x : X) (ξ : prvar X)
+    (Φ : X -d> PROP $oi Σ) : iProp Σ :=
+    [†α] ∨ ∃ γ, val_obs γ x ∗ bor_tok α (xpbor X γ ξ Φ).
   Local Lemma pbor_tok_aux : seal (@pbor_tok_def). Proof. by eexists. Qed.
   Definition pbor_tok {X} := pbor_tok_aux.(unseal) X.
   Local Lemma pbor_tok_unseal : @pbor_tok = @pbor_tok_def.
   Proof. exact: seal_eq. Qed.
 
   (** Open prophetic borrower token *)
-  Local Definition pobor_tok_def {X} α q (ξ : prvar X) (Φ : X → PROP $oi Σ)
+  Local Definition pobor_tok_def {X} α q (ξ : prvar X) (Φ : X -d> PROP $oi Σ)
     : iProp Σ :=
     ∃ γ, (∃ x, val_obs γ x ∗ proph_ctrl γ x ξ) ∗
       obor_tok α q (xpbor X γ ξ Φ).
@@ -84,8 +85,41 @@ Section pborrow.
   Proof. exact: seal_eq. Qed.
 
   (** Prophetic lender token *)
-  Definition plend_tok {X} α (xπ : clair TY X) (Φ : X → PROP $oi Σ) : iProp Σ :=
-    lend_tok α (xplend X xπ Φ).
+  Definition plend_tok {X} α (xπ : clair TY X) (Φ : X -d> PROP $oi Σ)
+    : iProp Σ := lend_tok α (xplend X xπ Φ).
+
+  (** Borrower and lender tokens are non-expansive *)
+  #[export] Instance nborc_tok_ne {α} : NonExpansive (nborc_tok α).
+  Proof. solve_proper. Qed.
+  #[export] Instance nbor_tok_ne {α} : NonExpansive (nbor_tok α).
+  Proof. solve_proper. Qed.
+  #[export] Instance nobor_tok_ne {α q} : NonExpansive (nobor_tok α q).
+  Proof. solve_proper. Qed.
+  #[export] Instance nlend_tok_ne {α} : NonExpansive (nlend_tok α).
+  Proof. solve_proper. Qed.
+  #[export] Instance pborc_tok_ne {α X x ξ} :
+    NonExpansive (pborc_tok (X:=X) α x ξ).
+  Proof.
+    rewrite pborc_tok_unseal /pborc_tok_def=> ????. do 7 f_equiv.
+    apply inr_ne. by apply: existT_ne.
+  Qed.
+  #[export] Instance pbor_tok_ne {α X x ξ} :
+    NonExpansive (pbor_tok (X:=X) α x ξ).
+  Proof.
+    rewrite pbor_tok_unseal /pbor_tok_def=> ????. do 7 f_equiv.
+    apply inr_ne. by apply: existT_ne.
+  Qed.
+  #[export] Instance pobor_tok_ne {α q X ξ} :
+    NonExpansive (pobor_tok (X:=X) α q ξ).
+  Proof.
+    rewrite pobor_tok_unseal /pobor_tok_def=> ????. do 6 f_equiv.
+    apply inr_ne. by apply: existT_ne.
+  Qed.
+  #[export] Instance plend_tok_ne {α X xπ} :
+    NonExpansive (plend_tok (X:=X) α xπ).
+  Proof.
+    unfold plend_tok=> ????. do 2 f_equiv. apply inr_ne. by apply: existT_ne.
+  Qed.
 
   (** Borrower and lender tokens are timeless if the underlying ofe is discrete
     *)
