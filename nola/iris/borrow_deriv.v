@@ -13,7 +13,7 @@ Notation borrow_wsatid M := (borrow_wsati M der).
 
 (** Derivability pre-data for [borrow] *)
 Class BorrowPreDeriv (PRO JUDG : ofe) := BORROW_PRE_DERIV {
-  (** Conversion judgment for [borrow] *)
+  (** Conversion judgment *)
   borrow_jto : PRO → PRO → JUDG;
   (** [borrow_jto] is non-expansive *)
   borrow_jto_ne :: NonExpansive2 borrow_jto;
@@ -25,7 +25,7 @@ Section borrow_deriv.
   Context `{!borrowGS PROP Σ, !BorrowPreDeriv (PROP $oi Σ) JUDG}.
   Implicit Type δ : JUDG → iProp Σ.
 
-  (** [bor]: Relaxed closed borrower *)
+  (** [borc]: Relaxed closed borrower *)
   Local Definition borc_def δ α P : iProp Σ :=
     ∃ Q, δ (borrow_jto P Q) ∗ δ (borrow_jto Q P) ∗ borc_tok α Q.
   Local Lemma borc_aux : seal borc_def. Proof. by eexists. Qed.
@@ -50,7 +50,7 @@ Section borrow_deriv.
   Definition lend := lend_aux.(unseal).
   Local Lemma lend_unseal : lend = lend_def. Proof. exact: seal_eq. Qed.
 
-  (** [borc], [bor], [obor] and [lend] are non-expansive *)
+  (** Borrower and lender propositions are non-expansive *)
   #[export] Instance borc_ne `{!NonExpansive δ} {α} : NonExpansive (borc δ α).
   Proof. rewrite borc_unseal. solve_proper. Qed.
   #[export] Instance bor_ne `{!NonExpansive δ} {α} : NonExpansive (bor δ α).
@@ -108,7 +108,7 @@ Section borrow_deriv.
     der (borrow_jto P Q) ⊢ (⟦ P ⟧ ==∗ ⟦ Q ⟧).
   Proof. by rewrite der_sound borrow_jto_intp. Qed.
 
-  (** Convert the body of [borc], [bor], [obor] and [lend] *)
+  (** Convert the body of borrower and lender propositions *)
   Lemma borc_to {α P Q} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ → ⟦ P ⟧(δ') ==∗ ⟦ Q ⟧(δ')) -∗
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ → ⟦ Q ⟧(δ') ==∗ ⟦ P ⟧(δ')) -∗
