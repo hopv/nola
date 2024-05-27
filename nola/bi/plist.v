@@ -11,6 +11,9 @@ Fixpoint big_sepPL {PROP : bi} {A} {F : A → Type} {al} (Φ : ∀ a, F a → PR
     λ '(x, xl)', Φ _ x ∗ big_sepPL Φ xl end%I.
 
 Module PlistNotation.
+  Notation "[∗ plist] a ∈ al ; x ∈ xl , P" := (big_sepPL (al:=al) (λ a x, P) xl)
+    (at level 200, al at level 10, xl at level 10, a binder, x binder,
+      only parsing) : bi_scope.
   Notation "[∗ plist] a ; x ∈ xl , P" := (big_sepPL (λ a x, P) xl)
     (at level 200, xl at level 10, a binder, x binder,
       format "[∗  plist]  a ;  x  ∈  xl ,  P") : bi_scope.
