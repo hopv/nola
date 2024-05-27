@@ -9,6 +9,8 @@ Import ProdNotation PlistNotation iPropAppNotation PintpNotation IntpNotation
 
 Implicit Type (TY : synty).
 
+(** ** Preliminaries *)
+
 (** Notation *)
 Notation pborrow_wsati M δ := (pborrow_wsat M ⟦⟧(δ)).
 Notation pborrow_wsatid M := (pborrow_wsati M der).
@@ -142,6 +144,8 @@ Section pborrow_deriv.
   !Dintp JUDGI (PROP $oi Σ) (iProp Σ), !PborrowDeriv TY PROP Σ JUDGI,
   !Deriv (JUDGI:=JUDGI) ih δ}.
   Implicit Type (X Y Z : TY) (P Q R : PROP $oi Σ) (δ : JUDGI → iProp Σ).
+
+  (** ** Conversion *)
 
   (** Lemmas for [pborrow_jto] *)
   Lemma pborrow_jto_refl {P} : ⊢ δ (pborrow_jto P P).
@@ -349,7 +353,7 @@ Section pborrow_deriv.
   Lemma plend_tok_plend {X α xπ Φ} : plend_tok (X:=X) α xπ Φ ⊢ plend δ α xπ Φ.
   Proof. rewrite plend_unseal. iIntros "$". iApply pborrow_jlto_refl. Qed.
 
-  (** Other conversions *)
+  (** Other types of conversion *)
   Lemma nborc_nbor {α P} : nborc δ α P ⊢ nbor δ α P.
   Proof.
     rewrite nborc_unseal nbor_unseal. iIntros "[%[$[$?]]]".
@@ -370,6 +374,8 @@ Section pborrow_deriv.
   Proof. by rewrite pborc_fake pborc_pbor. Qed.
 
   Context `{!GenUpd (PROP:=iProp Σ) M, !GenUpdBupd M}.
+
+  (** ** Rules that work under [Deriv ih δ] *)
 
   (** Create borrowers and lenders *)
   Lemma nborc_nlend_new_list α Pl Ql :

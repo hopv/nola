@@ -34,7 +34,7 @@ Notation ciPropOF := (ciPropOF idom cdom dataOF).
 Fact ciPropOF_contractive : oFunctorContractive ciPropOF.
 Proof. exact _. Qed.
 
-(** ** Construct [ciProp] *)
+(** Construct [ciProp] *)
 Section ciProp.
   Context {Σ : gFunctors}.
   Definition cip_inv N (Px : ciProp Σ) : ciProp Σ :=
@@ -79,7 +79,7 @@ Section intp.
     NonExpansive3 (bintp δ s).
   Proof. case s; solve_proper. Qed.
 
-  (** ** Parameterized interpretation of [ciProp] *)
+  (** Parameterized interpretation of [ciProp] *)
   #[export] Instance ciProp_dintp : Dintp (judg Σ) (ciProp Σ) (iProp Σ) :=
     DINTP (λ δ, cip_intp (bintp δ)).
 
@@ -89,7 +89,7 @@ Section intp.
 
   Context `{!heapGS_gen hlc Σ}.
 
-  (** ** [judg_intp]: Judgment interpretation *)
+  (** [judg_intp]: Judgment interpretation *)
   Definition judg_intp δ (J : judg Σ) := match J with
     | inl (N, Px) => inv_acsr ⟦⟧(δ) N ⟦ Px ⟧(δ)
     | inr (Px, Qx) => mod_iff (fupd ⊤ ⊤) ⟦ Px ⟧(δ) ⟦ Qx ⟧(δ)
@@ -108,7 +108,9 @@ Section intp.
   Proof. done. Qed.
 End intp.
 
-(** ** Target function: Linked list mutation *)
+(** ** Linked list mutation *)
+
+(** Target function *)
 Definition iter_ilist : val := rec: "self" "f" "c" "l" :=
   if: !"c" = #0 then #() else
     "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (!("l" +ₗ #1)).
@@ -117,7 +119,7 @@ Section verify.
   Context `{!inv'GS ciPropOF Σ, !mutexGS ciPropOF Σ, !heapGS_gen hlc Σ}.
   Implicit Type Φx Ψx : loc → ciProp Σ.
 
-  (** ** [ilist]: Syntactic proposition for a list *)
+  (** [ilist]: Syntactic proposition for a list *)
   Definition ilist_gen N Φx Ilist' l : ciProp Σ :=
     cip_inv N (Φx l) ∗ cip_inv N (Ilist' N Φx l).
   Definition ilist'_gen N Φx Ilist' l : ciProp Σ :=
@@ -125,7 +127,7 @@ Section verify.
   CoFixpoint ilist' N Φx : loc → ciProp Σ := ilist'_gen N Φx ilist'.
   Definition ilist N Φx : loc → ciProp Σ := ilist_gen N Φx ilist'.
 
-  (** ** Convert the predicate of [ilist] using [mod_acsr] *)
+  (** Convert the predicate of [ilist] using [mod_acsr] *)
   Local Lemma inv'_acsr_iff `{!Deriv ih δ} {N Φx Ψx l} :
     □ (∀ l' δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
       mod_acsr (fupd ∅ ∅) ⟦ Φx l' ⟧(δ') ⟦ Ψx l' ⟧(δ') ∧
@@ -159,7 +161,7 @@ Section verify.
       [iApply bi.wand_iff_sym|]; by iApply inv'_acsr_iff.
   Qed.
 
-  (** ** Termination of [iter] *)
+  (** Termination of [iter] *)
   Lemma twp_iter_list {N Φx c l} {f : val} {n : nat} :
     (∀ l', [[{ invd N (Φx l') }]][inv_wsatid] f #l' @ ↑N
       [[{ RET #(); True }]]) -∗
@@ -180,7 +182,9 @@ Section verify.
   Qed.
 End verify.
 
-(** ** Target function: Linked list mutation over a mutex *)
+(** ** Linked list mutation over a mutex *)
+
+(** Target function *)
 Definition iter_mlist : val := rec: "self" "f" "k" "c" "l" :=
   if: !"c" = #0 then #true else
     if: try_acquire_loop_mutex "k" "l" then
@@ -192,7 +196,7 @@ Section verify.
   Context `{!inv'GS ciPropOF Σ, !mutexGS ciPropOF Σ, !heapGS_gen hlc Σ}.
   Implicit Type Φx : loc → ciProp Σ.
 
-  (** ** [mlist]: Syntactic proposition for a list with a mutex *)
+  (** [mlist]: Syntactic proposition for a list with a mutex *)
   Definition mlist_gen Φx Mlist' l : ciProp Σ :=
     cip_mutex l (Mlist' Φx l).
   Definition mlist'_gen Φx Mlist' l : ciProp Σ :=
@@ -200,7 +204,7 @@ Section verify.
   CoFixpoint mlist' Φx : loc → ciProp Σ := mlist'_gen Φx mlist'.
   Definition mlist Φx : loc → ciProp Σ := mlist_gen Φx mlist'.
 
-  (** ** Convert the predicate of [mlist] using [mod_iff] *)
+  (** Convert the predicate of [mlist] using [mod_iff] *)
   Lemma mlist_iff `{!Deriv ih δ} {Φx Ψx l} :
     □ (∀ l' δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
       mod_iff (fupd ⊤ ⊤) ⟦ Φx l' ⟧(δ') ⟦ Ψx l' ⟧(δ')) -∗
@@ -215,7 +219,7 @@ Section verify.
       by iApply IH.
   Qed.
 
-  (** ** Termination of [iter_mlist] *)
+  (** Termination of [iter_mlist] *)
   Lemma twp_iter_mlist {Φx c l} {f : val} {k n : nat} :
     (∀ l', [[{ ⟦ Φx l' ⟧ }]][mutex_wsatid] f #l'
       [[{ RET #(); ⟦ Φx l' ⟧ }]]) -∗

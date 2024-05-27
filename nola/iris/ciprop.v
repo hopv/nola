@@ -5,7 +5,9 @@ From nola.bi Require Import ofe.
 From nola.iris Require Export ofe.
 Import iPropAppNotation.
 
-(** ** [cip_binsel]: Binary operator selector *)
+(** ** Data types *)
+
+(** [cip_binsel]: Binary operator selector *)
 Variant cip_binsel :=
 | (** Conjunction *) cips_and
 | (** Disjunction *) cips_or
@@ -13,14 +15,14 @@ Variant cip_binsel :=
 | (** Separating conjunction *) cips_sep
 | (** Magic wand *) cips_wand.
 
-(** ** [cip_unsel]: Unary operator selector *)
+(** [cip_unsel]: Unary operator selector *)
 Variant cip_unsel :=
 | (** Plainly *) cips_plain
 | (** Persistently *) cips_pers
 | (** Basic update *) cips_bupd
 | (** Except-0 *) cips_except0.
 
-(** ** [cip_sel]: Selector *)
+(** [cip_sel]: Selector *)
 Variant cip_sel S :=
 | (** Universal quantifier *) cips_all (A : Type)
 | (** Existential quantifier *) cips_ex (A : Type)
@@ -33,20 +35,20 @@ Arguments cips_all {_}. Arguments cips_ex {_}.
 Arguments cips_bin {_}.  Arguments cips_un {_}.
 Arguments cips_pure {_}. Arguments cips_later {_}. Arguments cips_custom {_}.
 
-(** ** [cip_idom]: Domain for inductive parts *)
+(** [cip_idom]: Domain for inductive parts *)
 Definition cip_idom {S} (I : S → Type) (s : cip_sel S) : Type := match s with
   | cips_all A | cips_ex A => A | cips_bin _ => bool | cips_un _ => unit
   | cips_pure | cips_later => Empty_set | cips_custom s => I s
   end.
 
-(** ** [cip_cdom]: Domain for coinductive parts *)
+(** [cip_cdom]: Domain for coinductive parts *)
 Definition cip_cdom {S} (C : S → Type) (s : cip_sel S) : Type := match s with
   | cips_all _ | cips_ex _ | cips_bin _ | cips_un _ | cips_pure | cips_later =>
       Empty_set
   | cips_custom s => C s
   end.
 
-(** ** [cip_dataOF]: Data [oFunctor] *)
+(** [cip_dataOF]: Data [oFunctor] *)
 Definition cip_dataOF {S} (D : S → oFunctor) (s : cip_sel S) : oFunctor :=
   match s with
   | cips_all _ | cips_ex _ | cips_bin _ | cips_un _ => unitO
@@ -138,10 +140,11 @@ Notation "'True'" := (cip_pure True) : ciProp_scope.
 Notation "'False'" := (cip_pure False) : ciProp_scope.
 Notation "▷ P" := (cip_later P) : ciProp_scope.
 
+(** ** [cip_intp]: Interpretation of [ciProp] *)
 Section iris.
   Context {S} {I C : S → Type} {D : S → oFunctor} {Σ : gFunctors}.
 
-  (** ** [cip_bintp]: Base interpretation for [ciProp] *)
+  (** [cip_bintp]: Base interpretation for [ciProp] *)
   Definition cip_bintp
     (ip : ∀ s, (I s -d> iProp Σ) → (C s -d> ciProp I C D Σ) →
       D s $oi Σ → iProp Σ) s
@@ -170,7 +173,7 @@ Section iris.
     case s=>/=; try solve_proper. move=> ???????. by apply laterl_ne.
   Qed.
 
-  (** ** [cip_intp]: Interpretation of [ciProp] *)
+  (** [cip_intp]: Interpretation of [ciProp] *)
   Definition cip_intp ip : ciProp I C D Σ → iProp Σ := cit_intp (cip_bintp ip).
 
   (** [cip_intp ip] is non-expansive if [ip] is *)

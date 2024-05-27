@@ -12,7 +12,7 @@ Next Obligation.
   move=> >. split; by [move/bi.equiv_entails|move=> ?; apply bi.equiv_entails].
 Qed.
 
-(** ** [biPro] has the top, bottom, meet and join *)
+(** [biPro] has the top, bottom, meet and join *)
 #[export] Program Instance otop_bi {PROP} : Otop PROP := OTOP True%I _.
 Next Obligation. by iIntros. Qed.
 #[export] Program Instance obot_bi {PROP} : Obot PROP := OBOT False%I _.

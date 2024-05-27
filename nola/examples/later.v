@@ -7,7 +7,9 @@ Import WpwNotation.
 
 Implicit Type (N : namespace) (l : loc).
 
-(** ** Target function: Linked list mutation *)
+(** ** Linked list mutation *)
+
+(** Target function *)
 Definition iter_ilist : val := rec: "self" "f" "c" "l" :=
   if: !"c" = #0 then #() else
     "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (!("l" +ₗ #1)).
@@ -19,23 +21,20 @@ Section verify.
   Definition ilist_gen N Φ (self : loc -d> iProp Σ) : loc -d> iProp Σ :=
     (λ l, inv_tok N (Next (Φ l)) ∗ inv_tok N (Next
       (∃ l', (l +ₗ 1) ↦ #l' ∗ self l')%I))%I.
-
   (** [ilist_gen] is contractive *)
   Instance ilist_gen_contractive N Φ : Contractive (ilist_gen N Φ).
   Proof. solve_contractive. Qed.
 
-  (** Fixed point of [ilist_gen] *)
+  (** [ilist]: Linked list *)
   Definition ilist N Φ l : iProp Σ := fixpoint (ilist_gen N Φ) l.
-
   (** Unfold [ilist] *)
   Lemma ilist_unfold {N Φ l} : ilist N Φ l ≡ ilist_gen N Φ (ilist N Φ) l.
   Proof. by rewrite /ilist (fixpoint_unfold (ilist_gen N Φ) l). Qed.
-
   (** [ilist] is persistent *)
   Instance ilist_persistent N Φ l : Persistent (ilist N Φ l).
   Proof. rewrite ilist_unfold. exact _. Qed.
 
-  (** ** Safety of [iter] *)
+  (** Safety of [iter] *)
   Lemma wp_iter_list {N Φ c l} {f : val} {n : nat} :
     (∀ l0, {{{ inv_tok N (Next (Φ l0)) }}}[inv_wsat laterl] f #l0 @ ↑N
       {{{ RET #(); True }}}) -∗

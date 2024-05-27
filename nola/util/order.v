@@ -47,7 +47,7 @@ Proof. move=> >. apply oeqv_ole. Qed.
 #[export] Instance oeqv_ole_2 {OT} : subrelation (≃@{OT}) (flip (⊑@{OT})).
 Proof. move=> >. apply oeqv_ole. Qed.
 
-(** ** Canonical structures *)
+(** ** Canonical structures of [proty] *)
 
 (** Natural number *)
 Program Canonical natPro : proty := Proty nat (≤) (=) _ _.

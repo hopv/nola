@@ -7,7 +7,9 @@ Import EqNotations IsoNotation.
 
 Implicit Type S CIT : Type.
 
-(** ** [citI]: Intermediate inductive tree *)
+(** ** Coinductive-inductive tree *)
+
+(** [citI]: Intermediate inductive tree *)
 Section citI.
   Context {S} (I C D : S → Type) CIT.
   Inductive citI := CitI {
@@ -22,7 +24,7 @@ Arguments CitI {_ _ _ _ _}. Arguments cit_sel {_ _ _ _ _}.
 Arguments cit_ikidsI {_ _ _ _ _}. Arguments cit_ckids {_ _ _ _ _}.
 Arguments cit_data {_ _ _ _ _}.
 
-(** ** [cit]: Coinductive-inductive tree *)
+(** [cit]: Coinductive-inductive tree *)
 Section cit.
   Context {S} (I C D : S → Type).
   CoInductive cit := Cit { uncit : citI I C D cit; }.
@@ -34,7 +36,9 @@ Notation cit' I C D := (citI I C D (cit I C D)).
 Notation cit_ikids t i := (Cit (t.(cit_ikidsI) i)).
 #[warning="-uniform-inheritance"] Coercion uncit : cit >-> cit'.
 
-(** ** [cit_forall2I]: Intermediate universal relation between [citI]s *)
+(** ** Universal relation between [cit]s *)
+
+(** [cit_forall2I]: Intermediate universal relation between [citI]s *)
 Section cit_forall2I.
   Context {S} {I C D D' : S → Type}.
   Context (R : ∀ s, D s → D' s → Prop)
@@ -120,7 +124,7 @@ Section cit_forall2I.
   Qed.
 End cit_forall2I.
 
-(** ** [cit_forall2]: Universal relation between [cit]s *)
+(** [cit_forall2]: Universal relation between [cit]s *)
 Definition cit_forall2 {S I C D D'} R : cit (S:=S) I C D → cit I C D' → Prop :=
   gfp (cit_forall2I R).
 
@@ -211,7 +215,7 @@ Section cit_forall2.
   Qed.
 End cit_forall2.
 
-(** ** OFE on [cit_forall2] *)
+(** ** OFE on [cit] *)
 
 Section citO.
   Context {S} {I C : S → Type} {D : S → ofe}.
@@ -385,7 +389,9 @@ Section cit_intp.
   Proof. move=> ??. by apply cit'_intp_ne_intp. Qed.
 End cit_intp.
 
-(** ** [cit_mapI]: Intermediate map over [cit'] *)
+(** ** [cit_map]: Map over [cit] *)
+
+(** [cit_mapI]: Intermediate map over [cit'] *)
 Section cit_mapI.
   Context {S} {I C D D' : S → Type}.
   Context (f : ∀ s, D s → D' s) (self : cit I C D → cit I C D').
@@ -395,7 +401,7 @@ Section cit_mapI.
       (λ c, self (t.(cit_ckids) c)) (f _ t.(cit_data)).
 End cit_mapI.
 
-(** ** [cit_map]: Map over [cit]
+(** [cit_map]: Map over [cit]
 
   Unfortunately, due to the limitation of Coq's productivity checker, we cannot
   define [cit_map] directly, and so we assume axioms for the existence of

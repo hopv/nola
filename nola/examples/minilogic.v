@@ -16,7 +16,9 @@ Inductive nProp : Type :=
 | ilist (N : namespace) (Φ : loc → nProp) (l : loc).
 #[warning="-redundant-canonical-projection"] Canonical nPropO := leibnizO nProp.
 
-(** ** Target function: Linked list mutation *)
+(** ** Linked list mutation *)
+
+(** Target function *)
 Definition iter_ilist : val := rec: "self" "f" "c" "l" :=
   if: !"c" = #0 then #() else
     "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (!("l" +ₗ #1)).
@@ -24,7 +26,7 @@ Definition iter_ilist : val := rec: "self" "f" "c" "l" :=
 Section verify.
   Context `{!inv'GS nPropO Σ, !heapGS_gen hlc Σ}.
 
-  (** ** Interpretation of [nProp] *)
+  (** Interpretation of [nProp] *)
   Fixpoint intp (P : nProp) : iProp Σ := match P with
   | all Φ => ∀ x, intp (Φ x) | ex Φ => ∃ x, intp (Φ x)
   | and P Q => intp P ∧ intp Q | or P Q => intp P ∨ intp Q
@@ -37,7 +39,7 @@ Section verify.
       (ex (λ l', sep (pointsto 1 (l +ₗ 1) (#l')) (ilist N Φ l')))
   end.
 
-  (** ** Termination of [iter] *)
+  (** Termination of [iter] *)
   Lemma twp_iter_list {N Φ c l} {f : val} {n : nat} :
     (∀ l0, [[{ inv_tok N (Φ l0) }]][inv_wsat intp] f #l0 @ ↑N
       [[{ RET #(); True }]]) -∗

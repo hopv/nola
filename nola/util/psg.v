@@ -93,7 +93,7 @@ Section psg.
       etrans; [|done]. by apply (big_meet_elim id).
   Qed.
 
-  (** ** Properties on [Psgoid] *)
+  (** ** Properties of [Psgoid] *)
 
   (** [Psgoid f] is closed under [f] *)
   Lemma Psgoid_app {f o} : Psgoid f o → Psgoid f (f o).

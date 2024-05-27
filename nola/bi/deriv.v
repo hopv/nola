@@ -27,7 +27,7 @@ Arguments Judgi {_} _ {_}.
 Arguments judgi_car {PROP JUDGI} : rename.
 Arguments judgi_Dintp {PROP JUDGI} : rename.
 
-(** ** [dinto δ δ']: [δ] can be turned into the semantics at [δ'] *)
+(** [dinto δ δ']: [δ] can be turned into the semantics at [δ'] *)
 Notation dinto δ δ' := (∀ J, δ J ⊢ ⟦ J ⟧(δ')) (only parsing).
 
 Section deriv.

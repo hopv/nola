@@ -8,7 +8,7 @@ From iris.bi Require Import fixpoint.
 From iris.proofmode Require Import proofmode.
 Import UpdwNotation.
 
-(** ** What becomes [irisGS_gen] combined with an extra world satisfaction *)
+(** ** [irisGS'_gen]: Language ghost state for a custom world satisfaction *)
 Class irisGS'_gen (hlc : has_lc) (Λ : language) Σ := IrisG' {
   iris'_invGS :: invGS_gen hlc Σ;
   state_interp' : state Λ → nat → list (observation Λ) → nat → iProp Σ;
@@ -256,6 +256,7 @@ Module WpwNotation.
 End WpwNotation.
 Import WpwNotation.
 
+(** ** Lemmas for [wpw]/[twpw] *)
 Section wpw.
   Context `{!irisGS'_gen hlc Λ Σ}.
 
