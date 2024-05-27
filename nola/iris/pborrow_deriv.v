@@ -194,7 +194,7 @@ Section pborrow_deriv.
   Qed.
   Lemma der_pborrow_jlto {X Y xπ yπ Φ Ψ} :
     der (pborrow_jlto (X:=X) (Y:=Y) xπ yπ Φ Ψ) ⊢
-      (plend_body ⟦ ⟧ xπ Φ ==∗ plend_body ⟦ ⟧ yπ Ψ).
+      (plend_bodyid xπ Φ ==∗ plend_bodyid yπ Ψ).
   Proof. by rewrite der_sound pborrow_jlto_intp. Qed.
 
   (** Convert the body of borrower and lender propositions *)
