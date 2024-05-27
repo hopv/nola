@@ -468,7 +468,8 @@ Section pborrow_deriv.
   Local Lemma nobord_list {αqPl β} :
     ([∗ list] '(α, q, P)' ∈ αqPl, β ⊑□ α ∗ nobord α q P) ⊢
     ∃ αqRl,
-      ⌜(λ '(α, q, _)', (α, q)') <$> αqRl = (λ '(α, q, _)', (α, q)') <$> αqPl⌝ ∗
+      ⌜([∗ list] '(α, q, _)' ∈ αqPl, q.[α]) ⊣⊢
+        [∗ list] '(α, q, _)' ∈ αqRl, q.[α]⌝ ∗
       ([∗ list] '(α, q, R)' ∈ αqRl, β ⊑□ α ∗ nobor_tok α q R) ∗
       (([∗ list] '(_, _, P)' ∈ αqPl, ⟦ P ⟧) ==∗
         [∗ list] '(_, _, R)' ∈ αqRl, ⟦ R ⟧).
@@ -476,9 +477,9 @@ Section pborrow_deriv.
     rewrite nobor_unseal /=. elim: αqPl=>/=.
     { iIntros. iExists []=>/=. do 2 (iSplit; [done|]). by iIntros. }
     iIntros ([α[q P]] αqPl ->) "[[⊑[%R[PR o]]][%αqRl[%[ol →']]]]".
-    iExists ((α, q, R)' :: αqRl)=>/=. iFrame "⊑ o ol". iSplit.
-    { iPureIntro. by f_equal. }
-    iIntros "[P Pl]". rewrite der_pborrow_jto. iMod ("PR" with "P") as "$".
+    iExists ((α, q, R)' :: αqRl)=>/=. iFrame "⊑ o ol".
+    iSplit; [iPureIntro; by f_equiv|]. iIntros "[P Pl]".
+    rewrite der_pborrow_jto. iMod ("PR" with "P") as "$".
     iApply ("→'" with "Pl").
   Qed.
   (** Merge and subdivide open borrowers *)
@@ -489,9 +490,7 @@ Section pborrow_deriv.
       ([∗ list] '(_, _, P)' ∈ αqPl, ⟦ P ⟧)) =[pborrow_wsatid M]=∗
       ([∗ list] '(α, q, _)' ∈ αqPl, q.[α]) ∗ ([∗ list] Q ∈ Ql, nborcd β Q).
   Proof.
-    rewrite nobord_list /=.
-    rewrite -(big_sepL_fmap (λ '(α, q, _)', (α, q)') (λ _ '(α, q)', q.[α])%I).
-    iIntros "[%[<-[ol →]]] Ql →Pl". rewrite big_sepL_fmap.
+    rewrite nobord_list /=. iIntros "[%[->[ol →]]] Ql →Pl".
     setoid_rewrite <-nborc_tok_nborc.
     iApply (nobor_tok_merge_subdiv (M:=M) with "ol Ql [→ →Pl]"). iIntros "† Ql".
     iMod ("→Pl" with "† Ql") as "Pl". iMod ("→" with "Pl") as "$". by iIntros.
