@@ -83,8 +83,8 @@ Section na_inv.
   #[export] Instance na_inv_tok_persistent {p N P} :
     Persistent (na_inv_tok p N P).
   Proof. rewrite na_inv_tok_unseal. exact _. Qed.
-  (** [na_inv_tok] is timeless if the underlying ofe is discrete *)
-  #[export] Instance na_inv_tok_timeless `{!OfeDiscrete (PROP $oi Σ)} {p N P} :
+  (** [na_inv_tok] is timeless for discrete propositions *)
+  #[export] Instance na_inv_tok_timeless `{!Discrete P} {p N} :
     Timeless (na_inv_tok p N P).
   Proof. rewrite na_inv_tok_unseal. exact _. Qed.
 

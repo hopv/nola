@@ -121,31 +121,26 @@ Section pborrow.
     unfold plend_tok=> ????. do 2 f_equiv. apply inr_ne. by apply: existT_ne.
   Qed.
 
-  (** Borrower and lender tokens are timeless if the underlying ofe is discrete
-    *)
-  Fact nborc_tok_timeless `{!OfeDiscrete (PROP $oi Σ)} {α P} :
-    Timeless (nborc_tok α P).
+  (** Borrower and lender tokens are timeless for discrete propositions *)
+  Fact nborc_tok_timeless `{!Discrete P} {α} : Timeless (nborc_tok α P).
   Proof. exact _. Qed.
-  Fact nbor_tok_timeless `{!OfeDiscrete (PROP $oi Σ)} {α P} :
-    Timeless (nbor_tok α P).
+  Fact nbor_tok_timeless `{!Discrete P} {α} : Timeless (nbor_tok α P).
   Proof. exact _. Qed.
-  Fact nobor_tok_timeless `{!OfeDiscrete (PROP $oi Σ)} {α q P} :
-    Timeless (nobor_tok α q P).
+  Fact nobor_tok_timeless `{!Discrete P} {α q} : Timeless (nobor_tok α q P).
   Proof. exact _. Qed.
-  Fact nlend_tok_timeless `{!OfeDiscrete (PROP $oi Σ)} {α P} :
-    Timeless (nlend_tok α P).
+  Fact nlend_tok_timeless `{!Discrete P} {α} : Timeless (nlend_tok α P).
   Proof. exact _. Qed.
-  #[export] Instance pborc_tok_timeless `{!OfeDiscrete (PROP $oi Σ)}
-    {X α x ξ Φ} : Timeless (pborc_tok (X:=X) α x ξ Φ).
+  #[export] Instance pborc_tok_timeless `{!Discrete (Φ : X -d> _)} {α x ξ} :
+    Timeless (pborc_tok α x ξ Φ).
   Proof. rewrite pborc_tok_unseal. exact _. Qed.
-  #[export] Instance pbor_tok_timeless `{!OfeDiscrete (PROP $oi Σ)}
-    {X α x ξ Φ} : Timeless (pbor_tok (X:=X) α x ξ Φ).
+  #[export] Instance pbor_tok_timeless `{!Discrete (Φ : X -d> _)} {α x ξ} :
+    Timeless (pbor_tok α x ξ Φ).
   Proof. rewrite pbor_tok_unseal. exact _. Qed.
-  #[export] Instance pobor_tok_timeless `{!OfeDiscrete (PROP $oi Σ)}
-    {X α q ξ Φ} : Timeless (pobor_tok (X:=X) α q ξ Φ).
+  #[export] Instance pobor_tok_timeless `{!Discrete (Φ : X -d> _)} {α q ξ} :
+    Timeless (pobor_tok α q ξ Φ).
   Proof. rewrite pobor_tok_unseal. exact _. Qed.
-  Fact plend_tok_timeless `{!OfeDiscrete (PROP $oi Σ)} {X α xπ Φ} :
-    Timeless (plend_tok (X:=X) α xπ Φ).
+  Fact plend_tok_timeless `{!Discrete (Φ : X -d> _)} {α xπ} :
+    Timeless (plend_tok α xπ Φ).
   Proof. exact _. Qed.
 
   (** Turn [nborc_tok] to [nbor_tok] *)

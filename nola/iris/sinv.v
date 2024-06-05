@@ -68,13 +68,11 @@ Section sinv.
   Proof. rewrite sinv_itok_unseal. exact _. Qed.
   Fact sinv_tok_persistent {P} : Persistent (sinv_tok P).
   Proof. exact _. Qed.
-  (** [sinv_itok] and [sinv_tok] are timeless
-    if the underlying ofe is discrete *)
-  #[export] Instance sinv_itok_timeless `{!OfeDiscrete (PROP $oi Σ)}
-    {i P} : Timeless (sinv_itok i P).
-  Proof. rewrite sinv_itok_unseal. exact _. Qed.
-  Fact sinv_tok_timeless `{!OfeDiscrete (PROP $oi Σ)} {P} :
-    Timeless (sinv_tok P).
+  (** [sinv_itok] and [sinv_tok] are timeless for discrete propositions *)
+  #[export] Instance sinv_itok_timeless `{!Discrete P} {i} :
+    Timeless (sinv_itok i P).
+  Proof. rewrite sinv_itok_unseal /sinv_itok_def /gmap_view_frag. exact _. Qed.
+  Fact sinv_tok_timeless `{!Discrete P} : Timeless (sinv_tok P).
   Proof. exact _. Qed.
 
   (** [sinv_iwsat] is non-expansive *)

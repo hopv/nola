@@ -33,9 +33,8 @@ Section mutex.
   (** [mutex_tok] is persistent *)
   Fact mutex_tok_persistent {l P} : Persistent (mutex_tok l P).
   Proof. exact _. Qed.
-  (** [mutex_tok] is timeless if the underlying OFE is discrete *)
-  Fact mutex_tok_timeless `{!OfeDiscrete (PROP $oi Σ)} {l P} :
-    Timeless (mutex_tok l P).
+  (** [mutex_tok] is timeless for discrete propositions *)
+  Fact mutex_tok_timeless `{!Discrete P} {l} : Timeless (mutex_tok l P).
   Proof. exact _. Qed.
 
   (** Interpretation for a mutex *)

@@ -35,8 +35,8 @@ Section inv.
   (** [inv_tok] is persistent *)
   #[export] Instance inv_tok_persistent {N P} : Persistent (inv_tok N P).
   Proof. rewrite inv_tok_unseal. exact _. Qed.
-  (** [inv_tok] is timeless if the underlying ofe is discrete *)
-  #[export] Instance inv_tok_timeless `{!OfeDiscrete (PROP $oi Σ)} {N P} :
+  (** [inv_tok] is timeless for discrete propositions *)
+  #[export] Instance inv_tok_timeless `{!Discrete P} {N} :
     Timeless (inv_tok N P).
   Proof. rewrite inv_tok_unseal. exact _. Qed.
 

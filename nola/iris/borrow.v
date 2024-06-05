@@ -168,18 +168,17 @@ Section borrow.
   #[export] Instance lend_tok_ne {α} : NonExpansive (lend_tok α).
   Proof. rewrite lend_tok_unseal. solve_proper. Qed.
 
-  (** Borrower and lender tokens are timeless if the underlying OFE is discrete
-    *)
-  #[export] Instance borc_tok_timeless `{!OfeDiscrete (PROP $oi Σ)} {α P} :
+  (** Borrower and lender tokens are timeless for discrete propositions *)
+  #[export] Instance borc_tok_timeless `{!Discrete P} {α} :
     Timeless (borc_tok α P).
   Proof. rewrite borc_tok_unseal. exact _. Qed.
-  #[export] Instance bor_tok_timeless `{!OfeDiscrete (PROP $oi Σ)} {α P} :
+  #[export] Instance bor_tok_timeless `{!Discrete P} {α} :
     Timeless (bor_tok α P).
   Proof. rewrite bor_tok_unseal. exact _. Qed.
-  #[export] Instance obor_tok_timeless `{!OfeDiscrete (PROP $oi Σ)} {α q P} :
+  #[export] Instance obor_tok_timeless `{!Discrete P} {α q} :
     Timeless (obor_tok α q P).
   Proof. rewrite obor_tok_unseal. exact _. Qed.
-  #[export] Instance lend_tok_timeless `{!OfeDiscrete (PROP $oi Σ)} {α P} :
+  #[export] Instance lend_tok_timeless `{!Discrete P} {α} :
     Timeless (lend_tok α P).
   Proof. rewrite lend_tok_unseal. exact _. Qed.
 
