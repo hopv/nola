@@ -128,7 +128,7 @@ Section sinv.
     iExists P'. iSplit; [done|]. by rewrite to_agree_includedI.
   Qed.
   (** Access via [sinv_tok] *)
-  Lemma sinv_tok_acc' {ip i P} `{!NonExpansive (ip i)} :
+  Lemma sinv_tok_acc' `{!NonExpansive (ip i)} {P} :
     sinv_itok i P -∗ sinv_iwsat ip -∗ ip i P ∗ (ip i P -∗ sinv_iwsat ip).
   Proof.
     rewrite sinv_iwsat_unseal. iIntros "i [%M[● M]]".
@@ -137,7 +137,7 @@ Section sinv.
     iRewrite "≡". iFrame "P'". iIntros "P'". iExists _. iFrame "●".
     by iApply "→M".
   Qed.
-  Lemma sinv_tok_acc {ip P} `{!NonExpansive ip} :
+  Lemma sinv_tok_acc `{!NonExpansive ip} {P} :
     sinv_tok P -∗ sinv_wsat ip -∗ ip P ∗ (ip P -∗ sinv_wsat ip).
   Proof. iIntros "[%i i]". iApply (sinv_tok_acc' with "i"). Qed.
 End sinv.
