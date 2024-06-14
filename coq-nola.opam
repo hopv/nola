@@ -1,5 +1,5 @@
 opam-version: "2.0"
-synopsis: "Nola: Parameterization for Later-Free Invariants and Borrows"
+synopsis: "Parameterizing Higher-Order Ghost State to Wipe Out the Later Modality"
 maintainer: "Yusuke Matsushita <ysk.m24t@gmail.com>"
 authors: ["Yusuke Matsushita <ysk.m24t@gmail.com>"]
 license: "MIT"

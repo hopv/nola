@@ -1,7 +1,7 @@
-# Nola: Parameterization for Later-Free Invariants and Borrows
+# Nola: Parameterizing Higher-Order Ghost State to Wipe Out the Later Modality
 
-Nola is a library to achieve _later-free invariants and borrows_ by the power
-of _parameterization_.
+Nola is a library for _parameterizing higher-order ghost state_, which enables
+wiping out the _later modality_.
 It is fully mechanized in [Coq](https://coq.inria.fr/) with the
 [Iris](https://iris-project.org/) separation logic framework.
 
