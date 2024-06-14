@@ -5,7 +5,7 @@ wiping out the _later modality_.
 It is fully mechanized in [Coq](https://coq.inria.fr/) with the
 [Iris](https://iris-project.org/) separation logic framework.
 
-The name Nola comes from _No_ *la*ters and a nickname for New Orleans,
+The name Nola comes from '_No_ *la*ters' and the nickname for New Orleans,
 Louisiana, US.
 
 - [Publication](#publication)
