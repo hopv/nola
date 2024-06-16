@@ -211,10 +211,18 @@ Section pborrow.
   (** ** World satisfaction *)
 
   (** Body of a prophetic lender *)
-  Definition plend_body ip {X} (xπ : clair TY X) (Φ : X → PROP $oi Σ)
+  Definition plend_body ip {X} (xπ : clair TY X) (Φ : X -d> PROP $oi Σ)
     : iProp Σ := ∃ x', ⟨π, xπ π = x'⟩ ∗ ip (Φ x').
-  Definition plend_body_var ip {X} (ξ : prvar X) (Φ : X → PROP $oi Σ)
+  Definition plend_body_var ip {X} (ξ : prvar X) (Φ : X -d> PROP $oi Σ)
     : iProp Σ := plend_body ip (λ π, π ξ) Φ.
+
+  (** [plend_body] is non-expansive *)
+  #[export] Instance plend_body_ne `{!NonExpansive ip} {X xπ} :
+    NonExpansive (@plend_body ip X xπ).
+  Proof. solve_proper. Qed.
+  Fact plend_body_var_ne `{!NonExpansive ip} {X ξ} :
+    NonExpansive (@plend_body_var ip X ξ).
+  Proof. exact _. Qed.
 
   (** Interpretation of [pbprop] *)
   Definition pbintp ip : _ -d> iProp Σ := λ Pb, match Pb with
