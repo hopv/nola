@@ -17,8 +17,7 @@ Variant sel :=
 Definition idom (_ : sel) : Type := Empty_set.
 (** [cdom]: Domain for coinductive parts *)
 Definition cdom (s : sel) : Type := match s with
-  | cips_inv _ => unit
-  | cips_mutex _ => unit
+  | cips_inv _ | cips_mutex _ => unit
   end.
 (** [dataOF]: Data [oFunctor] *)
 Definition dataOF (_ : sel) : oFunctor := unitO.
@@ -37,16 +36,18 @@ Proof. exact _. Qed.
 (** Construct [ciProp] *)
 Section ciProp.
   Context {Σ : gFunctors}.
-  Definition cip_inv N (Px : ciProp Σ) : ciProp Σ :=
+  Implicit Type Px : ciProp Σ.
+  Definition cip_inv N Px : ciProp Σ :=
     cip_custom (cips_inv N) nullary (unary Px) ().
-  Definition cip_mutex l (Px : ciProp Σ) : ciProp Σ :=
+  Definition cip_mutex l Px : ciProp Σ :=
     cip_custom (cips_mutex l) nullary (unary Px) ().
 
   #[export] Instance cip_inv_ne {N} : NonExpansive (cip_inv N).
   Proof. move=> ????. apply cip_custom_ne; solve_proper. Qed.
+  #[export] Instance cip_mutex_ne {l} : NonExpansive (cip_mutex l).
+  Proof. move=> ????. apply cip_custom_ne; solve_proper. Qed.
 End ciProp.
 
-From iris.algebra Require Import ofe.
 (** ** [judg]: Judgment *)
 Definition judg Σ : ofe :=
   (leibnizO namespace * ciProp Σ + ciProp Σ * ciProp Σ)%type.
