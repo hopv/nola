@@ -5,9 +5,9 @@ From nola.bi Require Import util.
 From nola.heap_lang Require Export notation proofmode lib.mutex.
 From nola.examples Require Export nsynty.
 Import ProdNotation WpwNotation iPropAppNotation PintpNotation IntpNotation
-  NsyntyNotation.
+  ProphNotation LftNotation NsyntyNotation.
 
-Implicit Type (N : namespace) (l : loc) (b : bool) (α : lft) (q : Qp)
+Implicit Type (N : namespace) (l : loc) (b : bool) (α β : lft) (q : Qp)
   (X Y : nsynty).
 
 (** ** Preliminaries *)
@@ -335,5 +335,51 @@ Section verify.
     { iSplit; [done|]. rewrite !/⟦ mlist' _ _ ⟧ /=. by iFrame. }
     iIntros "_". wp_load. wp_store. have -> : (S m - 1)%Z = m by lia.
     by iApply ("IH" with "c↦ →Ψ").
+  Qed.
+End verify.
+
+(** ** On borrows *)
+Section verify.
+  Context `{!inv'GS ciPropOF Σ, !mutexGS ciPropOF Σ,
+    !pborrowGS nsynty ciPropOF Σ, !heapGS_gen hlc Σ}.
+
+  (** Dereference a nested mutable reference *)
+  Lemma bor_bor_deref {α β l Φx q} :
+    [[{ q.[α ⊓ β] ∗ nbord α (∃ l', ▷ l ↦ #l' ∗ cip_bor β (Φx l'))%n }]]
+      [pborrow_wsatid bupd]
+      !#l
+    [[{ l', RET #l'; q.[α ⊓ β] ∗ nborcd (α ⊓ β) (Φx l') }]].
+  Proof.
+    iIntros "%Ψ [[α β] b] →Ψ".
+    iMod (nbord_open (M:=bupd) with "α b") as "[o big]". rewrite /intp /=.
+    iDestruct "big" as (l') "[>↦ b']". iApply twpw_fupdw_nonval; [done|].
+    wp_load. iModIntro.
+    iMod (nbord_reborrow (M:=bupd) α with "β b'") as "[β[b' →b']]".
+    rewrite [_⊓_]comm.
+    iMod (nobord_subdiv (M:=bupd) [] with "[] o [] [↦ →b']") as "[α _]"=>/=.
+    { iApply lft_sincl_refl. } { done. }
+    { iIntros "† _". iModIntro. iExists _. iFrame "↦". by iApply "→b'". }
+    iModIntro. iApply "→Ψ". iFrame.
+  Qed.
+
+  (** Dereference a nested prophetic mutable reference *)
+  Lemma proph_bor_bor_deref {X η ξ α β l Φx q} {x : X} :
+    [[{ q.[α ⊓ β] ∗
+        pbord α ((x, ξ)' : _ *'ₛ prvarₛ _) η
+          (λ '(x', ξ')', ∃ l', ▷ l ↦ #l' ∗ cip_pbor β x' ξ' (Φx l'))%n }]]
+      [pborrow_wsatid bupd]
+      !#l
+    [[{ l', RET #l';
+        q.[α ⊓ β] ∗ ∃ ξ' : prvar X,
+          ⟨π, π η = (π ξ', ξ)'⟩ ∗ pborcd (α ⊓ β) x ξ' (Φx l') }]].
+  Proof.
+    iIntros "%Ψ [[α β] b] →Ψ".
+    iMod (pbord_open (M:=bupd) with "α b") as "/=[o big]".
+    rewrite /intp /=. iDestruct "big" as (l') "[>↦ b']".
+    iApply twpw_fupdw_nonval; [done|]. wp_load. iModIntro.
+    iMod (pobord_pbord_reborrow (TY:=nsynty) (M:=bupd) (λ _, (_,_)' : _ *'ₛ _)
+      with "o β b' [↦]") as (?) "[α[β[obs c]]]".
+    { iIntros "/=% _ ? !>". iExists _. iFrame. }
+    iModIntro. iApply "→Ψ". iFrame "α β". iExists _. iFrame.
   Qed.
 End verify.
