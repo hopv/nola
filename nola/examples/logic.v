@@ -329,9 +329,9 @@ Section verify.
     wp_rec. wp_load. wp_pures.
     wp_apply (twp_try_acquire_loop_mutexd with "ml"). iIntros ([|]); last first.
     { iIntros (?). wp_pure. iModIntro. iApply "→Ψ". by iExists _. }
-    rewrite !/⟦ mlist' _ _ ⟧ /=. iIntros "[Φ[%[>↦ #mtl]]]". wp_pure.
-    wp_apply ("f" with "Φ"). iIntros "Φ". wp_load. wp_pures.
-    wp_apply (twp_release_mutexd with "[Φ ↦]").
+    rewrite !/⟦ mlist' _ _ ⟧ /=. iIntros "[Φx[%[>↦ #mtl]]]". wp_pure.
+    wp_apply ("f" with "Φx"). iIntros "Φx". wp_load. wp_pures.
+    wp_apply (twp_release_mutexd with "[Φx ↦]").
     { iSplit; [done|]. rewrite !/⟦ mlist' _ _ ⟧ /=. by iFrame. }
     iIntros "_". wp_load. wp_store. have -> : (S m - 1)%Z = m by lia.
     by iApply ("IH" with "c↦ →Ψ").
