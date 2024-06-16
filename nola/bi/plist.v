@@ -50,7 +50,7 @@ Section big_sepPL.
   Proof.
     move=> ?? eq xl _<-. elim: al xl; [done|]=>/= ?? IH ?. by rewrite eq IH.
   Qed.
-  #[export] Instance big_sepPL_mono' {al} :
+  #[export] Instance big_sepPL_flip_mono {al} :
     Proper
       (forall_relation (λ _, pointwise_relation _ (flip (⊢))) ==> (=) ==>
         flip (⊢))

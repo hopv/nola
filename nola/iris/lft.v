@@ -284,7 +284,8 @@ Section lft.
   Qed.
   #[export] Instance lft_dead_mono : Proper (flip (⊑) ==> (⊢)) (λ α, [†α])%I.
   Proof. move=> >. exact lft_incl_dead. Qed.
-  #[export] Instance lft_dead_mono' : Proper ((⊑) ==> flip (⊢)) (λ α, [†α])%I.
+  #[export] Instance lft_dead_flip_mono :
+    Proper ((⊑) ==> flip (⊢)) (λ α, [†α])%I.
   Proof. solve_proper. Qed.
 
   (** Modify an eternal lifetime token using [⊑] *)
@@ -296,7 +297,7 @@ Section lft.
   Qed.
   #[export] Instance lft_etern_mono : Proper ((⊑) ==> (⊢)) (λ α, [∞α])%I.
   Proof. move=> >. exact lft_incl_etern. Qed.
-  #[export] Instance lft_etern_mono' :
+  #[export] Instance lft_etern_flip_mono :
     Proper (flip (⊑) ==> flip (⊢)) (λ α, [∞α])%I.
   Proof. solve_proper. Qed.
 End lft.

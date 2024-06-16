@@ -67,7 +67,7 @@ Section lemmas.
   #[export] Instance modw_mono `{!Proper ((⊢) ==> (⊢)) M} {W} :
     Proper ((⊢) ==> (⊢)) (modw M W) | 10.
   Proof. solve_proper. Qed.
-  #[export] Instance modw_mono' `{!Proper ((⊢) ==> (⊢)) M} {W} :
+  #[export] Instance modw_flip_mono `{!Proper ((⊢) ==> (⊢)) M} {W} :
     Proper (flip (⊢) ==> flip (⊢)) (modw M W) | 10.
   Proof. solve_proper. Qed.
 
@@ -264,7 +264,7 @@ Section lemmas.
   #[export] Instance bupdw_mono `{!BiBUpd PROP} {W} :
     Proper ((⊢) ==> (⊢)) (bupdw (PROP:=PROP) W).
   Proof. exact _. Qed.
-  #[export] Instance bupdw_mono' `{!BiBUpd PROP} {W} :
+  #[export] Instance bupdw_flip_mono `{!BiBUpd PROP} {W} :
     Proper (flip (⊢) ==> flip (⊢)) (bupdw (PROP:=PROP) W).
   Proof. exact _. Qed.
 
@@ -272,7 +272,7 @@ Section lemmas.
   #[export] Instance fupdw_mono `{!BiFUpd PROP} {W E E'} :
     Proper ((⊢) ==> (⊢)) (fupdw (PROP:=PROP) W E E').
   Proof. exact _. Qed.
-  #[export] Instance fupdw_flip_mono' `{!BiFUpd PROP} {W E E'} :
+  #[export] Instance fupdw_flip_mono `{!BiFUpd PROP} {W E E'} :
     Proper (flip (⊢) ==> flip (⊢)) (fupdw (PROP:=PROP) W E E').
   Proof. exact _. Qed.
 

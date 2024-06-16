@@ -382,7 +382,7 @@ Section lemmas.
     move=> ?? imp. rewrite proph_obs_unseal /proph_obs_def. do 4 f_equiv.
     move=> imp' ??. by apply imp, imp'.
   Qed.
-  #[export] Instance proph_obs_mono' :
+  #[export] Instance proph_obs_flip_mono :
     Proper (pointwise_relation _ (flip impl) ==> flip (⊢)) proph_obs.
   Proof. solve_proper. Qed.
   #[export] Instance proph_obs_proper :

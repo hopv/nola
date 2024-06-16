@@ -146,7 +146,7 @@ Section lemmas.
   #[export] Instance proph_dep_mono {A} (aπ : clair TY A) :
     Proper ((⊆) ==> impl) (proph_dep aπ).
   Proof. move=>/= ?? sub dep ?? eqv. apply dep => ??. by apply eqv, sub. Qed.
-  #[export] Instance proph_dep_mono' {A} (aπ : clair TY A) :
+  #[export] Instance proph_dep_flip_mono {A} (aπ : clair TY A) :
     Proper (flip (⊆) ==> flip impl) (proph_dep aπ).
   Proof. solve_proper. Qed.
   #[export] Instance proph_dep_proper {A} (aπ : clair TY A) :
