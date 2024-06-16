@@ -60,4 +60,5 @@ nola/heap_lang/lib/mutex.v
 
 nola/examples/later.v
 nola/examples/minilogic.v
+nola/examples/nsynty.v
 nola/examples/logic.v
