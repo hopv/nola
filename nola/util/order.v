@@ -16,23 +16,23 @@ Module IsoNotation.
 End IsoNotation.
 Import IsoNotation.
 
-(** ** [proty]: Pre-ordered type *)
+(** ** [poty]: Partially ordered type *)
 #[projections(primitive)]
-Structure proty := Proty {
-  proty_car :> Type;
-  #[canonical=no] ole :: SqSubsetEq proty_car;
-  #[canonical=no] oeqv :: Iso proty_car;
+Structure poty := Poty {
+  poty_car :> Type;
+  #[canonical=no] ole :: SqSubsetEq poty_car;
+  #[canonical=no] oeqv :: Iso poty_car;
   #[canonical=no] ole_preorder :: PreOrder ole;
-  #[canonical=no] oeqv_ole {o o' : proty_car} :
+  #[canonical=no] oeqv_ole {o o' : poty_car} :
     o ≃ o' ↔ o ⊑ o' ∧ o' ⊑ o;
 }.
-Add Printing Constructor proty.
-Arguments proty_car {OT} : rename.
+Add Printing Constructor poty.
+Arguments poty_car {OT} : rename.
 Arguments ole {OT} : rename. Arguments oeqv {OT} : rename.
 Arguments ole_preorder {OT} : rename. Arguments oeqv_ole {OT _ _} : rename.
 #[export] Typeclasses Transparent ole. #[export] Typeclasses Transparent oeqv.
 
-Implicit Type (OT : proty) (A : Type).
+Implicit Type (OT : poty) (A : Type).
 
 (** [≃] is an equivalence relation *)
 #[export] Instance oeqv_equivalence {OT} : Equivalence (≃@{OT}).
@@ -47,10 +47,10 @@ Proof. move=> >. apply oeqv_ole. Qed.
 #[export] Instance oeqv_ole_2 {OT} : subrelation (≃@{OT}) (flip (⊑@{OT})).
 Proof. move=> >. apply oeqv_ole. Qed.
 
-(** ** Canonical structures of [proty] *)
+(** ** Canonical structures of [poty] *)
 
 (** Natural number *)
-Program Canonical natPro : proty := Proty nat (≤) (=) _ _.
+Program Canonical natPro : poty := Poty nat (≤) (=) _ _.
 Next Obligation.
   move=> >. split; [by move=> ->|]. case=> *. by apply Nat.le_antisymm.
 Qed.
@@ -60,7 +60,7 @@ Lemma nat_oeqv {n m : nat} : n ≃ m ↔ n = m.
 Proof. done. Qed.
 
 (** Proposition *)
-Program Canonical PropPro : proty := Proty Prop (→) (↔) _ _.
+Program Canonical PropPro : poty := Poty Prop (→) (↔) _ _.
 Next Obligation. constructor; auto. Qed.
 Next Obligation. done. Qed.
 Lemma Prop_ole {P Q : Prop} : P ⊑ Q ↔ (P → Q).
@@ -69,7 +69,7 @@ Lemma Prop_oeqv {P Q : Prop} : P ≃ Q ↔ (P ↔ Q).
 Proof. done. Qed.
 
 (** Unit *)
-Program Canonical unitPro : proty := Proty unit (λ _ _, True) (λ _ _, True) _ _.
+Program Canonical unitPro : poty := Poty unit (λ _ _, True) (λ _ _, True) _ _.
 Next Obligation. done. Qed.
 Lemma unit_ole {u u' : ()} : u ⊑ u' ↔ True.
 Proof. done. Qed.
@@ -77,8 +77,8 @@ Lemma unit_oeqv {u u' : ()} : u ≃ u' ↔ True.
 Proof. done. Qed.
 
 (** Function *)
-Program Canonical funPro {A} (OTF : A → proty) : proty :=
-  Proty (∀ a, OTF a) (λ f g, ∀ a, f a ⊑ g a) (λ f g, ∀ a, f a ≃ g a) _ _.
+Program Canonical funPro {A} (OTF : A → poty) : poty :=
+  Poty (∀ a, OTF a) (λ f g, ∀ a, f a ⊑ g a) (λ f g, ∀ a, f a ≃ g a) _ _.
 Next Obligation. constructor; [auto|]=> ??????. etrans; auto. Qed.
 Next Obligation.
   move=> ????. split.
@@ -91,8 +91,8 @@ Qed.
 Record dual A := Dual { undual : A }.
 Add Printing Constructor dual.
 Arguments Dual {_} _. Arguments undual {_} _.
-Program Canonical dualPro OT : proty :=
-  Proty (dual OT) (λ o o', undual o' ⊑ undual o) (λ o o', undual o' ≃ undual o)
+Program Canonical dualPro OT : poty :=
+  Poty (dual OT) (λ o o', undual o' ⊑ undual o) (λ o o', undual o' ≃ undual o)
     _ _.
 Next Obligation. move=> ?. constructor; [auto|]=> ?????. by etrans. Qed.
 Next Obligation.
