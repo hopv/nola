@@ -1,4 +1,4 @@
-(** * [ciProp]: Coinductive-inductive proposition *)
+(** * [ciProp]: Coinductive-inductive set of propositions *)
 
 From nola.util Require Export fn cit.
 From nola.bi Require Import ofe.
@@ -60,7 +60,7 @@ Definition cip_dataOF {S} (D : S → oFunctor) (s : cip_sel S) : oFunctor :=
   `{∀ s : S, oFunctorContractive (D s)} : oFunctorContractive (cip_dataOF D s).
 Proof. case s=>/=; exact _. Qed.
 
-(** ** [ciProp]: Coinductive-inductive proposition *)
+(** ** [ciProp]: Coinductive-inductive set of propositions *)
 Definition ciPropOF {S} I C D : oFunctor :=
   citOF (cip_idom (S:=S) I) (cip_cdom C) (cip_dataOF D).
 Definition ciProp {S} I C D Σ : Type := ciPropOF (S:=S) I C D $oi Σ.

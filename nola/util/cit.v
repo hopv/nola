@@ -1,4 +1,4 @@
-(** * [cit]: Coinductive-inductive tree *)
+(** * [cit]: Coinductive-inductive set of trees *)
 
 From nola Require Export prelude.
 From nola.util Require Import rel order.
@@ -7,9 +7,9 @@ Import EqNotations IsoNotation.
 
 Implicit Type S CIT : Type.
 
-(** ** Coinductive-inductive tree *)
+(** ** Coinductive-inductive set of trees *)
 
-(** [citI]: Intermediate inductive tree *)
+(** [citI]: Intermediate inductive set of trees *)
 Section citI.
   Context {S} (I C D : S → Type) CIT.
   Inductive citI := CitI {
@@ -24,7 +24,7 @@ Arguments CitI {_ _ _ _ _}. Arguments cit_sel {_ _ _ _ _}.
 Arguments cit_ikidsI {_ _ _ _ _}. Arguments cit_ckids {_ _ _ _ _}.
 Arguments cit_data {_ _ _ _ _}.
 
-(** [cit]: Coinductive-inductive tree *)
+(** [cit]: Coinductive-inductive set of trees *)
 Section cit.
   Context {S} (I C D : S → Type).
   CoInductive cit := Cit { uncit : citI I C D cit; }.
