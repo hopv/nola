@@ -271,8 +271,7 @@ Class prophGS TY Σ := ProphGS {
   proph_name : gname;
 }.
 Local Existing Instance prophG_in.
-Local Instance inG_prophR_def `{!inG Σ (prophR PROP)} :
-  inG Σ (prophR_def PROP).
+Local Instance inG_prophR_def `{!inG Σ (prophR TY)} : inG Σ (prophR_def TY).
 Proof. rewrite -prophR_unseal. exact _. Qed.
 Class prophGpreS TY Σ := prophGpreS_in : inG Σ (prophR TY).
 Local Existing Instance prophGpreS_in.
