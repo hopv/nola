@@ -1,6 +1,6 @@
 (** * Showcase logic *)
 
-From nola.iris Require Export ciprop inv_deriv pborrow_deriv.
+From nola.iris Require Export cif inv_deriv pborrow_deriv.
 From nola.bi Require Import util.
 From nola.heap_lang Require Export notation proofmode lib.mutex.
 From nola.examples Require Export nsynty.
@@ -14,25 +14,25 @@ Implicit Type (N : namespace) (l : loc) (b : bool) (α β : lft) (q : Qp)
 
 (** [sel]: Selector *)
 Variant sel :=
-| (** Invariant *) cips_inv (N : namespace)
-| (** Mutex *) cips_mutex (l : loc)
-| (** Non-prophetic closed borrower *) cips_borc (α : lft)
-| (** Non-prophetic borrower *) cips_bor (α : lft)
-| (** Non-prophetic open borrower *) cips_obor (α : lft) (q : Qp)
-| (** Non-prophetic lender *) cips_lend (α : lft)
+| (** Invariant *) cifs_inv (N : namespace)
+| (** Mutex *) cifs_mutex (l : loc)
+| (** Non-prophetic closed borrower *) cifs_borc (α : lft)
+| (** Non-prophetic borrower *) cifs_bor (α : lft)
+| (** Non-prophetic open borrower *) cifs_obor (α : lft) (q : Qp)
+| (** Non-prophetic lender *) cifs_lend (α : lft)
 | (** Prophetic closed borrower *)
-    cips_pborc {X} (α : lft) (x : X) (ξ : prvar X)
-| (** Prophetic borrower *) cips_pbor {X} (α : lft) (x : X) (ξ : prvar X)
-| (** Prophetic open borrower *) cips_pobor {X} (α : lft) (q : Qp) (ξ : prvar X)
-| (** Prophetic lender *) cips_plend {X} (α : lft) (xπ : clair nsynty X).
+    cifs_pborc {X} (α : lft) (x : X) (ξ : prvar X)
+| (** Prophetic borrower *) cifs_pbor {X} (α : lft) (x : X) (ξ : prvar X)
+| (** Prophetic open borrower *) cifs_pobor {X} (α : lft) (q : Qp) (ξ : prvar X)
+| (** Prophetic lender *) cifs_plend {X} (α : lft) (xπ : clair nsynty X).
 (** [idom]: Domain for inductive parts *)
 Definition idom (_ : sel) : Type := Empty_set.
 (** [cdom]: Domain for coinductive parts *)
 Definition cdom (s : sel) : Type := match s with
-  | cips_inv _ | cips_mutex _
-    | cips_borc _ | cips_bor _ | cips_obor _ _ | cips_lend _ => unit
-  | @cips_pborc X _ _ _ | @cips_pbor X _ _ _ | @cips_pobor X _ _ _
-    | @cips_plend X _ _ => X
+  | cifs_inv _ | cifs_mutex _
+    | cifs_borc _ | cifs_bor _ | cifs_obor _ _ | cifs_lend _ => unit
+  | @cifs_pborc X _ _ _ | @cifs_pbor X _ _ _ | @cifs_pobor X _ _ _
+    | @cifs_plend X _ _ => X
   end.
 (** [dataOF]: Data [oFunctor] *)
 Definition dataOF (_ : sel) : oFunctor := unitO.
@@ -40,78 +40,78 @@ Definition dataOF (_ : sel) : oFunctor := unitO.
 Fact dataOF_contractive {s} : oFunctorContractive (dataOF s).
 Proof. exact _. Qed.
 
-(** ** [ciProp]: Proposition *)
-Notation ciProp Σ := (ciProp idom cdom dataOF Σ).
-Notation ciPropOF := (ciPropOF idom cdom dataOF).
+(** ** [cif]: Formulas *)
+Notation cif Σ := (cif idom cdom dataOF Σ).
+Notation cifOF := (cifOF idom cdom dataOF).
 
-(** [ciPropOF] is contractive *)
-Fact ciPropOF_contractive : oFunctorContractive ciPropOF.
+(** [cifOF] is contractive *)
+Fact cifOF_contractive : oFunctorContractive cifOF.
 Proof. exact _. Qed.
 
-(** Construct [ciProp] *)
-Section ciProp.
+(** Construct [cif] *)
+Section cif.
   Context {Σ : gFunctors}.
-  Implicit Type Px : ciProp Σ.
+  Implicit Type Px : cif Σ.
   (** Invariant *)
-  Definition cip_inv N Px : ciProp Σ :=
-    cip_custom (cips_inv N) nullary (unary Px) ().
+  Definition cif_inv N Px : cif Σ :=
+    cif_custom (cifs_inv N) nullary (unary Px) ().
   (** Mutex *)
-  Definition cip_mutex l Px : ciProp Σ :=
-    cip_custom (cips_mutex l) nullary (unary Px) ().
+  Definition cif_mutex l Px : cif Σ :=
+    cif_custom (cifs_mutex l) nullary (unary Px) ().
   (** Non-prophetic closed borrower *)
-  Definition cip_borc α Px : ciProp Σ :=
-    cip_custom (cips_borc α) nullary (unary Px) ().
+  Definition cif_borc α Px : cif Σ :=
+    cif_custom (cifs_borc α) nullary (unary Px) ().
   (** Non-prophetic borrower *)
-  Definition cip_bor α Px : ciProp Σ :=
-    cip_custom (cips_bor α) nullary (unary Px) ().
+  Definition cif_bor α Px : cif Σ :=
+    cif_custom (cifs_bor α) nullary (unary Px) ().
   (** Non-prophetic open borrower *)
-  Definition cip_obor α q Px : ciProp Σ :=
-    cip_custom (cips_obor α q) nullary (unary Px) ().
+  Definition cif_obor α q Px : cif Σ :=
+    cif_custom (cifs_obor α q) nullary (unary Px) ().
   (** Non-prophetic lender *)
-  Definition cip_lend α Px : ciProp Σ :=
-    cip_custom (cips_lend α) nullary (unary Px) ().
+  Definition cif_lend α Px : cif Σ :=
+    cif_custom (cifs_lend α) nullary (unary Px) ().
   (** Prophetic closed borrower *)
-  Definition cip_pborc {X} α x ξ (Φx : X -d> ciProp Σ) : ciProp Σ :=
-    cip_custom (@cips_pborc X α x ξ) nullary Φx ().
+  Definition cif_pborc {X} α x ξ (Φx : X -d> cif Σ) : cif Σ :=
+    cif_custom (@cifs_pborc X α x ξ) nullary Φx ().
   (** Prophetic borrower *)
-  Definition cip_pbor {X} α x ξ (Φx : X -d> ciProp Σ) : ciProp Σ :=
-    cip_custom (@cips_pbor X α x ξ) nullary Φx ().
+  Definition cif_pbor {X} α x ξ (Φx : X -d> cif Σ) : cif Σ :=
+    cif_custom (@cifs_pbor X α x ξ) nullary Φx ().
   (** Prophetic open borrower *)
-  Definition cip_pobor {X} α q ξ (Φx : X -d> ciProp Σ) : ciProp Σ :=
-    cip_custom (@cips_pobor X α q ξ) nullary Φx ().
+  Definition cif_pobor {X} α q ξ (Φx : X -d> cif Σ) : cif Σ :=
+    cif_custom (@cifs_pobor X α q ξ) nullary Φx ().
   (** Prophetic lender *)
-  Definition cip_plend {X} α xπ (Φx : X -d> ciProp Σ) : ciProp Σ :=
-    cip_custom (@cips_plend X α xπ) nullary Φx ().
+  Definition cif_plend {X} α xπ (Φx : X -d> cif Σ) : cif Σ :=
+    cif_custom (@cifs_plend X α xπ) nullary Φx ().
 
   (** The custom constructors are non-expansive *)
-  #[export] Instance cip_inv_ne {N} : NonExpansive (cip_inv N).
-  Proof. move=> ????. apply cip_custom_ne; solve_proper. Qed.
-  #[export] Instance cip_mutex_ne {l} : NonExpansive (cip_mutex l).
-  Proof. move=> ????. apply cip_custom_ne; solve_proper. Qed.
-  #[export] Instance cip_borc_ne {α} : NonExpansive (cip_borc α).
-  Proof. move=> ????. apply cip_custom_ne; solve_proper. Qed.
-  #[export] Instance cip_bor_ne {α} : NonExpansive (cip_bor α).
-  Proof. move=> ????. apply cip_custom_ne; solve_proper. Qed.
-  #[export] Instance cip_obor_ne {α q} : NonExpansive (cip_obor α q).
-  Proof. move=> ????. apply cip_custom_ne; solve_proper. Qed.
-  #[export] Instance cip_lend_ne {α} : NonExpansive (cip_lend α).
-  Proof. move=> ????. apply cip_custom_ne; solve_proper. Qed.
-  #[export] Instance cip_pborc_ne {X α x ξ} : NonExpansive (@cip_pborc X α x ξ).
-  Proof. move=> ????. apply cip_custom_ne; solve_proper. Qed.
-  #[export] Instance cip_pbor_ne {X α x ξ} : NonExpansive (@cip_pbor X α x ξ).
-  Proof. move=> ????. apply cip_custom_ne; solve_proper. Qed.
-  #[export] Instance cip_pobor_ne {X α q ξ} : NonExpansive (@cip_pobor X α q ξ).
-  Proof. move=> ????. apply cip_custom_ne; solve_proper. Qed.
-  #[export] Instance cip_plend_ne {X α xπ} : NonExpansive (@cip_plend X α xπ).
-  Proof. move=> ????. apply cip_custom_ne; solve_proper. Qed.
-End ciProp.
+  #[export] Instance cif_inv_ne {N} : NonExpansive (cif_inv N).
+  Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
+  #[export] Instance cif_mutex_ne {l} : NonExpansive (cif_mutex l).
+  Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
+  #[export] Instance cif_borc_ne {α} : NonExpansive (cif_borc α).
+  Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
+  #[export] Instance cif_bor_ne {α} : NonExpansive (cif_bor α).
+  Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
+  #[export] Instance cif_obor_ne {α q} : NonExpansive (cif_obor α q).
+  Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
+  #[export] Instance cif_lend_ne {α} : NonExpansive (cif_lend α).
+  Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
+  #[export] Instance cif_pborc_ne {X α x ξ} : NonExpansive (@cif_pborc X α x ξ).
+  Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
+  #[export] Instance cif_pbor_ne {X α x ξ} : NonExpansive (@cif_pbor X α x ξ).
+  Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
+  #[export] Instance cif_pobor_ne {X α q ξ} : NonExpansive (@cif_pobor X α q ξ).
+  Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
+  #[export] Instance cif_plend_ne {X α xπ} : NonExpansive (@cif_plend X α xπ).
+  Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
+End cif.
 
 (** ** [judg]: Judgment *)
 Definition judg Σ : ofe :=
-  (leibnizO namespace * ciProp Σ + ciProp Σ * ciProp Σ + ciProp Σ * ciProp Σ +
+  (leibnizO namespace * cif Σ + cif Σ * cif Σ + cif Σ * cif Σ +
     sigT (A:=nsynty *' nsynty) (λ '(X, Y)',
       leibnizO (clair nsynty X *' clair nsynty Y) *
-      (X -d> ciProp Σ) * (Y -d> ciProp Σ)))%type.
+      (X -d> cif Σ) * (Y -d> cif Σ)))%type.
 Definition inv_jacsr {Σ} N Px : judg Σ := inl (inl (inl (N, Px))).
 Definition mutex_jiff {Σ} Px Qx : judg Σ := inl (inl (inr (Px, Qx))).
 Definition pborrow_jto {Σ} Px Qx : judg Σ := inl (inr (Px, Qx)).
@@ -130,32 +130,32 @@ Proof.
 Qed.
 
 #[export] Instance judg_inv_pre_deriv {Σ} :
-  InvPreDeriv (ciProp Σ) (judg Σ) := INV_PRE_DERIV inv_jacsr.
+  InvPreDeriv (cif Σ) (judg Σ) := INV_PRE_DERIV inv_jacsr.
 #[export] Instance judg_mutex_pre_deriv {Σ} :
-  MutexPreDeriv (ciProp Σ) (judg Σ) := MUTEX_PRE_DERIV mutex_jiff.
+  MutexPreDeriv (cif Σ) (judg Σ) := MUTEX_PRE_DERIV mutex_jiff.
 #[export] Instance judg_pborrow_pre_deriv {Σ} :
-  PborrowPreDeriv nsynty (ciProp Σ) (judg Σ) :=
+  PborrowPreDeriv nsynty (cif Σ) (judg Σ) :=
   PBORROW_PRE_DERIV pborrow_jto (@pborrow_jlto _).
 
 Section intp.
-  Context `{!inv'GS ciPropOF Σ, !mutexGS ciPropOF Σ,
-    !pborrowGS nsynty ciPropOF Σ}.
+  Context `{!inv'GS cifOF Σ, !mutexGS cifOF Σ,
+    !pborrowGS nsynty cifOF Σ}.
   Implicit Type δ : judg Σ → iProp Σ.
 
   (** ** [bintp]: Base interpretation *)
   Definition bintp δ s :
-    (idom s -d> iProp Σ) → (cdom s -d> ciProp Σ) → dataOF s $oi Σ → iProp Σ :=
+    (idom s -d> iProp Σ) → (cdom s -d> cif Σ) → dataOF s $oi Σ → iProp Σ :=
     match s with
-    | cips_inv N => λ _ Pxs _, inv' δ N (Pxs ())
-    | cips_mutex l => λ _ Pxs _, mutex δ l (Pxs ())
-    | cips_borc α => λ _ Pxs _, nborc δ α (Pxs ())
-    | cips_bor α => λ _ Pxs _, nbor δ α (Pxs ())
-    | cips_obor α q => λ _ Pxs _, nobor δ α q (Pxs ())
-    | cips_lend α => λ _ Pxs _, nlend δ α (Pxs ())
-    | cips_pborc α x ξ => λ _ Φx _, pborc δ α x ξ Φx
-    | cips_pbor α x ξ => λ _ Φx _, pbor δ α x ξ Φx
-    | cips_pobor α q ξ => λ _ Φx _, pobor δ α q ξ Φx
-    | cips_plend α xπ => λ _ Φx _, plend δ α xπ Φx
+    | cifs_inv N => λ _ Pxs _, inv' δ N (Pxs ())
+    | cifs_mutex l => λ _ Pxs _, mutex δ l (Pxs ())
+    | cifs_borc α => λ _ Pxs _, nborc δ α (Pxs ())
+    | cifs_bor α => λ _ Pxs _, nbor δ α (Pxs ())
+    | cifs_obor α q => λ _ Pxs _, nobor δ α q (Pxs ())
+    | cifs_lend α => λ _ Pxs _, nlend δ α (Pxs ())
+    | cifs_pborc α x ξ => λ _ Φx _, pborc δ α x ξ Φx
+    | cifs_pbor α x ξ => λ _ Φx _, pbor δ α x ξ Φx
+    | cifs_pobor α q ξ => λ _ Φx _, pobor δ α q ξ Φx
+    | cifs_plend α xπ => λ _ Φx _, plend δ α xπ Φx
     end.
 
   (** [bintp] is non-expansive *)
@@ -163,12 +163,12 @@ Section intp.
     NonExpansive3 (bintp δ s).
   Proof. case s; solve_proper. Qed.
 
-  (** Parameterized interpretation of [ciProp] *)
-  #[export] Instance ciProp_dintp : Dintp (judg Σ) (ciProp Σ) (iProp Σ) :=
-    DINTP (λ δ, cip_intp (bintp δ)).
+  (** Parameterized interpretation of [cif] *)
+  #[export] Instance cif_dintp : Dintp (judg Σ) (cif Σ) (iProp Σ) :=
+    DINTP (λ δ, cif_intp (bintp δ)).
 
-  (** [ciProp_intp] is non-expansive *)
-  Fact ciProp_intp_ne `{!NonExpansive δ} : NonExpansive ⟦⟧(δ)@{ciProp Σ}.
+  (** [cif_intp] is non-expansive *)
+  Fact cif_intp_ne `{!NonExpansive δ} : NonExpansive ⟦⟧(δ)@{cif Σ}.
   Proof. exact _. Qed.
 
   Context `{!heapGS_gen hlc Σ}.
@@ -194,11 +194,11 @@ Section intp.
     DINTP judg_intp.
   Canonical judgJ : judgi (iProp Σ) := Judgi (judg Σ).
 
-  #[export] Instance judg_inv_deriv : InvDeriv ciPropOF Σ judgJ.
+  #[export] Instance judg_inv_deriv : InvDeriv cifOF Σ judgJ.
   Proof. done. Qed.
-  #[export] Instance judg_mutex_deriv : MutexDeriv ciPropOF Σ judgJ.
+  #[export] Instance judg_mutex_deriv : MutexDeriv cifOF Σ judgJ.
   Proof. done. Qed.
-  #[export] Instance judg_pborrow_deriv : PborrowDeriv nsynty ciPropOF Σ judgJ.
+  #[export] Instance judg_pborrow_deriv : PborrowDeriv nsynty cifOF Σ judgJ.
   Proof. done. Qed.
 End intp.
 
@@ -210,17 +210,17 @@ Definition iter_ilist : val := rec: "self" "f" "c" "l" :=
     "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (!("l" +ₗ #1)).
 
 Section verify.
-  Context `{!inv'GS ciPropOF Σ, !mutexGS ciPropOF Σ,
-    !pborrowGS nsynty ciPropOF Σ, !heapGS_gen hlc Σ}.
-  Implicit Type Φx Ψx : loc → ciProp Σ.
+  Context `{!inv'GS cifOF Σ, !mutexGS cifOF Σ,
+    !pborrowGS nsynty cifOF Σ, !heapGS_gen hlc Σ}.
+  Implicit Type Φx Ψx : loc → cif Σ.
 
-  (** [ilist]: Syntactic proposition for a list *)
-  Definition ilist_gen N Φx Ilist' l : ciProp Σ :=
-    cip_inv N (Φx l) ∗ cip_inv N (Ilist' N Φx l).
-  Definition ilist'_gen N Φx Ilist' l : ciProp Σ :=
+  (** [ilist]: Formula for a list *)
+  Definition ilist_gen N Φx Ilist' l : cif Σ :=
+    cif_inv N (Φx l) ∗ cif_inv N (Ilist' N Φx l).
+  Definition ilist'_gen N Φx Ilist' l : cif Σ :=
     ∃ l', ▷ (l +ₗ 1) ↦ #l' ∗ ilist_gen N Φx Ilist' l'.
-  CoFixpoint ilist' N Φx : loc → ciProp Σ := ilist'_gen N Φx ilist'.
-  Definition ilist N Φx : loc → ciProp Σ := ilist_gen N Φx ilist'.
+  CoFixpoint ilist' N Φx : loc → cif Σ := ilist'_gen N Φx ilist'.
+  Definition ilist N Φx : loc → cif Σ := ilist_gen N Φx ilist'.
 
   (** Convert the predicate of [ilist] using [mod_acsr] *)
   Local Lemma inv'_acsr_iff `{!Deriv ih δ} {N Φx Ψx l} :
@@ -288,17 +288,17 @@ Definition iter_mlist : val := rec: "self" "f" "k" "c" "l" :=
     else #false.
 
 Section verify.
-  Context `{!inv'GS ciPropOF Σ, !mutexGS ciPropOF Σ,
-    !pborrowGS nsynty ciPropOF Σ, !heapGS_gen hlc Σ}.
-  Implicit Type Φx : loc → ciProp Σ.
+  Context `{!inv'GS cifOF Σ, !mutexGS cifOF Σ,
+    !pborrowGS nsynty cifOF Σ, !heapGS_gen hlc Σ}.
+  Implicit Type Φx : loc → cif Σ.
 
-  (** [mlist]: Syntactic proposition for a list with a mutex *)
-  Definition mlist_gen Φx Mlist' l : ciProp Σ :=
-    cip_mutex l (Mlist' Φx l).
-  Definition mlist'_gen Φx Mlist' l : ciProp Σ :=
+  (** [mlist]: Formula for a list with a mutex *)
+  Definition mlist_gen Φx Mlist' l : cif Σ :=
+    cif_mutex l (Mlist' Φx l).
+  Definition mlist'_gen Φx Mlist' l : cif Σ :=
     Φx l ∗ ∃ l', ▷ (l +ₗ 1) ↦ #l' ∗ mlist_gen Φx Mlist' l'.
-  CoFixpoint mlist' Φx : loc → ciProp Σ := mlist'_gen Φx mlist'.
-  Definition mlist Φx : loc → ciProp Σ := mlist_gen Φx mlist'.
+  CoFixpoint mlist' Φx : loc → cif Σ := mlist'_gen Φx mlist'.
+  Definition mlist Φx : loc → cif Σ := mlist_gen Φx mlist'.
 
   (** Convert the predicate of [mlist] using [mod_iff] *)
   Lemma mlist_iff `{!Deriv ih δ} {Φx Ψx l} :
@@ -340,12 +340,12 @@ End verify.
 
 (** ** On borrows *)
 Section verify.
-  Context `{!inv'GS ciPropOF Σ, !mutexGS ciPropOF Σ,
-    !pborrowGS nsynty ciPropOF Σ, !heapGS_gen hlc Σ}.
+  Context `{!inv'GS cifOF Σ, !mutexGS cifOF Σ,
+    !pborrowGS nsynty cifOF Σ, !heapGS_gen hlc Σ}.
 
   (** Dereference a nested mutable reference *)
   Lemma bor_bor_deref {α β l Φx q} :
-    [[{ q.[α ⊓ β] ∗ nbord α (∃ l', ▷ l ↦ #l' ∗ cip_bor β (Φx l'))%n }]]
+    [[{ q.[α ⊓ β] ∗ nbord α (∃ l', ▷ l ↦ #l' ∗ cif_bor β (Φx l'))%n }]]
       [pborrow_wsatid bupd]
       !#l
     [[{ l', RET #l'; q.[α ⊓ β] ∗ nborcd (α ⊓ β) (Φx l') }]].
@@ -366,7 +366,7 @@ Section verify.
   Lemma proph_bor_bor_deref {X η ξ α β l Φx q} {x : X} :
     [[{ q.[α ⊓ β] ∗
         pbord α ((x, ξ)' : _ *'ₛ prvarₛ _) η
-          (λ '(x', ξ')', ∃ l', ▷ l ↦ #l' ∗ cip_pbor β x' ξ' (Φx l'))%n }]]
+          (λ '(x', ξ')', ∃ l', ▷ l ↦ #l' ∗ cif_pbor β x' ξ' (Φx l'))%n }]]
       [pborrow_wsatid bupd]
       !#l
     [[{ l', RET #l';

@@ -6,20 +6,20 @@ From iris.algebra Require Import gset.
 From iris.proofmode Require Import proofmode.
 Import iPropAppNotation UpdwNotation.
 
-Implicit Type (PROP : oFunctor) (i : positive) (N : namespace).
+Implicit Type (FML : oFunctor) (i : positive) (N : namespace).
 
-Class inv'GpreS PROP Σ := inv'GpreS_sinv : sinvGpreS PROP Σ.
+Class inv'GpreS FML Σ := inv'GpreS_sinv : sinvGpreS FML Σ.
 Local Existing Instance inv'GpreS_sinv.
-Class inv'GS PROP Σ := inv'GS_sinv : sinvGS PROP Σ.
+Class inv'GS FML Σ := inv'GS_sinv : sinvGS FML Σ.
 Local Existing Instance inv'GS_sinv.
-Definition inv'Σ PROP `{!oFunctorContractive PROP} := #[sinvΣ PROP].
+Definition inv'Σ FML `{!oFunctorContractive FML} := #[sinvΣ FML].
 #[export] Instance subG_inv'Σ
-  `{!oFunctorContractive PROP, !subG (inv'Σ PROP) Σ} : inv'GpreS PROP Σ.
+  `{!oFunctorContractive FML, !subG (inv'Σ FML) Σ} : inv'GpreS FML Σ.
 Proof. solve_inG. Qed.
 
 Section inv.
-  Context `{!inv'GS PROP Σ, !invGS_gen hlc Σ}.
-  Implicit Type (ip : PROP $oi Σ → iProp Σ) (P : PROP $oi Σ).
+  Context `{!inv'GS FML Σ, !invGS_gen hlc Σ}.
+  Implicit Type (ip : FML $oi Σ → iProp Σ) (P : FML $oi Σ).
 
   (** [inv_tok]: Invariant token *)
   Local Definition inv_tok_def N P : iProp Σ :=
@@ -35,13 +35,13 @@ Section inv.
   (** [inv_tok] is persistent *)
   #[export] Instance inv_tok_persistent {N P} : Persistent (inv_tok N P).
   Proof. rewrite inv_tok_unseal. exact _. Qed.
-  (** [inv_tok] is timeless for discrete propositions *)
+  (** [inv_tok] is timeless for discrete formulas *)
   #[export] Instance inv_tok_timeless `{!Discrete P} {N} :
     Timeless (inv_tok N P).
   Proof. rewrite inv_tok_unseal. exact _. Qed.
 
   (** Interpretation *)
-  Local Definition inv_intp (ip : PROP $oi Σ → iProp Σ) i P : iProp Σ :=
+  Local Definition inv_intp (ip : FML $oi Σ → iProp Σ) i P : iProp Σ :=
     ip P ∗ ownD {[i]} ∨ ownE {[i]}.
 
   (** [inv_intp ip] is non-expansive when [ip] is *)
@@ -50,7 +50,7 @@ Section inv.
   Proof. solve_proper. Qed.
 
   (** World satisfaction *)
-  Local Definition inv_wsat_def (ip : PROP $oi Σ -d> iProp Σ) : iProp Σ :=
+  Local Definition inv_wsat_def (ip : FML $oi Σ -d> iProp Σ) : iProp Σ :=
     sinv_iwsat (inv_intp ip).
   Local Definition inv_wsat_aux : seal inv_wsat_def. Proof. by eexists. Qed.
   Definition inv_wsat := inv_wsat_aux.(unseal).
@@ -153,8 +153,8 @@ Section inv.
 End inv.
 
 (** Allocate [inv_wsat] *)
-Lemma inv_wsat_alloc `{!inv'GpreS PROP Σ, !invGS_gen hlc Σ} :
-  ⊢ |==> ∃ _ : inv'GS PROP Σ, ∀ ip, inv_wsat ip.
+Lemma inv_wsat_alloc `{!inv'GpreS FML Σ, !invGS_gen hlc Σ} :
+  ⊢ |==> ∃ _ : inv'GS FML Σ, ∀ ip, inv_wsat ip.
 Proof.
   iMod sinv_wsat_alloc as (?) "W". iModIntro. iExists _. iIntros (?).
   rewrite inv_wsat_unseal. iApply "W".

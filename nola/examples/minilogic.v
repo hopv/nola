@@ -6,15 +6,15 @@ Import WpwNotation.
 
 Implicit Type (N : namespace) (l : loc).
 
-(** ** Syntax for separation logic propositions *)
-Inductive nProp : Type :=
-| all {A : Type} (Φ : A → nProp) | ex {A : Type} (Φ : A → nProp)
-| and (P Q : nProp) | or (P Q : nProp) | imp (P Q : nProp) | pure (φ : Prop)
-| sep (P Q : nProp) | wand (P Q : nProp) | pers (P : nProp)
-| bupd (P : nProp) | later (P : nProp) | pointsto (q : frac) (l : loc) (v : val)
-| inv (N : namespace) (P : nProp)
-| ilist (N : namespace) (Φ : loc → nProp) (l : loc).
-#[warning="-redundant-canonical-projection"] Canonical nPropO := leibnizO nProp.
+(** ** Separation logic formulas *)
+Inductive fml : Type :=
+| all {A : Type} (Φ : A → fml) | ex {A : Type} (Φ : A → fml)
+| and (P Q : fml) | or (P Q : fml) | imp (P Q : fml) | pure (φ : Prop)
+| sep (P Q : fml) | wand (P Q : fml) | pers (P : fml)
+| bupd (P : fml) | later (P : fml) | pointsto (q : frac) (l : loc) (v : val)
+| inv (N : namespace) (P : fml)
+| ilist (N : namespace) (Φ : loc → fml) (l : loc).
+#[warning="-redundant-canonical-projection"] Canonical fmlO := leibnizO fml.
 
 (** ** Linked list mutation *)
 
@@ -24,10 +24,10 @@ Definition iter_ilist : val := rec: "self" "f" "c" "l" :=
     "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (!("l" +ₗ #1)).
 
 Section verify.
-  Context `{!inv'GS nPropO Σ, !heapGS_gen hlc Σ}.
+  Context `{!inv'GS fmlO Σ, !heapGS_gen hlc Σ}.
 
-  (** Interpretation of [nProp] *)
-  Fixpoint intp (P : nProp) : iProp Σ := match P with
+  (** Interpretation of [fml] *)
+  Fixpoint intp (P : fml) : iProp Σ := match P with
   | all Φ => ∀ x, intp (Φ x) | ex Φ => ∃ x, intp (Φ x)
   | and P Q => intp P ∧ intp Q | or P Q => intp P ∨ intp Q
   | imp P Q => intp P → intp Q | pure φ => ⌜φ⌝
@@ -52,7 +52,7 @@ Section verify.
     { wp_rec. wp_load. wp_pures. by iApply "→Ψ". }
     wp_rec. wp_load. wp_pures. wp_apply "f"; [done|]. iIntros "_".
     wp_load. wp_store. wp_op. wp_bind (! _)%E. have -> : (S m - 1)%Z = m by lia.
-    iMod (inv_tok_acc (PROP:=nPropO) (ip:=intp) with "itl") as
+    iMod (inv_tok_acc (FML:=fmlO) (ip:=intp) with "itl") as
       "/=[(%l' & ↦l' & #itlhd & #itltl) cl]"; [done|].
     wp_load. iModIntro. iMod ("cl" with "[↦l']") as "_".
     { iExists _. iFrame "↦l'". by iSplit. }

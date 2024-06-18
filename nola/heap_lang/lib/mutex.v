@@ -11,21 +11,21 @@ Implicit Type (b : bool) (l : loc) (n : nat).
 
 (** ** Camera for the mutex machinery *)
 
-Local Definition mutex_prop PROP : oFunctor := leibnizO loc * PROP.
-Class mutexGS PROP Σ := mutexGS_inv : inv'GS (mutex_prop PROP) Σ.
+Local Definition mutex_fml FML : oFunctor := leibnizO loc * FML.
+Class mutexGS FML Σ := mutexGS_inv : inv'GS (mutex_fml FML) Σ.
 Local Existing Instances mutexGS_inv.
 
-Class mutexGpreS PROP Σ := mutexGpreS_inv : inv'GpreS PROP Σ.
+Class mutexGpreS FML Σ := mutexGpreS_inv : inv'GpreS FML Σ.
 Local Existing Instances mutexGpreS_inv.
-Definition mutexΣ PROP `{!oFunctorContractive PROP} := #[inv'Σ PROP].
+Definition mutexΣ FML `{!oFunctorContractive FML} := #[inv'Σ FML].
 #[export] Instance subG_mutexΣ
-  `{!oFunctorContractive PROP, !subG (mutexΣ PROP) Σ} : mutexGpreS PROP Σ.
+  `{!oFunctorContractive FML, !subG (mutexΣ FML) Σ} : mutexGpreS FML Σ.
 Proof. solve_inG. Qed.
 
 (** ** Mutex *)
 Section mutex.
-  Context `{!mutexGS PROP Σ, !heapGS_gen hlc Σ}.
-  Implicit Types (ip : PROP $oi Σ → iProp Σ) (P : PROP $oi Σ).
+  Context `{!mutexGS FML Σ, !heapGS_gen hlc Σ}.
+  Implicit Types (ip : FML $oi Σ → iProp Σ) (P : FML $oi Σ).
 
   (** [mutex_tok]: Mutex token *)
   Definition mutex_tok l P : iProp Σ := inv_tok nroot (l, P).
@@ -33,20 +33,20 @@ Section mutex.
   (** [mutex_tok] is persistent *)
   Fact mutex_tok_persistent {l P} : Persistent (mutex_tok l P).
   Proof. exact _. Qed.
-  (** [mutex_tok] is timeless for discrete propositions *)
+  (** [mutex_tok] is timeless for discrete formulas *)
   Fact mutex_tok_timeless `{!Discrete P} {l} : Timeless (mutex_tok l P).
   Proof. exact _. Qed.
 
   (** Interpretation for a mutex *)
-  Local Definition mutex_intp (ip : PROP $oi Σ -d> iProp Σ)
-    : mutex_prop PROP $oi Σ -d> iProp Σ := λ '(l, P),
+  Local Definition mutex_intp (ip : FML $oi Σ -d> iProp Σ)
+    : mutex_fml FML $oi Σ -d> iProp Σ := λ '(l, P),
     (∃ b, l ↦ #b ∗ if b then True else ip P)%I.
   #[export] Instance mutex_intp_ne `{!NonExpansive ip} :
     NonExpansive (mutex_intp ip).
   Proof. move=> ?[??][??][/=??]. solve_proper. Qed.
 
   (** World satisfaction for the mutex machinery *)
-  Local Definition mutex_wsat_def (ip : PROP $oi Σ -d> iProp Σ) : iProp Σ :=
+  Local Definition mutex_wsat_def (ip : FML $oi Σ -d> iProp Σ) : iProp Σ :=
     inv_wsat (mutex_intp ip).
   Local Lemma mutex_wsat_aux : seal mutex_wsat_def. Proof. by eexists. Qed.
   Definition mutex_wsat := mutex_wsat_aux.(unseal).
@@ -73,7 +73,7 @@ Section mutex.
   Proof.
     rewrite mutex_wsat_unseal. iIntros (Φ) "P →Φ". wp_lam.
     iApply twpw_fupdw_nonval; [done|]. wp_alloc l as "↦". iModIntro.
-    iMod (inv_tok_alloc (PROP:=mutex_prop _) (l, P) with "[↦ P]") as "l".
+    iMod (inv_tok_alloc (FML:=mutex_fml _) (l, P) with "[↦ P]") as "l".
     { by iFrame. } { iApply ("→Φ" with "l"). }
   Qed.
 
@@ -86,7 +86,7 @@ Section mutex.
   Proof.
     rewrite mutex_wsat_unseal. iIntros (Φ) "_ →Φ". wp_lam.
     iApply twpw_fupdw_nonval; [done|]. wp_alloc l as "↦". iModIntro.
-    iMod (inv_tok_alloc (PROP:=mutex_prop _) (l, P) with "[↦]") as "l".
+    iMod (inv_tok_alloc (FML:=mutex_fml _) (l, P) with "[↦]") as "l".
     { iFrame. } { iApply ("→Φ" with "l"). }
   Qed.
 
@@ -146,15 +146,15 @@ Notation mutex_wsati δ := (mutex_wsat ⟦⟧(δ)).
 Notation mutex_wsatid := (mutex_wsati der).
 
 (** Derivability pre-data for [mutex] *)
-Class MutexPreDeriv (PRO JUDG : ofe) := MUTEX_PRE_DERIV {
-  mutex_jiff : PRO → PRO → JUDG;
+Class MutexPreDeriv (FM JUDG : ofe) := MUTEX_PRE_DERIV {
+  mutex_jiff : FM → FM → JUDG;
   mutex_jiff_ne :: NonExpansive2 mutex_jiff;
 }.
 Hint Mode MutexPreDeriv ! - : typeclass_instances.
 Arguments MUTEX_PRE_DERIV {_ _} _ {_}.
 
 Section mutex_deriv.
-  Context `{!mutexGS PROP Σ, !MutexPreDeriv (PROP $oi Σ) JUDG}.
+  Context `{!mutexGS FML Σ, !MutexPreDeriv (FML $oi Σ) JUDG}.
   Implicit Type δ : JUDG → iProp Σ.
 
   (** [mutex]: Relaxed simple invariant *)
@@ -175,10 +175,10 @@ End mutex_deriv.
 Notation mutexd := (mutex der).
 
 Section mutex_deriv.
-  Context `{!mutexGS PROP Σ, !heapGS_gen hlc Σ,
-    !MutexPreDeriv (PROP $oi Σ) (JUDGI : judgi (iProp Σ)),
-    !Dintp JUDGI (PROP $oi Σ) (iProp Σ)}.
-  Implicit Type (δ : JUDGI → iProp Σ) (P Q : PROP $oi Σ).
+  Context `{!mutexGS FML Σ, !heapGS_gen hlc Σ,
+    !MutexPreDeriv (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
+    !Dintp JUDGI (FML $oi Σ) (iProp Σ)}.
+  Implicit Type (δ : JUDGI → iProp Σ) (P Q : FML $oi Σ).
 
   (** Derivability data for [mutex] *)
   Class MutexDeriv :=
@@ -265,5 +265,5 @@ Section mutex_deriv.
     apply mod_iff_sym.
   Qed.
 End mutex_deriv.
-Arguments MutexDeriv PROP Σ {_ _} JUDGI {_ _}.
+Arguments MutexDeriv FML Σ {_ _} JUDGI {_ _}.
 Hint Mode MutexDeriv ! - - - - - - : typeclass_instances.

@@ -10,9 +10,9 @@ Notation sinv_wsati δ := (sinv_wsat ⟦⟧(δ)).
 Notation sinv_wsatid := (sinv_wsati der).
 
 (** Derivability pre-data for [sinv] *)
-Class SinvPreDeriv (PRO JUDG : ofe) := SINV_PRE_DERIV {
+Class SinvPreDeriv (FM JUDG : ofe) := SINV_PRE_DERIV {
   (** Accessor judgment *)
-  sinv_jacsr : PRO → PRO → JUDG;
+  sinv_jacsr : FM → FM → JUDG;
   (** [sinv_jacsr] is non-expansive *)
   sinv_jacsr_ne :: NonExpansive2 sinv_jacsr;
 }.
@@ -20,11 +20,11 @@ Hint Mode SinvPreDeriv ! - : typeclass_instances.
 Arguments SINV_PRE_DERIV {_ _} _ {_}.
 
 Section sinv_deriv.
-  Context `{!sinvGS PROP Σ, !SinvPreDeriv (PROP $oi Σ) JUDG}.
+  Context `{!sinvGS FML Σ, !SinvPreDeriv (FML $oi Σ) JUDG}.
   Implicit Type δ : JUDG → iProp Σ.
 
   (** [sinv]: Relaxed simple invariant *)
-  Local Definition sinv_def δ (P : PROP $oi Σ) : iProp Σ :=
+  Local Definition sinv_def δ (P : FML $oi Σ) : iProp Σ :=
     ∃ Q, □ δ (sinv_jacsr Q P) ∗ sinv_tok Q.
   Local Lemma sinv_aux : seal sinv_def. Proof. by eexists. Qed.
   Definition sinv := sinv_aux.(unseal).
@@ -41,9 +41,9 @@ End sinv_deriv.
 Notation sinvd := (sinv der).
 
 Section sinv_deriv.
-  Context `{!SinvPreDeriv (PROP $oi Σ) (JUDGI : judgi (iProp Σ)),
-    !Dintp JUDGI (PROP $oi Σ) (iProp Σ)}.
-  Implicit Type (δ : JUDGI → iProp Σ) (P Q : PROP $oi Σ).
+  Context `{!SinvPreDeriv (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
+    !Dintp JUDGI (FML $oi Σ) (iProp Σ)}.
+  Implicit Type (δ : JUDGI → iProp Σ) (P Q : FML $oi Σ).
 
   (** Derivability data for [sinv] *)
   Class SinvDeriv := SINV_DERIV {
@@ -56,7 +56,7 @@ Section sinv_deriv.
       ⟦ sinv_jacsr P Q ⟧(δ) ⊣⊢ mod_acsr sinv_mod ⟦ P ⟧(δ) ⟦ Q ⟧(δ);
   }.
 
-  Context `{!sinvGS PROP Σ, !SinvDeriv}.
+  Context `{!sinvGS FML Σ, !SinvDeriv}.
 
   (** Access [sinv] *)
   Lemma sinv_acc {P} :
@@ -109,5 +109,5 @@ Section sinv_deriv.
     iApply (sinv_sep' with "s"). iIntros (?). by rewrite eq comm.
   Qed.
 End sinv_deriv.
-Arguments SinvDeriv PROP Σ JUDGI {_ _}.
+Arguments SinvDeriv FML Σ JUDGI {_ _}.
 Hint Mode SinvDeriv ! - - - - : typeclass_instances.

@@ -7,15 +7,15 @@ From iris.proofmode Require Import proofmode.
 Import ProdNotation PlistNotation iPropAppNotation LftNotation ProphNotation
   UpdwNotation.
 
-Implicit Type (TY : synty) (PROP : oFunctor) (α : lft) (q : Qp).
+Implicit Type (TY : synty) (FML : oFunctor) (α : lft) (q : Qp).
 
-(** Proposition for prophetic borrowing *)
-Local Definition pbprop TY PROP : oFunctor :=
-  (* Just a proposition *) PROP +
+(** Formula for prophetic borrowing *)
+Local Definition pborrow_fml TY FML : oFunctor :=
+  (* Just a formula *) FML +
   (* For prophetic borrower *)
-  { X : TY & leibnizO (gname *' prvar X) * (X -d> PROP) } +
+  { X : TY & leibnizO (gname *' prvar X) * (X -d> FML) } +
   (* For prophetic lender *)
-  { X : TY & leibnizO (clair TY X) * (X -d> PROP) } +
+  { X : TY & leibnizO (clair TY X) * (X -d> FML) } +
   (* For prophetic reborrowing *)
   leibnizO (gname *' gname *' gname *'
     { X : TY & prvar X *' { Y : TY & Y → X }}).
@@ -26,29 +26,29 @@ Local Notation xpreborrow X Y γ γ' γx ξ f :=
   (inr (γ, γ', γx, existT X (ξ, existT Y f)')').
 
 (** Ghost state *)
-Class pborrowGS TY PROP Σ := PborrowGS {
-  pborrowGS_borrow :: borrowGS (pbprop TY PROP) Σ;
+Class pborrowGS TY FML Σ := PborrowGS {
+  pborrowGS_borrow :: borrowGS (pborrow_fml TY FML) Σ;
   pborrowGS_proph :: prophGS TY Σ;
   pborrowGS_proph_ag : proph_agG TY Σ;
 }.
 Local Existing Instance pborrowGS_proph_ag.
-Class pborrowGpreS TY PROP Σ := PborrowGpreS {
-  pborrowGpreS_borrow :: borrowGpreS (pbprop TY PROP) Σ;
+Class pborrowGpreS TY FML Σ := PborrowGpreS {
+  pborrowGpreS_borrow :: borrowGpreS (pborrow_fml TY FML) Σ;
   pborrowGpreS_proph :: prophGpreS TY Σ;
   pborrowGpreS_proph_ag : proph_agG TY Σ;
 }.
 Local Existing Instance pborrowGpreS_proph_ag.
-Definition pborrowΣ TY PROP `{!oFunctorContractive PROP} :=
-  #[borrowΣ (pbprop TY PROP); prophΣ TY; proph_agΣ TY].
+Definition pborrowΣ TY FML `{!oFunctorContractive FML} :=
+  #[borrowΣ (pborrow_fml TY FML); prophΣ TY; proph_agΣ TY].
 #[export] Instance subG_pborrow
-  `{!oFunctorContractive PROP, !subG (pborrowΣ TY PROP) Σ} :
-  pborrowGpreS TY PROP Σ.
+  `{!oFunctorContractive FML, !subG (pborrowΣ TY FML) Σ} :
+  pborrowGpreS TY FML Σ.
 Proof. solve_inG. Qed.
 
 Section pborrow.
-  Context `{!pborrowGS TY PROP Σ, !GenUpd (PROP:=iProp Σ) M, !GenUpdBupd M}.
-  Implicit Type (ip : PROP $oi Σ -d> iProp Σ) (X Y : TY) (Xl Yl : list TY)
-    (P : PROP $oi Σ) (Pb : pbprop TY PROP $oi Σ).
+  Context `{!pborrowGS TY FML Σ, !GenUpd (PROP:=iProp Σ) M, !GenUpdBupd M}.
+  Implicit Type (ip : FML $oi Σ -d> iProp Σ) (X Y : TY) (Xl Yl : list TY)
+    (P : FML $oi Σ) (Pb : pborrow_fml TY FML $oi Σ).
 
   (** ** Tokens *)
 
@@ -60,14 +60,14 @@ Section pborrow.
 
   (** Prophetic borrower token *)
   Local Definition pborc_tok_def {X} α (x : X) (ξ : prvar X)
-    (Φ : X -d> PROP $oi Σ) : iProp Σ :=
+    (Φ : X -d> FML $oi Σ) : iProp Σ :=
     [†α] ∨ ∃ γ, val_obs γ x ∗ borc_tok α (xpbor X γ ξ Φ).
   Local Lemma pborc_tok_aux : seal (@pborc_tok_def). Proof. by eexists. Qed.
   Definition pborc_tok {X} := pborc_tok_aux.(unseal) X.
   Local Lemma pborc_tok_unseal : @pborc_tok = @pborc_tok_def.
   Proof. exact: seal_eq. Qed.
   Local Definition pbor_tok_def {X} α (x : X) (ξ : prvar X)
-    (Φ : X -d> PROP $oi Σ) : iProp Σ :=
+    (Φ : X -d> FML $oi Σ) : iProp Σ :=
     [†α] ∨ ∃ γ, val_obs γ x ∗ bor_tok α (xpbor X γ ξ Φ).
   Local Lemma pbor_tok_aux : seal (@pbor_tok_def). Proof. by eexists. Qed.
   Definition pbor_tok {X} := pbor_tok_aux.(unseal) X.
@@ -75,7 +75,7 @@ Section pborrow.
   Proof. exact: seal_eq. Qed.
 
   (** Open prophetic borrower token *)
-  Local Definition pobor_tok_def {X} α q (ξ : prvar X) (Φ : X -d> PROP $oi Σ)
+  Local Definition pobor_tok_def {X} α q (ξ : prvar X) (Φ : X -d> FML $oi Σ)
     : iProp Σ :=
     ∃ γ, (∃ x, val_obs γ x ∗ proph_ctrl γ x ξ) ∗
       obor_tok α q (xpbor X γ ξ Φ).
@@ -85,7 +85,7 @@ Section pborrow.
   Proof. exact: seal_eq. Qed.
 
   (** Prophetic lender token *)
-  Definition plend_tok {X} α (xπ : clair TY X) (Φ : X -d> PROP $oi Σ)
+  Definition plend_tok {X} α (xπ : clair TY X) (Φ : X -d> FML $oi Σ)
     : iProp Σ := lend_tok α (xplend X xπ Φ).
 
   (** Borrower and lender tokens are non-expansive *)
@@ -121,7 +121,7 @@ Section pborrow.
     unfold plend_tok=> ????. do 2 f_equiv. apply inr_ne. by apply: existT_ne.
   Qed.
 
-  (** Borrower and lender tokens are timeless for discrete propositions *)
+  (** Borrower and lender tokens are timeless for discrete formulas *)
   Fact nborc_tok_timeless `{!Discrete P} {α} : Timeless (nborc_tok α P).
   Proof. exact _. Qed.
   Fact nbor_tok_timeless `{!Discrete P} {α} : Timeless (nbor_tok α P).
@@ -211,9 +211,9 @@ Section pborrow.
   (** ** World satisfaction *)
 
   (** Body of a prophetic lender *)
-  Definition plend_body ip {X} (xπ : clair TY X) (Φ : X -d> PROP $oi Σ)
+  Definition plend_body ip {X} (xπ : clair TY X) (Φ : X -d> FML $oi Σ)
     : iProp Σ := ∃ x', ⟨π, xπ π = x'⟩ ∗ ip (Φ x').
-  Definition plend_body_var ip {X} (ξ : prvar X) (Φ : X -d> PROP $oi Σ)
+  Definition plend_body_var ip {X} (ξ : prvar X) (Φ : X -d> FML $oi Σ)
     : iProp Σ := plend_body ip (λ π, π ξ) Φ.
 
   (** [plend_body] is non-expansive *)
@@ -224,7 +224,7 @@ Section pborrow.
     NonExpansive (@plend_body_var ip X ξ).
   Proof. exact _. Qed.
 
-  (** Interpretation of [pbprop] *)
+  (** Interpretation of [pborrow_fml] *)
   Definition pbintp ip : _ -d> iProp Σ := λ Pb, match Pb with
     | xjust P => ip P
     | xpbor _ γ ξ Φ => ∃ x, proph_ctrl γ x ξ ∗ ip (Φ x)
@@ -353,10 +353,10 @@ Section pborrow.
   (** Utility *)
   Local Definition pbor_list {Xl}
     (γξxΦl : plist (λ X, _ *' _ *' X *' (X → _)) Xl)
-    : list (pbprop TY PROP $oi Σ) :=
+    : list (pborrow_fml TY FML $oi Σ) :=
     of_plist (λ _ '(γ, ξ, _, Φ)', xpbor _ γ ξ Φ) γξxΦl.
   Local Definition plend_list {Xl} (xπΦl : plist (λ X, _ *' (X → _)) Xl)
-    : list (pbprop TY PROP $oi Σ) :=
+    : list (pborrow_fml TY FML $oi Σ) :=
     of_plist (λ _ '(xπ, Φ)', xplend _ xπ Φ) xπΦl.
   Local Lemma vo_pbor_alloc_list {Xl ξl} {xΦl : plist _ Xl} :
     1:∗[of_plist_prvar ξl] -∗ ([∗ plist] '(x, Φ)' ∈ xΦl, ip (Φ x)) ==∗ ∃ γl,
@@ -670,8 +670,8 @@ Section pborrow.
 End pborrow.
 
 (** Allocate [pborrow_wsat] *)
-Lemma pborrow_wsat_alloc `{!pborrowGpreS TY PROP Σ} :
-  ⊢ |==> ∃ _ : pborrowGS TY PROP Σ, ∀ M ip, pborrow_wsat M ip.
+Lemma pborrow_wsat_alloc `{!pborrowGpreS TY FML Σ} :
+  ⊢ |==> ∃ _ : pborrowGS TY FML Σ, ∀ M ip, pborrow_wsat M ip.
 Proof.
   iMod proph_init as (?) "_". iMod borrow_wsat_alloc as (?) "W".
   iModIntro. iExists (PborrowGS _ _ _ _ _ _). by iIntros.

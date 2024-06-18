@@ -47,7 +47,7 @@ Section verify.
     rewrite ilist_unfold. iDestruct "l" as "[ihd itl]". wp_rec. wp_load.
     wp_pures. wp_apply "f"; [done|]. iIntros "_". wp_load. wp_store. wp_op.
     wp_bind (! _)%E. have -> : (S m - 1)%Z = m by lia.
-    iMod (inv_tok_acc (PROP:=▶ ∙) (ip:=laterl) with "itl") as
+    iMod (inv_tok_acc (FML:=▶ ∙) (ip:=laterl) with "itl") as
       "/=[(%l' & ↦l' & #l') cl]"; [done|].
     wp_load. iModIntro. iMod ("cl" with "[↦l']") as "_".
     { iNext. iExists _. by iFrame "↦l'". }

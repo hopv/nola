@@ -10,9 +10,9 @@ Notation inv_wsati δ := (inv_wsat ⟦⟧(δ)).
 Notation inv_wsatid := (inv_wsati der).
 
 (** Derivability pre-data for [inv] *)
-Class InvPreDeriv (PRO JUDG : ofe) := INV_PRE_DERIV {
+Class InvPreDeriv (FM JUDG : ofe) := INV_PRE_DERIV {
   (** Accessor judgment *)
-  inv_jacsr : namespace → PRO → JUDG;
+  inv_jacsr : namespace → FM → JUDG;
   (** [inv_jacsr] is non-expansive *)
   inv_jacsr_ne {N} :: NonExpansive (inv_jacsr N);
 }.
@@ -20,11 +20,11 @@ Hint Mode InvPreDeriv ! - : typeclass_instances.
 Arguments INV_PRE_DERIV {_ _} _ {_}.
 
 Section inv_deriv.
-  Context `{!InvPreDeriv PRO JUDG} {Σ : gFunctors}.
+  Context `{!InvPreDeriv FM JUDG} {Σ : gFunctors}.
   Implicit Type δ : JUDG → iProp Σ.
 
   (** [inv']: Relaxed invariant *)
-  Local Definition inv'_def δ N (P : PRO) : iProp Σ := □ δ (inv_jacsr N P).
+  Local Definition inv'_def δ N (P : FM) : iProp Σ := □ δ (inv_jacsr N P).
   Local Lemma inv'_aux : seal inv'_def. Proof. by eexists. Qed.
   Definition inv' := inv'_aux.(unseal).
   Local Lemma inv'_unseal : inv' = inv'_def. Proof. exact: seal_eq. Qed.
@@ -40,16 +40,16 @@ End inv_deriv.
 Notation invd := (inv' der).
 
 Section inv_deriv.
-  Context `{!inv'GS PROP Σ, !invGS_gen hlc Σ}.
-  Implicit Type P Q PQ : PROP $oi Σ.
+  Context `{!inv'GS FML Σ, !invGS_gen hlc Σ}.
+  Implicit Type P Q PQ : FML $oi Σ.
 
   (** Accessor to the invariant body *)
   Definition inv_acsr ip N Pi : iProp Σ :=
     ∀ E, ⌜↑N ⊆ E⌝ → |=[inv_wsat ip]{E,E∖↑N}=>
       Pi ∗ (Pi =[inv_wsat ip]{E∖↑N,E}=∗ True).
 
-  Context `{!InvPreDeriv (PROP $oi Σ) (JUDGI : judgi (iProp Σ)),
-    !Dintp JUDGI (PROP $oi Σ) (iProp Σ)}.
+  Context `{!InvPreDeriv (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
+    !Dintp JUDGI (FML $oi Σ) (iProp Σ)}.
   Implicit Type δ : JUDGI → iProp Σ.
 
   (** Derivability data for [inv] *)
@@ -142,5 +142,5 @@ Section inv_deriv.
     iMod "cl" as "_". iMod ("Q→" with "Q") as "_". iApply ("P→" with "P").
   Qed.
 End inv_deriv.
-Arguments InvDeriv PROP Σ {_ _ _} JUDGI {_ _}.
+Arguments InvDeriv FML Σ {_ _ _} JUDGI {_ _}.
 Hint Mode InvDeriv ! - - - - - - - : typeclass_instances.

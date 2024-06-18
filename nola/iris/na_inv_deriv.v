@@ -10,9 +10,9 @@ Notation na_inv_wsati δ := (na_inv_wsat ⟦⟧(δ)).
 Notation na_inv_wsatid := (na_inv_wsati der).
 
 (** Derivability pre-data for [na_inv] *)
-Class NaInvPreDeriv (PRO JUDG : ofe) := NA_INV_PRE_DERIV {
+Class NaInvPreDeriv (FM JUDG : ofe) := NA_INV_PRE_DERIV {
   (** Accessor judgment *)
-  na_inv_jacsr : na_inv_pool_name → namespace → PRO → JUDG;
+  na_inv_jacsr : na_inv_pool_name → namespace → FM → JUDG;
   (** [na_inv_jacsr] is non-expansive *)
   na_inv_jacsr_ne {p N} :: NonExpansive (na_inv_jacsr p N);
 }.
@@ -20,11 +20,11 @@ Hint Mode NaInvPreDeriv ! - : typeclass_instances.
 Arguments NA_INV_PRE_DERIV {_ _} _ {_}.
 
 Section na_inv_deriv.
-  Context `{!NaInvPreDeriv PRO JUDG} {Σ : gFunctors}.
+  Context `{!NaInvPreDeriv FM JUDG} {Σ : gFunctors}.
   Implicit Type δ : JUDG → iProp Σ.
 
   (** [na_inv']: Relaxed na_invariant *)
-  Local Definition na_inv'_def δ p N (P : PRO) : iProp Σ :=
+  Local Definition na_inv'_def δ p N (P : FM) : iProp Σ :=
     □ δ (na_inv_jacsr p N P).
   Local Lemma na_inv'_aux : seal na_inv'_def. Proof. by eexists. Qed.
   Definition na_inv' := na_inv'_aux.(unseal).
@@ -44,8 +44,8 @@ End na_inv_deriv.
 Notation na_invd := (na_inv' der).
 
 Section na_inv_deriv.
-  Context `{!na_inv'GS PROP Σ, !invGS_gen hlc Σ, !na_invG Σ}.
-  Implicit Type P Q PQ : PROP $oi Σ.
+  Context `{!na_inv'GS FML Σ, !invGS_gen hlc Σ, !na_invG Σ}.
+  Implicit Type P Q PQ : FML $oi Σ.
 
   (** Accessor *)
   Definition na_inv_acsr ip p N Pi : iProp Σ :=
@@ -53,8 +53,8 @@ Section na_inv_deriv.
       na_own p (F∖↑N) ∗ Pi ∗
       (na_own p (F∖↑N) -∗ Pi =[na_inv_wsat ip]{E}=∗ na_own p F) .
 
-  Context `{!NaInvPreDeriv (PROP $oi Σ) (JUDGI : judgi (iProp Σ)),
-    !Dintp JUDGI (PROP $oi Σ) (iProp Σ)}.
+  Context `{!NaInvPreDeriv (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
+    !Dintp JUDGI (FML $oi Σ) (iProp Σ)}.
   Implicit Type δ : JUDGI → iProp Σ.
 
   (** Derivability data for [na_inv] *)
@@ -155,5 +155,5 @@ Section na_inv_deriv.
     iMod ("Q→" with "F∖N12 Q") as "F∖N". iApply ("P→" with "F∖N P").
   Qed.
 End na_inv_deriv.
-Arguments NaInvDeriv PROP Σ {_ _ _ _} JUDGI {_ _}.
+Arguments NaInvDeriv FML Σ {_ _ _ _} JUDGI {_ _}.
 Hint Mode NaInvDeriv ! - - - - - - - - : typeclass_instances.

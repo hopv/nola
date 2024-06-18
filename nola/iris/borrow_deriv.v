@@ -12,9 +12,9 @@ Notation borrow_wsati M δ := (borrow_wsat M ⟦⟧(δ)).
 Notation borrow_wsatid M := (borrow_wsati M der).
 
 (** Derivability pre-data for [borrow] *)
-Class BorrowPreDeriv (PRO JUDG : ofe) := BORROW_PRE_DERIV {
+Class BorrowPreDeriv (FM JUDG : ofe) := BORROW_PRE_DERIV {
   (** Conversion judgment *)
-  borrow_jto : PRO → PRO → JUDG;
+  borrow_jto : FM → FM → JUDG;
   (** [borrow_jto] is non-expansive *)
   borrow_jto_ne :: NonExpansive2 borrow_jto;
 }.
@@ -22,7 +22,7 @@ Hint Mode BorrowPreDeriv ! - : typeclass_instances.
 Arguments BORROW_PRE_DERIV {_ _} _ {_}.
 
 Section borrow_deriv.
-  Context `{!borrowGS PROP Σ, !BorrowPreDeriv (PROP $oi Σ) JUDG}.
+  Context `{!borrowGS FML Σ, !BorrowPreDeriv (FML $oi Σ) JUDG}.
   Implicit Type δ : JUDG → iProp Σ.
 
   (** [borc]: Relaxed closed borrower *)
@@ -65,9 +65,9 @@ Notation borcd := (borc der). Notation bord := (bor der).
 Notation obord := (obor der). Notation lendd := (lend der).
 
 Section borrow_deriv.
-  Context `{!BorrowPreDeriv (PROP $oi Σ) (JUDGI : judgi (iProp Σ)),
-    !Dintp JUDGI (PROP $oi Σ) (iProp Σ)}.
-  Implicit Type (δ : JUDGI → iProp Σ) (P Q : PROP $oi Σ).
+  Context `{!BorrowPreDeriv (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
+    !Dintp JUDGI (FML $oi Σ) (iProp Σ)}.
+  Implicit Type (δ : JUDGI → iProp Σ) (P Q : FML $oi Σ).
 
   (** Derivability data for [borrow] *)
   Class BorrowDeriv :=
@@ -75,15 +75,15 @@ Section borrow_deriv.
     borrow_jto_intp : ∀{δ P Q},
       ⟦ borrow_jto P Q ⟧(δ) ⊣⊢ (⟦ P ⟧(δ) ==∗ ⟦ Q ⟧(δ)).
 End borrow_deriv.
-Arguments BorrowDeriv PROP Σ JUDGI {_ _}.
+Arguments BorrowDeriv FML Σ JUDGI {_ _}.
 Hint Mode BorrowDeriv ! - - - - : typeclass_instances.
 
 Section borrow_deriv.
-  Context `{!borrowGS PROP Σ,
-  !BorrowPreDeriv (PROP $oi Σ) (JUDGI : judgi (iProp Σ)),
-  !Dintp JUDGI (PROP $oi Σ) (iProp Σ), !BorrowDeriv PROP Σ JUDGI,
+  Context `{!borrowGS FML Σ,
+  !BorrowPreDeriv (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
+  !Dintp JUDGI (FML $oi Σ) (iProp Σ), !BorrowDeriv FML Σ JUDGI,
   !Deriv (JUDGI:=JUDGI) ih δ}.
-  Implicit Type (P Q : PROP $oi Σ) (δ : JUDGI → iProp Σ).
+  Implicit Type (P Q : FML $oi Σ) (δ : JUDGI → iProp Σ).
 
   (** Lemmas for [borrow_jto] *)
   Lemma borrow_jto_refl {P} : ⊢ δ (borrow_jto P P).
@@ -205,11 +205,11 @@ Section borrow_deriv.
 End borrow_deriv.
 
 Section borrow_deriv.
-  Context `{!borrowGS PROP Σ,
-  !BorrowPreDeriv (PROP $oi Σ) (JUDGI : judgi (iProp Σ)),
-  !Dintp JUDGI (PROP $oi Σ) (iProp Σ), !BorrowDeriv PROP Σ JUDGI,
+  Context `{!borrowGS FML Σ,
+  !BorrowPreDeriv (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
+  !Dintp JUDGI (FML $oi Σ) (iProp Σ), !BorrowDeriv FML Σ JUDGI,
   !GenUpd (PROP:=iProp Σ) M, !GenUpdBupd M}.
-  Implicit Type (P Q : PROP $oi Σ).
+  Implicit Type (P Q : FML $oi Σ).
 
   (** Split a lender *)
   Lemma lendd_split {α P} Ql :

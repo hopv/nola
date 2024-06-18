@@ -7,26 +7,26 @@ From iris.algebra Require Import gset coPset.
 From iris.proofmode Require Import proofmode.
 Import ProdNotation iPropAppNotation UpdwNotation.
 
-Implicit Type (PROP : oFunctor) (p : na_inv_pool_name) (i : positive).
+Implicit Type (FML : oFunctor) (p : na_inv_pool_name) (i : positive).
 
 (** Proposition data type *)
-Local Definition na_inv_prop PROP : oFunctor :=
-  leibnizO (na_inv_pool_name *' positive) * PROP.
+Local Definition na_inv_prop FML : oFunctor :=
+  leibnizO (na_inv_pool_name *' positive) * FML.
 
-Class na_inv'GS PROP Σ := na_inv'GS_in : inv'GS (na_inv_prop PROP) Σ.
+Class na_inv'GS FML Σ := na_inv'GS_in : inv'GS (na_inv_prop FML) Σ.
 Local Existing Instance na_inv'GS_in.
-Class na_inv'GpreS PROP Σ := na_inv'GpreS_in : inv'GpreS (na_inv_prop PROP) Σ.
+Class na_inv'GpreS FML Σ := na_inv'GpreS_in : inv'GpreS (na_inv_prop FML) Σ.
 Local Existing Instance na_inv'GpreS_in.
-Definition na_inv'Σ PROP `{!oFunctorContractive PROP} :=
-  #[inv'Σ (na_inv_prop PROP)].
+Definition na_inv'Σ FML `{!oFunctorContractive FML} :=
+  #[inv'Σ (na_inv_prop FML)].
 #[export] Instance subG_na_inv'Σ
-  `{!oFunctorContractive PROP, !subG (na_inv'Σ PROP) Σ} : na_inv'GpreS PROP Σ.
+  `{!oFunctorContractive FML, !subG (na_inv'Σ FML) Σ} : na_inv'GpreS FML Σ.
 Proof. solve_inG. Qed.
 
 Section na_inv.
-  Context `{!na_inv'GS PROP Σ, !invGS_gen hlc Σ, !na_invG Σ}.
+  Context `{!na_inv'GS FML Σ, !invGS_gen hlc Σ, !na_invG Σ}.
   Local Existing Instance na_inv_inG.
-  Implicit Type ip : PROP $oi Σ → iProp Σ.
+  Implicit Type ip : FML $oi Σ → iProp Σ.
 
   (** Access l of an non-atomic invariant *)
   Local Definition na_lock p i : iProp Σ := own p (ε, GSet {[i]}).
@@ -67,7 +67,7 @@ Section na_inv.
     P ∗ na_lock p i ∨ na_own p {[i]}.
 
   (** Token for a non-atomic invariant *)
-  Local Definition na_inv_tok_def p N (P : PROP $oi Σ) : iProp Σ :=
+  Local Definition na_inv_tok_def p N (P : FML $oi Σ) : iProp Σ :=
     ∃ i, ⌜i ∈ (↑N:coPset)⌝ ∗ inv_tok N ((p, i)', P).
   Local Lemma na_inv_tok_aux : seal na_inv_tok_def. Proof. by eexists. Qed.
   Definition na_inv_tok := na_inv_tok_aux.(unseal).
@@ -83,14 +83,14 @@ Section na_inv.
   #[export] Instance na_inv_tok_persistent {p N P} :
     Persistent (na_inv_tok p N P).
   Proof. rewrite na_inv_tok_unseal. exact _. Qed.
-  (** [na_inv_tok] is timeless for discrete propositions *)
+  (** [na_inv_tok] is timeless for discrete formulas *)
   #[export] Instance na_inv_tok_timeless `{!Discrete P} {p N} :
     Timeless (na_inv_tok p N P).
   Proof. rewrite na_inv_tok_unseal. exact _. Qed.
 
   (** Interpretation *)
-  Local Definition na_inv_intp (ip : PROP $oi Σ -d> iProp Σ)
-    : na_inv_prop PROP $oi Σ -d> iProp Σ :=
+  Local Definition na_inv_intp (ip : FML $oi Σ -d> iProp Σ)
+    : na_inv_prop FML $oi Σ -d> iProp Σ :=
     λ '((p, i)', P), na_body p i (ip P).
 
   (** [na_inv_intp ip] is non-expansive if [ip] is *)
@@ -99,7 +99,7 @@ Section na_inv.
   Proof. move=> ?[??][??][/=??]. solve_proper. Qed.
 
   (** World satisfaction for non-atomic invariants *)
-  Local Definition na_inv_wsat_def (ip : PROP $oi Σ -d> iProp Σ) : iProp Σ :=
+  Local Definition na_inv_wsat_def (ip : FML $oi Σ -d> iProp Σ) : iProp Σ :=
     inv_wsat (na_inv_intp ip).
   Local Lemma na_inv_wsat_aux : seal na_inv_wsat_def. Proof. by eexists. Qed.
   Definition na_inv_wsat := na_inv_wsat_aux.(unseal).
@@ -140,7 +140,7 @@ Section na_inv.
     rewrite na_inv_tok_unseal na_inv_wsat_unseal=> NE NF.
     iMod (na_lock_alloc p N) as (i iN) "l".
     rewrite (na_own_subset NF) (na_own_in iN). iIntros "[[i $]$] W".
-    iMod (inv_tok_alloc_open (PROP:=na_inv_prop _) ((p, i)', P) N NE with "W")
+    iMod (inv_tok_alloc_open (FML:=na_inv_prop _) ((p, i)', P) N NE with "W")
       as "[W[iP cl]]".
     iMod ("cl" with "[$i//] W") as "[$ _]". iModIntro.
     iSplit; [iExists _; by iFrame|]. iIntros "$ P W".
@@ -179,8 +179,8 @@ Section na_inv.
 End na_inv.
 
 (** Allocate [na_inv_wsat] *)
-Lemma na_inv_wsat_alloc `{!na_inv'GpreS PROP Σ, !invGS_gen hlc Σ, !na_invG Σ} :
-  ⊢ |==> ∃ _ : na_inv'GS PROP Σ, ∀ ip, na_inv_wsat ip.
+Lemma na_inv_wsat_alloc `{!na_inv'GpreS FML Σ, !invGS_gen hlc Σ, !na_invG Σ} :
+  ⊢ |==> ∃ _ : na_inv'GS FML Σ, ∀ ip, na_inv_wsat ip.
 Proof.
   iMod inv_wsat_alloc as (?) "W". iModIntro. iExists _. iIntros (?).
   rewrite na_inv_wsat_unseal. iApply "W".

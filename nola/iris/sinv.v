@@ -7,25 +7,25 @@ From iris.base_logic.lib Require Export own.
 From iris.proofmode Require Import proofmode.
 Import iPropAppNotation.
 
-Implicit Type PROP : oFunctor.
+Implicit Type FML : oFunctor.
 
-Class sinvGpreS PROP Σ :=
-  sinvGpreS_in : inG Σ (gmap_viewR positive (agreeR (PROP $oi Σ))).
+Class sinvGpreS FML Σ :=
+  sinvGpreS_in : inG Σ (gmap_viewR positive (agreeR (FML $oi Σ))).
 Local Existing Instance sinvGpreS_in.
-Class sinvGS PROP Σ := SinvGS {
-  sinvGS_pre : sinvGpreS PROP Σ;
+Class sinvGS FML Σ := SinvGS {
+  sinvGS_pre : sinvGpreS FML Σ;
   sinv_name : gname;
 }.
 Local Existing Instance sinvGS_pre.
-Definition sinvΣ PROP `{!oFunctorContractive PROP} :=
-  #[GFunctor (gmap_viewRF positive (agreeRF PROP))].
+Definition sinvΣ FML `{!oFunctorContractive FML} :=
+  #[GFunctor (gmap_viewRF positive (agreeRF FML))].
 #[export] Instance subG_sinvΣ
-  `{!oFunctorContractive PROP, !subG (sinvΣ PROP) Σ} : sinvGpreS PROP Σ.
+  `{!oFunctorContractive FML, !subG (sinvΣ FML) Σ} : sinvGpreS FML Σ.
 Proof. solve_inG. Qed.
 
 Section sinv.
-  Context `{!sinvGS PROP Σ}.
-  Implicit Type P : PROP $oi Σ.
+  Context `{!sinvGS FML Σ}.
+  Implicit Type P : FML $oi Σ.
 
   (** Simple invariant token *)
   Local Definition sinv_itok_def i P : iProp Σ :=
@@ -50,12 +50,12 @@ Section sinv.
   Proof. exact: seal_eq. Qed.
 End sinv.
 (** World satisfaction whose interpretation ignores the index *)
-Notation sinv_wsat' PROP ip := (sinv_iwsat (PROP:=PROP) (λ _, ip)).
+Notation sinv_wsat' FML ip := (sinv_iwsat (FML:=FML) (λ _, ip)).
 Notation sinv_wsat ip := (sinv_wsat' _ ip).
 
 Section sinv.
-  Context `{!sinvGS PROP Σ}.
-  Implicit Type P : PROP $oi Σ.
+  Context `{!sinvGS FML Σ}.
+  Implicit Type P : FML $oi Σ.
   Implicit Type (i : positive) (I : gset positive).
 
   (** [sinv_itok] and [sinv_tok] are non-expansive *)
@@ -68,7 +68,7 @@ Section sinv.
   Proof. rewrite sinv_itok_unseal. exact _. Qed.
   Fact sinv_tok_persistent {P} : Persistent (sinv_tok P).
   Proof. exact _. Qed.
-  (** [sinv_itok] and [sinv_tok] are timeless for discrete propositions *)
+  (** [sinv_itok] and [sinv_tok] are timeless for discrete formulas *)
   #[export] Instance sinv_itok_timeless `{!Discrete P} {i} :
     Timeless (sinv_itok i P).
   Proof. rewrite sinv_itok_unseal /sinv_itok_def /gmap_view_frag. exact _. Qed.
@@ -87,7 +87,7 @@ Section sinv.
   (** [sinv_iwsat] is timeless if [ip] is always timeless
     and the underlying ofe is discrete *)
   #[export] Instance sinv_iwsat_timeless
-    `{!OfeDiscrete (PROP $oi Σ), !∀ i P, Timeless (ip i P)} :
+    `{!OfeDiscrete (FML $oi Σ), !∀ i P, Timeless (ip i P)} :
     Timeless (sinv_iwsat ip).
   Proof. rewrite sinv_iwsat_unseal. exact _. Qed.
 
@@ -143,15 +143,15 @@ Section sinv.
 End sinv.
 
 (** Lemma for [sinv_wsat_alloc] *)
-Local Lemma sinv_auth_tok_alloc_empty `{!sinvGpreS PROP Σ} :
-  ⊢ |==> ∃ _ : sinvGS PROP Σ, sinv_auth_tok ∅.
+Local Lemma sinv_auth_tok_alloc_empty `{!sinvGpreS FML Σ} :
+  ⊢ |==> ∃ _ : sinvGS FML Σ, sinv_auth_tok ∅.
 Proof.
   iMod (own_alloc (gmap_view_auth (DfracOwn 1) ∅)) as (γ) "●".
   { apply gmap_view_auth_valid. } { iModIntro. by iExists (SinvGS _ _ _ γ). }
 Qed.
 (** Allocate [sinv_wsat] *)
-Lemma sinv_wsat_alloc `{!sinvGpreS PROP Σ} :
-  ⊢ |==> ∃ _ : sinvGS PROP Σ, ∀ ip, sinv_iwsat ip.
+Lemma sinv_wsat_alloc `{!sinvGpreS FML Σ} :
+  ⊢ |==> ∃ _ : sinvGS FML Σ, ∀ ip, sinv_iwsat ip.
 Proof.
   iMod sinv_auth_tok_alloc_empty as (?) "●". iModIntro. iExists _.
   iIntros. rewrite sinv_iwsat_unseal. iExists ∅. by iFrame.

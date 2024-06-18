@@ -10,7 +10,7 @@ From iris.base_logic.lib Require Export own.
 From iris.proofmode Require Import proofmode.
 Import ProdNotation iPropAppNotation LftNotation UpdwNotation.
 
-Implicit Type (PROP : oFunctor) (α : lft) (q : Qp).
+Implicit Type (FML : oFunctor) (α : lft) (q : Qp).
 
 (** ** Ghost state *)
 
@@ -30,12 +30,12 @@ Implicit Type b : bor_mode.
 Local Canonical bor_modeO := leibnizO bor_mode.
 
 (** State of a borrower *)
-Local Definition bor_stOF PROP : oFunctor := PROP * bor_modeO.
+Local Definition bor_stOF FML : oFunctor := FML * bor_modeO.
 (** State of the borrowers *)
-Local Definition bor_stmOF PROP := (gmapOF bor_id (bor_stOF PROP)).
+Local Definition bor_stmOF FML := (gmapOF bor_id (bor_stOF FML)).
 
 (** State of the lenders *)
-Local Definition lendmOF PROP := (gmapOF lend_id PROP).
+Local Definition lendmOF FML := (gmapOF lend_id FML).
 
 (** Kind of a deposit *)
 Local Definition depo_kind : Set := nat (* depth *) *' lft.
@@ -44,57 +44,57 @@ Implicit Type e : depo_kind.
 Local Canonical depo_kindO := leibnizO depo_kind.
 
 (** State of a deposit *)
-Local Definition depo_stOF PROP : oFunctor :=
-  depo_kindO * bor_stmOF PROP * lendmOF PROP.
+Local Definition depo_stOF FML : oFunctor :=
+  depo_kindO * bor_stmOF FML * lendmOF FML.
 (** State of the deposits *)
-Local Definition depo_stmOF PROP := (gmapOF depo_id (depo_stOF PROP)).
+Local Definition depo_stmOF FML := (gmapOF depo_id (depo_stOF FML)).
 
 (** Algebra for a borrower *)
-Local Definition borRF PROP := exclRF (bor_stOF PROP).
+Local Definition borRF FML := exclRF (bor_stOF FML).
 (** Algebra for a lender *)
-Local Definition lendRF PROP := exclRF PROP.
+Local Definition lendRF FML := exclRF FML.
 (** Algebra for a deposit *)
-Local Definition depoRF PROP : rFunctor :=
+Local Definition depoRF FML : rFunctor :=
   agreeRF depo_kindO *
-  gmapRF bor_id (borRF PROP) * gmapRF lend_id (lendRF PROP).
+  gmapRF bor_id (borRF FML) * gmapRF lend_id (lendRF FML).
 
 (** Algebra for the borrowing machinery *)
-Local Definition borrowRF_def PROP := authRF (gmapURF depo_id (depoRF PROP)).
+Local Definition borrowRF_def FML := authRF (gmapURF depo_id (depoRF FML)).
 Local Lemma borrowRF_aux : seal borrowRF_def. Proof. by eexists. Qed.
 Definition borrowRF := borrowRF_aux.(unseal).
 Local Lemma borrowRF_unseal : borrowRF = borrowRF_def.
 Proof. exact: seal_eq. Qed.
-Local Instance borrowRF_contractive `{!oFunctorContractive PROP} :
-  rFunctorContractive (borrowRF PROP).
+Local Instance borrowRF_contractive `{!oFunctorContractive FML} :
+  rFunctorContractive (borrowRF FML).
 Proof. rewrite borrowRF_unseal. exact _. Qed.
 
 (** Ghost state for the borrowing machinery *)
-Class borrowGpreS PROP Σ := BorrowGpreS {
+Class borrowGpreS FML Σ := BorrowGpreS {
   borrowGpreS_lft :: lftG Σ;
-  borrowGpreS_borrow : inG Σ (borrowRF PROP $ri Σ);
+  borrowGpreS_borrow : inG Σ (borrowRF FML $ri Σ);
 }.
 Local Existing Instance borrowGpreS_borrow.
-Class borrowGS PROP Σ := BorrowGS {
-  borrowGS_pre :: borrowGpreS PROP Σ;
+Class borrowGS FML Σ := BorrowGS {
+  borrowGS_pre :: borrowGpreS FML Σ;
   borrow_name : gname;
 }.
-Local Instance inG_borrow_def `{!inG Σ (borrowRF PROP $ri Σ)} :
-  inG Σ (borrowRF_def PROP $ri Σ).
+Local Instance inG_borrow_def `{!inG Σ (borrowRF FML $ri Σ)} :
+  inG Σ (borrowRF_def FML $ri Σ).
 Proof. rewrite -borrowRF_unseal. exact _. Qed.
-Definition borrowΣ PROP `{!oFunctorContractive PROP} : gFunctors :=
-  #[GFunctor lftR; GFunctor (borrowRF PROP)].
+Definition borrowΣ FML `{!oFunctorContractive FML} : gFunctors :=
+  #[GFunctor lftR; GFunctor (borrowRF FML)].
 #[export] Instance subG_borrow
-  `{!oFunctorContractive PROP, !subG (borrowΣ PROP) Σ} : borrowGpreS PROP Σ.
+  `{!oFunctorContractive FML, !subG (borrowΣ FML) Σ} : borrowGpreS FML Σ.
 Proof. solve_inG. Qed.
 
 (** ** Tokens *)
 
 Section borrow.
-  Context `{!borrowGS PROP Σ}.
-  Implicit Type (P Q : PROP $oi Σ) (Pl Ql : list (PROP $oi Σ))
-    (D : depo_stOF PROP $oi Σ) (Dm : depo_stmOF PROP $oi Σ)
-    (B : bor_stOF PROP $oi Σ) (Bm : bor_stmOF PROP $oi Σ)
-    (Pm : lendmOF PROP $oi Σ).
+  Context `{!borrowGS FML Σ}.
+  Implicit Type (P Q : FML $oi Σ) (Pl Ql : list (FML $oi Σ))
+    (D : depo_stOF FML $oi Σ) (Dm : depo_stmOF FML $oi Σ)
+    (B : bor_stOF FML $oi Σ) (Bm : bor_stmOF FML $oi Σ)
+    (Pm : lendmOF FML $oi Σ).
 
   (** General borrower token *)
   Local Definition bor_itok i j d α B : iProp Σ :=
@@ -168,7 +168,7 @@ Section borrow.
   #[export] Instance lend_tok_ne {α} : NonExpansive (lend_tok α).
   Proof. rewrite lend_tok_unseal. solve_proper. Qed.
 
-  (** Borrower and lender tokens are timeless for discrete propositions *)
+  (** Borrower and lender tokens are timeless for discrete formulas *)
   #[export] Instance borc_tok_timeless `{!Discrete P} {α} :
     Timeless (borc_tok α P).
   Proof. rewrite borc_tok_unseal. exact _. Qed.
@@ -222,7 +222,7 @@ Section borrow.
   Qed.
 
   (** Token for [depo_stm] *)
-  Local Definition depo_st_R D : depoRF PROP $ri Σ :=
+  Local Definition depo_st_R D : depoRF FML $ri Σ :=
     let '(e, Bm, Pm) := D in (to_agree e, Excl <$> Bm, Excl <$> Pm).
   Arguments depo_st_R _ /.
   Local Definition depo_stm_tok Dm : iProp Σ :=
@@ -399,11 +399,11 @@ End borrow.
 (** ** World satisfactions *)
 
 Section borrow.
-  Context `{!borrowGS PROP Σ}.
-  Implicit Type (M : iProp Σ → iProp Σ) (ip : PROP $oi Σ -d> iProp Σ)
-    (P Q : PROP $oi Σ) (D : depo_stOF PROP $oi Σ) (Dm : depo_stmOF PROP $oi Σ)
-    (B : bor_stOF PROP $oi Σ) (Bm : bor_stmOF PROP $oi Σ)
-    (Pm : lendmOF PROP $oi Σ).
+  Context `{!borrowGS FML Σ}.
+  Implicit Type (M : iProp Σ → iProp Σ) (ip : FML $oi Σ -d> iProp Σ)
+    (P Q : FML $oi Σ) (D : depo_stOF FML $oi Σ) (Dm : depo_stmOF FML $oi Σ)
+    (B : bor_stOF FML $oi Σ) (Bm : bor_stmOF FML $oi Σ)
+    (Pm : lendmOF FML $oi Σ).
 
   (** World satisfaction for a borrower *)
   Local Definition bor_wsat ip d α B : iProp Σ :=
@@ -875,10 +875,10 @@ Section borrow.
 End borrow.
 
 (** Allocate [borrow_wsat] *)
-Lemma borrow_wsat_alloc `{!borrowGpreS PROP Σ} :
-  ⊢ |==> ∃ _ : borrowGS PROP Σ, ∀ M ip, borrow_wsat M ip.
+Lemma borrow_wsat_alloc `{!borrowGpreS FML Σ} :
+  ⊢ |==> ∃ _ : borrowGS FML Σ, ∀ M ip, borrow_wsat M ip.
 Proof.
-  iMod (own_alloc (● (∅ : gmap _ _) : borrowRF_def PROP $ri Σ)) as (γ) "●";
+  iMod (own_alloc (● (∅ : gmap _ _) : borrowRF_def FML $ri Σ)) as (γ) "●";
     [by apply auth_auth_valid|].
   iModIntro. iExists (BorrowGS _ _ _ γ). iIntros (??).
   rewrite borrow_wsat_unseal. iExists ∅. unfold borrow_wsat'. by iFrame.
