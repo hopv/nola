@@ -344,42 +344,47 @@ Section verify.
     !pborrowGS nsynty cifOF Σ, !heapGS_gen hlc Σ}.
 
   (** Dereference a nested mutable reference *)
-  Lemma bor_bor_deref {α β l Φx q} :
-    [[{ q.[α ⊓ β] ∗ nbord α (∃ l', ▷ l ↦ #l' ∗ cif_bor β (Φx l'))%n }]]
+  Lemma bor_bor_deref {α β l Φx q} : β ⊑□ α -∗
+    [[{ q.[β] ∗ nbord α (∃ l', ▷ l ↦ #l' ∗ cif_bor β (Φx l'))%n }]]
       [pborrow_wsatid bupd]
       !#l
-    [[{ l', RET #l'; q.[α ⊓ β] ∗ nborcd (α ⊓ β) (Φx l') }]].
+    [[{ l', RET #l'; q.[β] ∗ nborcd β (Φx l') }]].
   Proof.
-    iIntros "%Ψ [[α β] b] →Ψ".
+    iIntros "#⊑ %Ψ !> [[β β'] b] →Ψ".
+    iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
     iMod (nbord_open (M:=bupd) with "α b") as "[o big]". rewrite /intp /=.
     iDestruct "big" as (l') "[>↦ b']". iApply twpw_fupdw_nonval; [done|].
     wp_load. iModIntro.
     iMod (nbord_reborrow (M:=bupd) α with "β b'") as "[β[b' →b']]".
-    rewrite [_⊓_]comm.
     iMod (nobord_subdiv (M:=bupd) [] with "[] o [] [↦ →b']") as "[α _]"=>/=.
     { iApply lft_sincl_refl. } { done. }
     { iIntros "† _". iModIntro. iExists _. iFrame "↦". by iApply "→b'". }
-    iModIntro. iApply "→Ψ". iFrame.
+    iModIntro. iApply "→Ψ". iFrame "β". iDestruct ("→β'" with "α") as "$".
+    iApply nborc_lft; [|done]. iApply lft_sincl_meet_intro; [|done].
+    iApply lft_sincl_refl.
   Qed.
 
   (** Dereference a nested prophetic mutable reference *)
-  Lemma proph_bor_bor_deref {X η ξ α β l Φx q} {x : X} :
-    [[{ q.[α ⊓ β] ∗
+  Lemma pbor_pbor_deref {X η ξ α β l Φx q} {x : X} : β ⊑□ α -∗
+    [[{ q.[β] ∗
         pbord α ((x, ξ)' : _ *'ₛ prvarₛ _) η
           (λ '(x', ξ')', ∃ l', ▷ l ↦ #l' ∗ cif_pbor β x' ξ' (Φx l'))%n }]]
       [pborrow_wsatid bupd]
       !#l
     [[{ l', RET #l';
-        q.[α ⊓ β] ∗ ∃ ξ' : prvar X,
-          ⟨π, π η = (π ξ', ξ)'⟩ ∗ pborcd (α ⊓ β) x ξ' (Φx l') }]].
+        q.[β] ∗ ∃ ξ' : prvar X,
+          ⟨π, π η = (π ξ', ξ)'⟩ ∗ pborcd β x ξ' (Φx l') }]].
   Proof.
-    iIntros "%Ψ [[α β] b] →Ψ".
+    iIntros "#⊑ %Ψ !> [[β β'] b] →Ψ".
+    iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
     iMod (pbord_open (M:=bupd) with "α b") as "/=[o big]".
     rewrite /intp /=. iDestruct "big" as (l') "[>↦ b']".
     iApply twpw_fupdw_nonval; [done|]. wp_load. iModIntro.
     iMod (pobord_pbord_reborrow (TY:=nsynty) (M:=bupd) (λ _, (_,_)' : _ *'ₛ _)
       with "o β b' [↦]") as (?) "[α[β[obs c]]]".
     { iIntros "/=% _ ? !>". iExists _. iFrame. }
-    iModIntro. iApply "→Ψ". iFrame "α β". iExists _. iFrame.
+    iModIntro. iApply "→Ψ". iFrame "β". iDestruct ("→β'" with "α") as "$".
+    iExists _. iFrame "obs". iApply pborc_lft; [|done].
+    iApply lft_sincl_meet_intro; [done|]. iApply lft_sincl_refl.
   Qed.
 End verify.
