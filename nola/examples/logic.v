@@ -378,4 +378,36 @@ Section verify.
     iExists _. iFrame "obs". iApply pborc_lft; [|done].
     iApply lft_sincl_meet_intro; [done|]. iApply lft_sincl_refl.
   Qed.
+
+  (** ** On derivability *)
+
+  Local Lemma inv'_sep_comm' `{!Deriv ih δ} {N Px Qx} :
+    inv' δ N (Px ∗ Qx)%n ⊢ inv' δ N (Qx ∗ Px)%n.
+  Proof.
+    iApply inv'_iff. iIntros "!>" (????). rewrite /pintp /= bi.sep_comm.
+    iApply bi.wand_iff_refl.
+  Qed.
+  Lemma inv'_sep_comm `{!Deriv ih δ} {N Px Qx} :
+    inv' δ N (Px ∗ Qx)%n ⊣⊢ inv' δ N (Qx ∗ Px)%n.
+  Proof. apply bi.equiv_entails. split; exact inv'_sep_comm'. Qed.
+
+  Local Lemma inv'_inv'_sep_comm' `{!Deriv ih δ} {N N' Px Qx} :
+    inv' δ N (cif_inv N' (Px ∗ Qx)) ⊢ inv' δ N (cif_inv N' (Qx ∗ Px)).
+  Proof.
+    iApply inv'_iff. iIntros "!>" (????). rewrite /pintp /= inv'_sep_comm.
+    iApply bi.wand_iff_refl.
+  Qed.
+  Lemma inv'_inv'_sep_comm `{!Deriv ih δ} {N N' Px Qx} :
+    inv' δ N (cif_inv N' (Px ∗ Qx)) ⊣⊢ inv' δ N (cif_inv N' (Qx ∗ Px)).
+  Proof. apply bi.equiv_entails. split; exact inv'_inv'_sep_comm'. Qed.
+
+  Local Lemma inv'_bor_lft' `{!Deriv ih δ} {N α β Px} :
+    α ⊑□ β -∗ β ⊑□ α -∗ inv' δ N (cif_bor α Px) -∗ inv' δ N (cif_bor β Px).
+  Proof.
+    iIntros "#? #?". iApply inv'_iff. iIntros "!>" (????). rewrite /pintp /=.
+    iSplit; by iApply nbor_lft.
+  Qed.
+  Lemma inv'_bor_lft `{!Deriv ih δ} {N α β Px} :
+    α ⊑□ β -∗ β ⊑□ α -∗ inv' δ N (cif_bor α Px) ∗-∗ inv' δ N (cif_bor β Px).
+  Proof. iIntros "#? #?". iSplit; by iApply inv'_bor_lft'. Qed.
 End verify.
