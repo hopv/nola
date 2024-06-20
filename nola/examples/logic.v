@@ -202,17 +202,18 @@ Section intp.
   Proof. done. Qed.
 End intp.
 
-(** ** Linked list mutation *)
-
-(** Target function *)
-Definition iter_ilist : val := rec: "self" "f" "c" "l" :=
-  if: !"c" = #0 then #() else
-    "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (!("l" +ₗ #1)).
-
 Section verify.
   Context `{!inv'GS cifOF Σ, !mutexGS cifOF Σ,
     !pborrowGS nsynty cifOF Σ, !heapGS_gen hlc Σ}.
+
+  (** ** Linked list mutation *)
+
   Implicit Type Φx Ψx : loc → cif Σ.
+
+  (** Target function *)
+  Definition iter_ilist : val := rec: "self" "f" "c" "l" :=
+    if: !"c" = #0 then #() else
+      "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (!("l" +ₗ #1)).
 
   (** [ilist]: Formula for a list *)
   Definition ilist_gen N Φx Ilist' l : cif Σ :=
@@ -275,22 +276,16 @@ Section verify.
     { iExists _. iFrame "↦l'". by iSplit. }
     iModIntro. by iApply ("IH" with "c↦ →Ψ").
   Qed.
-End verify.
 
-(** ** Linked list mutation over a mutex *)
+  (** ** Linked list mutation over a mutex *)
 
-(** Target function *)
-Definition iter_mlist : val := rec: "self" "f" "k" "c" "l" :=
-  if: !"c" = #0 then #true else
-    if: try_acquire_loop_mutex "k" "l" then
-      "f" "l";; let: "l'" := !("l" +ₗ #1) in release_mutex "l";;
-      "c" <- !"c" - #1;; "self" "f" "k" "c" "l'"
-    else #false.
-
-Section verify.
-  Context `{!inv'GS cifOF Σ, !mutexGS cifOF Σ,
-    !pborrowGS nsynty cifOF Σ, !heapGS_gen hlc Σ}.
-  Implicit Type Φx : loc → cif Σ.
+  (** Target function *)
+  Definition iter_mlist : val := rec: "self" "f" "k" "c" "l" :=
+    if: !"c" = #0 then #true else
+      if: try_acquire_loop_mutex "k" "l" then
+        "f" "l";; let: "l'" := !("l" +ₗ #1) in release_mutex "l";;
+        "c" <- !"c" - #1;; "self" "f" "k" "c" "l'"
+      else #false.
 
   (** [mlist]: Formula for a list with a mutex *)
   Definition mlist_gen Φx Mlist' l : cif Σ :=
@@ -336,12 +331,8 @@ Section verify.
     iIntros "_". wp_load. wp_store. have -> : (S m - 1)%Z = m by lia.
     by iApply ("IH" with "c↦ →Ψ").
   Qed.
-End verify.
 
-(** ** On borrows *)
-Section verify.
-  Context `{!inv'GS cifOF Σ, !mutexGS cifOF Σ,
-    !pborrowGS nsynty cifOF Σ, !heapGS_gen hlc Σ}.
+  (** ** On borrows *)
 
   (** Dereference a nested mutable reference *)
   Lemma bor_bor_deref {α β l Φx q} : β ⊑□ α -∗
@@ -365,15 +356,15 @@ Section verify.
   Qed.
 
   (** Dereference a nested prophetic mutable reference *)
-  Lemma pbor_pbor_deref {X η ξ α β l Φx q} {x : X} : β ⊑□ α -∗
+  Lemma pbor_pbor_deref {X η ξ α β l Φxx q} {x : X} : β ⊑□ α -∗
     [[{ q.[β] ∗
         pbord α ((x, ξ)' : _ *'ₛ prvarₛ _) η
-          (λ '(x', ξ')', ∃ l', ▷ l ↦ #l' ∗ cif_pbor β x' ξ' (Φx l'))%n }]]
+          (λ '(x', ξ')', ∃ l', ▷ l ↦ #l' ∗ cif_pbor β x' ξ' (Φxx l'))%n }]]
       [pborrow_wsatid bupd]
       !#l
     [[{ l', RET #l';
         q.[β] ∗ ∃ ξ' : prvar X,
-          ⟨π, π η = (π ξ', ξ)'⟩ ∗ pborcd β x ξ' (Φx l') }]].
+          ⟨π, π η = (π ξ', ξ)'⟩ ∗ pborcd β x ξ' (Φxx l') }]].
   Proof.
     iIntros "#⊑ %Ψ !> [[β β'] b] →Ψ".
     iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
