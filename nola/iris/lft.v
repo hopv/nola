@@ -29,7 +29,7 @@ Fact lft_meet_assoc : Assoc (=) (meet (A:=lft)). Proof. exact _. Qed.
 
 (** Algebra for an atomic lifetime *)
 Definition lftR := csumR
-  dfracR (* Alive, fractionally owned *)
+  dfracR (* Live, fractionally owned *)
   unitR (* Dead *).
 
 (** Ghost state *)
@@ -79,11 +79,11 @@ Proof. by move=> ? /lft_eqtop_meet_r. Qed.
 
 (** ** Lifetime tokens *)
 
-(** Atomic alive lifetime token *)
-Local Definition alft_alive `{!lftG Σ} (a : alft) (q : Qp) : iProp Σ :=
+(** Atomic live lifetime token *)
+Local Definition alft_live `{!lftG Σ} (a : alft) (q : Qp) : iProp Σ :=
   own a (Cinl (DfracOwn q)).
-(** Alive lifetime token *)
-Notation lft_alive α q := ([∗ mset] a ∈ α, alft_alive a q)%I.
+(** Live lifetime token *)
+Notation lft_live α q := ([∗ mset] a ∈ α, alft_live a q)%I.
 
 (** Dead atomic lifetime token *)
 Local Definition alft_dead `{!lftG Σ} (a : alft) : iProp Σ := own a (Cinr ()).
@@ -102,7 +102,7 @@ Local Definition alft_etern `{!lftG Σ} (a : alft) : iProp Σ :=
 Notation lft_etern α := ([∗ mset] a ∈ α, alft_etern a)%I.
 
 Module LftNotation'.
-  Notation "q .[ α ]" := (lft_alive α q)
+  Notation "q .[ α ]" := (lft_live α q)
     (format "q .[ α ]", at level 2, left associativity) : bi_scope.
   Notation "[† α ]" := (lft_dead α) (format "[† α ]") : bi_scope.
   Notation "[∞ α ]" := (lft_etern α) (format "[∞ α ]") : bi_scope.
@@ -118,16 +118,16 @@ Section lft.
   Fact lft_etern_persistent {α} : Persistent [∞α].
   Proof. exact _. Qed.
 
-  (** Alive, dead, eternal lifetime tokens are timeless *)
-  Fact lft_alive_timeless {α q} : Timeless q.[α].
+  (** Live, dead, eternal lifetime tokens are timeless *)
+  Fact lft_live_timeless {α q} : Timeless q.[α].
   Proof. exact _. Qed.
   #[export] Instance lft_dead_timeless {α} : Timeless [†α].
   Proof. rewrite lft_dead_unseal. exact _. Qed.
   Fact lft_etern_timeless {α} : Timeless [∞α].
   Proof. exact _. Qed.
 
-  (** Alive and dead lifetime tokens can't coexist *)
-  Lemma lft_alive_dead {α q} : q.[α] -∗ [†α] -∗ False.
+  (** Live and dead lifetime tokens can't coexist *)
+  Lemma lft_live_dead {α q} : q.[α] -∗ [†α] -∗ False.
   Proof.
     rewrite lft_dead_unseal. iIntros "q". iDestruct 1 as (a) "[%e †]".
     rewrite big_sepMS_elem_of; [|done].
@@ -140,31 +140,31 @@ Section lft.
     rewrite big_sepMS_elem_of; [|done].
     by iDestruct (own_valid_2 with "∞ †") as "%".
   Qed.
-  (** The fraction of an alive lifetime token is no more than [1] *)
-  Lemma lft_alive_valid {α q} : α ≠ ⊤ → q.[α] -∗ ⌜q ≤ 1⌝%Qp.
+  (** The fraction of a live lifetime token is no more than [1] *)
+  Lemma lft_live_valid {α q} : α ≠ ⊤ → q.[α] -∗ ⌜q ≤ 1⌝%Qp.
   Proof.
     case: (gmultiset_choose_or_empty α); [|done]=> [[a ?]_]. iIntros "α".
     iDestruct (big_sepMS_elem_of with "α") as "a"; [done|].
     by iDestruct (own_valid with "a") as %?.
   Qed.
 
-  (** Alive lifetime token is fractional *)
-  Local Instance alft_alive_fract {a} : Fractional (alft_alive a)%I.
+  (** Live lifetime token is fractional *)
+  Local Instance alft_live_fract {a} : Fractional (alft_live a)%I.
   Proof. move=> ??. by rewrite -own_op -Cinl_op. Qed.
-  Local Instance alft_alive_as_fract {a q} :
-    AsFractional (alft_alive a q) (alft_alive a) q.
+  Local Instance alft_live_as_fract {a q} :
+    AsFractional (alft_live a q) (alft_live a) q.
   Proof. split; [done|exact _]. Qed.
-  #[export] Instance lft_alive_fract {α} : Fractional (λ q, q.[α])%I.
+  #[export] Instance lft_live_fract {α} : Fractional (λ q, q.[α])%I.
   Proof. exact _. Qed.
-  #[export] Instance lft_alive_as_fract {α q} :
+  #[export] Instance lft_live_as_fract {α q} :
     AsFractional q.[α] (λ q, q.[α])%I q.
   Proof. split; [done|exact _]. Qed.
-  #[export] Instance lft_alive_fract_frame {p α} `{!FrameFractionalQp q r s} :
+  #[export] Instance lft_live_fract_frame {p α} `{!FrameFractionalQp q r s} :
     Frame p q.[α] r.[α] s.[α] | 5.
   Proof. apply: frame_fractional. Qed.
 
-  (** Combine alive lifetime tokens *)
-  Lemma lft_alive_combine {α β q r} :
+  (** Combine live lifetime tokens *)
+  Lemma lft_live_combine {α β q r} :
     q.[α] -∗ r.[β] -∗ ∃ s, s.[α ⊓ β] ∗ (s.[α ⊓ β] -∗ q.[α] ∗ r.[β]).
   Proof.
     case: (Qp.lower_bound q r)=> [s[t[t'[->->]]]]. iIntros "[α α'][β β']".
@@ -189,7 +189,7 @@ Section lft.
   Qed.
 
   (** Eternalize a lifetime *)
-  Local Lemma alft_eternalize {a q} : alft_alive a q ==∗ alft_etern a.
+  Local Lemma alft_eternalize {a q} : alft_live a q ==∗ alft_etern a.
   Proof.
     iIntros "a". iApply (own_update with "a").
     apply csum_update_l, dfrac_discard_update.
@@ -200,8 +200,8 @@ Section lft.
     iApply alft_eternalize.
   Qed.
 
-  (** Get an alive lifetime token out of an eternal lifetime token *)
-  Local Lemma alft_etern_alive {a} : alft_etern a ==∗ ∃ q, alft_alive a q.
+  (** Get a live lifetime token out of an eternal lifetime token *)
+  Local Lemma alft_etern_live {a} : alft_etern a ==∗ ∃ q, alft_live a q.
   Proof.
     iIntros "∞".
     iMod (own_updateP (λ a, ∃ q, a = Cinl (DfracOwn q)) with "∞") as
@@ -209,23 +209,23 @@ Section lft.
     eapply csum_updateP_l; [exact dfrac_undiscard_update|]=>/= ?[?->].
     by eexists _.
   Qed.
-  Local Lemma alftl_etern_alive {al} :
-    ([∗ list] a ∈ al, alft_etern a) ==∗ ∃ q, [∗ list] a ∈ al, alft_alive a q.
+  Local Lemma alftl_etern_live {al} :
+    ([∗ list] a ∈ al, alft_etern a) ==∗ ∃ q, [∗ list] a ∈ al, alft_live a q.
   Proof.
     elim: al=> [|a al IH]/=; [iIntros "_"; by iExists 1%Qp|].
-    iIntros "[∞ al]". iMod (alft_etern_alive with "∞") as (q) "a".
+    iIntros "[∞ al]". iMod (alft_etern_live with "∞") as (q) "a".
     iMod (IH with "al") as (r) "al". iModIntro.
     case: (Qp.lower_bound q r)=> [s[t[t'[->->]]]].
     iExists s. iDestruct "a" as "[$ _]". iStopProof. do 3 f_equiv.
     iDestruct 1 as "[$ ?]".
   Qed.
-  Lemma lft_etern_alive {α} : [∞α] ==∗ ∃ q, q.[α].
-  Proof. setoid_rewrite big_opMS_elements. apply alftl_etern_alive. Qed.
+  Lemma lft_etern_live {α} : [∞α] ==∗ ∃ q, q.[α].
+  Proof. setoid_rewrite big_opMS_elements. apply alftl_etern_live. Qed.
 
-  (** Alive lifetime token over [⊤]/[⊓] *)
-  Lemma lft_alive_top {q} : ⊢ q.[⊤].
+  (** Live lifetime token over [⊤]/[⊓] *)
+  Lemma lft_live_top {q} : ⊢ q.[⊤].
   Proof. by apply big_sepMS_empty'. Qed.
-  Lemma lft_alive_meet {α β q} : q.[α ⊓ β] ⊣⊢ q.[α] ∗ q.[β].
+  Lemma lft_live_meet {α β q} : q.[α ⊓ β] ⊣⊢ q.[α] ∗ q.[β].
   Proof. by apply big_sepMS_disj_union. Qed.
 
   (** Dead lifetime token over [⊤]/[⊓] *)
@@ -250,10 +250,10 @@ Section lft.
   Lemma lft_etern_meet {α β} : [∞α ⊓ β] ⊣⊢ [∞α] ∗ [∞β].
   Proof. by apply big_sepMS_disj_union. Qed.
 
-  (** Access an alive lifetime token using [⊑] *)
-  Local Lemma alftl_incl_alive_acc {α q} bl : bl ⊆ elements α →
-    q.[α] ⊢ ∃ r, ([∗ list] b ∈ bl, alft_alive b r) ∗
-      (([∗ list] b ∈ bl, alft_alive b r) -∗ q.[α]).
+  (** Access a live lifetime token using [⊑] *)
+  Local Lemma alftl_incl_live_acc {α q} bl : bl ⊆ elements α →
+    q.[α] ⊢ ∃ r, ([∗ list] b ∈ bl, alft_live b r) ∗
+      (([∗ list] b ∈ bl, alft_live b r) -∗ q.[α]).
   Proof.
     elim: bl q=> /=[|b bl IH] q inc.
     { iIntros. iExists 1%Qp. iSplit; [done|]. by iFrame. }
@@ -261,17 +261,17 @@ Section lft.
     iDestruct (big_sepMS_elem_of_acc _ _ b with "α") as "[b →α]".
     { rewrite -gmultiset_elem_of_elements. set_solver. }
     case: (Qp.lower_bound r (q/2)%Qp)=> [s[t[t'[->eq]]]].
-    have -> : alft_alive b (q / 2) ⊣⊢ alft_alive b s ∗ alft_alive b t'.
+    have -> : alft_live b (q / 2) ⊣⊢ alft_live b s ∗ alft_live b t'.
     { by rewrite eq fractional. }
     iExists _. iDestruct "b" as "[$ b']". setoid_rewrite fractional.
     rewrite big_sepL_sep. iDestruct "bl" as "[$ bl']". iIntros "[b bl]".
     iDestruct ("→α" with "[$b $b']") as "$". iApply "→α'". iFrame.
   Qed.
-  Lemma lft_incl_alive_acc {α β q} :
+  Lemma lft_incl_live_acc {α β q} :
     α ⊑ β → q.[α] ⊢ ∃ r, r.[β] ∗ (r.[β] -∗ q.[α]).
   Proof.
     move=> βα. iIntros "α".
-    iDestruct (alftl_incl_alive_acc (elements β) with "α") as (r) "[bl →α]";
+    iDestruct (alftl_incl_live_acc (elements β) with "α") as (r) "[bl →α]";
       [done|]. iExists _. rewrite -big_opMS_elements. iFrame.
   Qed.
 
@@ -329,15 +329,15 @@ Section lft.
   #[export] Instance lft_sincl_timeless {α β} : Timeless (α ⊑□ β).
   Proof. rewrite lft_sincl_unseal. exact _. Qed.
 
-  (** Access an alive lifetime token by [⊑□] *)
-  Lemma lft_sincl_alive_acc {α β q} :
+  (** Access a live lifetime token by [⊑□] *)
+  Lemma lft_sincl_live_acc {α β q} :
     α ⊑□ β -∗ q.[α] ==∗ ∃ r, r.[β] ∗ (r.[β] -∗ q.[α]).
   Proof.
     rewrite lft_sincl_unseal. iIntros "[†|[%[% γ]]] α".
-    { iDestruct (lft_alive_dead with "α †") as "[]". }
-    iMod (lft_etern_alive with "γ") as (r) "γ". iModIntro.
-    iDestruct (lft_alive_combine with "α γ") as (s) "[αγ →]".
-    iDestruct (lft_incl_alive_acc with "αγ") as (?) "[β →α]"; [done|].
+    { iDestruct (lft_live_dead with "α †") as "[]". }
+    iMod (lft_etern_live with "γ") as (r) "γ". iModIntro.
+    iDestruct (lft_live_combine with "α γ") as (s) "[αγ →]".
+    iDestruct (lft_incl_live_acc with "αγ") as (?) "[β →α]"; [done|].
     iExists _. iFrame "β". iIntros "β". iDestruct ("→α" with "β") as "αγ".
     iDestruct ("→" with "αγ") as "[$ _]".
   Qed.
