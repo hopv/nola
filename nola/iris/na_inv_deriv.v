@@ -122,6 +122,14 @@ Section na_inv_deriv.
     iIntros "F∖N Q". iMod ("QP" with "Q") as "P". iMod "→E∖N" as "_".
     iApply ("cl" with "F∖N P").
   Qed.
+  Lemma na_inv'_iff {p N P Q} :
+    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
+      ⟦ P ⟧(δ') ∗-∗ ⟦ Q ⟧(δ')) -∗
+      na_inv' δ p N P -∗ na_inv' δ p N Q.
+  Proof.
+    iIntros "#big". iApply na_inv'_acsr. iIntros "!>" (????).
+    iApply (wand_iff_mod_acsr (M:=fupd _ _)). iModIntro. by iApply "big".
+  Qed.
 
   (** Split [na_inv'] over [∗] *)
   Local Lemma na_inv'_sep' {p N PQ P Q} :

@@ -113,6 +113,14 @@ Section inv_deriv.
     iIntros "!> Q". iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
     iMod ("QP" with "Q") as "P". iMod "→E∖N" as "_". iApply ("cl" with "P").
   Qed.
+  Lemma inv'_iff {N P Q} :
+    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
+      ⟦ P ⟧(δ') ∗-∗ ⟦ Q ⟧(δ')) -∗
+      inv' δ N P -∗ inv' δ N Q.
+  Proof.
+    iIntros "#big". iApply inv'_acsr. iIntros "!>" (????).
+    iApply (wand_iff_mod_acsr (M:=fupd _ _)). iModIntro. by iApply "big".
+  Qed.
 
   (** Split [inv'] over [∗] *)
   Local Lemma inv'_sep' {N PQ P Q} :
