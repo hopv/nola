@@ -150,7 +150,8 @@ Section pborrow_deriv.
   (** Lemmas for [pborrow_jto] *)
   Lemma pborrow_jto_refl {P} : ⊢ δ (pborrow_jto P P).
   Proof.
-    iApply Deriv_to. iIntros (????). rewrite pborrow_jto_intp. by iIntros "$".
+    iApply Deriv_factor. iIntros (????). rewrite pborrow_jto_intp.
+    by iIntros "$".
   Qed.
   Lemma pborrow_jto_trans {P Q R} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ → ⟦ P ⟧(δ') ==∗ ⟦ Q ⟧(δ')) -∗
@@ -174,7 +175,8 @@ Section pborrow_deriv.
   Lemma pborrow_jlto_refl {X xπ Φ} :
     ⊢ δ (pborrow_jlto (FM:=FML $oi Σ) (X:=X) xπ xπ Φ Φ).
   Proof.
-    iApply Deriv_to. iIntros (????). rewrite pborrow_jlto_intp. by iIntros "$".
+    iApply Deriv_factor. iIntros (????). rewrite pborrow_jlto_intp.
+    by iIntros "$".
   Qed.
   Lemma pborrow_jlto_trans {X Y Z xπ yπ zπ Φ Ψ Ω} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →

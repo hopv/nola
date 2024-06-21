@@ -77,7 +77,7 @@ Section inv_deriv.
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
       inv_acsr ⟦⟧(δ') N ⟦ P ⟧(δ')) ⊢ inv' δ N P.
   Proof.
-    rewrite inv'_unseal. iIntros "#big !>". iApply Deriv_to. iIntros (????).
+    rewrite inv'_unseal. iIntros "#big !>". iApply Deriv_factor. iIntros (????).
     rewrite inv_jacsr_intp. by iApply "big".
   Qed.
 
@@ -105,7 +105,7 @@ Section inv_deriv.
       mod_acsr (fupd ∅ ∅) ⟦ P ⟧(δ') ⟦ Q ⟧(δ')) -∗
       inv' δ N P -∗ inv' δ N Q.
   Proof.
-    rewrite inv'_unseal. iIntros "#PQP #accP !>". iApply Deriv_to.
+    rewrite inv'_unseal. iIntros "#PQP #accP !>". iApply Deriv_factor.
     iIntros (??? to). rewrite to !inv_jacsr_intp. iIntros (? NE).
     iMod ("accP" $! _ NE) as "[P cl]".
     iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].

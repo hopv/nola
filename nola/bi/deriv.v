@@ -49,33 +49,34 @@ Section deriv.
   Lemma Deriv_ind `{!Deriv ih' δ} ih : Deriv (λ δ', ih δ' ∧ ih' δ') ⊑ ih → ih δ.
   Proof. by apply Psgoidp_ind. Qed.
 
-  (** Get the derivability [δ J] by the interpretaion *)
-  Lemma Deriv_to `{!Deriv ih δ} {J} :
+  (** Factorize the derivability [δ J] by semantics *)
+  Lemma Deriv_factor' `{!Deriv ih δ} {J} :
     ((* Take any good derivability predicate [δ'] *) ∀ δ', ⌜Deriv ih δ'⌝ →
       (* Can use the inductive hypothesis *) ⌜ih δ'⌝ →
       (* Can turn [δ] into the semantics at [δ'] *) ⌜dinto δ δ'⌝ →
       (* The semantics at [δ'] *) ⟦ J ⟧(δ')) ⊢
       (* The derivability at [δ] *) δ J.
   Proof.
-    iIntros "to". iApply (Psgoidp_le Deriv0). iIntros (?[?[??]]).
+    iIntros "to". iApply (Psgoidp_factor' Deriv0). iIntros (?[?[??]]).
     by iApply "to".
   Qed.
-  Lemma Deriv_eqv `{!Deriv ih δ} {J} :
+  Lemma Deriv_factor `{!Deriv ih δ} {J} :
     δ J ⊣⊢ ∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ → ⟦ J ⟧(δ').
   Proof.
-    iSplit; iIntros "?"; [|iStopProof; by exact Deriv_to]. by iIntros (??? ->).
+    iSplit; iIntros "?"; [|iStopProof; by exact Deriv_factor'].
+    by iIntros (??? ->).
   Qed.
-  Lemma Deriv_eqv' `{!Deriv ih δ} {J} :
+  Lemma Deriv_factor_all `{!Deriv ih δ} {J} :
     δ J ⊣⊢ ∀ δ' (_ : Deriv ih δ') (_ : ih δ') (_ : dinto δ δ'), ⟦ J ⟧(δ').
   Proof.
-    rewrite Deriv_eqv. repeat (do 2 f_equiv; rewrite bi.pure_impl_forall).
+    rewrite Deriv_factor. repeat (do 2 f_equiv; rewrite bi.pure_impl_forall).
   Qed.
 
   (** [Deriv ih δ] implies that [δ] is non-expansive *)
   #[export] Instance Deriv_to_ne `{!Deriv ih δ} : NonExpansive δ.
   Proof.
-    apply Deriv_ind=> ??????. rewrite !Deriv_eqv'. do 5 f_equiv. move=> [??].
-    solve_proper.
+    apply Deriv_ind=> ??????. rewrite !Deriv_factor_all. do 5 f_equiv.
+    move=> [??]. solve_proper.
   Qed.
 
   (** Map derivabilities via semantics *)
@@ -83,14 +84,15 @@ Section deriv.
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ → ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ')) ⊢
       δ J -∗ δ J'.
   Proof.
-    iIntros "∀ J". iApply Deriv_to. iIntros (??? to). rewrite to. by iApply "∀".
+    iIntros "∀ J". iApply Deriv_factor. iIntros (??? to). rewrite to.
+    by iApply "∀".
   Qed.
   Lemma Deriv_map2 `{!Deriv ih δ} {J J' J''} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
       ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ') -∗ ⟦ J'' ⟧(δ')) ⊢
       δ J -∗ δ J' -∗ δ J''.
   Proof.
-    iIntros "∀ J J'". iApply Deriv_to. iIntros (??? to). rewrite !to.
+    iIntros "∀ J J'". iApply Deriv_factor. iIntros (??? to). rewrite !to.
     iApply ("∀" with "[//] [//] [//] J J'").
   Qed.
   Lemma Deriv_map3 `{!Deriv ih δ} {J J' J'' J'''} :
@@ -98,7 +100,7 @@ Section deriv.
       ⟦ J ⟧(δ') -∗ ⟦ J' ⟧(δ') -∗ ⟦ J'' ⟧(δ') -∗ ⟦ J''' ⟧(δ')) ⊢
       δ J -∗ δ J' -∗ δ J'' -∗ δ J'''.
   Proof.
-    iIntros "∀ J J' J''". iApply Deriv_to. iIntros (??? to). rewrite !to.
+    iIntros "∀ J J' J''". iApply Deriv_factor. iIntros (??? to). rewrite !to.
     iApply ("∀" with "[//] [//] [//] J J' J''").
   Qed.
   Lemma Deriv_mapl `{!Deriv ih δ} {Js J'} :
@@ -106,15 +108,16 @@ Section deriv.
       ([∗ list] J ∈ Js, ⟦ J ⟧(δ')) -∗ ⟦ J' ⟧(δ')) ⊢
       ([∗ list] J ∈ Js, δ J) -∗ δ J'.
   Proof.
-    iIntros "∀ Js". iApply Deriv_to. iIntros (??? to). iApply "∀"; [done..|].
-    iStopProof. elim: Js; [done|]=>/= ?? ->. by rewrite to.
+    iIntros "∀ Js". iApply Deriv_factor. iIntros (??? to).
+    iApply "∀"; [done..|]. iStopProof. elim: Js; [done|]=>/= ?? ->.
+    by rewrite to.
   Qed.
   Lemma Deriv_all `{!Deriv ih δ} {A Jf J'} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
       (∀ a : A, ⟦ Jf a ⟧(δ')) -∗ ⟦ J' ⟧(δ')) ⊢
       (∀ a, δ (Jf a)) -∗ δ J'.
   Proof.
-    iIntros "∀ Jf". iApply Deriv_to. iIntros (????). iApply "∀"; [done..|].
+    iIntros "∀ Jf". iApply Deriv_factor. iIntros (????). iApply "∀"; [done..|].
     iStopProof. by do 2 f_equiv.
   Qed.
 
@@ -123,7 +126,7 @@ Section deriv.
     `{Sem : ∀ δ', Deriv ih δ' → ih δ' → dinto δ δ' → Persistent ⟦ J ⟧(δ')} :
     Persistent (δ J).
   Proof.
-    rewrite Deriv_eqv'. repeat apply bi.forall_persistent=> ?. exact: Sem.
+    rewrite Deriv_factor_all. repeat apply bi.forall_persistent=> ?. exact: Sem.
   Qed.
 
   (** Derivability preserves timelessness *)
@@ -131,7 +134,7 @@ Section deriv.
     `{Sem : ∀ δ', Deriv ih δ' → ih δ' → dinto δ δ' → Timeless ⟦ J ⟧(δ')} :
     Timeless (δ J).
   Proof.
-    rewrite Deriv_eqv'. repeat apply bi.forall_timeless=> ?. exact: Sem.
+    rewrite Deriv_factor_all. repeat apply bi.forall_timeless=> ?. exact: Sem.
   Qed.
 
   (** ** [der]: The best derivability predicate *)

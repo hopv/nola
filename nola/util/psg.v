@@ -17,16 +17,29 @@ Section psg.
   Qed.
   Definition Psgoid f : OT → Prop := lfp (Psgoid_gen f).
 
-  (** Pseudo-coinduction principle on [Psgoid] *)
-  Lemma Psgoid_le {f o} :
+  (** Factorization on [Psgoid] *)
+  Lemma Psgoid_factor' {f o} :
     Psgoid f o → ([⊓] o' :: Psgoid f o' ∧ o ⊑ f o', f o') ⊑ o.
   Proof. apply (lfp_unfold (f:=Psgoid_gen f)). Qed.
-  Lemma Psgoid_eqv {f o} :
+  Lemma Psgoid_factor {f o} :
     Psgoid f o → o ≃ [⊓] o' :: Psgoid f o' ∧ o ⊑ f o', f o'.
   Proof.
-    move=> ?. apply oeqv_ole. split; [|by apply Psgoid_le].
+    move=> /Psgoid_factor' ?. apply oeqv_ole. split; [|done].
     by apply big_meet_intro=> ?[??].
   Qed.
+  Lemma factor'_Psgoid {f o} :
+    ([⊓] o' :: Psgoid f o' ∧ o ⊑ f o', f o') ⊑ o → Psgoid f o.
+  Proof. apply (lfp_unfold (f:=Psgoid_gen f)). Qed.
+
+  (** [Psgoid f] is proper *)
+  #[export] Instance Psgoid_proper' {f} : Proper ((≃) ==> (⊑)) (Psgoid f).
+  Proof.
+    move=> ?? /oeqv_ole[??] /Psgoid_factor' ?. apply factor'_Psgoid.
+    do 2 (etrans; [|done]). apply big_meet_mono; [|done]=>/= ?[??].
+    split; [done|]. by etrans.
+  Qed.
+  #[export] Instance Psgoid_proper {f} : Proper ((≃) ==> (≃)) (Psgoid f).
+  Proof. move=> ???; split; by apply Psgoid_proper'. Qed.
 
   (** ** [Psgoidp]: [Psgoid] parameterized with an inductive hypothesis [ih] *)
   Definition Psgoidp f (ih : OT → Prop) : OT → Prop :=
@@ -48,19 +61,39 @@ Section psg.
     apply (mono (f:=lfp)), oeqv_ole_1, aug_meet_nest.
   Qed.
 
-  (** Pseudo-coinduction principle on [Psgoidp] *)
-  Lemma Psgoidp_le {f ih o} :
+  (** Factorization on [Psgoidp] *)
+  Lemma Psgoidp_factor' {f ih o} :
     Psgoidp f ih o → ([⊓] o' :: Psgoidp f ih o' ∧ o ⊑ f o' ∧ ih o', f o') ⊑ o.
   Proof.
     move=> /(lfp_unfold_1 (f:=aug_meet _ ih)). etrans; [|done].
     by apply big_meet_mono; [|done]=>/= ?[[??]?].
   Qed.
-  Lemma Psgoidp_eqv {f ih o} :
+  Lemma Psgoidp_factor {f ih o} :
     Psgoidp f ih o → o ≃ [⊓] o' :: Psgoidp f ih o' ∧ o ⊑ f o' ∧ ih o', f o'.
   Proof.
-    move=> ?. apply oeqv_ole. split; [|by apply Psgoidp_le].
+    move=> ?. apply oeqv_ole. split; [|by apply Psgoidp_factor'].
     by apply big_meet_intro=> ?[?[??]].
   Qed.
+  Lemma factor'_Psgoidp {f ih o} :
+    ([⊓] o' :: Psgoidp f ih o' ∧ o ⊑ f o' ∧ ih o', f o') ⊑ o → Psgoidp f ih o.
+  Proof.
+    move=> ?. apply (lfp_unfold (f:=aug_meet _ ih)).
+    unfold aug_meet, Psgoid_gen. etrans; [|done].
+    by apply big_meet_mono; [|done]=>/= ?[?[??]].
+  Qed.
+
+  (** [Psgoidp f] is proper *)
+  #[export] Instance Psgoidp_proper' {f} :
+    Proper ((⊑) ==> (≃) ==> (⊑)) (Psgoidp f).
+  Proof.
+    move=> ????? /oeqv_ole[??] /Psgoidp_factor'?. apply: Psgoidp_mono; [done|].
+    apply factor'_Psgoidp. do 2 (etrans; [|done]).
+    apply big_meet_mono; [|done]=>/= ?[?[??]]. split; [done|].
+    split; by [etrans|].
+  Qed.
+  #[export] Instance Psgoidp_proper {f} :
+    Proper ((≃) ==> (≃) ==> (≃)) (Psgoidp f).
+  Proof. move=> ?? /oeqv_ole[??] ???. split; by apply Psgoidp_proper'. Qed.
 
   (** ** [Psgoid' f]: Another definition of [Psgoid f], the closure under [f]
     and the meet *)
@@ -77,7 +110,7 @@ Section psg.
   Lemma Psgoid_Psgoid' {f} : Psgoid f ≃ Psgoid' f.
   Proof.
     apply oeqv_ole. split.
-    - apply lfp_ind=> o PS. apply (lfp_unfold (f:=Psgoid'_gen f)). right.
+    - apply lfp_ind=> o ?. apply (lfp_unfold (f:=Psgoid'_gen f)). right.
       exists (λ o', ∃ o'', o' = f o'' ∧ Psgoid' f o'' ∧ o ⊑ f o''). split.
       { move=> ?[?[->[? _]]]. apply (lfp_unfold (f:=Psgoid'_gen f)). left.
         by eexists _. }
@@ -85,10 +118,8 @@ Section psg.
       etrans; [|done]. apply big_meet_intro=> ?[??]. apply (big_meet_elim id).
       eauto.
     - apply lfp_ind=> o [[o'[? /oeqv_ole[??]]]|[S[sub /oeqv_ole[??]]]];
-        apply (lfp_unfold (f:=Psgoid_gen f)).
-      { unfold Psgoid_gen. etrans; [|done]. by apply big_meet_elim. }
-      unfold Psgoid_gen. etrans; [|done]. apply big_meet_intro=> o' s.
-      move: (sub _ s)=> /Psgoid_le ?. etrans; [|done].
+        apply factor'_Psgoid; (etrans; [|done]); [by apply big_meet_elim|].
+      apply big_meet_intro=> o' s. move: (sub _ s)=> /Psgoid_factor ->.
       apply big_meet_mono; [|done]=> ?[??]. split; [done|]. etrans; [done|].
       etrans; [|done]. by apply (big_meet_elim id).
   Qed.
@@ -98,7 +129,7 @@ Section psg.
   (** [Psgoid f] is closed under [f] *)
   Lemma Psgoid_app {f o} : Psgoid f o → Psgoid f (f o).
   Proof.
-    move=> PS. apply Psgoid_Psgoid' in PS. apply Psgoid_Psgoid'.
+    move=> /Psgoid_Psgoid' ?. apply Psgoid_Psgoid'.
     apply (lfp_unfold (f:=Psgoid'_gen f)). left. by eexists _.
   Qed.
 
@@ -113,17 +144,6 @@ Section psg.
     { move=> [?[?->]]. by apply big_meet_elim. }
     move=> ?. apply (big_meet_elim id). eauto.
   Qed.
-
-  (** [Psgoid f] is proper *)
-  Lemma Psgoid_proper' {f} : Proper ((≃) ==> (⊑)) (Psgoid f).
-  Proof.
-    move=> ?? /oeqv_ole[??] PS. apply (lfp_unfold (f:=Psgoid_gen f)) in PS.
-    apply (lfp_unfold (f:=Psgoid_gen f)). unfold Psgoid_gen. etrans; [|done].
-    etrans; [|done]. apply big_meet_mono; [|done]=>/= ?[??]. split; [done|].
-    by etrans.
-  Qed.
-  #[export] Instance Psgoid_proper {f} : Proper ((≃) ==> (≃)) (Psgoid f).
-  Proof. move=> ???; split; by apply Psgoid_proper'. Qed.
 
   (** ** [psg]: Pseudo-gfp *)
   Definition psg_def f : OT := [⊓] o :: Psgoid f o, o.

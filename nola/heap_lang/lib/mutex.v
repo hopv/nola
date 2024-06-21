@@ -230,7 +230,7 @@ Section mutex_deriv.
   (** Turn [mutex_tok] into [mutex] *)
   Lemma mutex_tok_mutex {l P} : mutex_tok l P ⊢ mutex δ l P.
   Proof.
-    rewrite mutex_unseal. iIntros "$ !>". iApply Deriv_to.
+    rewrite mutex_unseal. iIntros "$ !>". iApply Deriv_factor.
     iIntros (????). rewrite mutex_jiff_intp. iSplit; by iIntros.
   Qed.
 
@@ -252,7 +252,7 @@ Section mutex_deriv.
       mod_iff (fupd ⊤ ⊤) ⟦ P ⟧(δ') ⟦ Q ⟧(δ')) -∗
       mutex δ l P -∗ mutex δ l Q.
   Proof.
-    rewrite mutex_unseal. iIntros "#big [%R[#iff $]] !>". iApply Deriv_to.
+    rewrite mutex_unseal. iIntros "#big [%R[#iff $]] !>". iApply Deriv_factor.
     iIntros (??? to). rewrite to !mutex_jiff_intp.
     iApply (mod_iff_trans with "[] iff"). iApply mod_iff_sym. by iApply "big".
   Qed.

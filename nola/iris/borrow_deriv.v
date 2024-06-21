@@ -88,7 +88,8 @@ Section borrow_deriv.
   (** Lemmas for [borrow_jto] *)
   Lemma borrow_jto_refl {P} : ⊢ δ (borrow_jto P P).
   Proof.
-    iApply Deriv_to. iIntros (????). rewrite borrow_jto_intp. by iIntros "$".
+    iApply Deriv_factor. iIntros (????). rewrite borrow_jto_intp.
+    by iIntros "$".
   Qed.
   Lemma borrow_jto_trans {P Q R} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ → ⟦ P ⟧(δ') ==∗ ⟦ Q ⟧(δ')) -∗
