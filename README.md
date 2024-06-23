@@ -1,4 +1,4 @@
-# Nola: Parameterizing Higher-Order Ghost State to Wipe Out the Later Modality
+# Nola: Parameterizing Higher-Order Ghost State to Clear the Later Modality
 
 Nola is a library for _parameterizing higher-order ghost state_, which enables
 wiping out the _later modality_.
