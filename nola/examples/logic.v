@@ -4,7 +4,7 @@ From nola.iris Require Export cif inv_deriv pborrow_deriv.
 From nola.bi Require Import util.
 From nola.heap_lang Require Export notation proofmode lib.mutex.
 From nola.examples Require Export nsynty.
-Import ProdNotation WpwNotation iPropAppNotation PintpNotation IntpNotation
+Import ProdNotation WpwNotation iPropAppNotation PsemNotation SemNotation
   ProphNotation LftNotation NsyntyNotation.
 
 Implicit Type (N : namespace) (l : loc) (b : bool) (α β : lft) (q : Qp)
@@ -137,13 +137,12 @@ Qed.
   PborrowPreDeriv nsynty (cif Σ) (judg Σ) :=
   PBORROW_PRE_DERIV pborrow_jto (@pborrow_jlto _).
 
-Section intp.
-  Context `{!inv'GS cifOF Σ, !mutexGS cifOF Σ,
-    !pborrowGS nsynty cifOF Σ}.
+Section sem.
+  Context `{!inv'GS cifOF Σ, !mutexGS cifOF Σ, !pborrowGS nsynty cifOF Σ}.
   Implicit Type δ : judg Σ → iProp Σ.
 
-  (** ** [bintp]: Base interpretation *)
-  Definition bintp δ s :
+  (** ** [bsem]: Base semantics *)
+  Definition bsem δ s :
     (idom s -d> iProp Σ) → (cdom s -d> cif Σ) → dataOF s $oi Σ → iProp Σ :=
     match s with
     | cifs_inv N => λ _ Pxs _, inv' δ N (Pxs ())
@@ -158,30 +157,29 @@ Section intp.
     | cifs_plend α xπ => λ _ Φx _, plend δ α xπ Φx
     end.
 
-  (** [bintp] is non-expansive *)
-  #[export] Instance bintp_ne `{!NonExpansive δ} {s} :
-    NonExpansive3 (bintp δ s).
+  (** [bsem] is non-expansive *)
+  #[export] Instance bsem_ne `{!NonExpansive δ} {s} : NonExpansive3 (bsem δ s).
   Proof. case s; solve_proper. Qed.
 
-  (** Parameterized interpretation of [cif] *)
-  #[export] Instance cif_dintp : Dintp (judg Σ) (cif Σ) (iProp Σ) :=
-    DINTP (λ δ, cif_intp (bintp δ)).
+  (** Parameterized semantics of [cif] *)
+  #[export] Instance cif_dsem : Dsem (judg Σ) (cif Σ) (iProp Σ) :=
+    DSEM (λ δ, cif_sem (bsem δ)).
 
-  (** [cif_intp] is non-expansive *)
-  Fact cif_intp_ne `{!NonExpansive δ} : NonExpansive ⟦⟧(δ)@{cif Σ}.
+  (** [cif_sem] is non-expansive *)
+  Fact cif_sem_ne `{!NonExpansive δ} : NonExpansive ⟦⟧(δ)@{cif Σ}.
   Proof. exact _. Qed.
 
   Context `{!heapGS_gen hlc Σ}.
 
-  (** [judg_intp]: Judgment interpretation *)
-  Definition judg_intp δ (J : judg Σ) := match J with
+  (** [judg_sem]: Judgment semantics *)
+  Definition judg_sem δ (J : judg Σ) := match J with
     | inl (inl (inl (N, Px))) => inv_acsr ⟦⟧(δ) N ⟦ Px ⟧(δ)
     | inl (inl (inr (Px, Qx))) => mod_iff (fupd ⊤ ⊤) ⟦ Px ⟧(δ) ⟦ Qx ⟧(δ)
     | inl (inr (Px, Qx)) => ⟦ Px ⟧(δ) ==∗ ⟦ Qx ⟧(δ)
     | inr (existT (X, Y)' ((xπ, yπ)', Φx, Ψx)) =>
         plend_body ⟦ ⟧(δ) xπ Φx ==∗ plend_body ⟦ ⟧(δ) yπ Ψx
     end%I.
-  Local Instance judg_intp_ne `{!NonExpansive δ} : NonExpansive (judg_intp δ).
+  Local Instance judg_sem_ne `{!NonExpansive δ} : NonExpansive (judg_sem δ).
   Proof.
     move=> ? _ _[_ _[_ _[|]|]|].
     - move=> [??][??][/=/leibniz_equiv_iff<- ?]. solve_proper.
@@ -190,8 +188,8 @@ Section intp.
     - move=> [?[[[??]?]?]][?[[[??]?]?]][/=?]. subst=>/=.
       move=> [/=[/=/leibniz_equiv_iff[<-<-]?]?]. solve_proper.
   Qed.
-  #[export] Instance judg_dintp : Dintp (judg Σ) (judg Σ) (iProp Σ) :=
-    DINTP judg_intp.
+  #[export] Instance judg_dsem : Dsem (judg Σ) (judg Σ) (iProp Σ) :=
+    DSEM judg_sem.
   Canonical judgJ : judgi (iProp Σ) := Judgi (judg Σ).
 
   #[export] Instance judg_inv_deriv : InvDeriv cifOF Σ judgJ.
@@ -200,7 +198,7 @@ Section intp.
   Proof. done. Qed.
   #[export] Instance judg_pborrow_deriv : PborrowDeriv nsynty cifOF Σ judgJ.
   Proof. done. Qed.
-End intp.
+End sem.
 
 Section verify.
   Context `{!inv'GS cifOF Σ, !mutexGS cifOF Σ,
@@ -265,7 +263,7 @@ Section verify.
       iter_ilist f #c #l @ ↑N
     [[{ RET #(); c ↦ #0 }]].
   Proof.
-    unfold intp. iIntros "#f" (Ψ) "!> /=[c↦ #[ihd itl]] →Ψ".
+    unfold sem. iIntros "#f" (Ψ) "!> /=[c↦ #[ihd itl]] →Ψ".
     iInduction n as [|m] "IH" forall (l) "ihd itl".
     { wp_rec. wp_load. wp_pures. by iApply "→Ψ". }
     wp_rec. wp_load. wp_pures. wp_apply "f"; [done|]. iIntros "_". wp_load.
@@ -343,7 +341,7 @@ Section verify.
   Proof.
     iIntros "#⊑ %Ψ !> [[β β'] b] →Ψ".
     iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
-    iMod (nbord_open (M:=bupd) with "α b") as "[o big]". rewrite /intp /=.
+    iMod (nbord_open (M:=bupd) with "α b") as "[o big]". rewrite /sem /=.
     iDestruct "big" as (l') "[>↦ b']". iApply twpw_fupdw_nonval; [done|].
     wp_load. iModIntro.
     iMod (nbord_reborrow (M:=bupd) α with "β b'") as "[β[b' →b']]".
@@ -369,7 +367,7 @@ Section verify.
     iIntros "#⊑ %Ψ !> [[β β'] b] →Ψ".
     iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
     iMod (pbord_open (M:=bupd) with "α b") as "/=[o big]".
-    rewrite /intp /=. iDestruct "big" as (l') "[>↦ b']".
+    rewrite /sem /=. iDestruct "big" as (l') "[>↦ b']".
     iApply twpw_fupdw_nonval; [done|]. wp_load. iModIntro.
     iMod (pobord_pbord_reborrow (TY:=nsynty) (M:=bupd) (λ _, (_,_)' : _ *'ₛ _)
       with "o β b' [↦]") as (?) "[α[β[obs c]]]".
@@ -384,7 +382,7 @@ Section verify.
   Local Lemma inv'_sep_comm' `{!Deriv ih δ} {N Px Qx} :
     inv' δ N (Px ∗ Qx)%n ⊢ inv' δ N (Qx ∗ Px)%n.
   Proof.
-    iApply inv'_iff. iIntros "!>" (????). rewrite /pintp /= bi.sep_comm.
+    iApply inv'_iff. iIntros "!>" (????). rewrite /psem /= bi.sep_comm.
     iApply bi.wand_iff_refl.
   Qed.
   Lemma inv'_sep_comm `{!Deriv ih δ} {N Px Qx} :
@@ -394,7 +392,7 @@ Section verify.
   Local Lemma inv'_inv'_sep_comm' `{!Deriv ih δ} {N N' Px Qx} :
     inv' δ N (cif_inv N' (Px ∗ Qx)) ⊢ inv' δ N (cif_inv N' (Qx ∗ Px)).
   Proof.
-    iApply inv'_iff. iIntros "!>" (????). rewrite /pintp /= inv'_sep_comm.
+    iApply inv'_iff. iIntros "!>" (????). rewrite /psem /= inv'_sep_comm.
     iApply bi.wand_iff_refl.
   Qed.
   Lemma inv'_inv'_sep_comm `{!Deriv ih δ} {N N' Px Qx} :
@@ -404,7 +402,7 @@ Section verify.
   Local Lemma inv'_bor_lft' `{!Deriv ih δ} {N α β Px} :
     α ⊑□ β -∗ β ⊑□ α -∗ inv' δ N (cif_bor α Px) -∗ inv' δ N (cif_bor β Px).
   Proof.
-    iIntros "#? #?". iApply inv'_iff. iIntros "!>" (????). rewrite /pintp /=.
+    iIntros "#? #?". iApply inv'_iff. iIntros "!>" (????). rewrite /psem /=.
     iSplit; by iApply nbor_lft.
   Qed.
   Lemma inv'_bor_lft `{!Deriv ih δ} {N α β Px} :

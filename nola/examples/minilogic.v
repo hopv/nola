@@ -26,13 +26,13 @@ Definition iter_ilist : val := rec: "self" "f" "c" "l" :=
 Section verify.
   Context `{!inv'GS fmlO Σ, !heapGS_gen hlc Σ}.
 
-  (** Interpretation of [fml] *)
-  Fixpoint intp (P : fml) : iProp Σ := match P with
-  | all Φ => ∀ x, intp (Φ x) | ex Φ => ∃ x, intp (Φ x)
-  | and P Q => intp P ∧ intp Q | or P Q => intp P ∨ intp Q
-  | imp P Q => intp P → intp Q | pure φ => ⌜φ⌝
-  | sep P Q => intp P ∗ intp Q | wand P Q => intp P -∗ intp Q
-  | pers P => □ intp P | bupd P => |==> intp P | later P => ▷ intp P
+  (** Semantics of [fml] *)
+  Fixpoint sem (P : fml) : iProp Σ := match P with
+  | all Φ => ∀ x, sem (Φ x) | ex Φ => ∃ x, sem (Φ x)
+  | and P Q => sem P ∧ sem Q | or P Q => sem P ∨ sem Q
+  | imp P Q => sem P → sem Q | pure φ => ⌜φ⌝
+  | sep P Q => sem P ∗ sem Q | wand P Q => sem P -∗ sem Q
+  | pers P => □ sem P | bupd P => |==> sem P | later P => ▷ sem P
   | pointsto q l v => l ↦{#q} v
   | inv N P => inv_tok N P
   | ilist N Φ l => inv_tok N (Φ l) ∗ inv_tok N
@@ -41,9 +41,9 @@ Section verify.
 
   (** Termination of [iter] *)
   Lemma twp_iter_list {N Φ c l} {f : val} {n : nat} :
-    (∀ l0, [[{ inv_tok N (Φ l0) }]][inv_wsat intp] f #l0 @ ↑N
+    (∀ l0, [[{ inv_tok N (Φ l0) }]][inv_wsat sem] f #l0 @ ↑N
       [[{ RET #(); True }]]) -∗
-    [[{ c ↦ #n ∗ intp (ilist N Φ l) }]][inv_wsat intp]
+    [[{ c ↦ #n ∗ sem (ilist N Φ l) }]][inv_wsat sem]
       iter_ilist f #c #l @ ↑N
     [[{ RET #(); c ↦ #0 }]].
   Proof.
@@ -52,7 +52,7 @@ Section verify.
     { wp_rec. wp_load. wp_pures. by iApply "→Ψ". }
     wp_rec. wp_load. wp_pures. wp_apply "f"; [done|]. iIntros "_".
     wp_load. wp_store. wp_op. wp_bind (! _)%E. have -> : (S m - 1)%Z = m by lia.
-    iMod (inv_tok_acc (FML:=fmlO) (ip:=intp) with "itl") as
+    iMod (inv_tok_acc (FML:=fmlO) (sm:=sem) with "itl") as
       "/=[(%l' & ↦l' & #itlhd & #itltl) cl]"; [done|].
     wp_load. iModIntro. iMod ("cl" with "[↦l']") as "_".
     { iExists _. iFrame "↦l'". by iSplit. }

@@ -26,7 +26,7 @@ Proof. solve_inG. Qed.
 Section na_inv.
   Context `{!na_inv'GS FML Σ, !invGS_gen hlc Σ, !na_invG Σ}.
   Local Existing Instance na_inv_inG.
-  Implicit Type ip : FML $oi Σ → iProp Σ.
+  Implicit Type sm : FML $oi Σ → iProp Σ.
 
   (** Access l of an non-atomic invariant *)
   Local Definition na_lock p i : iProp Σ := own p (ε, GSet {[i]}).
@@ -88,19 +88,19 @@ Section na_inv.
     Timeless (na_inv_tok p N P).
   Proof. rewrite na_inv_tok_unseal. exact _. Qed.
 
-  (** Interpretation *)
-  Local Definition na_inv_intp (ip : FML $oi Σ -d> iProp Σ)
+  (** Semantics *)
+  Local Definition na_inv_sem (sm : FML $oi Σ -d> iProp Σ)
     : na_inv_prop FML $oi Σ -d> iProp Σ :=
-    λ '((p, i)', P), na_body p i (ip P).
+    λ '((p, i)', P), na_body p i (sm P).
 
-  (** [na_inv_intp ip] is non-expansive if [ip] is *)
-  Local Instance na_inv_intp_ne `{!NonExpansive ip} :
-    NonExpansive (na_inv_intp ip).
+  (** [na_inv_sem sm] is non-expansive if [sm] is *)
+  Local Instance na_inv_sem_ne `{!NonExpansive sm} :
+    NonExpansive (na_inv_sem sm).
   Proof. move=> ?[??][??][/=??]. solve_proper. Qed.
 
   (** World satisfaction for non-atomic invariants *)
-  Local Definition na_inv_wsat_def (ip : FML $oi Σ -d> iProp Σ) : iProp Σ :=
-    inv_wsat (na_inv_intp ip).
+  Local Definition na_inv_wsat_def (sm : FML $oi Σ -d> iProp Σ) : iProp Σ :=
+    inv_wsat (na_inv_sem sm).
   Local Lemma na_inv_wsat_aux : seal na_inv_wsat_def. Proof. by eexists. Qed.
   Definition na_inv_wsat := na_inv_wsat_aux.(unseal).
   Local Lemma na_inv_wsat_unseal : na_inv_wsat = na_inv_wsat_def.
@@ -110,16 +110,16 @@ Section na_inv.
   #[export] Instance na_inv_wsat_ne : NonExpansive na_inv_wsat.
   Proof.
     rewrite na_inv_wsat_unseal /na_inv_wsat_def=> ????. f_equiv. case=> ??.
-    unfold na_inv_intp. solve_proper.
+    unfold na_inv_sem. solve_proper.
   Qed.
   #[export] Instance na_inv_wsat_proper : Proper ((≡) ==> (≡)) inv_wsat.
   Proof. apply ne_proper, _. Qed.
 
-  Context `{!NonExpansive ip}.
+  Context `{!NonExpansive sm}.
 
   (** Allocate [na_inv_tok] *)
   Lemma na_inv_tok_alloc_rec P p N :
-    (na_inv_tok p N P -∗ ip P) =[na_inv_wsat ip]=∗ na_inv_tok p N P.
+    (na_inv_tok p N P -∗ sm P) =[na_inv_wsat sm]=∗ na_inv_tok p N P.
   Proof.
     rewrite na_inv_tok_unseal na_inv_wsat_unseal.
     iIntros "→P". iMod (na_lock_alloc p N) as (i ?) "l".
@@ -128,23 +128,23 @@ Section na_inv.
     iIntros "i". iLeft. iFrame "l". iApply "→P". iExists _. by iSplit.
   Qed.
   Lemma na_inv_tok_alloc P p N :
-    ip P =[na_inv_wsat ip]=∗ na_inv_tok p N P.
+    sm P =[na_inv_wsat sm]=∗ na_inv_tok p N P.
   Proof. iIntros "?". iApply na_inv_tok_alloc_rec. by iIntros. Qed.
 
   (** Allocate [inv_tok] before storing the content *)
   Lemma na_inv_tok_alloc_open {p N E F P} : ↑N ⊆ E → ↑N ⊆ F →
-    na_own p F =[na_inv_wsat ip]{E}=∗
+    na_own p F =[na_inv_wsat sm]{E}=∗
       na_own p (F∖↑N) ∗ na_inv_tok p N P ∗
-      (na_own p (F∖↑N) -∗ ip P =[na_inv_wsat ip]{E}=∗ na_own p F).
+      (na_own p (F∖↑N) -∗ sm P =[na_inv_wsat sm]{E}=∗ na_own p F).
   Proof.
     rewrite na_inv_tok_unseal na_inv_wsat_unseal=> NE NF.
     iMod (na_lock_alloc p N) as (i iN) "l".
     rewrite (na_own_subset NF) (na_own_in iN). iIntros "[[i $]$] W".
     iMod (inv_tok_alloc_open (FML:=na_inv_prop _) ((p, i)', P) N NE with "W")
-      as "[W[iP cl]]".
+      as "[W[sm cl]]".
     iMod ("cl" with "[$i//] W") as "[$ _]". iModIntro.
     iSplit; [iExists _; by iFrame|]. iIntros "$ P W".
-    iMod (inv_tok_acc NE with "iP W") as "[W[[[_ l']|$]cl]]".
+    iMod (inv_tok_acc NE with "sm W") as "[W[[[_ l']|$]cl]]".
     { iDestruct (na_lock_2_no with "l l'") as "[]". }
     iMod ("cl" with "[l P] W") as "[$ _]"; [|done]. iLeft. iFrame.
   Qed.
@@ -163,16 +163,16 @@ Section na_inv.
 
   (** Access via [na_inv_tok] *)
   Lemma na_inv_tok_acc {p N E F P} : ↑N ⊆ E → ↑N ⊆ F →
-    na_own p F -∗ na_inv_tok p N P =[na_inv_wsat ip]{E}=∗
-      na_own p (F∖↑N) ∗ ip P ∗
-      (na_own p (F∖↑N) -∗ ip P =[na_inv_wsat ip]{E}=∗ na_own p F).
+    na_own p F -∗ na_inv_tok p N P =[na_inv_wsat sm]{E}=∗
+      na_own p (F∖↑N) ∗ sm P ∗
+      (na_own p (F∖↑N) -∗ sm P =[na_inv_wsat sm]{E}=∗ na_own p F).
   Proof.
     rewrite na_inv_tok_unseal na_inv_wsat_unseal=> NE NF.
-    rewrite (na_own_subset NF). iIntros "[N $] [%i[%iN #iP]] W".
-    iMod (inv_tok_acc NE with "iP W") as "[W[bd cl]]".
+    rewrite (na_own_subset NF). iIntros "[N $] [%i[%iN #sm]] W".
+    iMod (inv_tok_acc NE with "sm W") as "[W[bd cl]]".
     iDestruct (na_body_acc iN with "N bd") as "[bd[$ →bd]]".
     iMod ("cl" with "bd W") as "[$ _]". iIntros "!> F∖N P W".
-    iMod (inv_tok_acc NE with "iP W") as "[W[bd cl]]".
+    iMod (inv_tok_acc NE with "sm W") as "[W[bd cl]]".
     iDestruct ("→bd" with "bd P") as "[$ bd]".
     by iMod ("cl" with "bd W") as "[$ _]".
   Qed.
@@ -180,7 +180,7 @@ End na_inv.
 
 (** Allocate [na_inv_wsat] *)
 Lemma na_inv_wsat_alloc `{!na_inv'GpreS FML Σ, !invGS_gen hlc Σ, !na_invG Σ} :
-  ⊢ |==> ∃ _ : na_inv'GS FML Σ, ∀ ip, na_inv_wsat ip.
+  ⊢ |==> ∃ _ : na_inv'GS FML Σ, ∀ sm, na_inv_wsat sm.
 Proof.
   iMod inv_wsat_alloc as (?) "W". iModIntro. iExists _. iIntros (?).
   rewrite na_inv_wsat_unseal. iApply "W".

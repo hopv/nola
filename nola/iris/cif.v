@@ -140,13 +140,13 @@ Notation "'True'" := (cif_pure True) : cif_scope.
 Notation "'False'" := (cif_pure False) : cif_scope.
 Notation "▷ P" := (cif_later P) : cif_scope.
 
-(** ** [cif_intp]: Interpretation of [cif] *)
+(** ** [cif_sem]: Semantics of [cif] *)
 Section iris.
   Context {S} {I C : S → Type} {D : S → oFunctor} {Σ : gFunctors}.
 
-  (** [cif_bintp]: Base interpretation for [cif] *)
-  Definition cif_bintp
-    (ip : ∀ s, (I s -d> iProp Σ) → (C s -d> cif I C D Σ) →
+  (** [cif_bsem]: Base semantics for [cif] *)
+  Definition cif_bsem
+    (sm : ∀ s, (I s -d> iProp Σ) → (C s -d> cif I C D Σ) →
       D s $oi Σ → iProp Σ) s
     : (cif_idom I s -d> iProp Σ) → (cif_cdom C s -d> cif I C D Σ) →
         cif_dataOF D s $oi Σ → iProp Σ :=
@@ -163,21 +163,21 @@ Section iris.
         | cifs_except0 => ◇ P
         end
     | cifs_pure => λ _ _ φ, ⌜φ⌝ | cifs_later => λ _ _, laterl
-    | cifs_custom s => ip s
+    | cifs_custom s => sm s
     end%I.
 
-  (** [cif_bintp] is non-expansive *)
-  #[export] Instance cif_bintp_ne `{!∀ s, NonExpansive3 (ip s)} {s} :
-    NonExpansive3 (cif_bintp ip s).
+  (** [cif_bsem] is non-expansive *)
+  #[export] Instance cif_bsem_ne `{!∀ s, NonExpansive3 (sm s)} {s} :
+    NonExpansive3 (cif_bsem sm s).
   Proof.
     case s=>/=; try solve_proper. move=> ???????. by apply laterl_ne.
   Qed.
 
-  (** [cif_intp]: Interpretation of [cif] *)
-  Definition cif_intp ip : cif I C D Σ → iProp Σ := cit_intp (cif_bintp ip).
+  (** [cif_sem]: Semantics of [cif] *)
+  Definition cif_sem sm : cif I C D Σ → iProp Σ := cit_sem (cif_bsem sm).
 
-  (** [cif_intp ip] is non-expansive if [ip] is *)
-  Fact cif_intp_ne `{!∀ s, NonExpansive3 (ip s)} : NonExpansive (cif_intp ip).
+  (** [cif_sem sm] is non-expansive if [sm] is *)
+  Fact cif_sem_ne `{!∀ s, NonExpansive3 (sm s)} : NonExpansive (cif_sem sm).
   Proof. exact _. Qed.
 End iris.
-Arguments cif_intp {_ _ _ _ _} _ _ /.
+Arguments cif_sem {_ _ _ _ _} _ _ /.

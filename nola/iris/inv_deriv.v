@@ -3,7 +3,7 @@
 From nola.bi Require Export deriv.
 From nola.iris Require Export inv.
 From iris.proofmode Require Import proofmode.
-Import iPropAppNotation PintpNotation IntpNotation UpdwNotation.
+Import iPropAppNotation PsemNotation SemNotation UpdwNotation.
 
 (** Notation *)
 Notation inv_wsati δ := (inv_wsat ⟦⟧(δ)).
@@ -44,18 +44,18 @@ Section inv_deriv.
   Implicit Type P Q PQ : FML $oi Σ.
 
   (** Accessor to the invariant body *)
-  Definition inv_acsr ip N Pi : iProp Σ :=
-    ∀ E, ⌜↑N ⊆ E⌝ → |=[inv_wsat ip]{E,E∖↑N}=>
-      Pi ∗ (Pi =[inv_wsat ip]{E∖↑N,E}=∗ True).
+  Definition inv_acsr sm N Pi : iProp Σ :=
+    ∀ E, ⌜↑N ⊆ E⌝ → |=[inv_wsat sm]{E,E∖↑N}=>
+      Pi ∗ (Pi =[inv_wsat sm]{E∖↑N,E}=∗ True).
 
   Context `{!InvPreDeriv (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
-    !Dintp JUDGI (FML $oi Σ) (iProp Σ)}.
+    !Dsem JUDGI (FML $oi Σ) (iProp Σ)}.
   Implicit Type δ : JUDGI → iProp Σ.
 
   (** Derivability data for [inv] *)
   Class InvDeriv :=
     (** Interpreting [inv_jacsr] *)
-    inv_jacsr_intp : ∀{δ N P},
+    inv_jacsr_sem : ∀{δ N P},
       ⟦ inv_jacsr N P ⟧(δ) ⊣⊢ inv_acsr ⟦⟧(δ) N ⟦ P ⟧(δ).
 
   Context `{!InvDeriv}.
@@ -66,7 +66,7 @@ Section inv_deriv.
       ⟦ P ⟧ ∗ (⟦ P ⟧ =[inv_wsatid]{E∖↑N,E}=∗ True).
   Proof.
     rewrite inv'_unseal. iIntros (?) "accP".
-    iDestruct (der_sound with "accP") as "accP". rewrite inv_jacsr_intp.
+    iDestruct (der_sound with "accP") as "accP". rewrite inv_jacsr_sem.
     by iApply "accP".
   Qed.
 
@@ -78,14 +78,14 @@ Section inv_deriv.
       inv_acsr ⟦⟧(δ') N ⟦ P ⟧(δ')) ⊢ inv' δ N P.
   Proof.
     rewrite inv'_unseal. iIntros "#big !>". iApply Deriv_factor. iIntros (????).
-    rewrite inv_jacsr_intp. by iApply "big".
+    rewrite inv_jacsr_sem. by iApply "big".
   Qed.
 
   (** Turn [inv_tok] into [inv'] *)
   Lemma inv_tok_inv' {N P} : inv_tok N P ⊢ inv' δ N P.
   Proof.
     rewrite -inv_acsr_inv'. iIntros "#i !>" (δ' ?????).
-    by iApply (inv_tok_acc (ip:=⟦⟧(δ')) with "i").
+    by iApply (inv_tok_acc (sm:=⟦⟧(δ')) with "i").
   Qed.
 
   (** Allocate [inv'] *)
@@ -106,7 +106,7 @@ Section inv_deriv.
       inv' δ N P -∗ inv' δ N Q.
   Proof.
     rewrite inv'_unseal. iIntros "#PQP #accP !>". iApply Deriv_factor.
-    iIntros (??? to). rewrite to !inv_jacsr_intp. iIntros (? NE).
+    iIntros (??? to). rewrite to !inv_jacsr_sem. iIntros (? NE).
     iMod ("accP" $! _ NE) as "[P cl]".
     iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
     iMod ("PQP" with "[//] [//] [//] P") as "($& QP)". iMod "→E∖N" as "_".
@@ -143,7 +143,7 @@ Section inv_deriv.
   Proof.
     rewrite inv'_unseal. iIntros (?? eq) "#i #i' !>".
     iApply (Deriv_map2 with "[] i i'"). iIntros (????) "{i}i {i'}i'".
-    rewrite !inv_jacsr_intp. iIntros (??). rewrite eq.
+    rewrite !inv_jacsr_sem. iIntros (??). rewrite eq.
     iMod ("i" with "[%]") as "[$ P→]"; [set_solver|].
     iMod ("i'" with "[%]") as "[$ Q→]"; [set_solver|].
     iApply fupdw_mask_intro; [set_solver|]. iIntros "cl [P Q]".

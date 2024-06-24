@@ -82,7 +82,7 @@ Definition of_plist_prvar {TY : synpty} {Xl : list TY}
 #[projections(primitive)]
 Structure synty := Synty {
   (* Pre-type *) synty_pty :> synpty;
-  (* Type interpretation *) #[canonical=no] synty_ty : synty_pty → Type;
+  (* Type semantics *) #[canonical=no] synty_ty : synty_pty → Type;
   (* [synty_inhab] ensures [Inhabited] *) #[canonical=no]
     synty_inhabited {X} :: synpty_inhab X → Inhabited (synty_ty X);
   (* An inhabitant implies [synty_inhab] *) #[canonical=no]

@@ -3,7 +3,7 @@
 From nola.bi Require Export deriv.
 From nola.iris Require Export sinv.
 From iris.proofmode Require Import proofmode.
-Import iPropAppNotation PintpNotation IntpNotation UpdwNotation.
+Import iPropAppNotation PsemNotation SemNotation UpdwNotation.
 
 (** Notation *)
 Notation sinv_wsati δ := (sinv_wsat ⟦⟧(δ)).
@@ -42,7 +42,7 @@ Notation sinvd := (sinv der).
 
 Section sinv_deriv.
   Context `{!SinvPreDeriv (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
-    !Dintp JUDGI (FML $oi Σ) (iProp Σ)}.
+    !Dsem JUDGI (FML $oi Σ) (iProp Σ)}.
   Implicit Type (δ : JUDGI → iProp Σ) (P Q : FML $oi Σ).
 
   (** Derivability data for [sinv] *)
@@ -52,7 +52,7 @@ Section sinv_deriv.
     (** [sinv_mod] is [GenUpd] *)
     sinv_mod_gen_upd :: GenUpd sinv_mod;
     (** Interpreting [sinv_jacsr] *)
-    sinv_jacsr_intp {δ P Q} :
+    sinv_jacsr_sem {δ P Q} :
       ⟦ sinv_jacsr P Q ⟧(δ) ⊣⊢ mod_acsr sinv_mod ⟦ P ⟧(δ) ⟦ Q ⟧(δ);
   }.
 
@@ -64,7 +64,7 @@ Section sinv_deriv.
       (⟦ P ⟧ ∗ (⟦ P ⟧ -∗ sinv_mod (sinv_wsatid))).
   Proof.
     rewrite sinv_unseal. iIntros "[%Q[QPQ s]] W".
-    iDestruct (der_sound with "QPQ") as "QPQ". rewrite sinv_jacsr_intp.
+    iDestruct (der_sound with "QPQ") as "QPQ". rewrite sinv_jacsr_sem.
     iDestruct (sinv_tok_acc with "s W") as "[Q cl]".
     iMod ("QPQ" with "Q") as "[$ PQ]". iIntros "!> P".
     iMod ("PQ" with "P") as "Q". iModIntro. by iApply "cl".
@@ -76,7 +76,7 @@ Section sinv_deriv.
   Lemma sinv_tok_sinv {P} : sinv_tok P ⊢ sinv δ P.
   Proof.
     rewrite sinv_unseal. iIntros "$ !>". iApply Deriv_factor. iIntros (? _ _ _).
-    rewrite sinv_jacsr_intp. iApply (mod_acsr_refl (M:=sinv_mod)).
+    rewrite sinv_jacsr_sem. iApply (mod_acsr_refl (M:=sinv_mod)).
   Qed.
 
   (** Allocate [sinv] *)
@@ -90,8 +90,8 @@ Section sinv_deriv.
       sinv δ P -∗ sinv δ Q.
   Proof.
     rewrite sinv_unseal. iIntros "#PQP [%R[#RPR $]] !>". iApply Deriv_factor.
-    iIntros (??? to). rewrite sinv_jacsr_intp.
-    iApply (mod_acsr_trans (M:=sinv_mod)). { by rewrite to sinv_jacsr_intp. }
+    iIntros (??? to). rewrite sinv_jacsr_sem.
+    iApply (mod_acsr_trans (M:=sinv_mod)). { by rewrite to sinv_jacsr_sem. }
     by iApply "PQP".
   Qed.
 

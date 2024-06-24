@@ -1,31 +1,31 @@
 (** * Derivability *)
 
-From nola.util Require Export intp psg.
+From nola.util Require Export sem psg.
 From nola.bi Require Export order.
 From iris.bi Require Import bi.
 From iris.proofmode Require Import proofmode.
-Import PintpNotation.
+Import PsemNotation.
 
-(** ** [Dintp]: Interpretation parameterized over derivability candidates *)
-Class Dintp (JUDG : ofe) (A : ofe) (PROP : bi) := DINTP {
-  dintp :: Pintp (JUDG → PROP) A PROP;
-  dintp_ne `{!NonExpansive δ} :: NonExpansive (dintp δ);
+(** ** [Dsem]: Semantics parameterized over derivability candidates *)
+Class Dsem (JUDG : ofe) (A : ofe) (PROP : bi) := DSEM {
+  dsem :: Psem (JUDG → PROP) A PROP;
+  dsem_ne `{!NonExpansive δ} :: NonExpansive (dsem δ);
 }.
-Add Printing Constructor Dintp.
-Hint Mode Dintp - ! - : typeclass_instances.
-Arguments DINTP {_ _ _} _ {_}.
+Add Printing Constructor Dsem.
+Hint Mode Dsem - ! - : typeclass_instances.
+Arguments DSEM {_ _ _} _ {_}.
 
-(** ** [judgi]: Judgment with the parameterized interpretation *)
+(** ** [judgi]: Judgment with the parameterized semantics *)
 #[projections(primitive)]
 Structure judgi (PROP : bi) : Type := Judgi {
   judgi_car :> ofe;
-  (** Interpretation parameterized over derivability candidates *)
-  #[canonical=no] judgi_Dintp :: Dintp judgi_car judgi_car PROP;
+  (** Semantics parameterized over derivability candidates *)
+  #[canonical=no] judgi_Dsem :: Dsem judgi_car judgi_car PROP;
 }.
 Add Printing Constructor judgi.
 Arguments Judgi {_} _ {_}.
 Arguments judgi_car {PROP JUDGI} : rename.
-Arguments judgi_Dintp {PROP JUDGI} : rename.
+Arguments judgi_Dsem {PROP JUDGI} : rename.
 
 (** [dinto δ δ']: [δ] can be turned into the semantics at [δ'] *)
 Notation dinto δ δ' := (∀ J, δ J ⊢ ⟦ J ⟧(δ')) (only parsing).
@@ -37,7 +37,7 @@ Section deriv.
   (** ** [Deriv ih δ] : [δ] is a good derivability predicate
 
     [ih] is the inductive hypothesis, used for parameterized induction *)
-  Definition Deriv ih δ := Psgoidp (OT:=JUDGI → PROP) pintp ih δ.
+  Definition Deriv ih δ := Psgoidp (OT:=JUDGI → PROP) psem ih δ.
   Existing Class Deriv.
 
   (** [Deriv] is monotone over the inductive hypothesis *)
@@ -138,11 +138,11 @@ Section deriv.
   Qed.
 
   (** ** [der]: The best derivability predicate *)
-  Definition der : JUDGI → PROP := psg (OT:=JUDGI → PROP) pintp.
+  Definition der : JUDGI → PROP := psg (OT:=JUDGI → PROP) psem.
 
-  (** [Intp] with [der] for [Dintp] *)
-  #[export] Instance Dintp_Intp `{!Dintp (JUDGI : judgi PROP) A PROP} :
-    Intp A PROP := ⟦⟧(der).
+  (** [Sem] with [der] for [Dsem] *)
+  #[export] Instance Dsem_Sem `{!Dsem (JUDGI : judgi PROP) A PROP} : Sem A PROP
+    := ⟦⟧(der).
 
   (** [der] satisfies [Deriv] *)
   #[export] Instance der_Deriv : Deriv (λ _, True) der.

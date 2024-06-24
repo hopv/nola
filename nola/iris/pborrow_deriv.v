@@ -4,7 +4,7 @@ From nola.bi Require Export deriv.
 From nola.bi Require Import list.
 From nola.iris Require Export pborrow.
 From iris.proofmode Require Import proofmode.
-Import ProdNotation PlistNotation iPropAppNotation PintpNotation IntpNotation
+Import ProdNotation PlistNotation iPropAppNotation PsemNotation SemNotation
   UpdwNotation LftNotation ProphNotation.
 
 Implicit Type (TY : synty).
@@ -121,16 +121,16 @@ Notation pobord := (pobor der). Notation plendd := (plend der).
 Section pborrow_deriv.
   Context `{!pborrowGS TY FML Σ,
     !PborrowPreDeriv TY (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
-    !Dintp JUDGI (FML $oi Σ) (iProp Σ)}.
+    !Dsem JUDGI (FML $oi Σ) (iProp Σ)}.
   Implicit Type (δ : JUDGI → iProp Σ) (P Q : FML $oi Σ).
 
   (** Derivability data for [pborrow] *)
   Class PborrowDeriv := PBORROW_DERIV {
     (** Interpreting [pborrow_jto] *)
-    pborrow_jto_intp : ∀{δ P Q},
+    pborrow_jto_sem : ∀{δ P Q},
       ⟦ pborrow_jto P Q ⟧(δ) ⊣⊢ (⟦ P ⟧(δ) ==∗ ⟦ Q ⟧(δ));
     (** Interpreting [pborrow_jlto] *)
-    pborrow_jlto_intp : ∀{δ X Y xπ yπ} {Φ Ψ : _ -d> FML $oi Σ},
+    pborrow_jlto_sem : ∀{δ X Y xπ yπ} {Φ Ψ : _ -d> FML $oi Σ},
       ⟦ pborrow_jlto (X:=X) (Y:=Y) xπ yπ Φ Ψ ⟧(δ) ⊣⊢
         (plend_body ⟦ ⟧(δ) xπ Φ ==∗ plend_body ⟦ ⟧(δ) yπ Ψ);
   }.
@@ -141,7 +141,7 @@ Hint Mode PborrowDeriv - ! - - - - - : typeclass_instances.
 Section pborrow_deriv.
   Context `{!pborrowGS TY FML Σ,
   !PborrowPreDeriv TY (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
-  !Dintp JUDGI (FML $oi Σ) (iProp Σ), !PborrowDeriv TY FML Σ JUDGI,
+  !Dsem JUDGI (FML $oi Σ) (iProp Σ), !PborrowDeriv TY FML Σ JUDGI,
   !Deriv (JUDGI:=JUDGI) ih δ}.
   Implicit Type (X Y Z : TY) (P Q R : FML $oi Σ) (δ : JUDGI → iProp Σ).
 
@@ -150,32 +150,32 @@ Section pborrow_deriv.
   (** Lemmas for [pborrow_jto] *)
   Lemma pborrow_jto_refl {P} : ⊢ δ (pborrow_jto P P).
   Proof.
-    iApply Deriv_factor. iIntros (????). rewrite pborrow_jto_intp.
+    iApply Deriv_factor. iIntros (????). rewrite pborrow_jto_sem.
     by iIntros "$".
   Qed.
   Lemma pborrow_jto_trans {P Q R} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ → ⟦ P ⟧(δ') ==∗ ⟦ Q ⟧(δ')) -∗
     δ (pborrow_jto Q R) -∗ δ (pborrow_jto P R).
   Proof.
-    iIntros "big". iApply Deriv_map. iIntros (????). rewrite !pborrow_jto_intp.
+    iIntros "big". iApply Deriv_map. iIntros (????). rewrite !pborrow_jto_sem.
     iIntros "QR P". iMod ("big" with "[//] [//] [//] P"). by iApply "QR".
   Qed.
   Lemma pborrow_jto_trans' {P Q R} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ → ⟦ Q ⟧(δ') ==∗ ⟦ R ⟧(δ')) -∗
     δ (pborrow_jto P Q) -∗ δ (pborrow_jto P R).
   Proof.
-    iIntros "big". iApply Deriv_map. iIntros (????). rewrite !pborrow_jto_intp.
+    iIntros "big". iApply Deriv_map. iIntros (????). rewrite !pborrow_jto_sem.
     iIntros "ΦΨ P". iMod ("ΦΨ" with "P"). by iApply "big".
   Qed.
   Lemma der_pborrow_jto {P Q} :
     der (pborrow_jto P Q) ⊢ (⟦ P ⟧ ==∗ ⟦ Q ⟧).
-  Proof. by rewrite der_sound pborrow_jto_intp. Qed.
+  Proof. by rewrite der_sound pborrow_jto_sem. Qed.
 
   (** Lemmas for [pborrow_jlto] *)
   Lemma pborrow_jlto_refl {X xπ Φ} :
     ⊢ δ (pborrow_jlto (FM:=FML $oi Σ) (X:=X) xπ xπ Φ Φ).
   Proof.
-    iApply Deriv_factor. iIntros (????). rewrite pborrow_jlto_intp.
+    iApply Deriv_factor. iIntros (????). rewrite pborrow_jlto_sem.
     by iIntros "$".
   Qed.
   Lemma pborrow_jlto_trans {X Y Z xπ yπ zπ Φ Ψ Ω} :
@@ -185,7 +185,7 @@ Section pborrow_deriv.
     δ (pborrow_jlto (X:=X) xπ zπ Φ Ω).
   Proof.
     iIntros "big". iApply Deriv_map. iIntros (????).
-    rewrite !pborrow_jlto_intp. iIntros "ΨΩ Φ".
+    rewrite !pborrow_jlto_sem. iIntros "ΨΩ Φ".
     iMod ("big" with "[//] [//] [//] Φ"). by iApply "ΨΩ".
   Qed.
   Lemma pborrow_jlto_trans' {X Y Z xπ yπ zπ Φ Ψ Ω} :
@@ -195,13 +195,13 @@ Section pborrow_deriv.
     δ (pborrow_jlto (Y:=Z) xπ zπ Φ Ω).
   Proof.
     iIntros "big". iApply Deriv_map. iIntros (????).
-    rewrite !pborrow_jlto_intp. iIntros "ΦΨ Φ". iMod ("ΦΨ" with "Φ").
+    rewrite !pborrow_jlto_sem. iIntros "ΦΨ Φ". iMod ("ΦΨ" with "Φ").
     by iApply "big".
   Qed.
   Lemma der_pborrow_jlto {X Y xπ yπ Φ Ψ} :
     der (pborrow_jlto (X:=X) (Y:=Y) xπ yπ Φ Ψ) ⊢
       (plend_bodyid xπ Φ ==∗ plend_bodyid yπ Ψ).
-  Proof. by rewrite der_sound pborrow_jlto_intp. Qed.
+  Proof. by rewrite der_sound pborrow_jlto_sem. Qed.
 
   (** Convert the body of borrower and lender propositions *)
   Lemma nborc_to {α P Q} :
@@ -406,7 +406,7 @@ Section pborrow_deriv.
         ([∗ plist] '(ξ, x, Φ)' ∈ ξxΦl, pborc δ α x ξ Φ) ∗
         ([∗ plist] '(yπ, Ψ)' ∈ yπΨl, plend δ α yπ Ψ).
   Proof.
-    iMod (pborc_plend_tok_new_list (M:=M) (ip:=⟦⟧(_))) as (?) "big". iModIntro.
+    iMod (pborc_plend_tok_new_list (M:=M) (sm:=⟦⟧(_))) as (?) "big". iModIntro.
     iExists _. iIntros (??). setoid_rewrite <-pborc_tok_pborc.
     setoid_rewrite <-plend_tok_plend. iApply "big".
   Qed.
@@ -423,7 +423,7 @@ End pborrow_deriv.
 Section pborrow_deriv.
   Context `{!pborrowGS TY FML Σ,
   !PborrowPreDeriv TY (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
-  !Dintp JUDGI (FML $oi Σ) (iProp Σ), !PborrowDeriv TY FML Σ JUDGI,
+  !Dsem JUDGI (FML $oi Σ) (iProp Σ), !PborrowDeriv TY FML Σ JUDGI,
   !GenUpd (PROP:=iProp Σ) M, !GenUpdBupd M}.
   Implicit Type (X Y : TY) (P Q : FML $oi Σ).
 
@@ -436,7 +436,7 @@ Section pborrow_deriv.
   Proof.
     rewrite {1}nlend_unseal. setoid_rewrite <-nlend_tok_nlend.
     iIntros "[%R[RP l]] →Ql".
-    iApply (nlend_tok_split (M:=M) (ip:=⟦⟧) with "l [RP →Ql]").
+    iApply (nlend_tok_split (M:=M) (sm:=⟦⟧) with "l [RP →Ql]").
     iIntros "R". rewrite der_pborrow_jto. iMod ("RP" with "R"). by iApply "→Ql".
   Qed.
 
@@ -445,7 +445,7 @@ Section pborrow_deriv.
     [†α] -∗ nlendd α P -∗ modw M (pborrow_wsatid M) ⟦ P ⟧.
   Proof.
     rewrite nlend_unseal. iIntros "† [%Q[QP l]]". rewrite der_pborrow_jto.
-    iMod (nlend_tok_retrieve (M:=M) (ip:=⟦⟧) with "† l") as "Q".
+    iMod (nlend_tok_retrieve (M:=M) (sm:=⟦⟧) with "† l") as "Q".
     iMod ("QP" with "Q") as "$". by iIntros.
   Qed.
 
@@ -454,7 +454,7 @@ Section pborrow_deriv.
     q.[α] -∗ nborcd α P =[pborrow_wsatid M]=∗ nobord α q P ∗ ⟦ P ⟧.
   Proof.
     rewrite nborc_unseal nobor_unseal. iIntros "α [%Q[$[QP c]]]".
-    iMod (nborc_tok_open (ip:=⟦⟧) with "α c") as "[$ Q]".
+    iMod (nborc_tok_open (sm:=⟦⟧) with "α c") as "[$ Q]".
     rewrite der_pborrow_jto. by iMod ("QP" with "Q").
   Qed.
   (** Open a borrower *)
@@ -462,7 +462,7 @@ Section pborrow_deriv.
     q.[α] -∗ nbord α P -∗ modw M (pborrow_wsatid M) (nobord α q P ∗ ⟦ P ⟧).
   Proof.
     rewrite nbor_unseal nobor_unseal. iIntros "α [%Q[$[QP c]]]".
-    iMod (nbor_tok_open (M:=M) (ip:=⟦⟧) with "α c") as "[$ Q]".
+    iMod (nbor_tok_open (M:=M) (sm:=⟦⟧) with "α c") as "[$ Q]".
     rewrite der_pborrow_jto. iMod ("QP" with "Q") as "$". by iIntros.
   Qed.
 
@@ -521,11 +521,11 @@ Section pborrow_deriv.
     nobord α q P -∗ ⟦ P ⟧ =[pborrow_wsatid M]=∗ nobor_tok α q P ∗ ⟦ P ⟧.
   Proof.
     rewrite nobor_unseal. iIntros "[%[ΦΨ o]] P".
-    iMod (nobor_tok_subdiv (M:=M) (ip:=⟦⟧) [_] with "[] o [$P //] [ΦΨ]")
+    iMod (nobor_tok_subdiv (M:=M) (sm:=⟦⟧) [_] with "[] o [$P //] [ΦΨ]")
       as "[α[c _]]".
     { iApply lft_sincl_refl. }
     { rewrite der_pborrow_jto /=. iIntros "_ [P _]". by iMod ("ΦΨ" with "P"). }
-    iApply (nborc_tok_open (ip:=⟦⟧) with "α c").
+    iApply (nborc_tok_open (sm:=⟦⟧) with "α c").
   Qed.
 
   (** Reborrow a borrower *)
@@ -535,7 +535,7 @@ Section pborrow_deriv.
   Proof.
     iIntros "o P". iMod (nobord_nobor_tok with "o P") as "[o P]".
     rewrite -nborc_tok_nborc -nbor_tok_nbor.
-    iApply (nobor_tok_reborrow (M:=M) (ip:=⟦⟧) with "o P").
+    iApply (nobor_tok_reborrow (M:=M) (sm:=⟦⟧) with "o P").
   Qed.
   Lemma nborcd_reborrow {α q P} β :
     q.[α] -∗ nborcd α P =[pborrow_wsatid M]=∗
@@ -563,7 +563,7 @@ Section pborrow_deriv.
   Proof.
     rewrite {1}plend_unseal. iIntros "(%Z & %zπ & %Ω & ΩΦ & l) →Ψl".
     setoid_rewrite <-plend_tok_plend.
-    iApply (plend_tok_split (M:=M) (ip:=⟦⟧) with "l [ΩΦ →Ψl]"). iIntros "lb".
+    iApply (plend_tok_split (M:=M) (sm:=⟦⟧) with "l [ΩΦ →Ψl]"). iIntros "lb".
     rewrite der_pborrow_jlto. iMod ("ΩΦ" with "lb") as "?". by iApply "→Ψl".
   Qed.
 
@@ -572,7 +572,7 @@ Section pborrow_deriv.
     [†α] -∗ plendd α xπ Φ -∗ modw M (pborrow_wsatid M) (plend_bodyid xπ Φ).
   Proof.
     rewrite {1}plend_unseal. iIntros "† (%Y & %yπ & %Ψ & ΨΦ & l)".
-    iMod (plend_tok_retrieve (M:=M) (ip:=⟦⟧) with "† l") as "lb".
+    iMod (plend_tok_retrieve (M:=M) (sm:=⟦⟧) with "† l") as "lb".
     rewrite der_pborrow_jlto. iMod ("ΨΦ" with "lb") as "$". by iIntros.
   Qed.
 
@@ -581,7 +581,7 @@ Section pborrow_deriv.
     q.[α] -∗ pborcd α x ξ Φ =[pborrow_wsatid M]=∗ pobord α q ξ Φ ∗ ⟦ Φ x ⟧.
   Proof.
     rewrite pborc_unseal pobor_unseal. iIntros "α [%[ΦΨ[ΨΦ c]]]".
-    iMod (pborc_tok_open (ip:=⟦⟧) with "α c") as "[$ Ψ]".
+    iMod (pborc_tok_open (sm:=⟦⟧) with "α c") as "[$ Ψ]".
     by iMod (der_pborrow_jto with "ΨΦ Ψ") as "$".
   Qed.
   Lemma pbord_open {X α q x ξ} {Φ : X → _} :
@@ -589,7 +589,7 @@ Section pborrow_deriv.
       (pobord α q ξ Φ ∗ ⟦ Φ x ⟧).
   Proof.
     rewrite pbor_unseal pobor_unseal. iIntros "α [%[ΦΨ[ΨΦ b]]]".
-    iMod (pbor_tok_open (M:=M) (ip:=⟦⟧) with "α b") as "[$ Ψ]".
+    iMod (pbor_tok_open (M:=M) (sm:=⟦⟧) with "α b") as "[$ Ψ]".
     iMod (der_pborrow_jto with "ΨΦ Ψ") as "$". by iIntros "$".
   Qed.
 
@@ -635,7 +635,7 @@ Section pborrow_deriv.
     rewrite pobord_plist /=. iIntros "(% & %eq & %eq' & ol & →) Ψl Rl →Φl".
     setoid_rewrite eq. setoid_rewrite eq'. setoid_rewrite <-pborc_tok_pborc.
     setoid_rewrite <-nborc_tok_nborc.
-    iApply (pobor_tok_merge_subdiv (M:=M) (ip:=⟦⟧) with "ol Ψl Rl").
+    iApply (pobor_tok_merge_subdiv (M:=M) (sm:=⟦⟧) with "ol Ψl Rl").
     iIntros "% † Ψl Rl". iMod ("→Φl" with "† Ψl Rl") as "Φl".
     by iMod ("→" with "Φl").
   Qed.
@@ -687,7 +687,7 @@ Section pborrow_deriv.
       q.[α] ∗ pborcd β x ξ Ψ.
   Proof.
     rewrite pobor_unseal. iIntros "⊑ [%Ω[ΦΩ o]] Ψ →Φ". rewrite -pborc_tok_pborc.
-    iApply (pobor_tok_nsubdiv (M:=M) (ip:=⟦⟧) with "⊑ o Ψ [ΦΩ →Φ]").
+    iApply (pobor_tok_nsubdiv (M:=M) (sm:=⟦⟧) with "⊑ o Ψ [ΦΩ →Φ]").
     iIntros "% † Ψ". iMod ("→Φ" with "† Ψ") as "Φ".
     by iMod (der_pborrow_jto with "ΦΩ Φ").
   Qed.
@@ -704,10 +704,10 @@ Section pborrow_deriv.
     pobord α q ξ Φ -∗ ⟦ Φ x ⟧ =[pborrow_wsatid M]=∗ pobor_tok α q ξ Φ ∗ ⟦ Φ x ⟧.
   Proof.
     rewrite pobor_unseal. iIntros "[%Ψ[ΦΨ o]] Φ".
-    iMod (pobor_tok_nsubdiv (M:=M) (ip:=⟦⟧) with "[] o Φ [ΦΨ]") as "[β c]".
+    iMod (pobor_tok_nsubdiv (M:=M) (sm:=⟦⟧) with "[] o Φ [ΦΨ]") as "[β c]".
     { iApply lft_sincl_refl. }
     { iIntros (?) "_ Φ". by iMod (der_pborrow_jto with "ΦΨ Φ"). }
-    iApply (pborc_tok_open (ip:=⟦⟧) with "β c").
+    iApply (pborc_tok_open (sm:=⟦⟧) with "β c").
   Qed.
 
   (** Reborrow a nested prophetic borrower *)
@@ -719,7 +719,7 @@ Section pborrow_deriv.
     rewrite {1}pobor_unseal. iIntros "[%Φ'[ΦΦ' o]] o' Ψ →Φ".
     iMod (pobord_pobor_tok with "o' Ψ") as "[o' Ψ]".
     setoid_rewrite <-pborc_tok_pborc.
-    iApply (pobor_pobor_tok_reborrow (M:=M) (ip:=⟦⟧) with "o o' Ψ").
+    iApply (pobor_pobor_tok_reborrow (M:=M) (sm:=⟦⟧) with "o o' Ψ").
     iIntros "% † b". rewrite pbor_tok_pbor. iMod ("→Φ" with "† b") as "Φ".
     by iMod (der_pborrow_jto with "ΦΦ' Φ").
   Qed.

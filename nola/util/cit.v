@@ -336,28 +336,28 @@ Section citO.
   Qed.
 End citO.
 
-(** ** [cit_intp]: Interpretation over [cit] *)
-Section cit_intp.
+(** ** [cit_sem]: Semantics over [cit] *)
+Section cit_sem.
   Context {S} {I C : S → Type} {D : S → ofe} {A : ofe}.
-  Context (ip : ∀ s, (I s -d> A) → (C s -d> cit I C D) → D s → A).
+  Context (sm : ∀ s, (I s -d> A) → (C s -d> cit I C D) → D s → A).
 
-  (** Interpretation over [cit'] *)
-  Fixpoint cit'_intp (t : cit' I C D) : A :=
-    ip t.(cit_sel) (λ i, cit'_intp (t.(cit_ikidsI) i))
+  (** Semantics over [cit'] *)
+  Fixpoint cit'_sem (t : cit' I C D) : A :=
+    sm t.(cit_sel) (λ i, cit'_sem (t.(cit_ikidsI) i))
       t.(cit_ckids) t.(cit_data).
 
-  (** Interpretation over [cit] *)
-  Definition cit_intp : cit I C D → A := cit'_intp.
-End cit_intp.
-Arguments cit_intp {_ _ _ _ _} _ _ /.
+  (** Semantics over [cit] *)
+  Definition cit_sem : cit I C D → A := cit'_sem.
+End cit_sem.
+Arguments cit_sem {_ _ _ _ _} _ _ /.
 
-Section cit_intp.
+Section cit_sem.
   Context {S} {I C : S → Type} {D : S → ofe} {A : ofe}.
 
-  (** [cit'_intp] is non-expansive *)
-  #[export] Instance cit'_intp_ne_gen {n} :
+  (** [cit'_sem] is non-expansive *)
+  #[export] Instance cit'_sem_ne_gen {n} :
     Proper (forall_relation (λ _, (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡))
-      ==> (≡{n}≡) ==> (≡{n}≡)) (@cit'_intp _ I C D A).
+      ==> (≡{n}≡) ==> (≡{n}≡)) (@cit'_sem _ I C D A).
   Proof.
     move=> ?? eqv t t' /cit_forall2_unfold.
     have {2}->: t = uncit (Cit t) by done.
@@ -366,28 +366,28 @@ Section cit_intp.
     elim. move=> [[????]][[????]]/= ???? Hd. subst. apply eqv; [done..|].
     exact: (Hd _ eq_refl).
   Qed.
-  #[export] Instance cit_intp_ne_gen {n} :
+  #[export] Instance cit_sem_ne_gen {n} :
     Proper (forall_relation (λ _, (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡))
-      ==> (≡{n}≡) ==> (≡{n}≡)) (@cit_intp _ I C D A).
+      ==> (≡{n}≡) ==> (≡{n}≡)) (@cit_sem _ I C D A).
   Proof. solve_proper. Qed.
-  #[export] Instance cit'_intp_ne `{!∀ s, NonExpansive3 (ip s)} :
-    NonExpansive (@cit'_intp _ I C D A ip).
-  Proof. move=> ????. apply cit'_intp_ne_gen; [solve_proper|done]. Qed.
-  #[export] Instance cit_intp_ne `{!∀ s, NonExpansive3 (ip s)} :
-    NonExpansive (@cit_intp _ I C D A ip).
+  #[export] Instance cit'_sem_ne `{!∀ s, NonExpansive3 (sm s)} :
+    NonExpansive (@cit'_sem _ I C D A sm).
+  Proof. move=> ????. apply cit'_sem_ne_gen; [solve_proper|done]. Qed.
+  #[export] Instance cit_sem_ne `{!∀ s, NonExpansive3 (sm s)} :
+    NonExpansive (@cit_sem _ I C D A sm).
   Proof. solve_proper. Qed.
-  Lemma cit'_intp_ne_intp `{!∀ s, NonExpansive3 (ip s)} {ip' n} :
-    (∀ s ti tc d, ip s ti tc d ≡{n}≡ ip' s ti tc d) →
-    ∀ t, @cit'_intp _ I C D A ip t ≡{n}≡ cit'_intp ip' t.
+  Lemma cit'_sem_ne_sem `{!∀ s, NonExpansive3 (sm s)} {sm' n} :
+    (∀ s ti tc d, sm s ti tc d ≡{n}≡ sm' s ti tc d) →
+    ∀ t, @cit'_sem _ I C D A sm t ≡{n}≡ cit'_sem sm' t.
   Proof.
-    move=> eqv ?. apply cit'_intp_ne_gen; [|done]=> ??????????.
+    move=> eqv ?. apply cit'_sem_ne_gen; [|done]=> ??????????.
     etrans; [|by apply eqv]. solve_proper.
   Qed.
-  Lemma cit_intp_ne_intp `{!∀ s, NonExpansive3 (ip s)} {ip' n} :
-    (∀ s ti tc d, ip s ti tc d ≡{n}≡ ip' s ti tc d) →
-    ∀ t, @cit_intp _ I C D A ip t ≡{n}≡ cit_intp ip' t.
-  Proof. move=> ??. by apply cit'_intp_ne_intp. Qed.
-End cit_intp.
+  Lemma cit_sem_ne_sem `{!∀ s, NonExpansive3 (sm s)} {sm' n} :
+    (∀ s ti tc d, sm s ti tc d ≡{n}≡ sm' s ti tc d) →
+    ∀ t, @cit_sem _ I C D A sm t ≡{n}≡ cit_sem sm' t.
+  Proof. move=> ??. by apply cit'_sem_ne_sem. Qed.
+End cit_sem.
 
 (** ** [cit_map]: Map over [cit] *)
 
