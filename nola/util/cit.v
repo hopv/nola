@@ -36,6 +36,10 @@ Notation cit' I C D := (citI I C D (cit I C D)).
 Notation cit_ikids t i := (Cit (t.(cit_ikidsI) i)).
 #[warning="-uniform-inheritance"] Coercion uncit : cit >-> cit'.
 
+(** Simplify [Cit] after [uncit] *)
+Lemma Cit_uncit {S I C D} {t : @cit S I C D} : Cit (uncit t) = t.
+Proof. by case t. Qed.
+
 (** ** Universal relation between [cit]s *)
 
 (** [cit_forall2I]: Intermediate universal relation between [citI]s *)
