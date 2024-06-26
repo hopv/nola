@@ -75,10 +75,10 @@ Section cif.
   Context {S} {I C : S → Type} {D : S → oFunctor} {Σ : gFunctors}.
   Implicit Type Px Qx : cif I C D Σ.
 
-  Definition cif_all {A} (Φxs : A -d> cif I C D Σ) : cif I C D Σ :=
-    CitX (cifs_all A) Φxs nullary ().
-  Definition cif_ex {A} (Φxs : A -d> cif I C D Σ) : cif I C D Σ :=
-    CitX (cifs_ex A) Φxs nullary ().
+  Definition cif_all {A} (Φx : A -d> cif I C D Σ) : cif I C D Σ :=
+    CitX (cifs_all A) Φx nullary ().
+  Definition cif_ex {A} (Φx : A -d> cif I C D Σ) : cif I C D Σ :=
+    CitX (cifs_ex A) Φx nullary ().
 
   Definition cif_bin s Px Qx : cif I C D Σ :=
     CitX (cifs_bin s) (binary Px Qx) nullary ().
@@ -100,9 +100,9 @@ Section cif.
   Definition cif_later (P : iProp Σ) : cif I C D Σ :=
     CitX cifs_later nullary nullary (Next P%I).
 
-  Definition cif_custom s (Φxs : I s -d> cif I C D Σ)
-    (Ψxs : C s -d> cif I C D Σ) (d : D s $oi Σ) : cif I C D Σ :=
-    CitX (cifs_custom s) Φxs Ψxs d.
+  Definition cif_custom s (Φx : I s -d> cif I C D Σ) (Ψx : C s -d> cif I C D Σ)
+    (d : D s $oi Σ) : cif I C D Σ :=
+    CitX (cifs_custom s) Φx Ψx d.
 
   (** Non-expansiveness *)
   #[export] Instance cif_all_ne {A} : NonExpansive (@cif_all A).
