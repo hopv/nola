@@ -329,7 +329,7 @@ Section citO.
   Proof. by move=> ?[?][?]. Qed.
 
   (** [citO S I C D] is discrete if [D] is discrete *)
-  #[export] Instance citO_discrete `{∀ s, OfeDiscrete (D s)} :
+  #[export] Instance citO_discrete `{!∀ s, OfeDiscrete (D s)} :
     OfeDiscrete (citO I C D).
   Proof.
     move=> ?? + ?. by apply cit_forall2_mono=> ??? /discrete_0 /equiv_dist.
