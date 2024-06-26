@@ -332,6 +332,22 @@ Section citO.
   #[export] Instance uncit_ne : NonExpansive (@uncit _ I C D).
   Proof. by move=> ?[?][?]. Qed.
 
+  (** [uncit] preserves discreteness *)
+  #[export] Instance uncit_discrete `{!Discrete t} : Discrete (uncit t).
+  Proof. by move: t Discrete0=> [t] ?? /(discrete_0 (Cit t)). Qed.
+  (** [CitX] preserves discreteness *)
+  #[export] Instance CitX_discrete {s ti tc d}
+    `{!∀ i, Discrete (ti i), !∀ c, Discrete (tc c), !Discrete d} :
+    Discrete (@Cit _ I C D (CitI s ti tc d)).
+  Proof.
+    move=> [[????]] /cit_forall2_unfold[/=? Hi Hc Hd] n. subst. simpl in *.
+    apply cit_forall2_unfold. apply: Citf2=>/=.
+    - move=> i. move: (Hi i)=> /cit_forall2_unfold/(discrete_0 (ti _)) eq.
+      apply cit_forall2_unfold, eq.
+    - move=> c. move: (Hc c)=> /(discrete_0 (tc _)) eq. apply eq.
+    - move=> ??. subst=>/=. move: (Hd _ eq_refl)=> /discrete_0/= ?.
+      by apply equiv_dist.
+  Qed.
   (** [citO S I C D] is discrete if [D] is discrete *)
   #[export] Instance citO_discrete `{!∀ s, OfeDiscrete (D s)} :
     OfeDiscrete (citO I C D).

@@ -119,6 +119,26 @@ Section cif.
   Proof. move=> ????. apply Cit_ne, CitI_ne; solve_proper. Qed.
   #[export] Instance cif_custom_ne {s} : NonExpansive3 (cif_custom s).
   Proof. move=> ??????????. apply Cit_ne, CitI_ne; solve_proper. Qed.
+
+  (** Discreteness *)
+  #[export] Instance cif_all_discrete {A} `{!∀ a : A, Discrete (Φx a)} :
+    Discrete (cif_all Φx).
+  Proof. by apply: CitX_discrete. Qed.
+  #[export] Instance cif_ex_discrete {A} `{!∀ a : A, Discrete (Φx a)} :
+    Discrete (cif_ex Φx).
+  Proof. by apply: CitX_discrete. Qed.
+  #[export] Instance cif_bin_discrete {s} `{!Discrete Px, !Discrete Qx} :
+    Discrete (cif_bin s Px Qx).
+  Proof. apply: CitX_discrete=>//. case; exact _. Qed.
+  #[export] Instance cif_un_discrete {s} `{!Discrete Px} :
+    Discrete (cif_un s Px).
+  Proof. by apply: CitX_discrete. Qed.
+  #[export] Instance cif_pure_discrete {φ} : Discrete (cif_pure φ).
+  Proof. by apply: CitX_discrete. Qed.
+  #[export] Instance cif_custom_discrete {s}
+    `{!∀ i, Discrete (Φx i), !∀ c, Discrete (Ψx c), !Discrete d} :
+    Discrete (cif_custom s Φx Ψx d).
+  Proof. exact _. Qed.
 End cif.
 
 Declare Scope cif_scope.
