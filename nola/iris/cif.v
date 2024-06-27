@@ -171,13 +171,13 @@ Section iris.
     : (cif_idom I s -d> iProp Σ) → (cif_cdom C s -d> cif I C D Σ) →
         cif_dataOF D s $oi Σ → iProp Σ :=
     match s with
-    | cifs_all _ => λ Ps _ _, ∀ a, Ps a | cifs_ex _ => λ Ps _ _, ∃ a, Ps a
-    | cifs_bin s => λ Ps _ _, let P := Ps true in let Q := Ps false in
+    | cifs_all _ => λ Φ _ _, ∀ a, Φ a | cifs_ex _ => λ Φ _ _, ∃ a, Φ a
+    | cifs_bin s => λ Φ _ _, let P := Φ true in let Q := Φ false in
         match s with
         | cifs_and => P ∧ Q | cifs_or => P ∨ Q | cifs_imp => P → Q
         | cifs_sep => P ∗ Q | cifs_wand => P -∗ Q
         end
-    | cifs_un s => λ Ps _ _, let P := Ps () in
+    | cifs_un s => λ Φ _ _, let P := Φ () in
         match s with
         | cifs_plain => ■ P | cifs_pers => □ P | cifs_bupd => |==> P
         | cifs_except0 => ◇ P
