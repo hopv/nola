@@ -115,8 +115,8 @@ Section cif.
   Proof. move=> ????. apply Cit_ne, CitI_ne; solve_proper. Qed.
   #[export] Instance cif_pure_ne : NonExpansive cif_pure.
   Proof. move=> ????. apply Cit_ne, CitI_ne; solve_proper. Qed.
-  #[export] Instance cif_later_ne : NonExpansive cif_later.
-  Proof. move=> ????. apply Cit_ne, CitI_ne; solve_proper. Qed.
+  #[export] Instance cif_later_contractive : Contractive cif_later.
+  Proof. move=> ????. by apply Cit_ne, CitI_ne. Qed.
   #[export] Instance cif_custom_ne {s} : NonExpansive3 (cif_custom s).
   Proof. move=> ??????????. apply Cit_ne, CitI_ne; solve_proper. Qed.
 
