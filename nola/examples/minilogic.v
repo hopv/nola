@@ -20,7 +20,7 @@ Inductive fml : Type :=
 
 (** Target function *)
 Definition iter_ilist : val := rec: "self" "f" "c" "l" :=
-  if: !"c" = #0 then #() else
+  if: !"c" ≤ #0 then #() else
     "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (!("l" +ₗ #1)).
 
 Section verify.

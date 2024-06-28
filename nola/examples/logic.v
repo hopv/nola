@@ -210,7 +210,7 @@ Section verify.
 
   (** Target function *)
   Definition iter_ilist : val := rec: "self" "f" "c" "l" :=
-    if: !"c" = #0 then #() else
+    if: !"c" ≤ #0 then #() else
       "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (!("l" +ₗ #1)).
 
   (** [ilist]: Formula for a list *)
@@ -279,7 +279,7 @@ Section verify.
 
   (** Target function *)
   Definition iter_mlist : val := rec: "self" "f" "k" "c" "l" :=
-    if: !"c" = #0 then #true else
+    if: !"c" ≤ #0 then #true else
       if: try_acquire_loop_mutex "k" "l" then
         "f" "l";; let: "l'" := !("l" +ₗ #1) in release_mutex "l";;
         "c" <- !"c" - #1;; "self" "f" "k" "c" "l'"
