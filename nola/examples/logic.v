@@ -281,7 +281,7 @@ Section verify.
   Definition iter_mlist : val := rec: "self" "f" "k" "c" "l" :=
     if: !"c" ≤ #0 then #true else
       if: try_acquire_loop_mutex "k" "l" then
-        "f" "l";; let: "l'" := !("l" +ₗ #1) in release_mutex "l";;
+        "f" ("l" +ₗ #1);; let: "l'" := !("l" +ₗ #2) in release_mutex "l";;
         "c" <- !"c" - #1;; "self" "f" "k" "c" "l'"
       else #false.
 
@@ -289,7 +289,7 @@ Section verify.
   Definition mlist_gen Φx Mlist' l : cif Σ :=
     cif_mutex l (Mlist' Φx l).
   Definition mlist'_gen Φx Mlist' l : cif Σ :=
-    Φx l ∗ ∃ l', ▷ (l +ₗ 1) ↦ #l' ∗ mlist_gen Φx Mlist' l'.
+    Φx (l +ₗ 1) ∗ ∃ l', ▷ (l +ₗ 2) ↦ #l' ∗ mlist_gen Φx Mlist' l'.
   CoFixpoint mlist' Φx : loc → cif Σ := mlist'_gen Φx mlist'.
   Definition mlist Φx : loc → cif Σ := mlist_gen Φx mlist'.
 
@@ -310,8 +310,8 @@ Section verify.
 
   (** Termination of [iter_mlist] *)
   Lemma twp_iter_mlist {Φx c l} {f : val} {k n : nat} :
-    (∀ l', [[{ ⟦ Φx l' ⟧ }]][mutex_wsatid] f #l'
-      [[{ RET #(); ⟦ Φx l' ⟧ }]]) -∗
+    (∀ l', [[{ ⟦ Φx (l' +ₗ 1) ⟧ }]][mutex_wsatid] f #(l' +ₗ 1)
+      [[{ RET #(); ⟦ Φx (l' +ₗ 1) ⟧ }]]) -∗
     [[{ c ↦ #n ∗ ⟦ mlist Φx l ⟧ }]][mutex_wsatid]
       iter_mlist f #k #c #l
     [[{ b, RET #b; if b then c ↦ #0 else ∃ n', c ↦ #n' }]].
@@ -322,7 +322,7 @@ Section verify.
     wp_rec. wp_load. wp_pures.
     wp_apply (twp_try_acquire_loop_mutexd with "ml"). iIntros ([|]); last first.
     { iIntros (?). wp_pure. iModIntro. iApply "→Ψ". by iExists _. }
-    rewrite !/⟦ mlist' _ _ ⟧ /=. iIntros "[Φx[%[>↦ #mtl]]]". wp_pure.
+    rewrite !/⟦ mlist' _ _ ⟧ /=. iIntros "[Φx[%[>↦ #mtl]]]". wp_pures.
     wp_apply ("f" with "Φx"). iIntros "Φx". wp_load. wp_pures.
     wp_apply (twp_release_mutexd with "[Φx ↦]").
     { iSplit; [done|]. rewrite !/⟦ mlist' _ _ ⟧ /=. by iFrame. }
