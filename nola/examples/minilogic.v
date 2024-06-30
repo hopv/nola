@@ -57,7 +57,7 @@ Section verify.
       iter_ilist f #c #l @ ↑N
     [[{ RET #(); c ↦ #0 }]].
   Proof.
-    iIntros "#f" (Ψ) "!> /=[c↦ #l] →Ψ".
+    iIntros "#f" (Ψ) "!> [c↦ #l] →Ψ".
     iInduction n as [|m] "IH" forall (l) "l".
     { wp_rec. wp_load. wp_pures. by iApply "→Ψ". }
     wp_rec. wp_load. wp_pures. wp_apply "f". { iDestruct "l" as "[$ _]". }
