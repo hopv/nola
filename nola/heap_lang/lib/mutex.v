@@ -64,30 +64,22 @@ Section mutex.
 
   Context `{!NonExpansive sm}.
 
-  (** Create a new mutex *)
-  Definition new_mutex : val := λ: <>, ref #false.
-  Lemma twp_new_mutex_tok {P} :
-    [[{ sm P }]][mutex_wsat sm]
-      new_mutex #()
-    [[{ l, RET #l; mutex_tok l P }]].
+  (** Allocate a new mutex *)
+  Lemma alloc_mutex_tok {l P} :
+    l ↦ #false -∗ sm P =[mutex_wsat sm]=∗ mutex_tok l P.
   Proof.
-    rewrite mutex_wsat_unseal. iIntros (Φ) "P →Φ". wp_lam.
-    iApply twpw_fupdw_nonval; [done|]. wp_alloc l as "↦". iModIntro.
-    iMod (inv_tok_alloc (FML:=mutex_fml _) (l, P) with "[↦ P]") as "l".
-    { by iFrame. } { iApply ("→Φ" with "l"). }
+    rewrite mutex_wsat_unseal. iIntros "↦ P".
+    iApply (inv_tok_alloc (FML:=mutex_fml _) (l, P) with "[↦ P]").
+    by iFrame.
   Qed.
 
-  (** Create a new mutex with the lock acquired *)
-  Definition new_acquire_mutex : val := λ: <>, ref #true.
-  Lemma twp_new_acquire_mutex_tok {P} :
-    [[{ True }]][mutex_wsat sm]
-      new_acquire_mutex #()
-    [[{ l, RET #l; mutex_tok l P }]].
+  (** Allocate a new mutex with the lock acquired *)
+  Lemma alloc_acquire_mutex_tok {l P} :
+    l ↦ #true =[mutex_wsat sm]=∗ mutex_tok l P.
   Proof.
-    rewrite mutex_wsat_unseal. iIntros (Φ) "_ →Φ". wp_lam.
-    iApply twpw_fupdw_nonval; [done|]. wp_alloc l as "↦". iModIntro.
-    iMod (inv_tok_alloc (FML:=mutex_fml _) (l, P) with "[↦]") as "l".
-    { iFrame. } { iApply ("→Φ" with "l"). }
+    rewrite mutex_wsat_unseal. iIntros "↦".
+    iApply (inv_tok_alloc (FML:=mutex_fml _) (l, P) with "[↦]").
+    iFrame.
   Qed.
 
   (** Try to acquire the lock on the mutex *)
@@ -235,16 +227,12 @@ Section mutex_deriv.
   Qed.
 
   (** Wrapper lemmas *)
-  Lemma twp_new_mutex {P} :
-    [[{ ⟦ P ⟧(δ) }]][mutex_wsati δ]
-      new_mutex #()
-    [[{ l, RET #l; mutex δ l P }]].
-  Proof. setoid_rewrite <-mutex_tok_mutex. exact twp_new_mutex_tok. Qed.
-  Lemma twp_new_acquire_mutex {P} :
-    [[{ True }]][mutex_wsati δ]
-      new_acquire_mutex #()
-    [[{ l, RET #l; mutex δ l P }]].
-  Proof. setoid_rewrite <-mutex_tok_mutex. exact twp_new_acquire_mutex_tok. Qed.
+  Lemma alloc_mutex {l P} :
+    l ↦ #false -∗ ⟦ P ⟧(δ) =[mutex_wsati δ]=∗ mutex δ l P.
+  Proof. rewrite -mutex_tok_mutex. exact alloc_mutex_tok. Qed.
+  Lemma alloc_acquire_mutex {l P} :
+    l ↦ #true =[mutex_wsati δ]=∗ mutex δ l P.
+  Proof. rewrite -mutex_tok_mutex. exact alloc_acquire_mutex_tok. Qed.
 
   (** Convert [mutex] with [mod_iff] *)
   Lemma mutex_iff' {l P Q} :
