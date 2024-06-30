@@ -204,14 +204,9 @@ Section verify.
   Context `{!inv'GS cifOF Σ, !mutexGS cifOF Σ,
     !pborrowGS nsynty cifOF Σ, !heapGS_gen hlc Σ}.
 
-  (** ** Linked list mutation *)
+  (** ** Linked list *)
 
   Implicit Type Φx Ψx : loc → cif Σ.
-
-  (** Target function *)
-  Definition iter_ilist : val := rec: "self" "f" "c" "l" :=
-    if: !"c" ≤ #0 then #() else
-      "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (!("l" +ₗ #1)).
 
   (** [ilist]: Formula for a list *)
   Definition ilist_gen N Φx Ilist' l : cif Σ :=
@@ -255,7 +250,24 @@ Section verify.
       [iApply bi.wand_iff_sym|]; by iApply inv'_acsr_iff.
   Qed.
 
-  (** Termination of [iter] *)
+  (** Access the tail of a list *)
+  Definition tail_ilist : val := λ: "l", !("l" +ₗ #1).
+  Lemma twp_tail_list {N Φx l} :
+    [[{ ⟦ ilist N Φx l ⟧ }]][inv_wsatid]
+      tail_ilist #l @ ↑N
+    [[{ l', RET #l'; ⟦ ilist N Φx l' ⟧ }]].
+  Proof.
+    rewrite !/⟦ ilist _ _ _ ⟧ /=. iIntros (Ψ) "/= #[_ itl] →Ψ". wp_rec. wp_pure.
+    iMod (invd_acc with "itl") as "[ltl cl]"; [done|].
+    rewrite !/⟦ ilist' _ _ _ ⟧ /=. iDestruct "ltl" as (?) "[>↦l' #ltl]".
+    wp_load. iModIntro. iMod ("cl" with "[↦l']") as "_".
+    { iExists _. by iFrame. } { iModIntro. iApply ("→Ψ" with "ltl"). }
+  Qed.
+
+  (** Iterate over a list *)
+  Definition iter_ilist : val := rec: "self" "f" "c" "l" :=
+    if: !"c" ≤ #0 then #() else
+      "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (tail_ilist "l").
   Lemma twp_iter_list {N Φx c l} {f : val} {n : nat} :
     (∀ l', [[{ invd N (Φx l') }]][inv_wsatid] f #l' @ ↑N
       [[{ RET #(); True }]]) -∗
@@ -263,27 +275,15 @@ Section verify.
       iter_ilist f #c #l @ ↑N
     [[{ RET #(); c ↦ #0 }]].
   Proof.
-    unfold sem. iIntros "#f" (Ψ) "!> /=[c↦ #[ihd itl]] →Ψ".
-    iInduction n as [|m] "IH" forall (l) "ihd itl".
+    iIntros "#f" (Ψ) "!> /=[c↦ #l] →Ψ".
+    iInduction n as [|m] "IH" forall (l) "l".
     { wp_rec. wp_load. wp_pures. by iApply "→Ψ". }
-    wp_rec. wp_load. wp_pures. wp_apply "f"; [done|]. iIntros "_". wp_load.
-    wp_store. wp_op. wp_bind (! _)%E. have -> : (S m - 1)%Z = m by lia.
-    iMod (invd_acc with "itl") as "/=[(%l' & >↦l' & #itlhd & #itltl) cl]/=";
-      [done|].
-    wp_load. iModIntro. iMod ("cl" with "[↦l']") as "_".
-    { iExists _. iFrame "↦l'". by iSplit. }
-    iModIntro. by iApply ("IH" with "c↦ →Ψ").
+    wp_rec. wp_load. wp_pures. wp_apply "f".
+    { rewrite !/⟦ ilist _ _ _ ⟧ /=. iDestruct "l" as "[$ _]". }
+    iIntros "_". wp_load. wp_store. have -> : (S m - 1)%Z = m by lia.
+    wp_apply twp_tail_list; [done|]. iIntros (l') "#ltl".
+    iApply ("IH" with "c↦ →Ψ ltl").
   Qed.
-
-  (** ** Linked list mutation over a mutex *)
-
-  (** Target function *)
-  Definition iter_mlist : val := rec: "self" "f" "k" "c" "l" :=
-    if: !"c" ≤ #0 then #true else
-      if: try_acquire_loop_mutex "k" "l" then
-        "f" ("l" +ₗ #1);; let: "l'" := !("l" +ₗ #2) in release_mutex "l";;
-        "c" <- !"c" - #1;; "self" "f" "k" "c" "l'"
-      else #false.
 
   (** [mlist]: Formula for a list with a mutex *)
   Definition mlist_gen Φx Mlist' l : cif Σ :=
@@ -308,7 +308,38 @@ Section verify.
       by iApply IH.
   Qed.
 
-  (** Termination of [iter_mlist] *)
+  (** Try to acquire the lock of [mlist] *)
+  Lemma twp_try_acquire_loop_mlist {Φx l} {k : nat} :
+    [[{ ⟦ mlist Φx l ⟧ }]][mutex_wsatid]
+      try_acquire_loop_mutex #k #l
+    [[{ b, RET #b; if negb b then True else
+        ⟦ Φx (l +ₗ 1) ⟧ ∗ ∃ l', (l +ₗ 2) ↦ #l' ∗ ⟦ mlist Φx l' ⟧ }]].
+  Proof.
+    iIntros (Ψ) "/= #m →Ψ". iApply twp_fupd.
+    wp_apply (twp_try_acquire_loop_mutexd with "m"). iIntros ([|]); last first.
+    { iIntros (?). by iApply "→Ψ". }
+    rewrite /sem /=. iIntros "[Φx (% & >↦ & #m')]". iApply "→Ψ". by iFrame.
+  Qed.
+
+  (** Release the lock of [mlist] *)
+  Lemma twp_release_mlist {Φx l} :
+    [[{ ⟦ mlist Φx l ⟧ ∗ ⟦ Φx (l +ₗ 1) ⟧ ∗
+        ∃ l', (l +ₗ 2) ↦ #l' ∗ ⟦ mlist Φx l' ⟧ }]][mutex_wsatid]
+      release_mutex #l
+    [[{ RET #(); True }]].
+  Proof.
+    iIntros (Ψ) "(#m & Φx & %l' & ↦ & #mtl) →Ψ".
+    wp_apply (twp_release_mutexd with "[Φx ↦]"); [|done]. iSplit; [done|].
+    rewrite /sem /=. by iFrame.
+  Qed.
+
+  (** Iterate over [mlist] *)
+  Definition iter_mlist : val := rec: "self" "f" "k" "c" "l" :=
+    if: !"c" ≤ #0 then #true else
+      if: try_acquire_loop_mutex "k" "l" then
+        "f" ("l" +ₗ #1);; let: "l'" := !("l" +ₗ #2) in release_mutex "l";;
+        "c" <- !"c" - #1;; "self" "f" "k" "c" "l'"
+      else #false.
   Lemma twp_iter_mlist {Φx c l} {f : val} {k n : nat} :
     (∀ l', [[{ ⟦ Φx (l' +ₗ 1) ⟧ }]][mutex_wsatid] f #(l' +ₗ 1)
       [[{ RET #(); ⟦ Φx (l' +ₗ 1) ⟧ }]]) -∗
@@ -316,18 +347,16 @@ Section verify.
       iter_mlist f #k #c #l
     [[{ b, RET #b; if b then c ↦ #0 else ∃ n', c ↦ #n' }]].
   Proof.
-    rewrite !/⟦ mlist _ _ ⟧ /=. iIntros "#f" (Ψ) "!> [c↦ #ml] →Ψ".
-    iInduction n as [|m] "IH" forall (l) "ml".
+    iIntros "#f" (Ψ) "!> [c↦ #m] →Ψ". iInduction n as [|m] "IH" forall (l) "m".
     { wp_rec. wp_load. wp_pures. by iApply "→Ψ". }
-    wp_rec. wp_load. wp_pures.
-    wp_apply (twp_try_acquire_loop_mutexd with "ml"). iIntros ([|]); last first.
+    wp_rec. wp_load. wp_pures. wp_apply (twp_try_acquire_loop_mlist with "m").
+    iIntros ([|])=>/=; last first.
     { iIntros (?). wp_pure. iModIntro. iApply "→Ψ". by iExists _. }
-    rewrite !/⟦ mlist' _ _ ⟧ /=. iIntros "[Φx[%[>↦ #mtl]]]". wp_pures.
-    wp_apply ("f" with "Φx"). iIntros "Φx". wp_load. wp_pures.
-    wp_apply (twp_release_mutexd with "[Φx ↦]").
-    { iSplit; [done|]. rewrite !/⟦ mlist' _ _ ⟧ /=. by iFrame. }
+    iIntros "(Φx & %l' & ↦ & #mtl)". wp_pures. wp_apply ("f" with "Φx").
+    iIntros "Φx". wp_load. wp_pures.
+    wp_apply (twp_release_mlist with "[Φx ↦]"). { iSplit; [done|]. by iFrame. }
     iIntros "_". wp_load. wp_store. have -> : (S m - 1)%Z = m by lia.
-    by iApply ("IH" with "c↦ →Ψ").
+    iApply ("IH" with "c↦ →Ψ mtl").
   Qed.
 
   (** ** On borrows *)

@@ -6,7 +6,7 @@ Import WpwNotation.
 
 Implicit Type (N : namespace) (l : loc).
 
-(** ** Separation logic formulas *)
+(** Separation logic formulas *)
 Inductive fml : Type :=
 | all {A : Type} (Φ : A → fml) | ex {A : Type} (Φ : A → fml)
 | and (P Q : fml) | or (P Q : fml) | imp (P Q : fml) | pure (φ : Prop)
@@ -15,13 +15,6 @@ Inductive fml : Type :=
 | inv (N : namespace) (P : fml)
 | ilist (N : namespace) (Φ : loc → fml) (l : loc).
 #[warning="-redundant-canonical-projection"] Canonical fmlO := leibnizO fml.
-
-(** ** Linked list mutation *)
-
-(** Target function *)
-Definition iter_ilist : val := rec: "self" "f" "c" "l" :=
-  if: !"c" ≤ #0 then #() else
-    "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (!("l" +ₗ #1)).
 
 Section verify.
   Context `{!inv'GS fmlO Σ, !heapGS_gen hlc Σ}.
@@ -39,7 +32,24 @@ Section verify.
       (ex (λ l', sep (pointsto 1 (l +ₗ 1) (#l')) (ilist N Φ l')))
   end.
 
-  (** Termination of [iter] *)
+  (** Access the tail of [ilist] *)
+  Definition tail_ilist : val := λ: "l", !("l" +ₗ #1).
+  Lemma twp_tail_ilist {N Φ l} :
+    [[{ sem (ilist N Φ l) }]][inv_wsat sem]
+      tail_ilist #l @ ↑N
+    [[{ l', RET #l'; sem (ilist N Φ l') }]].
+  Proof.
+    iIntros (Ψ) "/= #[_ itl] →Ψ". wp_rec. wp_pure.
+    iMod (inv_tok_acc (FML:=fmlO) (sm:=sem) with "itl") as
+      "/=[(%l' & ↦l' & #ltl) cl]"; [done|].
+    wp_load. iModIntro. iMod ("cl" with "[↦l']") as "_".
+    { iExists _. by iFrame. } { iModIntro. iApply ("→Ψ" with "ltl"). }
+  Qed.
+
+  (** Iterate over [ilist] *)
+  Definition iter_ilist : val := rec: "self" "f" "c" "l" :=
+    if: !"c" ≤ #0 then #() else
+      "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (tail_ilist "l").
   Lemma twp_iter_list {N Φ c l} {f : val} {n : nat} :
     (∀ l0, [[{ inv_tok N (Φ l0) }]][inv_wsat sem] f #l0 @ ↑N
       [[{ RET #(); True }]]) -∗
@@ -47,15 +57,12 @@ Section verify.
       iter_ilist f #c #l @ ↑N
     [[{ RET #(); c ↦ #0 }]].
   Proof.
-    iIntros "#f" (Ψ) "!> /=[c↦ #[ihd itl]] →Ψ".
-    iInduction n as [|m] "IH" forall (l) "ihd itl".
+    iIntros "#f" (Ψ) "!> /=[c↦ #l] →Ψ".
+    iInduction n as [|m] "IH" forall (l) "l".
     { wp_rec. wp_load. wp_pures. by iApply "→Ψ". }
-    wp_rec. wp_load. wp_pures. wp_apply "f"; [done|]. iIntros "_".
-    wp_load. wp_store. wp_op. wp_bind (! _)%E. have -> : (S m - 1)%Z = m by lia.
-    iMod (inv_tok_acc (FML:=fmlO) (sm:=sem) with "itl") as
-      "/=[(%l' & ↦l' & #itlhd & #itltl) cl]"; [done|].
-    wp_load. iModIntro. iMod ("cl" with "[↦l']") as "_".
-    { iExists _. iFrame "↦l'". by iSplit. }
-    iModIntro. by iApply ("IH" with "c↦ →Ψ").
+    wp_rec. wp_load. wp_pures. wp_apply "f". { iDestruct "l" as "[$ _]". }
+    iIntros "_". wp_load. wp_store. have -> : (S m - 1)%Z = m by lia.
+    wp_apply twp_tail_ilist; [done|]. iIntros (l') "#ltl".
+    iApply ("IH" with "c↦ →Ψ ltl").
   Qed.
 End verify.
