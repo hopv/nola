@@ -285,6 +285,20 @@ Section verify.
     iApply ("IH" with "c↦ →Ψ ltl").
   Qed.
 
+  (** Iterate over a list with two threads *)
+  Lemma twp_fork_iter_list {N Φx c' c l} {f : val} {m n : nat} :
+    (∀ l', [[{ invd N (Φx l') }]][inv_wsatid] f #l' @ ↑N
+      [[{ RET #(); True }]]) -∗
+    [[{ c' ↦ #m ∗ c ↦ #n ∗ ⟦ ilist N Φx l ⟧ }]][inv_wsatid]
+      Fork (iter_ilist f #c' #l);; iter_ilist f #c #l @ ↑N
+    [[{ RET #(); c ↦ #0 }]].
+  Proof.
+    iIntros "#f" (Ψ) "!> (↦' & ↦ & #l) →Ψ". wp_apply (twp_fork with "[↦']").
+    { iApply (twp_mask_mono _ (↑N)); [done|].
+      wp_apply (twp_iter_list with "f [$↦' $l //]"). by iIntros. }
+    wp_pures. by wp_apply (twp_iter_list with "f [$↦ $l //]").
+  Qed.
+
   (** [mlist]: Formula for a list with a mutex *)
   Definition mlist_gen Φx Mlist' l : cif Σ :=
     cif_mutex l (Mlist' Φx l).
