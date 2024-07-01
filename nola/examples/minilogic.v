@@ -34,12 +34,12 @@ Section verify.
 
   (** Access the tail of [ilist] *)
   Definition tail_ilist : val := λ: "l", !("l" +ₗ #1).
-  Lemma twp_tail_ilist {N Φ l} :
+  Lemma twp_tail_ilist {N E Φ l} : ↑N ⊆ E →
     [[{ sem (ilist N Φ l) }]][inv_wsat sem]
-      tail_ilist #l @ ↑N
+      tail_ilist #l @ E
     [[{ l', RET #l'; sem (ilist N Φ l') }]].
   Proof.
-    iIntros (Ψ) "/= #[_ itl] →Ψ". wp_rec. wp_pure.
+    iIntros (? Ψ) "/= #[_ itl] →Ψ". wp_rec. wp_pure.
     iMod (inv_tok_acc (FML:=fmlO) (sm:=sem) with "itl") as
       "/=[(%l' & ↦l' & #ltl) cl]"; [done|].
     wp_load. iModIntro. iMod ("cl" with "[↦l']") as "_".
@@ -50,19 +50,19 @@ Section verify.
   Definition iter_ilist : val := rec: "self" "f" "c" "l" :=
     if: !"c" ≤ #0 then #() else
       "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (tail_ilist "l").
-  Lemma twp_iter_list {N Φ c l} {f : val} {n : nat} :
-    (∀ l0, [[{ inv_tok N (Φ l0) }]][inv_wsat sem] f #l0 @ ↑N
+  Lemma twp_iter_list {N E Φ c l} {f : val} {n : nat} : ↑N ⊆ E →
+    (∀ l0, [[{ inv_tok N (Φ l0) }]][inv_wsat sem] f #l0 @ E
       [[{ RET #(); True }]]) -∗
     [[{ c ↦ #n ∗ sem (ilist N Φ l) }]][inv_wsat sem]
-      iter_ilist f #c #l @ ↑N
+      iter_ilist f #c #l @ E
     [[{ RET #(); c ↦ #0 }]].
   Proof.
-    iIntros "#f" (Ψ) "!> [c↦ #l] →Ψ".
+    iIntros "% #f" (Ψ) "!> [c↦ #l] →Ψ".
     iInduction n as [|m] "IH" forall (l) "l".
     { wp_rec. wp_load. wp_pures. by iApply "→Ψ". }
     wp_rec. wp_load. wp_pures. wp_apply "f". { iDestruct "l" as "[$ _]". }
     iIntros "_". wp_load. wp_store. have -> : (S m - 1)%Z = m by lia.
-    wp_apply twp_tail_ilist; [done|]. iIntros (l') "#ltl".
+    wp_apply twp_tail_ilist; [done..|]. iIntros (l') "#ltl".
     iApply ("IH" with "c↦ →Ψ ltl").
   Qed.
 End verify.

@@ -252,13 +252,13 @@ Section verify.
 
   (** Access the tail of a list *)
   Definition tail_ilist : val := λ: "l", !("l" +ₗ #1).
-  Lemma twp_tail_list {N Φx l} :
+  Lemma twp_tail_list {N E Φx l} : ↑N ⊆ E →
     [[{ ⟦ ilist N Φx l ⟧ }]][inv_wsatid]
-      tail_ilist #l @ ↑N
+      tail_ilist #l @ E
     [[{ l', RET #l'; ⟦ ilist N Φx l' ⟧ }]].
   Proof.
-    rewrite !/⟦ ilist _ _ _ ⟧ /=. iIntros (Ψ) "/= #[_ itl] →Ψ". wp_rec. wp_pure.
-    iMod (invd_acc with "itl") as "[ltl cl]"; [done|].
+    rewrite !/⟦ ilist _ _ _ ⟧ /=. iIntros (? Ψ) "/= #[_ itl] →Ψ". wp_rec.
+    wp_pure. iMod (invd_acc with "itl") as "[ltl cl]"; [done|].
     rewrite !/⟦ ilist' _ _ _ ⟧ /=. iDestruct "ltl" as (?) "[>↦l' #ltl]".
     wp_load. iModIntro. iMod ("cl" with "[↦l']") as "_".
     { iExists _. by iFrame. } { iModIntro. iApply ("→Ψ" with "ltl"). }
@@ -268,34 +268,34 @@ Section verify.
   Definition iter_ilist : val := rec: "self" "f" "c" "l" :=
     if: !"c" ≤ #0 then #() else
       "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (tail_ilist "l").
-  Lemma twp_iter_list {N Φx c l} {f : val} {n : nat} :
-    (∀ l', [[{ invd N (Φx l') }]][inv_wsatid] f #l' @ ↑N
+  Lemma twp_iter_list {N E Φx c l} {f : val} {n : nat} : ↑N ⊆ E →
+    (∀ l', [[{ invd N (Φx l') }]][inv_wsatid] f #l' @ E
       [[{ RET #(); True }]]) -∗
     [[{ c ↦ #n ∗ ⟦ ilist N Φx l ⟧ }]][inv_wsatid]
-      iter_ilist f #c #l @ ↑N
+      iter_ilist f #c #l @ E
     [[{ RET #(); c ↦ #0 }]].
   Proof.
-    iIntros "#f" (Ψ) "!> [c↦ #l] →Ψ".
+    iIntros "% #f" (Ψ) "!> [c↦ #l] →Ψ".
     iInduction n as [|m] "IH" forall (l) "l".
     { wp_rec. wp_load. wp_pures. by iApply "→Ψ". }
     wp_rec. wp_load. wp_pures. wp_apply "f".
     { rewrite !/⟦ ilist _ _ _ ⟧ /=. iDestruct "l" as "[$ _]". }
     iIntros "_". wp_load. wp_store. have -> : (S m - 1)%Z = m by lia.
-    wp_apply twp_tail_list; [done|]. iIntros (l') "#ltl".
+    wp_apply twp_tail_list; [done..|]. iIntros (l') "#ltl".
     iApply ("IH" with "c↦ →Ψ ltl").
   Qed.
 
   (** Iterate over a list with two threads *)
-  Lemma twp_fork_iter_list {N Φx c' c l} {f : val} {m n : nat} :
-    (∀ l', [[{ invd N (Φx l') }]][inv_wsatid] f #l' @ ↑N
+  Lemma twp_fork_iter_list {N E Φx c' c l} {f : val} {m n : nat} : ↑N ⊆ E →
+    (∀ l', [[{ invd N (Φx l') }]][inv_wsatid] f #l' @ E
       [[{ RET #(); True }]]) -∗
     [[{ c' ↦ #m ∗ c ↦ #n ∗ ⟦ ilist N Φx l ⟧ }]][inv_wsatid]
-      Fork (iter_ilist f #c' #l);; iter_ilist f #c #l @ ↑N
+      Fork (iter_ilist f #c' #l);; iter_ilist f #c #l @ E
     [[{ RET #(); c ↦ #0 }]].
   Proof.
-    iIntros "#f" (Ψ) "!> (↦' & ↦ & #l) →Ψ". wp_apply (twp_fork with "[↦']").
-    { iApply (twp_mask_mono _ (↑N)); [done|].
-      wp_apply (twp_iter_list with "f [$↦' $l //]"). by iIntros. }
+    iIntros "% #f" (Ψ) "!> (↦' & ↦ & #l) →Ψ". wp_apply (twp_fork with "[↦']").
+    { iApply (twp_mask_mono _ E); [done|].
+      wp_apply (twp_iter_list with "f [$↦' $l //]"); [done|]. by iIntros. }
     wp_pures. by wp_apply (twp_iter_list with "f [$↦ $l //]").
   Qed.
 
