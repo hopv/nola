@@ -1,7 +1,6 @@
 (** * Prophetic borrowing machinery relaxed with derivability *)
 
 From nola.bi Require Export deriv.
-From nola.bi Require Import list.
 From nola.iris Require Export pborrow.
 From iris.proofmode Require Import proofmode.
 Import ProdNotation PlistNotation iPropAppNotation PsemNotation SemNotation
