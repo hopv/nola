@@ -58,31 +58,29 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
 - [`prelude`](nola/prelude.v) : Prelude
 - [`util/`](nola/util/) : General-purpose utilities, extending
   [`stdpp`](https://gitlab.mpi-sws.org/iris/stdpp)
-  + [`fn`](nola/util/fn) (Functions),
-    [`rel`](nola/util/rel) (Relations)
+  + [`fn`](nola/util/fn.v) (Functions),
+    [`rel`](nola/util/rel.v) (Relations)
   + [`prod`](nola/util/prod.v) (Modified product),
     [`plist`](nola/util/plist.v) (Product list)
   + [`proph`](nola/util/proph.v) (Prophecy)
-  + [`intp`](nola/util/intp.v) (Interpretation)
+  + [`sem`](nola/util/sem.v) (Semantics)
   + [`order`](nola/util/order.v) (Order theory),
     [`psg`](nola/util/psg.v) (Pseudo-gfp)
-  + [`citree`](nola/util/citree.v) (Coinductive-inductive tree)
-- [`bi/`](nola/bi) : Libraries for bunched implication logic
-  + [`ofe`](nola/bi/ofe.v) (On OFE),
-    [`list`](nola/bi/list.v) (On `list`),
-    [`gmap`](nola/bi/gmap.v) (On `gmap`),
+  + [`cit`](nola/util/cit.v) (Coinductive-inductive tree)
+- [`bi/`](nola/bi/) : Libraries for bunched implication logic
+  + [`util`](nola/bi/util.v) (Utilities)
+  + [`ofe`](nola/bi/ofe.v) (On OFE)
+  + [`gmap`](nola/bi/gmap.v) (On `gmap`),
     [`plist`](nola/bi/plist.v) (On `plist`)
   + [`order`](nola/bi/order.v) (Order theory),
     [`deriv`](nola/bi/deriv.v) (Derivability)
   + [`genupd`](nola/bi/genupd.v) (General update),
     [`updw`](nola/bi/updw.v) (Update with a custom world satisfaction),
     [`wpw`](nola/bi/wpw.v) (Weakest precondition with a custom world
-      satisfaction),
-    [`util`](nola/bi/util.v) (Utilities)
+      satisfaction)
   + [`paradox`](nola/bi/paradox.v) (Paradoxes)
-- [`iris/`](nola/iris) : Libraries for Iris base logic
-  + [`ofe`](nola/bi/ofe.v) (On OFE),
-    [`list`](nola/bi/list.v) (On `list`)
+- [`iris/`](nola/iris/) : Libraries for Iris base logic
+  + [`ofe`](nola/bi/ofe.v) (On OFE)
   + [`sinv`](nola/iris/sinv.v) (Simple invariant),
     [`sinv_deriv`](nola/iris/sinv_deriv.v) (Simple invariant relaxed with
       derivability)
@@ -93,17 +91,17 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
       with derivability)
   + [`lft`](nola/iris/lft.v) (Lifetime),
     [`borrow`](nola/iris/borrow.v) (Borrowing),
-    [`borrow_deriv`](nola/iris/borrow_deriv) (Borrowing relaxed with
+    [`borrow_deriv`](nola/iris/borrow_deriv.v) (Borrowing relaxed with
       derivability)
   + [`proph`](nola/iris/proph.v) (Prophecy),
     [`proph_ag`](nola/iris/proph_ag.v) (Prophetic agreement),
     [`pborrow`](nola/iris/pborrow.v) (Prophetic borrowing)
-  + [`ciprop`](nola/iris/ciprop.v) (Coinductive-inductive proposition)
+  + [`cif`](nola/iris/cif.v) (Coinductive-inductive formula)
 - [`heap_lang/`](nola/heap_lang/) : Variant of Iris HeapLang, supporting `Ndnat`
     (infinite non-determinism) and program logic with custom world satisfactions
-  + [`lib/`](nola/heap_lang/lib) : Libraries
+  + [`lib/`](nola/heap_lang/lib/) : Libraries
     * [`mutex`](nola/heap_lang/lib/mutex.v) (Mutex machinery)
 - [`examples/`](nola/examples/) : Examples
-  + [`minilogic`](nola/examples/minilogic.v) : Minimal showcase logic
-  + [`later`](nola/examples/later.v) : Instantiating Nola with later
-  + [`logic/`](nola/examples/logic/) : Showcase logic
+  + [`minilogic`](nola/examples/minilogic.v) (Minimal logic)
+  + [`later`](nola/examples/later.v) (Instantiating with later)
+  + [`logic`](nola/examples/logic.v) (Main logic)
