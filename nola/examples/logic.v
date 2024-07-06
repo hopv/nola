@@ -4,8 +4,8 @@ From nola.iris Require Export cif inv_deriv pborrow_deriv.
 From nola.bi Require Import util.
 From nola.heap_lang Require Export notation proofmode lib.mutex.
 From nola.examples Require Export nsynty.
-Import ProdNotation WpwNotation iPropAppNotation PsemNotation SemNotation
-  ProphNotation LftNotation NsyntyNotation.
+Import ProdNotation UpdwNotation WpwNotation iPropAppNotation PsemNotation
+  SemNotation ProphNotation LftNotation NsyntyNotation.
 
 Implicit Type (N : namespace) (l : loc) (b : bool) (α β : lft) (q : Qp)
   (X Y : nsynty).
@@ -432,6 +432,30 @@ Section verify.
     rewrite /sem /=. iDestruct "↦" as ">↦". wp_load. iModIntro.
     iMod (nobord_close (M:=bupd) with "o [$↦ //]") as "[α b]".
     rewrite nborc_nbor. iMod ("cl" with "b") as "_". iModIntro. by iApply "→Φ".
+  Qed.
+
+  (** Create a borrow and a lender over a mutex *)
+  Lemma mutex_bor_lend_new {l b Px α q} :
+    l ↦ #b -∗ ⟦ Px ⟧ -∗ q.[α] =[inv_wsatid ∗ pborrow_wsatid bupd]=∗
+      invd nroot (cif_bor α ((▷ l ↦ #false ∗ cif_bor α Px) ∨ ▷ l ↦ #true)) ∗
+      nlendd α (∃ b', ▷ l ↦ #b' ∗ Px)%n ∗ q.[α].
+  Proof.
+    iIntros "↦ Px α".
+    iMod (nborc_nlend_new (M:=bupd) with "[↦ Px]") as "[b $]"; [by iFrame|].
+    iMod (nborcd_open with "α b") as "[o big]". rewrite /sem /=.
+    iDestruct "big" as (b') "[↦ Px]".
+    iMod (nobord_subdiv (M:=bupd) [∃ b', ▷ l ↦ #b'; Px]%n
+      with "[] o [↦ Px] []") as "[α[b[b' _]]]"; rewrite /sem /=.
+    { iApply lft_sincl_refl. } { iSplitL "↦"; iFrame. }
+    { by iIntros "_ [[% $][$ _]]". }
+    iMod (nborcd_open with "α b") as "[o ↦]".
+    iMod (nobord_subdiv (M:=bupd)
+      [(▷ l ↦ #false ∗ cif_bor α Px) ∨ ▷ l ↦ #true]%n with "[] o [↦ b'] []")
+      as "[$[b _]]"; rewrite /sem /=. { iApply lft_sincl_refl. }
+    { iSplit; [|done]. rewrite nborc_nbor.
+      iDestruct "↦" as ([|]) "↦"; [|iLeft]; iFrame. }
+    { by iIntros "_ [[[$ _]|$]_]". }
+    rewrite nborc_nbor. by iMod (inv'_alloc with "[b]") as "$".
   Qed.
 
   (** ** On derivability *)
