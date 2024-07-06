@@ -420,6 +420,20 @@ Section verify.
     iApply lft_sincl_meet_intro; [done|]. iApply lft_sincl_refl.
   Qed.
 
+  (** Load from an immutable shared borrow *)
+  Lemma imbor_load {l α q} {n : Z} :
+    [[{ q.[α] ∗ invd nroot (cif_bor α (▷ l ↦ #n)) }]]
+      [inv_wsatid ∗ pborrow_wsatid bupd]
+      !#l
+    [[{ RET #n; q.[α] }]].
+  Proof.
+    iIntros (Φ) "[α #i] →Φ". iMod (invd_acc with "i") as "[b cl]"; [done|].
+    rewrite /sem /=. iMod (nbord_open (M:=bupd) with "α b") as "[o ↦]".
+    rewrite /sem /=. iDestruct "↦" as ">↦". wp_load. iModIntro.
+    iMod (nobord_close (M:=bupd) with "o [$↦ //]") as "[α b]".
+    rewrite nborc_nbor. iMod ("cl" with "b") as "_". iModIntro. by iApply "→Φ".
+  Qed.
+
   (** ** On derivability *)
 
   Local Lemma inv'_sep_comm' `{!Deriv ih δ} {N Px Qx} :
