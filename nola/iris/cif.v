@@ -148,9 +148,9 @@ Notation "∀ x .. y , Px" :=
   (cif_all (λ x, .. (cif_all (λ y, Px%n)) ..)) : cif_scope.
 Notation "∃ x .. y , Px" :=
   (cif_ex (λ x, .. (cif_ex (λ y, Px%n)) ..)) : cif_scope.
+Infix "∧" := cif_and : cif_scope. Infix "∨" := cif_or : cif_scope.
 Infix "→" := cif_imp : cif_scope.
-Infix "∗" := cif_sep : cif_scope.
-Infix "-∗" := cif_wand : cif_scope.
+Infix "∗" := cif_sep : cif_scope. Infix "-∗" := cif_wand : cif_scope.
 Notation "■ Px" := (cif_plain Px) : cif_scope.
 Notation "□ Px" := (cif_pers Px) : cif_scope.
 Notation "|==> Px" := (cif_bupd Px) : cif_scope.
