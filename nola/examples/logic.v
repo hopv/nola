@@ -203,10 +203,9 @@ End sem.
 Section verify.
   Context `{!inv'GS cifOF Σ, !mutexGS cifOF Σ,
     !pborrowGS nsynty cifOF Σ, !heapGS_gen hlc Σ}.
+  Implicit Type (Px Qx : cif Σ) (Φx Ψx : loc → cif Σ).
 
   (** ** Linked list *)
-
-  Implicit Type Φx Ψx : loc → cif Σ.
 
   (** [ilist]: Formula for a list *)
   Definition ilist_gen N Φx Ilist' l : cif Σ :=
@@ -298,6 +297,8 @@ Section verify.
       wp_apply (twp_iter_list with "f [$↦' $l //]"); [done|]. by iIntros. }
     wp_pures. by wp_apply (twp_iter_list with "f [$↦ $l //]").
   Qed.
+
+  (** ** Linked list with a mutex *)
 
   (** [mlist]: Formula for a list with a mutex *)
   Definition mlist_gen Φx Mlist' l : cif Σ :=
@@ -434,11 +435,14 @@ Section verify.
     rewrite nborc_nbor. iMod ("cl" with "b") as "_". iModIntro. by iApply "→Φ".
   Qed.
 
-  (** Create a borrow and a lender over a mutex *)
-  Lemma mutex_bor_lend_new {l b Px α q} :
+  (** Shared borrow of a mutex *)
+  Definition mutex_bor α l Px :=
+    invd nroot (cif_bor α ((▷ l ↦ #false ∗ cif_bor α Px) ∨ ▷ l ↦ #true)).
+
+  (** Create a shared borrow and a lender of a mutex *)
+  Lemma mutex_bor_lend_new {α l Px b q} :
     l ↦ #b -∗ ⟦ Px ⟧ -∗ q.[α] =[inv_wsatid ∗ pborrow_wsatid bupd]=∗
-      invd nroot (cif_bor α ((▷ l ↦ #false ∗ cif_bor α Px) ∨ ▷ l ↦ #true)) ∗
-      nlendd α (∃ b', ▷ l ↦ #b' ∗ Px)%n ∗ q.[α].
+      mutex_bor α l Px ∗ nlendd α (∃ b', ▷ l ↦ #b' ∗ Px)%n ∗ q.[α].
   Proof.
     iIntros "↦ Px α".
     iMod (nborc_nlend_new (M:=bupd) with "[↦ Px]") as "[b $]"; [by iFrame|].
