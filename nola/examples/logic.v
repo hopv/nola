@@ -439,6 +439,21 @@ Section verify.
   Definition mutex_bor α l Px :=
     invd nroot (cif_bor α ((▷ l ↦ #false ∗ cif_bor α Px) ∨ ▷ l ↦ #true)).
 
+  (** Try to acquire a lock from a shared borrow over a mutex *)
+  Lemma mutex_bor_try_acquire {α l Px q} :
+    [[{ mutex_bor α l Px ∗ q.[α] }]][inv_wsatid ∗ pborrow_wsatid bupd]
+      CAS #l #false #true
+    [[{ b, RET #b; (if b then nbord α Px else True) ∗ q.[α] }]].
+  Proof.
+    iIntros (Φ) "[#m [α α']] →Φ". wp_bind (CmpXchg _ _ _).
+    iMod (invd_acc with "m") as "[b cl]"; [done|]. rewrite /⟦ cif_bor _ _ ⟧ /=.
+    iMod (nbord_open (M:=bupd) with "α b") as "[o big]". rewrite /⟦_ ∨ _⟧%n /=.
+    iDestruct "big" as "[[>↦ b']|>↦]"; [wp_cmpxchg_suc|wp_cmpxchg_fail];
+      iModIntro; iMod (nobord_close (M:=bupd) with "o [$↦ //]") as "[α b]";
+      rewrite nborc_nbor; iMod ("cl" with "b") as "_"; iModIntro; wp_pure;
+      iApply "→Φ"; by iFrame.
+  Qed.
+
   (** Create a shared borrow and a lender of a mutex *)
   Lemma mutex_bor_lend_new {α l Px b q} :
     l ↦ #b -∗ ⟦ Px ⟧ -∗ q.[α] =[inv_wsatid ∗ pborrow_wsatid bupd]=∗
