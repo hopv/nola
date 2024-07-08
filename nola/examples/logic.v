@@ -454,6 +454,24 @@ Section verify.
       iApply "→Φ"; by iFrame.
   Qed.
 
+  (** Release a lock from a shared borrow over a mutex *)
+  Lemma mutex_bor_release {α l Px q} :
+    [[{ mutex_bor α l Px ∗ nbord α Px ∗ q.[α] }]]
+      [inv_wsatid ∗ pborrow_wsatid bupd]
+      #l <- #false
+    [[{ RET #(); q.[α] }]].
+  Proof.
+    iIntros (Φ) "(#m & b' & α) →Φ".
+    iMod (invd_acc with "m") as "[b cl]"; [done|]. rewrite /⟦ cif_bor _ _ ⟧ /=.
+    iMod (nbord_open (M:=bupd) with "α b") as "[o big]". rewrite /⟦_ ∨ _⟧%n /=.
+    iAssert (∃ b, ▷ l ↦ #b)%I with "[big]" as (?) ">↦".
+    { iDestruct "big" as "[[$ _]|$]". }
+    wp_store. iModIntro.
+    iMod (nobord_close (M:=bupd) with "o [b' ↦]") as "[α b]".
+    { iLeft. iFrame. }
+    rewrite nborc_nbor. iMod ("cl" with "b") as "_". iModIntro. by iApply "→Φ".
+  Qed.
+
   (** Create a shared borrow and a lender of a mutex *)
   Lemma mutex_bor_lend_new {α l Px b q} :
     l ↦ #b -∗ ⟦ Px ⟧ -∗ q.[α] =[inv_wsatid ∗ pborrow_wsatid bupd]=∗
