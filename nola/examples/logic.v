@@ -343,7 +343,7 @@ Section verify.
     iIntros (Ψ) "/= #m →Ψ". iApply twp_fupd.
     wp_apply (twp_try_acquire_loop_mutexd with "m"). iIntros ([|]); last first.
     { iIntros (?). by iApply "→Ψ". }
-    rewrite /sem /=. iIntros "[Φx (% & ↦ & #m')]". iApply "→Ψ". by iFrame.
+    rewrite /⟦⟧ /=. iIntros "[Φx (% & ↦ & #m')]". iApply "→Ψ". by iFrame.
   Qed.
 
   (** Release the lock of [mlist] *)
@@ -355,7 +355,7 @@ Section verify.
   Proof.
     iIntros (Ψ) "(#m & Φx & %l' & ↦ & #mtl) →Ψ".
     wp_apply (twp_release_mutexd with "[Φx ↦]"); [|done]. iSplit; [done|].
-    rewrite /sem /=. by iFrame.
+    rewrite /⟦⟧ /=. by iFrame.
   Qed.
 
   (** Iterate over [mlist] *)
@@ -395,7 +395,7 @@ Section verify.
   Proof.
     iIntros (Ψ) "(#⊑ & [β β'] & b) →Ψ".
     iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
-    iMod (nbord_open (M:=bupd) with "α b") as "[o big]". rewrite /sem /=.
+    iMod (nbord_open (M:=bupd) with "α b") as "[o big]". rewrite /⟦⟧ /=.
     iDestruct "big" as (l') "[↦ b']". iApply twpw_fupdw_nonval; [done|].
     wp_load. iModIntro.
     iMod (nbord_reborrow (M:=bupd) α with "β b'") as "[β[b' →b']]".
@@ -420,7 +420,7 @@ Section verify.
   Proof.
     iIntros (Ψ) "(#⊑ & [β β'] & b) →Ψ".
     iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
-    iMod (pbord_open (M:=bupd) with "α b") as "/=[o big]". rewrite /sem /=.
+    iMod (pbord_open (M:=bupd) with "α b") as "/=[o big]". rewrite /⟦⟧ /=.
     iDestruct "big" as (l') "[↦ b']". iApply twpw_fupdw_nonval; [done|].
     wp_load. iModIntro.
     iMod (pobord_pbord_reborrow (TY:=nsynty) (M:=bupd) (λ _, (_,_)' : _ *'ₛ _)
@@ -439,8 +439,8 @@ Section verify.
     [[{ RET #n; q.[α] }]].
   Proof.
     iIntros (Φ) "[α #i] →Φ". iMod (invd_acc with "i") as "[b cl]"; [done|].
-    rewrite /sem /=. iMod (nbord_open (M:=bupd) with "α b") as "[o ↦]".
-    rewrite /sem /=. iDestruct "↦" as "↦". wp_load. iModIntro.
+    rewrite /⟦⟧ /=. iMod (nbord_open (M:=bupd) with "α b") as "[o ↦]".
+    rewrite /⟦⟧ /=. iDestruct "↦" as "↦". wp_load. iModIntro.
     iMod (nobord_close (M:=bupd) with "o [$↦ //]") as "[α b]".
     rewrite nborc_nbor. iMod ("cl" with "b") as "_". iModIntro. by iApply "→Φ".
   Qed.
@@ -489,16 +489,16 @@ Section verify.
   Proof.
     iIntros "↦ Px α".
     iMod (nborc_nlend_new (M:=bupd) with "[↦ Px]") as "[b $]"; [by iFrame|].
-    iMod (nborcd_open with "α b") as "[o big]". rewrite /sem /=.
+    iMod (nborcd_open with "α b") as "[o big]". rewrite /⟦⟧ /=.
     iDestruct "big" as (b') "[↦ Px]".
     iMod (nobord_subdiv (M:=bupd) [∃ b', l ↦ #b'; Px]%n
-      with "[] o [↦ Px] []") as "[α[b[b' _]]]"; rewrite /sem /=.
+      with "[] o [↦ Px] []") as "[α[b[b' _]]]"; rewrite /⟦⟧ /=.
     { iApply lft_sincl_refl. } { iSplitL "↦"; iFrame. }
     { by iIntros "_ [[% $][$ _]]". }
     iMod (nborcd_open with "α b") as "[o ↦]".
     iMod (nobord_subdiv (M:=bupd)
       [(l ↦ #false ∗ cif_bor α Px) ∨ l ↦ #true]%n with "[] o [↦ b'] []")
-      as "[$[b _]]"; rewrite /sem /=. { iApply lft_sincl_refl. }
+      as "[$[b _]]"; rewrite /⟦⟧ /=. { iApply lft_sincl_refl. }
     { iSplit; [|done]. rewrite nborc_nbor.
       iDestruct "↦" as ([|]) "↦"; [|iLeft]; iFrame. }
     { by iIntros "_ [[[$ _]|$]_]". }
@@ -510,7 +510,7 @@ Section verify.
   Local Lemma inv'_sep_comm' `{!Deriv ih δ} {N Px Qx} :
     inv' δ N (Px ∗ Qx)%n ⊢ inv' δ N (Qx ∗ Px)%n.
   Proof.
-    iApply inv'_iff. iIntros "!>" (????). rewrite /psem /= bi.sep_comm.
+    iApply inv'_iff. iIntros "!>" (????). rewrite /⟦⟧(_) /= bi.sep_comm.
     iApply bi.wand_iff_refl.
   Qed.
   Lemma inv'_sep_comm `{!Deriv ih δ} {N Px Qx} :
@@ -520,7 +520,7 @@ Section verify.
   Local Lemma inv'_inv'_sep_comm' `{!Deriv ih δ} {N N' Px Qx} :
     inv' δ N (cif_inv N' (Px ∗ Qx)) ⊢ inv' δ N (cif_inv N' (Qx ∗ Px)).
   Proof.
-    iApply inv'_iff. iIntros "!>" (????). rewrite /psem /= inv'_sep_comm.
+    iApply inv'_iff. iIntros "!>" (????). rewrite /⟦⟧(_) /= inv'_sep_comm.
     iApply bi.wand_iff_refl.
   Qed.
   Lemma inv'_inv'_sep_comm `{!Deriv ih δ} {N N' Px Qx} :
@@ -530,7 +530,7 @@ Section verify.
   Local Lemma inv'_bor_lft' `{!Deriv ih δ} {N α β Px} :
     α ⊑□ β -∗ β ⊑□ α -∗ inv' δ N (cif_bor α Px) -∗ inv' δ N (cif_bor β Px).
   Proof.
-    iIntros "#? #?". iApply inv'_iff. iIntros "!>" (????). rewrite /psem /=.
+    iIntros "#? #?". iApply inv'_iff. iIntros "!>" (????). rewrite /⟦⟧(_) /=.
     iSplit; by iApply nbor_lft.
   Qed.
   Lemma inv'_bor_lft `{!Deriv ih δ} {N α β Px} :
