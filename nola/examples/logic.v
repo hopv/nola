@@ -387,13 +387,13 @@ Section verify.
   (** ** On borrows *)
 
   (** Dereference a nested mutable reference *)
-  Lemma bor_bor_deref {α β l Φx q} : β ⊑□ α -∗
-    [[{ q.[β] ∗ nbord α (∃ l', l ↦ #l' ∗ cif_bor β (Φx l'))%n }]]
+  Lemma bor_bor_deref {α β l Φx q} :
+    [[{ β ⊑□ α ∗ q.[β] ∗ nbord α (∃ l', l ↦ #l' ∗ cif_bor β (Φx l'))%n }]]
       [pborrow_wsatid bupd]
       !#l
     [[{ l', RET #l'; q.[β] ∗ nborcd β (Φx l') }]].
   Proof.
-    iIntros "#⊑ %Ψ !> [[β β'] b] →Ψ".
+    iIntros (Ψ) "(#⊑ & [β β'] & b) →Ψ".
     iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
     iMod (nbord_open (M:=bupd) with "α b") as "[o big]". rewrite /sem /=.
     iDestruct "big" as (l') "[↦ b']". iApply twpw_fupdw_nonval; [done|].
@@ -408,8 +408,8 @@ Section verify.
   Qed.
 
   (** Dereference a nested prophetic mutable reference *)
-  Lemma pbor_pbor_deref {X η ξ α β l Φxx q} {x : X} : β ⊑□ α -∗
-    [[{ q.[β] ∗
+  Lemma pbor_pbor_deref {X η ξ α β l Φxx q} {x : X} :
+    [[{ β ⊑□ α ∗ q.[β] ∗
         pbord α ((x, ξ)' : _ *'ₛ prvarₛ _) η
           (λ '(x', ξ')', ∃ l', l ↦ #l' ∗ cif_pbor β x' ξ' (Φxx l'))%n }]]
       [pborrow_wsatid bupd]
@@ -418,7 +418,7 @@ Section verify.
         q.[β] ∗ ∃ ξ' : prvar X,
           ⟨π, π η = (π ξ', ξ)'⟩ ∗ pborcd β x ξ' (Φxx l') }]].
   Proof.
-    iIntros "#⊑ %Ψ !> [[β β'] b] →Ψ".
+    iIntros (Ψ) "(#⊑ & [β β'] & b) →Ψ".
     iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
     iMod (pbord_open (M:=bupd) with "α b") as "/=[o big]". rewrite /sem /=.
     iDestruct "big" as (l') "[↦ b']". iApply twpw_fupdw_nonval; [done|].
