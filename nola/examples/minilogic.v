@@ -1,4 +1,4 @@
-(** * Minimal showcase logic *)
+(** * Minimal logic *)
 
 From nola.iris Require Export inv.
 From nola.heap_lang Require Export notation proofmode.
