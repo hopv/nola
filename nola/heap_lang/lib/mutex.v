@@ -30,6 +30,9 @@ Section mutex.
   (** [mutex_tok]: Mutex token *)
   Definition mutex_tok l P : iProp Σ := inv_tok nroot (l, P).
 
+  (** [mutex_tok] is non-expansive *)
+  #[export] Instance mutex_tok_ne {l} : NonExpansive (mutex_tok l).
+  Proof. move=> ????. by apply inv_tok_ne. Qed.
   (** [mutex_tok] is persistent *)
   Fact mutex_tok_persistent {l P} : Persistent (mutex_tok l P).
   Proof. exact _. Qed.
