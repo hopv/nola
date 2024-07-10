@@ -1,6 +1,6 @@
-(** * Showcase logic *)
+(** * Main logic *)
 
-From nola.iris Require Export cif inv_deriv pborrow_deriv.
+From nola.iris Require Export cif inv pborrow.
 From nola.bi Require Import util.
 From nola.heap_lang Require Export notation proofmode lib.mutex.
 From nola.examples Require Export nsynty.
@@ -16,6 +16,7 @@ Implicit Type (N : namespace) (dq : dfrac) (l : loc) (b : bool) (α β : lft)
 Variant sel :=
 | (** Points-to token *) cifs_pointsto (l : loc) (dq : dfrac) (v : val)
 | (** Invariant *) cifs_inv (N : namespace)
+| (** Relaxed invariant *) cifs_inv' (N : namespace)
 | (** Mutex *) cifs_mutex (l : loc)
 | (** Non-prophetic closed borrower *) cifs_borc (α : lft)
 | (** Non-prophetic borrower *) cifs_bor (α : lft)
@@ -31,7 +32,7 @@ Definition idom (_ : sel) : Type := Empty_set.
 (** [cdom]: Domain for coinductive parts *)
 Definition cdom (s : sel) : Type := match s with
   | cifs_pointsto _ _ _ => Empty_set
-  | cifs_inv _ | cifs_mutex _
+  | cifs_inv _ | cifs_inv' _ | cifs_mutex _
     | cifs_borc _ | cifs_bor _ | cifs_obor _ _ | cifs_lend _ => unit
   | @cifs_pborc X _ _ _ | @cifs_pbor X _ _ _ | @cifs_pobor X _ _ _
     | @cifs_plend X _ _ => X
@@ -60,6 +61,9 @@ Section cif.
   (** Invariant *)
   Definition cif_inv N Px : cif Σ :=
     cif_custom (cifs_inv N) nullary (unary Px) ().
+  (** Relaxed invariant *)
+  Definition cif_inv' N Px : cif Σ :=
+    cif_custom (cifs_inv' N) nullary (unary Px) ().
   (** Mutex *)
   Definition cif_mutex l Px : cif Σ :=
     cif_custom (cifs_mutex l) nullary (unary Px) ().
@@ -91,6 +95,8 @@ Section cif.
   (** The custom constructors are non-expansive *)
   #[export] Instance cif_inv_ne {N} : NonExpansive (cif_inv N).
   Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
+  #[export] Instance cif_inv'_ne {N} : NonExpansive (cif_inv' N).
+  Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
   #[export] Instance cif_mutex_ne {l} : NonExpansive (cif_mutex l).
   Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
   #[export] Instance cif_borc_ne {α} : NonExpansive (cif_borc α).
@@ -113,63 +119,41 @@ End cif.
 Notation "l ↦ dq v" := (cif_pointsto l dq v)
   (at level 20, dq custom dfrac at level 1, format "l  ↦ dq  v") : cif_scope.
 
-
 (** ** [judg]: Judgment *)
-Definition judg Σ : ofe :=
-  (leibnizO namespace * cif Σ + cif Σ * cif Σ + cif Σ * cif Σ +
-    sigT (A:=nsynty *' nsynty) (λ '(X, Y)',
-      leibnizO (clair nsynty X *' clair nsynty Y) *
-      (X -d> cif Σ) * (Y -d> cif Σ)))%type.
-Definition inv_jacsr {Σ} N Px : judg Σ := inl (inl (inl (N, Px))).
-Definition mutex_jiff {Σ} Px Qx : judg Σ := inl (inl (inr (Px, Qx))).
-Definition pborrow_jto {Σ} Px Qx : judg Σ := inl (inr (Px, Qx)).
-Definition pborrow_jlto {Σ X Y} xπ yπ Φx Ψx : judg Σ :=
-  inr (existT (X, Y)' ((xπ, yπ)', Φx, Ψx)).
-#[export] Instance inv_jacsr_ne {Σ N} : NonExpansive (@inv_jacsr Σ N).
-Proof. move=> ????. by do 3 apply: inl_ne. Qed.
-#[export] Instance mutex_jiff_ne {Σ} : NonExpansive2 (@mutex_jiff Σ).
-Proof. move=> ???????. do 2 apply: inl_ne. exact: inr_ne. Qed.
-#[export] Instance pborrow_jto_ne {Σ} : NonExpansive2 (@pborrow_jto Σ).
-Proof. move=> ???????. apply: inl_ne. exact: inr_ne. Qed.
-#[export] Instance pborrow_jlto_ne {Σ X Y xπ yπ} :
-  NonExpansive2 (@pborrow_jlto Σ X Y xπ yπ).
-Proof.
-  move=> ???????. apply inr_ne. apply: existT_ne=>/=. by split; [split|].
-Qed.
-
-#[export] Instance judg_inv_pre_deriv {Σ} :
-  InvPreDeriv (cif Σ) (judg Σ) := INV_PRE_DERIV inv_jacsr.
-#[export] Instance judg_mutex_pre_deriv {Σ} :
-  MutexPreDeriv (cif Σ) (judg Σ) := MUTEX_PRE_DERIV mutex_jiff.
-#[export] Instance judg_pborrow_pre_deriv {Σ} :
-  PborrowPreDeriv nsynty (cif Σ) (judg Σ) :=
-  PBORROW_PRE_DERIV pborrow_jto (@pborrow_jlto _).
+Definition judg Σ : ofe := (cif Σ * cif Σ)%type.
 
 Section sem.
   Context `{!inv'GS cifOF Σ, !mutexGS cifOF Σ, !pborrowGS nsynty cifOF Σ,
     !heapGS_gen hlc Σ}.
   Implicit Type δ : judg Σ → iProp Σ.
 
+  (** Relaxed invariant *)
+  Definition inv' δ N Px : iProp Σ := ∃ Qx, δ (Px, Qx) ∗ inv_tok N Qx.
+  (** [inv'] is non-expansive *)
+  #[export] Instance inv'_ne `{!NonExpansive δ} {N} : NonExpansive (inv' δ N).
+  Proof. solve_proper. Qed.
+
   (** ** [bsem]: Base semantics *)
   Definition bsem δ s :
     (idom s -d> iProp Σ) → (cdom s -d> cif Σ) → dataOF s $oi Σ → iProp Σ :=
     match s with
     | cifs_pointsto l dq v => λ _ _ _, l ↦{dq} v
-    | cifs_inv N => λ _ Pxs _, inv' δ N (Pxs ())
-    | cifs_mutex l => λ _ Pxs _, mutex δ l (Pxs ())
-    | cifs_borc α => λ _ Pxs _, nborc δ α (Pxs ())
-    | cifs_bor α => λ _ Pxs _, nbor δ α (Pxs ())
-    | cifs_obor α q => λ _ Pxs _, nobor δ α q (Pxs ())
-    | cifs_lend α => λ _ Pxs _, nlend δ α (Pxs ())
-    | cifs_pborc α x ξ => λ _ Φx _, pborc δ α x ξ Φx
-    | cifs_pbor α x ξ => λ _ Φx _, pbor δ α x ξ Φx
-    | cifs_pobor α q ξ => λ _ Φx _, pobor δ α q ξ Φx
-    | cifs_plend α xπ => λ _ Φx _, plend δ α xπ Φx
+    | cifs_inv N => λ _ Pxs _, inv_tok N (Pxs ())
+    | cifs_inv' N => λ _ Pxs _, inv' δ N (Pxs ())
+    | cifs_mutex l => λ _ Pxs _, mutex_tok l (Pxs ())
+    | cifs_borc α => λ _ Pxs _, nborc_tok α (Pxs ())
+    | cifs_bor α => λ _ Pxs _, nbor_tok α (Pxs ())
+    | cifs_obor α q => λ _ Pxs _, nobor_tok α q (Pxs ())
+    | cifs_lend α => λ _ Pxs _, nlend_tok α (Pxs ())
+    | cifs_pborc α x ξ => λ _ Φx _, pborc_tok α x ξ Φx
+    | cifs_pbor α x ξ => λ _ Φx _, pbor_tok α x ξ Φx
+    | cifs_pobor α q ξ => λ _ Φx _, pobor_tok α q ξ Φx
+    | cifs_plend α xπ => λ _ Φx _, plend_tok α xπ Φx
     end%I.
 
   (** [bsem] is non-expansive *)
   #[export] Instance bsem_ne `{!NonExpansive δ} {s} : NonExpansive3 (bsem δ s).
-  Proof. case s; solve_proper. Qed.
+  Proof. case s; try solve_proper; move=> ?*?*?*?*/=; f_equiv; by move: (). Qed.
 
   (** Parameterized semantics of [cif] *)
   #[export] Instance cif_dsem : Dsem (judg Σ) (cif Σ) (iProp Σ) :=
@@ -183,32 +167,15 @@ Section sem.
 
   (** [judg_sem]: Judgment semantics *)
   Definition judg_sem δ (J : judg Σ) := match J with
-    | inl (inl (inl (N, Px))) => inv_acsr ⟦⟧(δ) N ⟦ Px ⟧(δ)
-    | inl (inl (inr (Px, Qx))) => mod_iff (fupd ⊤ ⊤) ⟦ Px ⟧(δ) ⟦ Qx ⟧(δ)
-    | inl (inr (Px, Qx)) => ⟦ Px ⟧(δ) ==∗ ⟦ Qx ⟧(δ)
-    | inr (existT (X, Y)' ((xπ, yπ)', Φx, Ψx)) =>
-        plend_body ⟦ ⟧(δ) xπ Φx ==∗ plend_body ⟦ ⟧(δ) yπ Ψx
+    | (Px, Qx) => □ (⟦ Px ⟧(δ) ∗-∗ ⟦ Qx ⟧(δ))
     end%I.
   Local Instance judg_sem_ne `{!NonExpansive δ} : NonExpansive (judg_sem δ).
-  Proof.
-    move=> ? _ _[_ _[_ _[|]|]|].
-    - move=> [??][??][/=/leibniz_equiv_iff<- ?]. solve_proper.
-    - move=> [??][??][/=??]. solve_proper.
-    - move=> [??][??]/=[??]. solve_proper.
-    - move=> [?[[[??]?]?]][?[[[??]?]?]][/=?]. subst=>/=.
-      move=> [/=[/=/leibniz_equiv_iff[<-<-]?]?]. solve_proper.
-  Qed.
+  Proof. move=> ?[??][??][/=??]. solve_proper. Qed.
   #[export] Instance judg_dsem : Dsem (judg Σ) (judg Σ) (iProp Σ) :=
     DSEM judg_sem.
   Canonical judgJ : judgi (iProp Σ) := Judgi (judg Σ).
-
-  #[export] Instance judg_inv_deriv : InvDeriv cifOF Σ judgJ.
-  Proof. done. Qed.
-  #[export] Instance judg_mutex_deriv : MutexDeriv cifOF Σ judgJ.
-  Proof. done. Qed.
-  #[export] Instance judg_pborrow_deriv : PborrowDeriv nsynty cifOF Σ judgJ.
-  Proof. done. Qed.
 End sem.
+Notation invd := (inv' der).
 
 Section verify.
   Context `{!inv'GS cifOF Σ, !mutexGS cifOF Σ,
@@ -225,49 +192,15 @@ Section verify.
   CoFixpoint ilist' N Φx : loc → cif Σ := ilist'_gen N Φx ilist'.
   Definition ilist N Φx : loc → cif Σ := ilist_gen N Φx ilist'.
 
-  (** Convert the predicate of [ilist] using [mod_acsr] *)
-  Local Lemma inv'_acsr_iff `{!Deriv ih δ} {N Φx Ψx l} :
-    □ (∀ l' δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
-      mod_acsr (fupd ∅ ∅) ⟦ Φx l' ⟧(δ') ⟦ Ψx l' ⟧(δ') ∧
-      mod_acsr (fupd ∅ ∅) ⟦ Ψx l' ⟧(δ') ⟦ Φx l' ⟧(δ')) ⊢
-      inv' δ N (Φx l) ∗-∗ inv' δ N (Ψx l).
-  Proof.
-    iIntros "#big". iSplit; iApply inv'_acsr; iIntros "!>" (????);
-      [iApply bi.and_elim_l|iApply bi.and_elim_r]; by iApply "big".
-  Qed.
-  Local Lemma inv'_ilist'_iff `{!Deriv ih δ} {N Φx Ψx l} :
-    □ (∀ l' δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
-      inv' δ' N (Φx l') ∗-∗ inv' δ' N (Ψx l')) -∗
-      inv' δ N (ilist' N Φx l) ∗-∗ inv' δ N (ilist' N Ψx l).
-  Proof.
-    move: l. apply Deriv_ind=> δ' ??. iIntros "#eqv".
-    iSplit; iApply inv'_acsr; iIntros "!>" (??[IH ?]?);
-      rewrite -(wand_iff_mod_acsr (M:=fupd _ _)) !/⟦ ilist' _ _ _ ⟧(_);
-      (iModIntro; iSplit; iIntros "/=[%[$[ihd ?]]]"; (iSplit; [|by iApply IH]));
-      iApply ("eqv" with "[%] [//] ihd"); by apply Deriv_mono=> ?[??].
-  Qed.
-  Lemma ilist_acsr `{!Deriv ih δ} {N Φx Ψx l} :
-    □ (∀ l' δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
-      mod_acsr (fupd ∅ ∅) ⟦ Φx l' ⟧(δ') ⟦ Ψx l' ⟧(δ') ∧
-      mod_acsr (fupd ∅ ∅) ⟦ Ψx l' ⟧(δ') ⟦ Φx l' ⟧(δ')) -∗
-      ⟦ ilist N Φx l ⟧(δ) ∗-∗ ⟦ ilist N Ψx l ⟧(δ).
-  Proof.
-    iIntros "#eqv". rewrite /⟦ ⟧(δ) /=.
-    iSplit; (iIntros "[ihd itl]"; iSplitL "ihd";
-      [by iApply (inv'_acsr_iff (Φx:=Φx))|]);
-      iApply (inv'_ilist'_iff with "[] itl"); iIntros "!>" (????);
-      [iApply bi.wand_iff_sym|]; by iApply inv'_acsr_iff.
-  Qed.
-
   (** Access the tail of a list *)
   Definition tail_ilist : val := λ: "l", !("l" +ₗ #1).
   Lemma twp_tail_list {N E Φx l} : ↑N ⊆ E →
-    [[{ ⟦ ilist N Φx l ⟧ }]][inv_wsatid]
+    [[{ ⟦ ilist N Φx l ⟧ }]][inv_wsat ⟦⟧]
       tail_ilist #l @ E
     [[{ l', RET #l'; ⟦ ilist N Φx l' ⟧ }]].
   Proof.
     rewrite !/⟦ ilist _ _ _ ⟧ /=. iIntros (? Ψ) "/= #[_ itl] →Ψ". wp_rec.
-    wp_pure. iMod (invd_acc with "itl") as "[ltl cl]"; [done|].
+    wp_pure. iMod (inv_tok_acc (sm:=⟦⟧) with "itl") as "[ltl cl]"; [done|].
     rewrite !/⟦ ilist' _ _ _ ⟧ /=. iDestruct "ltl" as (?) "[↦l' #ltl]".
     wp_load. iModIntro. iMod ("cl" with "[↦l']") as "_".
     { iExists _. by iFrame. } { iModIntro. iApply ("→Ψ" with "ltl"). }
@@ -278,9 +211,9 @@ Section verify.
     if: !"c" ≤ #0 then #() else
       "f" "l";; "c" <- !"c" - #1;; "self" "f" "c" (tail_ilist "l").
   Lemma twp_iter_list {N E Φx c l} {f : val} {n : nat} : ↑N ⊆ E →
-    (∀ l', [[{ invd N (Φx l') }]][inv_wsatid] f #l' @ E
+    (∀ l', [[{ inv_tok N (Φx l') }]][inv_wsat ⟦⟧] f #l' @ E
       [[{ RET #(); True }]]) -∗
-    [[{ c ↦ #n ∗ ⟦ ilist N Φx l ⟧ }]][inv_wsatid]
+    [[{ c ↦ #n ∗ ⟦ ilist N Φx l ⟧ }]][inv_wsat ⟦⟧]
       iter_ilist f #c #l @ E
     [[{ RET #(); c ↦ #0 }]].
   Proof.
@@ -296,9 +229,9 @@ Section verify.
 
   (** Iterate over a list with two threads *)
   Lemma twp_fork_iter_list {N E Φx c' c l} {f : val} {m n : nat} : ↑N ⊆ E →
-    (∀ l', [[{ invd N (Φx l') }]][inv_wsatid] f #l' @ E
+    (∀ l', [[{ inv_tok N (Φx l') }]][inv_wsat ⟦⟧] f #l' @ E
       [[{ RET #(); True }]]) -∗
-    [[{ c' ↦ #m ∗ c ↦ #n ∗ ⟦ ilist N Φx l ⟧ }]][inv_wsatid]
+    [[{ c' ↦ #m ∗ c ↦ #n ∗ ⟦ ilist N Φx l ⟧ }]][inv_wsat ⟦⟧]
       Fork (iter_ilist f #c' #l);; iter_ilist f #c #l @ E
     [[{ RET #(); c ↦ #0 }]].
   Proof.
@@ -318,44 +251,29 @@ Section verify.
   CoFixpoint mlist' Φx : loc → cif Σ := mlist'_gen Φx mlist'.
   Definition mlist Φx : loc → cif Σ := mlist_gen Φx mlist'.
 
-  (** Convert the predicate of [mlist] using [mod_iff] *)
-  Lemma mlist_iff `{!Deriv ih δ} {Φx Ψx l} :
-    □ (∀ l' δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
-      mod_iff (fupd ⊤ ⊤) ⟦ Φx l' ⟧(δ') ⟦ Ψx l' ⟧(δ')) -∗
-      ⟦ mlist Φx l ⟧(δ) ∗-∗ ⟦ mlist Ψx l ⟧(δ).
-  Proof.
-    rewrite !/⟦ mlist _ _ ⟧(_) /=. move: l. apply Deriv_ind=> ???.
-    iIntros "#eqv". iApply mutex_iff. iIntros "!>" (??[IH ?]?).
-    rewrite !/⟦ mlist' _ _ ⟧(_) /=.
-    have ?: Deriv ih δ'. { by apply Deriv_mono=> ?[??]. }
-    iSplit; (iIntros "[hd[%[$ mtl]]]"; iSplitL "hd"; [by iApply "eqv"|]);
-      iModIntro; iRevert "mtl"; [iApply bi.and_elim_l|iApply bi.and_elim_r];
-      by iApply IH.
-  Qed.
-
   (** Try to acquire the lock of [mlist] *)
   Lemma twp_try_acquire_loop_mlist {Φx l} {k : nat} :
-    [[{ ⟦ mlist Φx l ⟧ }]][mutex_wsatid]
+    [[{ ⟦ mlist Φx l ⟧ }]][mutex_wsat ⟦⟧]
       try_acquire_loop_mutex #k #l
     [[{ b, RET #b; if negb b then True else
         ⟦ Φx (l +ₗ 1) ⟧ ∗ ∃ l', (l +ₗ 2) ↦ #l' ∗ ⟦ mlist Φx l' ⟧ }]].
   Proof.
     iIntros (Ψ) "/= #m →Ψ". iApply twp_fupd.
-    wp_apply (twp_try_acquire_loop_mutexd with "m"). iIntros ([|]); last first.
-    { iIntros (?). by iApply "→Ψ". }
+    wp_apply (twp_try_acquire_loop_mutex_tok (sm:=⟦⟧) with "m").
+    iIntros ([|]); last first. { iIntros (?). by iApply "→Ψ". }
     rewrite /⟦⟧ /=. iIntros "[Φx (% & ↦ & #m')]". iApply "→Ψ". by iFrame.
   Qed.
 
   (** Release the lock of [mlist] *)
   Lemma twp_release_mlist {Φx l} :
     [[{ ⟦ mlist Φx l ⟧ ∗ ⟦ Φx (l +ₗ 1) ⟧ ∗
-        ∃ l', (l +ₗ 2) ↦ #l' ∗ ⟦ mlist Φx l' ⟧ }]][mutex_wsatid]
+        ∃ l', (l +ₗ 2) ↦ #l' ∗ ⟦ mlist Φx l' ⟧ }]][mutex_wsat ⟦⟧]
       release_mutex #l
     [[{ RET #(); True }]].
   Proof.
     iIntros (Ψ) "(#m & Φx & %l' & ↦ & #mtl) →Ψ".
-    wp_apply (twp_release_mutexd with "[Φx ↦]"); [|done]. iSplit; [done|].
-    rewrite /⟦⟧ /=. by iFrame.
+    wp_apply (twp_release_mutex_tok (sm:=⟦⟧) with "[Φx ↦]"); [|done].
+    iSplit; [done|]. rewrite /⟦⟧ /=. by iFrame.
   Qed.
 
   (** Iterate over [mlist] *)
@@ -366,9 +284,9 @@ Section verify.
         "c" <- !"c" - #1;; "self" "f" "k" "c" "l'"
       else #false.
   Lemma twp_iter_mlist {Φx c l} {f : val} {k n : nat} :
-    (∀ l', [[{ ⟦ Φx (l' +ₗ 1) ⟧ }]][mutex_wsatid] f #(l' +ₗ 1)
+    (∀ l', [[{ ⟦ Φx (l' +ₗ 1) ⟧ }]][mutex_wsat ⟦⟧] f #(l' +ₗ 1)
       [[{ RET #(); ⟦ Φx (l' +ₗ 1) ⟧ }]]) -∗
-    [[{ c ↦ #n ∗ ⟦ mlist Φx l ⟧ }]][mutex_wsatid]
+    [[{ c ↦ #n ∗ ⟦ mlist Φx l ⟧ }]][mutex_wsat ⟦⟧]
       iter_mlist f #k #c #l
     [[{ b, RET #b; if b then c ↦ #0 else ∃ n', c ↦ #n' }]].
   Proof.
@@ -388,125 +306,176 @@ Section verify.
 
   (** Dereference a nested mutable reference *)
   Lemma bor_bor_deref {α β l Φx q} :
-    [[{ β ⊑□ α ∗ q.[β] ∗ nbord α (∃ l', l ↦ #l' ∗ cif_bor β (Φx l'))%n }]]
-      [pborrow_wsatid bupd]
+    [[{ β ⊑□ α ∗ q.[β] ∗ nbor_tok α (∃ l', l ↦ #l' ∗ cif_bor β (Φx l'))%n }]]
+      [pborrow_wsat bupd ⟦⟧]
       !#l
-    [[{ l', RET #l'; q.[β] ∗ nborcd β (Φx l') }]].
+    [[{ l', RET #l'; q.[β] ∗ nborc_tok β (Φx l') }]].
   Proof.
     iIntros (Ψ) "(#⊑ & [β β'] & b) →Ψ".
     iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
-    iMod (nbord_open (M:=bupd) with "α b") as "[o big]". rewrite /⟦⟧ /=.
-    iDestruct "big" as (l') "[↦ b']". iApply twpw_fupdw_nonval; [done|].
-    wp_load. iModIntro.
-    iMod (nbord_reborrow (M:=bupd) α with "β b'") as "[β[b' →b']]".
-    iMod (nobord_subdiv (M:=bupd) [] with "[] o [] [↦ →b']") as "[α _]"=>/=.
-    { iApply lft_sincl_refl. } { done. }
+    iMod (nbor_tok_open (sm:=⟦⟧) (M:=bupd) with "α b") as "[o big]".
+    rewrite /⟦⟧ /=. iDestruct "big" as (l') "[↦ b']".
+    iApply twpw_fupdw_nonval; [done|]. wp_load. iModIntro.
+    iMod (nbor_tok_reborrow (sm:=⟦⟧) (M:=bupd) α with "β b'") as "[β[b' →b']]".
+    iMod (nobor_tok_subdiv (sm:=⟦⟧) (M:=bupd) [] with "[] o [] [↦ →b']")
+      as "[α _]"=>/=. { iApply lft_sincl_refl. } { done. }
     { iIntros "† _". iModIntro. iExists _. iFrame "↦". by iApply "→b'". }
     iModIntro. iApply "→Ψ". iFrame "β". iDestruct ("→β'" with "α") as "$".
-    iApply nborc_lft; [|done]. iApply lft_sincl_meet_intro; [|done].
+    iApply nborc_tok_lft; [|done]. iApply lft_sincl_meet_intro; [|done].
     iApply lft_sincl_refl.
   Qed.
 
   (** Dereference a nested prophetic mutable reference *)
   Lemma pbor_pbor_deref {X η ξ α β l Φxx q} {x : X} :
     [[{ β ⊑□ α ∗ q.[β] ∗
-        pbord α ((x, ξ)' : _ *'ₛ prvarₛ _) η
+        pbor_tok α ((x, ξ)' : _ *'ₛ prvarₛ _) η
           (λ '(x', ξ')', ∃ l', l ↦ #l' ∗ cif_pbor β x' ξ' (Φxx l'))%n }]]
-      [pborrow_wsatid bupd]
+      [pborrow_wsat bupd ⟦⟧]
       !#l
     [[{ l', RET #l';
         q.[β] ∗ ∃ ξ' : prvar X,
-          ⟨π, π η = (π ξ', ξ)'⟩ ∗ pborcd β x ξ' (Φxx l') }]].
+          ⟨π, π η = (π ξ', ξ)'⟩ ∗ pborc_tok β x ξ' (Φxx l') }]].
   Proof.
     iIntros (Ψ) "(#⊑ & [β β'] & b) →Ψ".
     iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
-    iMod (pbord_open (M:=bupd) with "α b") as "/=[o big]". rewrite /⟦⟧ /=.
-    iDestruct "big" as (l') "[↦ b']". iApply twpw_fupdw_nonval; [done|].
-    wp_load. iModIntro.
-    iMod (pobord_pbord_reborrow (TY:=nsynty) (M:=bupd) (λ _, (_,_)' : _ *'ₛ _)
-      with "o β b' [↦]") as (?) "[α[β[obs c]]]".
+    iMod (pbor_tok_open (sm:=⟦⟧) (M:=bupd) with "α b") as "/=[o big]".
+    rewrite /⟦⟧ /=. iDestruct "big" as (l') "[↦ b']".
+    iApply twpw_fupdw_nonval; [done|]. wp_load. iModIntro.
+    iMod (pobor_pbor_tok_reborrow (TY:=nsynty) (sm:=⟦⟧) (M:=bupd)
+      (λ _, (_,_)' : _ *'ₛ _) with "o β b' [↦]") as (?) "[α[β[obs c]]]".
     { iIntros "/=% _ ? !>". iExists _. iFrame. }
     iModIntro. iApply "→Ψ". iFrame "β". iDestruct ("→β'" with "α") as "$".
-    iExists _. iFrame "obs". iApply pborc_lft; [|done].
+    iExists _. iFrame "obs". iApply pborc_tok_lft; [|done].
     iApply lft_sincl_meet_intro; [done|]. iApply lft_sincl_refl.
   Qed.
 
   (** Load from an immutable shared borrow *)
   Lemma imbor_load {l α q} {n : Z} :
-    [[{ q.[α] ∗ invd nroot (cif_bor α (l ↦ #n)) }]]
-      [inv_wsatid ∗ pborrow_wsatid bupd]
+    [[{ q.[α] ∗ inv_tok nroot (cif_bor α (l ↦ #n)) }]]
+      [inv_wsat ⟦⟧ ∗ pborrow_wsat bupd ⟦⟧]
       !#l
     [[{ RET #n; q.[α] }]].
   Proof.
-    iIntros (Φ) "[α #i] →Φ". iMod (invd_acc with "i") as "[b cl]"; [done|].
-    rewrite /⟦⟧ /=. iMod (nbord_open (M:=bupd) with "α b") as "[o ↦]".
+    iIntros (Φ) "[α #i] →Φ".
+    iMod (inv_tok_acc (sm:=⟦⟧) with "i") as "[b cl]"; [done|]. rewrite /⟦⟧ /=.
+    iMod (nbor_tok_open (sm:=⟦⟧) (M:=bupd) with "α b") as "[o ↦]".
     rewrite /⟦⟧ /=. iDestruct "↦" as "↦". wp_load. iModIntro.
-    iMod (nobord_close (M:=bupd) with "o [$↦ //]") as "[α b]".
-    rewrite nborc_nbor. iMod ("cl" with "b") as "_". iModIntro. by iApply "→Φ".
+    iMod (nobor_tok_close (sm:=⟦⟧) (M:=bupd) with "o [$↦ //]") as "[α b]".
+    rewrite nborc_tok_nbor_tok. iMod ("cl" with "b") as "_". iModIntro.
+    by iApply "→Φ".
   Qed.
 
   (** Shared borrow of a mutex *)
   Definition mutex_bor α l Px :=
-    invd nroot (cif_bor α ((l ↦ #false ∗ cif_bor α Px) ∨ l ↦ #true)).
+    inv_tok nroot (cif_bor α ((l ↦ #false ∗ cif_bor α Px) ∨ l ↦ #true)).
 
   (** Try to acquire a lock from a shared borrow over a mutex *)
   Lemma mutex_bor_try_acquire {α l Px q} :
-    [[{ mutex_bor α l Px ∗ q.[α] }]][inv_wsatid ∗ pborrow_wsatid bupd]
+    [[{ mutex_bor α l Px ∗ q.[α] }]][inv_wsat ⟦⟧ ∗ pborrow_wsat bupd ⟦⟧]
       CAS #l #false #true
-    [[{ b, RET #b; (if b then nbord α Px else True) ∗ q.[α] }]].
+    [[{ b, RET #b; (if b then nbor_tok α Px else True) ∗ q.[α] }]].
   Proof.
     iIntros (Φ) "[#m [α α']] →Φ". wp_bind (CmpXchg _ _ _).
-    iMod (invd_acc with "m") as "[b cl]"; [done|]. rewrite /⟦ cif_bor _ _ ⟧ /=.
-    iMod (nbord_open (M:=bupd) with "α b") as "[o big]". rewrite /⟦_ ∨ _⟧%n /=.
+    iMod (inv_tok_acc (sm:=⟦⟧) with "m") as "[b cl]"; [done|].
+    rewrite /⟦ cif_bor _ _ ⟧ /=.
+    iMod (nbor_tok_open (sm:=⟦⟧) (M:=bupd) with "α b") as "[o big]".
+    rewrite /⟦_ ∨ _⟧%n /=.
     iDestruct "big" as "[[↦ b']|↦]"; [wp_cmpxchg_suc|wp_cmpxchg_fail];
-      iModIntro; iMod (nobord_close (M:=bupd) with "o [$↦ //]") as "[α b]";
-      rewrite nborc_nbor; iMod ("cl" with "b") as "_"; iModIntro; wp_pure;
-      iApply "→Φ"; by iFrame.
+      iModIntro;
+      iMod (nobor_tok_close (sm:=⟦⟧) (M:=bupd) with "o [$↦ //]") as "[α b]";
+      rewrite nborc_tok_nbor_tok; iMod ("cl" with "b") as "_"; iModIntro;
+      wp_pure; iApply "→Φ"; by iFrame.
   Qed.
 
   (** Release a lock from a shared borrow over a mutex *)
   Lemma mutex_bor_release {α l Px q} :
-    [[{ mutex_bor α l Px ∗ nbord α Px ∗ q.[α] }]]
-      [inv_wsatid ∗ pborrow_wsatid bupd]
+    [[{ mutex_bor α l Px ∗ nbor_tok α Px ∗ q.[α] }]]
+      [inv_wsat ⟦⟧ ∗ pborrow_wsat bupd ⟦⟧]
       #l <- #false
     [[{ RET #(); q.[α] }]].
   Proof.
     iIntros (Φ) "(#m & b' & α) →Φ".
-    iMod (invd_acc with "m") as "[b cl]"; [done|]. rewrite /⟦ cif_bor _ _ ⟧ /=.
-    iMod (nbord_open (M:=bupd) with "α b") as "[o big]". rewrite /⟦_ ∨ _⟧%n /=.
+    iMod (inv_tok_acc (sm:=⟦⟧) with "m") as "[b cl]"; [done|].
+    rewrite /⟦ cif_bor _ _ ⟧ /=.
+    iMod (nbor_tok_open (sm:=⟦⟧) (M:=bupd) with "α b") as "[o big]".
+    rewrite /⟦_ ∨ _⟧%n /=.
     iAssert (∃ b, l ↦ #b)%I with "[big]" as (?) "↦".
     { iDestruct "big" as "[[$ _]|$]". }
     wp_store. iModIntro.
-    iMod (nobord_close (M:=bupd) with "o [b' ↦]") as "[α b]".
+    iMod (nobor_tok_close (sm:=⟦⟧) (M:=bupd) with "o [b' ↦]") as "[α b]".
     { iLeft. iFrame. }
-    rewrite nborc_nbor. iMod ("cl" with "b") as "_". iModIntro. by iApply "→Φ".
+    rewrite nborc_tok_nbor_tok. iMod ("cl" with "b") as "_". iModIntro.
+    by iApply "→Φ".
   Qed.
 
   (** Create a shared borrow and a lender of a mutex *)
   Lemma mutex_bor_lend_new {α l Px b q} :
-    l ↦ #b -∗ ⟦ Px ⟧ -∗ q.[α] =[inv_wsatid ∗ pborrow_wsatid bupd]=∗
-      mutex_bor α l Px ∗ nlendd α (∃ b', l ↦ #b' ∗ Px)%n ∗ q.[α].
+    l ↦ #b -∗ ⟦ Px ⟧ -∗ q.[α] =[inv_wsat ⟦⟧ ∗ pborrow_wsat bupd ⟦⟧]=∗
+      mutex_bor α l Px ∗ nlend_tok α (∃ b', l ↦ #b' ∗ Px)%n ∗ q.[α].
   Proof.
     iIntros "↦ Px α".
-    iMod (nborc_nlend_new (M:=bupd) with "[↦ Px]") as "[b $]"; [by iFrame|].
-    iMod (nborcd_open with "α b") as "[o big]". rewrite /⟦⟧ /=.
+    iMod (nborc_nlend_tok_new (M:=bupd) with "[↦ Px]") as "[b $]"; [by iFrame|].
+    iMod (nborc_tok_open (sm:=⟦⟧) with "α b") as "[o big]". rewrite /⟦⟧ /=.
     iDestruct "big" as (b') "[↦ Px]".
-    iMod (nobord_subdiv (M:=bupd) [∃ b', l ↦ #b'; Px]%n
+    iMod (nobor_tok_subdiv (sm:=⟦⟧) (M:=bupd) [∃ b', l ↦ #b'; Px]%n
       with "[] o [↦ Px] []") as "[α[b[b' _]]]"; rewrite /⟦⟧ /=.
     { iApply lft_sincl_refl. } { iSplitL "↦"; iFrame. }
     { by iIntros "_ [[% $][$ _]]". }
-    iMod (nborcd_open with "α b") as "[o ↦]".
-    iMod (nobord_subdiv (M:=bupd)
+    iMod (nborc_tok_open (sm:=⟦⟧) with "α b") as "[o ↦]".
+    iMod (nobor_tok_subdiv (sm:=⟦⟧) (M:=bupd)
       [(l ↦ #false ∗ cif_bor α Px) ∨ l ↦ #true]%n with "[] o [↦ b'] []")
       as "[$[b _]]"; rewrite /⟦⟧ /=. { iApply lft_sincl_refl. }
-    { iSplit; [|done]. rewrite nborc_nbor.
+    { iSplit; [|done]. rewrite nborc_tok_nbor_tok.
       iDestruct "↦" as ([|]) "↦"; [|iLeft]; iFrame. }
     { by iIntros "_ [[[$ _]|$]_]". }
-    rewrite nborc_nbor. by iMod (inv'_alloc with "[b]") as "$".
+    rewrite nborc_tok_nbor_tok. by iMod (inv_tok_alloc with "[b]") as "$".
   Qed.
 
   (** ** On derivability *)
 
+  (** [inv'] is persistent *)
+  Fact inv'_persistent `{!Deriv ih δ} {N Px} : Persistent (inv' δ N Px).
+  Proof. exact _. Qed.
+
+  (** Turn [inv_tok] into [inv'] *)
+  Lemma inv_tok_inv' `{!Deriv ih δ} {N Px} : inv_tok N Px ⊢ inv' δ N Px.
+  Proof.
+    iIntros "$". iApply Deriv_factor. iIntros. iModIntro. iSplit; by iIntros.
+  Qed.
+
+  (** Access [invd] *)
+  Lemma invd_acc {N Px E} : ↑N ⊆ E →
+    invd N Px =[inv_wsat ⟦⟧]{E,E∖↑N}=∗
+      ⟦ Px ⟧ ∗ (⟦ Px ⟧ =[inv_wsat ⟦⟧]{E∖↑N,E}=∗ True).
+  Proof.
+    iIntros (?) "[%Qx[#PQ i]]". iDestruct (der_sound with "PQ") as "{PQ}PQ".
+    iMod (inv_tok_acc (sm:=⟦⟧) with "i") as "[Q cl]"; [done|].
+    iDestruct ("PQ" with "Q") as "$". iIntros "!> P". iApply "cl".
+    by iApply "PQ".
+  Qed.
+
+  (** General rule for semantic alteration *)
+  Lemma inv'_iff `{!Deriv ih δ} {N Px Qx} :
+    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
+      ⟦ Px ⟧(δ') ∗-∗ ⟦ Qx ⟧(δ')) -∗
+      inv' δ N Px -∗ inv' δ N Qx.
+  Proof.
+    iIntros "#iff [%Rx[#? i]]". iExists Rx. iFrame "i".
+    iApply Deriv_map; [|done]. iIntros (????). rewrite /⟦⟧(_) /=.
+    iIntros "#[PR RP] !>". iSplit.
+    - iIntros "Q". iApply "PR". by iApply "iff".
+    - iIntros "R". iApply "iff"; [done..|]. by iApply "RP".
+  Qed.
+  Lemma inv'_iff' `{!Deriv ih δ} {N Px Qx} :
+    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
+      ⟦ Px ⟧(δ') ∗-∗ ⟦ Qx ⟧(δ')) -∗
+      inv' δ N Px ∗-∗ inv' δ N Qx.
+  Proof.
+    iIntros "#iff". iSplit; iApply inv'_iff; [done|]. iIntros "!>" (????).
+    rewrite bi.wand_iff_sym. by iApply "iff".
+  Qed.
+
+  (** Derived semantic alteration *)
   Local Lemma inv'_sep_comm' `{!Deriv ih δ} {N Px Qx} :
     inv' δ N (Px ∗ Qx)%n ⊢ inv' δ N (Qx ∗ Px)%n.
   Proof.
@@ -516,22 +485,20 @@ Section verify.
   Lemma inv'_sep_comm `{!Deriv ih δ} {N Px Qx} :
     inv' δ N (Px ∗ Qx)%n ⊣⊢ inv' δ N (Qx ∗ Px)%n.
   Proof. apply bi.equiv_entails. split; exact inv'_sep_comm'. Qed.
-
   Local Lemma inv'_inv'_sep_comm' `{!Deriv ih δ} {N N' Px Qx} :
-    inv' δ N (cif_inv N' (Px ∗ Qx)) ⊢ inv' δ N (cif_inv N' (Qx ∗ Px)).
+    inv' δ N (cif_inv' N' (Px ∗ Qx)) ⊢ inv' δ N (cif_inv' N' (Qx ∗ Px)).
   Proof.
     iApply inv'_iff. iIntros "!>" (????). rewrite /⟦⟧(_) /= inv'_sep_comm.
     iApply bi.wand_iff_refl.
   Qed.
   Lemma inv'_inv'_sep_comm `{!Deriv ih δ} {N N' Px Qx} :
-    inv' δ N (cif_inv N' (Px ∗ Qx)) ⊣⊢ inv' δ N (cif_inv N' (Qx ∗ Px)).
+    inv' δ N (cif_inv' N' (Px ∗ Qx)) ⊣⊢ inv' δ N (cif_inv' N' (Qx ∗ Px)).
   Proof. apply bi.equiv_entails. split; exact inv'_inv'_sep_comm'. Qed.
-
   Local Lemma inv'_bor_lft' `{!Deriv ih δ} {N α β Px} :
     α ⊑□ β -∗ β ⊑□ α -∗ inv' δ N (cif_bor α Px) -∗ inv' δ N (cif_bor β Px).
   Proof.
     iIntros "#? #?". iApply inv'_iff. iIntros "!>" (????). rewrite /⟦⟧(_) /=.
-    iSplit; by iApply nbor_lft.
+    iSplit; by iApply nbor_tok_lft.
   Qed.
   Lemma inv'_bor_lft `{!Deriv ih δ} {N α β Px} :
     α ⊑□ β -∗ β ⊑□ α -∗ inv' δ N (cif_bor α Px) ∗-∗ inv' δ N (cif_bor β Px).

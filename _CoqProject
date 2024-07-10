@@ -61,3 +61,4 @@ nola/examples/later.v
 nola/examples/minilogic.v
 nola/examples/nsynty.v
 nola/examples/logic.v
+nola/examples/deriv.v

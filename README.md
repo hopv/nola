@@ -104,4 +104,5 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
 - [`examples/`](nola/examples/) : Examples
   + [`minilogic`](nola/examples/minilogic.v) (Minimal logic)
   + [`later`](nola/examples/later.v) (Instantiating with later)
-  + [`logic`](nola/examples/logic.v) (Main logic)
+  + [`logic`](nola/examples/logic.v) (Logic)
+  + [`deriv`](nola/examples/deriv.v) (Logic with derivability)
