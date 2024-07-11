@@ -453,6 +453,26 @@ Section verify.
     iDestruct ("PQ" with "Q") as "$". iIntros "!> P". iApply "cl".
     by iApply "PQ".
   Qed.
+  (** Access using [invd] via view shift *)
+  Lemma invd_acc_vs {N Px E Q R} : ↑N ⊆ E →
+    □ (⟦ Px ⟧ -∗ Q =[inv_wsat ⟦⟧]{E∖↑N}=∗ ⟦ Px ⟧ ∗ R) -∗
+    □ (invd N Px -∗ Q =[inv_wsat ⟦⟧]{E}=∗ R).
+  Proof.
+    iIntros (?) "#vs !> i Q". iMod (invd_acc with "i") as "[Px cl]"; [done|].
+    iMod ("vs" with "Px Q") as "[Px $]". by iApply "cl".
+  Qed.
+  (** Access using [invd] via [twp] *)
+  Lemma invd_acc_twp {N Px E Q Ψ} `{!Atomic (stuckness_to_atomicity s) e} :
+    ↑N ⊆ E → to_val e = None →
+    [[{ ⟦ Px ⟧ ∗ Q }]][inv_wsat ⟦⟧] e @ s; E∖↑N [[{ v, RET v; ⟦ Px ⟧ ∗ Ψ v }]]
+      -∗
+      [[{ invd N Px ∗ Q }]][inv_wsat ⟦⟧] e @ s; E [[{ v, RET v; Ψ v }]].
+  Proof.
+    iIntros (??) "#twp %Φ !> [i Q] →Φ".
+    iMod (invd_acc with "i") as "[Px cl]"; [done..|].
+    iApply ("twp" with "[$Px $Q //]"). iIntros (?) "[Px Ψ]".
+    iMod ("cl" with "Px") as "_". iModIntro. by iApply "→Φ".
+  Qed.
 
   (** General rule for semantic alteration *)
   Lemma inv'_iff `{!Deriv ih δ} {N Px Qx} :

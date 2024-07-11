@@ -1,9 +1,10 @@
 (** * Invariant machinery relaxed with derivability *)
 
 From nola.bi Require Export deriv.
+From nola.bi Require Import wpw.
 From nola.iris Require Export inv.
 From iris.proofmode Require Import proofmode.
-Import iPropAppNotation PsemNotation SemNotation UpdwNotation.
+Import iPropAppNotation PsemNotation SemNotation UpdwNotation WpwNotation.
 
 (** Notation *)
 Notation inv_wsati δ := (inv_wsat ⟦⟧(δ)).
@@ -41,7 +42,7 @@ Notation invd := (inv' der).
 
 Section inv_deriv.
   Context `{!inv'GS FML Σ, !invGS_gen hlc Σ}.
-  Implicit Type Px Qx PQx : FML $oi Σ.
+  Implicit Type Px : FML $oi Σ.
 
   (** Accessor to the invariant body *)
   Definition inv_acsr sm N Pi : iProp Σ :=
@@ -69,8 +70,44 @@ Section inv_deriv.
     iDestruct (der_sound with "accPx") as "accPx". rewrite inv_jacsr_sem.
     by iApply "accPx".
   Qed.
+  (** Access using [inv'] via *)
+  Lemma invd_acc_vs {N Px E Q R} : ↑N ⊆ E →
+    □ (⟦ Px ⟧ -∗ Q =[inv_wsatid]{E∖↑N}=∗ ⟦ Px ⟧ ∗ R) -∗
+    □ (invd N Px -∗ Q =[inv_wsatid]{E}=∗ R).
+  Proof.
+    iIntros (?) "#vs !> i Q". iMod (invd_acc with "i") as "[Px cl]"; [done|].
+    iMod ("vs" with "Px Q") as "[Px $]". by iApply "cl".
+  Qed.
+End inv_deriv.
+Arguments InvDeriv FML Σ {_ _ _} JUDGI {_ _}.
+Hint Mode InvDeriv ! - - - - - - - : typeclass_instances.
 
-  Context `{!Deriv (JUDGI:=JUDGI) ih δ}.
+Section inv_deriv_wp.
+  Context `{!inv'GS FML Σ, !iris'GS_gen hlc Λ Σ,
+    !InvPreDeriv (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
+    !Dsem JUDGI (FML $oi Σ) (iProp Σ), !InvDeriv FML Σ JUDGI}.
+  Implicit Type Px : FML $oi Σ.
+
+  (** Access using [invd] via [twp] *)
+  Lemma invd_acc_twp `{!Atomic (stuckness_to_atomicity s) e} {N Px E Q Ψ} :
+    ↑N ⊆ E → to_val e = None →
+    [[{ ⟦ Px ⟧ ∗ Q }]][inv_wsatid] e @ s; E∖↑N [[{ v, RET v; ⟦ Px ⟧ ∗ Ψ v }]]
+      -∗
+      [[{ invd N Px ∗ Q }]][inv_wsatid] e @ s; E [[{ v, RET v; Ψ v }]].
+  Proof.
+    iIntros (??) "#twp %Φ !> [i Q] →Φ".
+    iMod (invd_acc with "i") as "[Px cl]"; [done..|].
+    iApply ("twp" with "[$Px $Q //]"). iIntros (?) "[Px Ψ]".
+    iMod ("cl" with "Px") as "_". iModIntro. by iApply "→Φ". Unshelve.
+  Qed.
+End inv_deriv_wp.
+
+Section inv_deriv.
+  Context `{!inv'GS FML Σ, !invGS_gen hlc Σ,
+    !InvPreDeriv (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
+    !Dsem JUDGI (FML $oi Σ) (iProp Σ), !InvDeriv FML Σ JUDGI,
+    !Deriv (JUDGI:=JUDGI) ih δ}.
+  Implicit Type Px Qx PQx : FML $oi Σ.
 
   (** Turn [inv_acsr] into [inv'] *)
   Lemma inv_acsr_inv' {N Px} :
@@ -152,5 +189,3 @@ Section inv_deriv.
     iMod "cl" as "_". iMod ("Qx→" with "Qx") as "_". iApply ("Px→" with "Px").
   Qed.
 End inv_deriv.
-Arguments InvDeriv FML Σ {_ _ _} JUDGI {_ _}.
-Hint Mode InvDeriv ! - - - - - - - : typeclass_instances.

@@ -1,12 +1,13 @@
 (** * Nola later-free invariant *)
 
 From nola.bi Require Export updw.
+From nola.bi Require Import wpw.
 From nola.iris Require Export ofe.
 From nola.iris Require Import sinv.
 From iris.base_logic.lib Require Export wsat invariants.
 From iris.algebra Require Import gset.
 From iris.proofmode Require Import proofmode.
-Import iPropAppNotation UpdwNotation.
+Import iPropAppNotation UpdwNotation WpwNotation.
 
 Implicit Type (FML : oFunctor) (i : positive) (N : namespace).
 
@@ -152,7 +153,34 @@ Section inv.
     iMod ("cl" with "i") as "_". iModIntro. iSplit; [|done]. iApply "→W".
     iLeft. iFrame.
   Qed.
+  (** Access using [inv_tok] via view shift *)
+  Lemma inv_tok_acc_vs {N Px E Q R} : ↑N ⊆ E →
+    □ (sm Px -∗ Q =[inv_wsat sm]{E∖↑N}=∗ sm Px ∗ R) -∗
+    □ (inv_tok N Px -∗ Q =[inv_wsat sm]{E}=∗ R).
+  Proof.
+    iIntros (?) "#vs !> i Q". iMod (inv_tok_acc with "i") as "[Px cl]"; [done|].
+    iMod ("vs" with "Px Q") as "[Px $]". by iApply "cl".
+  Qed.
 End inv.
+
+Section inv_wp.
+  Context `{!inv'GS FML Σ, !iris'GS_gen hlc Λ Σ}.
+  Implicit Type (sm : FML $oi Σ → iProp Σ) (Px : FML $oi Σ).
+  Context `{!NonExpansive sm}.
+
+  (** Access using [inv_tok] via [twp] *)
+  Lemma inv_tok_acc_twp `{!Atomic (stuckness_to_atomicity s) e} {N Px E Q Ψ} :
+    ↑N ⊆ E → to_val e = None →
+    [[{ sm Px ∗ Q }]][inv_wsat sm] e @ s; E∖↑N [[{ v, RET v; sm Px ∗ Ψ v }]]
+      -∗
+      [[{ inv_tok N Px ∗ Q }]][inv_wsat sm] e @ s; E [[{ v, RET v; Ψ v }]].
+  Proof.
+    iIntros (??) "#twp %Φ !> [i Q] →Φ".
+    iMod (inv_tok_acc with "i") as "[Px cl]"; [done..|].
+    iApply ("twp" with "[$Px $Q //]"). iIntros (?) "[Px Ψ]".
+    iMod ("cl" with "Px") as "_". iModIntro. by iApply "→Φ".
+  Qed.
+End inv_wp.
 
 (** Allocate [inv_wsat] *)
 Lemma inv_wsat_alloc `{!inv'GpreS FML Σ, !invGS_gen hlc Σ} :
