@@ -8,8 +8,8 @@ From iris.bi Require Import fixpoint.
 From iris.proofmode Require Import proofmode.
 Import UpdwNotation.
 
-(** ** [irisGS'_gen]: Language ghost state for a custom world satisfaction *)
-Class irisGS'_gen (hlc : has_lc) (Λ : language) Σ := IrisG' {
+(** ** [iris'GS_gen]: Language ghost state for a custom world satisfaction *)
+Class iris'GS_gen (hlc : has_lc) (Λ : language) Σ := Iris'G {
   iris'_invGS :: invGS_gen hlc Σ;
   state_interp' : state Λ → nat → list (observation Λ) → nat → iProp Σ;
   fork_post' : val Λ → iProp Σ;
@@ -17,10 +17,10 @@ Class irisGS'_gen (hlc : has_lc) (Λ : language) Σ := IrisG' {
   state_interp'_mono σ ns κs nt:
     state_interp' σ ns κs nt ⊢ |={∅}=> state_interp' σ (S ns) κs nt
 }.
-Arguments IrisG' {_ _ _}.
+Arguments Iris'G {_ _ _}.
 
-(** [irisGS_gen] made from [irisGS'_gen] and an extra world satisfaction *)
-Program Definition IrisW `{!irisGS'_gen hlc Λ Σ} (W : iProp Σ)
+(** [irisGS_gen] made from [iris'GS_gen] and an extra world satisfaction *)
+Program Definition IrisW `{!iris'GS_gen hlc Λ Σ} (W : iProp Σ)
   : irisGS_gen hlc Λ Σ := {|
   iris_invGS := iris'_invGS;
   state_interp σ ns ks nt := (W ∗ state_interp' σ ns ks nt)%I;
@@ -258,7 +258,7 @@ Import WpwNotation.
 
 (** ** Lemmas for [wpw]/[twpw] *)
 Section wpw.
-  Context `{!irisGS'_gen hlc Λ Σ}.
+  Context `{!iris'GS_gen hlc Λ Σ}.
 
   (** [wpw] is non-expansive over the world satisfaction *)
   #[export] Instance wpw_ne {n} :
@@ -521,7 +521,7 @@ Lemma wpw_strong_adequacy_gen hlc Σ Λ `{!invGpreS Σ} s es σ1 n κs t2 σ2 φ
   num_laters_per_step :
   (∀ `{!invGS_gen hlc Σ}, ⊢ |={⊤}=>
       ∃ state_interp Φs fork_post state_interp_mono,
-      let _ : irisGS'_gen hlc Λ Σ := IrisG' _
+      let _ : iris'GS_gen hlc Λ Σ := Iris'G _
         state_interp fork_post num_laters_per_step state_interp_mono in
       ∃ W : iProp Σ,
       W ∗ state_interp σ1 0 κs 0 ∗
@@ -544,7 +544,7 @@ Qed.
 Theorem twpw_total Σ Λ `{!invGpreS Σ} s e σ Φ n :
   (∀ `{!invGS_gen HasNoLc Σ}, ⊢ |={⊤}=>
     ∃ state_interp num_laters_per_step fork_post state_interp_mono,
-    let _ : irisGS'_gen HasNoLc Λ Σ := IrisG' _
+    let _ : iris'GS_gen HasNoLc Λ Σ := Iris'G _
       state_interp fork_post num_laters_per_step state_interp_mono in
     ∃ W : iProp Σ, W ∗ state_interp σ n [] 0 ∗ WP[W] e @ s; ⊤ [{ Φ }]) →
   sn erased_step ([e], σ).
