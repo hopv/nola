@@ -1,6 +1,8 @@
 (** * Nola later-free invariant *)
 
-From nola.iris Require Export sinv.
+From nola.bi Require Export updw.
+From nola.iris Require Export ofe.
+From nola.iris Require Import sinv.
 From iris.base_logic.lib Require Export wsat invariants.
 From iris.algebra Require Import gset.
 From iris.proofmode Require Import proofmode.
