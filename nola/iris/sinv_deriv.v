@@ -24,14 +24,14 @@ Section sinv_deriv.
   Implicit Type δ : JUDG → iProp Σ.
 
   (** [sinv]: Relaxed simple invariant *)
-  Local Definition sinv_def δ (P : FML $oi Σ) : iProp Σ :=
-    ∃ Q, □ δ (sinv_jacsr Q P) ∗ sinv_tok Q.
+  Local Definition sinv_def δ (Px : FML $oi Σ) : iProp Σ :=
+    ∃ Qx, □ δ (sinv_jacsr Qx Px) ∗ sinv_tok Qx.
   Local Lemma sinv_aux : seal sinv_def. Proof. by eexists. Qed.
   Definition sinv := sinv_aux.(unseal).
   Local Lemma sinv_unseal : sinv = sinv_def. Proof. exact: seal_eq. Qed.
 
   (** [sinv] is persistent *)
-  #[export] Instance sinv_persistent {δ P} : Persistent (sinv δ P).
+  #[export] Instance sinv_persistent {δ Px} : Persistent (sinv δ Px).
   Proof. rewrite sinv_unseal. exact _. Qed.
 
   (** [sinv] is non-expansive *)
@@ -43,7 +43,7 @@ Notation sinvd := (sinv der).
 Section sinv_deriv.
   Context `{!SinvPreDeriv (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
     !Dsem JUDGI (FML $oi Σ) (iProp Σ)}.
-  Implicit Type (δ : JUDGI → iProp Σ) (P Q : FML $oi Σ).
+  Implicit Type (δ : JUDGI → iProp Σ) (Px Qx : FML $oi Σ).
 
   (** Derivability data for [sinv] *)
   Class SinvDeriv := SINV_DERIV {
@@ -52,42 +52,42 @@ Section sinv_deriv.
     (** [sinv_mod] is [GenUpd] *)
     sinv_mod_gen_upd :: GenUpd sinv_mod;
     (** Interpreting [sinv_jacsr] *)
-    sinv_jacsr_sem {δ P Q} :
-      ⟦ sinv_jacsr P Q ⟧(δ) ⊣⊢ mod_acsr sinv_mod ⟦ P ⟧(δ) ⟦ Q ⟧(δ);
+    sinv_jacsr_sem {δ Px Qx} :
+      ⟦ sinv_jacsr Px Qx ⟧(δ) ⊣⊢ mod_acsr sinv_mod ⟦ Px ⟧(δ) ⟦ Qx ⟧(δ);
   }.
 
   Context `{!sinvGS FML Σ, !SinvDeriv}.
 
   (** Access [sinv] *)
-  Lemma sinv_acc {P} :
-    sinvd P -∗ sinv_wsatid -∗ sinv_mod
-      (⟦ P ⟧ ∗ (⟦ P ⟧ -∗ sinv_mod (sinv_wsatid))).
+  Lemma sinv_acc {Px} :
+    sinvd Px -∗ sinv_wsatid -∗ sinv_mod
+      (⟦ Px ⟧ ∗ (⟦ Px ⟧ -∗ sinv_mod (sinv_wsatid))).
   Proof.
-    rewrite sinv_unseal. iIntros "[%Q[QPQ s]] W".
+    rewrite sinv_unseal. iIntros "[%Qx[QPQ s]] W".
     iDestruct (der_sound with "QPQ") as "QPQ". rewrite sinv_jacsr_sem.
-    iDestruct (sinv_tok_acc with "s W") as "[Q cl]".
-    iMod ("QPQ" with "Q") as "[$ PQ]". iIntros "!> P".
-    iMod ("PQ" with "P") as "Q". iModIntro. by iApply "cl".
+    iDestruct (sinv_tok_acc with "s W") as "[Qx cl]".
+    iMod ("QPQ" with "Qx") as "[$ PQx]". iIntros "!> Px".
+    iMod ("PQx" with "Px") as "Qx". iModIntro. by iApply "cl".
   Qed.
 
   Context `{!Deriv (JUDGI:=JUDGI) ih δ}.
 
   (** Turn [sinv_tok] into [sinv] *)
-  Lemma sinv_tok_sinv {P} : sinv_tok P ⊢ sinv δ P.
+  Lemma sinv_tok_sinv {Px} : sinv_tok Px ⊢ sinv δ Px.
   Proof.
     rewrite sinv_unseal. iIntros "$ !>". iApply Deriv_factor. iIntros (? _ _ _).
     rewrite sinv_jacsr_sem. iApply (mod_acsr_refl (M:=sinv_mod)).
   Qed.
 
   (** Allocate [sinv] *)
-  Lemma sinv_alloc P : sinv_wsati δ ==∗ sinv δ P ∗ (⟦ P ⟧(δ) -∗ sinv_wsati δ).
+  Lemma sinv_alloc Px : sinv_wsati δ ==∗ sinv δ Px ∗ (⟦ Px ⟧(δ) -∗ sinv_wsati δ).
   Proof. rewrite -sinv_tok_sinv. exact: sinv_tok_alloc. Qed.
 
   (** Convert [sinv] with [mod_acsr] *)
-  Lemma sinv_acsr {P Q} :
+  Lemma sinv_acsr {Px Qx} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      mod_acsr sinv_mod ⟦ P ⟧(δ') ⟦ Q ⟧(δ')) -∗
-      sinv δ P -∗ sinv δ Q.
+      mod_acsr sinv_mod ⟦ Px ⟧(δ') ⟦ Qx ⟧(δ')) -∗
+      sinv δ Px -∗ sinv δ Qx.
   Proof.
     rewrite sinv_unseal. iIntros "#PQP [%R[#RPR $]] !>". iApply Deriv_factor.
     iIntros (??? to). rewrite sinv_jacsr_sem.
@@ -96,14 +96,15 @@ Section sinv_deriv.
   Qed.
 
   (** Split [sinv] over [∗] *)
-  Local Lemma sinv_sep' {PQ P Q} :
-    (∀ δ', ⟦ PQ ⟧(δ') ≡ (⟦ P ⟧(δ') ∗ ⟦ Q ⟧(δ'))%I) → sinv δ PQ ⊢ sinv δ P.
+  Local Lemma sinv_sep' {PQx Px Qx} :
+    (∀ δ', ⟦ PQx ⟧(δ') ≡ (⟦ Px ⟧(δ') ∗ ⟦ Qx ⟧(δ'))%I) → sinv δ PQx ⊢ sinv δ Px.
   Proof.
     move=> eq. iApply sinv_acsr. iIntros "!>" (????). rewrite eq.
     iApply (mod_acsr_sep_l (M:=sinv_mod)).
   Qed.
-  Lemma sinv_sep {PQ P Q} : (∀ δ', ⟦ PQ ⟧(δ') ≡ (⟦ P ⟧(δ') ∗ ⟦ Q ⟧(δ'))%I) →
-    sinv δ PQ ⊢ sinv δ P ∗ sinv δ Q.
+  Lemma sinv_sep {PQx Px Qx} :
+    (∀ δ', ⟦ PQx ⟧(δ') ≡ (⟦ Px ⟧(δ') ∗ ⟦ Qx ⟧(δ'))%I) →
+    sinv δ PQx ⊢ sinv δ Px ∗ sinv δ Qx.
   Proof.
     iIntros (eq) "#s". iSplit; [by iApply sinv_sep'|].
     iApply (sinv_sep' with "s"). iIntros (?). by rewrite eq comm.

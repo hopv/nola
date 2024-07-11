@@ -25,25 +25,25 @@ Proof. solve_inG. Qed.
 
 Section sinv.
   Context `{!sinvGS FML Σ}.
-  Implicit Type P : FML $oi Σ.
+  Implicit Type Px : FML $oi Σ.
 
   (** Simple invariant token *)
-  Local Definition sinv_itok_def i P : iProp Σ :=
-    own sinv_name (gmap_view_frag i DfracDiscarded (to_agree P)).
+  Local Definition sinv_itok_def i Px : iProp Σ :=
+    own sinv_name (gmap_view_frag i DfracDiscarded (to_agree Px)).
   Local Lemma sinv_itok_aux : seal sinv_itok_def. Proof. by eexists. Qed.
   Definition sinv_itok := sinv_itok_aux.(unseal).
   Local Lemma sinv_itok_unseal : sinv_itok = sinv_itok_def.
   Proof. exact: seal_eq. Qed.
 
   (** Simple invariant token with the index hidden *)
-  Definition sinv_tok P : iProp Σ := ∃ i, sinv_itok i P.
+  Definition sinv_tok Px : iProp Σ := ∃ i, sinv_itok i Px.
 
   (** Authoritative token *)
   Local Definition sinv_auth_tok M :=
     own sinv_name (gmap_view_auth (DfracOwn 1) (to_agree <$> M)).
   (** World satisfaction *)
   Definition sinv_iwsat_def sm : iProp Σ :=
-    ∃ M, sinv_auth_tok M ∗ [∗ map] i ↦ P ∈ M, sm i P.
+    ∃ M, sinv_auth_tok M ∗ [∗ map] i ↦ Px ∈ M, sm i Px.
   Local Lemma sinv_iwsat_aux : seal sinv_iwsat_def. Proof. by eexists. Qed.
   Definition sinv_iwsat := sinv_iwsat_aux.(unseal).
   Local Lemma sinv_iwsat_unseal : sinv_iwsat = sinv_iwsat_def.
@@ -55,7 +55,7 @@ Notation sinv_wsat sm := (sinv_wsat' _ sm).
 
 Section sinv.
   Context `{!sinvGS FML Σ}.
-  Implicit Type P : FML $oi Σ.
+  Implicit Type Px : FML $oi Σ.
   Implicit Type (i : positive) (I : gset positive).
 
   (** [sinv_itok] and [sinv_tok] are non-expansive *)
@@ -64,15 +64,15 @@ Section sinv.
   #[export] Instance sinv_tok_ne : NonExpansive sinv_tok.
   Proof. solve_proper. Qed.
   (** [sinv_itok] and [sinv_tok] are persistent *)
-  #[export] Instance sinv_itok_persistent {i P} : Persistent (sinv_itok i P).
+  #[export] Instance sinv_itok_persistent {i Px} : Persistent (sinv_itok i Px).
   Proof. rewrite sinv_itok_unseal. exact _. Qed.
-  Fact sinv_tok_persistent {P} : Persistent (sinv_tok P).
+  Fact sinv_tok_persistent {Px} : Persistent (sinv_tok Px).
   Proof. exact _. Qed.
   (** [sinv_itok] and [sinv_tok] are timeless for discrete formulas *)
-  #[export] Instance sinv_itok_timeless `{!Discrete P} {i} :
-    Timeless (sinv_itok i P).
+  #[export] Instance sinv_itok_timeless `{!Discrete Px} {i} :
+    Timeless (sinv_itok i Px).
   Proof. rewrite sinv_itok_unseal /sinv_itok_def /gmap_view_frag. exact _. Qed.
-  Fact sinv_tok_timeless `{!Discrete P} : Timeless (sinv_tok P).
+  Fact sinv_tok_timeless `{!Discrete Px} : Timeless (sinv_tok Px).
   Proof. exact _. Qed.
 
   (** [sinv_iwsat] is non-expansive *)
@@ -87,30 +87,30 @@ Section sinv.
   (** [sinv_iwsat] is timeless if [sm] is always timeless
     and the underlying ofe is discrete *)
   #[export] Instance sinv_iwsat_timeless
-    `{!OfeDiscrete (FML $oi Σ), !∀ i P, Timeless (sm i P)} :
+    `{!OfeDiscrete (FML $oi Σ), !∀ i Px, Timeless (sm i Px)} :
     Timeless (sinv_iwsat sm).
   Proof. rewrite sinv_iwsat_unseal. exact _. Qed.
 
   (** Lemma for [sinv_itok_alloc] *)
-  Local Lemma sinv_auth_tok_alloc {M i P} : i ∉ dom M →
-    sinv_auth_tok M ==∗ sinv_auth_tok (<[i:=P]> M) ∗ sinv_itok i P.
+  Local Lemma sinv_auth_tok_alloc {M i Px} : i ∉ dom M →
+    sinv_auth_tok M ==∗ sinv_auth_tok (<[i:=Px]> M) ∗ sinv_itok i Px.
   Proof.
     move=> /not_elem_of_dom eq. iIntros "●". rewrite sinv_itok_unseal -own_op.
     iApply own_update; [|done]. rewrite fmap_insert.
     apply gmap_view_alloc; [|done..]. by rewrite lookup_fmap eq.
   Qed.
   (** Allocate [sinv_itok] *)
-  Lemma sinv_itok_alloc {sm} P :
+  Lemma sinv_itok_alloc {sm} Px :
     sinv_iwsat sm -∗ ∃ I, ∀ i, ⌜i ∉ I⌝ ==∗
-      sinv_itok i P ∗ (sm i P -∗ sinv_iwsat sm).
+      sinv_itok i Px ∗ (sm i Px -∗ sinv_iwsat sm).
   Proof.
     rewrite sinv_iwsat_unseal. iIntros "[%M[● M]]". iExists (dom M).
     iIntros (i ?). iMod (sinv_auth_tok_alloc with "●") as "[● #i]"; [done|].
-    iModIntro. iSplitR; [by rewrite sinv_itok_unseal|]. iIntros "P". iExists _.
-    iFrame "●". iApply (big_sepM_insert_2 with "P M").
+    iModIntro. iSplitR; [by rewrite sinv_itok_unseal|]. iIntros "Px". iExists _.
+    iFrame "●". iApply (big_sepM_insert_2 with "Px M").
   Qed.
-  Lemma sinv_tok_alloc {sm} P :
-    sinv_wsat sm ==∗ sinv_tok P ∗ (sm P -∗ sinv_wsat sm).
+  Lemma sinv_tok_alloc {sm} Px :
+    sinv_wsat sm ==∗ sinv_tok Px ∗ (sm Px -∗ sinv_wsat sm).
   Proof.
     iIntros "W". iDestruct (sinv_itok_alloc with "W") as (?) "big".
     iMod ("big" with "[]") as "[? $]". { iPureIntro. apply is_fresh. }
@@ -118,27 +118,27 @@ Section sinv.
   Qed.
 
   (** Lemma for [sinv_tok_acc'] *)
-  Local Lemma sinv_auth_tok_lookup {M i P} :
-    sinv_auth_tok M -∗ sinv_itok i P -∗ ∃ P', ⌜M !! i = Some P'⌝ ∗ P ≡ P'.
+  Local Lemma sinv_auth_tok_lookup {M i Px} :
+    sinv_auth_tok M -∗ sinv_itok i Px -∗ ∃ Px', ⌜M !! i = Some Px'⌝ ∗ Px ≡ Px'.
   Proof.
     rewrite sinv_itok_unseal. iIntros "● i".
     iDestruct (own_valid_2 with "● i") as "✓".
     rewrite gmap_view_both_validI_total. iDestruct "✓" as (? _ _ eq) "[_ in]".
-    move: eq. rewrite lookup_fmap. case: (M !! i); [|done]=> P' [<-].
-    iExists P'. iSplit; [done|]. by rewrite to_agree_includedI.
+    move: eq. rewrite lookup_fmap. case: (M !! i); [|done]=> Px' [<-].
+    iExists Px'. iSplit; [done|]. by rewrite to_agree_includedI.
   Qed.
   (** Access via [sinv_tok] *)
-  Lemma sinv_tok_acc' `{!NonExpansive (sm i)} {P} :
-    sinv_itok i P -∗ sinv_iwsat sm -∗ sm i P ∗ (sm i P -∗ sinv_iwsat sm).
+  Lemma sinv_tok_acc' `{!NonExpansive (sm i)} {Px} :
+    sinv_itok i Px -∗ sinv_iwsat sm -∗ sm i Px ∗ (sm i Px -∗ sinv_iwsat sm).
   Proof.
     rewrite sinv_iwsat_unseal. iIntros "i [%M[● M]]".
-    iDestruct (sinv_auth_tok_lookup with "● i") as (P' eq) "#≡".
-    iDestruct (big_sepM_lookup_acc with "M") as "[P' →M]"; [done|].
-    iRewrite "≡". iFrame "P'". iIntros "P'". iExists _. iFrame "●".
+    iDestruct (sinv_auth_tok_lookup with "● i") as (Px' eq) "#≡".
+    iDestruct (big_sepM_lookup_acc with "M") as "[Px' →M]"; [done|].
+    iRewrite "≡". iFrame "Px'". iIntros "Px'". iExists _. iFrame "●".
     by iApply "→M".
   Qed.
-  Lemma sinv_tok_acc `{!NonExpansive sm} {P} :
-    sinv_tok P -∗ sinv_wsat sm -∗ sm P ∗ (sm P -∗ sinv_wsat sm).
+  Lemma sinv_tok_acc `{!NonExpansive sm} {Px} :
+    sinv_tok Px -∗ sinv_wsat sm -∗ sm Px ∗ (sm Px -∗ sinv_wsat sm).
   Proof. iIntros "[%i i]". iApply (sinv_tok_acc' with "i"). Qed.
 End sinv.
 

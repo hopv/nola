@@ -21,11 +21,11 @@ Proof. solve_inG. Qed.
 
 Section inv.
   Context `{!inv'GS FML Σ, !invGS_gen hlc Σ}.
-  Implicit Type (sm : FML $oi Σ → iProp Σ) (P : FML $oi Σ).
+  Implicit Type (sm : FML $oi Σ → iProp Σ) (Px : FML $oi Σ).
 
   (** [inv_tok]: Invariant token *)
-  Local Definition inv_tok_def N P : iProp Σ :=
-    ∃ i, ⌜i ∈ (↑N:coPset)⌝ ∗ sinv_itok i P.
+  Local Definition inv_tok_def N Px : iProp Σ :=
+    ∃ i, ⌜i ∈ (↑N:coPset)⌝ ∗ sinv_itok i Px.
   Local Definition inv_tok_aux : seal inv_tok_def. Proof. by eexists. Qed.
   Definition inv_tok := inv_tok_aux.(unseal).
   Local Lemma inv_tok_unseal : inv_tok = inv_tok_def.
@@ -35,16 +35,16 @@ Section inv.
   #[export] Instance inv_tok_ne N : NonExpansive (inv_tok N).
   Proof. rewrite inv_tok_unseal. solve_proper. Qed.
   (** [inv_tok] is persistent *)
-  #[export] Instance inv_tok_persistent {N P} : Persistent (inv_tok N P).
+  #[export] Instance inv_tok_persistent {N Px} : Persistent (inv_tok N Px).
   Proof. rewrite inv_tok_unseal. exact _. Qed.
   (** [inv_tok] is timeless for discrete formulas *)
-  #[export] Instance inv_tok_timeless `{!Discrete P} {N} :
-    Timeless (inv_tok N P).
+  #[export] Instance inv_tok_timeless `{!Discrete Px} {N} :
+    Timeless (inv_tok N Px).
   Proof. rewrite inv_tok_unseal. exact _. Qed.
 
   (** Semantics *)
-  Local Definition inv_sem (sm : FML $oi Σ → iProp Σ) i P : iProp Σ :=
-    sm P ∗ ownD {[i]} ∨ ownE {[i]}.
+  Local Definition inv_sem (sm : FML $oi Σ → iProp Σ) i Px : iProp Σ :=
+    sm Px ∗ ownD {[i]} ∨ ownE {[i]}.
 
   (** [inv_sem sm] is non-expansive when [sm] is *)
   Local Instance inv_sem_ne `{!NonExpansive sm} {i} :
@@ -104,32 +104,32 @@ Section inv.
   Qed.
 
   (** Allocate [inv_tok] *)
-  Lemma inv_tok_alloc_rec P N :
-    (inv_tok N P -∗ sm P) =[inv_wsat sm]=∗ inv_tok N P.
+  Lemma inv_tok_alloc_rec Px N :
+    (inv_tok N Px -∗ sm Px) =[inv_wsat sm]=∗ inv_tok N Px.
   Proof.
-    rewrite inv_tok_unseal inv_wsat_unseal. iIntros "→P W".
-    iDestruct (sinv_itok_alloc P with "W") as (I) "big".
+    rewrite inv_tok_unseal inv_wsat_unseal. iIntros "→Px W".
+    iDestruct (sinv_itok_alloc Px with "W") as (I) "big".
     iMod (alloc_ownD I N) as (???) "D". iMod ("big" with "[//]") as "[#i →W]".
     iModIntro. iSplitL; [|iExists _; by iSplit]. iApply "→W". iLeft.
-    iSplitR "D"; [|done]. iApply "→P". iExists _; by iSplit.
+    iSplitR "D"; [|done]. iApply "→Px". iExists _; by iSplit.
   Qed.
-  Lemma inv_tok_alloc P N : sm P =[inv_wsat sm]=∗ inv_tok N P.
+  Lemma inv_tok_alloc Px N : sm Px =[inv_wsat sm]=∗ inv_tok N Px.
   Proof.
-    iIntros "P W". iApply (inv_tok_alloc_rec with "[P] W"). by iIntros.
+    iIntros "Px W". iApply (inv_tok_alloc_rec with "[Px] W"). by iIntros.
   Qed.
 
   (** Allocate [inv_tok] before storing the content *)
-  Lemma inv_tok_alloc_open {E} P N : ↑N ⊆ E →
-    ⊢ |=[inv_wsat sm]{E, E∖↑N}=> inv_tok N P ∗
-      (sm P =[inv_wsat sm]{E∖↑N, E}=∗ True).
+  Lemma inv_tok_alloc_open {E} Px N : ↑N ⊆ E →
+    ⊢ |=[inv_wsat sm]{E, E∖↑N}=> inv_tok N Px ∗
+      (sm Px =[inv_wsat sm]{E∖↑N, E}=∗ True).
   Proof.
     rewrite inv_tok_unseal inv_wsat_unseal=> NE. iIntros "W".
-    iDestruct (sinv_itok_alloc P with "W") as (I) "big".
+    iDestruct (sinv_itok_alloc Px with "W") as (I) "big".
     iMod (alloc_ownD I N) as (?? iN) "D".
     iMod ("big" with "[//]") as "[#sm →W]".
     iMod (fupd_ownE_acc_in iN NE) as "[i cl]".
     iDestruct ("→W" with "[$i]") as "$". iModIntro.
-    iSplit; [iExists _; by iSplit|]. iIntros "P W".
+    iSplit; [iExists _; by iSplit|]. iIntros "Px W".
     iDestruct (sinv_tok_acc' with "sm W") as "[[[_ D']|i] →W]".
     { iDestruct (ownD_singleton_twice with "[$D $D']") as "[]". }
     iMod ("cl" with "i") as "_". iModIntro. iSplit; [|done]. iApply "→W".
@@ -137,16 +137,16 @@ Section inv.
   Qed.
 
   (** Access using [inv_tok] *)
-  Lemma inv_tok_acc {N E P} : ↑N ⊆ E →
-    inv_tok N P =[inv_wsat sm]{E,E∖↑N}=∗
-      sm P ∗ (sm P =[inv_wsat sm]{E∖↑N,E}=∗ True).
+  Lemma inv_tok_acc {N E Px} : ↑N ⊆ E →
+    inv_tok N Px =[inv_wsat sm]{E,E∖↑N}=∗
+      sm Px ∗ (sm Px =[inv_wsat sm]{E∖↑N,E}=∗ True).
   Proof.
     rewrite inv_tok_unseal inv_wsat_unseal=> NE. iIntros "[%i[%iN #sm]] W".
     iMod (fupd_ownE_acc_in iN NE) as "[i cl]".
     iDestruct (sinv_tok_acc' with "sm W") as "[in →W]".
     iDestruct "in" as "[[$ D]|i']"; last first.
     { iDestruct (ownE_singleton_twice with "[$i $i']") as "[]". }
-    iDestruct ("→W" with "[$i]") as "$". iIntros "!> P W".
+    iDestruct ("→W" with "[$i]") as "$". iIntros "!> Px W".
     iDestruct (sinv_tok_acc' with "sm W") as "[[[_ D']|i] →W]".
     { iDestruct (ownD_singleton_twice with "[$D $D']") as "[]". }
     iMod ("cl" with "i") as "_". iModIntro. iSplit; [|done]. iApply "→W".
