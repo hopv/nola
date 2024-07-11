@@ -91,7 +91,7 @@ Proof. solve_inG. Qed.
 
 Section borrow.
   Context `{!borrowGS FML Σ}.
-  Implicit Type (P Q : FML $oi Σ) (Pl Ql : list (FML $oi Σ))
+  Implicit Type (Px Qx : FML $oi Σ) (Pxl Qxl : list (FML $oi Σ))
     (D : depo_stOF FML $oi Σ) (Dm : depo_stmOF FML $oi Σ)
     (B : bor_stOF FML $oi Σ) (Bm : bor_stmOF FML $oi Σ)
     (Pm : lendmOF FML $oi Σ).
@@ -105,8 +105,8 @@ Section borrow.
     It may be a dead lifetime token or a closed borrower
 
     Slightly stronger than [bor_tok] *)
-  Local Definition borc_tok_def α P : iProp Σ :=
-    [†α] ∨ ∃ i j d α', α ⊑□ α' ∗ bor_itok i j d α' (P, Clsd).
+  Local Definition borc_tok_def α Px : iProp Σ :=
+    [†α] ∨ ∃ i j d α', α ⊑□ α' ∗ bor_itok i j d α' (Px, Clsd).
   Local Lemma borc_tok_aux : seal borc_tok_def. Proof. by eexists. Qed.
   Definition borc_tok := borc_tok_aux.(unseal).
   Local Lemma borc_tok_unseal : borc_tok = borc_tok_def.
@@ -115,9 +115,9 @@ Section borrow.
   (** Borrower token
 
     It may be [bor_tok] or a retrieving reborrower *)
-  Local Definition bor_tok_def α P : iProp Σ :=
-    borc_tok α P ∨ ∃ i j d α' β,
-      α ⊑□ α' ∗ [†β] ∗ bor_itok i j d α' (P, Rebor β).
+  Local Definition bor_tok_def α Px : iProp Σ :=
+    borc_tok α Px ∨ ∃ i j d α' β,
+      α ⊑□ α' ∗ [†β] ∗ bor_itok i j d α' (Px, Rebor β).
   Local Lemma bor_tok_aux : seal bor_tok_def. Proof. by eexists. Qed.
   Definition bor_tok := bor_tok_aux.(unseal).
   Local Lemma bor_tok_unseal : bor_tok = bor_tok_def.
@@ -126,21 +126,21 @@ Section borrow.
   (** Open borrower token
 
     It keeps a live lifetime token [(r/2).[α']] at hand *)
-  Local Definition obor_tok_def α q P : iProp Σ :=
+  Local Definition obor_tok_def α q Px : iProp Σ :=
     ∃ α' r i j d, α ⊑□ α' ∗ (r.[α'] -∗ q.[α]) ∗
-      (r/2).[α'] ∗ bor_itok i j d α' (P, Open (r/2)).
+      (r/2).[α'] ∗ bor_itok i j d α' (Px, Open (r/2)).
   Local Lemma obor_tok_aux : seal obor_tok_def. Proof. by eexists. Qed.
   Definition obor_tok := obor_tok_aux.(unseal).
   Local Lemma obor_tok_unseal : obor_tok = obor_tok_def.
   Proof. exact: seal_eq. Qed.
 
   (** Lender token *)
-  Local Definition lend_itok i k d α P : iProp Σ :=
-    own borrow_name (◯ {[i := (to_agree (d, α)', ε, {[k := Excl P]})]}).
-  Local Definition lend_dtok d α P : iProp Σ :=
-    ∃ i k, lend_itok i k d α P.
-  Local Definition lend_tok_def α P : iProp Σ :=
-    ∃ α', α' ⊑□ α ∗ ∃ d, lend_dtok d α' P.
+  Local Definition lend_itok i k d α Px : iProp Σ :=
+    own borrow_name (◯ {[i := (to_agree (d, α)', ε, {[k := Excl Px]})]}).
+  Local Definition lend_dtok d α Px : iProp Σ :=
+    ∃ i k, lend_itok i k d α Px.
+  Local Definition lend_tok_def α Px : iProp Σ :=
+    ∃ α', α' ⊑□ α ∗ ∃ d, lend_dtok d α' Px.
   Local Lemma lend_tok_aux : seal lend_tok_def. Proof. by eexists. Qed.
   Definition lend_tok := lend_tok_aux.(unseal).
   Local Lemma lend_tok_unseal : lend_tok = lend_tok_def.
@@ -169,53 +169,53 @@ Section borrow.
   Proof. rewrite lend_tok_unseal. solve_proper. Qed.
 
   (** Borrower and lender tokens are timeless for discrete formulas *)
-  #[export] Instance borc_tok_timeless `{!Discrete P} {α} :
-    Timeless (borc_tok α P).
+  #[export] Instance borc_tok_timeless `{!Discrete Px} {α} :
+    Timeless (borc_tok α Px).
   Proof. rewrite borc_tok_unseal. exact _. Qed.
-  #[export] Instance bor_tok_timeless `{!Discrete P} {α} :
-    Timeless (bor_tok α P).
+  #[export] Instance bor_tok_timeless `{!Discrete Px} {α} :
+    Timeless (bor_tok α Px).
   Proof. rewrite bor_tok_unseal. exact _. Qed.
-  #[export] Instance obor_tok_timeless `{!Discrete P} {α q} :
-    Timeless (obor_tok α q P).
+  #[export] Instance obor_tok_timeless `{!Discrete Px} {α q} :
+    Timeless (obor_tok α q Px).
   Proof. rewrite obor_tok_unseal. exact _. Qed.
-  #[export] Instance lend_tok_timeless `{!Discrete P} {α} :
-    Timeless (lend_tok α P).
+  #[export] Instance lend_tok_timeless `{!Discrete Px} {α} :
+    Timeless (lend_tok α Px).
   Proof. rewrite lend_tok_unseal. exact _. Qed.
 
   (** Turn [borc_tok] to [bor_tok] *)
-  Lemma borc_tok_bor_tok {α P} : borc_tok α P ⊢ bor_tok α P.
+  Lemma borc_tok_bor_tok {α Px} : borc_tok α Px ⊢ bor_tok α Px.
   Proof. rewrite bor_tok_unseal. iIntros. by iLeft. Qed.
 
   (** Fake a borrower token from the dead lifetime token *)
-  Lemma borc_tok_fake {α} P : [†α] ⊢ borc_tok α P.
+  Lemma borc_tok_fake {α} Px : [†α] ⊢ borc_tok α Px.
   Proof. rewrite borc_tok_unseal. iIntros. by iLeft. Qed.
-  Lemma bor_tok_fake {α} P : [†α] ⊢ bor_tok α P.
+  Lemma bor_tok_fake {α} Px : [†α] ⊢ bor_tok α Px.
   Proof. by rewrite borc_tok_fake borc_tok_bor_tok. Qed.
 
   (** Modify the lifetime of borrower and lender tokens *)
-  Lemma borc_tok_lft {α β P} : β ⊑□ α -∗ borc_tok α P -∗ borc_tok β P.
+  Lemma borc_tok_lft {α β Px} : β ⊑□ α -∗ borc_tok α Px -∗ borc_tok β Px.
   Proof.
     rewrite borc_tok_unseal. iIntros "#? [?|c]".
     { iLeft. by iApply lft_sincl_dead. }
     iDestruct "c" as (????) "[#? c]". iRight. iExists _, _, _, _. iFrame "c".
     by iApply lft_sincl_trans.
   Qed.
-  Lemma bor_tok_lft {α β P} : β ⊑□ α -∗ bor_tok α P -∗ bor_tok β P.
+  Lemma bor_tok_lft {α β Px} : β ⊑□ α -∗ bor_tok α Px -∗ bor_tok β Px.
   Proof.
     rewrite bor_tok_unseal. iIntros "#⊑ [c|r]".
     { iLeft. by iApply (borc_tok_lft with "⊑ c"). }
     iDestruct "r" as (?????) "[#? r]". iRight. iExists _, _, _, _, _.
     iFrame "r". by iApply lft_sincl_trans.
   Qed.
-  Lemma obor_tok_lft {α β q r P} :
-    β ⊑□ α -∗ (q.[α] -∗ r.[β]) -∗ obor_tok α q P -∗ obor_tok β r P.
+  Lemma obor_tok_lft {α β q r Px} :
+    β ⊑□ α -∗ (q.[α] -∗ r.[β]) -∗ obor_tok α q Px -∗ obor_tok β r Px.
   Proof.
     rewrite obor_tok_unseal. iIntros "#? →β".
     iDestruct 1 as (α' ????) "[#?[→α o]]". iExists _, _, _, _, _. iFrame "o".
     iSplit; [by iApply lft_sincl_trans|]. iIntros "α'". iApply "→β".
     by iApply "→α".
   Qed.
-  Lemma lend_tok_lft {α β P} : α ⊑□ β -∗ lend_tok α P -∗ lend_tok β P.
+  Lemma lend_tok_lft {α β Px} : α ⊑□ β -∗ lend_tok α Px -∗ lend_tok β Px.
   Proof.
     rewrite lend_tok_unseal. iIntros "#? [%α'[#? l]]". iExists _. iFrame "l".
     by iApply lft_sincl_trans.
@@ -252,10 +252,10 @@ Section borrow.
   Qed.
 
   (** Lemma for [to_lend_itoks] *)
-  Local Lemma lend_insert_op {i k e P Pm} :
+  Local Lemma lend_insert_op {i k e Px Pm} :
     Pm !! k = None →
-    (◯ {[i := (to_agree e, ε, Excl <$> <[k:=P]> Pm)]} : borrowRF_def _ $ri _) ≡
-      ◯ {[i := (to_agree e, ε, {[k:=Excl P]})]} ⋅
+    (◯ {[i := (to_agree e, ε, Excl <$> <[k:=Px]> Pm)]} : borrowRF_def _ $ri _) ≡
+      ◯ {[i := (to_agree e, ε, {[k:=Excl Px]})]} ⋅
       ◯ {[i := (to_agree e, ε, Excl <$> Pm)]}.
     move=> eq. rewrite fmap_insert -auth_frag_op. f_equiv. rewrite singleton_op.
     apply: singletonM_proper.
@@ -265,22 +265,22 @@ Section borrow.
   (** Get [lend_itok]s out of [own] *)
   Local Lemma to_lend_itoks {i d α Pm} :
     own borrow_name (◯ {[i := (to_agree (d, α)', ε, Excl <$> Pm)]}) ⊢
-      [∗ map] k ↦ P ∈ Pm, lend_itok i k d α P.
+      [∗ map] k ↦ Px ∈ Pm, lend_itok i k d α Px.
   Proof.
-    induction (Pm : gmap _ _) as [|k P Pm' ? IH] using map_ind.
+    induction (Pm : gmap _ _) as [|k Px Pm' ? IH] using map_ind.
     { rewrite big_sepM_empty. by iIntros. }
     rewrite big_sepM_insert; [|done]. rewrite -IH lend_insert_op; [|done].
     iIntros "[$$]".
   Qed.
 
   (** Create [bor_itok]s and [lend_itok]s w.r.t. [depo_stm_tok] *)
-  Local Lemma depo_stm_borc_lend_new {Dm} d α Pl Ql :
+  Local Lemma depo_stm_borc_lend_new {Dm} d α Pxl Qxl :
     depo_stm_tok Dm -∗ |==> ∃ i,
-      let Bm := map_by _ (fmap (M:=list) (λ P, (P, Clsd)) Pl) in
-      let Qm := map_by _ Ql in
+      let Bm := map_by _ (fmap (M:=list) (λ Px, (Px, Clsd)) Pxl) in
+      let Qm := map_by _ Qxl in
       depo_stm_tok (<[i := ((d, α)', Bm, Qm)]> Dm) ∗
       ([∗ map] j ↦ B ∈ Bm, bor_itok i j d α B) ∗
-      [∗ map] k ↦ Q ∈ Qm, lend_itok i k d α Q.
+      [∗ map] k ↦ Qx ∈ Qm, lend_itok i k d α Qx.
   Proof.
     iIntros "●". iExists (fresh (dom Dm)).
     iMod (own_update with "●") as "[$[c l]]"; last first.
@@ -297,11 +297,11 @@ Section borrow.
   Qed.
 
   (** Lemma for [depo_stm_lend_agree] and [depo_stm_bor_agree] *)
-  Local Lemma depo_stm_own_agree {Dm i d α Bx Px} :
+  Local Lemma depo_stm_own_agree {Dm i d α Bx Pxx} :
     depo_stm_tok Dm -∗
-    own borrow_name (◯ {[i := (to_agree (d, α)', Bx, Px)]}) -∗
+    own borrow_name (◯ {[i := (to_agree (d, α)', Bx, Pxx)]}) -∗
     ∃ Bm Pm, ⌜Dm !! i = Some ((d, α)', Bm, Pm)⌝ ∧
-      Bx ≼ Excl <$> Bm ∧ Px ≼ Excl <$> Pm.
+      Bx ≼ Excl <$> Bm ∧ Pxx ≼ Excl <$> Pm.
   Proof.
     iIntros "● o". iDestruct (own_valid_2 with "● o") as "?". iStopProof.
     unfold internal_included. uPred.unseal. split=> n ? _.
@@ -317,22 +317,22 @@ Section borrow.
   Qed.
 
   (** Agreement between [depo_stm_tok] and [lend_itok] *)
-  Local Lemma depo_stm_lend_agree {Dm i k d α P} :
-    depo_stm_tok Dm -∗ lend_itok i k d α P -∗ ∃ Bm Pm P',
-      ⌜Dm !! i = Some ((d, α)', Bm, Pm)⌝ ∧ ⌜Pm !! k = Some P'⌝ ∧ P' ≡ P.
+  Local Lemma depo_stm_lend_agree {Dm i k d α Px} :
+    depo_stm_tok Dm -∗ lend_itok i k d α Px -∗ ∃ Bm Pm Px',
+      ⌜Dm !! i = Some ((d, α)', Bm, Pm)⌝ ∧ ⌜Pm !! k = Some Px'⌝ ∧ Px' ≡ Px.
   Proof.
     iIntros "● l".
     iDestruct (depo_stm_own_agree with "● l") as (Bm Pm ?) "[_?]".
     iStopProof. unfold internal_included. uPred.unseal. split=> n ? _.
     repeat unfold uPred_holds=>/=.
     move /singleton_includedN_l=>
-      [?[/Some_equiv_eq[?[/lookup_fmap_Some[P'[<-?]]<-]]/Excl_includedN incl]].
-    by exists Bm, Pm, P'.
+      [?[/Some_equiv_eq[?[/lookup_fmap_Some[Px'[<-?]]<-]]/Excl_includedN incl]].
+    by exists Bm, Pm, Px'.
   Qed.
   (** Delete a lender w.r.t. [depo_stm_tok] *)
-  Local Lemma depo_stm_lend_delete {Dm i k d α Bm Pm P} :
+  Local Lemma depo_stm_lend_delete {Dm i k d α Bm Pm Px} :
     Dm !! i = Some ((d, α)', Bm, Pm) →
-    depo_stm_tok Dm -∗ lend_itok i k d α P ==∗
+    depo_stm_tok Dm -∗ lend_itok i k d α Px ==∗
       depo_stm_tok (<[i := ((d, α)', Bm, delete k Pm)]> Dm).
   Proof.
     move=> ?. iIntros "● l". iMod (own_update_2 with "● l") as "[$_]"; [|done].
@@ -344,11 +344,11 @@ Section borrow.
     { by rewrite lookup_singleton. } exact _.
   Qed.
   (** Add lenders w.r.t. [depo_stm_tok] *)
-  Local Lemma depo_stm_lend_add {Dm i d α Bm Pm} Ql :
+  Local Lemma depo_stm_lend_add {Dm i d α Bm Pm} Qxl :
     Dm !! i = Some ((d, α)', Bm, Pm) →
     depo_stm_tok Dm ==∗
-      depo_stm_tok (<[i := ((d, α)', Bm, map_with Pm Ql)]> Dm) ∗
-      [∗ map] k ↦ Q ∈ map_without Pm Ql, lend_itok i k d α Q.
+      depo_stm_tok (<[i := ((d, α)', Bm, map_with Pm Qxl)]> Dm) ∗
+      [∗ map] k ↦ Qx ∈ map_without Pm Qxl, lend_itok i k d α Qx.
   Proof.
     move=> eq. iIntros "●". iMod (own_update with "●") as "[$ ?]"; last first.
     { iModIntro. by iApply to_lend_itoks. }
@@ -401,23 +401,23 @@ End borrow.
 Section borrow.
   Context `{!borrowGS FML Σ}.
   Implicit Type (M : iProp Σ → iProp Σ) (sm : FML $oi Σ -d> iProp Σ)
-    (P Q : FML $oi Σ) (D : depo_stOF FML $oi Σ) (Dm : depo_stmOF FML $oi Σ)
+    (Px Qx : FML $oi Σ) (D : depo_stOF FML $oi Σ) (Dm : depo_stmOF FML $oi Σ)
     (B : bor_stOF FML $oi Σ) (Bm : bor_stmOF FML $oi Σ)
     (Pm : lendmOF FML $oi Σ).
 
   (** World satisfaction for a borrower *)
   Local Definition bor_wsat sm d α B : iProp Σ :=
-    let '(Q, b) := B in match b with
-    | Clsd => sm Q | Open q => q.[α]
-    | Rebor β => ∃ d', ⌜d < d'⌝ ∗ lend_dtok d' (α ⊓ β) Q
+    let '(Qx, b) := B in match b with
+    | Clsd => sm Qx | Open q => q.[α]
+    | Rebor β => ∃ d', ⌜d < d'⌝ ∗ lend_dtok d' (α ⊓ β) Qx
     end.
 
   (** World satisfaction for a deposit *)
   Local Definition depo_wsat_in M sm d α Bm Pm : iProp Σ :=
     ([∗ map] B ∈ Bm, bor_wsat sm d α B) ∗
-    ([†α] -∗ ([∗ map] '(Q, _) ∈ Bm, sm Q) -∗ M ([∗ map] P ∈ Pm, sm P)%I).
+    ([†α] -∗ ([∗ map] '(Qx, _) ∈ Bm, sm Qx) -∗ M ([∗ map] Px ∈ Pm, sm Px)%I).
   Local Definition depo_wsat_dead M sm α Pm : iProp Σ :=
-    [†α] ∗ M ([∗ map] P ∈ Pm, sm P)%I.
+    [†α] ∗ M ([∗ map] Px ∈ Pm, sm Px)%I.
   Local Definition depo_wsat M sm d α Bm Pm : iProp Σ :=
     depo_wsat_in M sm d α Bm Pm ∨ depo_wsat_dead M sm α Pm.
 
@@ -468,52 +468,53 @@ Section borrow.
   Context `{!GenUpd M, !GenUpdBupd M, !NonExpansive sm}.
 
   (** Create new borrowers and lenders with a specific depth *)
-  Local Lemma borc_lend_tok_new_list' d α Pl Ql :
-    ([∗ list] P ∈ Pl, sm P) -∗
-    ([†α] -∗ ([∗ list] P ∈ Pl, sm P) -∗ M ([∗ list] Q ∈ Ql, sm Q)%I)
+  Local Lemma borc_lend_tok_new_list' d α Pxl Qxl :
+    ([∗ list] Px ∈ Pxl, sm Px) -∗
+    ([†α] -∗ ([∗ list] Px ∈ Pxl, sm Px) -∗ M ([∗ list] Qx ∈ Qxl, sm Qx)%I)
       =[borrow_wsat M sm]=∗
-      ([∗ list] P ∈ Pl, borc_tok α P) ∗ [∗ list] Q ∈ Ql, lend_dtok d α Q.
+      ([∗ list] Px ∈ Pxl, borc_tok α Px) ∗ [∗ list] Qx ∈ Qxl, lend_dtok d α Qx.
   Proof.
-    rewrite borrow_wsat_unseal borc_tok_unseal. iIntros "Pl →Ql [%Dm[● Dm]]".
-    iMod (depo_stm_borc_lend_new d α Pl Ql with "●") as (?) "[●[c l]]".
+    rewrite borrow_wsat_unseal borc_tok_unseal. iIntros "Pxl →Qxl [%Dm[● Dm]]".
+    iMod (depo_stm_borc_lend_new d α Pxl Qxl with "●") as (?) "[●[c l]]".
     iModIntro. rewrite !big_sepM_map_by' big_sepL_fmap.
     iSplitR "c l"; last first; [iSplitL "c"; iStopProof; do 3 f_equiv;
       iIntros "[% ?]"; [|by iExists _, _]|].
     { iRight. iExists _, _, _, _. iSplitR; by [iApply lft_sincl_refl|]. }
-    iExists _. iFrame "●". iApply (big_sepM_insert_2 with "[Pl →Ql] Dm"). iLeft.
-    iSplitL "Pl";by rewrite !big_sepM_map_by big_sepL_fmap.
+    iExists _. iFrame "●". iApply (big_sepM_insert_2 with "[Pxl →Qxl] Dm").
+    iLeft. iSplitL "Pxl";by rewrite !big_sepM_map_by big_sepL_fmap.
   Qed.
 
   (** Create new borrowers and lenders *)
-  Lemma borc_lend_tok_new_list α Pl Ql :
-    ([∗ list] P ∈ Pl, sm P) -∗
-    ([†α] -∗ ([∗ list] P ∈ Pl, sm P) -∗ M ([∗ list] Q ∈ Ql, sm Q)%I)
+  Lemma borc_lend_tok_new_list α Pxl Qxl :
+    ([∗ list] Px ∈ Pxl, sm Px) -∗
+    ([†α] -∗ ([∗ list] Px ∈ Pxl, sm Px) -∗ M ([∗ list] Qx ∈ Qxl, sm Qx)%I)
       =[borrow_wsat M sm]=∗
-      ([∗ list] P ∈ Pl, borc_tok α P) ∗ [∗ list] Q ∈ Ql, lend_tok α Q.
+      ([∗ list] Px ∈ Pxl, borc_tok α Px) ∗ [∗ list] Qx ∈ Qxl, lend_tok α Qx.
   Proof.
-    iIntros "Pl →Ql". iMod (borc_lend_tok_new_list' 0 with "Pl →Ql") as "[$ ?]".
+    iIntros "Pxl →Qxl".
+    iMod (borc_lend_tok_new_list' 0 with "Pxl →Qxl") as "[$ ?]".
     iModIntro. iStopProof. do 3 f_equiv. iIntros "l". rewrite lend_tok_unseal.
     iExists _. iSplit; [by iApply lft_sincl_refl|]. by iExists _.
   Qed.
   (** Simply create a new borrower and a new lender *)
-  Lemma borc_lend_tok_new α P :
-    sm P =[borrow_wsat M sm]=∗ borc_tok α P ∗ lend_tok α P.
+  Lemma borc_lend_tok_new α Px :
+    sm Px =[borrow_wsat M sm]=∗ borc_tok α Px ∗ lend_tok α Px.
   Proof.
-    iIntros "P". iMod (borc_lend_tok_new_list α [P] [P] with "[P] []")
+    iIntros "Px". iMod (borc_lend_tok_new_list α [Px] [Px] with "[Px] []")
       as "[[$_][$_]]"; by [iFrame|iIntros|].
   Qed.
 
   (** Split a lender *)
-  Lemma lend_tok_split {α P} Ql :
-    lend_tok α P -∗ (sm P -∗ M ([∗ list] Q ∈ Ql, sm Q))
-      =[borrow_wsat M sm]=∗ [∗ list] Q ∈ Ql, lend_tok α Q.
+  Lemma lend_tok_split {α Px} Qxl :
+    lend_tok α Px -∗ (sm Px -∗ M ([∗ list] Qx ∈ Qxl, sm Qx))
+      =[borrow_wsat M sm]=∗ [∗ list] Qx ∈ Qxl, lend_tok α Qx.
   Proof.
     rewrite lend_tok_unseal borrow_wsat_unseal.
     iIntros "[%α'[#?[%d[%i[%k l]]]]] PQ [%Dm[● Dm]]".
-    iDestruct (depo_stm_lend_agree with "● l") as (Bm Pm P' ? ?) "#eqv".
+    iDestruct (depo_stm_lend_agree with "● l") as (Bm Pm Px' ? ?) "#eqv".
     iRewrite -"eqv" in "PQ".
     iMod (depo_stm_lend_delete with "● l") as "●"; [done|].
-    iMod (depo_stm_lend_add Ql with "●") as "[● ls]".
+    iMod (depo_stm_lend_add Qxl with "●") as "[● ls]".
     { apply (lookup_insert (M:=gmap _)). }
     iModIntro. iSplitR "ls"; last first.
     { rewrite big_sepM_map_without'. iApply (big_sepL_impl with "ls").
@@ -525,7 +526,8 @@ Section borrow.
       rewrite big_sepM_map_with.
       iDestruct (big_sepM_delete with "Pm") as "[? $]"; [done|]. by iApply "PQ".
     - iRight. iFrame "†". iMod "Pm". rewrite big_sepM_map_with.
-      iDestruct (big_sepM_delete with "Pm") as "[P $]"; [done|]. by iApply "PQ".
+      iDestruct (big_sepM_delete with "Pm") as "[Px $]"; [done|].
+      by iApply "PQ".
   Qed.
 
   (** Filter [depo_stm] with a depth *)
@@ -543,11 +545,11 @@ Section borrow.
         depo_wsat_ret M sm d' α β Bm Pm.
 
   (** Retrieve from [borrow_wsat_ret] using [lend_dtok] *)
-  Local Lemma lend_dtok_ret_retrieve {Dm d d' α β P} : d ≤ d' → β ⊑ α →
-    lend_dtok d' β P -∗ modw M (borrow_wsat_ret M sm Dm d α) (sm P).
+  Local Lemma lend_dtok_ret_retrieve {Dm d d' α β Px} : d ≤ d' → β ⊑ α →
+    lend_dtok d' β Px -∗ modw M (borrow_wsat_ret M sm Dm d α) (sm Px).
   Proof.
     move=> ??. iIntros "[%[% l]] [%Dm'[%[● Dm']]]".
-    iDestruct (depo_stm_lend_agree with "● l") as (Bm Pm P' eq ?) "#eqv".
+    iDestruct (depo_stm_lend_agree with "● l") as (Bm Pm Px' eq ?) "#eqv".
     iRewrite -"eqv". iDestruct (big_sepM_insert_acc with "Dm'") as "[D →Dm']".
     { rewrite map_lookup_filter_Some. split; [done|]. unfold dep_of=>/=. lia. }
     rewrite /depo_wsat_ret decide_True; [|done]. iDestruct "D" as "[† >Pm]".
@@ -561,9 +563,9 @@ Section borrow.
   Qed.
 
   (** Retrieve from [bor_wsat] *)
-  Local Lemma bor_wsat_retrieve {Dm d α β P b} : β ⊑ α →
-    [†β] -∗ bor_wsat sm d β (P, b) -∗
-      modw M (borrow_wsat_ret M sm Dm (S d) α) (sm P).
+  Local Lemma bor_wsat_retrieve {Dm d α β Px b} : β ⊑ α →
+    [†β] -∗ bor_wsat sm d β (Px, b) -∗
+      modw M (borrow_wsat_ret M sm Dm (S d) α) (sm Px).
   Proof.
     move=> ?. iIntros "† B". case b=> [|q|?]/=; [done|..].
     { iDestruct (lft_live_dead with "B †") as "[]". }
@@ -573,7 +575,8 @@ Section borrow.
   (** Retrieve from [bor_wsat]s *)
   Local Lemma bor_wsats_retrieve {Dm d α β Bl} : β ⊑ α →
     [†β] -∗ ([∗ list] B ∈ Bl, bor_wsat sm d β B) -∗
-      modw M (borrow_wsat_ret M sm Dm (S d) α) ([∗ list] '(P, _) ∈ Bl, sm P)%I.
+      modw M (borrow_wsat_ret M sm Dm (S d) α)
+        ([∗ list] '(Px, _) ∈ Bl, sm Px)%I.
   Proof.
     move=> ?. elim: Bl; [by iIntros|]. move=>/= [??]Bl IH. iIntros "#† [B Bl]".
     iMod (IH with "† Bl") as "$". by iApply bor_wsat_retrieve.
@@ -666,8 +669,8 @@ Section borrow.
     apply map_filter_ext=> ?[[??]?]/=. lia.
   Qed.
   (** Retrive using [lend_dtok] *)
-  Local Lemma lend_dtok_retrieve {d α P} :
-    [†α] -∗ lend_dtok d α P -∗ modw M (borrow_wsat M sm) (sm P).
+  Local Lemma lend_dtok_retrieve {d α Px} :
+    [†α] -∗ lend_dtok d α Px -∗ modw M (borrow_wsat M sm) (sm Px).
   Proof.
     rewrite borrow_wsat_unseal. iIntros "† l [%Dm[● Dm]]".
     case: (filter_ge_empty Dm)=> d' eq.
@@ -681,8 +684,8 @@ Section borrow.
     case: (decide (β ⊑ α))=> ?; [|done]. iIntros. by iRight.
   Qed.
   (** Retrive using [lend_tok] *)
-  Lemma lend_tok_retrieve {α P} :
-    [†α] -∗ lend_tok α P -∗ modw M (borrow_wsat M sm) (sm P).
+  Lemma lend_tok_retrieve {α Px} :
+    [†α] -∗ lend_tok α Px -∗ modw M (borrow_wsat M sm) (sm Px).
   Proof.
     rewrite lend_tok_unseal. iIntros "† [%α'[⊑[%d l]]]".
     iDestruct (lft_sincl_dead with "⊑ †") as "†".
@@ -707,12 +710,12 @@ Section borrow.
   Qed.
 
   (** Update the borrower state to [Open q] *)
-  Local Lemma bor_open_core {i j d α P b q} :
-    q.[α] -∗ bor_itok i j d α (P, b) =[borrow_wsat M sm]=∗
-      obor_tok α q P ∗ bor_wsat sm d α (P, b).
+  Local Lemma bor_open_core {i j d α Px b q} :
+    q.[α] -∗ bor_itok i j d α (Px, b) =[borrow_wsat M sm]=∗
+      obor_tok α q Px ∗ bor_wsat sm d α (Px, b).
   Proof.
     rewrite borrow_wsat_unseal. iIntros "[α α'] b [%Dm[● Dm]]".
-    iDestruct (depo_stm_bor_agree with "● b") as (Bm Qm [P' b'] ??) "#eqv".
+    iDestruct (depo_stm_bor_agree with "● b") as (Bm Qm [Px' b'] ??) "#eqv".
     iDestruct (big_sepM_insert_acc with "Dm") as "[D →Dm]"; [done|].
     iDestruct (depo_wsat_tok with "α D") as "[α [Bm →Qm]]".
     iMod (depo_stm_bor_stupd with "● b") as "[● o]"; [done..|]. iRewrite -"eqv".
@@ -728,8 +731,8 @@ Section borrow.
     by iIntros.
   Qed.
   (** Open a closed borrower *)
-  Lemma borc_tok_open {α q P} :
-    q.[α] -∗ borc_tok α P =[borrow_wsat M sm]=∗ obor_tok α q P ∗ sm P.
+  Lemma borc_tok_open {α q Px} :
+    q.[α] -∗ borc_tok α Px =[borrow_wsat M sm]=∗ obor_tok α q Px ∗ sm Px.
   Proof.
     rewrite borc_tok_unseal. iIntros "α [†|c]".
     { by iDestruct (lft_live_dead with "α †") as "[]". }
@@ -739,8 +742,9 @@ Section borrow.
     iApply (obor_tok_lft with "⊑ →α o").
   Qed.
   (** Open a borrower *)
-  Lemma bor_tok_open {α q P} :
-    q.[α] -∗ bor_tok α P -∗ modw M (borrow_wsat M sm) (obor_tok α q P ∗ sm P).
+  Lemma bor_tok_open {α q Px} :
+    q.[α] -∗ bor_tok α Px -∗
+      modw M (borrow_wsat M sm) (obor_tok α q Px ∗ sm Px).
   Proof.
     rewrite bor_tok_unseal. iIntros "α [c|r]".
     { by iMod (borc_tok_open with "α c"). }
@@ -753,21 +757,21 @@ Section borrow.
   Qed.
 
   (** Open borrow token with the depth and real lifetime explicit *)
-  Local Definition obor_dtok d α α' q P : iProp Σ :=
+  Local Definition obor_dtok d α α' q Px : iProp Σ :=
     ∃ i j r, α ⊑□ α' ∗ (r.[α'] -∗ q.[α]) ∗ (r/2).[α'] ∗
-      bor_itok i j d α' (P, Open (r/2)).
+      bor_itok i j d α' (Px, Open (r/2)).
   (** Turn [obor_tok] into [obor_dtok] *)
-  Local Lemma obor_tok_dtok {α q P} :
-    obor_tok α q P ⊢ ∃ d α', α ⊑□ α' ∗ obor_dtok d α α' q P.
+  Local Lemma obor_tok_dtok {α q Px} :
+    obor_tok α q Px ⊢ ∃ d α', α ⊑□ α' ∗ obor_dtok d α α' q Px.
   Proof.
     rewrite obor_tok_unseal. iDestruct 1 as (α' r ???) "[#⊑ b]". iExists _, _.
     iFrame "⊑". by iExists _, _, _.
   Qed.
 
   (** Turn [obor_dtok] to a reborrower using [lend_dtok] *)
-  Local Lemma obor_dtok_reborrow {d α α' q P β d'} : d < d' →
-    obor_dtok d α α' q P -∗ lend_dtok d' (α' ⊓ β) P =[borrow_wsat M sm]=∗
-      q.[α] ∗ ([†β] -∗ bor_tok α P).
+  Local Lemma obor_dtok_reborrow {d α α' q Px β d'} : d < d' →
+    obor_dtok d α α' q Px -∗ lend_dtok d' (α' ⊓ β) Px =[borrow_wsat M sm]=∗
+      q.[α] ∗ ([†β] -∗ bor_tok α Px).
   Proof.
     rewrite borrow_wsat_unseal. iDestruct 1 as (i j r) "[#⊑[→α[α' o]]]".
     iIntros "[%i'[%k l]] [%Dm [● Dm]]".
@@ -791,13 +795,13 @@ Section borrow.
 
   (** Lemma for [obor_tok_merge_subdiv] *)
   Local Lemma obor_toks_dtoks_bound {αqPl β} :
-    ([∗ list] '(α, q, P)' ∈ αqPl, β ⊑□ α ∗ obor_tok α q P) ⊢ ∃ d γ, β ⊑□ γ ∗
-      [∗ list] '(α, q, P)' ∈ αqPl, ∃ d' α' γ',
-        ⌜d' < d ∧ γ = α' ⊓ γ'⌝ ∗ obor_dtok d' α α' q P.
+    ([∗ list] '(α, q, Px)' ∈ αqPl, β ⊑□ α ∗ obor_tok α q Px) ⊢ ∃ d γ, β ⊑□ γ ∗
+      [∗ list] '(α, q, Px)' ∈ αqPl, ∃ d' α' γ',
+        ⌜d' < d ∧ γ = α' ⊓ γ'⌝ ∗ obor_dtok d' α α' q Px.
   Proof.
     elim: αqPl=>/=.
     { iIntros. iExists 0, ⊤. iSplit; [iApply lft_sincl_top|done]. }
-    move=> [α[P q]] αqPl ->. rewrite obor_tok_dtok.
+    move=> [α[Px q]] αqPl ->. rewrite obor_tok_dtok.
     iIntros "[[#βα[%d[%α'[#αα' o]]]] [%d'[%γ[#βγ big]]]]".
     iExists (S d `max` d'), (α' ⊓ γ). iSplitR.
     { iApply lft_sincl_meet_intro; [|done].
@@ -808,69 +812,70 @@ Section borrow.
     iPureIntro. split; [lia|]. by rewrite assoc [α' ⊓ α'']comm -assoc.
   Qed.
   (** Merge and subdivide borrowers *)
-  Lemma obor_tok_merge_subdiv αqPl Ql β :
-    ([∗ list] '(α, q, P)' ∈ αqPl, β ⊑□ α ∗ obor_tok α q P) -∗
-    ([∗ list] Q ∈ Ql, sm Q) -∗
-    ([†β] -∗ ([∗ list] Q ∈ Ql, sm Q) -∗ M ([∗ list] '(_, _, P)' ∈ αqPl, sm P)%I)
+  Lemma obor_tok_merge_subdiv αqPl Qxl β :
+    ([∗ list] '(α, q, Px)' ∈ αqPl, β ⊑□ α ∗ obor_tok α q Px) -∗
+    ([∗ list] Qx ∈ Qxl, sm Qx) -∗
+    ([†β] -∗ ([∗ list] Qx ∈ Qxl, sm Qx) -∗
+      M ([∗ list] '(_, _, Px)' ∈ αqPl, sm Px)%I)
       =[borrow_wsat M sm]=∗
-      ([∗ list] '(α, q, _)' ∈ αqPl, q.[α]) ∗ [∗ list] Q ∈ Ql, borc_tok β Q.
+      ([∗ list] '(α, q, _)' ∈ αqPl, q.[α]) ∗ [∗ list] Qx ∈ Qxl, borc_tok β Qx.
   Proof.
-    rewrite/= obor_toks_dtoks_bound. iIntros "[%d[%γ[#⊑ αqPl]]] Ql →P".
-    iMod (borc_lend_tok_new_list' d γ Ql ((λ '(_, _, P)', P) <$> αqPl)
-      with "Ql [→P]") as "[bl ll]"=>/=.
-    { iIntros "† Ql". iDestruct (lft_sincl_dead with "⊑ †") as "†".
-      rewrite big_sepL_fmap. iApply ("→P" with "† Ql"). }
+    rewrite/= obor_toks_dtoks_bound. iIntros "[%d[%γ[#⊑ αqPl]]] Qxl →P".
+    iMod (borc_lend_tok_new_list' d γ Qxl ((λ '(_, _, Px)', Px) <$> αqPl)
+      with "Qxl [→P]") as "[bl ll]"=>/=.
+    { iIntros "† Qxl". iDestruct (lft_sincl_dead with "⊑ †") as "†".
+      rewrite big_sepL_fmap. iApply ("→P" with "† Qxl"). }
     iSplitR "bl"; last first.
     { iModIntro. iApply (big_sepL_impl with "bl"). iIntros "!> %% _".
       by iApply borc_tok_lft. }
-    iInduction αqPl as [|[α[q P]]αqPl] "IH"=>/=; [done|].
+    iInduction αqPl as [|[α[q Px]]αqPl] "IH"=>/=; [done|].
     iDestruct "αqPl" as "[big αqPl]". iDestruct "big" as (???[?->]) "o".
     iDestruct "ll" as "[l ll]". iMod ("IH" with "αqPl ll") as "$".
     iMod (obor_dtok_reborrow with "o l") as "[$ _]"; [lia|done].
   Qed.
   (** Subdivide a borrower *)
-  Lemma obor_tok_subdiv {α q P} Ql β :
-    β ⊑□ α -∗ obor_tok α q P -∗ ([∗ list] Q ∈ Ql, sm Q) -∗
-    ([†β] -∗ ([∗ list] Q ∈ Ql, sm Q) -∗ M (sm P))
-      =[borrow_wsat M sm]=∗ q.[α] ∗ [∗ list] Q ∈ Ql, borc_tok β Q.
+  Lemma obor_tok_subdiv {α q Px} Qxl β :
+    β ⊑□ α -∗ obor_tok α q Px -∗ ([∗ list] Qx ∈ Qxl, sm Qx) -∗
+    ([†β] -∗ ([∗ list] Qx ∈ Qxl, sm Qx) -∗ M (sm Px))
+      =[borrow_wsat M sm]=∗ q.[α] ∗ [∗ list] Qx ∈ Qxl, borc_tok β Qx.
   Proof.
-    iIntros "⊑ o Ql →P".
-    iMod (obor_tok_merge_subdiv [(_,_,_)'] with "[⊑ o] Ql [→P]")
+    iIntros "⊑ o Qxl →P".
+    iMod (obor_tok_merge_subdiv [(_,_,_)'] with "[⊑ o] Qxl [→P]")
       as "[[$_]$]"=>/=; by [iFrame|rewrite bi.sep_emp|].
   Qed.
   (** Simply close a borrower *)
-  Lemma obor_tok_close {α q P} :
-    obor_tok α q P -∗ sm P =[borrow_wsat M sm]=∗ q.[α] ∗ borc_tok α P.
+  Lemma obor_tok_close {α q Px} :
+    obor_tok α q Px -∗ sm Px =[borrow_wsat M sm]=∗ q.[α] ∗ borc_tok α Px.
   Proof.
-    iIntros "o P".
-    iMod (obor_tok_subdiv [P] with "[] o [P] []") as "[$[$_]]"=>/=;
+    iIntros "o Px".
+    iMod (obor_tok_subdiv [Px] with "[] o [Px] []") as "[$[$_]]"=>/=;
       by [iApply lft_sincl_refl|iFrame|iIntros "_[$_]"|].
   Qed.
 
   (** Reborrow a borrower *)
-  Lemma obor_tok_reborrow {α q P} β :
-    obor_tok α q P -∗ sm P =[borrow_wsat M sm]=∗
-      q.[α] ∗ borc_tok (α ⊓ β) P ∗ ([†β] -∗ bor_tok α P).
+  Lemma obor_tok_reborrow {α q Px} β :
+    obor_tok α q Px -∗ sm Px =[borrow_wsat M sm]=∗
+      q.[α] ∗ borc_tok (α ⊓ β) Px ∗ ([†β] -∗ bor_tok α Px).
   Proof.
-    rewrite obor_tok_dtok. iIntros "[%d[%α'[#? o]]] P".
-    iMod (borc_lend_tok_new_list' (S d) (α' ⊓ β) [P] [P] with "[P] []")
+    rewrite obor_tok_dtok. iIntros "[%d[%α'[#? o]]] Px".
+    iMod (borc_lend_tok_new_list' (S d) (α' ⊓ β) [Px] [Px] with "[Px] []")
       as "[[b _] [l _]]"; [by iFrame|by iIntros|].
     iMod (obor_dtok_reborrow with "o l") as "[$$]"; [lia|]. iModIntro.
     iApply (borc_tok_lft with "[] b"). by iApply lft_sincl_meet_mono_l.
   Qed.
-  Lemma borc_tok_reborrow {α q P} β :
-    q.[α] -∗ borc_tok α P =[borrow_wsat M sm]=∗
-      q.[α] ∗ borc_tok (α ⊓ β) P ∗ ([†β] -∗ bor_tok α P).
+  Lemma borc_tok_reborrow {α q Px} β :
+    q.[α] -∗ borc_tok α Px =[borrow_wsat M sm]=∗
+      q.[α] ∗ borc_tok (α ⊓ β) Px ∗ ([†β] -∗ bor_tok α Px).
   Proof.
-    iIntros "α c". iMod (borc_tok_open with "α c") as "[o P]".
-    by iMod (obor_tok_reborrow with "o P").
+    iIntros "α c". iMod (borc_tok_open with "α c") as "[o Px]".
+    by iMod (obor_tok_reborrow with "o Px").
   Qed.
-  Lemma bor_tok_reborrow {α q P} β :
-    q.[α] -∗ bor_tok α P -∗ modw M (borrow_wsat M sm)
-      (q.[α] ∗ borc_tok (α ⊓ β) P ∗ ([†β] -∗ bor_tok α P)).
+  Lemma bor_tok_reborrow {α q Px} β :
+    q.[α] -∗ bor_tok α Px -∗ modw M (borrow_wsat M sm)
+      (q.[α] ∗ borc_tok (α ⊓ β) Px ∗ ([†β] -∗ bor_tok α Px)).
   Proof.
-    iIntros "α b". iMod (bor_tok_open with "α b") as "[o P]".
-    by iMod (obor_tok_reborrow with "o P").
+    iIntros "α b". iMod (bor_tok_open with "α b") as "[o Px]".
+    by iMod (obor_tok_reborrow with "o Px").
   Qed.
 End borrow.
 
