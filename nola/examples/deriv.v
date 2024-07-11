@@ -287,13 +287,13 @@ Section verify.
   (** ** On derivability *)
 
   Local Lemma inv'_sep_comm' `{!Deriv ih δ} {N Px Qx} :
-    inv' δ N (Px ∗ Qx)%n ⊢ inv' δ N (Qx ∗ Px)%n.
+    inv' δ N (Px ∗ Qx)%cif ⊢ inv' δ N (Qx ∗ Px)%cif.
   Proof.
     iApply inv'_iff. iIntros "!>" (????). rewrite /⟦⟧(_) /= bi.sep_comm.
     iApply bi.wand_iff_refl.
   Qed.
   Lemma inv'_sep_comm `{!Deriv ih δ} {N Px Qx} :
-    inv' δ N (Px ∗ Qx)%n ⊣⊢ inv' δ N (Qx ∗ Px)%n.
+    inv' δ N (Px ∗ Qx)%cif ⊣⊢ inv' δ N (Qx ∗ Px)%cif.
   Proof. apply bi.equiv_entails. split; exact inv'_sep_comm'. Qed.
 
   Local Lemma inv'_inv'_sep_comm' `{!Deriv ih δ} {N N' Px Qx} :

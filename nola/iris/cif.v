@@ -142,12 +142,12 @@ Section cif.
 End cif.
 
 Declare Scope cif_scope.
-Delimit Scope cif_scope with n.
+Delimit Scope cif_scope with cif.
 Bind Scope cif_scope with cif.
 Notation "∀ x .. y , Px" :=
-  (cif_all (λ x, .. (cif_all (λ y, Px%n)) ..)) : cif_scope.
+  (cif_all (λ x, .. (cif_all (λ y, Px%cif)) ..)) : cif_scope.
 Notation "∃ x .. y , Px" :=
-  (cif_ex (λ x, .. (cif_ex (λ y, Px%n)) ..)) : cif_scope.
+  (cif_ex (λ x, .. (cif_ex (λ y, Px%cif)) ..)) : cif_scope.
 Infix "∧" := cif_and : cif_scope. Infix "∨" := cif_or : cif_scope.
 Infix "→" := cif_imp : cif_scope.
 Infix "∗" := cif_sep : cif_scope. Infix "-∗" := cif_wand : cif_scope.
