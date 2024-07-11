@@ -60,7 +60,7 @@ Section inv_deriv.
 
   Context `{!InvDeriv}.
 
-  (** Access [inv'] *)
+  (** Access using [inv'] *)
   Lemma invd_acc {N Px E} : ↑N ⊆ E →
     invd N Px =[inv_wsatid]{E,E∖↑N}=∗
       ⟦ Px ⟧ ∗ (⟦ Px ⟧ =[inv_wsatid]{E∖↑N,E}=∗ True).

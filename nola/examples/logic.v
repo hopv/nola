@@ -443,7 +443,7 @@ Section verify.
     iIntros "$". iApply Deriv_factor. iIntros. iModIntro. iSplit; by iIntros.
   Qed.
 
-  (** Access [invd] *)
+  (** Access using [invd] *)
   Lemma invd_acc {N Px E} : ↑N ⊆ E →
     invd N Px =[inv_wsat ⟦⟧]{E,E∖↑N}=∗
       ⟦ Px ⟧ ∗ (⟦ Px ⟧ =[inv_wsat ⟦⟧]{E∖↑N,E}=∗ True).

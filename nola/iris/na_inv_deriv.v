@@ -65,7 +65,7 @@ Section na_inv_deriv.
 
   Context `{!NaInvDeriv}.
 
-  (** Access [na_invd] *)
+  (** Access using [na_invd] *)
   Lemma na_invd_acc {p N Px E F} : ↑N ⊆ E → ↑N ⊆ F →
     na_own p F -∗ na_invd p N Px =[na_inv_wsatid]{E}=∗
       na_own p (F∖↑N) ∗ ⟦ Px ⟧ ∗
