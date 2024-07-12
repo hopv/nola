@@ -241,6 +241,40 @@ Section verify.
     wp_pures. by wp_apply (twp_iter_list with "f [$↦ $l //]").
   Qed.
 
+  (** Iterate over an unbounded number of elements of a list with an unbounded
+    number of threads *)
+  Definition forks_iter_list : val := rec: "self" "f" "k" "l" :=
+    if: !"k" ≤ #0 then #() else
+      Fork (let: "c" := ref Ndnat in iter_ilist "f" "c" "l");;
+      "k" <- !"k" - #1;; "self" "f" "k" "l".
+  Lemma twp_forks_iter_list {N E Φx k l} {f : val} {n : nat} :
+    (∀ l', [[{ inv_tok N (Φx l') }]][inv_wsat ⟦⟧] f #l'
+      [[{ RET #(); True }]]) -∗
+    [[{ k ↦ #n ∗ ⟦ ilist N Φx l ⟧ }]][inv_wsat ⟦⟧]
+      forks_iter_list f #k #l @ E
+    [[{ RET #(); k ↦ #0 }]].
+  Proof.
+    iIntros "#f" (Ψ) "!> [↦ #l] →Ψ". iInduction n as [|m] "IH" forall (l) "l".
+    { wp_rec. wp_load. wp_pures. by iApply "→Ψ". }
+    wp_rec. wp_load. wp_pures. wp_apply twp_fork.
+    { wp_apply twp_ndnat; [done|]. iIntros (?) "_". wp_alloc c as "↦".
+      wp_pures. wp_apply (twp_iter_list with "f [$↦ $l //]"); by [|iIntros]. }
+    wp_load. wp_op. have -> : (S m - 1)%Z = m by lia. wp_store.
+    iApply ("IH" with "↦ →Ψ l").
+  Qed.
+  Lemma twp_nd_forks_iter_list {N E Φx l} {f : val} :
+    (∀ l', [[{ inv_tok N (Φx l') }]][inv_wsat ⟦⟧] f #l'
+      [[{ RET #(); True }]]) -∗
+    [[{ ⟦ ilist N Φx l ⟧ }]][inv_wsat ⟦⟧]
+      let: "k" := ref Ndnat in forks_iter_list f "k" #l @ E
+    [[{ RET #(); True }]].
+  Proof.
+    iIntros "#f" (Ψ) "!> #l →Ψ". wp_apply twp_ndnat; [done|]. iIntros (?) "_".
+    wp_alloc k as "↦". wp_pures.
+    wp_apply (twp_forks_iter_list with "f [$↦ $l //]"). iIntros "_".
+    by iApply "→Ψ".
+  Qed.
+
   (** ** Linked list with a mutex *)
 
   (** [mlist]: Formula for a list with a mutex *)
