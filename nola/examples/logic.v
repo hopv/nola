@@ -539,8 +539,8 @@ Section verify.
       ⟦ Px ⟧ ∗ (⟦ Px ⟧ =[inv_wsat ⟦⟧]{E∖↑N,E}=∗ True).
   Proof.
     iIntros (?) "[%Qx[#PQ i]]". iDestruct (der_sound with "PQ") as "{PQ}PQ".
-    iMod (inv_tok_acc (sm:=⟦⟧) with "i") as "[Q cl]"; [done|].
-    iDestruct ("PQ" with "Q") as "$". iIntros "!> P". iApply "cl".
+    iMod (inv_tok_acc (sm:=⟦⟧) with "i") as "[Qx cl]"; [done|].
+    iDestruct ("PQ" with "Qx") as "$". iIntros "!> Px". iApply "cl".
     by iApply "PQ".
   Qed.
   (** Access using [invd] via view shift *)
@@ -573,8 +573,8 @@ Section verify.
     iIntros "#iff [%Rx[#? i]]". iExists Rx. iFrame "i".
     iApply Deriv_map; [|done]. iIntros (????). rewrite /⟦⟧(_) /=.
     iIntros "#[PR RP] !>". iSplit.
-    - iIntros "Q". iApply "PR". by iApply "iff".
-    - iIntros "R". iApply "iff"; [done..|]. by iApply "RP".
+    - iIntros "Qx". iApply "PR". by iApply "iff".
+    - iIntros "Rx". iApply "iff"; [done..|]. by iApply "RP".
   Qed.
   Lemma inv'_iff' `{!Deriv ih δ} {N Px Qx} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
