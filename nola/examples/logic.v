@@ -402,6 +402,7 @@ Section verify.
   Definition mutex_bor' α l Px :=
     cif_bor α ((l ↦ #false ∗ cif_bor α Px) ∨ l ↦ #true).
   Definition mutex_bor α l Px := inv_tok nroot (mutex_bor' α l Px).
+  Definition cif_mutex_bor α l Px := cif_inv nroot (mutex_bor' α l Px).
 
   (** Try to acquire a lock from a shared borrow over a mutex *)
   Lemma mutex_bor_try_acquire {α l Px q} :
@@ -477,6 +478,47 @@ Section verify.
       iDestruct "↦" as ([|]) "↦"; [|iLeft]; iFrame. }
     { by iIntros "_ [[[$ _]|$]_]". }
     rewrite nborc_tok_nbor_tok. by iMod (inv_tok_alloc with "[b]") as "$".
+  Qed.
+
+  (** ** Linked list with a shared borrow over a mutex *)
+
+  (** [mblist]: Formula for a list with a shared borrow over a mutex *)
+  Definition mblist_gen α Φx Mblist' l : cif Σ := cif_mutex_bor α l (Mblist' l).
+  Definition mblist'_gen α Φx Mblist' l : cif Σ :=
+    Φx (l +ₗ 1) ∗ ∃ l', (l +ₗ 2) ↦ #l' ∗ mblist_gen α Φx Mblist' l'.
+  CoFixpoint mblist' α Φx : loc → cif Σ := mblist'_gen α Φx (mblist' α Φx).
+  Definition mblist α Φx : loc → cif Σ := mblist_gen α Φx (mblist' α Φx).
+
+  (** Iterate over [mblist] *)
+  Definition iter_mblist : val := rec: "self" "f" "k" "c" "l" :=
+    if: !"c" ≤ #0 then #true else
+      if: try_acquire_loop_mutex "k" "l" then
+        "f" ("l" +ₗ #1);; let: "l'" := !("l" +ₗ #2) in release_mutex "l";;
+        "c" <- !"c" - #1;; "self" "f" "k" "c" "l'"
+      else #false.
+  Lemma twp_iter_mblist {α Φx c l q} {f : val} {k n : nat} :
+    (∀ l', [[{ ⟦ Φx (l' +ₗ 1) ⟧ }]][inv_wsat ⟦⟧ ∗ pborrow_wsat bupd ⟦⟧]
+        f #(l' +ₗ 1) [[{ RET #(); ⟦ Φx (l' +ₗ 1) ⟧ }]]) -∗
+    [[{ c ↦ #n ∗ ⟦ mblist α Φx l ⟧ ∗ q.[α] }]]
+      [inv_wsat ⟦⟧ ∗ pborrow_wsat bupd ⟦⟧]
+      iter_mblist f #k #c #l
+    [[{ b, RET #b; (if b then c ↦ #0 else ∃ n', c ↦ #n') ∗ q.[α] }]].
+  Proof.
+    iIntros "#f" (Ψ) "!> (c↦ & #m & α) →Ψ".
+    iInduction n as [|m] "IH" forall (l) "m".
+    { wp_rec. wp_load. wp_pures. iApply "→Ψ". by iFrame. }
+    wp_rec. wp_load. wp_pures.
+    wp_apply (mutex_bor_try_acquire_loop with "[$m $α //]").
+    iIntros ([|])=>/=; last first.
+    { iIntros "[_ α]". wp_pure. iModIntro. iApply "→Ψ". iFrame. }
+    iIntros "[b α]". wp_pures.
+    iMod (nbor_tok_open (M:=bupd) (sm:=⟦⟧) with "α b") as "[o big]".
+    rewrite /⟦ mblist' _ _ _ ⟧ /=. iDestruct "big" as "(Φx & %l' & ↦ & #mtl)".
+    wp_apply ("f" with "Φx"). iIntros "Φx". wp_load. wp_pures.
+    iMod (nobor_tok_close (M:=bupd) (sm:=⟦⟧) with "o [$Φx $↦ //]") as "[α c]".
+    rewrite nborc_tok_nbor_tok. wp_apply (mutex_bor_release with "[$c $α //]").
+    iIntros "α". wp_load. wp_store. have -> : (S m - 1)%Z = m by lia.
+    iApply ("IH" with "c↦ α →Ψ mtl").
   Qed.
 
   (** ** On derivability *)
