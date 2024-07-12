@@ -399,16 +399,17 @@ Section verify.
   Qed.
 
   (** Shared borrow of a mutex *)
-  Definition mutex_bor α l Px :=
-    inv_tok nroot (cif_bor α ((l ↦ #false ∗ cif_bor α Px) ∨ l ↦ #true)).
+  Definition mutex_bor' α l Px :=
+    cif_bor α ((l ↦ #false ∗ cif_bor α Px) ∨ l ↦ #true).
+  Definition mutex_bor α l Px := inv_tok nroot (mutex_bor' α l Px).
 
   (** Try to acquire a lock from a shared borrow over a mutex *)
   Lemma mutex_bor_try_acquire {α l Px q} :
     [[{ mutex_bor α l Px ∗ q.[α] }]][inv_wsat ⟦⟧ ∗ pborrow_wsat bupd ⟦⟧]
-      CAS #l #false #true
+      try_acquire_mutex #l
     [[{ b, RET #b; (if b then nbor_tok α Px else True) ∗ q.[α] }]].
   Proof.
-    iIntros (Φ) "[#m [α α']] →Φ". wp_bind (CmpXchg _ _ _).
+    iIntros (Φ) "[#m [α α']] →Φ". wp_lam. wp_bind (CmpXchg _ _ _).
     iMod (inv_tok_acc (sm:=⟦⟧) with "m") as "[b cl]"; [done|].
     rewrite /⟦ cif_bor _ _ ⟧ /=.
     iMod (nbor_tok_open (sm:=⟦⟧) (M:=bupd) with "α b") as "[o big]".
@@ -419,15 +420,29 @@ Section verify.
       rewrite nborc_tok_nbor_tok; iMod ("cl" with "b") as "_"; iModIntro;
       wp_pure; iApply "→Φ"; by iFrame.
   Qed.
+  (** [mutex_bor_try_acquire], repeatedly with a timeout *)
+  Lemma mutex_bor_try_acquire_loop {α l Px q} {n : nat} :
+    [[{ mutex_bor α l Px ∗ q.[α] }]][inv_wsat ⟦⟧ ∗ pborrow_wsat bupd ⟦⟧]
+      try_acquire_loop_mutex #n #l
+    [[{ b, RET #b; (if b then nbor_tok α Px else True) ∗ q.[α] }]].
+  Proof.
+    iIntros (Φ) "[#l α] →Φ". iInduction n as [|n] "IH".
+    { wp_lam. wp_pures. iApply "→Φ". by iFrame. }
+    wp_lam. wp_pures. wp_apply (mutex_bor_try_acquire with "[$l $α //]").
+    iIntros ([|]).
+    - iIntros "?". wp_pures. iModIntro. by iApply "→Φ".
+    - iIntros "[_ α]". wp_pures. have ->: (S n - 1)%Z = n by lia.
+      iApply ("IH" with "α →Φ").
+  Qed.
 
   (** Release a lock from a shared borrow over a mutex *)
   Lemma mutex_bor_release {α l Px q} :
     [[{ mutex_bor α l Px ∗ nbor_tok α Px ∗ q.[α] }]]
       [inv_wsat ⟦⟧ ∗ pborrow_wsat bupd ⟦⟧]
-      #l <- #false
+      release_mutex #l
     [[{ RET #(); q.[α] }]].
   Proof.
-    iIntros (Φ) "(#m & b' & α) →Φ".
+    iIntros (Φ) "(#m & b' & α) →Φ". wp_lam.
     iMod (inv_tok_acc (sm:=⟦⟧) with "m") as "[b cl]"; [done|].
     rewrite /⟦ cif_bor _ _ ⟧ /=.
     iMod (nbor_tok_open (sm:=⟦⟧) (M:=bupd) with "α b") as "[o big]".
