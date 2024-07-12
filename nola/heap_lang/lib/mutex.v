@@ -25,25 +25,25 @@ Proof. solve_inG. Qed.
 (** ** Mutex *)
 Section mutex.
   Context `{!mutexGS FML Σ, !heapGS_gen hlc Σ}.
-  Implicit Types (sm : FML $oi Σ → iProp Σ) (P : FML $oi Σ).
+  Implicit Types (sm : FML $oi Σ → iProp Σ) (Px : FML $oi Σ).
 
   (** [mutex_tok]: Mutex token *)
-  Definition mutex_tok l P : iProp Σ := inv_tok nroot (l, P).
+  Definition mutex_tok l Px : iProp Σ := inv_tok nroot (l, Px).
 
   (** [mutex_tok] is non-expansive *)
   #[export] Instance mutex_tok_ne {l} : NonExpansive (mutex_tok l).
   Proof. move=> ????. by apply inv_tok_ne. Qed.
   (** [mutex_tok] is persistent *)
-  Fact mutex_tok_persistent {l P} : Persistent (mutex_tok l P).
+  Fact mutex_tok_persistent {l Px} : Persistent (mutex_tok l Px).
   Proof. exact _. Qed.
   (** [mutex_tok] is timeless for discrete formulas *)
-  Fact mutex_tok_timeless `{!Discrete P} {l} : Timeless (mutex_tok l P).
+  Fact mutex_tok_timeless `{!Discrete Px} {l} : Timeless (mutex_tok l Px).
   Proof. exact _. Qed.
 
   (** Semantics for a mutex *)
   Local Definition mutex_sem (sm : FML $oi Σ -d> iProp Σ)
     : mutex_fml FML $oi Σ -d> iProp Σ :=
-    λ '(l, P), (∃ b, l ↦ #b ∗ if b then True else sm P)%I.
+    λ '(l, Px), (∃ b, l ↦ #b ∗ if b then True else sm Px)%I.
   #[export] Instance mutex_sem_ne `{!NonExpansive sm} :
     NonExpansive (mutex_sem sm).
   Proof. move=> ?[??][??][/=??]. solve_proper. Qed.
@@ -68,29 +68,29 @@ Section mutex.
   Context `{!NonExpansive sm}.
 
   (** Allocate a new mutex *)
-  Lemma alloc_mutex_tok {l P} :
-    l ↦ #false -∗ sm P =[mutex_wsat sm]=∗ mutex_tok l P.
+  Lemma alloc_mutex_tok {l Px} :
+    l ↦ #false -∗ sm Px =[mutex_wsat sm]=∗ mutex_tok l Px.
   Proof.
-    rewrite mutex_wsat_unseal. iIntros "↦ P".
-    iApply (inv_tok_alloc (FML:=mutex_fml _) (l, P) with "[↦ P]").
+    rewrite mutex_wsat_unseal. iIntros "↦ Px".
+    iApply (inv_tok_alloc (FML:=mutex_fml _) (l, Px) with "[↦ Px]").
     by iFrame.
   Qed.
 
   (** Allocate a new mutex with the lock acquired *)
-  Lemma alloc_acquire_mutex_tok {l P} :
-    l ↦ #true =[mutex_wsat sm]=∗ mutex_tok l P.
+  Lemma alloc_acquire_mutex_tok {l Px} :
+    l ↦ #true =[mutex_wsat sm]=∗ mutex_tok l Px.
   Proof.
     rewrite mutex_wsat_unseal. iIntros "↦".
-    iApply (inv_tok_alloc (FML:=mutex_fml _) (l, P) with "[↦]").
+    iApply (inv_tok_alloc (FML:=mutex_fml _) (l, Px) with "[↦]").
     iFrame.
   Qed.
 
   (** Try to acquire the lock on the mutex *)
   Definition try_acquire_mutex : val := λ: "l", CAS "l" #false #true.
-  Lemma twp_try_acquire_mutex_tok {l P} :
-    [[{ mutex_tok l P }]][mutex_wsat sm]
+  Lemma twp_try_acquire_mutex_tok {l Px} :
+    [[{ mutex_tok l Px }]][mutex_wsat sm]
       try_acquire_mutex #l
-    [[{ b, RET #b; if b then sm P else True }]].
+    [[{ b, RET #b; if b then sm Px else True }]].
   Proof.
     rewrite mutex_wsat_unseal. iIntros (Φ) "l →Φ". wp_lam.
     wp_bind (CmpXchg _ _ _).
@@ -107,10 +107,10 @@ Section mutex.
     rec: "self" "n" "l" :=
       if: "n" = #0 then #false else
       if: try_acquire_mutex "l" then #true else "self" ("n" - #1) "l".
-  Lemma twp_try_acquire_loop_mutex_tok {l P n} :
-    [[{ mutex_tok l P }]][mutex_wsat sm]
+  Lemma twp_try_acquire_loop_mutex_tok {l Px n} :
+    [[{ mutex_tok l Px }]][mutex_wsat sm]
       try_acquire_loop_mutex #n #l
-    [[{ b, RET #b; if b then sm P else True }]].
+    [[{ b, RET #b; if b then sm Px else True }]].
   Proof.
     iIntros (Φ) "#l →Φ". iInduction n as [|n] "IH".
     { wp_lam. wp_pures. by iApply "→Φ". }
@@ -122,12 +122,12 @@ Section mutex.
 
   (** Release the lock on the mutex *)
   Definition release_mutex : val := λ: "l", "l" <- #false.
-  Lemma twp_release_mutex_tok {l P} :
-    [[{ mutex_tok l P ∗ sm P }]][mutex_wsat sm]
+  Lemma twp_release_mutex_tok {l Px} :
+    [[{ mutex_tok l Px ∗ sm Px }]][mutex_wsat sm]
       release_mutex #l
     [[{ RET #(); True }]].
   Proof.
-    rewrite mutex_wsat_unseal. iIntros (Φ) "[#l P] →Φ". wp_lam.
+    rewrite mutex_wsat_unseal. iIntros (Φ) "[#l Px] →Φ". wp_lam.
     iMod (inv_tok_acc (sm:=mutex_sem _) with "l") as "[[%[↦ _]]cl]"; [done|].
     wp_store. iModIntro. iMod ("cl" with "[$]") as "_". iModIntro.
     by iApply "→Φ".
@@ -153,14 +153,14 @@ Section mutex_deriv.
   Implicit Type δ : JUDG → iProp Σ.
 
   (** [mutex]: Relaxed simple invariant *)
-  Local Definition mutex_def δ l P : iProp Σ :=
-    ∃ Q, □ δ (mutex_jiff P Q) ∗ mutex_tok l Q.
+  Local Definition mutex_def δ l Px : iProp Σ :=
+    ∃ Qx, □ δ (mutex_jiff Px Qx) ∗ mutex_tok l Qx.
   Local Lemma mutex_aux : seal mutex_def. Proof. by eexists. Qed.
   Definition mutex := mutex_aux.(unseal).
   Local Lemma mutex_unseal : mutex = mutex_def. Proof. exact: seal_eq. Qed.
 
   (** [mutex] is persistent *)
-  #[export] Instance mutex_persistent {δ l P} : Persistent (mutex δ l P).
+  #[export] Instance mutex_persistent {δ l Px} : Persistent (mutex δ l Px).
   Proof. rewrite mutex_unseal. exact _. Qed.
 
   (** [mutex] is non-expansive *)
@@ -173,84 +173,84 @@ Section mutex_deriv.
   Context `{!mutexGS FML Σ, !heapGS_gen hlc Σ,
     !MutexPreDeriv (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
     !Dsem JUDGI (FML $oi Σ) (iProp Σ)}.
-  Implicit Type (δ : JUDGI → iProp Σ) (P Q : FML $oi Σ).
+  Implicit Type (δ : JUDGI → iProp Σ) (Px Qx : FML $oi Σ).
 
   (** Derivability data for [mutex] *)
   Class MutexDeriv :=
-    mutex_jiff_sem : ∀{δ P Q},
-      ⟦ mutex_jiff P Q ⟧(δ) ⊣⊢ mod_iff (fupd ⊤ ⊤) ⟦ P ⟧(δ) ⟦ Q ⟧(δ).
+    mutex_jiff_sem : ∀{δ Px Qx},
+      ⟦ mutex_jiff Px Qx ⟧(δ) ⊣⊢ mod_iff (fupd ⊤ ⊤) ⟦ Px ⟧(δ) ⟦ Qx ⟧(δ).
 
   Context `{!MutexDeriv}.
 
   (** Unfold [mutexd] *)
-  Lemma mutexd_unfold {l P} :
-    mutexd l P ⊢ ∃ Q, □ mod_iff (fupd ⊤ ⊤) ⟦ P ⟧ ⟦ Q ⟧ ∗ mutex_tok l Q.
+  Lemma mutexd_unfold {l Px} :
+    mutexd l Px ⊢ ∃ Qx, □ mod_iff (fupd ⊤ ⊤) ⟦ Px ⟧ ⟦ Qx ⟧ ∗ mutex_tok l Qx.
   Proof.
     rewrite mutex_unseal /mutex_def. do 2 f_equiv.
     by rewrite der_sound mutex_jiff_sem.
   Qed.
 
   (** Wrapper lemmas *)
-  Lemma twp_try_acquire_mutexd {l P} :
-    [[{ mutexd l P }]][mutex_wsatid]
+  Lemma twp_try_acquire_mutexd {l Px} :
+    [[{ mutexd l Px }]][mutex_wsatid]
       try_acquire_mutex #l
-    [[{ b, RET #b; if b then ⟦ P ⟧ else True }]].
+    [[{ b, RET #b; if b then ⟦ Px ⟧ else True }]].
   Proof.
-    setoid_rewrite mutexd_unfold. iIntros (?) "[%Q[#[_ QP]l]] →Φ".
+    setoid_rewrite mutexd_unfold. iIntros (?) "[%Qx[#[_ QP]l]] →Φ".
     iApply twp_fupd. wp_apply (twp_try_acquire_mutex_tok (sm:=⟦⟧) with "l").
-    iIntros ([|]) "Q"; iApply "→Φ"; by [iApply "QP"|].
+    iIntros ([|]) "Qx"; iApply "→Φ"; by [iApply "QP"|].
   Qed.
-  Lemma twp_try_acquire_loop_mutexd {l P n} :
-    [[{ mutexd l P }]][mutex_wsatid]
+  Lemma twp_try_acquire_loop_mutexd {l Px n} :
+    [[{ mutexd l Px }]][mutex_wsatid]
       try_acquire_loop_mutex #n #l
-    [[{ b, RET #b; if b then ⟦ P ⟧ else True }]].
+    [[{ b, RET #b; if b then ⟦ Px ⟧ else True }]].
   Proof.
-    setoid_rewrite mutexd_unfold. iIntros (?) "[%Q[#[_ QP]l]] →Φ".
+    setoid_rewrite mutexd_unfold. iIntros (?) "[%Qx[#[_ QP]l]] →Φ".
     iApply twp_fupd.
     wp_apply (twp_try_acquire_loop_mutex_tok (sm:=⟦⟧) with "l").
-    iIntros ([|]) "Q"; iApply "→Φ"; by [iApply "QP"|].
+    iIntros ([|]) "Qx"; iApply "→Φ"; by [iApply "QP"|].
   Qed.
-  Lemma twp_release_mutexd {l P} :
-    [[{ mutexd l P ∗ ⟦ P ⟧ }]][mutex_wsatid]
+  Lemma twp_release_mutexd {l Px} :
+    [[{ mutexd l Px ∗ ⟦ Px ⟧ }]][mutex_wsatid]
       release_mutex #l
     [[{ RET #(); True }]].
   Proof.
-    setoid_rewrite mutexd_unfold. iIntros (?) "[[%Q[#[PQ _]l]] P] →Φ".
-    iApply fupd_twp. iMod ("PQ" with "P") as "Q". iModIntro.
+    setoid_rewrite mutexd_unfold. iIntros (?) "[[%Qx[#[PQ _]l]] Px] →Φ".
+    iApply fupd_twp. iMod ("PQ" with "Px") as "Qx". iModIntro.
     by wp_apply (twp_release_mutex_tok (sm:=⟦⟧) with "[$]").
   Qed.
 
   Context `{!Deriv (JUDGI:=JUDGI) ih δ}.
 
   (** Turn [mutex_tok] into [mutex] *)
-  Lemma mutex_tok_mutex {l P} : mutex_tok l P ⊢ mutex δ l P.
+  Lemma mutex_tok_mutex {l Px} : mutex_tok l Px ⊢ mutex δ l Px.
   Proof.
     rewrite mutex_unseal. iIntros "$ !>". iApply Deriv_factor. iIntros (????).
     rewrite mutex_jiff_sem. iSplit; by iIntros.
   Qed.
 
   (** Wrapper lemmas *)
-  Lemma alloc_mutex {l P} :
-    l ↦ #false -∗ ⟦ P ⟧(δ) =[mutex_wsati δ]=∗ mutex δ l P.
+  Lemma alloc_mutex {l Px} :
+    l ↦ #false -∗ ⟦ Px ⟧(δ) =[mutex_wsati δ]=∗ mutex δ l Px.
   Proof. rewrite -mutex_tok_mutex. exact alloc_mutex_tok. Qed.
-  Lemma alloc_acquire_mutex {l P} :
-    l ↦ #true =[mutex_wsati δ]=∗ mutex δ l P.
+  Lemma alloc_acquire_mutex {l Px} :
+    l ↦ #true =[mutex_wsati δ]=∗ mutex δ l Px.
   Proof. rewrite -mutex_tok_mutex. exact alloc_acquire_mutex_tok. Qed.
 
   (** Convert [mutex] with [mod_iff] *)
-  Lemma mutex_iff' {l P Q} :
+  Lemma mutex_iff' {l Px Qx} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      mod_iff (fupd ⊤ ⊤) ⟦ P ⟧(δ') ⟦ Q ⟧(δ')) -∗
-      mutex δ l P -∗ mutex δ l Q.
+      mod_iff (fupd ⊤ ⊤) ⟦ Px ⟧(δ') ⟦ Qx ⟧(δ')) -∗
+      mutex δ l Px -∗ mutex δ l Qx.
   Proof.
-    rewrite mutex_unseal. iIntros "#big [%R[#iff $]] !>". iApply Deriv_factor.
+    rewrite mutex_unseal. iIntros "#big [%Rx[#iff $]] !>". iApply Deriv_factor.
     iIntros (??? to). rewrite to !mutex_jiff_sem.
     iApply (mod_iff_trans with "[] iff"). iApply mod_iff_sym. by iApply "big".
   Qed.
-  Lemma mutex_iff {l P Q} :
+  Lemma mutex_iff {l Px Qx} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      mod_iff (fupd ⊤ ⊤) ⟦ P ⟧(δ') ⟦ Q ⟧(δ')) -∗
-      mutex δ l P ∗-∗ mutex δ l Q.
+      mod_iff (fupd ⊤ ⊤) ⟦ Px ⟧(δ') ⟦ Qx ⟧(δ')) -∗
+      mutex δ l Px ∗-∗ mutex δ l Qx.
   Proof.
     iIntros "big"; iSplit; iApply mutex_iff'; [done|]. iStopProof. do 6 f_equiv.
     apply mod_iff_sym.
