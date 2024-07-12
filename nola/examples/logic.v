@@ -186,11 +186,11 @@ Section verify.
 
   (** [ilist]: Formula for a list *)
   Definition ilist_gen N Φx Ilist' l : cif Σ :=
-    cif_inv N (Φx l) ∗ cif_inv N (Ilist' N Φx l).
+    cif_inv N (Φx l) ∗ cif_inv N (Ilist' l).
   Definition ilist'_gen N Φx Ilist' l : cif Σ :=
     ∃ l', (l +ₗ 1) ↦ #l' ∗ ilist_gen N Φx Ilist' l'.
-  CoFixpoint ilist' N Φx : loc → cif Σ := ilist'_gen N Φx ilist'.
-  Definition ilist N Φx : loc → cif Σ := ilist_gen N Φx ilist'.
+  CoFixpoint ilist' N Φx : loc → cif Σ := ilist'_gen N Φx (ilist' N Φx).
+  Definition ilist N Φx : loc → cif Σ := ilist_gen N Φx (ilist' N Φx).
 
   (** Access the tail of a list *)
   Definition tail_ilist : val := λ: "l", !("l" +ₗ #1).
@@ -278,12 +278,11 @@ Section verify.
   (** ** Linked list with a mutex *)
 
   (** [mlist]: Formula for a list with a mutex *)
-  Definition mlist_gen Φx Mlist' l : cif Σ :=
-    cif_mutex l (Mlist' Φx l).
+  Definition mlist_gen Φx Mlist' l : cif Σ := cif_mutex l (Mlist' l).
   Definition mlist'_gen Φx Mlist' l : cif Σ :=
     Φx (l +ₗ 1) ∗ ∃ l', (l +ₗ 2) ↦ #l' ∗ mlist_gen Φx Mlist' l'.
-  CoFixpoint mlist' Φx : loc → cif Σ := mlist'_gen Φx mlist'.
-  Definition mlist Φx : loc → cif Σ := mlist_gen Φx mlist'.
+  CoFixpoint mlist' Φx : loc → cif Σ := mlist'_gen Φx (mlist' Φx).
+  Definition mlist Φx : loc → cif Σ := mlist_gen Φx (mlist' Φx).
 
   (** Try to acquire the lock of [mlist] *)
   Lemma twp_try_acquire_loop_mlist {Φx l} {k : nat} :
