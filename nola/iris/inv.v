@@ -171,8 +171,7 @@ Section inv_wp.
   (** Access using [inv_tok] via [twp] *)
   Lemma inv_tok_acc_twp `{!Atomic (stuckness_to_atomicity s) e} {N Px E Q Ψ} :
     ↑N ⊆ E → to_val e = None →
-    [[{ sm Px ∗ Q }]][inv_wsat sm] e @ s; E∖↑N [[{ v, RET v; sm Px ∗ Ψ v }]]
-      -∗
+    [[{ sm Px ∗ Q }]][inv_wsat sm] e @ s; E∖↑N [[{ v, RET v; sm Px ∗ Ψ v }]] -∗
       [[{ inv_tok N Px ∗ Q }]][inv_wsat sm] e @ s; E [[{ v, RET v; Ψ v }]].
   Proof.
     iIntros (??) "#twp %Φ !> [i Q] →Φ".
