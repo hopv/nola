@@ -17,12 +17,9 @@ Variant sel :=
 | (** Points-to token *) cifs_pointsto (l : loc) (dq : dfrac) (v : val)
 | (** Invariant *) cifs_inv (N : namespace)
 | (** Mutex *) cifs_mutex (l : loc)
-| (** Non-prophetic closed borrower *) cifs_borc (α : lft)
 | (** Non-prophetic borrower *) cifs_bor (α : lft)
 | (** Non-prophetic open borrower *) cifs_obor (α : lft) (q : Qp)
 | (** Non-prophetic lender *) cifs_lend (α : lft)
-| (** Prophetic closed borrower *)
-    cifs_pborc {X} (α : lft) (x : X) (ξ : prvar X)
 | (** Prophetic borrower *) cifs_pbor {X} (α : lft) (x : X) (ξ : prvar X)
 | (** Prophetic open borrower *) cifs_pobor {X} (α : lft) (q : Qp) (ξ : prvar X)
 | (** Prophetic lender *) cifs_plend {X} (α : lft) (xπ : clair nsynty X).
@@ -32,9 +29,8 @@ Definition idom (_ : sel) : Type := Empty_set.
 Definition cdom (s : sel) : Type := match s with
   | cifs_pointsto _ _ _ => Empty_set
   | cifs_inv _ | cifs_mutex _
-    | cifs_borc _ | cifs_bor _ | cifs_obor _ _ | cifs_lend _ => unit
-  | @cifs_pborc X _ _ _ | @cifs_pbor X _ _ _ | @cifs_pobor X _ _ _
-    | @cifs_plend X _ _ => X
+    | cifs_bor _ | cifs_obor _ _ | cifs_lend _ => unit
+ | @cifs_pbor X _ _ _ | @cifs_pobor X _ _ _ | @cifs_plend X _ _ => X
   end.
 (** [dataOF]: Data [oFunctor] *)
 Definition dataOF (_ : sel) : oFunctor := unitO.
@@ -63,9 +59,6 @@ Section cif.
   (** Mutex *)
   Definition cif_mutex l Px : cif Σ :=
     cif_custom (cifs_mutex l) nullary (unary Px) ().
-  (** Non-prophetic closed borrower *)
-  Definition cif_borc α Px : cif Σ :=
-    cif_custom (cifs_borc α) nullary (unary Px) ().
   (** Non-prophetic borrower *)
   Definition cif_bor α Px : cif Σ :=
     cif_custom (cifs_bor α) nullary (unary Px) ().
@@ -75,9 +68,6 @@ Section cif.
   (** Non-prophetic lender *)
   Definition cif_lend α Px : cif Σ :=
     cif_custom (cifs_lend α) nullary (unary Px) ().
-  (** Prophetic closed borrower *)
-  Definition cif_pborc {X} α x ξ (Φx : X -d> cif Σ) : cif Σ :=
-    cif_custom (@cifs_pborc X α x ξ) nullary Φx ().
   (** Prophetic borrower *)
   Definition cif_pbor {X} α x ξ (Φx : X -d> cif Σ) : cif Σ :=
     cif_custom (@cifs_pbor X α x ξ) nullary Φx ().
@@ -93,15 +83,11 @@ Section cif.
   Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
   #[export] Instance cif_mutex_ne {l} : NonExpansive (cif_mutex l).
   Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
-  #[export] Instance cif_borc_ne {α} : NonExpansive (cif_borc α).
-  Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
   #[export] Instance cif_bor_ne {α} : NonExpansive (cif_bor α).
   Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
   #[export] Instance cif_obor_ne {α q} : NonExpansive (cif_obor α q).
   Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
   #[export] Instance cif_lend_ne {α} : NonExpansive (cif_lend α).
-  Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
-  #[export] Instance cif_pborc_ne {X α x ξ} : NonExpansive (@cif_pborc X α x ξ).
   Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
   #[export] Instance cif_pbor_ne {X α x ξ} : NonExpansive (@cif_pbor X α x ξ).
   Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
@@ -157,11 +143,9 @@ Section sem.
     | cifs_pointsto l dq v => λ _ _ _, l ↦{dq} v
     | cifs_inv N => λ _ Pxs _, inv' δ N (Pxs ())
     | cifs_mutex l => λ _ Pxs _, mutex δ l (Pxs ())
-    | cifs_borc α => λ _ Pxs _, nborc δ α (Pxs ())
     | cifs_bor α => λ _ Pxs _, nbor δ α (Pxs ())
     | cifs_obor α q => λ _ Pxs _, nobor δ α q (Pxs ())
     | cifs_lend α => λ _ Pxs _, nlend δ α (Pxs ())
-    | cifs_pborc α x ξ => λ _ Φx _, pborc δ α x ξ Φx
     | cifs_pbor α x ξ => λ _ Φx _, pbor δ α x ξ Φx
     | cifs_pobor α q ξ => λ _ Φx _, pobor δ α q ξ Φx
     | cifs_plend α xπ => λ _ Φx _, plend δ α xπ Φx

@@ -24,12 +24,6 @@ Section borrow_deriv.
   Context `{!borrowGS FML Σ, !BorrowPreDeriv (FML $oi Σ) JUDG}.
   Implicit Type δ : JUDG → iProp Σ.
 
-  (** [borc]: Relaxed closed borrower *)
-  Local Definition borc_def δ α Px : iProp Σ :=
-    ∃ Qx, δ (borrow_jto Px Qx) ∗ δ (borrow_jto Qx Px) ∗ borc_tok α Qx.
-  Local Lemma borc_aux : seal borc_def. Proof. by eexists. Qed.
-  Definition borc := borc_aux.(unseal).
-  Local Lemma borc_unseal : borc = borc_def. Proof. exact: seal_eq. Qed.
   (** [bor]: Relaxed borrower *)
   Local Definition bor_def δ α Px : iProp Σ :=
     ∃ Qx, δ (borrow_jto Px Qx) ∗ δ (borrow_jto Qx Px) ∗ bor_tok α Qx.
@@ -50,8 +44,6 @@ Section borrow_deriv.
   Local Lemma lend_unseal : lend = lend_def. Proof. exact: seal_eq. Qed.
 
   (** Borrower and lender propositions are non-expansive *)
-  #[export] Instance borc_ne `{!NonExpansive δ} {α} : NonExpansive (borc δ α).
-  Proof. rewrite borc_unseal. solve_proper. Qed.
   #[export] Instance bor_ne `{!NonExpansive δ} {α} : NonExpansive (bor δ α).
   Proof. rewrite bor_unseal. solve_proper. Qed.
   #[export] Instance obor_ne `{!NonExpansive δ} {α q} :
@@ -60,8 +52,8 @@ Section borrow_deriv.
   #[export] Instance lend_ne `{!NonExpansive δ} {α} : NonExpansive (lend δ α).
   Proof. rewrite lend_unseal. solve_proper. Qed.
 End borrow_deriv.
-Notation borcd := (borc der). Notation bord := (bor der).
-Notation obord := (obor der). Notation lendd := (lend der).
+Notation bord := (bor der). Notation obord := (obor der).
+Notation lendd := (lend der).
 
 Section borrow_deriv.
   Context `{!BorrowPreDeriv (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
@@ -110,17 +102,6 @@ Section borrow_deriv.
   Proof. by rewrite der_sound borrow_jto_sem. Qed.
 
   (** Convert the body of borrower and lender propositions *)
-  Lemma borc_to {α Px Qx} :
-    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      ⟦ Px ⟧(δ') ==∗ ⟦ Qx ⟧(δ')) -∗
-    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      ⟦ Qx ⟧(δ') ==∗ ⟦ Px ⟧(δ')) -∗
-    borc δ α Px -∗ borc δ α Qx.
-  Proof.
-    rewrite borc_unseal. iIntros "PQ QP [%R[PR[RP $]]]".
-    iSplitL "QP PR"; [iApply (borrow_jto_trans with "QP PR")|
-      iApply (borrow_jto_trans' with "PQ RP")].
-  Qed.
   Lemma bor_to {α Px Qx} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
       ⟦ Px ⟧(δ') ==∗ ⟦ Qx ⟧(δ')) -∗
@@ -150,11 +131,6 @@ Section borrow_deriv.
   Qed.
 
   (** Modify the lifetime of borrower and lender propositions *)
-  Lemma borc_lft {α β Px} : β ⊑□ α -∗ borc δ α Px -∗ borc δ β Px.
-  Proof.
-    rewrite borc_unseal. iIntros "⊑ [%[?[? c]]]".
-    iDestruct (borc_tok_lft with "⊑ c") as "$". iFrame.
-  Qed.
   Lemma bor_lft {α β Px} : β ⊑□ α -∗ bor δ α Px -∗ bor δ β Px.
   Proof.
     rewrite bor_unseal. iIntros "⊑ [%[?[? b]]]".
@@ -173,8 +149,6 @@ Section borrow_deriv.
   Qed.
 
   (** Turn from tokens *)
-  Lemma borc_tok_borc {α Px} : borc_tok α Px ⊢ borc δ α Px.
-  Proof. rewrite borc_unseal. iIntros "$". iSplitL; iApply borrow_jto_refl. Qed.
   Lemma bor_tok_bor {α Px} : bor_tok α Px ⊢ bor δ α Px.
   Proof. rewrite bor_unseal. iIntros "$". iSplitL; iApply borrow_jto_refl. Qed.
   Lemma obor_tok_obor {α q Px} : obor_tok α q Px ⊢ obor δ α q Px.
@@ -182,33 +156,26 @@ Section borrow_deriv.
   Lemma lend_tok_lend {α Px} : lend_tok α Px ⊢ lend δ α Px.
   Proof. rewrite lend_unseal. iIntros "$". iApply borrow_jto_refl. Qed.
 
-  (** Other conversions *)
-  Lemma borc_bor {α Px} : borc δ α Px ⊢ bor δ α Px.
-  Proof.
-    rewrite borc_unseal bor_unseal. iIntros "[%[$[$?]]]".
-    by rewrite borc_tok_bor_tok.
-  Qed.
-  Lemma borc_fake {α} Px : [†α] ⊢ borc δ α Px.
-  Proof. by rewrite borc_tok_fake borc_tok_borc. Qed.
+  (** Fake a borrower *)
   Lemma bor_fake {α} Px : [†α] ⊢ bor δ α Px.
-  Proof. by rewrite borc_fake borc_bor. Qed.
+  Proof. by rewrite bor_tok_fake bor_tok_bor. Qed.
 
   Context `{!GenUpd (PROP:=iProp Σ) M, !GenUpdBupd M}.
 
   (** Create borrowers and lenders *)
-  Lemma borc_lend_new_list α Pxl Qxl :
+  Lemma bor_lend_new_list α Pxl Qxl :
     ([∗ list] Px ∈ Pxl, ⟦ Px ⟧(δ)) -∗
     ([†α] -∗ ([∗ list] Px ∈ Pxl, ⟦ Px ⟧(δ)) -∗ M ([∗ list] Qx ∈ Qxl, ⟦ Qx ⟧(δ)))
       =[borrow_wsati M δ]=∗
-      ([∗ list] Px ∈ Pxl, borc δ α Px) ∗ [∗ list] Qx ∈ Qxl, lend δ α Qx.
+      ([∗ list] Px ∈ Pxl, bor δ α Px) ∗ [∗ list] Qx ∈ Qxl, lend δ α Qx.
   Proof.
-    setoid_rewrite <-borc_tok_borc. setoid_rewrite <-lend_tok_lend.
-    exact: borc_lend_tok_new_list.
+    setoid_rewrite <-bor_tok_bor. setoid_rewrite <-lend_tok_lend.
+    exact: bor_lend_tok_new_list.
   Qed.
   (** Simply create a borrower and a lender *)
-  Lemma borc_lend_new α Px :
-    ⟦ Px ⟧(δ) =[borrow_wsati M δ]=∗ borc δ α Px ∗ lend δ α Px.
-  Proof. rewrite -borc_tok_borc -lend_tok_lend. exact: borc_lend_tok_new. Qed.
+  Lemma bor_lend_new α Px :
+    ⟦ Px ⟧(δ) =[borrow_wsati M δ]=∗ bor δ α Px ∗ lend δ α Px.
+  Proof. rewrite -bor_tok_bor -lend_tok_lend. exact: bor_lend_tok_new. Qed.
 End borrow_deriv.
 
 Section borrow_deriv.
@@ -238,14 +205,6 @@ Section borrow_deriv.
     iMod ("QP" with "Qx") as "$". by iIntros.
   Qed.
 
-  (** Open a closed borrower *)
-  Lemma borcd_open {α q Px} :
-    q.[α] -∗ borcd α Px =[borrow_wsatid M]=∗ obord α q Px ∗ ⟦ Px ⟧.
-  Proof.
-    rewrite borc_unseal obor_unseal. iIntros "α [%Qx[$[QP c]]]".
-    iMod (borc_tok_open (sm:=⟦⟧) with "α c") as "[$ Qx]".
-    rewrite der_borrow_jto. by iMod ("QP" with "Qx").
-  Qed.
   (** Open a borrower *)
   Lemma bord_open {α q Px} :
     q.[α] -∗ bord α Px -∗ modw M (borrow_wsatid M) (obord α q Px ∗ ⟦ Px ⟧).
@@ -279,10 +238,10 @@ Section borrow_deriv.
     ([∗ list] Qx ∈ Qxl, ⟦ Qx ⟧) -∗
     ([†β] -∗ ([∗ list] Qx ∈ Qxl, ⟦ Qx ⟧) -∗ M
       ([∗ list] '(_, _, Px)' ∈ αqPl, ⟦ Px ⟧)) =[borrow_wsatid M]=∗
-      ([∗ list] '(α, q, _)' ∈ αqPl, q.[α]) ∗ ([∗ list] Qx ∈ Qxl, borcd β Qx).
+      ([∗ list] '(α, q, _)' ∈ αqPl, q.[α]) ∗ ([∗ list] Qx ∈ Qxl, bord β Qx).
   Proof.
     rewrite obord_list /=. iIntros "[%[->[ol →]]] Qxl →Pl".
-    setoid_rewrite <-borc_tok_borc.
+    setoid_rewrite <-bor_tok_bor.
     iApply (obor_tok_merge_subdiv (M:=M) with "ol Qxl [→ →Pl]").
     iIntros "† Qxl". iMod ("→Pl" with "† Qxl") as "Pxl".
     iMod ("→" with "Pxl") as "$". by iIntros.
@@ -291,7 +250,7 @@ Section borrow_deriv.
   Lemma obord_subdiv {α q Px} Qxl β :
     β ⊑□ α -∗ obord α q Px -∗ ([∗ list] Qx ∈ Qxl, ⟦ Qx ⟧) -∗
     ([†β] -∗ ([∗ list] Qx ∈ Qxl, ⟦ Qx ⟧) -∗ M ⟦ Px ⟧) =[borrow_wsatid M]=∗
-      q.[α] ∗ ([∗ list] Qx ∈ Qxl, borcd β Qx).
+      q.[α] ∗ ([∗ list] Qx ∈ Qxl, bord β Qx).
   Proof.
     iIntros "⊑ o Qxl →P".
     iMod (obord_merge_subdiv [(_,_,_)'] with "[⊑ o] Qxl [→P]")
@@ -299,7 +258,7 @@ Section borrow_deriv.
   Qed.
   (** Simply close a borrower *)
   Lemma obord_close {α q Px} :
-    obord α q Px -∗ ⟦ Px ⟧ =[borrow_wsatid M]=∗ q.[α] ∗ borcd α Px.
+    obord α q Px -∗ ⟦ Px ⟧ =[borrow_wsatid M]=∗ q.[α] ∗ bord α Px.
   Proof.
     iIntros "o Px".
     iMod (obord_subdiv [Px] with "[] o [Px] []") as "[$[$_]]"=>/=;
@@ -308,35 +267,29 @@ Section borrow_deriv.
 
   (** Turn [obord] to [obor_tok] *)
   Lemma obord_obor_tok {α q Px} :
-    obord α q Px -∗ ⟦ Px ⟧ =[borrow_wsatid M]=∗ obor_tok α q Px ∗ ⟦ Px ⟧.
+    obord α q Px -∗ ⟦ Px ⟧ -∗ modw M (borrow_wsatid M)
+      (obor_tok α q Px ∗ ⟦ Px ⟧).
   Proof.
     rewrite obor_unseal. iIntros "[%[PQ o]] Px".
     iMod (obor_tok_subdiv (M:=M) (sm:=⟦⟧) [_] with "[] o [$Px //] [PQ]")
       as "[α[c _]]".
     { iApply lft_sincl_refl. }
     { rewrite der_borrow_jto /=. iIntros "_ [Px _]". by iMod ("PQ" with "Px"). }
-    iApply (borc_tok_open (sm:=⟦⟧) with "α c").
+    iApply (bor_tok_open (M:=M) (sm:=⟦⟧) with "α c").
   Qed.
 
   (** Reborrow a borrower *)
   Lemma obord_reborrow {α q Px} β :
-    obord α q Px -∗ ⟦ Px ⟧ =[borrow_wsatid M]=∗
-      q.[α] ∗ borcd (α ⊓ β) Px ∗ ([†β] -∗ bord α Px).
+    obord α q Px -∗ ⟦ Px ⟧ -∗ modw M (borrow_wsatid M)
+      (q.[α] ∗ bord (α ⊓ β) Px ∗ ([†β] -∗ bord α Px)).
   Proof.
     iIntros "o Px". iMod (obord_obor_tok with "o Px") as "[o Px]".
-    rewrite -borc_tok_borc -bor_tok_bor.
-    iApply (obor_tok_reborrow (M:=M) (sm:=⟦⟧) with "o Px").
-  Qed.
-  Lemma borcd_reborrow {α q Px} β :
-    q.[α] -∗ borcd α Px =[borrow_wsatid M]=∗
-      q.[α] ∗ borcd (α ⊓ β) Px ∗ ([†β] -∗ bord α Px).
-  Proof.
-    iIntros "α c". iMod (borcd_open with "α c") as "[o Px]".
-    by iMod (obord_reborrow with "o Px").
+    rewrite -bor_tok_bor -bor_tok_bor.
+    iMod (obor_tok_reborrow (M:=M) (sm:=⟦⟧) with "o Px") as "$". by iIntros "$".
   Qed.
   Lemma bord_reborrow {α q Px} β :
     q.[α] -∗ bord α Px -∗ modw M (borrow_wsatid M)
-      (q.[α] ∗ borcd (α ⊓ β) Px ∗ ([†β] -∗ bord α Px)).
+      (q.[α] ∗ bord (α ⊓ β) Px ∗ ([†β] -∗ bord α Px)).
   Proof.
     iIntros "α b". iMod (bord_open with "α b") as "[o Px]".
     by iMod (obord_reborrow with "o Px").

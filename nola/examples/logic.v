@@ -18,12 +18,9 @@ Variant sel :=
 | (** Invariant *) cifs_inv (N : namespace)
 | (** Relaxed invariant *) cifs_inv' (N : namespace)
 | (** Mutex *) cifs_mutex (l : loc)
-| (** Non-prophetic closed borrower *) cifs_borc (α : lft)
 | (** Non-prophetic borrower *) cifs_bor (α : lft)
 | (** Non-prophetic open borrower *) cifs_obor (α : lft) (q : Qp)
 | (** Non-prophetic lender *) cifs_lend (α : lft)
-| (** Prophetic closed borrower *)
-    cifs_pborc {X} (α : lft) (x : X) (ξ : prvar X)
 | (** Prophetic borrower *) cifs_pbor {X} (α : lft) (x : X) (ξ : prvar X)
 | (** Prophetic open borrower *) cifs_pobor {X} (α : lft) (q : Qp) (ξ : prvar X)
 | (** Prophetic lender *) cifs_plend {X} (α : lft) (xπ : clair nsynty X).
@@ -33,9 +30,8 @@ Definition idom (_ : sel) : Type := Empty_set.
 Definition cdom (s : sel) : Type := match s with
   | cifs_pointsto _ _ _ => Empty_set
   | cifs_inv _ | cifs_inv' _ | cifs_mutex _
-    | cifs_borc _ | cifs_bor _ | cifs_obor _ _ | cifs_lend _ => unit
-  | @cifs_pborc X _ _ _ | @cifs_pbor X _ _ _ | @cifs_pobor X _ _ _
-    | @cifs_plend X _ _ => X
+    | cifs_bor _ | cifs_obor _ _ | cifs_lend _ => unit
+  | @cifs_pbor X _ _ _ | @cifs_pobor X _ _ _ | @cifs_plend X _ _ => X
   end.
 (** [dataOF]: Data [oFunctor] *)
 Definition dataOF (_ : sel) : oFunctor := unitO.
@@ -67,9 +63,6 @@ Section cif.
   (** Mutex *)
   Definition cif_mutex l Px : cif Σ :=
     cif_custom (cifs_mutex l) nullary (unary Px) ().
-  (** Non-prophetic closed borrower *)
-  Definition cif_borc α Px : cif Σ :=
-    cif_custom (cifs_borc α) nullary (unary Px) ().
   (** Non-prophetic borrower *)
   Definition cif_bor α Px : cif Σ :=
     cif_custom (cifs_bor α) nullary (unary Px) ().
@@ -79,9 +72,6 @@ Section cif.
   (** Non-prophetic lender *)
   Definition cif_lend α Px : cif Σ :=
     cif_custom (cifs_lend α) nullary (unary Px) ().
-  (** Prophetic closed borrower *)
-  Definition cif_pborc {X} α x ξ (Φx : X -d> cif Σ) : cif Σ :=
-    cif_custom (@cifs_pborc X α x ξ) nullary Φx ().
   (** Prophetic borrower *)
   Definition cif_pbor {X} α x ξ (Φx : X -d> cif Σ) : cif Σ :=
     cif_custom (@cifs_pbor X α x ξ) nullary Φx ().
@@ -99,15 +89,11 @@ Section cif.
   Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
   #[export] Instance cif_mutex_ne {l} : NonExpansive (cif_mutex l).
   Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
-  #[export] Instance cif_borc_ne {α} : NonExpansive (cif_borc α).
-  Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
   #[export] Instance cif_bor_ne {α} : NonExpansive (cif_bor α).
   Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
   #[export] Instance cif_obor_ne {α q} : NonExpansive (cif_obor α q).
   Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
   #[export] Instance cif_lend_ne {α} : NonExpansive (cif_lend α).
-  Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
-  #[export] Instance cif_pborc_ne {X α x ξ} : NonExpansive (@cif_pborc X α x ξ).
   Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
   #[export] Instance cif_pbor_ne {X α x ξ} : NonExpansive (@cif_pbor X α x ξ).
   Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
@@ -141,11 +127,9 @@ Section sem.
     | cifs_inv N => λ _ Pxs _, inv_tok N (Pxs ())
     | cifs_inv' N => λ _ Pxs _, inv' δ N (Pxs ())
     | cifs_mutex l => λ _ Pxs _, mutex_tok l (Pxs ())
-    | cifs_borc α => λ _ Pxs _, nborc_tok α (Pxs ())
     | cifs_bor α => λ _ Pxs _, nbor_tok α (Pxs ())
     | cifs_obor α q => λ _ Pxs _, nobor_tok α q (Pxs ())
     | cifs_lend α => λ _ Pxs _, nlend_tok α (Pxs ())
-    | cifs_pborc α x ξ => λ _ Φx _, pborc_tok α x ξ Φx
     | cifs_pbor α x ξ => λ _ Φx _, pbor_tok α x ξ Φx
     | cifs_pobor α q ξ => λ _ Φx _, pobor_tok α q ξ Φx
     | cifs_plend α xπ => λ _ Φx _, plend_tok α xπ Φx
@@ -342,7 +326,7 @@ Section verify.
     [[{ β ⊑□ α ∗ q.[β] ∗ nbor_tok α (∃ l', l ↦ #l' ∗ cif_bor β (Φx l'))%cif }]]
       [pborrow_wsat bupd ⟦⟧]
       !#l
-    [[{ l', RET #l'; q.[β] ∗ nborc_tok β (Φx l') }]].
+    [[{ l', RET #l'; q.[β] ∗ nbor_tok β (Φx l') }]].
   Proof.
     iIntros (Ψ) "(#⊑ & [β β'] & b) →Ψ".
     iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
@@ -354,7 +338,7 @@ Section verify.
       as "[α _]"=>/=. { iApply lft_sincl_refl. } { done. }
     { iIntros "† _". iModIntro. iExists _. iFrame "↦". by iApply "→b'". }
     iModIntro. iApply "→Ψ". iFrame "β". iDestruct ("→β'" with "α") as "$".
-    iApply nborc_tok_lft; [|done]. iApply lft_sincl_meet_intro; [|done].
+    iApply nbor_tok_lft; [|done]. iApply lft_sincl_meet_intro; [|done].
     iApply lft_sincl_refl.
   Qed.
 
@@ -367,7 +351,7 @@ Section verify.
       !#l
     [[{ l', RET #l';
         q.[β] ∗ ∃ ξ' : prvar X,
-          ⟨π, π η = (π ξ', ξ)'⟩ ∗ pborc_tok β x ξ' (Φxx l') }]].
+          ⟨π, π η = (π ξ', ξ)'⟩ ∗ pbor_tok β x ξ' (Φxx l') }]].
   Proof.
     iIntros (Ψ) "(#⊑ & [β β'] & b) →Ψ".
     iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
@@ -378,7 +362,7 @@ Section verify.
       (λ _, (_,_)' : _ *'ₛ _) with "o β b' [↦]") as (?) "[α[β[obs c]]]".
     { iIntros "/=% _ ? !>". iExists _. iFrame. }
     iModIntro. iApply "→Ψ". iFrame "β". iDestruct ("→β'" with "α") as "$".
-    iExists _. iFrame "obs". iApply pborc_tok_lft; [|done].
+    iExists _. iFrame "obs". iApply pbor_tok_lft; [|done].
     iApply lft_sincl_meet_intro; [done|]. iApply lft_sincl_refl.
   Qed.
 
@@ -394,8 +378,7 @@ Section verify.
     iMod (nbor_tok_open (sm:=⟦⟧) (M:=bupd) with "α b") as "[o ↦]".
     rewrite /⟦⟧ /=. iDestruct "↦" as "↦". wp_load. iModIntro.
     iMod (nobor_tok_close (sm:=⟦⟧) (M:=bupd) with "o [$↦ //]") as "[α b]".
-    rewrite nborc_tok_nbor_tok. iMod ("cl" with "b") as "_". iModIntro.
-    by iApply "→Φ".
+    iMod ("cl" with "b") as "_". iModIntro. by iApply "→Φ".
   Qed.
 
   (** Shared borrow of a mutex *)
@@ -418,8 +401,7 @@ Section verify.
     iDestruct "big" as "[[↦ b']|↦]"; [wp_cmpxchg_suc|wp_cmpxchg_fail];
       iModIntro;
       iMod (nobor_tok_close (sm:=⟦⟧) (M:=bupd) with "o [$↦ //]") as "[α b]";
-      rewrite nborc_tok_nbor_tok; iMod ("cl" with "b") as "_"; iModIntro;
-      wp_pure; iApply "→Φ"; by iFrame.
+      iMod ("cl" with "b") as "_"; iModIntro; wp_pure; iApply "→Φ"; by iFrame.
   Qed.
   (** [mutex_bor_try_acquire], repeatedly with a timeout *)
   Lemma mutex_bor_try_acquire_loop {α l Px q} {n : nat} :
@@ -453,8 +435,7 @@ Section verify.
     wp_store. iModIntro.
     iMod (nobor_tok_close (sm:=⟦⟧) (M:=bupd) with "o [b' ↦]") as "[α b]".
     { iLeft. iFrame. }
-    rewrite nborc_tok_nbor_tok. iMod ("cl" with "b") as "_". iModIntro.
-    by iApply "→Φ".
+    iMod ("cl" with "b") as "_". iModIntro. by iApply "→Φ".
   Qed.
 
   (** Create a shared borrow and a lender of a mutex *)
@@ -463,21 +444,20 @@ Section verify.
       mutex_bor α l Px ∗ nlend_tok α (∃ b', l ↦ #b' ∗ Px)%cif ∗ q.[α].
   Proof.
     iIntros "↦ Px α".
-    iMod (nborc_nlend_tok_new (M:=bupd) with "[↦ Px]") as "[b $]"; [by iFrame|].
-    iMod (nborc_tok_open (sm:=⟦⟧) with "α b") as "[o big]". rewrite /⟦⟧ /=.
-    iDestruct "big" as (b') "[↦ Px]".
+    iMod (nbor_nlend_tok_new (M:=bupd) with "[↦ Px]") as "[b $]"; [by iFrame|].
+    iMod (nbor_tok_open (M:=bupd) (sm:=⟦⟧) with "α b") as "[o big]".
+    rewrite /⟦⟧ /=. iDestruct "big" as (b') "[↦ Px]".
     iMod (nobor_tok_subdiv (sm:=⟦⟧) (M:=bupd) [∃ b', l ↦ #b'; Px]%cif
       with "[] o [↦ Px] []") as "[α[b[b' _]]]"; rewrite /⟦⟧ /=.
     { iApply lft_sincl_refl. } { iSplitL "↦"; iFrame. }
     { by iIntros "_ [[% $][$ _]]". }
-    iMod (nborc_tok_open (sm:=⟦⟧) with "α b") as "[o ↦]".
+    iMod (nbor_tok_open (M:=bupd) (sm:=⟦⟧) with "α b") as "[o ↦]".
     iMod (nobor_tok_subdiv (sm:=⟦⟧) (M:=bupd)
       [(l ↦ #false ∗ cif_bor α Px) ∨ l ↦ #true]%cif with "[] o [↦ b'] []")
       as "[$[b _]]"; rewrite /⟦⟧ /=. { iApply lft_sincl_refl. }
-    { iSplit; [|done]. rewrite nborc_tok_nbor_tok.
-      iDestruct "↦" as ([|]) "↦"; [|iLeft]; iFrame. }
+    { iSplit; [|done]. iDestruct "↦" as ([|]) "↦"; [|iLeft]; iFrame. }
     { by iIntros "_ [[[$ _]|$]_]". }
-    rewrite nborc_tok_nbor_tok. by iMod (inv_tok_alloc with "[b]") as "$".
+    by iMod (inv_tok_alloc with "[b]") as "$".
   Qed.
 
   (** ** Linked list with a shared borrow over a mutex *)
@@ -515,9 +495,9 @@ Section verify.
     iMod (nbor_tok_open (M:=bupd) (sm:=⟦⟧) with "α b") as "[o big]".
     rewrite /⟦ mblist' _ _ _ ⟧ /=. iDestruct "big" as "(Φx & %l' & ↦ & #mtl)".
     wp_apply ("f" with "Φx"). iIntros "Φx". wp_load. wp_pures.
-    iMod (nobor_tok_close (M:=bupd) (sm:=⟦⟧) with "o [$Φx $↦ //]") as "[α c]".
-    rewrite nborc_tok_nbor_tok. wp_apply (mutex_bor_release with "[$c $α //]").
-    iIntros "α". wp_load. wp_store. have -> : (S m - 1)%Z = m by lia.
+    iMod (nobor_tok_close (M:=bupd) (sm:=⟦⟧) with "o [$Φx $↦ //]") as "[α b]".
+    wp_apply (mutex_bor_release with "[$b $α //]"). iIntros "α". wp_load.
+    wp_store. have -> : (S m - 1)%Z = m by lia.
     iApply ("IH" with "c↦ α →Ψ mtl").
   Qed.
 
