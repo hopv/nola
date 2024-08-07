@@ -308,8 +308,8 @@ Section borrow.
     (repeat unfold uPred_holds=>/=)=> valid.
     apply auth_both_validN, proj1, singleton_includedN_l in valid as
       [?[eqv incl]].
-    apply Some_equiv_eq in eqv as (?&eq&eqv).
-    apply lookup_fmap_Some in eq as ([[dα Bm]Pm]&<-&?). exists Bm, Pm.
+    apply Some_equiv_eq in eqv as (? & eq & eqv).
+    apply lookup_fmap_Some in eq as ([[dα Bm]Pm] & <- & ?). exists Bm, Pm.
     rewrite Some_includedN_total in incl. rewrite -eqv in incl.
     apply prod_includedN in incl as [incl ?].
     apply prod_includedN in incl as [incl ?]. simpl in *.
@@ -481,7 +481,7 @@ Section borrow.
       iIntros "[% ?]"; [|by iExists _, _]|].
     { iRight. iExists _, _, _, _. iSplitR; by [iApply lft_sincl_refl|]. }
     iExists _. iFrame "●". iApply (big_sepM_insert_2 with "[Pxl →Qxl] Dm").
-    iLeft. iSplitL "Pxl";by rewrite !big_sepM_map_by big_sepL_fmap.
+    iLeft. iSplitL "Pxl"; by rewrite !big_sepM_map_by big_sepL_fmap.
   Qed.
 
   (** Create new borrowers and lenders *)
