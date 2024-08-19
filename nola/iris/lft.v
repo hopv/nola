@@ -25,20 +25,19 @@ Fact lft_meet_id_r : RightId (=) ⊤ (meet (A:=lft)). Proof. exact _. Qed.
 Fact lft_meet_comm : Comm (=) (meet (A:=lft)). Proof. exact _. Qed.
 Fact lft_meet_assoc : Assoc (=) (meet (A:=lft)). Proof. exact _. Qed.
 
-(** ** Ghost state *)
+(** [= ⊤] and [⊓] *)
+Lemma lft_eqtop_meet_l {α β} : α ⊓ β = ⊤ → α = ⊤.
+Proof. rewrite -!gmultiset_size_empty_iff gmultiset_size_disj_union. lia. Qed.
+Lemma lft_eqtop_meet_r {α β} : α ⊓ β = ⊤ → β = ⊤.
+Proof. rewrite [_ ⊓ _]comm. exact lft_eqtop_meet_l. Qed.
+Lemma lft_neqtop_meet_l {α β} : α ≠ ⊤ → α ⊓ β ≠ ⊤.
+Proof. by move=> ? /lft_eqtop_meet_l. Qed.
+Lemma lft_neqtop_meet_r {α β} : β ≠ ⊤ → α ⊓ β ≠ ⊤.
+Proof. by move=> ? /lft_eqtop_meet_r. Qed.
 
-(** Algebra for an atomic lifetime *)
-Definition lftR := csumR
-  dfracR (* Live, fractionally owned *)
-  unitR (* Dead *).
+(** ** [⊑]: Pure lifetime inclusion *)
 
-(** Ghost state *)
-Class lftG Σ := lftG_inG : inG Σ lftR.
-Local Existing Instance lftG_inG.
-Definition lftΣ : gFunctors := GFunctor lftR.
-#[export] Instance subG_lft `{!subG lftΣ Σ} : lftG Σ. Proof. solve_inG. Qed.
-
-(** ** Pure lifetime inclusion, as reverse set inclusion *)
+(** Pure lifetime inclusion, as reverse multiset inclusion *)
 Definition lft_incl (α β : lft) : Prop := elements β ⊆ elements α.
 #[export] Instance sqsubseteq_lft : SqSubsetEq lft := lft_incl.
 
@@ -67,15 +66,18 @@ Proof. rewrite !lft_incl_unfold !gmultiset_elements_disj_union. set_solver. Qed.
 Lemma lft_incl_meet_mono_r {α β β'} : β ⊑ β' → α ⊓ β ⊑ α ⊓ β'.
 Proof. rewrite !lft_incl_unfold !gmultiset_elements_disj_union. set_solver. Qed.
 
-(** [= ⊤] and [⊓] *)
-Lemma lft_eqtop_meet_l {α β} : α ⊓ β = ⊤ → α = ⊤.
-Proof. rewrite -!gmultiset_size_empty_iff gmultiset_size_disj_union. lia. Qed.
-Lemma lft_eqtop_meet_r {α β} : α ⊓ β = ⊤ → β = ⊤.
-Proof. rewrite [_ ⊓ _]comm. exact lft_eqtop_meet_l. Qed.
-Lemma lft_neqtop_meet_l {α β} : α ≠ ⊤ → α ⊓ β ≠ ⊤.
-Proof. by move=> ? /lft_eqtop_meet_l. Qed.
-Lemma lft_neqtop_meet_r {α β} : β ≠ ⊤ → α ⊓ β ≠ ⊤.
-Proof. by move=> ? /lft_eqtop_meet_r. Qed.
+(** ** Ghost state *)
+
+(** Algebra for an atomic lifetime *)
+Definition lftR := csumR
+  dfracR (* Live, fractionally owned *)
+  unitR (* Dead *).
+
+(** Ghost state *)
+Class lftG Σ := lftG_inG : inG Σ lftR.
+Local Existing Instance lftG_inG.
+Definition lftΣ : gFunctors := GFunctor lftR.
+#[export] Instance subG_lft `{!subG lftΣ Σ} : lftG Σ. Proof. solve_inG. Qed.
 
 (** ** Lifetime tokens *)
 
@@ -302,7 +304,7 @@ Section lft.
   Proof. solve_proper. Qed.
 End lft.
 
-(** ** Persistent lifetime inclusion *)
+(** ** [⊑□]: Persistent lifetime inclusion *)
 
 Section lft.
   Context `{!lftG Σ}.
