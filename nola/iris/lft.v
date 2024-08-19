@@ -133,20 +133,20 @@ Section lft.
   Proof.
     rewrite lft_dead_unseal. iIntros "q". iDestruct 1 as (a) "[%e †]".
     rewrite big_sepMS_elem_of; [|done].
-    by iDestruct (own_valid_2 with "q †") as "%".
+    by iDestruct (own_valid_2 with "q †") as %?.
   Qed.
   (** Eternal and dead lifetime tokens can't coexist *)
   Lemma lft_etern_dead {α} : [∞α] -∗ [†α] -∗ False.
   Proof.
     rewrite lft_dead_unseal. iIntros "∞". iDestruct 1 as (a) "[%e †]".
     rewrite big_sepMS_elem_of; [|done].
-    by iDestruct (own_valid_2 with "∞ †") as "%".
+    by iDestruct (own_valid_2 with "∞ †") as %?.
   Qed.
   (** The fraction of a live lifetime token is no more than [1] *)
   Lemma lft_live_valid {α q} : α ≠ ⊤ → q.[α] -∗ ⌜q ≤ 1⌝%Qp.
   Proof.
-    case: (gmultiset_choose_or_empty α); [|done]=> [[a ?]_]. iIntros "α".
-    iDestruct (big_sepMS_elem_of with "α") as "a"; [done|].
+    case: (gmultiset_choose_or_empty α); [|done]=> [[a ?]_].
+    rewrite big_sepMS_elem_of; [|done]. iIntros "a".
     by iDestruct (own_valid with "a") as %?.
   Qed.
 
@@ -183,8 +183,8 @@ Section lft.
   (** Kill a lifetime *)
   Lemma lft_kill {α} : α ≠ ⊤ → 1.[α] ==∗ [†α].
   Proof.
-    case: (gmultiset_choose_or_empty α); [|done]=> [[a ?]_]. iIntros "α".
-    iDestruct (big_sepMS_elem_of with "α") as "a"; [done|].
+    case: (gmultiset_choose_or_empty α); [|done]=> [[a ?]_].
+    rewrite big_sepMS_elem_of; [|done]. iIntros "a".
     iMod (own_update _ _ (Cinr ()) with "a") as "†".
     { by apply cmra_update_exclusive. }
     iModIntro. rewrite lft_dead_unseal. iExists a. by iFrame "†".
