@@ -853,11 +853,11 @@ Proof.
   rewrite list_fmap_insert/=.
   apply Forall2_app; last done.
   apply Forall2_same_length_lookup; split.
-  { apply Forall2_length in Hprstps; rewrite fmap_length in Hprstps.
-    by rewrite !insert_length fmap_length. }
+  { apply Forall2_length in Hprstps; rewrite length_fmap in Hprstps.
+    by rewrite !length_insert length_fmap. }
   intros j x y.
   destruct (decide (i = j)); simplify_eq.
-  { rewrite !list_lookup_insert ?fmap_length; eauto using lookup_lt_Some; [].
+  { rewrite !list_lookup_insert ?length_fmap; eauto using lookup_lt_Some; [].
     by intros ? ?; simplify_eq. }
   rewrite !list_lookup_insert_ne // list_lookup_fmap.
   intros ? ?.

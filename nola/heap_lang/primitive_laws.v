@@ -247,12 +247,12 @@ Proof.
   iMod (gen_heap_alloc_big _ (heap_array _ (replicate (Z.to_nat n) v)) with "Hσ")
     as "(Hσ & Hl & Hm)".
   { apply heap_array_map_disjoint.
-    rewrite replicate_length Z2Nat.id; auto with lia. }
+    rewrite length_replicate Z2Nat.id; auto with lia. }
   iMod (steps_auth_update_S with "Hsteps") as "Hsteps".
   iModIntro; do 2 (iSplit; first done). iFrame "W Hσ Hκs Hsteps". iApply "HΦ".
   iApply big_sepL_sep. iSplitL "Hl".
   - by iApply heap_array_to_seq_pointsto.
-  - iApply (heap_array_to_seq_meta with "Hm"). by rewrite replicate_length.
+  - iApply (heap_array_to_seq_meta with "Hm"). by rewrite length_replicate.
 Qed.
 Lemma wp_allocN_seq W s E v n :
   (0 < n)%Z →
