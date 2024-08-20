@@ -115,6 +115,36 @@ Section gen_upd.
     split=> >. { solve_proper. } { solve_proper. } { by iIntros. }
     { iIntros ">>$". } { by iIntros "[?$]". }
   Qed.
+
+  (** [MonoidHomomorphism] instances *)
+  Lemma gen_upd_sep {P Q} : M P ∗ M Q ⊢ M (P ∗ Q).
+  Proof. by iIntros "[>$ >$]". Qed.
+  #[export] Instance gen_upd_sep_homomorphism :
+    MonoidHomomorphism bi_sep bi_sep (flip (⊢)) M | 10.
+  Proof.
+    split; [split|]; (try apply _)=> >; [apply gen_upd_sep|apply gen_upd_intro].
+  Qed.
+  Lemma gen_upd_or {P Q} : M P ∨ M Q ⊢ M (P ∨ Q).
+  Proof. iIntros "[>?|>?] !>"; by [iLeft|iRight]. Qed.
+  #[export] Instance gen_upd_or_homomorphism :
+    MonoidHomomorphism bi_or bi_or (flip (⊢)) M | 10.
+  Proof.
+    split; [split|]; (try apply _)=> >; [apply gen_upd_or|apply gen_upd_intro].
+  Qed.
+
+  (** Over big operators *)
+  Lemma big_sepL_gen_upd {A} (Φ : nat → A → PROP) l :
+    ([∗ list] k↦x ∈ l, M (Φ k x)) ⊢ M ([∗ list] k↦x ∈ l, Φ k x).
+  Proof. by rewrite (big_opL_commute _). Qed.
+  Lemma big_sepM_gen_upd {A} `{Countable K} (Φ : K → A → PROP) l :
+    ([∗ map] k↦x ∈ l, M (Φ k x)) ⊢ M ([∗ map] k↦x ∈ l, Φ k x).
+  Proof. by rewrite (big_opM_commute _). Qed.
+  Lemma big_sepS_gen_upd `{Countable A} (Φ : A → PROP) l :
+    ([∗ set] x ∈ l, M (Φ x)) ⊢ M ([∗ set] x ∈ l, Φ x).
+  Proof. by rewrite (big_opS_commute _). Qed.
+  Lemma big_sepMS_gen_upd `{Countable A} (Φ : A → PROP) l :
+    ([∗ mset] x ∈ l, M (Φ x)) ⊢ M ([∗ mset] x ∈ l, Φ x).
+  Proof. by rewrite (big_opMS_commute _). Qed.
 End gen_upd.
 
 (** ** [GenUpdB]: General update subsuming [bupd] *)
