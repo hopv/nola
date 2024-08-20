@@ -160,7 +160,7 @@ Section borrow_deriv.
   Lemma bor_fake {α} Px : [†α] ⊢ bor δ α Px.
   Proof. by rewrite bor_tok_fake bor_tok_bor. Qed.
 
-  Context `{!GenUpd (PROP:=iProp Σ) M, !GenUpdBupd M}.
+  Context `{!GenUpd (PROP:=iProp Σ) M, !GenUpdB M}.
 
   (** Create borrowers and lenders *)
   Lemma bor_lend_new_list α Pxl Qxl :
@@ -182,7 +182,7 @@ Section borrow_deriv.
   Context `{!borrowGS FML Σ,
   !BorrowPreDeriv (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
   !Dsem JUDGI (FML $oi Σ) (iProp Σ), !BorrowDeriv FML Σ JUDGI,
-  !GenUpd (PROP:=iProp Σ) M, !GenUpdBupd M}.
+  !GenUpd (PROP:=iProp Σ) M, !GenUpdB M}.
   Implicit Type (Px Qx : FML $oi Σ).
 
   (** Split a lender *)

@@ -117,23 +117,23 @@ Section gen_upd.
   Qed.
 End gen_upd.
 
-(** ** [GenUpdBupd]: General update subsuming [bupd] *)
+(** ** [GenUpdB]: General update subsuming [bupd] *)
 
-Class GenUpdBupd `{!BiBUpd PROP} M `{!@GenUpd PROP M} : Prop :=
+Class GenUpdB `{!BiBUpd PROP} M `{!@GenUpd PROP M} : Prop :=
   gen_upd_from_bupd : ∀{P}, (|==> P) ⊢ M P.
-Hint Mode GenUpdBupd + - ! - : typeclass_instances.
+Hint Mode GenUpdB + - ! - : typeclass_instances.
 
 (** [bupd] and [fupd] satisfy [GenUpd] *)
 #[export] Instance bupd_gen_upd_b `{!BiBUpd PROP} :
-  GenUpdBupd (PROP:=PROP) bupd.
+  GenUpdB (PROP:=PROP) bupd.
 Proof. by move=> ?. Qed.
 #[export] Instance fupd_gen_upd_b
   `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {E} :
-  GenUpdBupd (PROP:=PROP) (fupd E E).
+  GenUpdB (PROP:=PROP) (fupd E E).
 Proof. by iIntros (?) ">?". Qed.
 
 Section gen_upd_b.
-  Context `{!BiBUpd PROP, !GenUpd (PROP:=PROP) M, !GenUpdBupd M}.
+  Context `{!BiBUpd PROP, !GenUpd (PROP:=PROP) M, !GenUpdB M}.
 
   (** Eliminate [bupd] *)
   #[export] Instance elim_modal_gen_upd_from_bupd {p P Q} :
@@ -144,7 +144,7 @@ Section gen_upd_b.
   Qed.
 
   (** [◇] preserves [GenUpd] *)
-  #[export] Instance gen_upd_b_except_0 : GenUpdBupd (λ P, M (◇ P))%I | 10.
+  #[export] Instance gen_upd_b_except_0 : GenUpdB (λ P, M (◇ P))%I | 10.
   Proof.
     move=> ?. rewrite (gen_upd_from_bupd (M:=M)). f_equiv. by iIntros.
   Qed.
