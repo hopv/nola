@@ -4,6 +4,7 @@ nola/prelude.v
 
 nola/util/fn.v
 nola/util/rel.v
+nola/util/set.v
 nola/util/prod.v
 nola/util/plist.v
 nola/util/proph.v
