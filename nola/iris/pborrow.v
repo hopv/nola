@@ -392,7 +392,7 @@ Section pborrow.
       (pobor_tok α q ξ Φx ∗ sm (Φx x)).
   Proof.
     rewrite pbor_tok_unseal pobor_tok_unseal. iIntros "α [†|[%[vo b]]]".
-    { iDestruct (lft_live_dead with "α †") as "[]". }
+    { iDestruct (lft_live_dead with "α †") as %[]. }
     iMod (bor_tok_open (M:=M) (sm:=pbsem _) with "α b") as "[o[%[pc Φx]]]".
     iModIntro. iDestruct (vo_pc_agree with "vo pc") as %<-. iFrame "Φx".
     iExists _. iFrame "o". iExists _. iFrame.

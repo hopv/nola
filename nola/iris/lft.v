@@ -336,7 +336,7 @@ Section lft.
     α ⊑□ β -∗ q.[α] ==∗ ∃ r, r.[β] ∗ (r.[β] -∗ q.[α]).
   Proof.
     rewrite lft_sincl_unseal. iIntros "[†|[%[% γ]]] α".
-    { iDestruct (lft_live_dead with "α †") as "[]". }
+    { iDestruct (lft_live_dead with "α †") as %[]. }
     iMod (lft_etern_live with "γ") as (r) "γ". iModIntro.
     iDestruct (lft_live_combine with "α γ") as (s) "[αγ →]".
     iDestruct (lft_incl_live_acc with "αγ") as (?) "[β →α]"; [done|].
@@ -349,14 +349,14 @@ Section lft.
   Proof.
     rewrite lft_sincl_unseal. iIntros "[$|[%[% γ]]] †"; [done|].
     rewrite lft_incl_dead; [|done]. rewrite lft_dead_meet.
-    iDestruct "†" as "[$|†]". iDestruct (lft_etern_dead with "γ †") as "[]".
+    iDestruct "†" as "[$|†]". iDestruct (lft_etern_dead with "γ †") as %[].
   Qed.
 
   (** Modify an eternal lifetime token using [⊑□] *)
   Lemma lft_sincl_etern {α β} : α ⊑□ β ⊢ [∞α] -∗ [∞β].
   Proof.
     rewrite lft_sincl_unseal. iIntros "[†|[%γ[%inc γ]]] α".
-    { iDestruct (lft_etern_dead with "α †") as "[]". }
+    { iDestruct (lft_etern_dead with "α †") as %[]. }
     iApply lft_incl_etern; [done|]. by iSplit.
   Qed.
 
@@ -375,7 +375,7 @@ Section lft.
     rewrite lft_sincl_unseal. iIntros "[$|[%δ[% δ]]]"; [by iIntros|].
     iIntros "[†|[%δ'[% δ']]]".
     { iLeft. rewrite lft_incl_dead; [|done]. rewrite lft_dead_meet.
-      iDestruct "†" as "[$|†]". iDestruct (lft_etern_dead with "δ †") as "[]". }
+      iDestruct "†" as "[$|†]". iDestruct (lft_etern_dead with "δ †") as %[]. }
     iRight. iExists (δ ⊓ δ'). iFrame "δ δ'". iPureIntro. etrans; [|done].
     rewrite assoc. by apply lft_incl_meet_mono_l.
   Qed.

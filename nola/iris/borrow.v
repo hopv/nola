@@ -539,7 +539,7 @@ Section borrow.
       modw M (borrow_wsat_ret M sm Dm (S d) α) (sm Px).
   Proof.
     move=> ?. iIntros "† B". case b=> [|q|?]/=; [done|..].
-    { iDestruct (lft_live_dead with "B †") as "[]". }
+    { iDestruct (lft_live_dead with "B †") as %[]. }
     iDestruct "B" as (??) "l". iApply (lend_dtok_ret_retrieve with "l"); [lia|].
     etrans; [|done]. apply lft_incl_meet_l.
   Qed.
@@ -668,7 +668,7 @@ Section borrow.
     q.[α] -∗ depo_wsat M sm d α Bm Pm -∗ q.[α] ∗ depo_wsat_in M sm d α Bm Pm.
   Proof.
     iIntros "α [$|[† _]]"; [done|].
-    iDestruct (lft_live_dead with "α †") as "[]".
+    iDestruct (lft_live_dead with "α †") as %[].
   Qed.
 
   (** [bor_wsat] is non-expansive over the borrower state *)
@@ -707,7 +707,7 @@ Section borrow.
       modw M (borrow_wsat M sm) (obor_tok α q Px ∗ sm Px).
   Proof.
     rewrite bor_tok_unseal. iIntros "α [†|b]".
-    { by iDestruct (lft_live_dead with "α †") as "[]". }
+    { by iDestruct (lft_live_dead with "α †") as %[]. }
     iDestruct "b" as (????) "[#⊑ b]".
     iMod (lft_sincl_live_acc with "⊑ α") as (r) "[α' →α]".
     iDestruct "b" as "[b|[%β[#† r]]]".

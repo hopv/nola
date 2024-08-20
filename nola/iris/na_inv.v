@@ -144,7 +144,7 @@ Section na_inv.
     iMod ("cl" with "[$i//] W") as "[$ _]". iModIntro.
     iSplit; [iExists _; by iFrame|]. iIntros "$ Px W".
     iMod (inv_tok_acc NE with "sm W") as "[W[[[_ l']|$]cl]]".
-    { iDestruct (na_lock_2_no with "l l'") as "[]". }
+    { iDestruct (na_lock_2_no with "l l'") as %[]. }
     iMod ("cl" with "[l Px] W") as "[$ _]"; [|done]. iLeft. iFrame.
   Qed.
 
@@ -156,7 +156,7 @@ Section na_inv.
     move=> iN. rewrite (na_own_in iN). iIntros "[i $] [[$ l]|i']"; last first.
     { iDestruct (na_own_disjoint with "i i'") as %?. set_solver. }
     iSplitL "i"; [by iRight|]. iIntros "[[_ l']|$] Px".
-    { iDestruct (na_lock_2_no with "l l'") as "[]". }
+    { iDestruct (na_lock_2_no with "l l'") as %[]. }
     iLeft. iFrame.
   Qed.
 

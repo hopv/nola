@@ -132,7 +132,7 @@ Section inv.
     iDestruct ("→W" with "[$i]") as "$". iModIntro.
     iSplit; [iExists _; by iSplit|]. iIntros "Px W".
     iDestruct (sinv_tok_acc' with "sm W") as "[[[_ D']|i] →W]".
-    { iDestruct (ownD_singleton_twice with "[$D $D']") as "[]". }
+    { iDestruct (ownD_singleton_twice with "[$D $D']") as %[]. }
     iMod ("cl" with "i") as "_". iModIntro. iSplit; [|done]. iApply "→W".
     iLeft. iFrame.
   Qed.
@@ -146,10 +146,10 @@ Section inv.
     iMod (fupd_ownE_acc_in iN NE) as "[i cl]".
     iDestruct (sinv_tok_acc' with "sm W") as "[in →W]".
     iDestruct "in" as "[[$ D]|i']"; last first.
-    { iDestruct (ownE_singleton_twice with "[$i $i']") as "[]". }
+    { iDestruct (ownE_singleton_twice with "[$i $i']") as %[]. }
     iDestruct ("→W" with "[$i]") as "$". iIntros "!> Px W".
     iDestruct (sinv_tok_acc' with "sm W") as "[[[_ D']|i] →W]".
-    { iDestruct (ownD_singleton_twice with "[$D $D']") as "[]". }
+    { iDestruct (ownD_singleton_twice with "[$D $D']") as %[]. }
     iMod ("cl" with "i") as "_". iModIntro. iSplit; [|done]. iApply "→W".
     iLeft. iFrame.
   Qed.

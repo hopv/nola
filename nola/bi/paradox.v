@@ -92,7 +92,7 @@ Module inv_fupd. Section inv_fupd.
   Proof.
     iIntros "P". iApply fupd_fupd. iApply (inv_bad_acc (finished γ)); [|done].
     iIntros "[[s|#⊥] #f]".
-    - iDestruct (start_finished_no with "[$s $f]") as "[]".
+    - iDestruct (start_finished_no with "[$s $f]") as %[].
     - iApply fupd_intro. iFrame "⊥".
   Qed.
 
