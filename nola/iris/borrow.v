@@ -564,8 +564,8 @@ Section borrow.
       modw M (borrow_wsat_ret M sm Dm (S d) α) (depo_wsat_dead M sm β Pm)%I.
   Proof.
     move=> ?. iIntros "#† [[Bl →Pm]|?]"; [|done]. iFrame "†". iApply modw_fold.
-    iDestruct ("→Pm" with "†") as "→Pm". rewrite !big_sepM_map_to_list_snd.
-    move: (map_to_list Bm).*2=> Bl.
+    iDestruct ("→Pm" with "†") as "→Pm".
+    setoid_rewrite big_sepM_map_to_list_snd.
     iMod (bor_wsats_retrieve with "† Bl") as "Bl"; [done..|].
     iDestruct ("→Pm" with "Bl") as "$". by iIntros.
   Qed.
