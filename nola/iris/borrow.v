@@ -507,28 +507,32 @@ Section borrow.
       by iApply "PQ".
   Qed.
 
+  (** [depo_wsat] with deposits under [α] retrieved *)
+  Local Definition depo_wsat_ret M sm d' α β Bm Pm : iProp Σ :=
+    if decide (β ⊑ α) then depo_wsat_dead M sm β Pm
+    else depo_wsat M sm d' β Bm Pm.
+
   (** Filter [depo_stm] with a depth *)
   Local Notation dep_of D := D.1.1.1'.
   Local Notation filter_ge d := (filter (λ iD, d ≤ dep_of iD.2)).
   Local Notation filter_lt d := (filter (λ iD, dep_of iD.2 < d)).
   Local Notation filter_eq d := (filter (λ iD, dep_of iD.2 = d)).
-  (** [borrow_wsat'] with deposits under [d] and [α] retrieved *)
-  Local Definition depo_wsat_ret M sm d' α β Bm Pm : iProp Σ :=
-    if decide (β ⊑ α) then depo_wsat_dead M sm β Pm
-    else depo_wsat M sm d' β Bm Pm.
-  Local Definition borrow_wsat_ret M sm Dm d α : iProp Σ :=
+  (** [borrow_wsat] with deposits under [d] and [α] retrieved *)
+  Local Definition borrow_wsat_dret M sm Dm d α : iProp Σ :=
     ∃ Dm', ⌜filter_lt d Dm' = filter_lt d Dm⌝ ∗ depo_stm_tok Dm' ∗
       [∗ map] '((d', β)', Bm, Pm) ∈ filter_ge d Dm',
         depo_wsat_ret M sm d' α β Bm Pm.
+  (** [borrow_wsat] with deposits under [α] retrieved *)
+  Local Definition borrow_wsat_ret M sm Dm := borrow_wsat_dret M sm Dm 0.
 
-  (** Retrieve from [borrow_wsat_ret] using [lend_dtok] *)
-  Local Lemma lend_dtok_ret_retrieve {Dm d d' α β Px} : d ≤ d' → β ⊑ α →
-    lend_dtok d' β Px -∗ modw M (borrow_wsat_ret M sm Dm d α) (sm Px).
+  (** Retrieve from [borrow_wsat_dret] using [lend_dtok] *)
+  Local Lemma lend_dtok_dret_retrieve {Dm d d' α β Px} : d ≤ d' → β ⊑ α →
+    lend_dtok d' β Px -∗ modw M (borrow_wsat_dret M sm Dm d α) (sm Px).
   Proof.
     move=> ??. iIntros "[%[% l]] [%Dm'[%[● Dm']]]".
     iDestruct (depo_stm_lend_agree with "● l") as (Bm Pm Px' eq ?) "#eqv".
     iRewrite -"eqv". iDestruct (big_sepM_insert_acc with "Dm'") as "[D →Dm']".
-    { rewrite map_lookup_filter_Some. split; [done|]. unfold dep_of=>/=. lia. }
+    { rewrite map_lookup_filter_Some. split; [done|]=>/=. lia. }
     rewrite /depo_wsat_ret decide_True; [|done]. iDestruct "D" as "[† >Pm]".
     iDestruct (big_sepM_delete with "Pm") as "[$ Pm]"; [done|]=>/=.
     iMod (depo_stm_lend_delete with "● l") as "●"; [done..|]. iModIntro.
@@ -538,34 +542,39 @@ Section borrow.
     rewrite map_filter_insert_True /=; [|done]. iApply "→Dm'".
     rewrite decide_True; [|done]. by iFrame.
   Qed.
+  Local Lemma lend_dtok_ret_retrieve {Dm d α Px} :
+    lend_dtok d α Px -∗ modw M (borrow_wsat_ret M sm Dm α) (sm Px).
+  Proof. apply lend_dtok_dret_retrieve; [lia|done]. Qed.
 
   (** Retrieve from [bor_wsat] *)
   Local Lemma bor_wsat_retrieve {Dm d α β Px b} : β ⊑ α →
     [†β] -∗ bor_wsat sm d β (Px, b) -∗
-      modw M (borrow_wsat_ret M sm Dm (S d) α) (sm Px).
+      modw M (borrow_wsat_dret M sm Dm (S d) α) (sm Px).
   Proof.
     move=> ?. iIntros "† B". case b=> [|q|?]/=; [done|..].
     { iDestruct (lft_live_dead with "B †") as %[]. }
-    iDestruct "B" as (??) "l". iApply (lend_dtok_ret_retrieve with "l"); [lia|].
-    etrans; [|done]. apply lft_incl_meet_l.
+    iDestruct "B" as (??) "l".
+    iApply (lend_dtok_dret_retrieve with "l"); [lia|]. etrans; [|done].
+    apply lft_incl_meet_l.
   Qed.
   (** Retrieve from [bor_wsat]s *)
   Local Lemma bor_wsats_retrieve {Dm d α β Bl} : β ⊑ α →
     [†β] -∗ ([∗ list] B ∈ Bl, bor_wsat sm d β B) -∗
-      modw M (borrow_wsat_ret M sm Dm (S d) α)
+      modw M (borrow_wsat_dret M sm Dm (S d) α)
         ([∗ list] '(Px, _) ∈ Bl, sm Px)%I.
   Proof.
     move=> ?. elim: Bl; [by iIntros|]. move=>/= [??]Bl IH. iIntros "#† [B Bl]".
     iMod (IH with "† Bl") as "$". by iApply bor_wsat_retrieve.
   Qed.
+
   (** Retrieve from [depo_wsat] *)
   Local Lemma depo_wsat_retrieve {Dm d α β Bm Pm} : β ⊑ α →
     [†β] -∗ depo_wsat M sm d β Bm Pm -∗
-      modw M (borrow_wsat_ret M sm Dm (S d) α) (depo_wsat_dead M sm β Pm)%I.
+      modw M (borrow_wsat_dret M sm Dm (S d) α) (depo_wsat_dead M sm β Pm)%I.
   Proof.
     move=> ?. iIntros "#† [[Bl →Pm]|?]"; [|done]. iFrame "†". iApply modw_fold.
     iDestruct ("→Pm" with "†") as "→Pm".
-    setoid_rewrite big_sepM_map_to_list_snd.
+    setoid_rewrite (big_sepM_map_to_list_snd Bm).
     iMod (bor_wsats_retrieve with "† Bl") as "Bl"; [done..|].
     iDestruct ("→Pm" with "Bl") as "$". by iIntros.
   Qed.
@@ -573,17 +582,18 @@ Section borrow.
   Local Lemma depo_wsats_retrieve {Dm d α Dl} :
     [†α] -∗ ([∗ list] D ∈ Dl,
       if decide (dep_of D = d) then let '((d', β)', Bm, Pm) := D in
-        depo_wsat M sm d' β Bm Pm else emp) -∗
-      modw M (borrow_wsat_ret M sm Dm (S d) α)
+        depo_wsat M sm d' β Bm Pm else True) -∗
+      modw M (borrow_wsat_dret M sm Dm (S d) α)
         ([∗ list] D ∈ Dl,
           if decide (dep_of D = d) then let '((d', β)', Bm, Pm) := D in
-            depo_wsat_ret M sm d' α β Bm Pm else emp)%I.
+            depo_wsat_ret M sm d' α β Bm Pm else True)%I.
   Proof.
     elim: Dl; [by iIntros|]. move=> [[[d' β]?]?] Dl IH /=. iIntros "#† [D Dl]".
     iMod (IH with "† Dl") as "$". iApply modw_fold. rewrite /depo_wsat_ret.
     case: (decide (β ⊑ α)); [|done]=> ?. rewrite lft_incl_dead; [|done].
     case: (decide (d' = d)); [|done]=> ->. by iApply depo_wsat_retrieve.
   Qed.
+
   (** Lemmas for [borrow_wsat_eq_retrieve] *)
   Local Lemma filter_eq_lt d Dm :
     filter_eq d Dm = filter_eq d (filter_lt (S d) Dm).
@@ -598,10 +608,10 @@ Section borrow.
     apply (map_filter_ext (M:=gmap _))=> ?[[??]?]/=?. lia.
   Qed.
   (** Retrieve from [borrow_wsat'] on [filter_eq] *)
-  Local Lemma borrow_wsat_eq_retrieve {Dm d α} :
+  Local Lemma borrow_wsat'_eq_retrieve {Dm d α} :
     [†α] -∗ borrow_wsat' M sm (filter_eq d Dm) -∗
-      borrow_wsat_ret M sm Dm (S d) α -∗
-      M (borrow_wsat_ret M sm Dm d α).
+      borrow_wsat_dret M sm Dm (S d) α -∗
+      M (borrow_wsat_dret M sm Dm d α).
   Proof.
     iIntros "† eq ret".
     rewrite /borrow_wsat' big_sepM_filter' /= big_sepM_map_to_list_snd.
@@ -615,7 +625,7 @@ Section borrow.
       apply (map_filter_ext (M:=gmap _))=>/=; lia.
   Qed.
   (** Lemma for [borrow_wsat_lt_retrieve] *)
-  Local Lemma borrow_wsat_lt_S_split d Dm :
+  Local Lemma borrow_wsat'_lt_S_split d Dm :
     borrow_wsat' M sm (filter_lt (S d) Dm) ⊣⊢
       borrow_wsat' M sm (filter_eq d Dm) ∗ borrow_wsat' M sm (filter_lt d Dm).
   Proof.
@@ -624,13 +634,13 @@ Section borrow.
       apply (map_filter_ext (M:=gmap _))=>/=; lia.
   Qed.
   (** Retrieve from [borrow_wsat'] on [filter_lt] *)
-  Local Lemma borrow_wsat_lt_retrieve {Dm d α} :
+  Local Lemma borrow_wsat'_lt_retrieve {Dm d α} :
     [†α] -∗ borrow_wsat' M sm (filter_lt d Dm) -∗
-      borrow_wsat_ret M sm Dm d α -∗ M (borrow_wsat_ret M sm Dm 0 α).
+      borrow_wsat_dret M sm Dm d α -∗ M (borrow_wsat_ret M sm Dm α).
   Proof.
-    elim: d; [by iIntros|]=> ? IH. rewrite borrow_wsat_lt_S_split.
+    elim: d; [by iIntros|]=> ? IH. rewrite borrow_wsat'_lt_S_split.
     iIntros "#† [eq lt] ret".
-    iMod (borrow_wsat_eq_retrieve with "† eq ret") as "ret".
+    iMod (borrow_wsat'_eq_retrieve with "† eq ret") as "ret".
     iApply (IH with "† lt ret").
   Qed.
 
@@ -645,20 +655,33 @@ Section borrow.
     rewrite map_filter_filter map_filter_empty=> <-.
     apply map_filter_ext=> ?[[??]?]/=. lia.
   Qed.
+  (** Retrieve from [borrow_wsat] *)
+  Local Lemma borrow_wsat_retrieve {α} :
+    [†α] -∗ borrow_wsat M sm -∗ M (∃ Dm, borrow_wsat_ret M sm Dm α).
+  Proof.
+    rewrite borrow_wsat_unseal. iIntros "† [%Dm[● Dm]]". iExists Dm.
+    case: (filter_ge_empty Dm)=> d eq.
+    iApply (borrow_wsat'_lt_retrieve (d:=d) with "† [Dm] [●]").
+    - iDestruct (big_sepM_filter_complement with "Dm") as "[$ _]".
+    - iExists _. iFrame "●". rewrite eq. by iSplit.
+  Qed.
+  (** [borrow_wsat_ret] into [borrow_wsat] *)
+  Local Lemma borrow_wsat_from_ret {Dm α} :
+    borrow_wsat_ret M sm Dm α ⊢ borrow_wsat M sm.
+  Proof.
+    rewrite borrow_wsat_unseal. iIntros "[%[_[● ?]]]". iExists _. iFrame "●".
+    rewrite map_filter_id; [|lia]. iStopProof. unfold borrow_wsat'.
+    do 2 f_equiv. move=> [[[? β]?]?]. unfold depo_wsat_ret.
+    case: (decide (β ⊑ α))=> ?; [|done]. iIntros. by iRight.
+  Qed.
+
   (** Retrive using [lend_dtok] *)
   Local Lemma lend_dtok_retrieve {d α Px} :
     [†α] -∗ lend_dtok d α Px -∗ modw M (borrow_wsat M sm) (sm Px).
   Proof.
-    rewrite borrow_wsat_unseal. iIntros "† l [%Dm[● Dm]]".
-    case: (filter_ge_empty Dm)=> d' eq.
-    iMod (borrow_wsat_lt_retrieve (d:=d') with "† [Dm] [●]") as "ret".
-    { iDestruct (big_sepM_filter_complement with "Dm") as "[$ _]". }
-    { iExists _. iFrame "●". rewrite eq. by iSplit. }
-    iMod (lend_dtok_ret_retrieve with "l ret") as "[[%[_[● ?]]]$]"; [lia|done|].
-    iModIntro. iExists _. iFrame "●".
-    rewrite map_filter_id; [|lia]. iStopProof. unfold borrow_wsat'.
-    do 2 f_equiv. move=> [[[? β]?]?]. unfold depo_wsat_ret.
-    case: (decide (β ⊑ α))=> ?; [|done]. iIntros. by iRight.
+    iIntros "† l W". iMod (borrow_wsat_retrieve with "† W") as (Dm) "ret".
+    iMod (lend_dtok_ret_retrieve with "l ret") as "[ret $]". iModIntro.
+    by iApply borrow_wsat_from_ret.
   Qed.
   (** Retrive using [lend_tok] *)
   Lemma lend_tok_retrieve {α Px} :
