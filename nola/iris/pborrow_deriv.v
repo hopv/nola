@@ -124,7 +124,7 @@ Section pborrow_deriv.
   !PborrowPreDeriv TY (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
   !Dsem JUDGI (FML $oi Σ) (iProp Σ), !PborrowDeriv TY FML Σ JUDGI,
   !Deriv (JUDGI:=JUDGI) ih δ}.
-  Implicit Type (X Y Z : TY) (Px Qx R : FML $oi Σ) (δ : JUDGI → iProp Σ).
+  Implicit Type (X Y Z : TY) (Px Qx Rx : FML $oi Σ) (δ : JUDGI → iProp Σ).
 
   (** ** Conversion *)
 
@@ -134,17 +134,17 @@ Section pborrow_deriv.
     iApply Deriv_factor. iIntros (????). rewrite pborrow_jto_sem.
     by iIntros "$".
   Qed.
-  Lemma pborrow_jto_trans {Px Qx R} :
+  Lemma pborrow_jto_trans {Px Qx Rx} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
       ⟦ Px ⟧(δ') ==∗ ⟦ Qx ⟧(δ')) -∗
-    δ (pborrow_jto Qx R) -∗ δ (pborrow_jto Px R).
+    δ (pborrow_jto Qx Rx) -∗ δ (pborrow_jto Px Rx).
   Proof.
     iIntros "big". iApply Deriv_map. iIntros (????). rewrite !pborrow_jto_sem.
     iIntros "QR Px". iMod ("big" with "[//] [//] [//] Px"). by iApply "QR".
   Qed.
-  Lemma pborrow_jto_trans' {Px Qx R} :
-    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ → ⟦ Qx ⟧(δ') ==∗ ⟦ R ⟧(δ')) -∗
-    δ (pborrow_jto Px Qx) -∗ δ (pborrow_jto Px R).
+  Lemma pborrow_jto_trans' {Px Qx Rx} :
+    (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ → ⟦ Qx ⟧(δ') ==∗ ⟦ Rx ⟧(δ'))
+      -∗ δ (pborrow_jto Px Qx) -∗ δ (pborrow_jto Px Rx).
   Proof.
     iIntros "big". iApply Deriv_map. iIntros (????). rewrite !pborrow_jto_sem.
     iIntros "ΦΨ Px". iMod ("ΦΨ" with "Px"). by iApply "big".
@@ -193,7 +193,7 @@ Section pborrow_deriv.
       ⟦ Qx ⟧(δ') ==∗ ⟦ Px ⟧(δ')) -∗
     nbor δ α Px -∗ nbor δ α Qx.
   Proof.
-    rewrite nbor_unseal. iIntros "ΦΨ QP [%R[PR[RP $]]]".
+    rewrite nbor_unseal. iIntros "ΦΨ QP [%Rx[PR[RP $]]]".
     iSplitL "QP PR"; [iApply (pborrow_jto_trans with "QP PR")|
       iApply (pborrow_jto_trans' with "ΦΨ RP")].
   Qed.
@@ -202,7 +202,7 @@ Section pborrow_deriv.
       ⟦ Qx ⟧(δ') ==∗ ⟦ Px ⟧(δ')) -∗
     nobor δ α q Px -∗ nobor δ α q Qx.
   Proof.
-    rewrite nobor_unseal. iIntros "QP [%R[PR $]]".
+    rewrite nobor_unseal. iIntros "QP [%Rx[PR $]]".
     iApply (pborrow_jto_trans with "QP PR").
   Qed.
   Lemma nlend_to {α Px Qx} :
@@ -210,7 +210,7 @@ Section pborrow_deriv.
       ⟦ Px ⟧(δ') ==∗ ⟦ Qx ⟧(δ')) -∗
     nlend δ α Px -∗ nlend δ α Qx.
   Proof.
-    rewrite nlend_unseal. iIntros "ΦΨ [%R[RP $]]".
+    rewrite nlend_unseal. iIntros "ΦΨ [%Rx[RP $]]".
     iApply (pborrow_jto_trans' with "ΦΨ RP").
   Qed.
   Lemma pbor_to {X α x ξ Φx Ψx} :
@@ -327,15 +327,15 @@ Section pborrow_deriv.
   Qed.
 
   (** Create new prophetic borrowers and lenders *)
-  Lemma pbor_plend_new_list α Xl (xΦl : plist _ Xl) :
-    ⊢ |==> ∃ ξl, ∀ Yl (yπΨl : plist (λ Y, _ *' (Y → _)) Yl),
-      let ξxΦl := plist_zip ξl xΦl in
-      ([∗ plist] '(x, Φx)' ∈ xΦl, ⟦ Φx x ⟧(δ)) -∗
-      ([†α] -∗ ([∗ plist] '(ξ, x, Φx)' ∈ ξxΦl, plend_body_vari δ ξ Φx) -∗ M
-        ([∗ plist] '(yπ, Ψx)' ∈ yπΨl, plend_bodyi δ yπ Ψx))
+  Lemma pbor_plend_new_list α Xl (xΦxl : plist _ Xl) :
+    ⊢ |==> ∃ ξl, ∀ Yl (yπΨxl : plist (λ Y, _ *' (Y → _)) Yl),
+      let ξxΦxl := plist_zip ξl xΦxl in
+      ([∗ plist] '(x, Φx)' ∈ xΦxl, ⟦ Φx x ⟧(δ)) -∗
+      ([†α] -∗ ([∗ plist] '(ξ, x, Φx)' ∈ ξxΦxl, plend_body_vari δ ξ Φx) -∗ M
+        ([∗ plist] '(yπ, Ψx)' ∈ yπΨxl, plend_bodyi δ yπ Ψx))
         =[pborrow_wsati M δ]=∗
-        ([∗ plist] '(ξ, x, Φx)' ∈ ξxΦl, pbor δ α x ξ Φx) ∗
-        ([∗ plist] '(yπ, Ψx)' ∈ yπΨl, plend δ α yπ Ψx).
+        ([∗ plist] '(ξ, x, Φx)' ∈ ξxΦxl, pbor δ α x ξ Φx) ∗
+        ([∗ plist] '(yπ, Ψx)' ∈ yπΨxl, plend δ α yπ Ψx).
   Proof.
     iMod (pbor_plend_tok_new_list (M:=M) (sm:=⟦⟧(_))) as (?) "big". iModIntro.
     iExists _. iIntros (??). setoid_rewrite <-pbor_tok_pbor.
@@ -366,9 +366,10 @@ Section pborrow_deriv.
       =[pborrow_wsatid M]=∗ [∗ list] Qx ∈ Qxl, nlendd α Qx.
   Proof.
     rewrite {1}nlend_unseal. setoid_rewrite <-nlend_tok_nlend.
-    iIntros "[%R[RP l]] →Ql".
+    iIntros "[%Rx[RP l]] →Ql".
     iApply (nlend_tok_split (M:=M) (sm:=⟦⟧) with "l [RP →Ql]").
-    iIntros "R". rewrite der_pborrow_jto. iMod ("RP" with "R"). by iApply "→Ql".
+    iIntros "Rx". rewrite der_pborrow_jto. iMod ("RP" with "Rx").
+    by iApply "→Ql".
   Qed.
 
   (** Retrive from [nlendd] *)
@@ -390,35 +391,35 @@ Section pborrow_deriv.
   Qed.
 
   (** Lemma for [nobord_merge_subdiv] *)
-  Local Lemma nobord_list {αqPl β} :
-    ([∗ list] '(α, q, Px)' ∈ αqPl, β ⊑□ α ∗ nobord α q Px) ⊢
-    ∃ αqRl,
-      ⌜([∗ list] '(α, q, _)' ∈ αqPl, q.[α]) ⊣⊢
-        [∗ list] '(α, q, _)' ∈ αqRl, q.[α]⌝ ∗
-      ([∗ list] '(α, q, R)' ∈ αqRl, β ⊑□ α ∗ nobor_tok α q R) ∗
-      (([∗ list] '(_, _, Px)' ∈ αqPl, ⟦ Px ⟧) ==∗
-        [∗ list] '(_, _, R)' ∈ αqRl, ⟦ R ⟧).
+  Local Lemma nobord_list {αqPxl β} :
+    ([∗ list] '(α, q, Px)' ∈ αqPxl, β ⊑□ α ∗ nobord α q Px) ⊢
+    ∃ αqRxl,
+      ⌜([∗ list] '(α, q, _)' ∈ αqPxl, q.[α]) ⊣⊢
+        [∗ list] '(α, q, _)' ∈ αqRxl, q.[α]⌝ ∗
+      ([∗ list] '(α, q, Rx)' ∈ αqRxl, β ⊑□ α ∗ nobor_tok α q Rx) ∗
+      (([∗ list] '(_, _, Px)' ∈ αqPxl, ⟦ Px ⟧) ==∗
+        [∗ list] '(_, _, Rx)' ∈ αqRxl, ⟦ Rx ⟧).
   Proof.
-    rewrite nobor_unseal /=. elim: αqPl=>/=.
+    rewrite nobor_unseal /=. elim: αqPxl=>/=.
     { iIntros. iExists []=>/=. do 2 (iSplit; [done|]). by iIntros. }
-    iIntros ([α[q Px]] αqPl ->) "[[⊑[%R[PR o]]][%αqRl[%[ol →']]]]".
-    iExists ((α, q, R)' :: αqRl)=>/=. iFrame "⊑ o ol".
+    iIntros ([α[q Px]] αqPxl ->) "[[⊑[%Rx[PR o]]][%αqRxl[%[ol →']]]]".
+    iExists ((α, q, Rx)' :: αqRxl)=>/=. iFrame "⊑ o ol".
     iSplit; [iPureIntro; by f_equiv|]. iIntros "[Px Pxl]".
     rewrite der_pborrow_jto. iMod ("PR" with "Px") as "$".
     iApply ("→'" with "Pxl").
   Qed.
   (** Merge and subdivide open borrowers *)
-  Lemma nobord_merge_subdiv αqPl Qxl β :
-    ([∗ list] '(α, q, Px)' ∈ αqPl, β ⊑□ α ∗ nobord α q Px) -∗
+  Lemma nobord_merge_subdiv αqPxl Qxl β :
+    ([∗ list] '(α, q, Px)' ∈ αqPxl, β ⊑□ α ∗ nobord α q Px) -∗
     ([∗ list] Qx ∈ Qxl, ⟦ Qx ⟧) -∗
     ([†β] -∗ ([∗ list] Qx ∈ Qxl, ⟦ Qx ⟧) -∗ M
-      ([∗ list] '(_, _, Px)' ∈ αqPl, ⟦ Px ⟧)) =[pborrow_wsatid M]=∗
-      ([∗ list] '(α, q, _)' ∈ αqPl, q.[α]) ∗ ([∗ list] Qx ∈ Qxl, nbord β Qx).
+      ([∗ list] '(_, _, Px)' ∈ αqPxl, ⟦ Px ⟧)) =[pborrow_wsatid M]=∗
+      ([∗ list] '(α, q, _)' ∈ αqPxl, q.[α]) ∗ ([∗ list] Qx ∈ Qxl, nbord β Qx).
   Proof.
-    rewrite nobord_list /=. iIntros "[%[->[ol →]]] Qxl →Pl".
+    rewrite nobord_list /=. iIntros "[%[->[ol →]]] Qxl →Pxl".
     setoid_rewrite <-nbor_tok_nbor.
-    iApply (nobor_tok_merge_subdiv (M:=M) with "ol Qxl [→ →Pl]").
-    iIntros "† Qxl". iMod ("→Pl" with "† Qxl") as "Pxl".
+    iApply (nobor_tok_merge_subdiv (M:=M) with "ol Qxl [→ →Pxl]").
+    iIntros "† Qxl". iMod ("→Pxl" with "† Qxl") as "Pxl".
     iMod ("→" with "Pxl") as "$". by iIntros.
   Qed.
   (** Subdivide open borrowers *)
@@ -476,15 +477,15 @@ Section pborrow_deriv.
 
   (** Split a prophetic lender *)
   Lemma plendd_split {X α xπ} {Φx : X → _} Yl
-    (yπΨl : plist (λ Y, _ *' (Y → _)) Yl) :
+    (yπΨxl : plist (λ Y, _ *' (Y → _)) Yl) :
     plendd α xπ Φx -∗
-    (plend_bodyid xπ Φx -∗ M ([∗ plist] '(yπ, Ψx)' ∈ yπΨl, plend_bodyid yπ Ψx))
-      =[pborrow_wsatid M]=∗ [∗ plist] '(yπ, Ψx)' ∈ yπΨl, plendd α yπ Ψx.
+    (plend_bodyid xπ Φx -∗ M ([∗ plist] '(yπ, Ψx)' ∈ yπΨxl, plend_bodyid yπ Ψx))
+      =[pborrow_wsatid M]=∗ [∗ plist] '(yπ, Ψx)' ∈ yπΨxl, plendd α yπ Ψx.
   Proof.
-    rewrite {1}plend_unseal. iIntros "(%Z & %zπ & %Ω & ΩΦ & l) →Ψl".
+    rewrite {1}plend_unseal. iIntros "(%Z & %zπ & %Ω & ΩΦ & l) →Ψxl".
     setoid_rewrite <-plend_tok_plend.
-    iApply (plend_tok_split (M:=M) (sm:=⟦⟧) with "l [ΩΦ →Ψl]"). iIntros "lb".
-    rewrite der_pborrow_jlto. iMod ("ΩΦ" with "lb") as "?". by iApply "→Ψl".
+    iApply (plend_tok_split (M:=M) (sm:=⟦⟧) with "l [ΩΦ →Ψxl]"). iIntros "lb".
+    rewrite der_pborrow_jlto. iMod ("ΩΦ" with "lb") as "?". by iApply "→Ψxl".
   Qed.
 
   (** Retrieve from a prophetic lender *)
@@ -508,22 +509,22 @@ Section pborrow_deriv.
 
   (** Lemma for [pobord_merge_subdiv] *)
   Local Lemma pobord_plist {Xl A β}
-    {αqξΦfl : plist (λ X, _ *' _ *' _ *' _ *' (A → X)) Xl} :
-    ([∗ plist] '(α, q, ξ, Φx, _)' ∈ αqξΦfl, β ⊑□ α ∗ pobord α q ξ Φx) ⊢
+    {αqξΦxfl : plist (λ X, _ *' _ *' _ *' _ *' (A → X)) Xl} :
+    ([∗ plist] '(α, q, ξ, Φx, _)' ∈ αqξΦxfl, β ⊑□ α ∗ pobord α q ξ Φx) ⊢
       ∃ αqξΩfl : plist (λ X, _ *' _ *' _ *' _ *' (A → X)) Xl,
-      ⌜([∗ plist] '(α, q, _)' ∈ αqξΦfl, q.[α]) ⊣⊢
+      ⌜([∗ plist] '(α, q, _)' ∈ αqξΦxfl, q.[α]) ⊣⊢
         [∗ plist] '(α, q, _)' ∈ αqξΩfl, q.[α]⌝ ∗
       ⌜∀ aπ,
-        ([∗ plist] '(_, _, ξ, _, f)' ∈ αqξΦfl,
+        ([∗ plist] '(_, _, ξ, _, f)' ∈ αqξΦxfl,
           ⟨π, π (Aprvar _ ξ) = f (aπ π)⟩) ⊣⊢
         [∗ plist] '(_, _, ξ, _, f)' ∈ αqξΩfl, ⟨π, π (Aprvar _ ξ) = f (aπ π)⟩⌝ ∗
       ([∗ plist] '(α, q, ξ, Ω, _)' ∈ αqξΩfl, β ⊑□ α ∗ pobor_tok α q ξ Ω) ∗
-      (∀ a, ([∗ plist] '(_, _, _, Φx, f)' ∈ αqξΦfl, ⟦ Φx (f a) ⟧) ==∗
+      (∀ a, ([∗ plist] '(_, _, _, Φx, f)' ∈ αqξΦxfl, ⟦ Φx (f a) ⟧) ==∗
         [∗ plist] '(_, _, _, Ω, f)' ∈ αqξΩfl, ⟦ Ω (f a) ⟧).
   Proof.
-    rewrite pobor_unseal. elim: Xl αqξΦfl=>/=.
+    rewrite pobor_unseal. elim: Xl αqξΦxfl=>/=.
     { iIntros. iExists (). do 2 (iSplit; [done|]). by iIntros. }
-    move=> X Xl IH [[α[q[ξ[Φx f]]]] αqξΦfl]. rewrite IH.
+    move=> X Xl IH [[α[q[ξ[Φx f]]]] αqξΦxfl]. rewrite IH.
     iIntros "[[⊑[%Ω[ΦΩ o]]][%αqξΩfl[%[%[ol →']]]]]".
     iExists ((α, q, ξ, Ω, f)', αqξΩfl)'. iFrame "⊑ o ol".
     do 2 (iSplit; [iPureIntro=> >; by f_equiv|]). iIntros (a) "[Φx Φxl]".
@@ -531,40 +532,41 @@ Section pborrow_deriv.
   Qed.
   (** Merge and subdivide prophetic borrowers *)
   Lemma pobord_merge_subdiv Xl Yl
-    (αqξΦfl : plist (λ X, _ *' _ *' _ *' _ *' (_ → X)) Xl) (yΨl : plist _ Yl) Rl
-    β :
-    ([∗ plist] '(α, q, ξ, Φx, _)' ∈ αqξΦfl, β ⊑□ α ∗ pobord α q ξ Φx) -∗
-    ([∗ plist] '(y, Ψx)' ∈ yΨl, ⟦ Ψx y ⟧) -∗ ([∗ list] R ∈ Rl, ⟦ R ⟧) -∗
-    (∀ yl', [†β] -∗ ([∗ plist] '(y', _, Ψx)' ∈ plist_zip yl' yΨl, ⟦ Ψx y' ⟧) -∗
-      ([∗ list] R ∈ Rl, ⟦ R ⟧) -∗ M
-        ([∗ plist] '(_, _, _, Φx, f)' ∈ αqξΦfl, ⟦ Φx (f yl') ⟧))
+    (αqξΦxfl : plist (λ X, _ *' _ *' _ *' _ *' (_ → X)) Xl) (yΨxl : plist _ Yl)
+    Rxl β :
+    ([∗ plist] '(α, q, ξ, Φx, _)' ∈ αqξΦxfl, β ⊑□ α ∗ pobord α q ξ Φx) -∗
+    ([∗ plist] '(y, Ψx)' ∈ yΨxl, ⟦ Ψx y ⟧) -∗ ([∗ list] Rx ∈ Rxl, ⟦ Rx ⟧) -∗
+    (∀ yl', [†β] -∗ ([∗ plist] '(y', _, Ψx)' ∈ plist_zip yl' yΨxl, ⟦ Ψx y' ⟧) -∗
+      ([∗ list] Rx ∈ Rxl, ⟦ Rx ⟧) -∗ M
+        ([∗ plist] '(_, _, _, Φx, f)' ∈ αqξΦxfl, ⟦ Φx (f yl') ⟧))
       =[pborrow_wsatid M]=∗ ∃ ηl,
-      ([∗ plist] '(α, q, _)' ∈ αqξΦfl, q.[α]) ∗
-      ([∗ plist] '(_, _, ξ, _, f)' ∈ αqξΦfl,
+      ([∗ plist] '(α, q, _)' ∈ αqξΦxfl, q.[α]) ∗
+      ([∗ plist] '(_, _, ξ, _, f)' ∈ αqξΦxfl,
         ⟨π, π (Aprvar _ ξ) = f (app_plist_prvar π ηl)⟩) ∗
-      ([∗ plist] '(η, y, Ψx)' ∈ plist_zip ηl yΨl, pbord β y η Ψx) ∗
-      [∗ list] R ∈ Rl, nbord β R.
+      ([∗ plist] '(η, y, Ψx)' ∈ plist_zip ηl yΨxl, pbord β y η Ψx) ∗
+      [∗ list] Rx ∈ Rxl, nbord β Rx.
   Proof.
-    rewrite pobord_plist /=. iIntros "(% & %eq & %eq' & ol & →) Ψxl Rl →Φxl".
+    rewrite pobord_plist /=. iIntros "(% & %eq & %eq' & ol & →) Ψxl Rxl →Φxl".
     setoid_rewrite eq. setoid_rewrite eq'. setoid_rewrite <-pbor_tok_pbor.
     setoid_rewrite <-nbor_tok_nbor.
-    iApply (pobor_tok_merge_subdiv (M:=M) (sm:=⟦⟧) with "ol Ψxl Rl").
-    iIntros "% † Ψxl Rl". iMod ("→Φxl" with "† Ψxl Rl") as "Φxl".
+    iApply (pobor_tok_merge_subdiv (M:=M) (sm:=⟦⟧) with "ol Ψxl Rxl").
+    iIntros "% † Ψxl Rxl". iMod ("→Φxl" with "† Ψxl Rxl") as "Φxl".
     by iMod ("→" with "Φxl").
   Qed.
   (** Subdivide a prophetic borrower *)
-  Lemma pobord_subdiv {X α q ξ Φx} Yl (f : _ → X) (yΨl : plist _ Yl) Rl β :
+  Lemma pobord_subdiv {X α q ξ Φx} Yl (f : _ → X) (yΨxl : plist _ Yl) Rxl β :
     β ⊑□ α -∗ pobord α q ξ Φx -∗
-    ([∗ plist] '(y, Ψx)' ∈ yΨl, ⟦ Ψx y ⟧) -∗ ([∗ list] R ∈ Rl, ⟦ R ⟧) -∗
-    (∀ yl', [†β] -∗ ([∗ plist] '(y', _, Ψx)' ∈ plist_zip yl' yΨl, ⟦ Ψx y' ⟧) -∗
-      ([∗ list] R ∈ Rl, ⟦ R ⟧) -∗ M ⟦ Φx (f yl') ⟧) =[pborrow_wsatid M]=∗ ∃ ηl,
+    ([∗ plist] '(y, Ψx)' ∈ yΨxl, ⟦ Ψx y ⟧) -∗ ([∗ list] Rx ∈ Rxl, ⟦ Rx ⟧) -∗
+    (∀ yl', [†β] -∗ ([∗ plist] '(y', _, Ψx)' ∈ plist_zip yl' yΨxl, ⟦ Ψx y' ⟧) -∗
+      ([∗ list] Rx ∈ Rxl, ⟦ Rx ⟧) -∗ M ⟦ Φx (f yl') ⟧) =[pborrow_wsatid M]=∗
+      ∃ ηl,
       q.[α] ∗ ⟨π, π (Aprvar _ ξ) = f (app_plist_prvar π ηl)⟩ ∗
-      ([∗ plist] '(η, y, Ψx)' ∈ plist_zip ηl yΨl, pbord β y η Ψx) ∗
-      [∗ list] R ∈ Rl, nbord β R.
+      ([∗ plist] '(η, y, Ψx)' ∈ plist_zip ηl yΨxl, pbord β y η Ψx) ∗
+      [∗ list] Rx ∈ Rxl, nbord β Rx.
   Proof.
-    iIntros "⊑ o Ψxl Rl →Φx".
+    iIntros "⊑ o Ψxl Rxl →Φx".
     iMod (pobord_merge_subdiv [_] _ ((_,_,_,_,_)',())'
-      with "[$⊑ $o //] Ψxl Rl [→Φx]") as (?) "/=[[$ _][[$ _]$]]"; [|done].
+      with "[$⊑ $o //] Ψxl Rxl [→Φx]") as (?) "/=[[$ _][[$ _]$]]"; [|done].
     iIntros (?). by rewrite /= bi.sep_emp.
   Qed.
 

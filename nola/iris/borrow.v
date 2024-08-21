@@ -763,14 +763,14 @@ Section borrow.
   Qed.
 
   (** Lemma for [obor_tok_merge_subdiv] *)
-  Local Lemma obor_toks_dtoks_bound {αqPl β} :
-    ([∗ list] '(α, q, Px)' ∈ αqPl, β ⊑□ α ∗ obor_tok α q Px) ⊢ ∃ d γ, β ⊑□ γ ∗
-      [∗ list] '(α, q, Px)' ∈ αqPl, ∃ d' α' γ',
+  Local Lemma obor_toks_dtoks_bound {αqPxl β} :
+    ([∗ list] '(α, q, Px)' ∈ αqPxl, β ⊑□ α ∗ obor_tok α q Px) ⊢ ∃ d γ, β ⊑□ γ ∗
+      [∗ list] '(α, q, Px)' ∈ αqPxl, ∃ d' α' γ',
         ⌜d' < d ∧ γ = α' ⊓ γ'⌝ ∗ obor_dtok d' α α' q Px.
   Proof.
-    elim: αqPl=>/=.
+    elim: αqPxl=>/=.
     { iIntros. iExists 0, ⊤. iSplit; [iApply lft_sincl_top|done]. }
-    move=> [α[Px q]] αqPl ->. rewrite obor_tok_dtok.
+    move=> [α[Px q]] αqPxl ->. rewrite obor_tok_dtok.
     iIntros "[[#βα[%d[%α'[#αα' o]]]] [%d'[%γ[#βγ big]]]]".
     iExists (S d `max` d'), (α' ⊓ γ). iSplitR.
     { iApply lft_sincl_meet_intro; [|done].
@@ -781,25 +781,25 @@ Section borrow.
     iPureIntro. split; [lia|]. by rewrite assoc [α' ⊓ α'']comm -assoc.
   Qed.
   (** Merge and subdivide borrowers *)
-  Lemma obor_tok_merge_subdiv αqPl Qxl β :
-    ([∗ list] '(α, q, Px)' ∈ αqPl, β ⊑□ α ∗ obor_tok α q Px) -∗
+  Lemma obor_tok_merge_subdiv αqPxl Qxl β :
+    ([∗ list] '(α, q, Px)' ∈ αqPxl, β ⊑□ α ∗ obor_tok α q Px) -∗
     ([∗ list] Qx ∈ Qxl, sm Qx) -∗
     ([†β] -∗ ([∗ list] Qx ∈ Qxl, sm Qx) -∗
-      M ([∗ list] '(_, _, Px)' ∈ αqPl, sm Px)%I)
+      M ([∗ list] '(_, _, Px)' ∈ αqPxl, sm Px)%I)
       =[borrow_wsat M sm]=∗
-      ([∗ list] '(α, q, _)' ∈ αqPl, q.[α]) ∗ [∗ list] Qx ∈ Qxl, bor_tok β Qx.
+      ([∗ list] '(α, q, _)' ∈ αqPxl, q.[α]) ∗ [∗ list] Qx ∈ Qxl, bor_tok β Qx.
   Proof.
-    rewrite/= obor_toks_dtoks_bound. iIntros "[%d[%γ[#⊑ αqPl]]] Qxl →P".
-    iMod (bor_lend_tok_new_list' d γ Qxl ((λ '(_, _, Px)', Px) <$> αqPl)
+    rewrite/= obor_toks_dtoks_bound. iIntros "[%d[%γ[#⊑ αqPxl]]] Qxl →P".
+    iMod (bor_lend_tok_new_list' d γ Qxl ((λ '(_, _, Px)', Px) <$> αqPxl)
       with "Qxl [→P]") as "[bl ll]"=>/=.
     { iIntros "† Qxl". iDestruct (lft_sincl_dead with "⊑ †") as "†".
       rewrite big_sepL_fmap. iApply ("→P" with "† Qxl"). }
     iSplitR "bl"; last first.
     { iModIntro. iApply (big_sepL_impl with "bl"). iIntros "!> %% _".
       by iApply bor_tok_lft. }
-    iInduction αqPl as [|[α[q Px]]αqPl] "IH"=>/=; [done|].
-    iDestruct "αqPl" as "[big αqPl]". iDestruct "big" as (???[?->]) "o".
-    iDestruct "ll" as "[l ll]". iMod ("IH" with "αqPl ll") as "$".
+    iInduction αqPxl as [|[α[q Px]]αqPxl] "IH"=>/=; [done|].
+    iDestruct "αqPxl" as "[big αqPxl]". iDestruct "big" as (???[?->]) "o".
+    iDestruct "ll" as "[l ll]". iMod ("IH" with "αqPxl ll") as "$".
     iMod (obor_dtok_reborrow with "o l") as "[$ _]"; [lia|done].
   Qed.
   (** Subdivide a borrower *)
