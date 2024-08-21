@@ -269,7 +269,19 @@ Section borrow.
     - split; [split|]=>/=; [done|by apply: gmap_fmap_valid..].
   Qed.
 
-  (** Lemma for [depo_stm_lend_agree] and [depo_stm_bor_agree] *)
+  (** Lemmas for [depo_stm_lend_agree] and [depo_stm_bor_agree] *)
+  Local Lemma depo_stm_own_agree' {Dm i d α Bx Pxx n} :
+    ✓{n} (● (depo_st_R <$> Dm) ⋅ ◯ {[i := (to_agree (d, α)', Bx, Pxx)]}
+      : borrowRF_def _ $ri _) →
+    ∃ Bm Pm, (Dm !! i = Some ((d, α)', Bm, Pm)) ∧
+      Bx ≼{n} Excl <$> Bm ∧ Pxx ≼{n} Excl <$> Pm.
+  Proof.
+    move=> /auth_both_validN/proj1/singleton_includedN_l.
+    move=> [?[/Some_equiv_eq[?[++]] /Some_includedN_total +]].
+    move=> /lookup_fmap_Some[[[dα Bm]Pm] [<- ?]] <-.
+    move=> /prod_includedN[/prod_includedN/=[+ ?] ?].
+    move=> /to_agree_includedN/leibniz_equiv_iff ?. subst. by exists Bm, Pm.
+  Qed.
   Local Lemma depo_stm_own_agree {Dm i d α Bx Pxx} :
     depo_stm_tok Dm -∗
     own borrow_name (◯ {[i := (to_agree (d, α)', Bx, Pxx)]}) -∗
@@ -277,16 +289,8 @@ Section borrow.
       Bx ≼ Excl <$> Bm ∧ Pxx ≼ Excl <$> Pm.
   Proof.
     iIntros "● o". iDestruct (own_valid_2 with "● o") as "?". iStopProof.
-    unfold internal_included. uPred.unseal. split=> n ? _.
-    (repeat unfold uPred_holds=>/=)=> valid.
-    apply auth_both_validN, proj1, singleton_includedN_l in valid as
-      [?[eqv incl]].
-    apply Some_equiv_eq in eqv as (? & eq & eqv).
-    apply lookup_fmap_Some in eq as ([[dα Bm]Pm] & <- & ?). exists Bm, Pm.
-    rewrite Some_includedN_total in incl. rewrite -eqv in incl.
-    apply prod_includedN in incl as [incl ?].
-    apply prod_includedN in incl as [incl ?]. simpl in *.
-    by apply to_agree_includedN, leibniz_equiv in incl as <-.
+    unfold internal_included. uPred.unseal.
+    by split=> ?? _ /depo_stm_own_agree'.
   Qed.
 
   (** Agreement between [depo_stm_tok] and [lend_itok] *)
