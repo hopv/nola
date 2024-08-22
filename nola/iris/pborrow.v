@@ -276,8 +276,8 @@ Section pborrow.
     ([†β] -∗ ([∗ list] Qx ∈ Qxl, sm Qx) -∗ M (sm Px))
       =[pborrow_wsat M sm]=∗ q.[α] ∗ [∗ list] Qx ∈ Qxl, nbor_tok β Qx.
   Proof.
-    iIntros "⊑ o Qxl →P".
-    iMod (nobor_tok_merge_subdiv [(_,_,_)'] with "[⊑ o] Qxl [→P]")
+    iIntros "⊑ o Qxl →Px".
+    iMod (nobor_tok_merge_subdiv [(_,_,_)'] with "[⊑ o] Qxl [→Px]")
       as "[[$ _]$]"=>/=; by [iFrame|rewrite bi.sep_emp|].
   Qed.
   Lemma nobor_tok_close {α q Px} :

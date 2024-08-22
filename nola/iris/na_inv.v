@@ -121,10 +121,10 @@ Section na_inv.
     (na_inv_tok p N Px -∗ sm Px) =[na_inv_wsat sm]=∗ na_inv_tok p N Px.
   Proof.
     rewrite na_inv_tok_unseal na_inv_wsat_unseal.
-    iIntros "→P". iMod (na_lock_alloc p N) as (i ?) "l".
-    iMod (inv_tok_alloc_rec with "[→P l]"); last first.
+    iIntros "→Px". iMod (na_lock_alloc p N) as (i ?) "l".
+    iMod (inv_tok_alloc_rec with "[→Px l]"); last first.
     { iModIntro. iExists _. by iSplit. }
-    iIntros "i". iLeft. iFrame "l". iApply "→P". iExists _. by iSplit.
+    iIntros "i". iLeft. iFrame "l". iApply "→Px". iExists _. by iSplit.
   Qed.
   Lemma na_inv_tok_alloc Px p N :
     sm Px =[na_inv_wsat sm]=∗ na_inv_tok p N Px.

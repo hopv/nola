@@ -812,11 +812,11 @@ Section borrow.
       =[borrow_wsat M sm]=∗
       ([∗ list] '(α, q, _)' ∈ αqPxl, q.[α]) ∗ [∗ list] Qx ∈ Qxl, bor_tok β Qx.
   Proof.
-    rewrite/= obor_toks_dtoks_bound. iIntros "[%d[%γ[#⊑ αqPxl]]] Qxl →P".
+    rewrite/= obor_toks_dtoks_bound. iIntros "[%d[%γ[#⊑ αqPxl]]] Qxl →Px".
     iMod (bor_lend_tok_new_list' d γ Qxl ((λ '(_, _, Px)', Px) <$> αqPxl)
-      with "Qxl [→P]") as "[bl ll]"=>/=.
+      with "Qxl [→Px]") as "[bl ll]"=>/=.
     { iIntros "† Qxl". iDestruct (lft_sincl_dead with "⊑ †") as "†".
-      rewrite big_sepL_fmap. iApply ("→P" with "† Qxl"). }
+      rewrite big_sepL_fmap. iApply ("→Px" with "† Qxl"). }
     iSplitR "bl"; last first.
     { iModIntro. iApply (big_sepL_impl with "bl"). iIntros "!> %% _".
       by iApply bor_tok_lft. }
@@ -831,8 +831,8 @@ Section borrow.
     ([†β] -∗ ([∗ list] Qx ∈ Qxl, sm Qx) -∗ M (sm Px))
       =[borrow_wsat M sm]=∗ q.[α] ∗ [∗ list] Qx ∈ Qxl, bor_tok β Qx.
   Proof.
-    iIntros "⊑ o Qxl →P".
-    iMod (obor_tok_merge_subdiv [(_,_,_)'] with "[⊑ o] Qxl [→P]")
+    iIntros "⊑ o Qxl →Px".
+    iMod (obor_tok_merge_subdiv [(_,_,_)'] with "[⊑ o] Qxl [→Px]")
       as "[[$_]$]"=>/=; by [iFrame|rewrite bi.sep_emp|].
   Qed.
   (** Simply close a borrower *)

@@ -428,8 +428,8 @@ Section pborrow_deriv.
     ([†β] -∗ ([∗ list] Qx ∈ Qxl, ⟦ Qx ⟧) -∗ M ⟦ Px ⟧) =[pborrow_wsatid M]=∗
       q.[α] ∗ ([∗ list] Qx ∈ Qxl, nbord β Qx).
   Proof.
-    iIntros "⊑ o Qxl →P".
-    iMod (nobord_merge_subdiv [(_,_,_)'] with "[⊑ o] Qxl [→P]") as "[[$ _]$]"
+    iIntros "⊑ o Qxl →Px".
+    iMod (nobord_merge_subdiv [(_,_,_)'] with "[⊑ o] Qxl [→Px]") as "[[$ _]$]"
       =>/=; by [iFrame|rewrite bi.sep_emp|].
   Qed.
   (** Simply close a borrower *)
