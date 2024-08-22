@@ -210,8 +210,8 @@ Section borrow_deriv.
   Lemma bord_open {α q Px} :
     q.[α] -∗ bord α Px -∗ modw M (borrow_wsatid M) (obord α q Px ∗ ⟦ Px ⟧).
   Proof.
-    rewrite bor_unseal obor_unseal. iIntros "α [%Qx[$[QP c]]]".
-    iMod (bor_tok_open (M:=M) (sm:=⟦⟧) with "α c") as "[$ Qx]".
+    rewrite bor_unseal obor_unseal. iIntros "α [%Qx[$[QP b]]]".
+    iMod (bor_tok_open (M:=M) (sm:=⟦⟧) with "α b") as "[$ Qx]".
     rewrite der_borrow_jto. iMod ("QP" with "Qx") as "$". by iIntros.
   Qed.
 
@@ -273,10 +273,10 @@ Section borrow_deriv.
   Proof.
     rewrite obor_unseal. iIntros "[%[PQ o]] Px".
     iMod (obor_tok_subdiv (M:=M) (sm:=⟦⟧) [_] with "[] o [$Px //] [PQ]")
-      as "[α[c _]]".
+      as "[α[b _]]".
     { iApply lft_sincl_refl. }
     { rewrite der_borrow_jto /=. iIntros "_ [Px _]". by iMod ("PQ" with "Px"). }
-    iApply (bor_tok_open (M:=M) (sm:=⟦⟧) with "α c").
+    iApply (bor_tok_open (M:=M) (sm:=⟦⟧) with "α b").
   Qed.
 
   (** Reborrow a borrower *)
