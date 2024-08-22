@@ -323,30 +323,30 @@ Section verify.
 
   (** Dereference a nested mutable reference *)
   Lemma bor_bor_deref {α β l Φx q} :
-    [[{ β ⊑□ α ∗ q.[β] ∗ nbor_tok α (∃ l', l ↦ #l' ∗ cif_bor β (Φx l'))%cif }]]
+    [[{ β ⊑□ α ∗ q.[β] ∗ nbor_tok β (∃ l', l ↦ #l' ∗ cif_bor α (Φx l'))%cif }]]
       [pborrow_wsat bupd ⟦⟧]
       !#l
     [[{ l', RET #l'; q.[β] ∗ nbor_tok β (Φx l') }]].
   Proof.
     iIntros (Ψ) "(#⊑ & [β β'] & b) →Ψ".
-    iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
-    iMod (nbor_tok_open (sm:=⟦⟧) (M:=bupd) with "α b") as "[o big]".
+    iMod (nbor_tok_open (sm:=⟦⟧) (M:=bupd) with "β b") as "[o big]".
     rewrite /⟦⟧ /=. iDestruct "big" as (l') "[↦ b']".
     iApply twpw_fupdw_nonval; [done|]. wp_load. iModIntro.
-    iMod (nbor_tok_reborrow (sm:=⟦⟧) (M:=bupd) α with "β b'") as "[β[b' →b']]".
+    iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
+    iMod (nbor_tok_reborrow (sm:=⟦⟧) (M:=bupd) with "⊑ α b'")
+      as "(α & →b' & b')".
+    iDestruct ("→β'" with "α") as "β'".
     iMod (nobor_tok_subdiv (sm:=⟦⟧) (M:=bupd) [] with "[] o [] [↦ →b']")
-      as "[α _]"=>/=. { iApply lft_sincl_refl. } { done. }
+      as "[β _]"=>/=. { iApply lft_sincl_refl. } { done. }
     { iIntros "† _". iModIntro. iExists _. iFrame "↦". by iApply "→b'". }
-    iModIntro. iApply "→Ψ". iFrame "β". iDestruct ("→β'" with "α") as "$".
-    iApply nbor_tok_lft; [|done]. iApply lft_sincl_meet_intro; [|done].
-    iApply lft_sincl_refl.
+    iModIntro. iApply "→Ψ". iFrame.
   Qed.
 
   (** Dereference a nested prophetic mutable reference *)
   Lemma pbor_pbor_deref {X η ξ α β l Φxx q} {x : X} :
     [[{ β ⊑□ α ∗ q.[β] ∗
-        pbor_tok α ((x, ξ)' : _ *'ₛ prvarₛ _) η
-          (λ '(x', ξ')', ∃ l', l ↦ #l' ∗ cif_pbor β x' ξ' (Φxx l'))%cif }]]
+        pbor_tok β ((x, ξ)' : _ *'ₛ prvarₛ _) η
+          (λ '(x', ξ')', ∃ l', l ↦ #l' ∗ cif_pbor α x' ξ' (Φxx l'))%cif }]]
       [pborrow_wsat bupd ⟦⟧]
       !#l
     [[{ l', RET #l';
@@ -354,16 +354,15 @@ Section verify.
           ⟨π, π η = (π ξ', ξ)'⟩ ∗ pbor_tok β x ξ' (Φxx l') }]].
   Proof.
     iIntros (Ψ) "(#⊑ & [β β'] & b) →Ψ".
-    iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
-    iMod (pbor_tok_open (sm:=⟦⟧) (M:=bupd) with "α b") as "/=[o big]".
+    iMod (pbor_tok_open (sm:=⟦⟧) (M:=bupd) with "β b") as "/=[o big]".
     rewrite /⟦⟧ /=. iDestruct "big" as (l') "[↦ b']".
     iApply twpw_fupdw_nonval; [done|]. wp_load. iModIntro.
+    iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
     iMod (pobor_pbor_tok_reborrow (TY:=nsynty) (sm:=⟦⟧) (M:=bupd)
-      (λ _, (_,_)' : _ *'ₛ _) with "o β b' [↦]") as (?) "[α[β[obs c]]]".
+      (λ _, (_,_)' : _ *'ₛ _) with "⊑ o α b' [↦]") as (?) "(β & α & obs & b)".
     { iIntros "/=% _ ? !>". iExists _. iFrame. }
-    iModIntro. iApply "→Ψ". iFrame "β". iDestruct ("→β'" with "α") as "$".
-    iExists _. iFrame "obs". iApply pbor_tok_lft; [|done].
-    iApply lft_sincl_meet_intro; [done|]. iApply lft_sincl_refl.
+    iModIntro. iApply "→Ψ". iDestruct ("→β'" with "α") as "$". iFrame "β".
+    iExists _. iFrame.
   Qed.
 
   (** Load from an immutable shared borrow *)
@@ -448,13 +447,13 @@ Section verify.
     iMod (nbor_tok_open (M:=bupd) (sm:=⟦⟧) with "α b") as "[o big]".
     rewrite /⟦⟧ /=. iDestruct "big" as (b') "[↦ Px]".
     iMod (nobor_tok_subdiv (sm:=⟦⟧) (M:=bupd) [∃ b', l ↦ #b'; Px]%cif
-      with "[] o [↦ Px] []") as "[α[b[b' _]]]"; rewrite /⟦⟧ /=.
+      with "[] o [↦ Px] []") as "(α & _ & (b & b' & _))"; rewrite /⟦⟧ /=.
     { iApply lft_sincl_refl. } { iSplitL "↦"; iFrame. }
     { by iIntros "_ [[% $][$ _]]". }
     iMod (nbor_tok_open (M:=bupd) (sm:=⟦⟧) with "α b") as "[o ↦]".
     iMod (nobor_tok_subdiv (sm:=⟦⟧) (M:=bupd)
       [(l ↦ #false ∗ cif_bor α Px) ∨ l ↦ #true]%cif with "[] o [↦ b'] []")
-      as "[$[b _]]"; rewrite /⟦⟧ /=. { iApply lft_sincl_refl. }
+      as "($ & _ & [b _])"; rewrite /⟦⟧ /=. { iApply lft_sincl_refl. }
     { iSplit; [|done]. iDestruct "↦" as ([|]) "↦"; [|iLeft]; iFrame. }
     { by iIntros "_ [[[$ _]|$]_]". }
     by iMod (inv_tok_alloc with "[b]") as "$".
