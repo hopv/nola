@@ -1,7 +1,7 @@
 (** * Lifetime machinery *)
 
 From nola Require Export prelude.
-From nola.util Require Import set.
+From nola.util Require Import gmultiset.
 From nola.bi Require Export updw.
 From nola.bi Require Import gen_upd.
 From iris.algebra Require Import view gmap csum dfrac.
