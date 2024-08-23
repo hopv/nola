@@ -149,7 +149,7 @@ Section cit_forall2.
   #[warning="-uniform-inheritance"]
   Coercion cit_forall2_unfold_1 : cit_forall2 >-> cit_forall2I.
 
-  (** Coinduction on [cit_forall2] *)
+  (** Coinductio over [cit_forall2] *)
   Lemma cit_forall2_coind {D D' R t t'}
     (CH : cit I C D → cit I C D' → Prop) :
     CH t t' → (CH ⊑ cit_forall2I R CH) → cit_forall2 R t t'.
@@ -219,7 +219,7 @@ Section cit_forall2.
   Qed.
 End cit_forall2.
 
-(** ** OFE on [cit] *)
+(** ** OFE of [cit] *)
 
 Section citO.
   Context {S} {I C : S → Type} {D : S → ofe}.
@@ -234,23 +234,23 @@ Section citO.
   Local Instance cit_equiv : Equiv (cit I C D) :=
     λ t t', ∀ n, cit_dist n t t'.
 
-  (** OFE mixin on [cit] *)
+  (** OFE mixin of [cit] *)
   Lemma cit_ofe_mixin : OfeMixin (cit I C D).
   Proof.
    split; [done|exact _|]=> ???? F ?. move: F. apply cit_forall2_mono.
    move=> ????. by eapply dist_lt.
   Qed.
-  (** OFE on [cit] *)
+  (** OFE of [cit] *)
   Canonical citO : ofe := Ofe (cit I C D) cit_ofe_mixin.
 
-  (** OFE on [cit'] *)
+  (** OFE of [cit'] *)
   Local Instance cit'_dist : Dist (cit' I C D) :=
     λ n t t', Cit t ≡{n}≡ Cit t'.
   Local Instance cit'_equiv : Equiv (cit' I C D) :=
     λ t t', Cit t ≡ Cit t'.
   Lemma cit'_ofe_mixin : OfeMixin (cit' I C D).
   Proof. by apply (iso_ofe_mixin Cit). Qed.
-  (** OFE on [cit'] *)
+  (** OFE of [cit'] *)
   Canonical cit'O : ofe := Ofe (cit' I C D) cit'_ofe_mixin.
 End citO.
 Arguments citO {_} _ _ _. Arguments cit'O {_} _ _ _.
@@ -259,7 +259,7 @@ Section citO.
   Context {S} {I C : S → Type} {D : S → ofe}.
   Implicit Type t : cit I C D.
 
-  (** Rewrite [dist] and [equiv] on [cit] and [citI] *)
+  (** Rewrite [dist] and [equiv] over [cit] and [citI] *)
   Lemma cit_dist_eq {n t t'} :
     (t ≡{n}≡ t') = cit_forall2 (λ _, dist n) t t'.
   Proof. done. Qed.

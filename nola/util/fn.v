@@ -1,4 +1,4 @@
-(** * Utility on functions *)
+(** * Utility for functions *)
 
 From nola Require Export prelude.
 

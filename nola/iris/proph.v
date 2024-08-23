@@ -66,7 +66,7 @@ Local Definition proph_upd {TY}
 Local Notation ":<[ ξ := xπ ]>" := (proph_upd ξ xπ)
   (at level 5, format ":<[ ξ  :=  xπ ]>").
 
-(** Access on [proph_upd] *)
+(** Applying [proph_upd] *)
 Local Lemma proph_upd_self {TY} {π : proph_asn TY} {ξ xπ} :
   :<[ξ := xπ]> π ξ = xπ π.
 Proof.

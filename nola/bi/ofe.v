@@ -1,4 +1,4 @@
-(** * Utility on OFEs *)
+(** * Utility for OFEs *)
 
 From nola Require Export prelude.
 From iris.bi Require Import bi.

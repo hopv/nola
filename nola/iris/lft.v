@@ -81,7 +81,7 @@ Variant alftst :=
 | #[local] live_alft (* Live *)
 | #[local] dead_alft (* Dead *)
 | #[local] etern_alft (* Eternal *).
-(** Equality on [alftst] is decidable *)
+(** Equality over [alftst] is decidable *)
 Local Instance alftst_eq_dec : EqDecision alftst.
 Proof. solve_decision. Defined.
 

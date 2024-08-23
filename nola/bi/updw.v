@@ -146,7 +146,7 @@ Section lemmas.
       apply bi.equiv_entails. f_equiv. by rewrite assoc.
   Qed.
 
-  (** [modw] on [emp] world satisfaction *)
+  (** [modw] over [emp] world satisfaction *)
   Lemma modw_emp `{!Proper ((⊣⊢) ==> (⊣⊢)) M} {P} : modw M emp P ⊣⊢ M P.
   Proof. by rewrite /modw !left_id. Qed.
 End lemmas.
@@ -220,7 +220,7 @@ Section lemmas.
     GenUpdB (fupdw W E E).
   Proof. exact gen_upd_b_modw. Qed.
 
-  (** For [modw M] on [GenUpdB] [M] *)
+  (** For [modw M] over [GenUpdB] [M] *)
   Lemma bupdw_modw_gen_upd `{!BiBUpd PROP, !GenUpd M, !GenUpdB M} {W P} :
     (|=[W]=> P) ⊢ modw M W P.
   Proof. rewrite /bupdw /modw. f_equiv. apply gen_upd_from_bupd. Qed.
@@ -334,12 +334,12 @@ Use [iApply fupdw_mask_intro] to introduce mask-changing update modalities")
     (|=[W]=> P) ⊢ |=[W]{E}=> P.
   Proof. exact bupdw_modw_gen_upd. Qed.
 
-  (** Frame on [bupdw] *)
+  (** Frame over [bupdw] *)
   #[export] Instance frame_bupdw `{!BiBUpd PROP, !Frame p R P Q} {W} :
     Frame p R (|=[W]=> P) (|=[W]=> Q) | 2.
   Proof. exact _. Qed.
 
-  (** Frame on [fupdw] *)
+  (** Frame over [fupdw] *)
   #[export] Instance frame_fupdw `{!BiFUpd PROP, !Frame p R P Q} {W E E'} :
     Frame p R (|=[W]{E,E'}=> P) (|=[W]{E,E'}=> Q) | 2.
   Proof. exact _. Qed.
@@ -421,11 +421,11 @@ Use [iMod (fupd_mask_subseteq E')] to adjust the mask of your goal to [E']")
     AddModal (|={E}=> P) P (|=[W]{E,E'}=> Q).
   Proof. rewrite /AddModal fupd_frame_r bi.wand_elim_r. iIntros ">$". Qed.
 
-  (** [modw] on [bupdw] *)
+  (** [modw] over [bupdw] *)
   Lemma modw_bupdw `{!BiBUpd PROP} {W W' P} :
     modw (bupdw W) W' P ⊣⊢ |=[W ∗ W']=> P.
   Proof. exact modw_modw_sep. Qed.
-  (** [modw] on [fupdw] *)
+  (** [modw] over [fupdw] *)
   Lemma modw_fupdw `{!BiFUpd PROP} {W W' E E' P} :
     modw (fupdw W E E') W' P ⊣⊢ |=[W ∗ W']{E,E'}=> P.
   Proof. exact modw_modw_sep. Qed.

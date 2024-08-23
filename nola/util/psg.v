@@ -17,7 +17,7 @@ Section psg.
   Qed.
   Definition Psgoid f : OT → Prop := lfp (Psgoid_gen f).
 
-  (** Factorization on [Psgoid] *)
+  (** Factorizing [Psgoid] *)
   Lemma Psgoid_factor' {f o} :
     Psgoid f o → ([⊓] o' :: Psgoid f o' ∧ o ⊑ f o', f o') ⊑ o.
   Proof. apply (lfp_unfold (f:=Psgoid_gen f)). Qed.
@@ -49,7 +49,7 @@ Section psg.
   #[export] Instance Psgoidp_mono {f} : Mono (Psgoidp f).
   Proof. move=> *. by apply (mono (f:=lfp)), mono. Qed.
 
-  (** [Psgoidp] on [⊤] is equivalent to [Psgoid] *)
+  (** [Psgoidp] over [⊤] is equivalent to [Psgoid] *)
   Lemma Psgoidp_Psgoid {f} : Psgoidp f ⊤ ≃ Psgoid f.
   Proof. apply (mono_proper (f:=lfp)), aug_meet_top. Qed.
 
@@ -61,7 +61,7 @@ Section psg.
     apply (mono (f:=lfp)), oeqv_ole_1, aug_meet_nest.
   Qed.
 
-  (** Factorization on [Psgoidp] *)
+  (** Factorizing [Psgoidp] *)
   Lemma Psgoidp_factor' {f ih o} :
     Psgoidp f ih o → ([⊓] o' :: Psgoidp f ih o' ∧ o ⊑ f o' ∧ ih o', f o') ⊑ o.
   Proof.

@@ -304,7 +304,7 @@ Section wpw.
   Lemma twpw_wpw {e s E W Φ} : WP[W] e @ s; E [{ Φ }] ⊢ WP[W] e @ s; E {{ Φ }}.
   Proof. iIntros "?". by iApply twp_wp. Qed.
 
-  (** Eliminate [fupdw] on [wpw] *)
+  (** Eliminate [fupdw] over [wpw] *)
   Lemma fupdw_wpw_nonval {e s E W Φ} : to_val e = None →
     (|=[W]{E}=> WP[W] e @ s; E {{ Φ }}) ⊢ WP[W] e @ s; E {{ Φ }}.
   Proof.
@@ -337,7 +337,7 @@ Section wpw.
       (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E {{ Φ }}).
   Proof. move=> ?. by rewrite (bupdw_fupdw E) elim_modal_fupdw_wpw_nonval. Qed.
 
-  (** Eliminate [fupdw] on [twpw] *)
+  (** Eliminate [fupdw] over [twpw] *)
   Lemma fupdw_twpw_nonval {e s E W Φ} : to_val e = None →
     (|=[W]{E}=> WP[W] e @ s; E [{ Φ }]) ⊢ WP[W] e @ s; E [{ Φ }].
   Proof.
@@ -370,7 +370,7 @@ Section wpw.
       (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E [{ Φ }]).
   Proof. move=> ?. by rewrite (bupdw_fupdw E) elim_modal_fupdw_twpw_nonval. Qed.
 
-  (** Mask-changing [fupdw] on atomic [wpw] *)
+  (** Mask-changing [fupdw] over atomic [wpw] *)
   Lemma wpw_atomic `{!Atomic (stuckness_to_atomicity s) e} {E E' W Φ} :
     to_val e = None →
     (|=[W]{E,E'}=> WP[W] e @ s; E' {{ v, |=[W]{E',E}=> Φ v }}) ⊢
@@ -399,7 +399,7 @@ Section wpw.
       bi.wand_elim_r (fupdw_incl (W:=W)) wpw_atomic.
   Qed.
 
-  (** Mask-changing [fupdw] on atomic [twpw] *)
+  (** Mask-changing [fupdw] over atomic [twpw] *)
   Lemma twpw_atomic `{!Atomic (stuckness_to_atomicity s) e} {E E' W Φ} :
     to_val e = None →
     (|=[W]{E,E'}=> WP[W] e @ s; E' [{ v, |=[W]{E',E}=> Φ v }]) ⊢

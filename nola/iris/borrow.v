@@ -611,7 +611,7 @@ Section borrow.
     rewrite map_filter_filter.
     apply (map_filter_ext (M:=gmap _))=> ?[[??]?]/=?. lia.
   Qed.
-  (** Retrieve from [borrow_wsat'] on [filter_eq] *)
+  (** Retrieve from [borrow_wsat'] over [filter_eq] *)
   Local Lemma borrow_wsat'_eq_retrieve {Dm d α} :
     [†α] -∗ borrow_wsat' M sm (filter_eq d Dm) -∗
       borrow_wsat_dret M sm Dm (S d) α -∗
@@ -637,7 +637,7 @@ Section borrow.
     do 2 f_equiv; rewrite map_filter_filter;
       apply (map_filter_ext (M:=gmap _))=>/=; lia.
   Qed.
-  (** Retrieve from [borrow_wsat'] on [filter_lt] *)
+  (** Retrieve from [borrow_wsat'] over [filter_lt] *)
   Local Lemma borrow_wsat'_lt_retrieve {Dm d α} :
     [†α] -∗ borrow_wsat' M sm (filter_lt d Dm) -∗
       borrow_wsat_dret M sm Dm d α -∗ M (borrow_wsat_ret M sm Dm α).

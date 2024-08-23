@@ -1,4 +1,4 @@
-(** * Utility on [list] *)
+(** * Utility for [list] *)
 
 From nola Require Export prelude.
 From iris.algebra Require Import cmra.
@@ -17,7 +17,7 @@ Section big_cmra_opL.
     move=> ?? IH /elem_of_cons[<-|/IH ?]; [done|]. by etrans.
   Qed.
 
-  (** [own] on [[^op list]] *)
+  (** [own] over [[^op list]] *)
   Lemma big_opL_own_2 `{!inG Σ C} {A} {γ al} (f : nat → A → C) :
     ([∗ list] k ↦ a ∈ al, own γ (f k a)) ⊢
       |==> own γ ([^op list] k ↦ a ∈ al, f k a).

@@ -1,4 +1,4 @@
-(** * Utility on [gmap] *)
+(** * Utility for [gmap] *)
 
 From nola.util Require Export gmap.
 From iris.algebra Require Import updates gmap.
@@ -24,7 +24,7 @@ Section gmapR.
     (∀ x, ✓ f x) → ✓ (f <$> m).
   Proof. move=> ? i. rewrite lookup_fmap. by case: (m !! i). Qed.
 
-  (** Simplify [op] on disjoint maps *)
+  (** Simplify [op] over disjoint maps *)
   Lemma gmap_op_disj {m m' : gmap K C} : m ##ₘ m' → m ⋅ m' ≡ m ∪ m'.
   Proof.
     move=> /map_disjoint_spec disj i. rewrite gmap_op lookup_merge.
@@ -60,7 +60,7 @@ Section big_sepM.
     rewrite big_sepM_union; by [|apply map_disjoint_filter_complement].
   Qed.
 
-  (** [[∗ map]] on [map_withouut] *)
+  (** [[∗ map]] over [map_without] *)
   Lemma big_sepM_map_without `{!Infinite K} m l (Φ : A → PROP) :
     ([∗ map] x ∈ map_without m l, Φ x) ⊣⊢ [∗ list] x ∈ l, Φ x.
   Proof.
@@ -75,7 +75,7 @@ Section big_sepM.
     iIntros. by iExists _.
   Qed.
 
-  (** [[∗ map]] on [map_with] *)
+  (** [[∗ map]] over [map_with] *)
   Lemma big_sepM_map_with_without `{!Infinite K} m l (Φ : K → A → PROP) :
     ([∗ map] i ↦ x ∈ map_with m l, Φ i x) ⊣⊢
       ([∗ map] i ↦ x ∈ map_without m l, Φ i x) ∗ [∗ map] i ↦ x ∈ m, Φ i x.
@@ -91,7 +91,7 @@ Section big_sepM.
       ([∗ list] x ∈ l, ∃ i, Φ i x) ∗ [∗ map] i ↦ x ∈ m, Φ i x.
   Proof. by rewrite big_sepM_map_with_without big_sepM_map_without'. Qed.
 
-  (** [[∗ map]] on [map_by] *)
+  (** [[∗ map]] over [map_by] *)
   Lemma big_sepM_map_by `{!Infinite K} l (Φ : A → PROP) :
     ([∗ map] x ∈ map_by K l, Φ x) ⊣⊢ [∗ list] x ∈ l, Φ x.
   Proof. by rewrite big_sepM_map_with big_sepM_empty right_id. Qed.
