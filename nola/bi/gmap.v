@@ -39,26 +39,19 @@ Section big_sepM.
   Context `{!EqDecision K, !Countable K} {PROP : bi} {A : Type}.
   Implicit Type (m : gmap K A) (l : list A).
 
-  (** Conversion between [[∗ map]] and [[∗ list]] *)
-  Lemma big_sepM_map_to_list_snd m (Φ : A → PROP) :
-    ([∗ map] x ∈ m, Φ x) ⊣⊢ [∗ list] x ∈ (map_to_list m).*2, Φ x.
-  Proof. by rewrite big_sepM_map_to_list big_sepL_fmap. Qed.
-
-  (** [big_sepM_filter'] with keys ignored *)
-  Lemma big_sepM_filter'' φ `{∀ x, Decision (φ x)} m (Φ : A → PROP) :
-    ([∗ map] x ∈ filter (λ ix, φ (snd ix)) m, Φ x) ⊣⊢
-    ([∗ map] x ∈ m, if decide (φ x) then Φ x else emp).
-  Proof. by rewrite big_sepM_filter'. Qed.
-
-  (** Split [big_sepM] by [filter] *)
-  Lemma big_sepM_filter_complement φ
-    `{! ∀ ix, Decision (φ ix)} m (Φ : A → PROP) :
-    ([∗ map] x ∈ m, Φ x) ⊣⊢ ([∗ map] x ∈ filter φ m, Φ x) ∗
-      ([∗ map] x ∈ filter (λ ix, ¬ φ ix)%type m, Φ x).
+  (** [[∗ map]] over [list_to_gmap] *)
+  Lemma big_sepM_list_to_gmap' l j (Φ : nat → A → PROP) :
+    ([∗ map] i ↦ x ∈ list_to_gmap' j l, Φ i x) ⊣⊢
+      [∗ list] i ↦ x ∈ l, Φ (j + i) x.
   Proof.
-    rewrite -{1}(map_filter_union_complement φ m).
-    rewrite big_sepM_union; by [|apply map_disjoint_filter_complement].
+    move: j. elim: l=>/=; [move=> ?; by rewrite big_sepM_empty|]=> ?? IH j.
+    setoid_rewrite <-plus_n_Sm. rewrite -(IH (S _)) (right_id 0).
+    rewrite big_sepM_insert; [done|]. apply lookup_list_to_gmap'_pre. lia.
   Qed.
+  Lemma big_sepM_list_to_gmap l (Φ : nat → A → PROP) :
+    ([∗ map] i ↦ x ∈ list_to_gmap l, Φ i x) ⊣⊢
+      [∗ list] i ↦ x ∈ l, Φ i x.
+  Proof. apply big_sepM_list_to_gmap'. Qed.
 
   (** [[∗ map]] over [map_without] *)
   Lemma big_sepM_map_without `{!Infinite K} m l (Φ : A → PROP) :
