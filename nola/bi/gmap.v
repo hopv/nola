@@ -39,46 +39,6 @@ Section big_sepM.
   Context `{!EqDecision K, !Countable K} {PROP : bi} {A : Type}.
   Implicit Type (m : gmap K A) (l : list A).
 
-  (** [[∗ map]] on [map_with] *)
-  Lemma big_sepM_map_with `{!Infinite K} m l (Φ : A → PROP) :
-    ([∗ map] x ∈ map_with m l, Φ x) ⊣⊢
-      ([∗ list] x ∈ l, Φ x) ∗ [∗ map] x ∈ m, Φ x.
-  Proof.
-    elim: l; [by rewrite/= left_id|]=>/= ?? IH. rewrite -assoc -IH.
-    rewrite big_sepM_insert; [done|]. apply not_elem_of_dom, is_fresh.
-  Qed.
-  Lemma big_sepM_map_with' `{!Infinite K} m l (Φ : K → A → PROP) :
-    ([∗ map] i ↦ x ∈ map_with m l, Φ i x) ⊢
-      ([∗ list] x ∈ l, ∃ i, Φ i x) ∗ [∗ map] i ↦ x ∈ m, Φ i x.
-  Proof.
-    elim: l; [by rewrite/= left_id|]=>/= ?? IH. rewrite -assoc -IH.
-    rewrite big_sepM_insert. { f_equiv. iIntros. by iExists _. }
-    apply not_elem_of_dom, is_fresh.
-  Qed.
-
-  (** [[∗ map]] on [map_by] *)
-  Lemma big_sepM_map_by `{!Infinite K} l (Φ : A → PROP) :
-    ([∗ map] x ∈ map_by K l, Φ x) ⊣⊢ [∗ list] x ∈ l, Φ x.
-  Proof. by rewrite big_sepM_map_with big_sepM_empty right_id. Qed.
-  Lemma big_sepM_map_by' `{!Infinite K} l (Φ : K → A → PROP) :
-    ([∗ map] i ↦ x ∈ map_by K l, Φ i x) ⊢ [∗ list] x ∈ l, ∃ i, Φ i x.
-  Proof. by rewrite big_sepM_map_with' big_sepM_empty right_id. Qed.
-
-  (** [[∗ map]] on [map_withouut] *)
-  Lemma big_sepM_map_without `{!Infinite K} m l (Φ : A → PROP) :
-    ([∗ map] x ∈ map_without m l, Φ x) ⊣⊢ [∗ list] x ∈ l, Φ x.
-  Proof.
-    elim: l; [by rewrite big_sepM_empty|]=>/= a l <-.
-    rewrite big_sepM_insert; [done|]. apply map_without_with_fresh.
-  Qed.
-  Lemma big_sepM_map_without' `{!Infinite K} m l (Φ : K → A → PROP) :
-    ([∗ map] i ↦ x ∈ map_without m l, Φ i x) ⊢ [∗ list] x ∈ l, ∃ i, Φ i x.
-  Proof.
-    elim: l; [by rewrite big_sepM_empty|]=>/= a l <-.
-    rewrite big_sepM_insert; [|by apply map_without_with_fresh]. f_equiv.
-    iIntros. by iExists _.
-  Qed.
-
   (** Conversion between [[∗ map]] and [[∗ list]] *)
   Lemma big_sepM_map_to_list_snd m (Φ : A → PROP) :
     ([∗ map] x ∈ m, Φ x) ⊣⊢ [∗ list] x ∈ (map_to_list m).*2, Φ x.
@@ -99,4 +59,43 @@ Section big_sepM.
     rewrite -{1}(map_filter_union_complement φ m).
     rewrite big_sepM_union; by [|apply map_disjoint_filter_complement].
   Qed.
+
+  (** [[∗ map]] on [map_withouut] *)
+  Lemma big_sepM_map_without `{!Infinite K} m l (Φ : A → PROP) :
+    ([∗ map] x ∈ map_without m l, Φ x) ⊣⊢ [∗ list] x ∈ l, Φ x.
+  Proof.
+    elim: l; [by rewrite big_sepM_empty|]=>/= a l <-.
+    rewrite big_sepM_insert; [done|]. apply map_without_with_fresh.
+  Qed.
+  Lemma big_sepM_map_without' `{!Infinite K} m l (Φ : K → A → PROP) :
+    ([∗ map] i ↦ x ∈ map_without m l, Φ i x) ⊢ [∗ list] x ∈ l, ∃ i, Φ i x.
+  Proof.
+    elim: l; [by rewrite big_sepM_empty|]=>/= a l <-.
+    rewrite big_sepM_insert; [|by apply map_without_with_fresh]. f_equiv.
+    iIntros. by iExists _.
+  Qed.
+
+  (** [[∗ map]] on [map_with] *)
+  Lemma big_sepM_map_with_without `{!Infinite K} m l (Φ : K → A → PROP) :
+    ([∗ map] i ↦ x ∈ map_with m l, Φ i x) ⊣⊢
+      ([∗ map] i ↦ x ∈ map_without m l, Φ i x) ∗ [∗ map] i ↦ x ∈ m, Φ i x.
+  Proof.
+    by rewrite map_with_without big_sepM_union; [|exact map_without_disj].
+  Qed.
+  Lemma big_sepM_map_with `{!Infinite K} m l (Φ : A → PROP) :
+    ([∗ map] x ∈ map_with m l, Φ x) ⊣⊢
+      ([∗ list] x ∈ l, Φ x) ∗ [∗ map] x ∈ m, Φ x.
+  Proof. by rewrite big_sepM_map_with_without big_sepM_map_without. Qed.
+  Lemma big_sepM_map_with' `{!Infinite K} m l (Φ : K → A → PROP) :
+    ([∗ map] i ↦ x ∈ map_with m l, Φ i x) ⊢
+      ([∗ list] x ∈ l, ∃ i, Φ i x) ∗ [∗ map] i ↦ x ∈ m, Φ i x.
+  Proof. by rewrite big_sepM_map_with_without big_sepM_map_without'. Qed.
+
+  (** [[∗ map]] on [map_by] *)
+  Lemma big_sepM_map_by `{!Infinite K} l (Φ : A → PROP) :
+    ([∗ map] x ∈ map_by K l, Φ x) ⊣⊢ [∗ list] x ∈ l, Φ x.
+  Proof. by rewrite big_sepM_map_with big_sepM_empty right_id. Qed.
+  Lemma big_sepM_map_by' `{!Infinite K} l (Φ : K → A → PROP) :
+    ([∗ map] i ↦ x ∈ map_by K l, Φ i x) ⊢ [∗ list] x ∈ l, ∃ i, Φ i x.
+  Proof. by rewrite big_sepM_map_with' big_sepM_empty right_id. Qed.
 End big_sepM.
