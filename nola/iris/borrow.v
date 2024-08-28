@@ -82,14 +82,14 @@ Definition borrowΣ FML `{!oFunctorContractive FML} : gFunctors :=
   `{!oFunctorContractive FML, !subG (borrowΣ FML) Σ} : borrowGpreS FML Σ.
 Proof. solve_inG. Qed.
 
-(** ** Tokens *)
-
 Section borrow.
   Context `{!borrowGS FML Σ}.
-  Implicit Type (Px Qx : FML $oi Σ) (Pxl Qxl : list (FML $oi Σ))
+  Implicit Type (M : iProp Σ → iProp Σ) (sm : FML $oi Σ -d> iProp Σ)
+    (Px Qx : FML $oi Σ) (Pxl Qxl : list (FML $oi Σ))
     (D : depo_st FML Σ) (Dl : depo_stl FML Σ)
-    (B : bor_stOF FML $oi Σ) (Bl : bor_stl FML Σ)
-    (Lm : lend_stm FML Σ).
+    (B : bor_stOF FML $oi Σ) (Bl : bor_stl FML Σ) (Lm : lend_stm FML Σ).
+
+  (** ** Tokens *)
 
   (** General borrower token *)
   Local Definition bor_jtok i j α B : iProp Σ :=
@@ -412,15 +412,8 @@ Section borrow.
       split; by [|rewrite lookup_list_to_gmap]. }
     by apply exclusive_local_update.
   Qed.
-End borrow.
 
-(** ** World satisfactions *)
-
-Section borrow.
-  Context `{!borrowGS FML Σ}.
-  Implicit Type (M : iProp Σ → iProp Σ) (sm : FML $oi Σ -d> iProp Σ)
-    (Px Qx : FML $oi Σ) (D : depo_st FML Σ) (Dl : depo_stl FML Σ)
-    (B : bor_stOF FML $oi Σ) (Bl : bor_stl FML Σ) (Lm : lend_stm FML Σ).
+  (** ** World satisfactions *)
 
   (** World satisfaction for a borrower *)
   Local Definition bor_wsat sm i α B : iProp Σ :=
@@ -482,6 +475,8 @@ Section borrow.
     rewrite borrow_wsat_unseal /borrow_wsat_def /borrow_lwsat. move=> ????.
     repeat f_equiv. by apply: depo_wsat_mono.
   Qed.
+
+  (** ** Proof rules *)
 
   Context `{!GenUpd M, !GenUpdB M, !NonExpansive sm}.
 
