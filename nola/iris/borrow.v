@@ -748,24 +748,24 @@ Section borrow.
     iDestruct (depo_stl_bor_agree with "● o") as (?????) "_". iPureIntro.
     by apply: lookup_lt_Some.
   Qed.
-  Local Lemma obor_toks_itoks_bound {αqPxl β Dl} :
+  Local Lemma obor_toks_itoks {αqPxl β Dl} :
     ([∗ list] '(α, q, Px)' ∈ αqPxl, β ⊑□ α ∗ obor_tok α q Px) -∗
-    borrow_lwsat M sm Dl -∗ ∃ γ, borrow_lwsat M sm Dl ∗
-      β ⊑□ γ ∗ γ ⊑□ β ∗
+    borrow_lwsat M sm Dl -∗ ∃ γ, ⌜γ ⊑ β⌝ ∗ β ⊑□ γ ∗
+      borrow_lwsat M sm Dl ∗
       [∗ list] '(α, q, Px)' ∈ αqPxl, ∃ i α',
         ⌜i < length Dl ∧ γ ⊑ α'⌝ ∗ obor_itok i α' α q Px.
   Proof.
     elim: αqPxl=>/=.
-    { iIntros "_ $". iExists β. iSplit; [|iSplit=>//]; iApply lft_sincl_refl. }
+    { iIntros "_ $". iExists β. iSplit; [done|]. iApply lft_sincl_refl. }
     rewrite obor_tok_unseal. move=> [α[Px q]] αqPxl IH.
     iIntros "[[#βα (%i' & %α' & o)] big] W".
     iDestruct (obor_itok_lt with "o W") as %?.
-    iDestruct (IH with "big W") as (γ) "($ & #⊑ & #⊑' & big)".
+    iDestruct (IH with "big W") as (γ ?) "(#βγ & $ & big)".
     iDestruct (obor_itok_lft_sincl with "o") as "#?". iExists (γ ⊓ α').
-    iSplit; [|iSplit].
-    { iApply lft_sincl_meet_intro; [done|].
-      by iApply lft_sincl_trans; [|done]. }
-    { iApply lft_sincl_trans; [iApply lft_sincl_meet_l|done]. }
+    iSplit. { iPureIntro. etrans; [|done]. exact lft_incl_meet_l. }
+    iSplit.
+    { iApply (lft_sincl_meet_intro with "βγ").
+      by iApply (lft_sincl_trans with "βα"). }
     iSplitL "o".
     { iExists _, _. iFrame "o". iPureIntro. split; [lia|].
       exact lft_incl_meet_r. }
@@ -784,8 +784,7 @@ Section borrow.
       [∗ list] Qx ∈ Qxl, bor_tok β Qx.
   Proof.
     rewrite borrow_wsat_unseal. iIntros "big Qxl →Px [%Dl W]".
-    iDestruct (obor_toks_itoks_bound with "big W")
-      as (?) "(W & #⊑ & #⊑' & αqPxl)".
+    iDestruct (obor_toks_itoks with "big W") as (??) "(#⊑ & W & αqPxl)".
     iMod (bor_lend_tok_new_list' γ Qxl ((λ '(_, _, Px)', Px) <$> αqPxl)
       with "Qxl [→Px] W") as (?) "(W & bl & ll)"=>/=.
     { iIntros "† Qxl". iDestruct (lft_sincl_dead with "⊑ †") as "†".
@@ -798,7 +797,7 @@ Section borrow.
     iDestruct "ll" as "[l ll]". iMod ("IH" with "αqPxl W ll") as "[W $]".
     rewrite -borrow_wsat_unseal.
     iMod (obor_itok_reborrow with "o l W") as "[$[$ →b]]"; [lia|done|].
-    iModIntro. iIntros "†". iApply "→b". by iApply (lft_sincl_dead with "[] †").
+    iModIntro. iIntros "†". iApply "→b". by iApply (lft_incl_dead with "†").
   Qed.
   (** Subdivide/reborrow a borrower *)
   Lemma obor_tok_subdiv {α q Px} Qxl β :
