@@ -547,7 +547,7 @@ Section borrow.
   Local Definition depo_wsat_ret' M sm α i β Bl Lm : iProp Σ :=
     if decide (β ⊑ α)
       then depo_wsat_ret M sm β Lm else depo_wsat M sm i β Bl Lm.
-  (** [borrow_wsat_ret] with deposits after [Dl], retrieved under [α] *)
+  (** [borrow_wsat] with deposits after [Dl], retrieved under [α] *)
   Local Definition borrow_wsat_ret M sm α Dl : iProp Σ :=
     ∃ Dl', depo_stl_tok (Dl ++ Dl') ∗
       [∗ list] i ↦ '(β, Bl, Lm)' ∈ Dl',
