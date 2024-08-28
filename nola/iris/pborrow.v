@@ -609,8 +609,8 @@ End pborrow.
 
 (** Allocate [pborrow_wsat] *)
 Lemma pborrow_wsat_alloc `{!pborrowGpreS TY FML Σ} :
-  ⊢ |==> ∃ _ : pborrowGS TY FML Σ, lft_wsat ∗ ∀ M sm, pborrow_wsat M sm.
+  ⊢ |==> ∃ _ : pborrowGS TY FML Σ, ∀ M sm, pborrow_wsat M sm.
 Proof.
-  iMod proph_init as (?) "_". iMod borrow_wsat_alloc as (?) "[W ?]".
-  iModIntro. iExists (PborrowGS _ _ _ _ _ _). iFrame "W". by iIntros.
+  iMod proph_init as (?) "_". iMod borrow_wsat_alloc as (?) "?".
+  iModIntro. iExists (PborrowGS _ _ _ _ _ _). by iIntros.
 Qed.

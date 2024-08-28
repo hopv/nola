@@ -2,13 +2,10 @@
 
 From nola Require Export prelude.
 From nola.util Require Import gmultiset.
-From nola.bi Require Export updw.
-From nola.bi Require Import gen_upd.
-From iris.algebra Require Import view gmap csum dfrac.
+From iris.algebra Require Import csum dfrac.
 From iris.bi Require Import fractional.
 From iris.base_logic.lib Require Export own.
 From iris.proofmode Require Import proofmode.
-Import UpdwNotation.
 
 (** ** Lifetime *)
 
@@ -76,129 +73,40 @@ Proof. rewrite !lft_incl_elem_of. set_solver. Qed.
 
 (** ** Ghost state *)
 
-(** State of an atomic lifetime *)
-Variant alftst :=
-| #[local] live_alft (* Live *)
-| #[local] dead_alft (* Dead *)
-| #[local] etern_alft (* Eternal *).
-(** Equality over [alftst] is decidable *)
-Local Instance alftst_eq_dec : EqDecision alftst.
-Proof. solve_decision. Defined.
-
-(** State of lifetimes *)
-Local Definition lftst := gmap alft alftst.
-#[warning="-redundant-canonical-projection"]
-Local Canonical lftstO := leibnizO lftst.
-
-(** Algebra for an atomic lifetime *)
-Local Definition alftR := csumR
+(** Algebra for an (atomic) lifetime *)
+Definition lftR := csumR
   dfracR (* Live, fractionally owned or eternal *)
   unitR (* Dead *).
-(** Algebra for atomic lifetimes *)
-Definition alftmR := gmapR alft alftR.
-
-(** View relation between [option alftst] and [option alftR] *)
-Definition view_alft' (s : alftst) (r : alftR) : Prop :=
-  match s, r with
-  | live_alft, Cinl (DfracOwn q) => (q ≤ 1)%Qp
-  | dead_alft, Cinr _ => True
-  | etern_alft, Cinl dq => ✓ dq
-  | _, _ => False
-  end.
-Definition view_alft (os : option alftst) (or : option alftR) : Prop :=
-  match or, os with
-  | None, _ => True
-  | Some _, None => False
-  | Some r, Some s => view_alft' s r
-  end.
-(** [view_alft] entails [✓] *)
-Local Lemma view_alft_valid os or : view_alft os or → ✓ or.
-Proof. case: or=>// r. case: os=>// s. case: s; case: r=>//. by case. Qed.
-(** [view_alft] is monotone *)
-Local Lemma view_alft_mono os or or' :
-  view_alft os or → or' ≼ or → view_alft os or'.
-Proof.
-  case: or'=>//= r'. case: or; [|by move=> _ /Some_included_is_Some[]]=>/= r.
-  case: os=>// ++[[rf|] /leibniz_equiv_iff]; [|by move=> ??[<-]]=> ++[].
-  case; case r=>//=.
-  - case=>// q ?. case r'; case rf=>//. case=> [q'||?]; case=>// ? [eq].
-    etrans; [|done]. rewrite eq. apply Qp.le_add_l.
-  - move=> ? _. by case r'; case rf.
-  - move=> dq val. case r'; case rf=>// ?? [eq]. move: val. rewrite eq.
-    apply cmra_valid_op_l.
-Qed.
-(** View relation between [lftst] and [alftmR] *)
-Local Definition view_lft_raw (σ : lftst) (m : alftmR) : Prop :=
-  ∀ a, view_alft (σ !! a) (m !! a).
-Local Program Canonical view_lft : view_rel lftst alftmR :=
-  ViewRel (const view_lft_raw) _ _ _.
-Next Obligation.
-  move=>/= _ _ σ _ m m' view /discrete_iff/leibniz_equiv_iff<-
-    /cmra_discrete_included_iff/lookup_included inc _ a.
-  by eapply view_alft_mono.
-Qed.
-Next Obligation.
-  move=> ????. apply cmra_discrete_valid_iff=> ?. by apply: view_alft_valid.
-Qed.
-Next Obligation. move=>/= _. by exists ∅. Qed.
-(** [view_lft] is discrete *)
-Local Instance view_lft_discrete : ViewRelDiscrete view_lft.
-Proof. by move=> *. Qed.
-
-(** Algebra for the lifetime machinery *)
-Definition lftR := viewR view_lft.
 
 (** Ghost state for lifetimes *)
-Class lftGpreS Σ := lftGpreS_in : inG Σ lftR.
-Local Existing Instance lftGpreS_in.
-Class lftGS Σ := LftGS {
-  lftGS_pre : lftGpreS Σ;
-  lft_name : gname;
-}.
-Local Existing Instance lftGS_pre.
+Class lftG Σ := lftG_in : inG Σ lftR.
+Local Existing Instance lftG_in.
 Definition lftΣ : gFunctors := GFunctor lftR.
-#[export] Instance subG_lft `{!subG lftΣ Σ} : lftGpreS Σ. Proof. solve_inG. Qed.
+#[export] Instance subG_lft `{!subG lftΣ Σ} : lftG Σ. Proof. solve_inG. Qed.
 
 (** ** Lifetime tokens *)
 
 (** Atomic live lifetime token *)
-Local Definition alft_live `{!lftGS Σ} (a : alft) (q : Qp) : iProp Σ :=
-  own lft_name (◯V {[a := Cinl (DfracOwn q)]}).
+Local Definition alft_live `{!lftG Σ} (a : alft) (q : Qp) : iProp Σ :=
+  own a (Cinl (DfracOwn q) : lftR).
 (** Live lifetime token *)
 Notation lft_live α q := ([∗ mset] a ∈ α, alft_live a q)%I.
 
 (** Dead atomic lifetime token *)
-Local Definition alft_dead `{!lftGS Σ} (a : alft) : iProp Σ :=
-  own lft_name (◯V {[a := Cinr ()]}).
+Local Definition alft_dead `{!lftG Σ} (a : alft) : iProp Σ := own a (Cinr ()).
 (** Dead lifetime token *)
-Local Definition lft_dead_def `{!lftGS Σ} (α : lft) : iProp Σ :=
+Local Definition lft_dead_def `{!lftG Σ} (α : lft) : iProp Σ :=
   ∃ a, ⌜a ∈ α⌝ ∗ alft_dead a.
 Local Lemma lft_dead_aux : seal (@lft_dead_def). Proof. by eexists. Qed.
-Definition lft_dead `{!lftGS Σ} := lft_dead_aux.(unseal) _ _.
-Local Lemma lft_dead_unseal `{!lftGS Σ} : @lft_dead = @lft_dead_def.
+Definition lft_dead `{!lftG Σ} := lft_dead_aux.(unseal) _ _.
+Local Lemma lft_dead_unseal `{!lftG Σ} : @lft_dead = @lft_dead_def.
 Proof. exact: seal_eq. Qed.
 
 (** Eternal atomic lifetime token *)
-Local Definition alft_etern `{!lftGS Σ} (a : alft) : iProp Σ :=
-  own lft_name (◯V {[a := Cinl DfracDiscarded]}).
+Local Definition alft_etern `{!lftG Σ} (a : alft) : iProp Σ :=
+  own a (Cinl DfracDiscarded).
 (** Eternal lifetime token *)
 Notation lft_etern α := ([∗ mset] a ∈ α, alft_etern a)%I.
-
-(** Persistent token for [alftst] *)
-Definition alftst_ptok `{!lftGS Σ} (a : alft) (s : alftst) : iProp Σ :=
-  match s with
-  | live_alft => True
-  | etern_alft => alft_etern a
-  | dead_alft => alft_dead a
-  end.
-#[export] Instance alftst_ptok_persistent `{!lftGS Σ} {a s} :
-  Persistent (alftst_ptok a s).
-(** Lifetime authoritative token *)
-Definition lft_auth `{!lftGS Σ} (σ : lftst) : iProp Σ :=
-  own lft_name (●V σ) ∗ [∗ map] a↦s ∈ σ, alftst_ptok a s.
-Proof. case s; exact _. Qed.
-(** Lifetime world satisfaction *)
-Definition lft_wsat `{!lftGS Σ} : iProp Σ := ∃ σ, lft_auth σ.
 
 Module LftNotation'.
   Notation "q .[ α ]" := (lft_live α q)
@@ -208,15 +116,8 @@ Module LftNotation'.
 End LftNotation'.
 Import LftNotation'.
 
-(** Allocate [lft_wsat] *)
-Lemma lft_wsat_alloc `{!lftGpreS Σ} : ⊢ |==> ∃ _ : lftGS Σ, lft_wsat.
-Proof.
-  iMod (own_alloc (●V ∅)) as (γ) "●"; [by apply view_auth_valid|]. iModIntro.
-  iExists (LftGS _ _ γ), _. by iFrame.
-Qed.
-
 Section lft.
-  Context `{!lftGS Σ}.
+  Context `{!lftG Σ}.
 
   (** Dead and eternal lifetime tokens are persistent *)
   #[export] Instance lft_dead_persistent {α} : Persistent [†α].
@@ -237,34 +138,26 @@ Section lft.
   Proof.
     rewrite lft_dead_unseal. iIntros "q". iDestruct 1 as (a) "[%e †]".
     rewrite big_sepMS_elem_of; [|done].
-    iDestruct (own_valid_2 with "q †") as %val.
-    rewrite -view_frag_op singleton_op view_frag_valid in val.
-    move: (val 0)=> [? view]. move: (view a). rewrite lookup_singleton.
-    by move/view_alft_valid.
+    iDestruct (own_valid_2 with "q †") as %[].
   Qed.
   (** Eternal and dead lifetime tokens can't coexist *)
   Lemma lft_etern_dead {α} : [∞α] -∗ [†α] -∗ False.
   Proof.
     rewrite lft_dead_unseal. iIntros "∞". iDestruct 1 as (a) "[%e †]".
     rewrite big_sepMS_elem_of; [|done].
-    iDestruct (own_valid_2 with "∞ †") as %val.
-    rewrite -view_frag_op singleton_op view_frag_valid in val.
-    move: (val 0)=> [? view]. move: (view a). rewrite lookup_singleton.
-    by move/view_alft_valid.
+    iDestruct (own_valid_2 with "∞ †") as %[].
   Qed.
   (** The fraction of a live lifetime token is no more than [1] *)
   Lemma lft_live_valid {α q} : α ≠ ⊤ → q.[α] -∗ ⌜q ≤ 1⌝%Qp.
   Proof.
     case: (gmultiset_choose_or_empty α); [|done]=> [[a ?]_]. iIntros "α".
     iDestruct (big_sepMS_elem_of with "α") as "a"; [done|].
-    iDestruct (own_valid with "a") as %val. rewrite view_frag_valid in val.
-    move: (val 0)=> [? view]. move: (view a). rewrite lookup_singleton.
-    by move/view_alft_valid.
+    by iDestruct (own_valid with "a") as %?.
   Qed.
 
   (** Live lifetime token is fractional *)
   Local Instance alft_live_fract {a} : Fractional (alft_live a)%I.
-  Proof. move=> ??. by rewrite -own_op -view_frag_op singleton_op -Cinl_op. Qed.
+  Proof. move=> ??. by rewrite -own_op -Cinl_op. Qed.
   Local Instance alft_live_as_fract {a q} :
     AsFractional (alft_live a q) (alft_live a) q.
   Proof. split; [done|exact _]. Qed.
@@ -286,84 +179,42 @@ Section lft.
   Qed.
 
   (** Allcate a fresh lifetime *)
-  Lemma lft_alloc : ⊢ |=[lft_wsat]=> ∃ α, ⌜α ≠ ⊤⌝ ∗ 1.[α].
+  Lemma lft_alloc : ⊢ |==> ∃ α, ⌜α ≠ ⊤⌝ ∗ 1.[α].
   Proof.
-    iIntros "[%σ[● p]]". set a := fresh (dom σ).
-    have σa: σ !! a = None by apply not_elem_of_dom, is_fresh.
-    iMod (own_update _ _ (●V <[a := live_alft]> σ ⋅ ◯V _) with "●") as "[$ ?]";
-      last first.
-    { iModIntro. iSplit; [rewrite big_sepM_insert //=; by iSplit|].
-      iExists {[+a+]}. rewrite big_sepMS_singleton. by iSplit. }
-    apply view_update_alloc=>/= _ m view b. case (decide (a = b)); last first.
-    { move=> ?. rewrite lookup_insert_ne; [|done].
-      rewrite lookup_op lookup_singleton_ne; [|done]. by rewrite left_id. }
-    move=> <-. rewrite lookup_insert lookup_op lookup_singleton. move: (view a).
-    rewrite σa. by case: (m !! a).
+    iMod (own_alloc (Cinl (DfracOwn 1))) as (a) "a"; [done|]. iModIntro.
+    iExists {[+a+]}. rewrite big_sepMS_singleton. by iFrame "a".
   Qed.
 
   (** Kill a lifetime *)
-  Lemma lft_kill {α} : α ≠ ⊤ → 1.[α] =[lft_wsat]=∗ [†α].
+  Lemma lft_kill {α} : α ≠ ⊤ → 1.[α] ==∗ [†α].
   Proof.
     case: (gmultiset_choose_or_empty α); [|done]=> [[a ?]_].
-    rewrite big_sepMS_elem_of; [|done]. iIntros "a [%σ[● p]]".
-    iMod (own_update_2 _ _ _ (●V <[a := dead_alft]> σ ⋅ ◯V {[a := Cinr ()]})
-      with "● a") as "[$ #?]"; last first.
-    { iModIntro. iAssert [†α]%I as "†".
-      { rewrite lft_dead_unseal. iExists a. by iSplit. }
-      iSplit; by [iApply big_sepM_insert_2|]. }
-    apply view_update=>/= _ m view b. case (decide (a = b)); last first.
-    { move=> ?. rewrite lookup_insert_ne; [|done]. move: (view b).
-      by rewrite !lookup_op !lookup_singleton_ne; [|done..]. }
-    move=> <-. move: (view a).
-    rewrite lookup_insert !lookup_op !lookup_singleton.
-    by case: (m !! a)=>// ? /view_alft_valid/Some_valid/exclusive_l.
+    rewrite big_sepMS_elem_of; [|done]. iIntros "a".
+    iMod (own_update _ _ (Cinr ()) with "a") as "†".
+    { by apply cmra_update_exclusive. }
+    iModIntro. rewrite lft_dead_unseal. iExists a. by iFrame "†".
   Qed.
 
   (** Eternalize a lifetime *)
-  Local Lemma alft_eternalize {a q} :
-    alft_live a q ⊢ |=[lft_wsat]=> alft_etern a.
+  Local Lemma alft_eternalize {a q} : alft_live a q ==∗ alft_etern a.
   Proof.
-    iIntros "a [%σ[● p]]".
-    iMod (own_update_2 _ _ _
-      (●V <[a := etern_alft]> σ ⋅ ◯V {[a := Cinl DfracDiscarded]}) with "● a")
-      as "[$ #?]"; last first.
-    { iModIntro. iSplit; by [iApply big_sepM_insert_2|]. }
-    apply view_update=>/= _ m view b. case (decide (a = b)); last first.
-    { move=> ?. rewrite lookup_insert_ne; [|done]. move: (view b).
-      by rewrite !lookup_op !lookup_singleton_ne; [|done..]. }
-    move=> <-. move: (view a).
-    rewrite lookup_insert !lookup_op !lookup_singleton.
-    case: (m !! a)=>// r /view_alft_valid/Some_valid. case: r=>// dq.
-    case: dq=>//= q' /Cinl_valid val; rewrite dfrac_valid /=.
-    - apply: Qp.lt_le_trans; [|exact val]. apply Qp.lt_add_r.
-    - etrans; [|exact val]. apply Qp.lt_add_r.
+    iIntros "a". iApply (own_update with "a").
+    apply csum_update_l, dfrac_discard_update.
   Qed.
-  Lemma lft_eternalize {α q} : q.[α] =[lft_wsat]=∗ [∞α].
+  Lemma lft_eternalize {α q} : q.[α] ==∗ [∞α].
   Proof.
-    setoid_rewrite alft_eternalize. apply bi.entails_wand, big_sepMS_gen_upd.
+    rewrite -big_sepMS_bupd. iApply big_sepMS_mono=> ? _.
+    iApply alft_eternalize.
   Qed.
 
   (** Get a live lifetime token out of an eternal lifetime token *)
   Local Lemma alft_etern_live {a} : alft_etern a ==∗ ∃ q, alft_live a q.
   Proof.
     iIntros "∞".
-    iMod (own_updateP (λ x, ∃ y, x = ◯V y ∧ ∃ q, y = {[a := Cinl (DfracOwn q)]})
-      with "∞") as (q[?[->[?->]]]) "?"; [|by iExists _].
-    apply view_updateP_frag=>/= σ _ m view.
-    move: (view a). rewrite lookup_op lookup_singleton Some_op_opM.
-    case eqσ: (σ !! a)=>/= [s|//]. move: eqσ.
-    case: s=>/=. { case: (m !! a)=>//. case=>//. by case. }
-    { case: (m !! a)=>//. by case. }
-    move=> eqσ val. have [odq eqm]: ∃ odq, m !! a = Cinl <$> odq.
-    { move: val.
-      case: (m !! a); [case|]=>// *; by [eexists (Some _)|exists None]. }
-    have {}val: ✓ (DfracDiscarded ⋅? odq).
-    { move: val. rewrite eqm. by case odq. }
-    move: dfrac_undiscard_update. rewrite cmra_discrete_updateP=> upd.
-    move: (upd odq val)=> [_[[q ->]{}val]]. eexists _. split; [by exists q|].
-    move=> b. rewrite lookup_op. case (decide (a = b)); last first.
-    { move=> ?. move: (view b). by rewrite lookup_op !lookup_singleton_ne. }
-    move=> <-. rewrite eqσ eqm lookup_singleton. move: val. by case odq.
+    iMod (own_updateP (λ a, ∃ q, a = Cinl (DfracOwn q)) with "∞") as
+      (q[?->]) "?"; [|by iExists _].
+    eapply csum_updateP_l; [exact dfrac_undiscard_update|]=>/= ?[?->].
+    by eexists _.
   Qed.
   Local Lemma alftl_etern_live {al} :
     ([∗ list] a ∈ al, alft_etern a) ==∗ ∃ q, [∗ list] a ∈ al, alft_live a q.
@@ -481,7 +332,7 @@ Proof.
 Qed.
 
 Section lft_sincl.
-  Context `{!lftGS Σ}.
+  Context `{!lftG Σ}.
   (** Persistent lifetime inclusion *)
   Local Definition lft_sincl_def (α β : lft) : iProp Σ :=
     [†α] ∨ [∞ lft_diff β α].
@@ -498,7 +349,7 @@ End LftNotation.
 Import LftNotation.
 
 Section lft_sincl.
-  Context `{!lftGS Σ}.
+  Context `{!lftG Σ}.
 
   (** [⊑□] is persistent and timeless *)
   #[export] Instance lft_sincl_persistent {α β} : Persistent (α ⊑□ β).
@@ -571,7 +422,7 @@ Section lft_sincl.
     iApply (lft_incl_etern with "∞"). apply lft_incl_elem_of=> ?.
     rewrite elem_of_lft_diff. set_solver.
   Qed.
-  Lemma lft_eternalize_sincl {α q} : q.[α] =[lft_wsat]=∗ ∀ β, β ⊑□ α.
+  Lemma lft_eternalize_sincl {α q} : q.[α] ==∗ ∀ β, β ⊑□ α.
   Proof. rewrite -lft_sincl_by_etern. apply lft_eternalize. Qed.
 
   (** [⊓] is the lub w.r.t. [⊑□] *)
@@ -594,76 +445,3 @@ Section lft_sincl.
   Lemma lft_sincl_meet_mono_r {α β β'} : β ⊑□ β' ⊢ α ⊓ β ⊑□ α ⊓ β'.
   Proof. rewrite comm [α ⊓ β']comm. exact lft_sincl_meet_mono_l. Qed.
 End lft_sincl.
-
-(** ** Decision based on [lft_auth] *)
-
-(** [lft_stdead]: Lifetime death based on [lftst] *)
-Definition lft_stdead (σ : lftst) (α : lft) : Prop :=
-  set_Exists (λ a, σ !! a = Some dead_alft) (dom α).
-(** [lft_stdead] is decidable *)
-#[export] Instance lft_stdead_dec {σ α} : Decision (lft_stdead σ α) := _.
-
-(** [lft_stetern]: Lifetime eternity based on [lftst] *)
-Definition lft_stetern (σ : lftst) (α : lft) : Prop :=
-  set_Forall (λ a, σ !! a = Some etern_alft) (dom α).
-(** [lft_stdead] is decidable *)
-#[export] Instance lft_stetern_dec {σ α} : Decision (lft_stetern σ α) := _.
-
-(** [lft_stincl]: Lifetime inclusion based on [lftst] *)
-Definition lft_stincl (σ : lftst) (α β : lft) : Prop :=
-  lft_stdead σ α ∨ lft_stetern σ (lft_diff β α).
-(** [lft_stincl] is decidable *)
-#[export] Instance lft_stincl_dec {σ} : RelDecision (lft_stincl σ) :=
-  λ _ _, _.
-
-Section lft_auth.
-  Context `{!lftGS Σ}.
-
-  (** [lft_stdead] implies [lft_dead] under [lft_auth] *)
-  Lemma lft_stdead_dead {σ α} : lft_stdead σ α → lft_auth σ ⊢ [†α].
-  Proof.
-    rewrite lft_dead_unseal. iIntros ([a[??]]) "[_ #p]". iExists a.
-    rewrite big_sepM_lookup //=. iSplit; [|done].
-    by rewrite -gmultiset_elem_of_dom.
-  Qed.
-  (** [lft_dead] implies [lft_stdead] under [lft_auth] *)
-  Lemma lft_dead_stdead {σ α} : lft_auth σ -∗ [†α] -∗ ⌜lft_stdead σ α⌝.
-  Proof.
-    rewrite lft_dead_unseal. iIntros "[● _] [%a[% †]]". iExists a.
-    iSplit; [by rewrite gmultiset_elem_of_dom|].
-    iDestruct (own_valid_2 with "● †") as %val. iPureIntro.
-    move: val=>/view_both_valid val. move: (val 0 a).
-    rewrite lookup_singleton /=. case: (σ !! a)=>//. by case.
-  Qed.
-
-  (** [lft_stetern] implies [lft_etern] under [lft_auth] *)
-  Lemma lft_stetern_etern {σ α} : lft_stetern σ α → lft_auth σ ⊢ [∞α].
-  Proof.
-    iIntros (all) "[_ #p]". iApply big_sepMS_intro. iIntros "!> %a %elem".
-    rewrite -gmultiset_elem_of_dom in elem. move: (all _ elem)=> ?.
-    by rewrite big_sepM_lookup //=.
-  Qed.
-  (** [lft_etern] implies [lft_stetern] under [lft_auth] *)
-  Lemma lft_etern_stetern {σ α} : lft_auth σ -∗ [∞α] -∗ ⌜lft_stetern σ α⌝.
-  Proof.
-    iIntros "[● _] ∞ %a %elem". rewrite gmultiset_elem_of_dom in elem.
-    rewrite big_sepMS_elem_of //. iDestruct (own_valid_2 with "● ∞") as %val.
-    iPureIntro. move: val=> /view_both_valid val. move: (val 0 a).
-    rewrite lookup_singleton. case: (σ !! a)=>//. by case.
-  Qed.
-
-  (** [lft_stincl] implies [⊑□] under [lft_auth] *)
-  Lemma lft_stincl_sincl {σ α β} : lft_stincl σ α β → lft_auth σ ⊢ α ⊑□ β.
-  Proof.
-    rewrite lft_sincl_unseal. move=> [dead|etern]; iIntros "σ".
-    { iLeft. by rewrite lft_stdead_dead. }
-    iRight. by iApply (lft_stetern_etern with "σ").
-  Qed.
-  (** [⊑□] implies [lft_stincl] under [lft_auth] *)
-  Lemma lft_sincl_stincl {σ α β} : lft_auth σ -∗ α ⊑□ β -∗ ⌜lft_stincl σ α β⌝.
-  Proof.
-    rewrite lft_sincl_unseal. iIntros "σ [†|∞]".
-    - iLeft. by iApply (lft_dead_stdead with "σ").
-    - iRight. by iApply (lft_etern_stetern with "σ").
-  Qed.
-End lft_auth.

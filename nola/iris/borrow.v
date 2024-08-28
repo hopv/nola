@@ -63,12 +63,12 @@ Proof. rewrite borrowRF_unseal. exact _. Qed.
 
 (** Ghost state for the borrowing machinery *)
 Class borrowGpreS FML Σ := BorrowGpreS {
-  borrowGpreS_lft :: lftGpreS Σ;
+  borrowGpreS_lft :: lftG Σ;
   borrowGpreS_borrow : inG Σ (borrowRF FML $ri Σ);
 }.
 Local Existing Instance borrowGpreS_borrow.
 Class borrowGS FML Σ := BorrowGS {
-  borrowGS_lft :: lftGS Σ;
+  borrowGS_lft :: lftG Σ;
   borrowGS_borrow : inG Σ (borrowRF FML $ri Σ);
   borrow_name : gname;
 }.
@@ -77,7 +77,7 @@ Local Instance inG_borrow_def `{!inG Σ (borrowRF FML $ri Σ)} :
   inG Σ (borrowRF_def FML $ri Σ).
 Proof. rewrite -borrowRF_unseal. exact _. Qed.
 Definition borrowΣ FML `{!oFunctorContractive FML} : gFunctors :=
-  #[GFunctor lftR; GFunctor (borrowRF FML)].
+  #[lftΣ; GFunctor (borrowRF FML)].
 #[export] Instance subG_borrow
   `{!oFunctorContractive FML, !subG (borrowΣ FML) Σ} : borrowGpreS FML Σ.
 Proof. solve_inG. Qed.
@@ -839,11 +839,10 @@ End borrow.
 
 (** Allocate [borrow_wsat] *)
 Lemma borrow_wsat_alloc `{!borrowGpreS FML Σ} :
-  ⊢ |==> ∃ _ : borrowGS FML Σ, lft_wsat ∗ ∀ M sm, borrow_wsat M sm.
+  ⊢ |==> ∃ _ : borrowGS FML Σ, ∀ M sm, borrow_wsat M sm.
 Proof.
-  iMod lft_wsat_alloc as (?) "W".
-  iMod (own_alloc (● ∅ : borrowRF_def FML $ri Σ)) as (γ) "●";
+  iMod (own_alloc (● ∅ : borrowRF_def _ $ri _)) as (γ) "●";
     [by apply auth_auth_valid|].
-  iModIntro. iExists (BorrowGS _ _ _ _ γ). iFrame "W". iIntros (??).
+  iModIntro. iExists (BorrowGS _ _ _ _ γ). iIntros (??).
   rewrite borrow_wsat_unseal. iExists []. by iFrame.
 Qed.
