@@ -71,7 +71,7 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`cit`](nola/util/cit.v) (Coinductive-inductive tree)
 - [`bi/`](nola/bi/) : Libraries for bunched implication logic
   + [`util`](nola/bi/util.v) (Utilities)
-  + [`ofe`](nola/bi/ofe.v) (On OFE)
+  + [`ofe`](nola/bi/ofe.v) (On OFEs)
   + [`gmap`](nola/bi/gmap.v) (On `gmap`),
     [`plist`](nola/bi/plist.v) (On `plist`)
   + [`order`](nola/bi/order.v) (Order theory),
@@ -82,7 +82,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
       satisfaction)
   + [`paradox`](nola/bi/paradox.v) (Paradoxes)
 - [`iris/`](nola/iris/) : Libraries for Iris base logic
-  + [`ofe`](nola/bi/ofe.v) (On OFE)
+  + [`ofe`](nola/iris/ofe.v) (On OFEs)
+  + [`list`](nol/iris/list.v) (On lists)
   + [`sinv`](nola/iris/sinv.v) (Simple invariant),
     [`sinv_deriv`](nola/iris/sinv_deriv.v) (Simple invariant relaxed with
       derivability)
