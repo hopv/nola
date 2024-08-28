@@ -49,8 +49,7 @@ Section big_sepM.
     rewrite big_sepM_insert; [done|]. apply lookup_list_to_gmap'_pre. lia.
   Qed.
   Lemma big_sepM_list_to_gmap l (Φ : nat → A → PROP) :
-    ([∗ map] i ↦ x ∈ list_to_gmap l, Φ i x) ⊣⊢
-      [∗ list] i ↦ x ∈ l, Φ i x.
+    ([∗ map] i ↦ x ∈ list_to_gmap l, Φ i x) ⊣⊢ [∗ list] i ↦ x ∈ l, Φ i x.
   Proof. apply big_sepM_list_to_gmap'. Qed.
 
   (** [[∗ map]] over [map_without] *)
