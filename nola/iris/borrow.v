@@ -617,7 +617,7 @@ Section borrow.
   Local Lemma depo_wsatl_retrieve {α Dl} : [†α] -∗
     ([∗ list] i ↦ '(β, Bl, Lm)' ∈ Dl, depo_wsat M sm i β Bl Lm) -∗
     borrow_wsat_ret M sm α Dl -∗
-    M (borrow_wsat_ret M sm α []).
+      M (borrow_wsat_ret M sm α []).
   Proof.
     rewrite /= -(reverse_involutive Dl). move: (reverse Dl)=> Dl'.
     iIntros "#†". iInduction Dl' as [|[?[??]] Dl'] "IH"; [by iIntros|]=>/=.
