@@ -22,8 +22,7 @@ Record proph_log_item TY := ProphLogItem {
 }.
 Arguments pli_var {_}. Arguments pli_val {_}.
 Arguments ProphLogItem {_} _ _.
-Local Notation ".{ ξ := aπ }" := (ProphLogItem ξ aπ)
-  (format ".{ ξ  :=  aπ }").
+Local Notation ".{ ξ := aπ }" := (ProphLogItem ξ aπ) (format ".{ ξ  :=  aπ }").
 
 (** Prophecy log *)
 Local Definition proph_log TY := list (proph_log_item TY).
@@ -47,7 +46,7 @@ Local Fixpoint proph_log_valid {TY} (L : proph_log TY) :=
   match L with
   | [] => True
   | .{ξ := xπ} :: L' =>
-    ξ ∉ pl_vars L' ∧ proph_dep_out xπ (pl_vars L) ∧ proph_log_valid L'
+      ξ ∉ pl_vars L' ∧ proph_dep_out xπ (pl_vars L) ∧ proph_log_valid L'
   end.
 Local Notation ".✓ L" := (proph_log_valid L) (at level 20, format ".✓  L").
 
@@ -136,8 +135,7 @@ Proof. split=> >; apply ofe_equivalence. Qed.
 Local Canonical prophO TY := discreteO (proph_car TY).
 
 (** [ProphCar] and [un_proph_car] are proper *)
-Local Instance ProphCar_proper {TY} :
-  Proper ((≡) ==> (≡)) (ProphCar (TY:=TY)).
+Local Instance ProphCar_proper {TY} : Proper ((≡) ==> (≡)) (ProphCar (TY:=TY)).
 Proof. solve_proper. Qed.
 Local Instance un_proph_car_proper {TY} :
   Proper ((≡) ==> (≡)) (un_proph_car (TY:=TY)).
@@ -171,8 +169,7 @@ Local Definition aitem {TY X} xπ : proph_itemR TY :=
 
 (** A prophecy map simulating a prophecy log *)
 Local Definition proph_sim {TY} (M : proph_mapR TY) L :=
-  (∀ ξ,
-    (∃ q, M !! aprvar_id ξ ≡ Some (fitem q)) → ξ ∉ pl_vars L) ∧
+  (∀ ξ, (∃ q, M !! aprvar_id ξ ≡ Some (fitem q)) → ξ ∉ pl_vars L) ∧
   (∀ ξ xπ, M !! aprvar_id ξ ≡ Some (aitem xπ) → .{ξ := xπ} ∈ L).
 Local Notation "M :~ L" := (proph_sim M L) (at level 70, format "M  :~  L").
 
@@ -192,14 +189,12 @@ Local Lemma proph_sim_op_l {TY M M'} {L : proph_log TY} :
   ✓ (M ⋅ M') → M ⋅ M' :~ L → M :~ L.
 Proof.
   move=> val [sim sim']. split.
-  - move=> ξ [q eq]. apply sim. move: (val ξ.(prvar_id)).
-    rewrite lookup_op. setoid_rewrite eq.
-    case: (M' !! ξ.(prvar_id)); last first.
+  - move=> ξ [q eq]. apply sim. move: (val ξ.(prvar_id)). rewrite lookup_op.
+    setoid_rewrite eq. case: (M' !! ξ.(prvar_id)); last first.
     { move=> _. exists q. by rewrite right_id. }
     case; [|done..]=> q' _. by exists (q + q')%Qp.
-  - move=> ξ xπ eq. apply sim'. move: (val ξ.(prvar_id)).
-    rewrite lookup_op. setoid_rewrite eq.
-    case: (M' !! ξ.(prvar_id)); [|by rewrite right_id].
+  - move=> ξ xπ eq. apply sim'. move: (val ξ.(prvar_id)). rewrite lookup_op.
+    setoid_rewrite eq. case: (M' !! ξ.(prvar_id)); [|by rewrite right_id].
     case; [done| |done]=> b /agree_op_inv <-.
     apply Some_proper, (Cinr_proper (B:=proph_aitemR TY)), agree_idemp.
 Qed.
@@ -262,8 +257,6 @@ Qed.
 #[warning="-redundant-canonical-projection"]
 Local Canonical prophUR TY : ucmra :=
   Ucmra (proph_car TY) (proph_ucmra_mixin TY).
-Local Instance prophR_total {TY} : CmraTotal (prophR_def TY).
-Proof. exact (cmra_unit_cmra_total (A:=prophUR TY)). Qed.
 
 (** Ghost state *)
 Class prophGS TY Σ := ProphGS {
@@ -311,8 +304,8 @@ Module ProphNotation.
     (at level 2, left associativity, format "q :[ ξ ]") : bi_scope.
   Notation "q :∗[ ξl ]" := (proph_toks ξl q)
     (at level 2, left associativity, format "q :∗[ ξl ]") : bi_scope.
-  Notation ".⟨ φπ ⟩" := (proph_obs φπ%type%stdpp)
-    (at level 1, format ".⟨ φπ ⟩") : bi_scope.
+  Notation ".⟨ φπ ⟩" := (proph_obs φπ%type%stdpp) (at level 1, only parsing)
+    : bi_scope.
   Notation "⟨ π , φ ⟩" := (proph_obs (λ π, φ%type%stdpp))
     (at level 1, format "⟨ π ,  φ ⟩") : bi_scope.
 End ProphNotation.
@@ -324,13 +317,13 @@ Import ProphNotation.
 Lemma proph_init `{!prophGpreS TY Σ} :
   ⊢ |==> ∃ _ : prophGS TY Σ, True : iProp Σ.
 Proof.
-  iMod (own_alloc (ε : prophR_def TY)) as (γ) "_".
-  { exact ucmra_unit_valid. } { by iExists (ProphGS _ _ _ γ). }
+  iMod (own_alloc (ε : prophR_def TY)) as (γ) "_"; [exact ucmra_unit_valid|].
+  by iExists (ProphGS _ _ _ γ).
 Qed.
 
 Section lemmas.
   Context `{!prophGS TY Σ}.
-  Implicit Type (X : TY) (φπ ψπ : clair TY Prop) (ψ : Prop).
+  Implicit Type (X : TY) (φπ ψπ : clair TY Prop) (φ ψ : Prop).
 
   (** [proph_tok] is timelesss and fractional *)
   #[export] Instance proph_tok_timeless {q ξ} : Timeless q:[ξ].
@@ -354,10 +347,10 @@ Section lemmas.
     Frame p q:∗[ξl] r:∗[ξl] s:∗[ξl] | 5.
   Proof. apply: (frame_fractional _ _ _ _ _ _ _ proph_toks_as_fractional). Qed.
 
-  (** On [proph_tok] *)
-  Lemma proph_tok_singleton {ξ q} : q:[ξ] ⊣⊢ q:∗[[ξ]].
+  (** On [proph_toks] *)
+  Lemma proph_toks_singleton {ξ q} : q:[ξ] ⊣⊢ q:∗[[ξ]].
   Proof. by rewrite/= right_id. Qed.
-  Lemma proph_tok_combine {ξl ηl q r} :
+  Lemma proph_toks_combine {ξl ηl q r} :
     q:∗[ξl] -∗ r:∗[ηl] -∗ ∃ s,
       s:∗[ξl ++ ηl] ∗ (s:∗[ξl ++ ηl] -∗ q:∗[ξl] ∗ r:∗[ηl]).
   Proof.
@@ -408,17 +401,16 @@ Section lemmas.
     (∀ π, φπ π → φπ' π → ψπ π) → .⟨φπ⟩ -∗ .⟨φπ'⟩ -∗ .⟨ψπ⟩.
   Proof.
     iIntros "%imp obs obs'". iCombine "obs obs'" as "?". iStopProof.
-    do 2 f_equiv. move=> [??]. by apply imp.
+    do 2 f_equiv. case. apply imp.
   Qed.
 
   (** Update of [proph_alloc] *)
   Local Lemma proph_alloc_upd :
     ε ~~>: (λ a : prophR_def TY, ∃ i, a = ProphCar {[i := fitem 1]}).
   Proof.
-    apply cmra_total_updateP. setoid_rewrite <-cmra_discrete_valid_iff=> _ [M].
-    rewrite left_id /=. move=> [val[L[[sim sim'] ?]]].
-    set i := fresh (dom M ∪ pl_ids L). exists (ProphCar {[i := fitem 1]}).
-    split; [by eexists _|]. split=>/=.
+    apply cmra_discrete_total_updateP. case=> M. rewrite left_id /=.
+    move=> [val[L[[sim sim'] ?]]]. set i := fresh (dom M ∪ pl_ids L).
+    exists (ProphCar {[i := fitem 1]}). split; [by eexists _|]. split=>/=.
     - move=> j. rewrite lookup_op. case: (decide (j = i)).
       + move=> ->. rewrite lookup_singleton. have ->: M !! i = None; [|done].
         apply (not_elem_of_dom M), (not_elem_of_union _ _ (pl_ids L)), is_fresh.
@@ -450,8 +442,8 @@ Section lemmas.
     ⊢ |==> ∃ ξl : plist _ Xl, 1:∗[of_plist_prvar ξl].
   Proof.
     elim: Xl; [move=>/= ?; by iExists ()|]=>/= ?? IH [x xl].
-    iMod (IH xl) as (ξl) "ξl". iMod (proph_alloc x) as (ξ) "ξ".
-    iModIntro. iExists (ξ, ξl)'. iFrame.
+    iMod (IH xl) as (ξl) "ξl". iMod (proph_alloc x) as (ξ) "ξ". iModIntro.
+    iExists (ξ, ξl)'. iFrame.
   Qed.
 
   (** Simplify [[^op list]] over [ProphCar] *)
@@ -483,13 +475,10 @@ Section lemmas.
       ProphCar {[aprvar_id .{ξ := xπ}.(pli_var) := aitem .{ξ := xπ}.(pli_val)]}
         ⋅ ([^op list] η ∈ ηl, ProphCar {[aprvar_id η := fitem q]}).
   Proof.
-    move=> dep. apply cmra_total_update.
-    setoid_rewrite <-cmra_discrete_valid_iff=> _ [M].
+    move=> dep. apply cmra_discrete_total_update. case=> M.
     rewrite !proph_valid /=. move=> [val[L[sim ?]]]. split.
-    { have: {[ξ.(prvar_id) := fitem 1]} ~~> {[ξ.(prvar_id) := aitem xπ]}
-        by apply singleton_update, cmra_update_exclusive.
-      move=> /cmra_total_update. setoid_rewrite <-cmra_discrete_valid_iff.
-      move=> upd. move: val. rewrite -!assoc. apply upd, 0. }
+    { move: val. rewrite -!assoc. apply cmra_discrete_total_update.
+      by apply singleton_update, cmra_update_exclusive. }
     exists (.{ξ := xπ} :: L)=>/=. split.
     - move: val sim. rewrite -!assoc. move: (_ ⋅ M)=> M' val sim. split=>/=.
       + move=> ζ [r eq]. apply not_elem_of_cons. split.
@@ -570,8 +559,7 @@ Section lemmas.
     move: val=> /aitems_sat[π sat]. exists π. by apply to.
   Qed.
   Lemma proph_obs_elim {φπ ψ} : (∀ π, φπ π → ψ) → .⟨φπ⟩ ⊢ ⌜ψ⌝.
-  Proof.
-    iIntros (to) "obs". iDestruct (proph_obs_sat with "obs") as %[? φx].
-    by apply to in φx.
-  Qed.
+  Proof. rewrite proph_obs_sat=> ?. iPureIntro. by case. Qed.
+  Lemma proph_obs_const {φ} : .⟨λ _, φ⟩ ⊢ ⌜φ⌝.
+  Proof. by apply proph_obs_elim. Qed.
 End lemmas.
