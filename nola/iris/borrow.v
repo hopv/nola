@@ -49,7 +49,7 @@ Local Definition lendRF FML := exclRF FML.
 #[warning="-redundant-canonical-projection"]
 Local Canonical lftO := leibnizO lft.
 Local Definition depoRF FML : rFunctor :=
-  agreeRF lftO * gmapRF bor_id (borRF FML) * gmapRF lend_id (lendRF FML).
+  agreeR lftO * gmapRF bor_id (borRF FML) * gmapRF lend_id (lendRF FML).
 
 (** Algebra for the borrowing machinery *)
 Local Definition borrowRF_def FML := authRF (gmapURF depo_id (depoRF FML)).
@@ -244,11 +244,9 @@ Section borrow.
     (to_agree α, Excl <$> list_to_gmap Bl, Excl <$> Lm).
   (** Auxiliary definition for performance *)
   Local Definition depoR FML Σ : cmra :=
-    prodR (prodR (agreeR lftO)
-      (gmapR bor_id (exclR (prodO (FML $oi Σ) bor_modeO))))
-      (gmapR lend_id (exclR (FML $oi Σ))).
+    (agreeR lftO *
+      gmapR bor_id (borRF FML $ri Σ) * gmapR lend_id (lendRF FML $ri Σ))%type.
   Local Definition of_depo_st' : depo_st FML Σ → depoR FML Σ := of_depo_st.
-  Local Lemma eq_of_depo_st' : of_depo_st = of_depo_st'. Proof. done. Qed.
 
   (** [depo_stk] to [gmap] over [depoRF] *)
   Local Definition of_depo_stl (Dl : depo_stl FML Σ)
@@ -369,7 +367,7 @@ Section borrow.
     case: (decide (i = i'))=> [<-|?]; last first.
     { rewrite lookup_insert_ne; [|done]. by rewrite lookup_singleton_ne. }
     rewrite lookup_empty lookup_of_depo_stl eq !lookup_insert.
-    apply depo_stl_lend_add'.
+    exact depo_stl_lend_add'.
   Qed.
 
   (** Agreement between [depo_stl_tok] and [bor_jtok] *)
