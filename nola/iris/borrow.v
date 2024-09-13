@@ -321,9 +321,8 @@ Section borrow.
     depo_stl_tok Dl -∗ lend_ktok i k α Px -∗ ∃ Bl Lm Px',
       ⌜Dl !! i = Some (α, Bl, Lm)'⌝ ∧ ⌜Lm !! k = Some Px'⌝ ∧ Px' ≡ Px.
   Proof.
-    iIntros "● l". iDestruct (own_valid_2 with "● l") as "?".
-    iStopProof. unfold internal_included. uPred.unseal.
-    by split=> ?? _ /depo_stl_lend_agree'.
+    iIntros "● l". iDestruct (own_valid_2 with "● l") as "?". iStopProof.
+    uPred.unseal. by split=> ?? _ /depo_stl_lend_agree'.
   Qed.
 
   (** Delete a lender w.r.t. [depo_stl_tok] *)
@@ -386,8 +385,7 @@ Section borrow.
       ⌜Dl !! i = Some (α, Bl, Lm)'⌝ ∧ ⌜Bl !! j = Some B'⌝ ∧ B' ≡ B.
   Proof.
     iIntros "● B". iDestruct (own_valid_2 with "● B") as "?". iStopProof.
-    unfold internal_included. uPred.unseal.
-    by split=> n ? _ /depo_stl_bor_agree'.
+    uPred.unseal. by split=> n ? _ /depo_stl_bor_agree'.
   Qed.
 
   (** Update the borrower state w.r.t. [depo_stl_tok] *)
