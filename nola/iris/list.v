@@ -1,7 +1,6 @@
 (** * Utility for [list] *)
 
 From nola Require Export prelude.
-From iris.algebra Require Import cmra.
 From iris.base_logic.lib Require Import own.
 From iris.proofmode Require Import proofmode.
 
