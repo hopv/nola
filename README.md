@@ -82,7 +82,7 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
       satisfaction)
   + [`paradox`](nola/bi/paradox.v) (Paradoxes)
 - [`iris/`](nola/iris/) : Libraries for Iris base logic
-  + [`ofe`](nola/iris/ofe.v) (On OFEs)
+  + [`iprop`](nola/iris/iprop.v) (`iprop`)
   + [`own`](nola/iris/own.v) (On `own`)
   + [`list`](nol/iris/list.v) (On lists)
   + [`option`](nola/iris/option.v) (On `option`),

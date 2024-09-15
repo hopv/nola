@@ -2,7 +2,7 @@
 
 From nola.bi Require Export updw.
 From nola.bi Require Import wpw.
-From nola.iris Require Export ofe.
+From nola.iris Require Export iprop.
 From nola.iris Require Import sinv.
 From iris.base_logic.lib Require Export wsat invariants.
 From iris.algebra Require Import gset.

@@ -25,7 +25,7 @@ nola/bi/updw.v
 nola/bi/wpw.v
 nola/bi/paradox.v
 
-nola/iris/ofe.v
+nola/iris/iprop.v
 nola/iris/own.v
 nola/iris/list.v
 nola/iris/option.v

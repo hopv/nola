@@ -1,7 +1,7 @@
 (** * Simple invariant *)
 
 From nola.bi Require Export updw.
-From nola.iris Require Export ofe.
+From nola.iris Require Export iprop.
 From iris.algebra Require Import agree gmap_view.
 From iris.base_logic.lib Require Export own.
 From iris.proofmode Require Import proofmode.

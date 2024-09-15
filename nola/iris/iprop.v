@@ -1,4 +1,4 @@
-(** * Utility on OFEs *)
+(** * Utility on iProp *)
 
 From nola Require Export prelude.
 From iris.base_logic.lib Require Export iprop.

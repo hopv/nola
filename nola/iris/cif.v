@@ -2,7 +2,7 @@
 
 From nola.util Require Export fn cit.
 From nola.bi Require Import ofe.
-From nola.iris Require Export ofe.
+From nola.iris Require Export iprop.
 Import iPropAppNotation.
 
 (** ** Data types *)
