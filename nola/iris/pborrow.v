@@ -195,7 +195,8 @@ Section pborrow.
     NonExpansive (pbsem sm).
   Proof.
     move=> ???[_ _[_ _[|]|]|]; [solve_proper|..].
-    - move=> [?[??]][?[??]][/=?]. subst. move=>/= [/=??]. solve_proper.
+    - move=> [?[??]][?[??]][/=?]. subst. move=>/= [/=/leibniz_equiv_iff ??].
+      solve_proper.
     - move=> [?[??]][?[??]][/=?]. subst. move=>/= [/=/leibniz_equiv_iff ??].
       solve_proper.
     - move=> ?? /leibniz_equiv_iff. solve_proper.

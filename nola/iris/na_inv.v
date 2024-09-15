@@ -95,7 +95,7 @@ Section na_inv.
   (** [na_inv_sem sm] is non-expansive if [sm] is *)
   Local Instance na_inv_sem_ne `{!NonExpansive sm} :
     NonExpansive (na_inv_sem sm).
-  Proof. move=> ?[??][??][/=??]. solve_proper. Qed.
+  Proof. move=> ?[[??]?][[??]?][/=[??]?]. solve_proper. Qed.
 
   (** World satisfaction for non-atomic invariants *)
   Local Definition na_inv_wsat_def (sm : FML $oi Σ -d> iProp Σ) : iProp Σ :=

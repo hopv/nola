@@ -9,7 +9,7 @@ dev-repo: "git+https://github.com/hopv/nola.git"
 version: "dev"
 
 depends: [
-  "coq-iris" { (= "dev.2024-08-17.0.8a98d00a") | (= "dev") }
+  "coq-iris" { (= "dev.2024-09-11.3.0203d5ca") | (= "dev") }
 ]
 
 build: [make "-j%{jobs}%"]

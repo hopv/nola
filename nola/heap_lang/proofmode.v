@@ -731,7 +731,7 @@ Tactic Notation "awp_apply" open_constr(lem) :=
   last iAuIntro.
 Tactic Notation "awp_apply" open_constr(lem) "without" constr(Hs) :=
   (* Convert "list of hypothesis" into specialization pattern. *)
-  let Hs := words Hs in
+  let Hs := String.words Hs in
   let Hs := eval vm_compute in (INamed <$> Hs) in
   wp_apply_core lem
     ltac:(fun H =>
