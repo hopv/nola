@@ -49,6 +49,27 @@ Proof.
     rewrite list_lookup_insert_ne; [|done]. by rewrite lookup_list_to_gmap.
 Qed.
 
+(** ** [insdel]: Insert or delete *)
+
+(** [insdel]: Insert or delete *)
+Definition insdel `{!EqDecision K, !Countable K, !Infinite K} {A}
+  (i : K) (oa : option A) : gmap K A → gmap K A :=
+  match oa with
+  | Some a => <[i := a]>
+  | None => delete i
+  end.
+
+Section insdel.
+  Context `{!EqDecision K, !Countable K, !Infinite K}.
+
+  (** Lookup over [insdel] *)
+  Lemma lookup_insdel {A i oa} {m : gmap K A} : insdel i oa m !! i = oa.
+  Proof. case: oa=> [?|]; [apply lookup_insert|apply lookup_delete]. Qed.
+  Lemma lookup_insdel_ne {A i j oa} {m : gmap K A} :
+    i ≠ j → insdel i oa m !! j = m !! j.
+  Proof. case: oa=> [?|]; [apply lookup_insert_ne|apply lookup_delete_ne]. Qed.
+End insdel.
+
 (** ** [map_with], [map_without] and [map_by] *)
 
 (** [map_with m l]: [m] with [l] freshly added *)

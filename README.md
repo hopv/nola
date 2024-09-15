@@ -83,7 +83,11 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`paradox`](nola/bi/paradox.v) (Paradoxes)
 - [`iris/`](nola/iris/) : Libraries for Iris base logic
   + [`ofe`](nola/iris/ofe.v) (On OFEs)
+  + [`own`](nola/iris/own.v) (On `own`)
   + [`list`](nol/iris/list.v) (On lists)
+  + [`option`](nola/iris/option.v) (On `option`),
+    [`agree`](nola/iris/agree.v) (On `agree`),
+    [`csum`](nola/iris/csum.v) (On `csum`)
   + [`sinv`](nola/iris/sinv.v) (Simple invariant),
     [`sinv_deriv`](nola/iris/sinv_deriv.v) (Simple invariant relaxed with
       derivability)

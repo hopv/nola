@@ -26,7 +26,11 @@ nola/bi/wpw.v
 nola/bi/paradox.v
 
 nola/iris/ofe.v
+nola/iris/own.v
 nola/iris/list.v
+nola/iris/option.v
+nola/iris/agree.v
+nola/iris/csum.v
 nola/iris/sinv.v
 nola/iris/sinv_deriv.v
 nola/iris/inv.v
