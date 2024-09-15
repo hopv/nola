@@ -56,10 +56,7 @@ Section psg.
   (** Parameterized induction principle for [Psgoidp] *)
   Lemma Psgoidp_ind {f ih'} ih o :
     Psgoidp f ih' o → Psgoidp f (ih ⊓ ih') ⊑ ih → ih o.
-  Proof.
-    move=> PS ?. move: o PS. apply (lfp_para_ind (o:=ih)). etrans; [|done].
-    apply (mono (f:=lfp)), oeqv_ole_1, aug_meet_nest.
-  Qed.
+  Proof. move=> PS ?. move: o PS. by apply (lfp_para_ind' (o:=ih)). Qed.
 
   (** Factorizing [Psgoidp] *)
   Lemma Psgoidp_factor' {f ih o} :

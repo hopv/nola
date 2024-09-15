@@ -47,6 +47,17 @@ Proof. move=> >. apply oeqv_ole. Qed.
 #[export] Instance oeqv_ole_2 {OT} : subrelation (≃@{OT}) (flip (⊑@{OT})).
 Proof. move=> >. apply oeqv_ole. Qed.
 
+(** [⊑] is proper *)
+#[export] Instance ole_proper_ole {OT} : Proper ((⊑) --> (⊑) ==> (→)) (⊑@{OT}).
+Proof. move=>/= ???????. etrans; by [|etrans]. Qed.
+#[export] Instance ole_proper_ole_flip {OT} :
+  Proper ((⊑) ==> (⊑) --> flip (→)) (⊑@{OT}).
+Proof. move=> ???????. by apply: ole_proper_ole. Qed.
+#[export] Instance ole_proper_oeqv {OT} : Proper ((≃) ==> (≃) ==> (↔)) (⊑@{OT}).
+Proof.
+  move=> ?? eqv ?? eqv'. by split=> ?; [rewrite -eqv -eqv'|rewrite eqv eqv'].
+Qed.
+
 (** ** Canonical structures of [poty] *)
 
 (** Natural number *)
@@ -475,8 +486,7 @@ Section lfp.
   (** [lfp] is monotone *)
   #[export] Instance lfp_mono : Mono lfp.
   Proof.
-    rewrite lfp_unseal=> ???. apply big_meet_mono; [|done]=>/= ??.
-    etrans; [|done]. done.
+    rewrite lfp_unseal=> ???. by apply big_meet_mono; [|done]=>/= ? {2}<-.
   Qed.
 
   (** Unfold [lfp] *)
@@ -512,10 +522,12 @@ Section lfp.
   Lemma lfp_para_ind `{!BinMeet OT, !BigMeet OT, !Mono f} {o} :
     lfp (aug_meet f o) ⊑ o → lfp f ⊑ o.
   Proof.
-    move=> to. etrans; [|apply to]. apply lfp_ind.
-    etrans; [|by apply lfp_unfold_2]. apply (mono (f:=f)).
-    by apply bin_meet_intro.
+    move=> to. rewrite -to. apply lfp_ind. etrans; [|exact lfp_unfold_2].
+    apply (mono (f:=f)). by apply bin_meet_intro.
   Qed.
+  Lemma lfp_para_ind' `{!BinMeet OT, !BigMeet OT, !Mono f} {o o'} :
+    lfp (aug_meet f (o ⊓ o')) ⊑ o → lfp (aug_meet f o') ⊑ o.
+  Proof. rewrite -aug_meet_nest. exact lfp_para_ind. Qed.
 End lfp.
 
 (** ** [gfp]: Knaster-Tarski greatest fixed point *)
@@ -533,7 +545,7 @@ Section gfp.
   (** [gfp] is monotone *)
   #[export] Instance gfp_mono : Mono gfp.
   Proof.
-    rewrite gfp_unseal=> ???. apply big_join_mono; [|done]=>/= ??. by etrans.
+    rewrite gfp_unseal=> ???. by apply big_join_mono; [|done]=>/= ? {1}->.
   Qed.
 
   (** Unfold [gfp] *)
@@ -569,8 +581,10 @@ Section gfp.
   Lemma gfp_para_coind `{!BinJoin OT, !BigJoin OT, !Mono f} {o} :
     o ⊑ gfp (aug_join f o) → o ⊑ gfp f.
   Proof.
-    move=> to. etrans; [apply to|]. apply gfp_coind.
-    etrans; [by apply gfp_unfold_1|]. apply (mono (f:=f)).
-    by apply bin_join_elim.
+    move=> to. rewrite to. apply gfp_coind. etrans; [exact gfp_unfold_1|].
+    apply (mono (f:=f)). by apply bin_join_elim.
   Qed.
+  Lemma gfp_para_coind' `{!BinJoin OT, !BigJoin OT, !Mono f} {o o'} :
+    o ⊑ gfp (aug_join f (o ⊔ o')) → o ⊑ gfp (aug_join f o').
+  Proof. rewrite -aug_join_nest. exact gfp_para_coind. Qed.
 End gfp.
