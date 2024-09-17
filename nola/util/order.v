@@ -61,7 +61,7 @@ Qed.
 (** ** Canonical structures of [poty] *)
 
 (** Natural number *)
-Program Canonical natPro : poty := Poty nat (≤) (=) _ _.
+Program Canonical natP : poty := Poty nat (≤) (=) _ _.
 Next Obligation.
   move=> >. split; [by move=> ->|]. case=> *. by apply Nat.le_antisymm.
 Qed.
@@ -71,7 +71,7 @@ Lemma nat_oeqv {n m : nat} : n ≃ m ↔ n = m.
 Proof. done. Qed.
 
 (** Proposition *)
-Program Canonical PropPro : poty := Poty Prop (→) (↔) _ _.
+Program Canonical PropP : poty := Poty Prop (→) (↔) _ _.
 Next Obligation. constructor; auto. Qed.
 Next Obligation. done. Qed.
 Lemma Prop_ole {P Q : Prop} : P ⊑ Q ↔ (P → Q).
@@ -80,7 +80,7 @@ Lemma Prop_oeqv {P Q : Prop} : P ≃ Q ↔ (P ↔ Q).
 Proof. done. Qed.
 
 (** Unit *)
-Program Canonical unitPro : poty := Poty unit (λ _ _, True) (λ _ _, True) _ _.
+Program Canonical unitP : poty := Poty unit (λ _ _, True) (λ _ _, True) _ _.
 Next Obligation. done. Qed.
 Lemma unit_ole {u u' : ()} : u ⊑ u' ↔ True.
 Proof. done. Qed.
@@ -88,7 +88,7 @@ Lemma unit_oeqv {u u' : ()} : u ≃ u' ↔ True.
 Proof. done. Qed.
 
 (** Function *)
-Program Canonical funPro {A} (OTF : A → poty) : poty :=
+Program Canonical funP {A} (OTF : A → poty) : poty :=
   Poty (∀ a, OTF a) (λ f g, ∀ a, f a ⊑ g a) (λ f g, ∀ a, f a ≃ g a) _ _.
 Next Obligation. constructor; [auto|]=> ??????. etrans; auto. Qed.
 Next Obligation.
@@ -102,7 +102,7 @@ Qed.
 Record dual A := Dual { undual : A }.
 Add Printing Constructor dual.
 Arguments Dual {_} _. Arguments undual {_} _.
-Program Canonical dualPro OT : poty :=
+Program Canonical dualP OT : poty :=
   Poty (dual OT) (λ o o', undual o' ⊑ undual o) (λ o o', undual o' ≃ undual o)
     _ _.
 Next Obligation. move=> ?. constructor; [auto|]=> ?????. by etrans. Qed.
