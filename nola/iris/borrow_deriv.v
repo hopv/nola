@@ -46,11 +46,20 @@ Section borrow_deriv.
   (** Borrower and lender propositions are non-expansive *)
   #[export] Instance bor_ne `{!NonExpansive δ} {α} : NonExpansive (bor δ α).
   Proof. rewrite bor_unseal. solve_proper. Qed.
+  #[export] Instance bor_proper `{!NonExpansive δ} {α} :
+    Proper ((≡) ==> (⊣⊢)) (bor δ α).
+  Proof. apply ne_proper, _. Qed.
   #[export] Instance obor_ne `{!NonExpansive δ} {α q} :
     NonExpansive (obor δ α q).
   Proof. rewrite obor_unseal. solve_proper. Qed.
+  #[export] Instance obor_proper `{!NonExpansive δ} {α q} :
+    Proper ((≡) ==> (⊣⊢)) (obor δ α q).
+  Proof. apply ne_proper, _. Qed.
   #[export] Instance lend_ne `{!NonExpansive δ} {α} : NonExpansive (lend δ α).
   Proof. rewrite lend_unseal. solve_proper. Qed.
+  #[export] Instance lend_proper `{!NonExpansive δ} {α} :
+    Proper ((≡) ==> (⊣⊢)) (lend δ α).
+  Proof. apply ne_proper, _. Qed.
 End borrow_deriv.
 Notation bord := (bor der). Notation obord := (obor der).
 Notation lendd := (lend der).

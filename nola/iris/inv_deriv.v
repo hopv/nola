@@ -37,6 +37,9 @@ Section inv_deriv.
   (** [inv'] is non-expansive *)
   #[export] Instance inv'_ne `{!NonExpansive δ} {N} : NonExpansive (inv' δ N).
   Proof. rewrite inv'_unseal. solve_proper. Qed.
+  #[export] Instance inv'_proper `{!NonExpansive δ} {N} :
+    Proper ((≡) ==> (⊣⊢)) (inv' δ N).
+  Proof. apply ne_proper, _. Qed.
 End inv_deriv.
 Notation invd := (inv' der).
 

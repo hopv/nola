@@ -80,20 +80,38 @@ Section pborrow_deriv.
   (** Borrower and lender propositions are non-expansive *)
   #[export] Instance nbor_ne `{!NonExpansive δ} {α} : NonExpansive (nbor δ α).
   Proof. rewrite nbor_unseal. solve_proper. Qed.
+  #[export] Instance nbor_proper `{!NonExpansive δ} {α} :
+    Proper ((≡) ==> (⊣⊢)) (nbor δ α).
+  Proof. apply ne_proper, _. Qed.
   #[export] Instance nobor_ne `{!NonExpansive δ} {α q} :
     NonExpansive (nobor δ α q).
   Proof. rewrite nobor_unseal. solve_proper. Qed.
+  #[export] Instance nobor_proper `{!NonExpansive δ} {α q} :
+    Proper ((≡) ==> (⊣⊢)) (nobor δ α q).
+  Proof. apply ne_proper, _. Qed.
   #[export] Instance nlend_ne `{!NonExpansive δ} {α} : NonExpansive (nlend δ α).
   Proof. rewrite nlend_unseal. solve_proper. Qed.
+  #[export] Instance nlend_proper `{!NonExpansive δ} {α} :
+    Proper ((≡) ==> (⊣⊢)) (nlend δ α).
+  Proof. apply ne_proper, _. Qed.
   #[export] Instance pbor_ne `{!NonExpansive δ} {X α x ξ} :
     NonExpansive (pbor (X:=X) δ α x ξ).
   Proof. rewrite pbor_unseal. solve_proper. Qed.
+  #[export] Instance pbor_proper `{!NonExpansive δ} {X α x ξ} :
+    Proper ((≡) ==> (⊣⊢)) (pbor (X:=X) δ α x ξ).
+  Proof. apply ne_proper, _. Qed.
   #[export] Instance pobor_ne `{!NonExpansive δ} {X α q ξ} :
     NonExpansive (pobor (X:=X) δ α q ξ).
   Proof. rewrite pobor_unseal. solve_proper. Qed.
+  #[export] Instance pobor_proper `{!NonExpansive δ} {X α q ξ} :
+    Proper ((≡) ==> (⊣⊢)) (pobor (X:=X) δ α q ξ).
+  Proof. apply ne_proper, _. Qed.
   #[export] Instance plend_ne `{!NonExpansive δ} {X α xπ} :
     NonExpansive (plend (X:=X) δ α xπ).
   Proof. rewrite plend_unseal. solve_proper. Qed.
+  #[export] Instance plend_proper `{!NonExpansive δ} {X α xπ} :
+    Proper ((≡) ==> (⊣⊢)) (plend (X:=X) δ α xπ).
+  Proof. apply ne_proper, _. Qed.
 End pborrow_deriv.
 Notation nbord := (nbor der). Notation nobord := (nobor der).
 Notation nlendd := (nlend der).

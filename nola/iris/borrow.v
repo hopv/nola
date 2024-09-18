@@ -141,11 +141,16 @@ Section borrow.
   Qed.
   #[export] Instance bor_tok_ne {α} : NonExpansive (bor_tok α).
   Proof. rewrite bor_tok_unseal. solve_proper. Qed.
-  #[export] Instance obor_itok_ne {i α' α q} :
+  #[export] Instance bor_tok_proper {α} : Proper ((≡) ==> (⊣⊢)) (bor_tok α).
+  Proof. apply ne_proper, _. Qed.
+  Local Instance obor_itok_ne {i α' α q} :
     NonExpansive (obor_itok i α' α q).
   Proof. solve_proper. Qed.
   #[export] Instance obor_tok_ne {α q} : NonExpansive (obor_tok α q).
   Proof. rewrite obor_tok_unseal. solve_proper. Qed.
+  #[export] Instance obor_tok_proper {α q} :
+    Proper ((≡) ==> (⊣⊢)) (obor_tok α q).
+  Proof. apply ne_proper, _. Qed.
   Local Instance lend_ktok_ne {i k α} : NonExpansive (lend_ktok i k α).
   Proof.
     unfold lend_ktok=> ????. do 2 f_equiv. apply singleton_ne.
@@ -155,6 +160,8 @@ Section borrow.
   Proof. solve_proper. Qed.
   #[export] Instance lend_tok_ne {α} : NonExpansive (lend_tok α).
   Proof. rewrite lend_tok_unseal. solve_proper. Qed.
+  #[export] Instance lend_tok_proper {α} : Proper ((≡) ==> (⊣⊢)) (lend_tok α).
+  Proof. apply ne_proper, _. Qed.
 
   (** Borrower and lender tokens are timeless for discrete formulas *)
   #[export] Instance bor_tok_timeless `{!Discrete Px} {α} :
@@ -457,6 +464,9 @@ Section borrow.
     rewrite borrow_wsat_unseal /borrow_wsat_def /borrow_lwsat. move=> ??????.
     repeat f_equiv. by apply depo_wsat_ne.
   Qed.
+  #[export] Instance borrow_wsat_proper `{!NonExpansive M} :
+    Proper ((≡) ==> (≡)) (borrow_wsat M).
+  Proof. apply ne_proper=> ????. apply borrow_wsat_ne=>//. solve_proper. Qed.
 
   (** [borrow_wsat] is monotone over the modality *)
   Local Instance depo_wsat_mono :

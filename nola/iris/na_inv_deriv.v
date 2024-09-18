@@ -40,6 +40,9 @@ Section na_inv_deriv.
   #[export] Instance na_inv'_ne `{!NonExpansive δ} {p N} :
     NonExpansive (na_inv' δ p N).
   Proof. rewrite na_inv'_unseal. solve_proper. Qed.
+  #[export] Instance na_inv'_proper `{!NonExpansive δ} {p N} :
+    Proper ((≡) ==> (⊣⊢)) (na_inv' δ p N).
+  Proof. apply ne_proper, _. Qed.
 End na_inv_deriv.
 Notation na_invd := (na_inv' der).
 

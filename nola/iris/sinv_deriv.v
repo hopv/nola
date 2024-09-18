@@ -37,6 +37,9 @@ Section sinv_deriv.
   (** [sinv] is non-expansive *)
   #[export] Instance sinv_ne `{!NonExpansive δ} : NonExpansive (sinv δ).
   Proof. rewrite sinv_unseal. solve_proper. Qed.
+  #[export] Instance sinv_proper `{!NonExpansive δ} :
+    Proper ((≡) ==> (⊣⊢)) (sinv δ).
+  Proof. apply ne_proper, _. Qed.
 End sinv_deriv.
 Notation sinvd := (sinv der).
 

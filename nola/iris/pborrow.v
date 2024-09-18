@@ -84,27 +84,43 @@ Section pborrow.
   (** Borrower and lender tokens are non-expansive *)
   #[export] Instance nbor_tok_ne {α} : NonExpansive (nbor_tok α).
   Proof. solve_proper. Qed.
+  #[export] Instance nbor_tok_proper {α} : Proper ((≡) ==> (⊣⊢)) (nbor_tok α).
+  Proof. apply ne_proper, _. Qed.
   #[export] Instance nobor_tok_ne {α q} : NonExpansive (nobor_tok α q).
   Proof. solve_proper. Qed.
+  #[export] Instance nobor_tok_proper {α q} :
+    Proper ((≡) ==> (⊣⊢)) (nobor_tok α q).
+  Proof. apply ne_proper, _. Qed.
   #[export] Instance nlend_tok_ne {α} : NonExpansive (nlend_tok α).
   Proof. solve_proper. Qed.
+  #[export] Instance nlend_tok_proper {α} : Proper ((≡) ==> (⊣⊢)) (nlend_tok α).
+  Proof. apply ne_proper, _. Qed.
   #[export] Instance pbor_tok_ne {X α x ξ} :
     NonExpansive (pbor_tok (X:=X) α x ξ).
   Proof.
     rewrite pbor_tok_unseal /pbor_tok_def=> ????. do 7 f_equiv.
     apply inr_ne. by apply: existT_ne.
   Qed.
+  #[export] Instance pbor_tok_proper {X α x ξ} :
+    Proper ((≡) ==> (⊣⊢)) (pbor_tok (X:=X) α x ξ).
+  Proof. apply ne_proper, _. Qed.
   #[export] Instance pobor_tok_ne {X α q ξ} :
     NonExpansive (pobor_tok (X:=X) α q ξ).
   Proof.
     rewrite pobor_tok_unseal /pobor_tok_def=> ????. do 6 f_equiv.
     apply inr_ne. by apply: existT_ne.
   Qed.
+  #[export] Instance pobor_tok_proper {X α q ξ} :
+    Proper ((≡) ==> (⊣⊢)) (pobor_tok (X:=X) α q ξ).
+  Proof. apply ne_proper, _. Qed.
   #[export] Instance plend_tok_ne {X α xπ} :
     NonExpansive (plend_tok (X:=X) α xπ).
   Proof.
     unfold plend_tok=> ????. do 2 f_equiv. apply inr_ne. by apply: existT_ne.
   Qed.
+  #[export] Instance plend_tok_proper {X α xπ} :
+    Proper ((≡) ==> (⊣⊢)) (plend_tok (X:=X) α xπ).
+  Proof. apply ne_proper, _. Qed.
 
   (** Borrower and lender tokens are timeless for discrete formulas *)
   Fact nbor_tok_timeless `{!Discrete Px} {α} : Timeless (nbor_tok α Px).

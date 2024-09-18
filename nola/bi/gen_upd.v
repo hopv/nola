@@ -16,6 +16,10 @@ Class GenUpd {PROP : bi} (M : PROP → PROP) : Prop := GEN_UPD {
 }.
 Hint Mode GenUpd + ! : typeclass_instances.
 
+#[export] Instance gen_upd_proper `{!@GenUpd PROP M} :
+  Proper ((⊣⊢) ==> (⊣⊢)) M.
+Proof. apply ne_proper, _. Qed.
+
 (** Instances of [GenUpd] *)
 #[export] Instance id_gen_upd {PROP} : GenUpd (PROP:=PROP) id.
 Proof. split; [exact _|done..]. Qed.
@@ -44,8 +48,6 @@ Section gen_upd.
   Proof. move=> ??. apply gen_upd_mono. Qed.
   #[export] Instance gen_upd_flip_mono' : Proper (flip (⊢) ==> flip (⊢)) M | 10.
   Proof. move=>/= ??. apply gen_upd_mono. Qed.
-  #[export] Instance gen_upd_proper : Proper ((⊣⊢) ==> (⊣⊢)) M | 10.
-  Proof. apply ne_proper, _. Qed.
 
   (** Introduce *)
   #[export] Instance from_modal_gen_upd {P} :
@@ -242,13 +244,16 @@ Section mod_iff.
   Proof.
     move=> ?? eqv ??????. unfold mod_iff. do 2 f_equiv=>//; by apply eqv.
   Qed.
-  Fact mod_iff_ne `{!NonExpansive M} : NonExpansive2 (mod_iff M).
+  #[export] Instance mod_iff_ne `{!NonExpansive M} : NonExpansive2 (mod_iff M).
   Proof. exact _. Qed.
-  #[export] Instance mod_iff_proper :
+  #[export] Instance mod_iff_proper_gen :
     Proper (((≡) ==> (≡)) ==> (≡) ==> (≡) ==> (≡)) mod_iff.
   Proof.
     move=> ?? eqv ??????. unfold mod_iff. do 2 f_equiv=>//; by apply eqv.
   Qed.
+  #[export] Instance mod_iff_proper `{!Proper ((≡) ==> (≡)) M} :
+    Proper ((≡) ==> (≡) ==> (≡)) (mod_iff M).
+  Proof. exact _. Qed.
 
   Context `{!GenUpd (PROP:=PROP) M}.
 

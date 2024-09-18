@@ -59,9 +59,13 @@ Section sinv.
   Implicit Type (i : positive) (I : gset positive).
 
   (** [sinv_itok] and [sinv_tok] are non-expansive *)
-  #[export] Instance sinv_itok_ne i : NonExpansive (sinv_itok i).
+  #[export] Instance sinv_itok_ne {i} : NonExpansive (sinv_itok i).
   Proof. rewrite sinv_itok_unseal. solve_proper. Qed.
+  #[export] Instance sinv_itok_proper {i} : Proper ((≡) ==> (⊣⊢)) (sinv_itok i).
+  Proof. apply ne_proper, _. Qed.
   #[export] Instance sinv_tok_ne : NonExpansive sinv_tok.
+  Proof. solve_proper. Qed.
+  #[export] Instance sinv_tok_proper: Proper ((≡) ==> (⊣⊢)) sinv_tok.
   Proof. solve_proper. Qed.
   (** [sinv_itok] and [sinv_tok] are persistent *)
   #[export] Instance sinv_itok_persistent {i Px} : Persistent (sinv_itok i Px).

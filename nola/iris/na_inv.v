@@ -74,10 +74,13 @@ Section na_inv.
   Proof. exact: seal_eq. Qed.
 
   (** [na_inv_tok] is non-expansive *)
-  #[export] Instance na_inv_tok_ne p N : NonExpansive (na_inv_tok p N).
+  #[export] Instance na_inv_tok_ne {p N} : NonExpansive (na_inv_tok p N).
   Proof.
     rewrite na_inv_tok_unseal /na_inv_tok_def=> ????. do 4 f_equiv. by split.
   Qed.
+  #[export] Instance na_inv_tok_proper {p N} :
+    Proper ((≡) ==> (⊣⊢)) (na_inv_tok p N).
+  Proof. apply ne_proper, _. Qed.
   (** [na_inv_tok] is persistent *)
   #[export] Instance na_inv_tok_persistent {p N Px} :
     Persistent (na_inv_tok p N Px).

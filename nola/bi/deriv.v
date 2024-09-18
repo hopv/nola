@@ -15,6 +15,10 @@ Add Printing Constructor Dsem.
 Hint Mode Dsem - ! - : typeclass_instances.
 Arguments DSEM {_ _ _} _ {_}.
 
+#[export] Instance dsem_proper `{!Dsem JUDG A PROP, !NonExpansive δ} :
+  Proper ((≡) ==> (⊣⊢)) (@dsem JUDG A PROP _ δ).
+Proof. apply ne_proper, _. Qed.
+
 (** ** [judgi]: Judgment with the parameterized semantics *)
 #[projections(primitive)]
 Structure judgi (PROP : bi) : Type := Judgi {

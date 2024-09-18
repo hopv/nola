@@ -13,3 +13,6 @@ Arguments laterl {_} _ /.
 #[export] Instance laterl_ne `{!BiLaterContractive PROP} :
   NonExpansive (@laterl PROP).
 Proof. move=> ?[?][?]?/=. by apply later_contractive. Qed.
+#[export] Instance laterl_proper `{!BiLaterContractive PROP} :
+  Proper ((≡) ==> (⊣⊢)) (@laterl PROP).
+Proof. apply ne_proper, _. Qed.
