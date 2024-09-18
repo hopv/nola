@@ -116,6 +116,11 @@ Section cif.
   (** [of_cif] is size-preserving *)
   #[export] Instance of_cif_preserv : Preserv of_cif.
   Proof. rewrite of_cif_unseal. exact _. Qed.
+  (** [of_cif] is non-expansive *)
+  #[export] Instance of_cif_ne : NonExpansive of_cif.
+  Proof. rewrite of_cif_unseal. exact _. Qed.
+  #[export] Instance of_cif_proper : Proper ((≡) ==> (≡)) of_cif.
+  Proof. apply ne_proper, _. Qed.
   (** Simplify [to_cit] over [of_cif] *)
   Lemma to_of_cif {Px} : to_cit (of_cif Px) ≡ Px.
   Proof. by rewrite of_cif_unseal to_of_cit'. Qed.
@@ -180,9 +185,7 @@ Section cif.
   #[export] Instance cif_later_proper : Proper ((≡) ==> (≡)) cif_later.
   Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_custom_ne {s} : NonExpansive3 (cif_custom s).
-  Proof.
-    move=> ??????????. apply Citg_ne=>// ?. rewrite of_cif_unseal. by f_equiv.
-  Qed.
+  Proof. move=> ??????????. apply Citg_ne=>// ?. by f_equiv. Qed.
   #[export] Instance cif_custom_proper {s} :
     Proper ((≡) ==> (≡) ==> (≡) ==> (≡)) (cif_custom s).
   Proof. move=> ??????????. apply cif_custom_ne; by apply equiv_dist. Qed.
