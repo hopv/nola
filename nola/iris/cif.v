@@ -113,7 +113,7 @@ Section cif.
   Proof. by eexists. Qed.
   Definition of_cif : cif I C D Σ → cifa I C D Σ := of_cif_aux.(unseal).
   Lemma of_cif_unseal : of_cif = of_cit. Proof. exact: seal_eq. Qed.
-  (** [of_cif] is [Preserv] *)
+  (** [of_cif] is size-preserving *)
   #[export] Instance of_cif_preserv : Preserv of_cif.
   Proof. rewrite of_cif_unseal. exact _. Qed.
   (** Simplify [to_cit] over [of_cif] *)

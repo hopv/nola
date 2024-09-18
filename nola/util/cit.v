@@ -820,7 +820,7 @@ Section citPR.
     by apply to_cit_proper.
   Qed.
 
-  (** [Citg] is [Preserv] over the inductive arguments
+  (** [Citg] is size-preserving over the inductive arguments
     and [Productive] over the coinductive arguments *)
   #[export] Instance Citg_preserv_productive {D s n} :
     Proper (@proeq (funPR (λ _, cit _ _ _)) n ==>
@@ -831,11 +831,11 @@ Section citPR.
     destruct n as [|?]=>/=; by apply citg_Forall2_eq.
   Qed.
 
-  (** [of_cit] is [Preserv] *)
+  (** [of_cit] is size-preserving *)
   #[export] Instance of_cit_preserv {D} : Preserv (@of_cit _ I C D).
   Proof. by move=> ??. Qed.
 
-  (** [cit_map] is [Preserv] *)
+  (** [cit_map] is size-preserving *)
   #[export] Instance cit_map_preserv {D D' f} :
     Preserv (@cit_map _ I C D D' f).
   Proof.
