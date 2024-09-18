@@ -21,10 +21,14 @@ Implicit Type α β : lft.
 #[export] Instance lft_meet : Meet lft := disj_union.
 
 (** [⊓] is unital over [⊤], commutative, and associative *)
-Fact lft_meet_id_l : LeftId (=) ⊤ (meet (A:=lft)). Proof. exact _. Qed.
-Fact lft_meet_id_r : RightId (=) ⊤ (meet (A:=lft)). Proof. exact _. Qed.
-Fact lft_meet_comm : Comm (=) (meet (A:=lft)). Proof. exact _. Qed.
-Fact lft_meet_assoc : Assoc (=) (meet (A:=lft)). Proof. exact _. Qed.
+#[export] Instance lft_meet_id_l : LeftId (=) ⊤ (meet (A:=lft)).
+Proof. exact _. Qed.
+#[export] Instance lft_meet_id_r : RightId (=) ⊤ (meet (A:=lft)).
+Proof. exact _. Qed.
+#[export] Instance lft_meet_comm : Comm (=) (meet (A:=lft)).
+Proof. exact _. Qed.
+#[export] Instance lft_meet_assoc : Assoc (=) (meet (A:=lft)).
+Proof. exact _. Qed.
 
 (** [= ⊤] and [⊓] *)
 Lemma lft_eqtop_meet_l {α β} : α ⊓ β = ⊤ → α = ⊤.
@@ -122,15 +126,15 @@ Section lft.
   (** Dead and eternal lifetime tokens are persistent *)
   #[export] Instance lft_dead_persistent {α} : Persistent [†α].
   Proof. rewrite lft_dead_unseal. exact _. Qed.
-  Fact lft_etern_persistent {α} : Persistent [∞α].
+  #[export] Instance lft_etern_persistent {α} : Persistent [∞α].
   Proof. exact _. Qed.
 
   (** Live, dead, eternal lifetime tokens are timeless *)
-  Fact lft_live_timeless {α q} : Timeless q.[α].
+  #[export] Instance lft_live_timeless {α q} : Timeless q.[α].
   Proof. exact _. Qed.
   #[export] Instance lft_dead_timeless {α} : Timeless [†α].
   Proof. rewrite lft_dead_unseal. exact _. Qed.
-  Fact lft_etern_timeless {α} : Timeless [∞α].
+  #[export] Instance lft_etern_timeless {α} : Timeless [∞α].
   Proof. exact _. Qed.
 
   (** Live and dead lifetime tokens can't coexist *)

@@ -72,8 +72,8 @@ Definition cifa {SEL} I C D Σ : Type :=
   cita (cif_idom (SEL:=SEL) I) (cif_cdom C) (λ s, cif_dataOF D s $oi Σ).
 
 (** [cifOF] is contractive *)
-Fact cifOF_contractive {SEL I C} `{∀ s, oFunctorContractive (D s)} :
-  oFunctorContractive (@cifOF SEL I C D).
+#[export] Instance cifOF_contractive {SEL I C}
+  `{∀ s, oFunctorContractive (D s)} : oFunctorContractive (@cifOF SEL I C D).
 Proof. exact _. Qed.
 
 (** ** Construct [cif] *)

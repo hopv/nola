@@ -35,7 +35,7 @@ Definition cdom (s : sel) : Type := match s with
 (** [dataOF]: Data [oFunctor] *)
 Definition dataOF (_ : sel) : oFunctor := unitO.
 (** [dataOF] is contractive *)
-Fact dataOF_contractive {s} : oFunctorContractive (dataOF s).
+#[export] Instance dataOF_contractive {s} : oFunctorContractive (dataOF s).
 Proof. exact _. Qed.
 
 (** ** [cif]: Formulas *)
@@ -43,7 +43,7 @@ Notation cif Σ := (cif idom cdom dataOF Σ).
 Notation cifOF := (cifOF idom cdom dataOF).
 
 (** [cifOF] is contractive *)
-Fact cifOF_contractive : oFunctorContractive cifOF.
+#[export] Instance cifOF_contractive : oFunctorContractive cifOF.
 Proof. exact _. Qed.
 
 (** Construct [cif] *)

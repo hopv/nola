@@ -70,13 +70,13 @@ Section sinv.
   (** [sinv_itok] and [sinv_tok] are persistent *)
   #[export] Instance sinv_itok_persistent {i Px} : Persistent (sinv_itok i Px).
   Proof. rewrite sinv_itok_unseal. exact _. Qed.
-  Fact sinv_tok_persistent {Px} : Persistent (sinv_tok Px).
+  #[export] Instance sinv_tok_persistent {Px} : Persistent (sinv_tok Px).
   Proof. exact _. Qed.
   (** [sinv_itok] and [sinv_tok] are timeless for discrete formulas *)
   #[export] Instance sinv_itok_timeless `{!Discrete Px} {i} :
     Timeless (sinv_itok i Px).
   Proof. rewrite sinv_itok_unseal /sinv_itok_def /gmap_view_frag. exact _. Qed.
-  Fact sinv_tok_timeless `{!Discrete Px} : Timeless (sinv_tok Px).
+  #[export] Instance sinv_tok_timeless `{!Discrete Px} : Timeless (sinv_tok Px).
   Proof. exact _. Qed.
 
   (** [sinv_iwsat] is non-expansive *)

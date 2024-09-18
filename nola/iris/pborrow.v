@@ -123,11 +123,14 @@ Section pborrow.
   Proof. apply ne_proper, _. Qed.
 
   (** Borrower and lender tokens are timeless for discrete formulas *)
-  Fact nbor_tok_timeless `{!Discrete Px} {α} : Timeless (nbor_tok α Px).
+  #[export] Instance nbor_tok_timeless `{!Discrete Px} {α} :
+    Timeless (nbor_tok α Px).
   Proof. exact _. Qed.
-  Fact nobor_tok_timeless `{!Discrete Px} {α q} : Timeless (nobor_tok α q Px).
+  #[export] Instance nobor_tok_timeless `{!Discrete Px} {α q} :
+    Timeless (nobor_tok α q Px).
   Proof. exact _. Qed.
-  Fact nlend_tok_timeless `{!Discrete Px} {α} : Timeless (nlend_tok α Px).
+  #[export] Instance nlend_tok_timeless `{!Discrete Px} {α} :
+    Timeless (nlend_tok α Px).
   Proof. exact _. Qed.
   #[export] Instance pbor_tok_timeless `{!Discrete (Φx : X -d> _)} {α x ξ} :
     Timeless (pbor_tok α x ξ Φx).
@@ -135,7 +138,7 @@ Section pborrow.
   #[export] Instance pobor_tok_timeless `{!Discrete (Φx : X -d> _)} {α q ξ} :
     Timeless (pobor_tok α q ξ Φx).
   Proof. rewrite pobor_tok_unseal. exact _. Qed.
-  Fact plend_tok_timeless `{!Discrete (Φx : X -d> _)} {α xπ} :
+  #[export] Instance plend_tok_timeless `{!Discrete (Φx : X -d> _)} {α xπ} :
     Timeless (plend_tok α xπ Φx).
   Proof. exact _. Qed.
 
@@ -193,7 +196,7 @@ Section pborrow.
   #[export] Instance plend_body_ne `{!NonExpansive sm} {X xπ} :
     NonExpansive (@plend_body sm X xπ).
   Proof. solve_proper. Qed.
-  Fact plend_body_var_ne `{!NonExpansive sm} {X ξ} :
+  #[export] Instance plend_body_var_ne `{!NonExpansive sm} {X ξ} :
     NonExpansive (@plend_body_var sm X ξ).
   Proof. exact _. Qed.
 

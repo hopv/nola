@@ -195,7 +195,7 @@ Section mod_acsr.
     move=> ?? eqv ??????. unfold mod_acsr. f_equiv=>//. apply eqv.
     do 2 f_equiv=>//. by apply eqv.
   Qed.
-  Fact mod_acsr_ne `{!NonExpansive M} : NonExpansive2 (mod_acsr M).
+  #[export] Instance mod_acsr_ne `{!NonExpansive M} : NonExpansive2 (mod_acsr M).
   Proof. exact _. Qed.
   #[export] Instance mod_acsr_proper :
     Proper (((≡) ==> (≡)) ==> (≡) ==> (≡) ==> (≡)) mod_acsr.
