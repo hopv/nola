@@ -196,18 +196,18 @@ Section cif.
   (** Discreteness *)
   #[export] Instance cif_all_discrete {A} `{!∀ a : A, Discrete (Φx a)} :
     Discrete (cif_all Φx).
-  Proof. by apply: Citg_discrete. Qed.
+  Proof. exact _. Qed.
   #[export] Instance cif_ex_discrete {A} `{!∀ a : A, Discrete (Φx a)} :
     Discrete (cif_ex Φx).
-  Proof. by apply: Citg_discrete. Qed.
+  Proof. exact _. Qed.
   #[export] Instance cif_bin_discrete {s} `{!Discrete Px, !Discrete Qx} :
     Discrete (cif_bin s Px Qx).
-  Proof. apply: Citg_discrete=>//. case; exact _. Qed.
+  Proof. exact _. Qed.
   #[export] Instance cif_un_discrete {s} `{!Discrete Px} :
     Discrete (cif_un s Px).
-  Proof. by apply: Citg_discrete. Qed.
+  Proof. exact _. Qed.
   #[export] Instance cif_pure_discrete {φ} : Discrete (cif_pure φ).
-  Proof. by apply: Citg_discrete. Qed.
+  Proof. exact _. Qed.
   #[export] Instance cif_custom_discrete {s}
     `{!∀ i, Discrete (Φx i), !∀ c, Discrete (Ψx c), !Discrete d} :
     Discrete (cif_custom s Φx Ψx d).
