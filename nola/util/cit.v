@@ -610,8 +610,7 @@ Section of_cit.
 
   (** [to_cit] is proper, under UIP over [SEL] *)
   Lemma to_cit_proper {D D' R ta ta'} `{!Uip SEL} :
-    @cita_Forall2 _ I C D D' R ta ta' →
-    cit_Forall2 R (to_cit ta) (to_cit ta').
+    @cita_Forall2 _ I C D D' R ta ta' → cit_Forall2 R (to_cit ta) (to_cit ta').
   Proof.
     unfold to_cit. move: ta ta'=> [+ + +][+ + +]+.
     elim=> ? ti IH tc d tl [/=sel ???] [s ti' tc' d'] tl' [/=sel' ???] F.
