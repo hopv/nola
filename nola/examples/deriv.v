@@ -268,8 +268,7 @@ Section verify.
   (** Unfold [ilist'] *)
   Lemma ilist'_unfold {N Φx l} : ilist' N Φx l ≡ ilist N Φx l.
   Proof.
-    move=> ?. apply cit_proeq_all=> n.
-    have E : proeq n (ilist' N Φx) (ilist N Φx) by exact profix_unfold. apply E.
+    move=> ?. apply cit_proeqa, (proeqa_fun (PRF:=λ _, _)), profix_unfold.
   Qed.
 
   (** Convert the predicate of [ilist] using [mod_acsr] *)
@@ -324,8 +323,7 @@ Section verify.
   (** Unfold [mlist'] *)
   Lemma mlist'_unfold {Φx l} : mlist' Φx l ≡ mlist Φx l.
   Proof.
-    move=> ?. apply cit_proeq_all=> n.
-    have E : proeq n (mlist' Φx) (mlist Φx) by exact profix_unfold. apply E.
+    move=> ?. apply cit_proeqa, (proeqa_fun (PRF:=λ _, _)), profix_unfold.
   Qed.
 
   (** Convert the predicate of [mlist] using [mod_iff] *)

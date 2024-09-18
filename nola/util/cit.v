@@ -805,14 +805,14 @@ Section citPR.
       (@cit_proeq SEL I C D n).
   Proof. move=> ??????. split; by apply cit_proeq_proper'. Qed.
 
-  (** Simplify universal [cita_proeq] *)
-  Lemma cita_proeq_all {D ta ta'} `{!∀ s, Reflexive (R s)} :
-    (∀ n, cita_proeq n ta ta') → @cita_Forall2 _ I C D _ R ta ta'.
+  (** Simplify [proeqa] over [cita] *)
+  Lemma cita_proeqa {D ta ta'} `{!∀ s, Reflexive (R s)} :
+    proeqa ta ta' → @cita_Forall2 _ I C D _ R ta ta'.
   Proof. move=> E n. move: (E n). by apply citi_Forall2_mono=> ???->. Qed.
 
-  (** Simplify universal [cit_proeq], under UIP over [SEL] *)
-  Lemma cit_proeq_all {D t t'} `{!Uip SEL, !∀ s, Reflexive (R s)} :
-    (∀ n, cit_proeq n t t') → @cit_Forall2 _ I C D _ R t t'.
+  (** Simplify [proeqa] over [cit], under UIP over [SEL] *)
+  Lemma cit_proeqa {D t t'} `{!Uip SEL, !∀ s, Reflexive (R s)} :
+    proeqa t t' → @cit_Forall2 _ I C D _ R t t'.
   Proof.
     move=> E.
     suff: cit_Forall2 (λ _, (=)) t t' by apply cit_Forall2_mono=> ???->.

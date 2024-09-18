@@ -250,8 +250,7 @@ Section verify.
   (** Unfold [ilist'] *)
   Lemma ilist'_unfold {N Φx l} : ilist' N Φx l ≡ ilist N Φx l.
   Proof.
-    move=> ?. apply cit_proeq_all=> n.
-    have E : proeq n (ilist' N Φx) (ilist N Φx) by exact profix_unfold. apply E.
+    move=> ?. apply cit_proeqa, (proeqa_fun (PRF:=λ _, _)), profix_unfold.
   Qed.
 
   (** Access the tail of a list *)
@@ -354,8 +353,7 @@ Section verify.
   (** Unfold [mlist'] *)
   Lemma mlist'_unfold {Φx l} : mlist' Φx l ≡ mlist Φx l.
   Proof.
-    move=> ?. apply cit_proeq_all=> n.
-    have E : proeq n (mlist' Φx) (mlist Φx) by exact profix_unfold. apply E.
+    move=> ?. apply cit_proeqa, (proeqa_fun (PRF:=λ _, _)), profix_unfold.
   Qed.
 
   (** Try to acquire the lock of [mlist] *)
@@ -579,9 +577,7 @@ Section verify.
   (** Unfold [mblist'] *)
   Lemma mblist'_unfold {α Φx l} : mblist' α Φx l ≡ mblist α Φx l.
   Proof.
-    move=> ?. apply cit_proeq_all=> n.
-    have E : proeq n (mblist' α Φx) (mblist α Φx) by exact profix_unfold.
-    apply E.
+    move=> ?. apply cit_proeqa, (proeqa_fun (PRF:=λ _, _)), profix_unfold.
   Qed.
 
   (** Iterate over [mblist] *)

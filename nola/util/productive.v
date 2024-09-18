@@ -8,14 +8,37 @@ Structure prost := Prost {
   (** Equivalences up to a level *)
     proeq : nat → relation prost_car;
   (** [proeq] is an equivalence relation *)
-    #[canonical=no] proeq_equivalence :: ∀ n, Equivalence (proeq n);
+    #[canonical=no] proeq_equivalence :: ∀ {n}, Equivalence (proeq n);
   (** [proeq] is antitone *)
-    #[canonical=no] proeq_anti : ∀ {m n a b}, m ≥ n → proeq m a b → proeq n a b;
+    #[canonical=no] proeq_anti :
+      ∀ {m n a a'}, m ≥ n → proeq m a a' → proeq n a a';
 }.
 Add Printing Constructor prost.
-Arguments proeq {PR} : rename. Arguments proeq_equivalence {PR} : rename.
-Arguments proeq_anti {PR m n a b} : rename.
+Arguments proeq {PR} : rename. Arguments proeq_equivalence {PR _} : rename.
+Arguments proeq_anti {PR _ _ _ _} : rename.
 Implicit Type PR : prost.
+
+(** [proeq_later]: [proeq] with the level deferred by 1 *)
+Definition proeq_later {PR} n : relation PR :=
+  match n with 0 => λ _ _, True | S n' => proeq n' end.
+#[export] Instance proeq_later_equivalence {PR n} :
+ Equivalence (@proeq_later PR n).
+Proof. case: n=>//=. exact _. Qed.
+(** [proeq] to [proeq_later] *)
+Lemma proeq_to_later {PR n a a'} : proeq n a a' → @proeq_later PR n a a'.
+Proof. case: n=>//= ?. apply proeq_anti. lia. Qed.
+(** [proeq_later] is antinone *)
+Lemma proeq_later_anti {PR m n a a'} :
+  m ≥ n → @proeq_later PR m a a' → proeq_later n a a'.
+Proof. case: n=>//= ?. case: m; [lia|]=>/= ??. apply proeq_anti. lia. Qed.
+
+(** [proeqa]: [proeq] over all levels *)
+Definition proeqa {PR} (a a' : PR) : Prop := ∀ n, proeq n a a'.
+#[export] Instance proeqa_equivalence {PR} : Equivalence (@proeqa PR).
+Proof.
+  split. { by move=> ??. } { move=> ????. by symmetry. }
+  { move=> ??? E E' n. move: (E n) (E' n)=> ??. by etrans. }
+Qed.
 
 (** ** Productivity structures *)
 
@@ -36,22 +59,18 @@ Next Obligation.
   { move=> ??? e ??. etrans; by [apply e|]. }
 Qed.
 Next Obligation. move=> ?????????. by eapply proeq_anti. Qed.
+(** Turn from [proeq] etc. over a function *)
+Lemma proeq_fun {A PRF} {n f g a} :
+  @proeq (@funPR A PRF) n f g → proeq n (f a) (g a).
+Proof. done. Qed.
+Lemma proeq_later_fun {A PRF} {n f g a} :
+  @proeq_later (@funPR A PRF) n f g → proeq_later n (f a) (g a).
+Proof. case: n=>//=. Qed.
+Lemma proeqa_fun {A PRF} {f g a} :
+  @proeqa (@funPR A PRF) f g → proeqa (f a) (g a).
+Proof. move=> E ?. apply E. Qed.
 
 (** ** Productivity *)
-
-(** [proeq_later]: [proeq] with the index deferred by 1 *)
-Definition proeq_later {PR} n : relation PR :=
-  match n with 0 => λ _ _, True | S n' => proeq n' end.
-#[export] Instance proeq_later_equivalence {PR n} :
-  Equivalence (@proeq_later PR n).
-Proof. case: n=>//=. exact _. Qed.
-(** [proeq] to [proeq_later] *)
-Lemma proeq_to_later {PR n a b} : proeq n a b → @proeq_later PR n a b.
-Proof. case: n=>//= ?. apply proeq_anti. lia. Qed.
-(** [proeq_later] is antinone *)
-Lemma proeq_later_anti {PR m n a b} :
-  m ≥ n → @proeq_later PR m a b → proeq_later n a b.
-Proof. case: n=>//= ?. case: m; [lia|]=>/= ??. apply proeq_anti. lia. Qed.
 
 (** [Productive]: Productive map *)
 Notation Productive f := (∀ n, Proper (proeq_later n ==> proeq n) f).
@@ -117,11 +136,13 @@ Section profix.
   Lemma profix_unseal : @profix = @profix_def. Proof. exact: seal_eq. Qed.
 
   (** Unfold [profix] *)
-  Lemma profix_unfold `{!Productive f} {n} : proeq n (profix f) (f (profix f)).
+  Lemma profix_unfold `{!Productive f} : proeqa (profix f) (f (profix f)).
   Proof.
-    rewrite profix_unseal. etrans; [exact prolimit_eq|]=>/=. f_equiv.
+    rewrite profix_unseal=> n. etrans; [exact prolimit_eq|]=>/=. f_equiv.
     case: n; [done|]=>/= n. symmetry. by etrans; [apply prolimit_eq|].
   Qed.
+  Lemma profix_unfold' `{!Productive f} {n} : proeq n (profix f) (f (profix f)).
+  Proof. apply profix_unfold. Qed.
 
   (** [profix] is size-preserving *)
   Lemma profix_preserv `{!Productive f, !Productive g} {n} :
