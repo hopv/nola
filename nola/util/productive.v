@@ -39,15 +39,19 @@ Next Obligation. move=> ?????????. by eapply proeq_anti. Qed.
 
 (** ** Productivity *)
 
-(** [proeq] with the index deferred by 1 *)
+(** [proeq_later]: [proeq] with the index deferred by 1 *)
 Definition proeq_later {PR} n : relation PR :=
   match n with 0 => λ _ _, True | S n' => proeq n' end.
 #[export] Instance proeq_later_equivalence {PR n} :
   Equivalence (@proeq_later PR n).
 Proof. case: n=>//=. exact _. Qed.
+(** [proeq] to [proeq_later] *)
+Lemma proeq_to_later {PR n a b} : proeq n a b → @proeq_later PR n a b.
+Proof. case: n=>//= ?. apply proeq_anti. lia. Qed.
+(** [proeq_later] is antinone *)
 Lemma proeq_later_anti {PR m n a b} :
   m ≥ n → @proeq_later PR m a b → proeq_later n a b.
-Proof. case: n=>//= ?. case: m; [lia|]=> ??. apply proeq_anti. lia. Qed.
+Proof. case: n=>//= ?. case: m; [lia|]=>/= ??. apply proeq_anti. lia. Qed.
 
 (** [Productive]: Productive map *)
 Notation Productive f := (∀ n, Proper (proeq_later n ==> proeq n) f).
@@ -60,10 +64,7 @@ Notation Preserv' PR PR' f := (∀ n, Proper (@proeq PR n ==> @proeq PR' n) f)
 
 (** [Productive] entails [Preserv] *)
 Lemma productive_preserv `{!Productive' PR PR' f} : Preserv f.
-Proof.
-  move=> n ?? E. f_equiv. destruct n as [|n]=>//=. move: E. apply proeq_anti.
-  lia.
-Qed.
+Proof. move=> ????. f_equiv. by apply proeq_to_later. Qed.
 
 (** ** Completeness *)
 
@@ -120,5 +121,15 @@ Section profix.
   Proof.
     rewrite profix_unseal. etrans; [exact prolimit_eq|]=>/=. f_equiv.
     case: n; [done|]=>/= n. symmetry. by etrans; [apply prolimit_eq|].
+  Qed.
+
+  (** [profix] is size-preserving *)
+  Lemma profix_preserv `{!Productive f, !Productive g} {n} :
+    proeq n f g → proeq n (profix f) (profix g).
+  Proof.
+    move=> eq. rewrite profix_unseal. etrans; [exact prolimit_eq|].
+    etrans; [|symmetry; exact prolimit_eq]=>/=. move: {2 3}n.
+    elim=>/=; [by apply eq|]=>/= ? IH. etrans; [by apply eq|]. f_equiv.
+    move: IH. apply proeq_to_later.
   Qed.
 End profix.
