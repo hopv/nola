@@ -2,8 +2,9 @@
 
 nola/prelude.v
 
+nola/util/eq.v
 nola/util/fn.v
-nola/util/rel.v
+nola/util/uip.v
 nola/util/gmap.v
 nola/util/gmultiset.v
 nola/util/prod.v
@@ -12,6 +13,7 @@ nola/util/proph.v
 nola/util/sem.v
 nola/util/order.v
 nola/util/psg.v
+nola/util/productive.v
 nola/util/cit.v
 
 nola/bi/util.v

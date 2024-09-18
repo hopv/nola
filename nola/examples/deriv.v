@@ -78,27 +78,77 @@ Section cif.
   Definition cif_plend {X} α xπ (Φx : X -d> cif Σ) : cif Σ :=
     cif_custom (@cifs_plend X α xπ) nullary Φx ().
 
+  (** The custom constructors are productive *)
+  #[export] Instance cif_inv_productive {N} : Productive (cif_inv N).
+  Proof.
+    move=> n ???. apply cif_custom_preserv_productive=>//. by destruct n=> >.
+  Qed.
+  #[export] Instance cif_mutex_productive {l} : Productive (cif_mutex l).
+  Proof.
+    move=> n ???. apply cif_custom_preserv_productive=>//. by destruct n=> >.
+  Qed.
+  #[export] Instance cif_bor_productive {α} : Productive (cif_bor α).
+  Proof.
+    move=> n ???. apply cif_custom_preserv_productive=>//. by destruct n=> >.
+  Qed.
+  #[export] Instance cif_obor_productive {α q} : Productive (cif_obor α q).
+  Proof.
+    move=> n ???. apply cif_custom_preserv_productive=>//. by destruct n=> >.
+  Qed.
+  #[export] Instance cif_lend_productive {α} : Productive (cif_lend α).
+  Proof.
+    move=> n ???. apply cif_custom_preserv_productive=>//. by destruct n=> >.
+  Qed.
+  #[export] Instance cif_pbor_productive {X α x ξ} :
+    Productive' (funPR (λ _, cif _)) _ (@cif_pbor X α x ξ).
+  Proof. move=> ????. by apply cif_custom_preserv_productive. Qed.
+  #[export] Instance cif_pobor_productive {X α q ξ} :
+    Productive' (funPR (λ _, cif _)) _ (@cif_pobor X α q ξ).
+  Proof. move=> ????. by apply cif_custom_preserv_productive. Qed.
+  #[export] Instance cif_plend_productive {X α xπ} :
+    Productive' (funPR (λ _, cif _)) _ (@cif_plend X α xπ).
+  Proof. move=> ????. by apply cif_custom_preserv_productive. Qed.
+
   (** The custom constructors are non-expansive *)
   #[export] Instance cif_inv_ne {N} : NonExpansive (cif_inv N).
   Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
+  #[export] Instance cif_inv_proper {N} : Proper ((≡) ==> (≡)) (cif_inv N).
+  Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_mutex_ne {l} : NonExpansive (cif_mutex l).
   Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
+  #[export] Instance cif_mutex_proper {l} : Proper ((≡) ==> (≡)) (cif_mutex l).
+  Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_bor_ne {α} : NonExpansive (cif_bor α).
   Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
+  #[export] Instance cif_bor_proper {α} : Proper ((≡) ==> (≡)) (cif_bor α).
+  Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_obor_ne {α q} : NonExpansive (cif_obor α q).
   Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
+  #[export] Instance cif_obor_proper {α q} :
+    Proper ((≡) ==> (≡)) (cif_obor α q).
+  Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_lend_ne {α} : NonExpansive (cif_lend α).
   Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
+  #[export] Instance cif_lend_proper {α} : Proper ((≡) ==> (≡)) (cif_lend α).
+  Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_pbor_ne {X α x ξ} : NonExpansive (@cif_pbor X α x ξ).
   Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
+  #[export] Instance cif_pbor_proper {X α x ξ} :
+    Proper ((≡) ==> (≡)) (@cif_pbor X α x ξ).
+  Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_pobor_ne {X α q ξ} : NonExpansive (@cif_pobor X α q ξ).
   Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
+  #[export] Instance cif_pobor_proper {X α q ξ} :
+    Proper ((≡) ==> (≡)) (@cif_pobor X α q ξ).
+  Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_plend_ne {X α xπ} : NonExpansive (@cif_plend X α xπ).
   Proof. move=> ????. apply cif_custom_ne; solve_proper. Qed.
+  #[export] Instance cif_plend_proper {X α xπ} :
+    Proper ((≡) ==> (≡)) (@cif_plend X α xπ).
+  Proof. apply ne_proper, _. Qed.
 End cif.
 Notation "l ↦ dq v" := (cif_pointsto l dq v)
   (at level 20, dq custom dfrac at level 1, format "l  ↦ dq  v") : cif_scope.
-
 
 (** ** [judg]: Judgment *)
 Definition judg Σ : ofe :=
@@ -153,14 +203,17 @@ Section sem.
 
   (** [bsem] is non-expansive *)
   #[export] Instance bsem_ne `{!NonExpansive δ} {s} : NonExpansive3 (bsem δ s).
-  Proof. case s; solve_proper. Qed.
+  Proof. case s; try solve_proper; move=> ?*?*?*?*/=; f_equiv; by move: (). Qed.
 
   (** Parameterized semantics of [cif] *)
   #[export] Instance cif_dsem : Dsem (judg Σ) (cif Σ) (iProp Σ) :=
     DSEM (λ δ, cif_sem (bsem δ)).
 
   (** [cif_sem] is non-expansive *)
-  Fact cif_sem_ne `{!NonExpansive δ} : NonExpansive ⟦⟧(δ)@{cif Σ}.
+  #[export] Instance cif_sem_ne `{!NonExpansive δ} : NonExpansive ⟦⟧(δ)@{cif Σ}.
+  Proof. exact _. Qed.
+  #[export] Instance cif_sem_proper `{!NonExpansive δ} :
+    Proper ((≡) ==> (⊣⊢)) ⟦⟧(δ)@{cif Σ}.
   Proof. exact _. Qed.
 
   Context `{!heapGS_gen hlc Σ}.
@@ -202,12 +255,22 @@ Section verify.
   (** ** Linked list *)
 
   (** [ilist]: Formula for a list *)
-  Definition ilist_gen N Φx Ilist' l : cif Σ :=
-    cif_inv N (Φx l) ∗ cif_inv N (Ilist' N Φx l).
-  Definition ilist'_gen N Φx Ilist' l : cif Σ :=
-    ∃ l', (l +ₗ 1) ↦ #l' ∗ ilist_gen N Φx Ilist' l'.
-  CoFixpoint ilist' N Φx : loc → cif Σ := ilist'_gen N Φx ilist'.
-  Definition ilist N Φx : loc → cif Σ := ilist_gen N Φx ilist'.
+  Definition ilist_gen N Φx Ilist l : cif Σ :=
+    cif_inv N (Φx l) ∗ cif_inv N (∃ l', (l +ₗ 1) ↦ #l' ∗ Ilist l').
+  #[export] Instance ilist_gen_productive {N Φx} :
+    Productive (ilist_gen N Φx).
+  Proof.
+    move=>/= n ????. unfold ilist_gen. do 2 f_equiv. destruct n as [|n]=>//=.
+    f_equiv=> ?. by f_equiv.
+  Qed.
+  Definition ilist' N Φx : loc → cif Σ := profix (ilist_gen N Φx).
+  Definition ilist N Φx : loc → cif Σ := ilist_gen N Φx (ilist' N Φx).
+  (** Unfold [ilist'] *)
+  Lemma ilist'_unfold {N Φx l} : ilist' N Φx l ≡ ilist N Φx l.
+  Proof.
+    move=> ?. apply cit_proeq_all=> n.
+    have E : proeq n (ilist' N Φx) (ilist N Φx) by exact profix_unfold. apply E.
+  Qed.
 
   (** Convert the predicate of [ilist] using [mod_acsr] *)
   Local Lemma inv'_acsr_iff `{!Deriv ih δ} {N Φx Ψx l} :
@@ -219,15 +282,18 @@ Section verify.
     iIntros "#big". iSplit; iApply inv'_acsr; iIntros "!>" (????);
       [iApply bi.and_elim_l|iApply bi.and_elim_r]; by iApply "big".
   Qed.
-  Local Lemma inv'_ilist'_iff `{!Deriv ih δ} {N Φx Ψx l} :
+  Local Lemma inv'_ilisti_iff `{!Deriv ih δ} {N Φx Ψx l} :
     □ (∀ l' δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →
       inv' δ' N (Φx l') ∗-∗ inv' δ' N (Ψx l')) -∗
-      inv' δ N (ilist' N Φx l) ∗-∗ inv' δ N (ilist' N Ψx l).
+      inv' δ N (∃ l', (l +ₗ 1) ↦ #l' ∗ ilist' N Φx l')%cif ∗-∗
+        inv' δ N (∃ l', (l +ₗ 1) ↦ #l' ∗ ilist' N Ψx l')%cif.
   Proof.
     move: l. apply Deriv_ind=> δ' ??. iIntros "#eqv".
-    iSplit; iApply inv'_acsr; iIntros "!>" (??[IH ?]?);
-      rewrite -(wand_iff_mod_acsr (M:=fupd _ _)) !/⟦ ilist' _ _ _ ⟧(_);
-      (iModIntro; iSplit; iIntros "/=[%[$[ihd ?]]]"; (iSplit; [|by iApply IH]));
+    iSplit; iApply inv'_acsr; iIntros "!> /=" (??[IH ?]?);
+      rewrite -(wand_iff_mod_acsr (M:=fupd _ _));
+      (iModIntro; iSplit; iIntros "/=[%[$ il]]";
+      rewrite !ilist'_unfold /= !to_of_cif; iDestruct "il" as "[ihd itl]";
+        (iSplit; [|by iApply IH]));
       iApply ("eqv" with "[%] [//] ihd"); by apply Deriv_mono=> ?[??].
   Qed.
   Lemma ilist_acsr `{!Deriv ih δ} {N Φx Ψx l} :
@@ -236,22 +302,31 @@ Section verify.
       mod_acsr (fupd ∅ ∅) ⟦ Ψx l' ⟧(δ') ⟦ Φx l' ⟧(δ')) -∗
       ⟦ ilist N Φx l ⟧(δ) ∗-∗ ⟦ ilist N Ψx l ⟧(δ).
   Proof.
-    iIntros "#eqv". rewrite /⟦ ⟧(δ) /=.
-    iSplit; (iIntros "[ihd itl]"; iSplitL "ihd";
+    iIntros "#eqv /=".
+    iSplit; (iIntros "[ihd itl]"; iSplitL "ihd"; rewrite !to_of_cif;
       [by iApply (inv'_acsr_iff (Φx:=Φx))|]);
-      iApply (inv'_ilist'_iff with "[] itl"); iIntros "!>" (????);
+      iApply (inv'_ilisti_iff with "[] itl"); iIntros "!>" (????);
       [iApply bi.wand_iff_sym|]; by iApply inv'_acsr_iff.
   Qed.
 
   (** ** Linked list with a mutex *)
 
   (** [mlist]: Formula for a list with a mutex *)
-  Definition mlist_gen Φx Mlist' l : cif Σ :=
-    cif_mutex l (Mlist' Φx l).
-  Definition mlist'_gen Φx Mlist' l : cif Σ :=
-    Φx (l +ₗ 1) ∗ ∃ l', (l +ₗ 2) ↦ #l' ∗ mlist_gen Φx Mlist' l'.
-  CoFixpoint mlist' Φx : loc → cif Σ := mlist'_gen Φx mlist'.
-  Definition mlist Φx : loc → cif Σ := mlist_gen Φx mlist'.
+  Definition mlist_gen Φx Mlist l : cif Σ :=
+    cif_mutex l (Φx (l +ₗ 1) ∗ ∃ l', (l +ₗ 2) ↦ #l' ∗ Mlist l').
+  #[export] Instance mlist_gen_productive {Φx} : Productive (mlist_gen Φx).
+  Proof.
+    move=>/= n ?? eq ?. unfold mlist_gen. f_equiv. destruct n as [|n]=>//=.
+    (do 2 f_equiv)=> ?. f_equiv. apply eq.
+  Qed.
+  Definition mlist' Φx : loc → cif Σ := profix (mlist_gen Φx).
+  Definition mlist Φx : loc → cif Σ := mlist_gen Φx (mlist' Φx).
+  (** Unfold [mlist'] *)
+  Lemma mlist'_unfold {Φx l} : mlist' Φx l ≡ mlist Φx l.
+  Proof.
+    move=> ?. apply cit_proeq_all=> n.
+    have E : proeq n (mlist' Φx) (mlist Φx) by exact profix_unfold. apply E.
+  Qed.
 
   (** Convert the predicate of [mlist] using [mod_iff] *)
   Lemma mlist_iff `{!Deriv ih δ} {Φx Ψx l} :
@@ -259,13 +334,12 @@ Section verify.
       mod_iff (fupd ⊤ ⊤) ⟦ Φx l' ⟧(δ') ⟦ Ψx l' ⟧(δ')) -∗
       ⟦ mlist Φx l ⟧(δ) ∗-∗ ⟦ mlist Ψx l ⟧(δ).
   Proof.
-    rewrite !/⟦ mlist _ _ ⟧(_) /=. move: l. apply Deriv_ind=> ???.
-    iIntros "#eqv". iApply mutex_iff. iIntros "!>" (??[IH ?]?).
-    rewrite !/⟦ mlist' _ _ ⟧(_) /=.
+    move: l. apply Deriv_ind=>/= ???. iIntros "#eqv". iApply mutex_iff.
+    iIntros "!>" (??[IH ?]?). rewrite !to_of_cif /=.
     have ?: Deriv ih δ'. { by apply Deriv_mono=> ?[??]. }
     iSplit; (iIntros "[hd[%[$ mtl]]]"; iSplitL "hd"; [by iApply "eqv"|]);
       iModIntro; iRevert "mtl"; [iApply bi.and_elim_l|iApply bi.and_elim_r];
-      by iApply IH.
+      rewrite !mlist'_unfold; by iApply IH.
   Qed.
 
   (** ** On derivability *)
@@ -283,7 +357,7 @@ Section verify.
   Local Lemma inv'_inv'_sep_comm' `{!Deriv ih δ} {N N' Px Qx} :
     inv' δ N (cif_inv N' (Px ∗ Qx)) ⊢ inv' δ N (cif_inv N' (Qx ∗ Px)).
   Proof.
-    iApply inv'_iff. iIntros "!>" (????). rewrite /⟦⟧(_) /= inv'_sep_comm.
+    iApply inv'_iff. iIntros "!> /=" (????). rewrite !to_of_cif inv'_sep_comm.
     iApply bi.wand_iff_refl.
   Qed.
   Lemma inv'_inv'_sep_comm `{!Deriv ih δ} {N N' Px Qx} :

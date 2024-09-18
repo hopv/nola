@@ -3,10 +3,13 @@
 From nola Require Export prelude.
 
 (** Map from [Empty_set] *)
-Notation nullary := (λ e : Empty_set, match e with end).
+Definition nullary {A} (e : Empty_set) : A := match e with end.
+Arguments nullary {_} _ /.
 
-(** Map from [unit] etc. *)
-Notation unary a := (λ _, a).
+(** Map from [unit] *)
+Definition unary {A} (a : A) (_ : unit) : A := a.
+Arguments unary {_} _ _ /.
 
 (** Map from [bool] *)
-Notation binary a a' := (λ b : bool, if b then a else a').
+Definition binary {A} (a a' : A) (b : bool) : A := if b then a else a'.
+Arguments binary {_} _ _ _ /.
