@@ -1010,6 +1010,15 @@ Section citgO.
   Lemma to_of_cit' {D t} : to_cit (@of_cit _ I C D t) ≡ t.
   Proof. move=> ?. apply to_of_cit. Qed.
 
+  (** [of_cit] preserves discreteness, under UIP over [SEL] *)
+  #[export] Instance of_cit_discrete {D} `{!Uip SEL, !Discrete t} :
+    Discrete (@of_cit _ I C D t).
+  Proof.
+    move=> ta eq. have /discrete_0-> : t ≡{0}≡ to_cit ta.
+    { rewrite -eq. symmetry. exact to_of_cit. }
+    move=> ??. apply: of_to_cit.
+  Qed.
+
   (** [cit_map] is non-expansive *)
   #[export] Instance cit_map_ne_gen {D D' n} :
     Proper (forall_relation (λ _, (≡{n}≡) ==> (≡{n}≡)) ==>

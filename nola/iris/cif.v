@@ -121,6 +121,9 @@ Section cif.
   Proof. rewrite of_cif_unseal. exact _. Qed.
   #[export] Instance of_cif_proper : Proper ((≡) ==> (≡)) of_cif.
   Proof. apply ne_proper, _. Qed.
+  (** [of_cif] preserves discreteness *)
+  #[export] Instance of_cif_discrete `{!Discrete t} : Discrete (of_cif t).
+  Proof. rewrite of_cif_unseal. exact _. Qed.
   (** Simplify [to_cit] over [of_cif] *)
   Lemma to_of_cif {Px} : to_cit (of_cif Px) ≡ Px.
   Proof. by rewrite of_cif_unseal to_of_cit'. Qed.
@@ -205,6 +208,10 @@ Section cif.
   Proof. by apply: Citg_discrete. Qed.
   #[export] Instance cif_pure_discrete {φ} : Discrete (cif_pure φ).
   Proof. by apply: Citg_discrete. Qed.
+  #[export] Instance cif_custom_discrete {s}
+    `{!∀ i, Discrete (Φx i), !∀ c, Discrete (Ψx c), !Discrete d} :
+    Discrete (cif_custom s Φx Ψx d).
+  Proof. exact _. Qed.
 End cif.
 
 Declare Scope cif_scope.
