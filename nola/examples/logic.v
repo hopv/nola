@@ -223,8 +223,7 @@ Section sem.
   Canonical judgJ : judgi (iProp Σ) := Judgi (judg Σ).
 
   (** Simplify [to_cit (of_cif Px)] *)
-  Lemma sem_to_of_cif {Px} :
-    ⟦ to_cit (of_cif Px) ⟧ ⊣⊢ ⟦ Px ⟧.
+  Lemma sem_to_of_cif {Px} : ⟦ to_cit (of_cif Px) ⟧ ⊣⊢ ⟦ Px ⟧.
   Proof. by rewrite to_of_cif. Qed.
 End sem.
 
@@ -644,7 +643,7 @@ Section verify.
   (** Access using [invd] via view shift *)
   Lemma invd_acc_vs {N Px E Q R} : ↑N ⊆ E →
     □ (⟦ Px ⟧ -∗ Q =[inv_wsat ⟦⟧]{E∖↑N}=∗ ⟦ Px ⟧ ∗ R) -∗
-    □ (invd N Px -∗ Q =[inv_wsat ⟦⟧]{E}=∗ R).
+      □ (invd N Px -∗ Q =[inv_wsat ⟦⟧]{E}=∗ R).
   Proof.
     iIntros (?) "#vs !> i Q". iMod (invd_acc with "i") as "[Px cl]"; [done|].
     iMod ("vs" with "Px Q") as "[Px $]". by iApply "cl".
