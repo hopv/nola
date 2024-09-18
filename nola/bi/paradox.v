@@ -134,27 +134,13 @@ Module inv_landin. Section inv_landin.
   Context (pointsto : loc → val → PROP).
   Local Notation "l ↦ v" := (pointsto l v) (at level 20) : bi_scope.
 
+  (** Total weakest precondition *)
+  Context (twp : mask → expr → (val → PROP) → PROP).
   (** Total Hoare triple *)
-  Context (thoare : mask → expr → PROP → (val → PROP) → PROP).
-  Local Notation "[[{ P } ] ] e @ E [[{ Ψ } ] ]" := (thoare E e P%I Ψ%I)
-    (at level 20, format "'[hv' [[{  '[' P  ']' } ] ]  '/  ' e  '/' @  E  '/' [[{  '[hv' Ψ  ']' } ] ] ']'")
-    : bi_scope.
-  Hypothesis thoare_persistent : ∀{E e P Ψ},
-    Persistent ([[{ P }]] e @ E [[{ Ψ }]]).
-  Hypothesis thoare_pre : ∀{E e P Ψ} P',
-    (P ⊢ P') → [[{ P' }]] e @ E [[{ Ψ }]] ⊢ [[{ P }]] e @ E [[{ Ψ }]].
-  Hypothesis thoare_post : ∀{E e P Ψ} Ψ',
-    (∀ v, Ψ' v ⊢ Ψ v) → [[{ P }]] e @ E [[{ Ψ' }]] ⊢ [[{ P }]] e @ E [[{ Ψ }]].
-  Hypothesis thoare_frame : ∀{E e P Ψ R},
-    [[{ P }]] e @ E [[{ Ψ }]] ⊢ [[{ P ∗ R }]] e @ E [[{ λ v, Ψ v ∗ R }]].
-  Hypothesis thoare_exists : ∀{A E e Φ Ψ},
-    (∀ a : A, [[{ Φ a }]] e @ E [[{ Ψ }]]) ⊢ [[{ ∃ a, Φ a }]] e @ E [[{ Ψ }]].
-  Hypothesis thoare_pure : ∀{E e φ P Ψ},
-    (⌜φ⌝ → [[{ P }]] e @ E [[{ Ψ }]]) ⊢ [[{ ⌜φ⌝ ∗ P }]] e @ E [[{ Ψ }]].
-  Hypothesis thoare_self : ∀{E e Ψ}, ⊢
-    [[{ [[{ True }]] e @ E [[{ Ψ }]] }]] e @ E [[{ Ψ }]].
-  Hypothesis thoare_apply : ∀{E e Ψ} P, Persistent P →
-    P ∗ [[{ P }]] e @ E [[{ Ψ }]] ⊢ [[{ True }]] e @ E [[{ Ψ }]].
+  Local Notation thoare P E e Ψ := (□ (P -∗ twp E e Ψ%I))%I.
+  Hypothesis twp_post : ∀{E e Ψ Ψ'},
+    twp e E Ψ -∗ □ (∀ v, Ψ v -∗ Ψ' v) -∗ twp e E Ψ'.
+  Hypothesis twp_frame : ∀{E e Ψ R}, twp e E Ψ ∗ R ⊢ twp e E (λ v, Ψ v ∗ R).
 
   (** Expression with a variable *)
   Context {vexpr : Type}.
@@ -173,41 +159,37 @@ Module inv_landin. Section inv_landin.
 
   (** Nop *)
   Context (nop : expr).
-  Hypothesis thoare_nop : ∀{P E}, ⊢ [[{ P }]] nop @ E [[{ λ _, P }]].
+  Hypothesis twp_nop : ∀{P E}, P ⊢ twp E nop (λ _, P).
   (** Sequential execution *)
   Context (bind : expr → vexpr → expr).
   Local Notation "e >>= ev" := (bind e ev) (at level 80, right associativity).
-  Hypothesis thoare_bind : ∀{E e ev P Ψ} Φ,
-    [[{ P }]] e @ E [[{ Φ }]] ∗ (∀ v, [[{ Φ v }]] ev v @ E [[{ Ψ }]]) ⊢
-      [[{ P }]] e >>= ev @ E [[{ Ψ }]].
+  Hypothesis twp_bind : ∀{E e ev Ψ},
+    twp E e (λ v, twp E (ev v) Ψ) ⊢ twp E (e >>= ev) Ψ.
   Context (seq : expr → expr → expr).
   Local Notation "e >> e'" := (seq e e') (at level 80, right associativity).
-  Hypothesis thoare_seq : ∀{E e e' P Ψ} Φ,
-    [[{ P }]] e @ E [[{ Φ }]] ∗ (∀ v, [[{ Φ v }]] e' @ E [[{ Ψ }]]) ⊢
-      [[{ P }]] e >> e' @ E [[{ Ψ }]].
+  Hypothesis twp_seq : ∀{E e e' Ψ},
+    twp E e (λ _, twp E e' Ψ) ⊢ twp E (e >> e') Ψ.
+
   (** Allocation *)
   Context (ref : val → expr).
-  Hypothesis thoare_ref : ∀{E v}, ⊢
-    [[{ True }]] ref v @ E [[{ λ w, ∃ l, ⌜w = l⌝ ∗ l ↦ v }]].
+  Hypothesis twp_ref : ∀{E v}, ⊢ twp E (ref v) (λ w, ∃ l, ⌜w = l⌝ ∗ l ↦ v).
   (** Store *)
   Context (store : loc → val → expr).
   Local Notation "l <- v" := (store l v) (at level 20).
   Hypothesis atomic_store : ∀{l v}, atomic (l <- v).
-  Hypothesis thoare_store : ∀{E l v w}, ⊢
-    [[{ l ↦ v }]] l <- w @ E [[{ λ _, l ↦ w }]].
+  Hypothesis twp_store : ∀{E l v w}, l ↦ v ⊢ twp E (l <- w) (λ _, l ↦ w).
   (** Load *)
   Context (load : loc → expr).
   Local Notation "! l" := (load l) (at level 20).
   Hypothesis atomic_load : ∀{l}, atomic (!l).
-  Hypothesis thoare_load : ∀{E l v}, ⊢
-    [[{ l ↦ v }]] !l @ E [[{ λ v', ⌜v' = v⌝ ∗ l ↦ v }]].
+  Hypothesis twp_load : ∀{E l v},
+    l ↦ v ⊢ twp E (!l) (λ v', ⌜v' = v⌝ ∗ l ↦ v).
   (** Function call *)
   Context (call : vexpr).
-  Hypothesis thoare_call : ∀{E e P Ψ},
-    [[{ P }]] e @ E [[{ Ψ }]] ⊢ [[{ P }]] call (λ(), e) @ E [[{ Ψ }]].
+  Hypothesis twp_call : ∀{E e Ψ}, twp E e Ψ ⊢ twp E (call (λ(), e)) Ψ.
 
   (** Termination of [call] *)
-  Definition termin_call f : PROP := [[{ True }]] call f @ ⊤ [[{ λ _, True }]].
+  Definition termin_call f : PROP := thoare True ⊤ (call f) (λ _, True).
   (** Bad proposition with an unguarded total Hoare triple *)
   Definition bad l : PROP := ∃ f, l ↦ f ∗ termin_call f.
 
@@ -215,10 +197,9 @@ Module inv_landin. Section inv_landin.
   Context (inv_bad : loc → PROP).
   Hypothesis inv_bad_persistent : ∀{l}, Persistent (inv_bad l).
   Hypothesis thoare_inv_bad_alloc : ∀{l e P Ψ},
-    [[{ inv_bad l ∗ P }]] e @ ⊤ [[{ Ψ }]] ⊢ [[{ bad l ∗ P }]] e @ ⊤ [[{ Ψ }]].
+    thoare (inv_bad l ∗ P) ⊤ e Ψ ⊢ thoare (bad l ∗ P) ⊤ e Ψ.
   Hypothesis thoare_inv_bad_acc : ∀{l e P Ψ}, atomic e →
-    [[{ bad l ∗ P }]] e @ ∅ [[{ λ v, bad l ∗ Ψ v }]] ⊢
-      [[{ inv_bad l ∗ P }]] e @ ⊤ [[{ Ψ }]].
+    thoare (bad l ∗ P) ⊤ e (λ v, bad l ∗ Ψ v) ⊢ thoare (inv_bad l ∗ P) ⊤ e Ψ.
 
   (** Bad call *)
   Definition badcall l := !l >>= call.
@@ -232,36 +213,29 @@ Module inv_landin. Section inv_landin.
   Definition landin := ref (λ(), nop) >>= landin_body'.
 
   (** [badcall] terminates under [inv_bad] *)
-  Lemma thoare_badcall {l} : ⊢
-    [[{ inv_bad l }]] badcall l @ ⊤ [[{ λ _, True }]].
+  Lemma twp_badcall {l} : inv_bad l ⊢ twp ⊤ (badcall l) (λ _, True).
   Proof.
-    iApply (thoare_bind termin_call). iSplit; last first.
-    { iIntros (f). iApply thoare_self. }
-    iApply (thoare_pre (inv_bad l ∗ True)); [by iIntros "$"|].
-    iApply thoare_inv_bad_acc; [by apply atomic_load|].
-    iApply (thoare_pre (bad l)); [by iIntros "[$ _]"|]. iApply thoare_exists.
-    iIntros (f).
-    iApply thoare_post; [|iApply thoare_frame; by iApply thoare_load].
-    iIntros (?) "[[-> $]#?]". by iSplit.
+    iIntros "i". iApply twp_bind.
+    iApply (thoare_inv_bad_acc (P:=True)); [exact atomic_load| |by iFrame].
+    iIntros "!> [[%f[↦ #call]] _]". iDestruct (twp_load with "↦") as "twp".
+    iApply (twp_post with "twp"). iIntros "!> %[% $]". subst.
+    iSplit; [done|]. by iApply "call".
   Qed.
 
   (** Landin's knot is shown to terminate, which is contradictory because it
     actually loops infinitely in the expected operational semantics *)
-  Lemma thoare_landin : ⊢ [[{ True }]] landin @ ⊤ [[{ λ _, True }]].
+  Lemma twp_landin : ⊢ twp ⊤ landin (λ _, True).
   Proof.
-    iApply thoare_bind. iSplit; [iApply thoare_ref|]. iIntros (?).
-    iApply thoare_exists. iIntros (l). iApply thoare_pure. iIntros (->).
-    rewrite landin_body_subst. iApply (thoare_pre (bad l)).
-    { iIntros "$". iApply thoare_call. iApply thoare_nop. }
-    iApply (thoare_pre (bad l ∗ True)); [by iIntros "$"|].
-    iApply thoare_inv_bad_alloc. iApply thoare_seq.
-    iSplit; [|iIntros (?); iApply thoare_badcall].
-    iApply (thoare_pre (inv_bad l ∗ inv_bad l)); [iIntros "[#? _]"; by iSplit|].
-    iApply thoare_inv_bad_acc; [by apply atomic_store|].
-    iApply (thoare_pre (∃ f, l ↦ f ∗ inv_bad l)); [by iIntros "[[%[$ _]]$]"|].
-    iApply thoare_exists. iIntros (g).
-    iApply thoare_post; [|iApply thoare_frame; by iApply thoare_store].
-    iIntros (?) "[$ #i]". iSplit; [|done]. iApply thoare_call.
-    iApply (thoare_apply (inv_bad l)). iSplit; [done|]. iApply thoare_badcall.
+    iApply twp_bind. iApply twp_post; [by iApply twp_ref|].
+    iIntros "!> % [%[% ↦]]". subst. rewrite landin_body_subst. iApply twp_seq.
+    iApply (thoare_inv_bad_alloc (P:=True)); last first.
+    { iFrame. iIntros "!> _". iApply twp_call. by iApply twp_nop. }
+    iIntros "!> [#i _]".
+    iApply (thoare_inv_bad_acc (P:=inv_bad l));
+      [by apply atomic_store| |by iSplit].
+    iIntros "!> [[%[↦ _]]_]".
+    iApply (twp_post with "[↦]"); [by iApply twp_store|]. iIntros "!> % $".
+    iSplit; [|by iApply twp_badcall]. iIntros "!> _". iApply twp_call.
+    by iApply twp_badcall.
   Qed.
 End inv_landin. End inv_landin.
