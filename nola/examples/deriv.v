@@ -257,12 +257,15 @@ Section verify.
   (** [ilist]: Formula for a list *)
   Definition ilist_gen N (Φx : loc → cif Σ) Ilist l : cif Σ :=
     cif_inv N (Φx l) ∗ cif_inv N (∃ l', (l +ₗ 1) ↦ #l' ∗ Ilist l').
-  #[export] Instance ilist_gen_productive {N Φx} :
-    Productive (ilist_gen N Φx).
+  #[export] Instance ilist_gen_productive {n N} :
+    Proper (proeq_later n ==> proeq_later n ==> proeq n) (ilist_gen N).
   Proof.
-    move=>/= n ????. unfold ilist_gen. do 2 f_equiv. destruct n as [|n]=>//=.
-    f_equiv=> ?. by f_equiv.
+    move=>/= ?? eq ?? eq' ?. unfold ilist_gen.
+    do 2 f_equiv; destruct n as [|n]=>//=; [apply eq|]. f_equiv=> ?. by f_equiv.
   Qed.
+  #[export] Instance ilist_gen_productive' {N Φx} :
+    Productive (ilist_gen N Φx).
+  Proof. move=> ????. by apply ilist_gen_productive. Qed.
   Definition ilist' N (Φx : loc → cif Σ) : loc → cif Σ :=
     profix (ilist_gen N Φx).
   Definition ilist N (Φx : loc → cif Σ) : loc → cif Σ :=
@@ -272,6 +275,16 @@ Section verify.
   Proof.
     move=> ?. apply cit_proeqa, (proeqa_fun (PRF:=λ _, _)), profix_unfold.
   Qed.
+
+  (** [ilist'] is productive *)
+  #[export] Instance ilist'_productive {N} : Productive (ilist' N).
+  Proof. move=> ????. apply profix_preserv=> ?. by f_equiv. Qed.
+  #[export] Instance ilist_productive {N} : Productive (ilist N).
+  Proof.
+    move=> n ?? eq. apply ilist_gen_productive=>//. destruct n as [|n]=>//= ?.
+    apply ilist'_productive. move: eq. apply proeq_later_anti. lia.
+  Qed.
+
   (** [ilist_gen] is non-expansive *)
   #[export] Instance ilist_gen_ne {N} :
     NonExpansive2
