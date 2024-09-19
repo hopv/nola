@@ -280,10 +280,8 @@ Section verify.
   #[export] Instance ilist'_ne {N} :
     NonExpansive (ilist' N : (loc -d> cif Σ) → loc -d> cif Σ).
   Proof.
-    move=> n ???. apply: (profix_proper (PR:=funPR (λ _ : loc, cif Σ))).
-    { apply (dist_equivalence (A:=_ -d> _)). }
-    { move=> ?? eq ?/=. f_equiv=>/= ?. apply eq. }
-    move=> ???. by f_equiv.
+    move=> ????. apply: profix_proper. { apply (dist_equivalence (A:=_-d>_)). }
+    { move=> ?? eq ?/=. f_equiv=>/= ?. apply eq. } { move=> ???. by f_equiv. }
   Qed.
   #[export] Instance ilist'_proper {N} :
     Proper ((≡) ==> (≡)) (ilist' N : (loc -d> cif Σ) → loc -d> cif Σ).
