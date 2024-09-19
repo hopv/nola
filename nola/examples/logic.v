@@ -237,7 +237,7 @@ Section verify.
   (** ** Linked list *)
 
   (** [ilist]: Formula for a list *)
-  Definition ilist_gen N Φx Ilist l : cif Σ :=
+  Definition ilist_gen N (Φx : loc → cif Σ) Ilist l : cif Σ :=
     cif_inv N (Φx l) ∗ cif_inv N (∃ l', (l +ₗ 1) ↦ #l' ∗ Ilist l').
   #[export] Instance ilist_gen_productive {N Φx} :
     Productive (ilist_gen N Φx).
@@ -245,13 +245,42 @@ Section verify.
     move=>/= n ????. unfold ilist_gen. do 2 f_equiv. destruct n as [|n]=>//=.
     f_equiv=> ?. by f_equiv.
   Qed.
-  Definition ilist' N Φx : loc → cif Σ := profix (ilist_gen N Φx).
-  Definition ilist N Φx : loc → cif Σ := ilist_gen N Φx (ilist' N Φx).
+  Definition ilist' N (Φx : loc → cif Σ) : loc → cif Σ :=
+    profix (ilist_gen N Φx).
+  Definition ilist N (Φx : loc → cif Σ) : loc → cif Σ :=
+    ilist_gen N Φx (ilist' N Φx).
   (** Unfold [ilist'] *)
   Lemma ilist'_unfold {N Φx l} : ilist' N Φx l ≡ ilist N Φx l.
   Proof.
     move=> ?. apply cit_proeqa, (proeqa_fun (PRF:=λ _, _)), profix_unfold.
   Qed.
+  (** [ilist_gen] is non-expansive *)
+  #[export] Instance ilist_gen_ne {N} :
+    NonExpansive2
+      (ilist_gen N : (loc -d> cif Σ) → (loc -d> cif Σ) → loc -d> cif Σ).
+  Proof. unfold ilist_gen=> ????????. (do 3 f_equiv)=> ?. do 2 f_equiv. Qed.
+  #[export] Instance ilist_gen_proper {N} :
+    Proper ((≡) ==> (≡) ==> (≡))
+      (ilist_gen N : (loc -d> cif Σ) → (loc -d> cif Σ) → loc -d> cif Σ).
+  Proof. apply ne_proper_2, _. Qed.
+  (** [ilist'] is non-expansive *)
+  #[export] Instance ilist'_ne {N} :
+    NonExpansive (ilist' N : (loc -d> cif Σ) → loc -d> cif Σ).
+  Proof.
+    move=> n ???. apply: (profix_proper (PR:=funPR (λ _ : loc, cif Σ))).
+    { apply (dist_equivalence (A:=_ -d> _)). }
+    { move=> ?? eq ?/=. f_equiv=>/= ?. apply eq. }
+    move=> ???. by f_equiv.
+  Qed.
+  #[export] Instance ilist'_proper {N} :
+    Proper ((≡) ==> (≡)) (ilist' N : (loc -d> cif Σ) → loc -d> cif Σ).
+  Proof. apply ne_proper, _. Qed.
+  #[export] Instance ilist_ne {N} :
+    NonExpansive (ilist N : (loc -d> cif Σ) → loc -d> cif Σ).
+  Proof. unfold ilist=> ????. f_equiv=>//. by f_equiv. Qed.
+  #[export] Instance ilist_proper {N} :
+    Proper ((≡) ==> (≡)) (ilist N : (loc -d> cif Σ) → loc -d> cif Σ).
+  Proof. apply ne_proper, _. Qed.
 
   (** Access the tail of a list *)
   Definition tail_ilist : val := λ: "l", !("l" +ₗ #1).

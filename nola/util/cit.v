@@ -1062,6 +1062,25 @@ Section citgO.
         pointwise_relation _ (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡)) (f s)} :
     Proper ((≡) ==> (≡)) (@cit_fold _ I C D A f).
   Proof. apply ne_proper, _. Qed.
+
+  (** [cita_limit] is non-expansive *)
+  #[export] Instance cita_limit_ne `{!Uip SEL} {D n} :
+    Proper ((pointwise_relation _ (≡{n}≡) : relation (prochain _)) ==> (≡{n}≡))
+      (@cita_limit _ I C D _).
+  Proof. move=> ?? eq ?. rewrite !cita_seq_limit. apply eq. Qed.
+  #[export] Instance cita_limit_proper `{!Uip SEL} {D} :
+    Proper ((pointwise_relation _ (≡) : relation (prochain _)) ==> (≡))
+      (@cita_limit _ I C D _).
+  Proof. move=> ?? eq ??. apply cita_limit_ne=> ?. apply eq. Qed.
+  (** [cit_limit] is non-expansive *)
+  #[export] Instance cit_limit_ne `{!Uip SEL} {D n} :
+    Proper ((pointwise_relation _ (≡{n}≡) : relation (prochain _)) ==> (≡{n}≡))
+      (@cit_limit _ I C D _).
+  Proof. move=> ???. unfold cit_limit. by do 4 f_equiv=>/=. Qed.
+  #[export] Instance cit_limit_proper `{!Uip SEL} {D} :
+    Proper ((pointwise_relation _ (≡) : relation (prochain _)) ==> (≡))
+      (@cit_limit _ I C D _).
+  Proof. move=> ?? eq ?. apply cit_limit_ne=> ?. apply eq. Qed.
 End citgO.
 
 (** ** [citOF]: [oFunctor] for [cit] *)

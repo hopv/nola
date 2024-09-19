@@ -153,4 +153,14 @@ Section profix.
     elim=>/=; [by apply eq|]=>/= ? IH. etrans; [by apply eq|]. f_equiv.
     move: IH. apply proeq_to_later.
   Qed.
+
+  (** [profix] is proper *)
+  Lemma profix_proper `{!Equivalence R}
+    `{!Proper ((pointwise_relation _ R : relation (prochain _)) ==> R) prolimit}
+    `{!Productive f, !Productive g} :
+    (∀ a a', R a a' → R (f a) (g a')) → R (profix f) (profix g).
+  Proof.
+    move=> eq. rewrite profix_unseal /profix_def. f_equiv=>/= +.
+    elim=>/= *; by apply eq.
+  Qed.
 End profix.
