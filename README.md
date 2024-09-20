@@ -59,7 +59,6 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
 - [`util/`](nola/util/) : General-purpose utilities, extending
   [`stdpp`](https://gitlab.mpi-sws.org/iris/stdpp)
   + [`eq`](nola/util/eq.v) (Equality),
-    [`fn`](nola/util/fn.v) (Functions)
   + [`uip`](nola/util/uip.v) (UIP)
   + [`gmap`](nola/util/gmap.v) (On `gmap`),
     [`gmultiset`](nola/util/gmultiset.v) (On `gmultiset`)
@@ -70,7 +69,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`order`](nola/util/order.v) (Order theory),
     [`psg`](nola/util/psg.v) (Pseudo-gfp)
   + [`productive`](nola/util/productive.v) (Productivity)
-  + [`cit`](nola/util/cit.v) (Coinductive-inductive tree)
+  + [`nary`](nola/util/nary.v) (N-ary maps),
+    [`cit`](nola/util/cit.v) (Coinductive-inductive tree)
 - [`bi/`](nola/bi/) : Libraries for bunched implication logic
   + [`util`](nola/bi/util.v) (Utilities)
   + [`ofe`](nola/bi/ofe.v) (On OFEs)
