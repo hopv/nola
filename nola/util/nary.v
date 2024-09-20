@@ -1,6 +1,7 @@
 (** * N-ary maps *)
 
 From nola Require Export prelude.
+From nola Require Import productive.
 From iris.algebra Require Import ofe.
 
 (** Nullary map *)
@@ -34,3 +35,10 @@ Proof. by case: u. Qed.
 #[export] Instance binary_discrete {A : ofe} {b}
   `{!Discrete a, !Discrete a'} : Discrete (@binary A a a' b).
 Proof. by case: b. Qed.
+
+(** N-ary maps are size-preserving *)
+#[export] Instance unary_preserv {A : prost} : Preserv (@unary A).
+Proof. solve_proper. Qed.
+#[export] Instance binary_preserv {A : prost} {n} :
+  Proper (proeq n ==> proeq n ==> proeq n) (@binary A).
+Proof. solve_proper. Qed.

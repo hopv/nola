@@ -146,9 +146,9 @@ Section cif.
   Proof. move=> ????. by apply Citg_preserv_productive. Qed.
   #[export] Instance cif_bin_preserv {s n} :
     Proper (proeq n ==> proeq n ==> proeq n) (cif_bin s).
-  Proof. move=> ??????. apply Citg_preserv_productive=>//. by case. Qed.
+  Proof. move=> ??????. apply Citg_preserv_productive=>//. by f_equiv. Qed.
   #[export] Instance cif_un_preserv {s} : Preserv (cif_un s).
-  Proof. move=> ????. apply Citg_preserv_productive=>//. by case. Qed.
+  Proof. move=> ????. apply Citg_preserv_productive=>//. by f_equiv. Qed.
 
   (** Custom connectives are size-preserving over the inductive arguments
     and productive over the coinductive arguments *)
