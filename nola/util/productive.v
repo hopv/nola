@@ -144,6 +144,15 @@ Section profix.
   Lemma profix_unfold' `{!Productive f} {n} : proeq n (profix f) (f (profix f)).
   Proof. apply profix_unfold. Qed.
 
+  (** Any fixed point of [f] equals [profix f] *)
+  Lemma profix_unique `{!Productive f} {a} :
+    proeqa a (f a) → proeqa a (profix f).
+  Proof.
+    move=>/= eq. elim.
+    { rewrite profix_unfold' (eq 0). by f_equiv. }
+    move=> n ?. rewrite profix_unfold' (eq (S n)). by f_equiv.
+  Qed.
+
   (** [profix] is size-preserving *)
   Lemma profix_preserv `{!Productive f, !Productive g} {n} :
     proeq n f g → proeq n (profix f) (profix g).
