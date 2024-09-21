@@ -62,7 +62,7 @@ Definition fun_proeq {A} {PRF : A → prost}
   λ k f g, ∀ a, proeq k (f a) (g a).
 Arguments fun_proeq /.
 Program Canonical funPR {A} (PRF : A → prost) : prost :=
-  Prost (discrete_fun PRF) fun_proeq _ _ _.
+  Prost (discrete_funO PRF) fun_proeq _ _ _.
 Next Obligation.
   move=> ???. split. { by move=> ??. } { move=> ????. by symmetry. }
   { move=> ??? e ??. etrans; by [apply e|]. }
