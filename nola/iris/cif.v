@@ -1,7 +1,7 @@
 (** * [cif]: Coinductive-inductive set of formulas *)
 
 From nola.util Require Export nary uip cit.
-From nola.bi Require Import ofe.
+From nola.bi Require Import later.
 From nola.iris Require Export iprop.
 Import iPropAppNotation.
 

@@ -1,7 +1,7 @@
 (** * Example of instantiating Nola with [▶ ∙] *)
 
 From nola.iris Require Export inv.
-From nola.bi Require Import ofe.
+From nola.bi Require Import later.
 From nola.heap_lang Require Export notation proofmode.
 Import WpwNotation.
 
