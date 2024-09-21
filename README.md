@@ -111,7 +111,4 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`lib/`](nola/heap_lang/lib/) : Libraries
     * [`mutex`](nola/heap_lang/lib/mutex.v) (Mutex machinery)
 - [`examples/`](nola/examples/) : Examples
-  + [`minilogic`](nola/examples/minilogic.v) (Minimal logic)
-  + [`later`](nola/examples/later.v) (Instantiating with later)
   + [`logic`](nola/examples/logic.v) (Logic)
-  + [`deriv`](nola/examples/deriv.v) (Logic with derivability)
