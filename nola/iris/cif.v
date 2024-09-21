@@ -1,9 +1,10 @@
 (** * [cif]: Coinductive-inductive set of formulas *)
 
-From nola.util Require Export nary uip cit.
+From nola.util Require Export uip (** Assume UIP over any type *).
+From nola.util Require Export nary cit.
 From nola.bi Require Import later.
 From nola.iris Require Export iprop.
-Import iPropAppNotation.
+Import iPropAppNotation FunPRNotation.
 
 (** ** Data types *)
 
@@ -66,10 +67,14 @@ Proof. case s=>/=; exact _. Qed.
 (** ** [cif]: Coinductive-inductive set of formulas *)
 Definition cifOF {SEL} I C D : oFunctor :=
   citOF (cif_idom (SEL:=SEL) I) (cif_cdom C) (cif_dataOF D).
-Definition cif {SEL} I C D Σ : Type :=
-  cit (cif_idom (SEL:=SEL) I) (cif_cdom C) (λ s, cif_dataOF D s $oi Σ).
-Definition cifa {SEL} I C D Σ : Type :=
-  cita (cif_idom (SEL:=SEL) I) (cif_cdom C) (λ s, cif_dataOF D s $oi Σ).
+Definition cifPR {SEL} I C D Σ : prost :=
+  citPR (cif_idom (SEL:=SEL) I) (cif_cdom C) (λ s, cif_dataOF D s $oi Σ).
+Definition cifO {SEL} I C D Σ : ofe := @cifPR SEL I C D Σ.
+Definition cif {SEL} I C D Σ : Type := @cifPR SEL I C D Σ.
+Definition cifaPR {SEL} I C D Σ : prost :=
+  citaPR (cif_idom (SEL:=SEL) I) (cif_cdom C) (λ s, cif_dataOF D s $oi Σ).
+Definition cifaO {SEL} I C D Σ : ofe := @cifaPR SEL I C D Σ.
+Definition cifa {SEL} I C D Σ : Type := @cifaPR SEL I C D Σ.
 
 (** [cifOF] is contractive *)
 #[export] Instance cifOF_contractive {SEL I C}
@@ -79,13 +84,12 @@ Proof. exact _. Qed.
 (** ** Construct [cif] *)
 Section cif.
   Context {SEL} {I C : SEL → Type} {D : SEL → oFunctor} {Σ : gFunctors}.
-  Implicit Type Px Qx : cif I C D Σ.
 
   (** Basic connectives *)
 
-  Definition cif_all {A} (Φx : A -d> cif I C D Σ) : cif I C D Σ :=
+  Definition cif_all {A} (Φx : A -pr> cif I C D Σ) : cif I C D Σ :=
     Citg (cifs_all A) Φx nullary ().
-  Definition cif_ex {A} (Φx : A -d> cif I C D Σ) : cif I C D Σ :=
+  Definition cif_ex {A} (Φx : A -pr> cif I C D Σ) : cif I C D Σ :=
     Citg (cifs_ex A) Φx nullary ().
 
   Definition cif_bin (s : cif_binsel) (Px Qx : cif I C D Σ) : cif I C D Σ :=
@@ -108,30 +112,10 @@ Section cif.
   Definition cif_later (P : iProp Σ) : cif I C D Σ :=
     Citg cifs_later nullary nullary (Next P%I).
 
-  (** Frozen [of_cit] *)
-  Lemma of_cif_aux : seal (of_cit : cif I C D Σ → cifa I C D Σ).
-  Proof. by eexists. Qed.
-  Definition of_cif : cif I C D Σ → cifa I C D Σ := of_cif_aux.(unseal).
-  Lemma of_cif_unseal : of_cif = of_cit. Proof. exact: seal_eq. Qed.
-  (** [of_cif] is size-preserving *)
-  #[export] Instance of_cif_preserv : Preserv of_cif.
-  Proof. rewrite of_cif_unseal. exact _. Qed.
-  (** [of_cif] is non-expansive *)
-  #[export] Instance of_cif_ne : NonExpansive of_cif.
-  Proof. rewrite of_cif_unseal. exact _. Qed.
-  #[export] Instance of_cif_proper : Proper ((≡) ==> (≡)) of_cif.
-  Proof. apply ne_proper, _. Qed.
-  (** [of_cif] preserves discreteness *)
-  #[export] Instance of_cif_discrete `{!Discrete t} : Discrete (of_cif t).
-  Proof. rewrite of_cif_unseal. exact _. Qed.
-  (** Simplify [to_cit] over [of_cif] *)
-  Lemma to_of_cif {Px} : to_cit (of_cif Px) ≡ Px.
-  Proof. by rewrite of_cif_unseal to_of_cit'. Qed.
-
   (** Custom connective *)
-  Definition cif_custom s (Φx : I s -d> cif I C D Σ) (Ψx : C s -d> cif I C D Σ)
-    (d : D s $oi Σ) : cif I C D Σ :=
-    Citg (cifs_custom s) Φx (λ c, of_cif (Ψx c)) d.
+  Definition cif_custom s (Φx : I s -pr> cif I C D Σ)
+    (Ψx : C s -pr> cif I C D Σ) (d : D s $oi Σ) : cif I C D Σ :=
+    Citg (cifs_custom s) Φx (λ c, of_cit (Ψx c)) d.
 
   (** [cif] is inhabited *)
   #[export] Instance cif_inhabited : Inhabited (cif I C D Σ) :=
@@ -153,21 +137,18 @@ Section cif.
   (** Custom connectives are size-preserving over the inductive arguments
     and productive over the coinductive arguments *)
   #[export] Instance cif_custom_preserv_productive {s n} :
-    Proper (@proeq (funPR (λ _, cif _ _ _ _)) n ==>
-      @proeq_later (funPR (λ _, cif _ _ _ _)) n ==> (=) ==> proeq n)
-      (cif_custom s).
+    Proper (proeq n ==> proeq_later n ==> (≡) ==> proeq n) (cif_custom s).
   Proof.
-    move=> ????? eq ??<-. apply Citg_preserv_productive=>//.
-    destruct n as [|?]=>//= ?. apply of_cif_preserv, eq.
+    move=> ?????????. apply Citg_preserv_productive=>//. by destruct n as [|n].
   Qed.
 
   (** Non-expansiveness *)
   #[export] Instance cif_all_ne {A} : NonExpansive (@cif_all A).
-  Proof. move=> ????. apply Citg_ne; solve_proper. Qed.
+  Proof. solve_proper. Qed.
   #[export] Instance cif_all_proper {A} : Proper ((≡) ==> (≡)) (@cif_all A).
   Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_ex_ne {A} : NonExpansive (@cif_ex A).
-  Proof. move=> ????. apply Citg_ne; solve_proper. Qed.
+  Proof. solve_proper. Qed.
   #[export] Instance cif_ex_proper {A} : Proper ((≡) ==> (≡)) (@cif_ex A).
   Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_bin_ne {s} : NonExpansive2 (cif_bin s).
@@ -176,7 +157,7 @@ Section cif.
     Proper ((≡) ==> (≡) ==> (≡)) (cif_bin s).
   Proof. apply ne_proper_2, _. Qed.
   #[export] Instance cif_un_ne {s} : NonExpansive (cif_un s).
-  Proof. move=> ????. apply Citg_ne; solve_proper. Qed.
+  Proof. solve_proper. Qed.
   #[export] Instance cif_un_proper {s} : Proper ((≡) ==> (≡)) (cif_un s).
   Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_pure_ne : NonExpansive cif_pure.
