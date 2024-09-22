@@ -802,8 +802,7 @@ End cit_map.
 
 (** ** [cit_fold]: Fold [cit] *)
 Definition cit_fold {SEL} {I C : SEL → Type} {D : SEL → ofe} {A : ofe}
-  (f : ∀ s, (I s -d> A) → (C s -d> citO I C D) → D s -d> A) :
-  citO I C D → A :=
+  (f : ∀ s, (I s -d> A) → (C s -d> citO I C D) → D s → A) : citO I C D → A :=
   citg_fold (λ s ri tc d, f s ri (λ c, to_cit (tc c)) d).
 
 Section cit_fold.
