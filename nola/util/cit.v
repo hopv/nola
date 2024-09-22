@@ -910,38 +910,25 @@ Section cit_cprost.
   Proof. by case: k. Qed.
   (** [cita] is complete *)
   #[export] Program Instance cita_cprost : Cprost (citaPR I C D) :=
-    CPROST cita_prolimit _.
+    CPROST cita_prolimit _ _.
   Next Obligation. move=> ?. by case=>/= >. Qed.
+  Next Obligation.
+    move=> ??? eq k. rewrite !cita_seq_limit. apply (eq k k).
+  Qed.
 
   (** Limit over [cit] *)
   Definition cit_prolimit (c : prochain (citPR I C D)) : citPR I C D :=
-    to_cit (cita_prolimit
+    to_cit (prolimit
       (Prochain (λ k, of_cit (c k)) (λ _ _, c.(prochain_eq)))).
   (** [cit] is complete *)
   #[export] Program Instance cit_cprost : Cprost (citPR I C D) :=
-    CPROST cit_prolimit _.
+    CPROST cit_prolimit _ _.
   Next Obligation.
     move=> c k. by rewrite cit_proeq of_to_cit cita_proeq cita_seq_limit.
   Qed.
-
-  (** [cita_prolimit] is non-expansive *)
-  #[export] Instance cita_prolimit_ne {n} :
-    Proper ((pointwise_relation _ (≡{n}≡) : relation (prochain _)) ==> (≡{n}≡))
-      cita_prolimit.
-  Proof. move=> ?? eq k. rewrite !cita_seq_limit. apply (eq k k). Qed.
-  #[export] Instance cita_prolimit_proper :
-    Proper ((pointwise_relation _ (≡) : relation (prochain _)) ==> (≡))
-      cita_prolimit.
-  Proof. apply (prolimit_proper (Cprost0:=cita_cprost)). Qed.
-  (** [cit_prolimit] is non-expansive *)
-  #[export] Instance cit_prolimit_ne {n} :
-    Proper ((pointwise_relation _ (≡{n}≡) : relation (prochain _)) ==> (≡{n}≡))
-      cit_prolimit.
-  Proof. move=> ???. unfold cit_prolimit. by do 4 f_equiv=>/=. Qed.
-  #[export] Instance cit_prolimit_proper :
-    Proper ((pointwise_relation _ (≡) : relation (prochain _)) ==> (≡))
-      cit_prolimit.
-  Proof. apply (prolimit_proper (Cprost0:=cit_cprost)). Qed.
+  Next Obligation.
+    move=> ????. unfold cit_prolimit. (do 2 f_equiv)=>/= ?. by f_equiv.
+  Qed.
 End cit_cprost.
 
 (** ** [citOF]: [oFunctor] for [cit] *)

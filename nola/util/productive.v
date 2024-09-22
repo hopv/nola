@@ -106,8 +106,14 @@ Arguments prochain_eq {_ c _ _} : rename.
 
 (** [Cprost]: Complete [prost] *)
 Class Cprost PR := CPROST {
+  (** Limit *)
   prolimit : prochain PR → PR;
+  (** For any level [k], [prolimit c] equals [c k] up to [k] *)
   prolimit_eq {c k} : proeq k (prolimit c) (c k);
+  (** [prolimit] is non-expansive *)
+  prolimit_ne {n} :: Proper
+    ((pointwise_relation _ (≡{n}≡) : relation (prochain _)) ==> (≡{n}≡))
+    prolimit;
 }.
 Arguments CPROST {_}.
 
@@ -116,8 +122,7 @@ Arguments CPROST {_}.
   Proper ((pointwise_relation _ (≡) : relation (prochain _)) ==> (≡))
     (@prolimit PR _).
 Proof.
-  move=> ???. apply equiv_proeq=> ?. etrans; [exact prolimit_eq|].
-  etrans; [|symmetry; exact prolimit_eq]. by apply equiv_proeq.
+  move=> ???. apply equiv_dist=> ?. apply prolimit_ne=> ?. by apply equiv_dist.
 Qed.
 
 (** Turn [prochain] over [funPR] *)
@@ -127,15 +132,11 @@ Program Definition prochain_app {A PRF}
 Next Obligation. move=> ?? c ????/=. by apply c.(prochain_eq). Qed.
 (** [Cprost] over [funPR] *)
 #[export] Program Instance fun_cprost {A PRF} `{!∀ a, Cprost (PRF a)} :
-  Cprost (@funPR A PRF) := CPROST (λ c a, prolimit (prochain_app c a)) _.
+  Cprost (@funPR A PRF) := CPROST (λ c a, prolimit (prochain_app c a)) _ _.
 Next Obligation. move=> ??????. by etrans; [exact prolimit_eq|]. Qed.
-(** [prolimit] of [funPR] is non-expansive if the underlying [prolimit] is *)
-#[export] Instance fun_prolimit_ne {A PRF n} `{!∀ a, Cprost (PRF a)}
-  `{Pro : !∀ a, Proper ((pointwise_relation _ (≡{n}≡) : relation (prochain _))
-    ==> (≡{n}≡)) (@prolimit (PRF a) _)} :
-  Proper ((pointwise_relation _ (≡{n}≡) : relation (prochain _)) ==> (≡{n}≡))
-    (@prolimit (@funPR A PRF) _).
-Proof. move=> ?? eq a. apply Pro=> k. by apply (eq k a). Qed.
+Next Obligation.
+  move=> ?????? eq a. apply prolimit_ne=> k. by apply (eq k a).
+Qed.
 
 (** ** Fixed point *)
 
@@ -197,9 +198,7 @@ Section profix.
   Lemma profix_equiv `{!Productive f, !Productive g} :
     (∀ a a', a ≡ a' → f a ≡ g a') → profix f ≡ profix g.
   Proof. apply profix_proper. Qed.
-  Lemma profix_ne `{!Productive f, !Productive g} {k}
-    `{!Proper ((pointwise_relation _ (dist k) : relation (prochain _)) ==>
-        dist k) prolimit} :
-    (∀ a a', a ≡{k}≡ a' → f a ≡{k}≡ g a') → profix f ≡{k}≡ profix g.
+  Lemma profix_ne `{!Productive f, !Productive g} {n} :
+    (∀ a a', a ≡{n}≡ a' → f a ≡{n}≡ g a') → profix f ≡{n}≡ profix g.
   Proof. apply profix_proper. Qed.
 End profix.
