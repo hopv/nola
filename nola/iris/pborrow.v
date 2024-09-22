@@ -165,7 +165,7 @@ Section pborrow.
   Qed.
   Lemma pobor_tok_lft {X α β q r ξ Φx} :
     β ⊑□ α -∗ (q.[α] -∗ r.[β]) -∗
-    pobor_tok (X:=X) α q ξ Φx -∗ pobor_tok β r ξ Φx.
+      pobor_tok (X:=X) α q ξ Φx -∗ pobor_tok β r ξ Φx.
   Proof.
     rewrite pobor_tok_unseal. iIntros "⊑ →β [%[vopc o]]". iExists _.
     iFrame "vopc". iApply (obor_tok_lft with "⊑ →β o").
