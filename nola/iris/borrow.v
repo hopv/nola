@@ -350,8 +350,8 @@ Section borrow.
   (** Add lenders w.r.t. [depo_stl_tok] *)
   Local Lemma depo_stl_lend_add' {α Bl Lm Qxl} :
     (Some (of_depo_st' (α, Bl, Lm)'), None) ~l~>
-    (Some (of_depo_st' (α, Bl, map_with Lm Qxl)'),
-      Some (to_agree α, ε, Excl <$> map_without Lm Qxl)).
+      (Some (of_depo_st' (α, Bl, map_with Lm Qxl)'),
+        Some (to_agree α, ε, Excl <$> map_without Lm Qxl)).
   Proof.
     apply local_update_unital=> n ?[/=??]. rewrite (left_id None)=> <-. split.
     { split; [done|]. by apply: gmap_fmap_valid. }
