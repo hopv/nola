@@ -57,12 +57,8 @@ Next Obligation. done. Qed.
 Next Obligation. move=> ???. split=>// eq. apply eq, 0. Qed.
 
 (** Function *)
-Definition fun_proeq {A} {PRF : A → prost}
-  : nat → relation (discrete_fun PRF) :=
-  λ k f g, ∀ a, proeq k (f a) (g a).
-Arguments fun_proeq /.
 Program Canonical funPR {A} (PRF : A → prost) : prost :=
-  Prost (discrete_funO PRF) fun_proeq _ _ _.
+  Prost (discrete_funO PRF) (λ k f g, ∀ a, proeq k (f a) (g a)) _ _ _.
 Next Obligation.
   move=> ???. split. { by move=> ??. } { move=> ????. by symmetry. }
   { move=> ??? e ??. etrans; by [apply e|]. }
@@ -72,6 +68,10 @@ Next Obligation.
   move=> ????. split. { move=> ???. by apply equiv_proeq. }
   { move=> eq ?. apply equiv_proeq=> ?. apply eq. }
 Qed.
+(** Unfold [proeq] over [funPR] *)
+Lemma fun_proeq {A PRF} :
+  @proeq (@funPR A PRF) = λ k f g, ∀ a, proeq k (f a) (g a).
+Proof. done. Qed.
 
 Module FunPRNotation.
   Notation "A -pr> B" := (@funPR A (λ _, B))

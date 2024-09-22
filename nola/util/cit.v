@@ -834,16 +834,12 @@ End cit_fold.
 (** ** Productivity structure for [cita] and [cit] *)
 
 (** [citaPR]: Productivity structure for [cita] *)
-Definition cita_proeq {SEL I C D} (k : nat) (ta ta' : @cita SEL I C D) : Prop :=
-  ta k ≡ ta' k.
-#[export] Instance cita_proeq_equivalence {SEL I C D k} :
-  Equivalence (@cita_proeq SEL I C D k).
-Proof.
-  unfold cita_proeq. split. { by move=> ?. }
-  { move=> ???. by symmetry. } { move=> ?????. by etrans. }
-Qed.
 Program Canonical citaPR {SEL} I C D :=
-  Prost (@citaO SEL I C D) cita_proeq _ _ _.
+  Prost (@citaO SEL I C D) (λ k ta ta', ta k ≡ ta' k) _ _ _.
+Next Obligation.
+  split. { by move=> ?. } { move=> ???. by symmetry. }
+  { move=> ?????. by etrans. }
+Qed.
 Next Obligation.
   move=> ???? k k' ta ta' ? /equiv_dist F. apply equiv_dist=> ?.
   apply citi_dist_Forall2.
@@ -854,34 +850,35 @@ Qed.
 Next Obligation. move=> ??????. split; [done|]=> eq ?. apply eq. Qed.
 
 (** [citPR]: Productivity structure for [cit], under UIP over [SEL] *)
-Definition cit_proeq {SEL I C D} (k : nat) (t t' : @cit SEL I C D) :=
-  proeq k (of_cit t) (of_cit t').
-#[export] Instance cit_proeq_equivalence {SEL I C D k} :
-  Equivalence (@cit_proeq SEL I C D k).
-Proof.
-  unfold cit_proeq. split. { by move=> ?. }
-  { move=> ???. by symmetry. } { move=> ?????. by etrans. }
-Qed.
 Program Canonical citPR {SEL} `{!Uip SEL} I C D :=
-  Prost (@citO SEL I C D) cit_proeq _ _ _.
+  Prost (@citO SEL I C D) (λ k t t', proeq k (of_cit t) (of_cit t')) _ _ _.
+Next Obligation.
+  split. { by move=> ?. } { move=> ???. by symmetry. }
+  { move=> ?????. by etrans. }
+Qed.
 Next Obligation. move=> *. by eapply proeq_anti. Qed.
 Next Obligation.
-  unfold cit_proeq. move=> ????? t t'. split. { move=> eq ?. by rewrite eq. }
+  move=> ????? t t'. split. { move=> eq ?. by rewrite eq. }
   move=> ?. rewrite -(to_of_cit (t:=t)) -(to_of_cit (t:=t')). by f_equiv.
 Qed.
 
 Section citPR.
-  Context {SEL} {I C : SEL → Type}.
-  Implicit Type D : SEL → ofe.
+  Context {SEL} {I C : SEL → Type} {D : SEL → ofe}.
+
+  (** Unfold [proeq] over [cita] and [cit] *)
+  Lemma cita_proeq : @proeq (citaPR I C D) = λ k ta ta', ta k ≡ ta' k.
+  Proof. done. Qed.
+  Lemma cit_proeq `{!Uip SEL} :
+    @proeq (citPR I C D) = λ k t t', proeq k (of_cit t) (of_cit t').
+  Proof. done. Qed.
 
   (** [Citg] is size-preserving over the inductive arguments
     and [Productive] over the coinductive arguments *)
-  #[export] Instance Citg_preserv_productive `{!Uip SEL} {D s k} :
+  #[export] Instance Citg_preserv_productive `{!Uip SEL} {s k} :
     Proper (@proeq (funPR (λ _, citPR I C D)) k ==>
       @proeq_later (_ -pr> _) k ==> (≡) ==> @proeq (citPR I C D) k) (Citg s).
   Proof.
-    move=> ?? eq ?? eq' ??<-.
-    rewrite /proeq /= /proeq /= /cit_proeq of_cit_unseal in eq.
+    move=> ?? eq ?? eq' ??<-. rewrite /proeq /= cit_proeq of_cit_unseal in eq.
     apply equiv_dist=> n. apply citi_dist_Forall2.
     rewrite !of_cit_unseal. destruct k as [|k]=>/=; apply citg_Forall2_eq=>//.
     - move=> i. apply (citi_equiv_Forall2 (k:=1)), eq.
@@ -890,7 +887,7 @@ Section citPR.
   Qed.
 
   (** [of_cit] is size-preserving *)
-  #[export] Instance of_cit_preserv `{!Uip SEL} {D} : Preserv (@of_cit _ I C D).
+  #[export] Instance of_cit_preserv `{!Uip SEL} : Preserv (@of_cit _ I C D).
   Proof. by move=> ??. Qed.
 End citPR.
 
@@ -924,8 +921,7 @@ Section cit_cprost.
   #[export] Program Instance cit_cprost : Cprost (citPR I C D) :=
     CPROST cit_prolimit _.
   Next Obligation.
-    move=> c k. rewrite /proeq /= /cit_proeq /cit_prolimit of_to_cit.
-    by rewrite /proeq /= /cita_proeq cita_seq_limit.
+    move=> c k. by rewrite cit_proeq of_to_cit cita_proeq cita_seq_limit.
   Qed.
 
   (** [cita_prolimit] is non-expansive *)
