@@ -4,6 +4,8 @@ From nola.util Require Export gmap.
 From iris.algebra Require Import updates gmap.
 From iris.proofmode Require Import proofmode.
 
+Implicit Type PROP : bi.
+
 (** ** On [gmapR] *)
 
 Section gmapR.
@@ -36,7 +38,7 @@ End gmapR.
 (** ** On [[∗ map]] *)
 
 Section big_sepM.
-  Context `{!EqDecision K, !Countable K} {PROP : bi} {A : Type}.
+  Context `{!EqDecision K, !Countable K} {PROP} {A : Type}.
   Implicit Type (m : gmap K A) (l : list A).
 
   (** [[∗ map]] over [list_to_gmap] *)

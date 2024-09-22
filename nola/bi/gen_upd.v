@@ -5,9 +5,11 @@ From nola.bi Require Import util.
 From iris.bi Require Export bi.
 From iris.proofmode Require Import proofmode.
 
+Implicit Type PROP : bi.
+
 (** ** [GenUpd]: General update, i.e., monad strong w.r.t. [∗] *)
 
-Class GenUpd {PROP : bi} (M : PROP → PROP) : Prop := GEN_UPD {
+Class GenUpd {PROP} (M : PROP → PROP) : Prop := GEN_UPD {
   gen_upd_ne :: NonExpansive M;
   gen_upd_mono {P Q} : (P ⊢ Q) → M P ⊢ M Q;
   gen_upd_intro {P} : P ⊢ M P;
@@ -183,7 +185,7 @@ Section gen_upd_b.
 End gen_upd_b.
 
 Section mod_acsr.
-  Context {PROP : bi}.
+  Context {PROP}.
 
   (** ** [mod_acsr]: Accessor from [P] to [Q] via the modality [M] *)
   Definition mod_acsr M P Q : PROP := P -∗ M (Q ∗ (Q -∗ M P))%I.
@@ -233,7 +235,7 @@ End mod_acsr.
 Arguments mod_acsr : simpl never.
 
 Section mod_iff.
-  Context {PROP : bi}.
+  Context {PROP}.
 
   (** ** [mod_iff]: Equivalence of [P] and [Q] under the modality [M] *)
   Definition mod_iff M P Q : PROP := ((P -∗ M Q) ∧ (Q -∗ M P))%I.

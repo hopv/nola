@@ -4,8 +4,10 @@ From nola Require Export prelude.
 From iris.bi Require Export bi.
 From iris.proofmode Require Import proofmode.
 
+Implicit Type PROP : bi.
+
 Section util.
-  Context {PROP : bi}.
+  Context {PROP}.
 
   (** ** On [∗-∗] *)
 
@@ -26,7 +28,7 @@ Section util.
 End util.
 
 (** Adding [◇] inside lets [M] absorb [◇] for introduceable [M] *)
-Lemma is_except_0_intro {PROP : bi} {M : PROP → PROP} {P} :
+Lemma is_except_0_intro {PROP} {M : PROP → PROP} {P} :
   (∀ P, P ⊢ M P) → IsExcept0 (M (◇ P))%I.
 Proof.
   rewrite /IsExcept0 /bi_except_0=> intro. iIntros "[?|$]". iApply intro.

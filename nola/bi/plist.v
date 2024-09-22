@@ -5,7 +5,9 @@ From iris.bi Require Import bi.
 From iris.proofmode Require Import proofmode.
 Import ProdNotation.
 
-Fixpoint big_sepPL {PROP : bi} {A} {F : A → Type} {al} (Φ : ∀ a, F a → PROP)
+Implicit Type PROP : bi.
+
+Fixpoint big_sepPL {PROP A} {F : A → Type} {al} (Φ : ∀ a, F a → PROP)
   : plist F al → PROP :=
   match al with [] => λ _, emp | _ :: _ =>
     λ '(x, xl)', Φ _ x ∗ big_sepPL Φ xl end%I.
@@ -24,7 +26,7 @@ End PlistNotation.
 Import PlistNotation.
 
 Section big_sepPL.
-  Context {PROP : bi} {A} {F : A → Type}.
+  Context {PROP A} {F : A → Type}.
 
   (** [big_sepPL] is non-expansive *)
   #[export] Instance big_sepPL_ne {n al} :

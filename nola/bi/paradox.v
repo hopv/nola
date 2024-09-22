@@ -7,7 +7,7 @@ Local Set Warnings "-notation-overridden".
 (** ** Paradox of the later-eliminating total weakest precondition *)
 Module twp. Section twp.
   (** Step-indexed logic *)
-  Context {PROP : bi} `{!BiLöb PROP}.
+  Context `{!BiLöb PROP}.
   (** Expression *)
   Context {expr : Type}.
 
@@ -37,7 +37,7 @@ End twp. End twp.
   The construction is analogous to Landin's knot but at the logic level. *)
 Module inv_fupd. Section inv_fupd.
   (** Separation logic *)
-  Context {PROP : bi} `{!BiAffine PROP}.
+  Context `{!BiAffine PROP}.
 
   (** Binary mask *)
   Context {mask : Type} (mask_empty mask_full : mask).
@@ -120,7 +120,7 @@ End inv_fupd. End inv_fupd.
   via Landin's knot *)
 Module inv_landin. Section inv_landin.
   (** Separation logic *)
-  Context {PROP : bi} `{!BiAffine PROP}.
+  Context `{!BiAffine PROP}.
 
   (** Binary mask *)
   Context {mask : Type} (mask_empty mask_full : mask).

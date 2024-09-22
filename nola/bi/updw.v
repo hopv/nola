@@ -4,16 +4,18 @@ From nola.bi Require Export gen_upd.
 From iris.bi Require Export bi.
 From iris.proofmode Require Import proofmode.
 
+Implicit Type PROP : bi.
+
 (** ** World satisfaction inclusion *)
 
-Class WsatIncl {PROP : bi} (W W' Wr : PROP) : Prop :=
+Class WsatIncl {PROP} (W W' Wr : PROP) : Prop :=
   wsat_incl : W ⊣⊢ W' ∗ Wr.
 Hint Mode WsatIncl + ! ! - : typeclass_instances.
 Arguments WsatIncl {_} _%_I _%_I _%_I : simpl never.
 Arguments wsat_incl {_} _%_I _%_I _%_I {_}.
 
 Section wsat_incl.
-  Context {PROP : bi}.
+  Context {PROP}.
   Implicit Types W Wr : PROP.
 
   #[export] Instance wsat_incl_refl {W} : WsatIncl W W emp.
@@ -35,13 +37,13 @@ End wsat_incl.
 
 (** ** Modality with a world satisfaction *)
 
-Definition modw {PROP : bi} (M : PROP → PROP) (W P : PROP) : PROP :=
+Definition modw {PROP} (M : PROP → PROP) (W P : PROP) : PROP :=
   W -∗ M (W ∗ P)%I.
 Arguments modw : simpl never.
 
 (** *** Lemmas *)
 Section lemmas.
-  Context {PROP : bi}.
+  Context {PROP}.
   Implicit Type (M : PROP → PROP) (W P Q R : PROP).
 
   (** Fold the definition of [modw] *)
@@ -205,7 +207,7 @@ Import UpdwNotation.
 
 (** *** Lemmas *)
 Section lemmas.
-  Context {PROP : bi}.
+  Context {PROP}.
   Implicit Type (M : PROP → PROP) (W P Q R : PROP).
 
   (** [bupdw W] and [fupdw W E E] satisfy [GenUpd] and [GenUpdW] *)
