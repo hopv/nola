@@ -185,6 +185,14 @@ Section profix.
     elim=>/=; [by apply eq|]=>/= ? IH. etrans; [by apply eq|]. f_equiv.
     move: IH. apply proeq_to_later.
   Qed.
+  Lemma map_profix_preserv {PR'} {f : PR' → PR → PR}
+    `{!∀ b, Productive (f b), Pres : !∀ a, Preserv (λ b, f b a)} :
+    Preserv (λ b, profix (f b)).
+  Proof. move=> ????. apply profix_preserv=> ?. by apply Pres. Qed.
+  Lemma map_profix_productive {PR'} {f : PR' → PR → PR}
+    `{!∀ b, Productive (f b), Prod : !∀ a, Productive (λ b, f b a)} :
+    Productive (λ b, profix (f b)).
+  Proof. move=> ????. apply profix_preserv=> ?. by apply Prod. Qed.
 
   (** [profix] is proper *)
   Lemma profix_proper `{!Equivalence R}
@@ -202,3 +210,7 @@ Section profix.
     (∀ a a', a ≡{n}≡ a' → f a ≡{n}≡ g a') → profix f ≡{n}≡ profix g.
   Proof. apply profix_proper. Qed.
 End profix.
+
+Section profix.
+  Context {PR} {PRF : PR → prost} `{!∀ a, Inhabited (PRF a)}
+    `{!∀ a, Cprost (PRF a)}.
