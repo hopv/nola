@@ -65,11 +65,11 @@ Section mutex.
   #[export] Instance mutex_wsat_proper : Proper ((≡) ==> (≡)) mutex_wsat.
   Proof. apply ne_proper, _. Qed.
 
-  Context `{!NonExpansive sm}.
+  Context `{sm : Sem (FML $oi Σ) (iProp Σ), !NonExpansive sm}.
 
   (** Allocate a new mutex *)
   Lemma alloc_mutex_tok {l Px} :
-    l ↦ #false -∗ sm Px =[mutex_wsat sm]=∗ mutex_tok l Px.
+    l ↦ #false -∗ ⟦ Px ⟧ =[mutex_wsat ⟦⟧]=∗ mutex_tok l Px.
   Proof.
     rewrite mutex_wsat_unseal. iIntros "↦ Px".
     iApply (inv_tok_alloc (FML:=mutex_fml _) (l, Px) with "[↦ Px]").
@@ -78,7 +78,7 @@ Section mutex.
 
   (** Allocate a new mutex with the lock acquired *)
   Lemma alloc_acquire_mutex_tok {l Px} :
-    l ↦ #true =[mutex_wsat sm]=∗ mutex_tok l Px.
+    l ↦ #true =[mutex_wsat ⟦⟧]=∗ mutex_tok l Px.
   Proof.
     rewrite mutex_wsat_unseal. iIntros "↦".
     iApply (inv_tok_alloc (FML:=mutex_fml _) (l, Px) with "[↦]").
@@ -88,9 +88,9 @@ Section mutex.
   (** Try to acquire the lock on the mutex *)
   Definition try_acquire_mutex : val := λ: "l", CAS "l" #false #true.
   Lemma twp_try_acquire_mutex_tok {l Px} :
-    [[{ mutex_tok l Px }]][mutex_wsat sm]
+    [[{ mutex_tok l Px }]][mutex_wsat ⟦⟧]
       try_acquire_mutex #l
-    [[{ b, RET #b; if b then sm Px else True }]].
+    [[{ b, RET #b; if b then ⟦ Px ⟧ else True }]].
   Proof.
     rewrite mutex_wsat_unseal. iIntros (Φ) "l →Φ". wp_lam.
     wp_bind (CmpXchg _ _ _).
@@ -108,9 +108,9 @@ Section mutex.
       if: "n" = #0 then #false else
       if: try_acquire_mutex "l" then #true else "self" ("n" - #1) "l".
   Lemma twp_try_acquire_loop_mutex_tok {l Px n} :
-    [[{ mutex_tok l Px }]][mutex_wsat sm]
+    [[{ mutex_tok l Px }]][mutex_wsat ⟦⟧]
       try_acquire_loop_mutex #n #l
-    [[{ b, RET #b; if b then sm Px else True }]].
+    [[{ b, RET #b; if b then ⟦ Px ⟧ else True }]].
   Proof.
     iIntros (Φ) "#l →Φ". iInduction n as [|n] "IH".
     { wp_lam. wp_pures. by iApply "→Φ". }
@@ -123,7 +123,7 @@ Section mutex.
   (** Release the lock on the mutex *)
   Definition release_mutex : val := λ: "l", "l" <- #false.
   Lemma twp_release_mutex_tok {l Px} :
-    [[{ mutex_tok l Px ∗ sm Px }]][mutex_wsat sm]
+    [[{ mutex_tok l Px ∗ ⟦ Px ⟧ }]][mutex_wsat ⟦⟧]
       release_mutex #l
     [[{ RET #(); True }]].
   Proof.

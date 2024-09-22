@@ -5,7 +5,7 @@ From nola.iris Require Export inv.
 From iris.base_logic.lib Require Export na_invariants.
 From iris.algebra Require Import gset coPset.
 From iris.proofmode Require Import proofmode.
-Import ProdNotation iPropAppNotation UpdwNotation.
+Import ProdNotation SemNotation iPropAppNotation UpdwNotation.
 
 Implicit Type (FML : oFunctor) (p : na_inv_pool_name) (i : positive).
 
@@ -117,11 +117,11 @@ Section na_inv.
   #[export] Instance na_inv_wsat_proper : Proper ((≡) ==> (≡)) inv_wsat.
   Proof. apply ne_proper, _. Qed.
 
-  Context `{!NonExpansive sm}.
+  Context `{sm : Sem (FML $oi Σ) (iProp Σ), !NonExpansive sm}.
 
   (** Allocate [na_inv_tok] *)
   Lemma na_inv_tok_alloc_rec Px p N :
-    (na_inv_tok p N Px -∗ sm Px) =[na_inv_wsat sm]=∗ na_inv_tok p N Px.
+    (na_inv_tok p N Px -∗ ⟦ Px ⟧) =[na_inv_wsat ⟦⟧]=∗ na_inv_tok p N Px.
   Proof.
     rewrite na_inv_tok_unseal na_inv_wsat_unseal.
     iIntros "→Px". iMod (na_lock_alloc p N) as (i ?) "l".
@@ -130,14 +130,14 @@ Section na_inv.
     iIntros "i". iLeft. iFrame "l". iApply "→Px". iExists _. by iSplit.
   Qed.
   Lemma na_inv_tok_alloc Px p N :
-    sm Px =[na_inv_wsat sm]=∗ na_inv_tok p N Px.
+    ⟦ Px ⟧ =[na_inv_wsat ⟦⟧]=∗ na_inv_tok p N Px.
   Proof. iIntros "?". iApply na_inv_tok_alloc_rec. by iIntros. Qed.
 
   (** Allocate [inv_tok] before storing the content *)
   Lemma na_inv_tok_alloc_open {p N E F Px} : ↑N ⊆ E → ↑N ⊆ F →
-    na_own p F =[na_inv_wsat sm]{E}=∗
+    na_own p F =[na_inv_wsat ⟦⟧]{E}=∗
       na_own p (F∖↑N) ∗ na_inv_tok p N Px ∗
-      (na_own p (F∖↑N) -∗ sm Px =[na_inv_wsat sm]{E}=∗ na_own p F).
+      (na_own p (F∖↑N) -∗ ⟦ Px ⟧ =[na_inv_wsat ⟦⟧]{E}=∗ na_own p F).
   Proof.
     rewrite na_inv_tok_unseal na_inv_wsat_unseal=> NE NF.
     iMod (na_lock_alloc p N) as (i iN) "l".
@@ -165,9 +165,9 @@ Section na_inv.
 
   (** Access via [na_inv_tok] *)
   Lemma na_inv_tok_acc {p N E F Px} : ↑N ⊆ E → ↑N ⊆ F →
-    na_own p F -∗ na_inv_tok p N Px =[na_inv_wsat sm]{E}=∗
-      na_own p (F∖↑N) ∗ sm Px ∗
-      (na_own p (F∖↑N) -∗ sm Px =[na_inv_wsat sm]{E}=∗ na_own p F).
+    na_own p F -∗ na_inv_tok p N Px =[na_inv_wsat ⟦⟧]{E}=∗
+      na_own p (F∖↑N) ∗ ⟦ Px ⟧ ∗
+      (na_own p (F∖↑N) -∗ ⟦ Px ⟧ =[na_inv_wsat ⟦⟧]{E}=∗ na_own p F).
   Proof.
     rewrite na_inv_tok_unseal na_inv_wsat_unseal=> NE NF.
     rewrite (na_own_subset NF). iIntros "[N $] [%i[%iN #sm]] W".

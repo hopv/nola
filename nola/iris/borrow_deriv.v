@@ -204,8 +204,8 @@ Section borrow_deriv.
   Proof.
     rewrite {1}lend_unseal. setoid_rewrite <-lend_tok_lend.
     iIntros "(%Rx & #RP & l) →Qxl".
-    iApply (lend_tok_split (M:=M) (sm:=⟦⟧) with "l [RP →Qxl]").
-    iIntros "Rx". iMod (der_borrow_jto with "RP Rx"). by iApply "→Qxl".
+    iApply (lend_tok_split (M:=M) with "l [RP →Qxl]"). iIntros "Rx".
+    iMod (der_borrow_jto with "RP Rx"). by iApply "→Qxl".
   Qed.
 
   (** Retrive from [lendd] *)
@@ -213,7 +213,7 @@ Section borrow_deriv.
     [†α] -∗ lendd α Px -∗ modw M (borrow_wsatid M) ⟦ Px ⟧.
   Proof.
     rewrite lend_unseal. iIntros "† (%Qx & #QP & l)".
-    iMod (lend_tok_retrieve (M:=M) (sm:=⟦⟧) with "† l") as "Qx".
+    iMod (lend_tok_retrieve (M:=M) with "† l") as "Qx".
     iMod (der_borrow_jto with "QP Qx") as "$". by iIntros.
   Qed.
 
@@ -222,7 +222,7 @@ Section borrow_deriv.
     q.[α] -∗ bord α Px -∗ modw M (borrow_wsatid M) (obord α q Px ∗ ⟦ Px ⟧).
   Proof.
     rewrite bor_unseal obor_unseal. iIntros "α (%Qx & $ & #QP & b)".
-    iMod (bor_tok_open (M:=M) (sm:=⟦⟧) with "α b") as "[$ Qx]".
+    iMod (bor_tok_open (M:=M) with "α b") as "[$ Qx]".
     iMod (der_borrow_jto with "QP Qx") as "$". by iIntros "$".
   Qed.
 

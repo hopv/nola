@@ -1,5 +1,6 @@
 (** * Nola later-free invariant *)
 
+From nola.util Require Export sem.
 From nola.bi Require Export updw.
 From nola.bi Require Import wpw.
 From nola.iris Require Export iprop.
@@ -7,7 +8,7 @@ From nola.iris Require Import sinv.
 From iris.base_logic.lib Require Export wsat invariants.
 From iris.algebra Require Import gset.
 From iris.proofmode Require Import proofmode.
-Import iPropAppNotation UpdwNotation WpwNotation.
+Import SemNotation iPropAppNotation UpdwNotation WpwNotation.
 
 Implicit Type (FML : oFunctor) (i : positive) (N : namespace).
 
@@ -22,10 +23,10 @@ Proof. solve_inG. Qed.
 
 Section inv.
   Context `{!inv'GS FML Σ, !invGS_gen hlc Σ}.
-  Implicit Type (sm : FML $oi Σ → iProp Σ) (Px : FML $oi Σ).
+  Implicit Type (Px : FML $oi Σ).
 
   (** [inv_tok]: Invariant token *)
-  Local Definition inv_tok_def N Px : iProp Σ :=
+  Local Definition inv_tok_def (N : namespace) (Px : FML $oi Σ) : iProp Σ :=
     ∃ i, ⌜i ∈ (↑N:coPset)⌝ ∗ sinv_itok i Px.
   Local Definition inv_tok_aux : seal inv_tok_def. Proof. by eexists. Qed.
   Definition inv_tok := inv_tok_aux.(unseal).
@@ -48,7 +49,6 @@ Section inv.
   (** Semantics *)
   Local Definition inv_sem (sm : FML $oi Σ → iProp Σ) i Px : iProp Σ :=
     sm Px ∗ ownD {[i]} ∨ ownE {[i]}.
-
   (** [inv_sem sm] is non-expansive when [sm] is *)
   Local Instance inv_sem_ne `{!NonExpansive sm} {i} :
     NonExpansive (inv_sem sm i).
@@ -70,7 +70,7 @@ Section inv.
   #[export] Instance inv_wsat_proper : Proper ((≡) ==> (≡)) inv_wsat.
   Proof. apply ne_proper, _. Qed.
 
-  Context `{!NonExpansive sm}.
+  Context `{sm : !Sem (FML $oi Σ) (iProp Σ), !NonExpansive sm}.
 
   (** Allocate [ownD] *)
   Lemma alloc_ownD (I : gset positive) N :
@@ -108,7 +108,7 @@ Section inv.
 
   (** Allocate [inv_tok] *)
   Lemma inv_tok_alloc_rec Px N :
-    (inv_tok N Px -∗ sm Px) =[inv_wsat sm]=∗ inv_tok N Px.
+    (inv_tok N Px -∗ ⟦ Px ⟧) =[inv_wsat ⟦⟧]=∗ inv_tok N Px.
   Proof.
     rewrite inv_tok_unseal inv_wsat_unseal. iIntros "→Px W".
     iDestruct (sinv_itok_alloc Px with "W") as (I) "big".
@@ -116,15 +116,15 @@ Section inv.
     iModIntro. iSplitL; [|iExists _; by iSplit]. iApply "→W". iLeft.
     iSplitR "D"; [|done]. iApply "→Px". iExists _; by iSplit.
   Qed.
-  Lemma inv_tok_alloc Px N : sm Px =[inv_wsat sm]=∗ inv_tok N Px.
+  Lemma inv_tok_alloc Px N : ⟦ Px ⟧ =[inv_wsat ⟦⟧]=∗ inv_tok N Px.
   Proof.
     iIntros "Px W". iApply (inv_tok_alloc_rec with "[Px] W"). by iIntros.
   Qed.
 
   (** Allocate [inv_tok] before storing the content *)
   Lemma inv_tok_alloc_open {E} Px N : ↑N ⊆ E →
-    ⊢ |=[inv_wsat sm]{E, E∖↑N}=> inv_tok N Px ∗
-      (sm Px =[inv_wsat sm]{E∖↑N, E}=∗ True).
+    ⊢ |=[inv_wsat ⟦⟧]{E, E∖↑N}=> inv_tok N Px ∗
+      (⟦ Px ⟧ =[inv_wsat ⟦⟧]{E∖↑N, E}=∗ True).
   Proof.
     rewrite inv_tok_unseal inv_wsat_unseal=> NE. iIntros "W".
     iDestruct (sinv_itok_alloc Px with "W") as (I) "big".
@@ -141,8 +141,8 @@ Section inv.
 
   (** Access using [inv_tok] *)
   Lemma inv_tok_acc {N E Px} : ↑N ⊆ E →
-    inv_tok N Px =[inv_wsat sm]{E,E∖↑N}=∗
-      sm Px ∗ (sm Px =[inv_wsat sm]{E∖↑N,E}=∗ True).
+    inv_tok N Px =[inv_wsat ⟦⟧]{E,E∖↑N}=∗
+      ⟦ Px ⟧ ∗ (⟦ Px ⟧ =[inv_wsat ⟦⟧]{E∖↑N,E}=∗ True).
   Proof.
     rewrite inv_tok_unseal inv_wsat_unseal=> NE. iIntros "[%i[%iN #sm]] W".
     iMod (fupd_ownE_acc_in iN NE) as "[i cl]".
@@ -157,8 +157,8 @@ Section inv.
   Qed.
   (** Access using [inv_tok] via view shift *)
   Lemma inv_tok_acc_vs {N Px E Q R} : ↑N ⊆ E →
-    □ (sm Px -∗ Q =[inv_wsat sm]{E∖↑N}=∗ sm Px ∗ R) -∗
-    □ (inv_tok N Px -∗ Q =[inv_wsat sm]{E}=∗ R).
+    □ (⟦ Px ⟧ -∗ Q =[inv_wsat ⟦⟧]{E∖↑N}=∗ ⟦ Px ⟧ ∗ R) -∗
+    □ (inv_tok N Px -∗ Q =[inv_wsat ⟦⟧]{E}=∗ R).
   Proof.
     iIntros (?) "#vs !> i Q". iMod (inv_tok_acc with "i") as "[Px cl]"; [done|].
     iMod ("vs" with "Px Q") as "[Px $]". by iApply "cl".
@@ -167,14 +167,13 @@ End inv.
 
 Section inv_wp.
   Context `{!inv'GS FML Σ, !iris'GS_gen hlc Λ Σ}.
-  Implicit Type (sm : FML $oi Σ → iProp Σ) (Px : FML $oi Σ).
-  Context `{!NonExpansive sm}.
+  Context `{sm : !Sem (FML $oi Σ) (iProp Σ), !NonExpansive sm}.
 
   (** Access using [inv_tok] via [twp] *)
   Lemma inv_tok_acc_twp `{!Atomic (stuckness_to_atomicity s) e} {N Px E Q Ψ} :
     ↑N ⊆ E → to_val e = None →
-    [[{ sm Px ∗ Q }]][inv_wsat sm] e @ s; E∖↑N [[{ v, RET v; sm Px ∗ Ψ v }]] -∗
-      [[{ inv_tok N Px ∗ Q }]][inv_wsat sm] e @ s; E [[{ v, RET v; Ψ v }]].
+    [[{ ⟦ Px ⟧ ∗ Q }]][inv_wsat ⟦⟧] e @ s; E∖↑N [[{ v, RET v; ⟦ Px ⟧ ∗ Ψ v }]] -∗
+      [[{ inv_tok N Px ∗ Q }]][inv_wsat ⟦⟧] e @ s; E [[{ v, RET v; Ψ v }]].
   Proof.
     iIntros (??) "#twp %Φ !> [i Q] →Φ".
     iMod (inv_tok_acc with "i") as "[Px cl]"; [done..|].

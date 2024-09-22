@@ -4,7 +4,7 @@ From nola.bi Require Export deriv.
 From nola.bi Require Import wpw.
 From nola.iris Require Export inv.
 From iris.proofmode Require Import proofmode.
-Import iPropAppNotation PsemNotation SemNotation UpdwNotation WpwNotation.
+Import SemNotation PsemNotation iPropAppNotation UpdwNotation WpwNotation.
 
 (** Notation *)
 Notation inv_wsati δ := (inv_wsat ⟦⟧(δ)).

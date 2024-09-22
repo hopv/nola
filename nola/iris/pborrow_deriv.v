@@ -395,9 +395,8 @@ Section pborrow_deriv.
   Proof.
     rewrite {1}nlend_unseal. setoid_rewrite <-nlend_tok_nlend.
     iIntros "(%Rx & #RP & l) →Ql".
-    iApply (nlend_tok_split (M:=M) (sm:=⟦⟧) with "l [RP →Ql]").
-    iIntros "Rx". iMod (der_pborrow_jto with "RP Rx").
-    by iApply "→Ql".
+    iApply (nlend_tok_split (M:=M) with "l [RP →Ql]"). iIntros "Rx".
+    iMod (der_pborrow_jto with "RP Rx"). by iApply "→Ql".
   Qed.
 
   (** Retrive from [nlendd] *)
@@ -405,7 +404,7 @@ Section pborrow_deriv.
     [†α] -∗ nlendd α Px -∗ modw M (pborrow_wsatid M) ⟦ Px ⟧.
   Proof.
     rewrite nlend_unseal. iIntros "† (%Qx & #QP & l)".
-    iMod (nlend_tok_retrieve (M:=M) (sm:=⟦⟧) with "† l") as "Qx".
+    iMod (nlend_tok_retrieve (M:=M) with "† l") as "Qx".
     iMod (der_pborrow_jto with "QP Qx") as "$". by iIntros.
   Qed.
 
@@ -414,7 +413,7 @@ Section pborrow_deriv.
     q.[α] -∗ nbord α Px -∗ modw M (pborrow_wsatid M) (nobord α q Px ∗ ⟦ Px ⟧).
   Proof.
     rewrite nbor_unseal nobor_unseal. iIntros "α (%Qx & $ & #QP & b)".
-    iMod (nbor_tok_open (M:=M) (sm:=⟦⟧) with "α b") as "[$ Qx]".
+    iMod (nbor_tok_open (M:=M) with "α b") as "[$ Qx]".
     iMod (der_pborrow_jto with "QP Qx") as "$". by iIntros "$".
   Qed.
 
@@ -503,7 +502,7 @@ Section pborrow_deriv.
   Proof.
     rewrite {1}plend_unseal. iIntros "(%Z & %zπ & %Ω & ΩΦ & l) →Ψxl".
     setoid_rewrite <-plend_tok_plend.
-    iApply (plend_tok_split (M:=M) (sm:=⟦⟧) with "l [ΩΦ →Ψxl]"). iIntros "lb".
+    iApply (plend_tok_split (M:=M) with "l [ΩΦ →Ψxl]"). iIntros "lb".
     iMod (der_pborrow_jlto with "ΩΦ lb") as "?". by iApply "→Ψxl".
   Qed.
 
@@ -512,7 +511,7 @@ Section pborrow_deriv.
     [†α] -∗ plendd α xπ Φx -∗ modw M (pborrow_wsatid M) (plend_bodyid xπ Φx).
   Proof.
     rewrite {1}plend_unseal. iIntros "† (%Y & %yπ & %Ψx & ΨΦ & l)".
-    iMod (plend_tok_retrieve (M:=M) (sm:=⟦⟧) with "† l") as "lb".
+    iMod (plend_tok_retrieve (M:=M) with "† l") as "lb".
     iMod (der_pborrow_jlto with "ΨΦ lb") as "$". by iIntros.
   Qed.
 
@@ -522,7 +521,7 @@ Section pborrow_deriv.
       (pobord α q ξ Φx ∗ ⟦ Φx x ⟧).
   Proof.
     rewrite pbor_unseal pobor_unseal. iIntros "α (% & $ & #ΨΦ & b)".
-    iMod (pbor_tok_open (M:=M) (sm:=⟦⟧) with "α b") as "[$ Ψx]".
+    iMod (pbor_tok_open (M:=M) with "α b") as "[$ Ψx]".
     iMod (der_pborrow_jto with "ΨΦ Ψx") as "$". by iIntros "$".
   Qed.
 
@@ -569,7 +568,7 @@ Section pborrow_deriv.
     iIntros "(% & %eq & %eq' & ol & →) Ψxl Rxl →Φxl". setoid_rewrite eq.
     setoid_rewrite eq'. setoid_rewrite <-pbor_tok_pbor.
     setoid_rewrite <-nbor_tok_nbor.
-    iApply (pobor_tok_merge_subdiv (M:=M) (sm:=⟦⟧) with "ol Ψxl Rxl").
+    iApply (pobor_tok_merge_subdiv (M:=M) with "ol Ψxl Rxl").
     iIntros "% † Ψxl Rxl". iMod ("→Φxl" with "† Ψxl Rxl") as "Φxl".
     by iMod ("→" with "Φxl").
   Qed.
@@ -616,7 +615,7 @@ Section pborrow_deriv.
   Proof.
     rewrite pobor_unseal. iIntros "⊑ (%Ω & #ΦΩ & _ & o) Ψx →Φx".
     rewrite -pbor_tok_pbor.
-    iApply (pobor_tok_nsubdiv (M:=M) (sm:=⟦⟧) with "⊑ o Ψx [ΦΩ →Φx]").
+    iApply (pobor_tok_nsubdiv (M:=M) with "⊑ o Ψx [ΦΩ →Φx]").
     iIntros "% † Ψx". iMod ("→Φx" with "† Ψx") as "Φx".
     by iMod (der_pborrow_jto with "ΦΩ Φx").
   Qed.
@@ -638,7 +637,7 @@ Section pborrow_deriv.
     rewrite pobor_unseal pbor_unseal.
     iIntros "⊑ (%Φx' & #ΦΦ' & #Φ'Φ & o) (%Ψx' & #ΨΨ' & #Ψ'Ψ & o') Ψx →Φx".
     iMod (der_pborrow_jto with "ΨΨ' Ψx") as "Ψx'".
-    iMod (pobor_pobor_tok_reborrow (M:=M) (sm:=⟦⟧)
+    iMod (pobor_pobor_tok_reborrow (M:=M)
       with "⊑ o o' Ψx' [→Φx]") as (?) "($ & $ & obs & b)"; last first.
     { iIntros "$ !>". iFrame "obs b". by iSplit. }
     iIntros "% † b". iMod ("→Φx" with "† [$b]") as "Φx"; [by iSplit|].

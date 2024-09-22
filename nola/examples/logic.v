@@ -292,10 +292,9 @@ Section verify.
     [[{ l', RET #l'; ⟦ ilist N Φx l' ⟧ }]].
   Proof.
     iIntros (? Ψ) "/= #[_ itl] →Ψ". wp_rec. wp_pure.
-    iMod (inv_tok_acc (sm:=⟦⟧) with "itl") as "[↦ltl cl]"; [done|].
-    rewrite /=. setoid_rewrite to_of_cit=>/=.
-    iDestruct "↦ltl" as (?) "[↦l' ltl]". rewrite ilist'_unfold /=.
-    iDestruct "ltl" as "#ltl". wp_load. iModIntro.
+    iMod (inv_tok_acc with "itl") as "[↦ltl cl]"; [done|]. simpl.
+    setoid_rewrite to_of_cit=>/=. iDestruct "↦ltl" as (?) "[↦l' ltl]".
+    rewrite ilist'_unfold /=. iDestruct "ltl" as "#ltl". wp_load. iModIntro.
     iMod ("cl" with "[$↦l']") as "_"; [by rewrite ilist'_unfold|]. iModIntro.
     rewrite !to_of_cit. iApply ("→Ψ" with "ltl").
   Qed.
@@ -394,7 +393,7 @@ Section verify.
         ⟦ Φx (l +ₗ 1) ⟧ ∗ ∃ l', (l +ₗ 2) ↦ #l' ∗ ⟦ mlist Φx l' ⟧ }]].
   Proof.
     iIntros (Ψ) "/= #m →Ψ". iApply twp_fupd.
-    wp_apply (twp_try_acquire_loop_mutex_tok (sm:=⟦⟧) with "m").
+    wp_apply (twp_try_acquire_loop_mutex_tok with "m").
     iIntros ([|]); last first. { iIntros (?). by iApply "→Ψ". }
     rewrite sem_to_of_cit /=. iIntros "[Φx [%[↦ m']]]".
     rewrite mlist'_unfold /=. iApply "→Ψ". by iFrame.
@@ -408,7 +407,7 @@ Section verify.
     [[{ RET #(); True }]].
   Proof.
     iIntros (Ψ) "(#m & Φx & %l' & ↦ & #mtl) →Ψ".
-    wp_apply (twp_release_mutex_tok (sm:=⟦⟧) with "[Φx ↦]"); [|done].
+    wp_apply (twp_release_mutex_tok with "[Φx ↦]"); [|done].
     iSplit; [done|]. rewrite sem_to_of_cit /=. iFrame. by rewrite mlist'_unfold.
   Qed.
 
@@ -448,14 +447,13 @@ Section verify.
     [[{ l', RET #l'; q.[β] ∗ nbor_tok β (Φx l') }]].
   Proof.
     iIntros (Ψ) "(#⊑ & [β β'] & b) →Ψ".
-    iMod (nbor_tok_open (sm:=⟦⟧) (M:=bupd) with "β b") as "/=[o [%l'[↦ b']]]".
+    iMod (nbor_tok_open (M:=bupd) with "β b") as "/=[o [%l'[↦ b']]]".
     iApply twpw_fupdw_nonval; [done|]. wp_load. iModIntro.
     iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
-    iMod (nbor_tok_reborrow (sm:=⟦⟧) (M:=bupd) with "⊑ α b'")
-      as "(α & →b' & b')".
+    iMod (nbor_tok_reborrow (M:=bupd) with "⊑ α b'") as "(α & →b' & b')".
     iDestruct ("→β'" with "α") as "β'".
-    iMod (nobor_tok_subdiv (sm:=⟦⟧) (M:=bupd) [] with "[] o [] [↦ →b']")
-      as "[β _]"=>/=. { iApply lft_sincl_refl. } { done. }
+    iMod (nobor_tok_subdiv (M:=bupd) [] with "[] o [] [↦ →b']") as "[β _]"=>/=.
+    { iApply lft_sincl_refl. } { done. }
     { iIntros "† _". iModIntro. iExists _. iFrame "↦". by iApply "→b'". }
     iModIntro. iApply "→Ψ". rewrite to_of_cit. iFrame.
   Qed.
@@ -472,10 +470,10 @@ Section verify.
           ⟨π, π η = (π ξ', ξ)'⟩ ∗ pbor_tok β x ξ' (Φxx l') }]].
   Proof.
     iIntros (Ψ) "(#⊑ & [β β'] & b) →Ψ".
-    iMod (pbor_tok_open (sm:=⟦⟧) (M:=bupd) with "β b") as "/=[o[%l'[↦ b']]]".
+    iMod (pbor_tok_open (M:=bupd) with "β b") as "/=[o[%l'[↦ b']]]".
     iApply twpw_fupdw_nonval; [done|]. wp_load. iModIntro.
     iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
-    iMod (pobor_pbor_tok_reborrow (TY:=nsynty) (sm:=⟦⟧) (M:=bupd)
+    iMod (pobor_pbor_tok_reborrow (TY:=nsynty) (M:=bupd)
       (λ _, (_,_)' : _ *'ₛ _) with "⊑ o α b' [↦]") as (?) "(β & α & obs & b)".
     { iIntros "/=% _ ? !>". iExists _. iFrame. }
     iModIntro. iApply "→Ψ". iDestruct ("→β'" with "α") as "$". iFrame "β".
@@ -491,10 +489,10 @@ Section verify.
     [[{ RET #n; q.[α] }]].
   Proof.
     iIntros (Φ) "[α #i] →Φ".
-    iMod (inv_tok_acc (sm:=⟦⟧) with "i") as "/=[b cl]"; [done|].
-    iMod (nbor_tok_open (sm:=⟦⟧) (M:=bupd) with "α b") as "[o ↦]".
+    iMod (inv_tok_acc with "i") as "/=[b cl]"; [done|].
+    iMod (nbor_tok_open (M:=bupd) with "α b") as "[o ↦]".
     rewrite sem_to_of_cit /=. wp_load. iModIntro.
-    iMod (nobor_tok_close (sm:=⟦⟧) (M:=bupd) with "o [↦]") as "[α b]".
+    iMod (nobor_tok_close (M:=bupd) with "o [↦]") as "[α b]".
     { by rewrite sem_to_of_cit. }
     iMod ("cl" with "b") as "_". iModIntro. by iApply "→Φ".
   Qed.
@@ -524,12 +522,12 @@ Section verify.
     [[{ b, RET #b; (if b then nbor_tok α Px else True) ∗ q.[α] }]].
   Proof.
     iIntros (Φ) "[#m [α α']] →Φ". wp_lam. wp_bind (CmpXchg _ _ _).
-    iMod (inv_tok_acc (sm:=⟦⟧) with "m") as "/=[b cl]"; [done|].
-    iMod (nbor_tok_open (sm:=⟦⟧) (M:=bupd) with "α b") as "[o big]".
+    iMod (inv_tok_acc with "m") as "/=[b cl]"; [done|].
+    iMod (nbor_tok_open (M:=bupd) with "α b") as "[o big]".
     rewrite sem_to_of_cit /=.
     iDestruct "big" as "[[↦ b']|↦]"; [wp_cmpxchg_suc|wp_cmpxchg_fail];
       iModIntro;
-      (iMod (nobor_tok_close (sm:=⟦⟧) (M:=bupd) with "o [↦]") as "[α b]";
+      (iMod (nobor_tok_close (M:=bupd) with "o [↦]") as "[α b]";
         [rewrite sem_to_of_cit /=; by iFrame|]);
       iMod ("cl" with "b") as "_"; iModIntro; wp_pure; iApply "→Φ"; iFrame=>//.
     by rewrite to_of_cit.
@@ -557,13 +555,13 @@ Section verify.
     [[{ RET #(); q.[α] }]].
   Proof.
     iIntros (Φ) "(#m & b' & α) →Φ". wp_lam.
-    iMod (inv_tok_acc (sm:=⟦⟧) with "m") as "/=[b cl]"; [done|].
-    iMod (nbor_tok_open (sm:=⟦⟧) (M:=bupd) with "α b") as "[o big]".
+    iMod (inv_tok_acc with "m") as "/=[b cl]"; [done|].
+    iMod (nbor_tok_open (M:=bupd) with "α b") as "[o big]".
     rewrite sem_to_of_cit /=.
     iAssert (∃ b, l ↦ #b)%I with "[big]" as (?) "↦".
     { iDestruct "big" as "[[$ _]|$]". }
     wp_store. iModIntro. rewrite to_of_cit.
-    iMod (nobor_tok_close (sm:=⟦⟧) (M:=bupd) with "o [b' ↦]") as "/=[α b]".
+    iMod (nobor_tok_close (M:=bupd) with "o [b' ↦]") as "/=[α b]".
     { rewrite /= to_of_cit. iLeft. iFrame. }
     iMod ("cl" with "b") as "_". iModIntro. by iApply "→Φ".
   Qed.
@@ -575,14 +573,14 @@ Section verify.
   Proof.
     iIntros "↦ Px α".
     iMod (nbor_nlend_tok_new (M:=bupd) with "[↦ Px]") as "[b $]"; [by iFrame|].
-    iMod (nbor_tok_open (M:=bupd) (sm:=⟦⟧) with "α b") as "/=[o[%b'[↦ Px]]]".
-    iMod (nobor_tok_subdiv (FML:=cifOF) (sm:=⟦⟧) (M:=bupd)
+    iMod (nbor_tok_open (M:=bupd) with "α b") as "/=[o[%b'[↦ Px]]]".
+    iMod (nobor_tok_subdiv (FML:=cifOF) (M:=bupd)
       [∃ b', l ↦ #b'; Px]%cif with "[] o [↦ Px] []")
       as "(α & _ & (b & b' & _))"=>/=.
     { iApply lft_sincl_refl. } { iSplitL "↦"; iFrame. }
     { by iIntros "_ [[% $][$ _]]". }
-    iMod (nbor_tok_open (M:=bupd) (sm:=⟦⟧) with "α b") as "/=[o ↦]".
-    iMod (nobor_tok_subdiv (FML:=cifOF) (sm:=⟦⟧) (M:=bupd)
+    iMod (nbor_tok_open (M:=bupd) with "α b") as "/=[o ↦]".
+    iMod (nobor_tok_subdiv (FML:=cifOF) (M:=bupd)
       [(l ↦ #false ∗ cif_bor α Px) ∨ l ↦ #true]%cif with "[] o [↦ b'] []")
       as "($ & _ & [b _])"=>/=. { iApply lft_sincl_refl. }
     { iSplit; [|done]. rewrite to_of_cit.
@@ -632,11 +630,10 @@ Section verify.
     iIntros ([|])=>/=; last first.
     { iIntros "[_ α]". wp_pure. iModIntro. iApply "→Ψ". iFrame. }
     iIntros "[b α]". wp_pures.
-    iMod (nbor_tok_open (M:=bupd) (sm:=⟦⟧) with "α b")
-      as "/=[o (Φx & %l' & ↦ & mtl)]".
+    iMod (nbor_tok_open (M:=bupd) with "α b") as "/=[o (Φx & %l' & ↦ & mtl)]".
     rewrite mblist'_unfold /=. iDestruct "mtl" as "#mtl".
     wp_apply ("f" with "Φx"). iIntros "Φx". wp_load. wp_pures.
-    iMod (nobor_tok_close (M:=bupd) (sm:=⟦⟧) with "o [Φx ↦]") as "[α b]"=>/=.
+    iMod (nobor_tok_close (M:=bupd) with "o [Φx ↦]") as "[α b]"=>/=.
     { iFrame. by rewrite mblist'_unfold. }
     wp_apply (mutex_bor_release with "[$b $α //]"). iIntros "α". wp_load.
     wp_store. have -> : (S m - 1)%Z = m by lia.
@@ -662,7 +659,7 @@ Section verify.
       ⟦ Px ⟧ ∗ (⟦ Px ⟧ =[inv_wsat ⟦⟧]{E∖↑N,E}=∗ True).
   Proof.
     iIntros (?) "[%Qx[#PQ i]]". iDestruct (der_sound with "PQ") as "{PQ}PQ".
-    iMod (inv_tok_acc (sm:=⟦⟧) with "i") as "[Qx cl]"; [done|].
+    iMod (inv_tok_acc with "i") as "[Qx cl]"; [done|].
     iDestruct ("PQ" with "Qx") as "$". iIntros "!> Px". iApply "cl".
     by iApply "PQ".
   Qed.
