@@ -2,6 +2,23 @@
 
 From nola Require Export prelude.
 From stdpp Require Export gmap.
+From iris.algebra Require Import gmap.
+
+(** ** Basic operations *)
+
+Section gmap.
+  Context `{!EqDecision K, !Countable K} {A : ofe}.
+
+  (** [lookup] is proper *)
+  #[export] Instance lookup_proper {i} :
+    Proper ((≡@{gmap K A}) ==> (≡)) (lookup i).
+  Proof. apply ne_proper, _. Qed.
+
+  (** [singletonM] is proper *)
+  #[export] Instance singleton_proper {i} :
+    Proper ((≡) ==> (≡@{gmap K A})) (singletonM i).
+  Proof. apply ne_proper, _. Qed.
+End gmap.
 
 (** ** [list_to_gmap] *)
 
