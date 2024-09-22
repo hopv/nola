@@ -9,12 +9,12 @@ Structure prost := Prost {
   (** Equivalences up to a level *)
     #[canonical=no] proeq : nat → relation prost_car;
   (** [proeq] is an equivalence relation *)
-    #[canonical=no] proeq_equivalence :: ∀ {k}, Equivalence (proeq k);
+    #[canonical=no] proeq_equivalence {k} :: Equivalence (proeq k);
   (** [proeq] is antitone *)
-    #[canonical=no] proeq_anti :
-      ∀ {k k' a a'}, k ≥ k' → proeq k a a' → proeq k' a a';
+    #[canonical=no] proeq_anti {k k' a a'} :
+      k ≥ k' → proeq k a a' → proeq k' a a';
   (** [≡] is equivalent to universal [proeq] *)
-    #[canonical=no] equiv_proeq : ∀ {a a'}, a ≡ a' ↔ (∀ k, proeq k a a');
+    #[canonical=no] equiv_proeq {a a'} : a ≡ a' ↔ (∀ k, proeq k a a');
 }.
 Add Printing Constructor prost.
 Arguments proeq {PR} : rename, simpl never.
@@ -98,7 +98,7 @@ Proof. move=> ????. f_equiv. by apply proeq_to_later. Qed.
 (** [prochain]: Chain / Cauchy sequence over [prost] *)
 Record prochain PR := Prochain {
   prochain_seq :> nat → PR;
-  prochain_eq : ∀{k k'}, k ≤ k' → proeq k (prochain_seq k) (prochain_seq k');
+  prochain_eq {k k'} : k ≤ k' → proeq k (prochain_seq k) (prochain_seq k');
 }.
 Add Printing Constructor prochain.
 Arguments Prochain {_}. Arguments prochain_seq {_}.
@@ -107,7 +107,7 @@ Arguments prochain_eq {_ c _ _} : rename.
 (** [Cprost]: Complete [prost] *)
 Class Cprost PR := CPROST {
   prolimit : prochain PR → PR;
-  prolimit_eq : ∀{c k}, proeq k (prolimit c) (c k);
+  prolimit_eq {c k} : proeq k (prolimit c) (c k);
 }.
 Arguments CPROST {_}.
 

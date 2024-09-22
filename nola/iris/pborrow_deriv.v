@@ -127,10 +127,10 @@ Section pborrow_deriv.
   (** Derivability data for [pborrow] *)
   Class PborrowDeriv := PBORROW_DERIV {
     (** Interpreting [pborrow_jto] *)
-    pborrow_jto_sem : ∀{δ Px Qx},
+    pborrow_jto_sem {δ Px Qx} :
       ⟦ pborrow_jto Px Qx ⟧(δ) ⊣⊢ (⟦ Px ⟧(δ) ==∗ ⟦ Qx ⟧(δ));
     (** Interpreting [pborrow_jlto] *)
-    pborrow_jlto_sem : ∀{δ X Y xπ yπ} {Φx Ψx : _ -d> FML $oi Σ},
+    pborrow_jlto_sem {δ X Y xπ yπ} {Φx Ψx : _ -d> FML $oi Σ} :
       ⟦ pborrow_jlto (X:=X) (Y:=Y) xπ yπ Φx Ψx ⟧(δ) ⊣⊢
         (plend_body ⟦ ⟧(δ) xπ Φx ==∗ plend_body ⟦ ⟧(δ) yπ Ψx);
   }.
