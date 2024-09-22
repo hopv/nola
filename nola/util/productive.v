@@ -210,7 +210,3 @@ Section profix.
     (∀ a a', a ≡{n}≡ a' → f a ≡{n}≡ g a') → profix f ≡{n}≡ profix g.
   Proof. apply profix_proper. Qed.
 End profix.
-
-Section profix.
-  Context {PR} {PRF : PR → prost} `{!∀ a, Inhabited (PRF a)}
-    `{!∀ a, Cprost (PRF a)}.
