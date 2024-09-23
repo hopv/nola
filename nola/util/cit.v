@@ -932,7 +932,7 @@ End cit_cprost.
 
 (** ** [citOF]: [oFunctor] for [cit] *)
 Program Definition citOF {SEL} I C (D : SEL → oFunctor) : oFunctor := {|
-  oFunctor_car A cA B cB := citO I C (λ s, (D s).(@oFunctor_car) A cA B cB);
+  oFunctor_car A _ B _ := citO I C (λ s, (D s).(oFunctor_car) A B);
   oFunctor_map _ _ _ _ _ _ _ _ fg :=
     OfeMor (cit_map (λ s, oFunctor_map (D s) fg));
 |}.
