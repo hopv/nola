@@ -122,11 +122,9 @@ Section cif.
     populate (cif_pure True).
 
   (** Basic connectives are size-preserving *)
-  #[export] Instance cif_all_preserv {A} :
-    Preserv' (funPR (λ _, cif _ _ _ _)) _ (@cif_all A).
+  #[export] Instance cif_all_preserv {A} : Preserv (@cif_all A).
   Proof. move=> ????. by apply Citg_preserv_productive. Qed.
-  #[export] Instance cif_ex_preserv {A} :
-    Preserv' (funPR (λ _, cif _ _ _ _)) _ (@cif_ex A).
+  #[export] Instance cif_ex_preserv {A} : Preserv (@cif_ex A).
   Proof. move=> ????. by apply Citg_preserv_productive. Qed.
   #[export] Instance cif_bin_preserv {s n} :
     Proper (proeq n ==> proeq n ==> proeq n) (cif_bin s).
