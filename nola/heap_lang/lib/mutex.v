@@ -15,9 +15,9 @@ Local Definition mutex_fml FML : oFunctor := leibnizO loc * FML.
 Class mutexGS FML Σ := mutexGS_inv : inv'GS (mutex_fml FML) Σ.
 Local Existing Instances mutexGS_inv.
 
-Class mutexGpreS FML Σ := mutexGpreS_inv : inv'GpreS FML Σ.
+Class mutexGpreS FML Σ := mutexGpreS_inv : inv'GpreS (mutex_fml FML) Σ.
 Local Existing Instances mutexGpreS_inv.
-Definition mutexΣ FML `{!oFunctorContractive FML} := #[inv'Σ FML].
+Definition mutexΣ FML `{!oFunctorContractive FML} := #[inv'Σ (mutex_fml FML)].
 #[export] Instance subG_mutexΣ
   `{!oFunctorContractive FML, !subG (mutexΣ FML) Σ} : mutexGpreS FML Σ.
 Proof. solve_inG. Qed.
@@ -133,6 +133,14 @@ Section mutex.
     by iApply "→Φ".
   Qed.
 End mutex.
+
+(** Allocate [mutex_wsat] *)
+Lemma mutex_wsat_alloc `{!mutexGpreS FML Σ, !heapGS_gen hlc Σ} :
+  ⊢ |==> ∃ _ : mutexGS FML Σ, ∀ sm, mutex_wsat sm.
+Proof.
+  iMod inv_wsat_alloc as (?) "W". iModIntro. iExists _. iIntros (?).
+  rewrite mutex_wsat_unseal. iApply "W".
+Qed.
 
 (** ** Relax a mutex with derivability *)
 
