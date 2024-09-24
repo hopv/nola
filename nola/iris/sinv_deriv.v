@@ -64,7 +64,7 @@ Section sinv_deriv.
   (** Access [sinv] *)
   Lemma sinv_acc {Px} :
     sinvd Px -∗ sinv_wsatid -∗ sinv_mod
-      (⟦ Px ⟧ ∗ (⟦ Px ⟧ -∗ sinv_mod (sinv_wsatid))).
+      (⟦ Px ⟧ ∗ (⟦ Px ⟧ -∗ sinv_mod sinv_wsatid)).
   Proof.
     rewrite sinv_unseal. iIntros "[%Qx[QPQ s]] W".
     iDestruct (der_sound with "QPQ") as "QPQ". rewrite sinv_jacsr_sem.
