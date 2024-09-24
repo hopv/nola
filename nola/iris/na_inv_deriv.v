@@ -1,31 +1,34 @@
 (** * Non-atomic invariant machinery relaxed with derivability *)
 
+From nola.util Require Export prod.
 From nola.bi Require Export deriv.
 From nola.iris Require Export na_inv.
 From iris.proofmode Require Import proofmode.
-Import iPropAppNotation UpdwNotation DsemNotation.
+Import ProdNotation iPropAppNotation UpdwNotation DsemNotation.
 
-(** Notation *)
-Notation na_inv_wsati δ := (na_inv_wsat ⟦⟧(δ)).
-Notation na_inv_wsatid := (na_inv_wsati der).
+Implicit Type (p : na_inv_pool_name) (N : namespace).
 
-(** Derivability pre-data for [na_inv] *)
-Class NaInvPreDeriv (FM JUDG : ofe) := NA_INV_PRE_DERIV {
-  (** Accessor judgment *)
-  na_inv_jacsr : na_inv_pool_name → namespace → FM → JUDG;
-  (** [na_inv_jacsr] is non-expansive *)
-  na_inv_jacsr_ne {p N} :: NonExpansive (na_inv_jacsr p N);
+(** ** [na_inv_judgty]: Judgment type for [na_inv] *)
+Definition na_inv_judgty (FM : ofe) : ofe :=
+  (leibnizO (na_inv_pool_name *' namespace) * FM)%type (** Accessor judgment *).
+
+(** ** [NaInvJudg]: Judgment structure for [na_inv] *)
+Class NaInvJudg (FM JUDG : ofe) := NA_INV_JUDG {
+  (** Inclusion of [na_inv_judgty] *)
+  na_inv_judg : na_inv_judgty FM → JUDG;
+  (** [na_inv_judg] is non-expansive *)
+  na_inv_judg_ne :: NonExpansive na_inv_judg;
 }.
-Hint Mode NaInvPreDeriv ! - : typeclass_instances.
-Arguments NA_INV_PRE_DERIV {_ _} _ {_}.
+Hint Mode NaInvJudg ! - : typeclass_instances.
+Arguments NA_INV_JUDG {_ _} _ _.
 
 Section na_inv_deriv.
-  Context `{!NaInvPreDeriv FM JUDG} {Σ : gFunctors}.
+  Context `{!NaInvJudg FM JUDG} {Σ : gFunctors}.
   Implicit Type δ : JUDG → iProp Σ.
 
   (** [na_inv']: Relaxed na_invariant *)
   Local Definition na_inv'_def δ p N (Px : FM) : iProp Σ :=
-    □ δ (na_inv_jacsr p N Px).
+    □ δ (na_inv_judg ((p, N)', Px)).
   Local Lemma na_inv'_aux : seal na_inv'_def. Proof. by eexists. Qed.
   Definition na_inv' := na_inv'_aux.(unseal).
   Local Lemma na_inv'_unseal : na_inv' = na_inv'_def.
@@ -39,12 +42,18 @@ Section na_inv_deriv.
   (** [na_inv'] is non-expansive *)
   #[export] Instance na_inv'_ne `{!NonExpansive δ} {p N} :
     NonExpansive (na_inv' δ p N).
-  Proof. rewrite na_inv'_unseal. solve_proper. Qed.
+  Proof.
+    rewrite na_inv'_unseal /na_inv'_def=> ????. do 3 f_equiv. by split.
+  Qed.
   #[export] Instance na_inv'_proper `{!NonExpansive δ} {p N} :
     Proper ((≡) ==> (⊣⊢)) (na_inv' δ p N).
   Proof. apply ne_proper, _. Qed.
 End na_inv_deriv.
+
+(** Notation *)
 Notation na_invd := (na_inv' der).
+Notation na_inv_wsati δ := (na_inv_wsat ⟦⟧(δ)).
+Notation na_inv_wsatid := (na_inv_wsati der).
 
 Section na_inv_deriv.
   Context `{!na_inv'GS FML Σ, !invGS_gen hlc Σ, !na_invG Σ}.
@@ -55,18 +64,30 @@ Section na_inv_deriv.
     ∀ E F, ⌜↑N ⊆ E⌝ → ⌜↑N ⊆ F⌝ → na_own p F =[na_inv_wsat sm]{E}=∗
       na_own p (F∖↑N) ∗ P ∗
       (na_own p (F∖↑N) -∗ P =[na_inv_wsat sm]{E}=∗ na_own p F) .
+  (** [na_inv_acsr] is non-expansive *)
+  #[export] Instance na_inv_acsr_ne {n} :
+    Proper ((≡{n}≡) ==> (=) ==> (=) ==> (≡{n}≡) ==> (≡{n}≡)) na_inv_acsr.
+  Proof. solve_proper. Qed.
 
-  Context `{!NaInvPreDeriv (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
-    !Dsem JUDGI (FML $oi Σ) (iProp Σ)}.
-  Implicit Type δ : JUDGI → iProp Σ.
+  Context `{!NaInvJudg (FML $oi Σ) JUDG, !Jsem JUDG (iProp Σ),
+    !Dsem JUDG (FML $oi Σ) (iProp Σ)}.
+  Implicit Type δ : JUDG → iProp Σ.
 
-  (** Derivability data for [na_inv] *)
-  Class NaInvDeriv :=
-    (** Interpreting [na_inv_jacsr] *)
-    na_inv_jacsr_sem : ∀{δ p N Px},
-      ⟦ na_inv_jacsr p N Px ⟧(δ) ⊣⊢ na_inv_acsr ⟦⟧(δ) p N (⟦ Px ⟧(δ)).
+  (** ** [na_inv_judg_sem]: Semantics of [na_inv_judgty] *)
+  Definition na_inv_judg_sem δ (pNPx : na_inv_judgty (FML $oi Σ)) : iProp Σ :=
+    na_inv_acsr ⟦⟧(δ) pNPx.1.1' pNPx.1.2' ⟦ pNPx.2 ⟧(δ).
+  (** [na_inv_judg_sem] is non-expansive *)
+  #[export] Instance na_inv_judg_sem_ne `{!NonExpansive δ} :
+    NonExpansive (na_inv_judg_sem δ).
+  Proof. move=> ?[??][??][/=/leibniz_equiv_iff<-?]. solve_proper. Qed.
 
-  Context `{!NaInvDeriv}.
+  (** ** [NaInvJsem]: Judgment semantics for [na_inv] *)
+  Class NaInvJsem :=
+    (** Interpreting [na_inv_judg] *)
+    sem_na_inv_judg : ∀{δ pNPx},
+      ⟦ na_inv_judg pNPx ⟧(δ) ⊣⊢ na_inv_judg_sem δ pNPx.
+
+  Context `{!NaInvJsem}.
 
   (** Access using [na_invd] *)
   Lemma na_invd_acc {p N Px E F} : ↑N ⊆ E → ↑N ⊆ F →
@@ -75,11 +96,11 @@ Section na_inv_deriv.
       (na_own p (F∖↑N) -∗ ⟦ Px ⟧ =[na_inv_wsatid]{E}=∗ na_own p F).
   Proof.
     rewrite na_inv'_unseal. iIntros (NE NF) "F accP".
-    iDestruct (der_sound with "accP") as "accP". rewrite na_inv_jacsr_sem.
+    iDestruct (der_sound with "accP") as "accP". rewrite sem_na_inv_judg.
     iApply ("accP" $! _ _ NE NF with "F").
   Qed.
 
-  Context `{!Deriv (JUDGI:=JUDGI) ih δ}.
+  Context `{!Deriv (JUDG:=JUDG) ih δ}.
 
   (** Turn [na_inv_acsr] into [na_inv'] *)
   Lemma na_inv_acsr_inv' {p N Px} :
@@ -87,7 +108,7 @@ Section na_inv_deriv.
       na_inv_acsr ⟦⟧(δ') p N ⟦ Px ⟧(δ')) ⊢ na_inv' δ p N Px.
   Proof.
     rewrite na_inv'_unseal. iIntros "#big !>". iApply Deriv_factor.
-    iIntros (????). rewrite na_inv_jacsr_sem. by iApply "big".
+    iIntros (????). rewrite sem_na_inv_judg. by iApply "big".
   Qed.
 
   (** Turn [na_inv_tok] into [na_inv'] *)
@@ -117,7 +138,7 @@ Section na_inv_deriv.
       na_inv' δ p N Px -∗ na_inv' δ p N Qx.
   Proof.
     rewrite na_inv'_unseal. iIntros "#PQP #accP !>". iApply Deriv_factor.
-    iIntros (??? to). rewrite to !na_inv_jacsr_sem. iIntros (?? NE NF) "F".
+    iIntros (??? to). rewrite to !sem_na_inv_judg. iIntros (?? NE NF) "F".
     iMod ("accP" $! _ _ NE NF with "F") as "($ & Px & cl)".
     iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
     iMod ("PQP" with "[//] [//] [//] Px") as "[$ QP]". iMod "→E∖N" as "_".
@@ -158,7 +179,7 @@ Section na_inv_deriv.
   Proof.
     rewrite na_inv'_unseal. iIntros (?? eq) "#i #i' !>".
     iApply (Deriv_map2 with "[] i i'"). iIntros (????) "{i}i {i'}i'".
-    rewrite !na_inv_jacsr_sem. iIntros (????) "F". rewrite eq.
+    rewrite !sem_na_inv_judg. iIntros (????) "F". rewrite eq.
     iMod ("i" with "[%] [%] F") as "(F∖N1 & $ & P→)"; [set_solver..|].
     iMod ("i'" with "[%] [%] F∖N1") as "(F∖N12 & $ & Q→)"; [set_solver..|].
     iDestruct (na_own_acc with "F∖N12") as "[$ F∖N→]"; [set_solver|].
@@ -167,5 +188,5 @@ Section na_inv_deriv.
     iMod ("Q→" with "F∖N12 Qx") as "F∖N". iApply ("P→" with "F∖N Px").
   Qed.
 End na_inv_deriv.
-Arguments NaInvDeriv FML Σ {_ _ _ _} JUDGI {_ _}.
-Hint Mode NaInvDeriv ! - - - - - - - - : typeclass_instances.
+Arguments NaInvJsem FML Σ {_ _ _ _} JUDG {_ _ _}.
+Hint Mode NaInvJsem ! - - - - - - - - - : typeclass_instances.

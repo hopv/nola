@@ -201,7 +201,7 @@ Section sem.
 
   (** Parameterized semantics of [cif] *)
   #[export] Instance cif_dsem : Dsem (judg Σ) (cif Σ) (iProp Σ) :=
-    DSEM (λ δ, cif_sem (bsem δ)).
+    DSEM (λ δ, cif_sem (bsem δ)) _.
 
   (** [cif_sem] is non-expansive *)
   #[export] Instance cif_sem_ne `{!NonExpansive δ} : NonExpansive ⟦⟧(δ)@{cif Σ}.
@@ -212,15 +212,10 @@ Section sem.
 
   Context `{!heapGS_gen hlc Σ}.
 
-  (** [judg_sem]: Judgment semantics *)
-  Definition judg_sem δ (J : judg Σ) := match J with
-    | (Px, Qx) => □ (⟦ Px ⟧(δ) ∗-∗ ⟦ Qx ⟧(δ))
-    end%I.
-  Local Instance judg_sem_ne `{!NonExpansive δ} : NonExpansive (judg_sem δ).
-  Proof. move=> ?[??][??][/=??]. solve_proper. Qed.
-  #[export] Instance judg_dsem : Dsem (judg Σ) (judg Σ) (iProp Σ) :=
-    DSEM judg_sem.
-  Canonical judgJ : judgi (iProp Σ) := Judgi (judg Σ).
+  (** Judgment semantics *)
+  #[export] Program Instance judg_jsem : Jsem (judg Σ) (iProp Σ) :=
+    DSEM (λ δ J, □ (⟦ J.1 ⟧(δ) ∗-∗ ⟦ J.2 ⟧(δ)))%I _.
+  Next Obligation. solve_proper. Qed.
 
   (** Simplify [to_cit (of_cit Px)] *)
   Lemma sem_to_of_cit `{!NonExpansive δ} {Px} :

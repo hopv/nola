@@ -147,25 +147,27 @@ Qed.
 
 (** ** Relax a mutex with derivability *)
 
-(** Notation *)
-Notation mutex_wsati δ := (mutex_wsat ⟦⟧(δ)).
-Notation mutex_wsatid := (mutex_wsati der).
+(** ** [mutex_judgty]: Judgment type for [mutex] *)
+Definition mutex_judgty (FM : ofe) : ofe :=
+  (FM * FM)%type (** Accessor judgment *).
 
-(** Derivability pre-data for [mutex] *)
-Class MutexPreDeriv (FM JUDG : ofe) := MUTEX_PRE_DERIV {
-  mutex_jiff : FM → FM → JUDG;
-  mutex_jiff_ne :: NonExpansive2 mutex_jiff;
+(** ** [MutexJudg]: Judgment structure for [mutex] *)
+Class MutexJudg (FM JUDG : ofe) := MUTEX_JUDG {
+  (** Inclusion of [mutex_judgty] *)
+  mutex_judg : mutex_judgty FM → JUDG;
+  (** [mutex_judg] is non-expansive *)
+  mutex_judg_ne :: NonExpansive mutex_judg;
 }.
-Hint Mode MutexPreDeriv ! - : typeclass_instances.
-Arguments MUTEX_PRE_DERIV {_ _} _ {_}.
+Hint Mode MutexJudg ! - : typeclass_instances.
+Arguments MUTEX_JUDG {_ _} _ _.
 
 Section mutex_deriv.
-  Context `{!mutexGS FML Σ, !MutexPreDeriv (FML $oi Σ) JUDG}.
+  Context `{!mutexGS FML Σ, !MutexJudg (FML $oi Σ) JUDG}.
   Implicit Type δ : JUDG → iProp Σ.
 
   (** [mutex]: Relaxed simple invariant *)
   Local Definition mutex_def δ l Px : iProp Σ :=
-    ∃ Qx, □ δ (mutex_jiff Px Qx) ∗ mutex_tok l Qx.
+    ∃ Qx, □ δ (mutex_judg (Px, Qx)) ∗ mutex_tok l Qx.
   Local Lemma mutex_aux : seal mutex_def. Proof. by eexists. Qed.
   Definition mutex := mutex_aux.(unseal).
   Local Lemma mutex_unseal : mutex = mutex_def. Proof. exact: seal_eq. Qed.
@@ -178,27 +180,38 @@ Section mutex_deriv.
   #[export] Instance mutex_ne `{!NonExpansive δ} {l} : NonExpansive (mutex δ l).
   Proof. rewrite mutex_unseal. solve_proper. Qed.
 End mutex_deriv.
+
+(** Notation *)
 Notation mutexd := (mutex der).
+Notation mutex_wsati δ := (mutex_wsat ⟦⟧(δ)).
+Notation mutex_wsatid := (mutex_wsati der).
 
 Section mutex_deriv.
-  Context `{!mutexGS FML Σ, !heapGS_gen hlc Σ,
-    !MutexPreDeriv (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
-    !Dsem JUDGI (FML $oi Σ) (iProp Σ)}.
-  Implicit Type (δ : JUDGI → iProp Σ) (Px Qx : FML $oi Σ).
+  Context `{!mutexGS FML Σ, !heapGS_gen hlc Σ, !MutexJudg (FML $oi Σ) JUDG,
+    !Jsem JUDG (iProp Σ), !Dsem JUDG (FML $oi Σ) (iProp Σ)}.
+  Implicit Type (δ : JUDG → iProp Σ) (Px Qx : FML $oi Σ).
 
-  (** Derivability data for [mutex] *)
-  Class MutexDeriv :=
-    mutex_jiff_sem : ∀{δ Px Qx},
-      ⟦ mutex_jiff Px Qx ⟧(δ) ⊣⊢ mod_iff (fupd ⊤ ⊤) ⟦ Px ⟧(δ) ⟦ Qx ⟧(δ).
+  (** ** [mutex_judg_sem]: Semantics of [mutex_judgty] *)
+  Definition mutex_judg_sem δ (PQx : mutex_judgty (FML $oi Σ)) : iProp Σ :=
+    mod_iff (fupd ⊤ ⊤) ⟦ PQx.1 ⟧(δ) ⟦ PQx.2 ⟧(δ).
+  (** [mutex_judg_sem] is non-expansive *)
+  #[export] Instance mutex_judg_sem_ne `{!NonExpansive δ} :
+    NonExpansive (mutex_judg_sem δ).
+  Proof. solve_proper. Qed.
 
-  Context `{!MutexDeriv}.
+  (** [MutexJsem]: Judgment semantics for [mutex] *)
+  Class MutexJsem :=
+    (** Interpreting [mutex_judg] *)
+    sem_mutex_judg : ∀ {δ PQx}, ⟦ mutex_judg PQx ⟧(δ) ⊣⊢ mutex_judg_sem δ PQx.
+
+  Context `{!MutexJsem}.
 
   (** Unfold [mutexd] *)
   Lemma mutexd_unfold {l Px} :
     mutexd l Px ⊢ ∃ Qx, □ mod_iff (fupd ⊤ ⊤) ⟦ Px ⟧ ⟦ Qx ⟧ ∗ mutex_tok l Qx.
   Proof.
     rewrite mutex_unseal /mutex_def. do 2 f_equiv.
-    by rewrite der_sound mutex_jiff_sem.
+    by rewrite der_sound sem_mutex_judg.
   Qed.
 
   (** Wrapper lemmas *)
@@ -231,13 +244,13 @@ Section mutex_deriv.
     by wp_apply (twp_release_mutex_tok (sm:=⟦⟧) with "[$]").
   Qed.
 
-  Context `{!Deriv (JUDGI:=JUDGI) ih δ}.
+  Context `{!Deriv (JUDG:=JUDG) ih δ}.
 
   (** Turn [mutex_tok] into [mutex] *)
   Lemma mutex_tok_mutex {l Px} : mutex_tok l Px ⊢ mutex δ l Px.
   Proof.
     rewrite mutex_unseal. iIntros "$ !>". iApply Deriv_factor. iIntros (????).
-    rewrite mutex_jiff_sem. iSplit; by iIntros.
+    rewrite sem_mutex_judg. iSplit; by iIntros.
   Qed.
 
   (** Wrapper lemmas *)
@@ -255,7 +268,7 @@ Section mutex_deriv.
       mutex δ l Px -∗ mutex δ l Qx.
   Proof.
     rewrite mutex_unseal. iIntros "#big [%Rx[#iff $]] !>". iApply Deriv_factor.
-    iIntros (??? to). rewrite to !mutex_jiff_sem.
+    iIntros (??? to). rewrite to !sem_mutex_judg.
     iApply (mod_iff_trans with "[] iff"). iApply mod_iff_sym. by iApply "big".
   Qed.
   Lemma mutex_iff {l Px Qx} :
@@ -267,5 +280,5 @@ Section mutex_deriv.
     apply mod_iff_sym.
   Qed.
 End mutex_deriv.
-Arguments MutexDeriv FML Σ {_ _} JUDGI {_ _}.
-Hint Mode MutexDeriv ! - - - - - - : typeclass_instances.
+Arguments MutexJsem FML Σ {_ _} JUDG {_ _ _}.
+Hint Mode MutexJsem ! - - - - - - - : typeclass_instances.

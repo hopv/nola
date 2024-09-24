@@ -8,34 +8,42 @@ Import ProdNotation PlistNotation iPropAppNotation UpdwNotation LftNotation
 
 Implicit Type (TY : synty).
 
-(** ** Preliminaries *)
-
-(** Notation *)
-Notation pborrow_wsati M δ := (pborrow_wsat M ⟦⟧(δ)).
-Notation pborrow_wsatid M := (pborrow_wsati M der).
-Notation plend_bodyi δ := (plend_body ⟦⟧(δ)).
-Notation plend_bodyid := (plend_bodyi der).
-Notation plend_body_vari δ := (plend_body_var ⟦⟧(δ)).
-Notation plend_body_varid := (plend_body_vari der).
-
-(** Derivability pre-data for [pborrow] *)
-Class PborrowPreDeriv TY (FM JUDG : ofe) := PBORROW_PRE_DERIV {
-  (** Basic conversion judgment *)
-  pborrow_jto : FM → FM → JUDG;
+(** ** [pborrow_judgty]: Judgment type for [pborrow] *)
+Definition pborrow_judgty TY (FM : ofe) : ofe := (
+  (** Basic conversion *) FM * FM +
   (** Conversion judgment for [lend_body] *)
-  pborrow_jlto {X Y : TY} : clair TY X → clair TY Y →
-    (X -d> FM) → (Y -d> FM) → JUDG;
-  (** [pborrow_jto] is non-expansive *)
-  pborrow_jto_ne :: NonExpansive2 pborrow_jto;
-  (** [pborrow_jto] is non-expansive *)
-  pborrow_jlto_ne {X Y xπ yπ} :: NonExpansive2 (@pborrow_jlto X Y xπ yπ);
+    @sigT (TY *' TY) (λ '(X, Y)',
+      leibnizO (clair TY X *' clair TY Y) *
+      (X -d> FM) * (Y -d> FM)))%type.
+
+(** ** [PborrowJudg]: Judgment structure for [pborrow] *)
+Class PborrowJudg TY (FM JUDG : ofe) := PBORROW_JUDG {
+  (** Inclusion of [borrow_judgty] *)
+  pborrow_judg : pborrow_judgty TY FM → JUDG;
+  (** [borrow_judg] is non-expansive *)
+  pborrow_judg_ne :: NonExpansive pborrow_judg;
 }.
-Hint Mode PborrowPreDeriv - ! - : typeclass_instances.
-Arguments PBORROW_PRE_DERIV {_ _ _} _ _ {_ _}.
+Hint Mode PborrowJudg - ! - : typeclass_instances.
+Arguments PBORROW_JUDG {_ _ _} _ _.
 
 Section pborrow_deriv.
-  Context `{!pborrowGS TY FML Σ, !PborrowPreDeriv TY (FML $oi Σ) JUDG}.
-  Implicit Type (δ : JUDG → iProp Σ) (X Y : TY).
+  Context `{!pborrowGS TY FML Σ, !PborrowJudg TY (FML $oi Σ) JUDG}.
+  Implicit Type (δ : JUDG → iProp Σ) (Px Qx : FML $oi Σ) (X Y : TY).
+
+  (** Judgments *)
+  Local Definition pborrow_jto Px Qx : JUDG :=
+    pborrow_judg (inl (Px, Qx)).
+  Local Definition pborrow_jlto {X Y} (xπ : clair TY X) (yπ : clair TY Y)
+    (Φx : X -d> FML $oi Σ) (Ψx : Y -d> FML $oi Σ) : JUDG :=
+    pborrow_judg (inr (existT (X, Y)' ((xπ, yπ)', Φx, Ψx))).
+  #[export] Instance pborrow_jto_ne : NonExpansive2 pborrow_jto.
+  Proof. solve_proper. Qed.
+  #[export] Instance pborrow_jlto_ne {X Y xπ yπ} :
+    NonExpansive2 (@pborrow_jlto X Y xπ yπ).
+  Proof.
+    unfold pborrow_jlto=> ???????. f_equiv. apply inr_ne. apply: existT_ne=>/=.
+    split; [split|]; solve_proper.
+  Qed.
 
   (** [nbor]: Relaxed non-prophetic borrower *)
   Local Definition nbor_def δ α Px : iProp Σ :=
@@ -113,44 +121,70 @@ Section pborrow_deriv.
     Proper ((≡) ==> (⊣⊢)) (plend (X:=X) δ α xπ).
   Proof. apply ne_proper, _. Qed.
 End pborrow_deriv.
+
+(** Notation *)
 Notation nbord := (nbor der). Notation nobord := (nobor der).
 Notation nlendd := (nlend der).
 Notation pbord := (pbor der). Notation pobord := (pobor der).
 Notation plendd := (plend der).
+Notation pborrow_wsati M δ := (pborrow_wsat M ⟦⟧(δ)).
+Notation pborrow_wsatid M := (pborrow_wsati M der).
+Notation plend_bodyi δ := (plend_body ⟦⟧(δ)).
+Notation plend_bodyid := (plend_bodyi der).
+Notation plend_body_vari δ := (plend_body_var ⟦⟧(δ)).
+Notation plend_body_varid := (plend_body_vari der).
 
 Section pborrow_deriv.
-  Context `{!pborrowGS TY FML Σ,
-    !PborrowPreDeriv TY (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
-    !Dsem JUDGI (FML $oi Σ) (iProp Σ)}.
-  Implicit Type (δ : JUDGI → iProp Σ) (Px Qx : FML $oi Σ).
+  Context `{!pborrowGS TY FML Σ, !PborrowJudg TY (FML $oi Σ) JUDG,
+    !Jsem JUDG (iProp Σ), !Dsem JUDG (FML $oi Σ) (iProp Σ)}.
+  Implicit Type (δ : JUDG → iProp Σ) (Px Qx : FML $oi Σ).
 
-  (** Derivability data for [pborrow] *)
-  Class PborrowDeriv := PBORROW_DERIV {
-    (** Interpreting [pborrow_jto] *)
-    pborrow_jto_sem {δ Px Qx} :
-      ⟦ pborrow_jto Px Qx ⟧(δ) ⊣⊢ (⟦ Px ⟧(δ) ==∗ ⟦ Qx ⟧(δ));
-    (** Interpreting [pborrow_jlto] *)
-    pborrow_jlto_sem {δ X Y xπ yπ} {Φx Ψx : _ -d> FML $oi Σ} :
-      ⟦ pborrow_jlto (X:=X) (Y:=Y) xπ yπ Φx Ψx ⟧(δ) ⊣⊢
-        (plend_body ⟦ ⟧(δ) xπ Φx ==∗ plend_body ⟦ ⟧(δ) yπ Ψx);
-  }.
+  (** ** [pborrow_judg_sem]: Semantics of [pborrow_judgty] *)
+  Definition pborrow_judg_sem δ (J : pborrow_judgty TY (FML $oi Σ)) : iProp Σ :=
+    match J with
+    | inl PQx => ⟦ PQx.1 ⟧(δ) ==∗ ⟦ PQx.2 ⟧(δ)
+    | inr (existT _ ((xπ, yπ)', Φx, Ψx)) =>
+        plend_body ⟦ ⟧(δ) xπ Φx ==∗ plend_body ⟦ ⟧(δ) yπ Ψx
+    end.
+  (** [pborrow_judg_sem] is non-expansive *)
+  #[export] Instance pborrow_judg_sem_ne `{!NonExpansive δ} :
+    NonExpansive (pborrow_judg_sem δ).
+  Proof.
+    move=> ???[?|]; [solve_proper|]. move=> [?[[??]?]][?[[??]?]][/=?].
+    subst=>/=. move=> [/=[/=/leibniz_equiv_iff]]. solve_proper.
+  Qed.
+
+  (** ** [PborrowJsem]: Judgment semantics for [pborrow] *)
+  Class PborrowJsem :=
+    (** Interpreting [pborrow_judg] *)
+    sem_pborrow_judg : ∀{δ J}, ⟦ pborrow_judg J ⟧(δ) ⊣⊢ pborrow_judg_sem δ J.
+
+  (** Interpreting [pborrow_jto] *)
+  Local Lemma sem_pborrow_jto `{!PborrowJsem} {δ Px Qx} :
+    ⟦ pborrow_jto Px Qx ⟧(δ) ⊣⊢ (⟦ Px ⟧(δ) ==∗ ⟦ Qx ⟧(δ)).
+  Proof. by rewrite sem_pborrow_judg. Qed.
+  (** Interpreting [pborrow_jlto] *)
+  Local Lemma sem_pborrow_jlto `{!PborrowJsem} {δ X Y xπ yπ}
+    {Φx Ψx : _ -d> FML $oi Σ} :
+    ⟦ pborrow_jlto (X:=X) (Y:=Y) xπ yπ Φx Ψx ⟧(δ) ⊣⊢
+      (plend_body ⟦ ⟧(δ) xπ Φx ==∗ plend_body ⟦ ⟧(δ) yπ Ψx).
+  Proof. by rewrite sem_pborrow_judg. Qed.
 End pborrow_deriv.
-Arguments PborrowDeriv TY FML Σ {_} JUDGI {_ _}.
-Hint Mode PborrowDeriv - ! - - - - - : typeclass_instances.
+Arguments PborrowJsem TY FML Σ {_} JUDG {_ _ _}.
+Hint Mode PborrowJsem - ! - - - - - - : typeclass_instances.
 
 Section pborrow_deriv.
-  Context `{!pborrowGS TY FML Σ,
-  !PborrowPreDeriv TY (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
-  !Dsem JUDGI (FML $oi Σ) (iProp Σ), !PborrowDeriv TY FML Σ JUDGI,
-  !Deriv (JUDGI:=JUDGI) ih δ}.
-  Implicit Type (X Y Z : TY) (Px Qx Rx : FML $oi Σ) (δ : JUDGI → iProp Σ).
+  Context `{!pborrowGS TY FML Σ, !PborrowJudg TY (FML $oi Σ) JUDG,
+    !Jsem JUDG (iProp Σ), !Dsem JUDG (FML $oi Σ) (iProp Σ),
+    !PborrowJsem TY FML Σ JUDG, !Deriv (JUDG:=JUDG) ih δ}.
+  Implicit Type (X Y Z : TY) (Px Qx Rx : FML $oi Σ) (δ : JUDG → iProp Σ).
 
   (** ** Conversion *)
 
   (** Lemmas for [pborrow_jto] *)
   Lemma pborrow_jto_refl {Px} : ⊢ δ (pborrow_jto Px Px).
   Proof.
-    iApply Deriv_factor. iIntros (????). rewrite pborrow_jto_sem.
+    iApply Deriv_factor. iIntros (????). rewrite sem_pborrow_jto.
     by iIntros "$".
   Qed.
   Lemma pborrow_jto_trans {Px Qx Rx} :
@@ -158,25 +192,24 @@ Section pborrow_deriv.
       ⟦ Px ⟧(δ') ==∗ ⟦ Qx ⟧(δ')) -∗
     δ (pborrow_jto Qx Rx) -∗ δ (pborrow_jto Px Rx).
   Proof.
-    iIntros "big". iApply Deriv_map. iIntros (????). rewrite !pborrow_jto_sem.
+    iIntros "big". iApply Deriv_map. iIntros (????). rewrite !sem_pborrow_jto.
     iIntros "QR Px". iMod ("big" with "[//] [//] [//] Px"). by iApply "QR".
   Qed.
   Lemma pborrow_jto_trans' {Px Qx Rx} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ → ⟦ Qx ⟧(δ') ==∗ ⟦ Rx ⟧(δ'))
       -∗ δ (pborrow_jto Px Qx) -∗ δ (pborrow_jto Px Rx).
   Proof.
-    iIntros "big". iApply Deriv_map. iIntros (????). rewrite !pborrow_jto_sem.
+    iIntros "big". iApply Deriv_map. iIntros (????). rewrite !sem_pborrow_jto.
     iIntros "PQ Px". iMod ("PQ" with "Px"). by iApply "big".
   Qed.
   Lemma der_pborrow_jto {Px Qx} :
     der (pborrow_jto Px Qx) ⊢ (⟦ Px ⟧ ==∗ ⟦ Qx ⟧).
-  Proof. by rewrite der_sound pborrow_jto_sem. Qed.
+  Proof. by rewrite der_sound sem_pborrow_jto. Qed.
 
   (** Lemmas for [pborrow_jlto] *)
-  Lemma pborrow_jlto_refl {X xπ Φx} :
-    ⊢ δ (pborrow_jlto (FM:=FML $oi Σ) (X:=X) xπ xπ Φx Φx).
+  Lemma pborrow_jlto_refl {X xπ Φx} : ⊢ δ (pborrow_jlto (X:=X) xπ xπ Φx Φx).
   Proof.
-    iApply Deriv_factor. iIntros (????). rewrite pborrow_jlto_sem.
+    iApply Deriv_factor. iIntros (????). rewrite sem_pborrow_jlto.
     by iIntros "$".
   Qed.
   Lemma pborrow_jlto_trans {X Y Z xπ yπ zπ Φx Ψx Ω} :
@@ -186,7 +219,7 @@ Section pborrow_deriv.
     δ (pborrow_jlto (X:=X) xπ zπ Φx Ω).
   Proof.
     iIntros "big". iApply Deriv_map. iIntros (????).
-    rewrite !pborrow_jlto_sem. iIntros "ΨΩ Φx".
+    rewrite !sem_pborrow_jlto. iIntros "ΨΩ Φx".
     iMod ("big" with "[//] [//] [//] Φx"). by iApply "ΨΩ".
   Qed.
   Lemma pborrow_jlto_trans' {X Y Z xπ yπ zπ Φx Ψx Ω} :
@@ -196,13 +229,13 @@ Section pborrow_deriv.
     δ (pborrow_jlto (Y:=Z) xπ zπ Φx Ω).
   Proof.
     iIntros "big". iApply Deriv_map. iIntros (????).
-    rewrite !pborrow_jlto_sem. iIntros "ΦΨ Φx". iMod ("ΦΨ" with "Φx").
+    rewrite !sem_pborrow_jlto. iIntros "ΦΨ Φx". iMod ("ΦΨ" with "Φx").
     by iApply "big".
   Qed.
   Lemma der_pborrow_jlto {X Y xπ yπ Φx Ψx} :
     der (pborrow_jlto (X:=X) (Y:=Y) xπ yπ Φx Ψx) ⊢
       (plend_bodyid xπ Φx ==∗ plend_bodyid yπ Ψx).
-  Proof. by rewrite der_sound pborrow_jlto_sem. Qed.
+  Proof. by rewrite der_sound sem_pborrow_jlto. Qed.
 
   (** Convert the body of borrower and lender propositions *)
   Lemma nbor_to {α Px Qx} :
@@ -380,10 +413,9 @@ Section pborrow_deriv.
 End pborrow_deriv.
 
 Section pborrow_deriv.
-  Context `{!pborrowGS TY FML Σ,
-  !PborrowPreDeriv TY (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
-  !Dsem JUDGI (FML $oi Σ) (iProp Σ), !PborrowDeriv TY FML Σ JUDGI,
-  !GenUpd (PROP:=iProp Σ) M, !GenUpdB M}.
+  Context `{!pborrowGS TY FML Σ, !PborrowJudg TY (FML $oi Σ) JUDG,
+    !Jsem JUDG (iProp Σ), !Dsem JUDG (FML $oi Σ) (iProp Σ),
+    !PborrowJsem TY FML Σ JUDG, !GenUpd (PROP:=iProp Σ) M, !GenUpdB M}.
   Implicit Type (X Y : TY) (Px Qx : FML $oi Σ).
 
   (** ** On non-prophetic borrowing *)

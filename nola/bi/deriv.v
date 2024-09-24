@@ -13,7 +13,7 @@ Record Dsem (JUDG : ofe) (A : ofe) (PROP : bi) := DSEM {
 Existing Class Dsem.
 Add Printing Constructor Dsem.
 Hint Mode Dsem - ! - : typeclass_instances.
-Arguments DSEM {_ _ _} _ {_}.
+Arguments DSEM {_ _ _} _ _.
 Arguments dsem {_ _ _ _} _ _ /. Arguments dsem_ne {_ _ _ _}.
 
 Module DsemNotation'.
@@ -28,29 +28,20 @@ Import DsemNotation'.
   Proper ((≡) ==> (⊣⊢)) (@dsem JUDG A PROP _ δ).
 Proof. apply ne_proper, _. Qed.
 
-(** ** [judgi]: Judgment with the parameterized semantics *)
-#[projections(primitive)]
-Structure judgi (PROP : bi) : Type := Judgi {
-  judgi_car :> ofe;
-  (** Semantics parameterized over derivability candidates *)
-  #[canonical=no] judgi_Dsem :: Dsem judgi_car judgi_car PROP;
-}.
-Add Printing Constructor judgi.
-Arguments Judgi {_} _ {_}.
-Arguments judgi_car {PROP JUDGI} : rename.
-Arguments judgi_Dsem {PROP JUDGI} : rename.
+(** Judgment semantics *)
+Notation Jsem JUDG PROP := (Dsem JUDG JUDG PROP).
 
 (** [dinto δ δ']: [δ] can be turned into the semantics at [δ'] *)
 Notation dinto δ δ' := (∀ J, δ J ⊢ ⟦ J ⟧(δ')) (only parsing).
 
 Section deriv.
-  Context {PROP} {JUDGI : judgi PROP}.
-  Implicit Type (J : JUDGI) (δ : JUDGI → PROP) (ih : (JUDGI → PROP) → Prop).
+  Context `{!Jsem JUDG PROP}.
+  Implicit Type (J : JUDG) (δ : JUDG → PROP) (ih : (JUDG → PROP) → Prop).
 
   (** ** [Deriv ih δ] : [δ] is a good derivability predicate
 
     [ih] is the inductive hypothesis, used for parameterized induction *)
-  Definition Deriv ih δ := Psgoidp (OT:=JUDGI → PROP) dsem ih δ.
+  Definition Deriv ih δ := Psgoidp (OT:=JUDG → PROP) dsem ih δ.
   Existing Class Deriv.
 
   (** [Deriv] is monotone over the inductive hypothesis *)
@@ -151,7 +142,7 @@ Section deriv.
   Qed.
 
   (** ** [der]: The best derivability predicate *)
-  Definition der : JUDGI → PROP := psg (OT:=JUDGI → PROP) dsem.
+  Definition der : JUDG → PROP := psg (OT:=JUDG → PROP) dsem.
 
   (** [der] satisfies [Deriv] *)
   #[export] Instance der_Deriv : Deriv (λ _, True) der.
@@ -159,7 +150,7 @@ Section deriv.
 
   (** [der] is sound w.r.t. the semantics at [der] *)
   Lemma der_sound {J} : der J ⊢ ⟦ J ⟧(der).
-  Proof. move: J. exact (psg_post (OT:=JUDGI → PROP)). Qed.
+  Proof. move: J. exact (psg_post (OT:=JUDG → PROP)). Qed.
 End deriv.
 
 Module DsemNotation.
