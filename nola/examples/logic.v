@@ -10,10 +10,10 @@ Import ProdNotation UpdwNotation WpwNotation iPropAppNotation ProphNotation
 Implicit Type (N : namespace) (dq : dfrac) (l : loc) (b : bool) (α β : lft)
   (q : Qp) (X Y : nsynty).
 
-(** ** Preliminaries *)
+(** ** Custom constructors *)
 
-(** [sel]: Selector *)
-Variant sel :=
+(** [con_sel]: Selector *)
+Variant con_sel :=
 | (** Points-to token *) cifs_pointsto (l : loc) (dq : dfrac) (v : val)
 | (** Invariant *) cifs_inv (N : namespace)
 | (** Relaxed invariant *) cifs_inv' (N : namespace)
@@ -24,28 +24,23 @@ Variant sel :=
 | (** Prophetic borrower *) cifs_pbor {X} (α : lft) (x : X) (ξ : prvar X)
 | (** Prophetic open borrower *) cifs_pobor {X} (α : lft) (q : Qp) (ξ : prvar X)
 | (** Prophetic lender *) cifs_plend {X} (α : lft) (xπ : clair nsynty X).
-(** [idom]: Domain for inductive parts *)
-Definition idom (_ : sel) : Type := Empty_set.
-(** [cdom]: Domain for coinductive parts *)
-Definition cdom (s : sel) : Type := match s with
+(** [con_idom]: Domain for inductive parts *)
+Definition con_idom (_ : con_sel) : Type := Empty_set.
+(** [con_cdom]: Domain for coinductive parts *)
+Definition con_cdom (s : con_sel) : Type := match s with
   | cifs_pointsto _ _ _ => Empty_set
   | cifs_inv _ | cifs_inv' _ | cifs_mutex _
     | cifs_bor _ | cifs_obor _ _ | cifs_lend _ => unit
   | @cifs_pbor X _ _ _ | @cifs_pobor X _ _ _ | @cifs_plend X _ _ => X
   end.
-(** [dataOF]: Data [oFunctor] *)
-Definition dataOF (_ : sel) : oFunctor := unitO.
-(** [dataOF] is contractive *)
-#[export] Instance dataOF_contractive {s} : oFunctorContractive (dataOF s).
-Proof. exact _. Qed.
+(** [con_data]: Data [oFunctor] *)
+Definition con_data (_ : con_sel) : oFunctor := unitO.
+(** [con]: Constructor structure *)
+Canonical con : cifcon := Cifcon con_sel con_idom con_cdom con_data _.
 
 (** ** [cif]: Formulas *)
-Notation cifOF := (cifOF idom cdom dataOF).
-Notation cif Σ := (cif idom cdom dataOF Σ).
-
-(** [cifOF] is contractive *)
-#[export] Instance cifOF_contractive : oFunctorContractive cifOF.
-Proof. exact _. Qed.
+Notation cifOF := (cifOF con).
+Notation cif Σ := (cif con Σ).
 
 (** Construct [cif] *)
 Section cif.
@@ -53,7 +48,7 @@ Section cif.
   Implicit Type Px : cif Σ.
   (** Points-to token *)
   Definition cif_pointsto l dq v : cif Σ :=
-    cif_custom (D:=dataOF) (cifs_pointsto l dq v) nullary nullary ().
+    cif_custom (cifs_pointsto l dq v) nullary nullary ().
   (** Invariant *)
   Definition cif_inv N Px : cif Σ :=
     cif_custom (cifs_inv N) nullary (unary Px) ().
@@ -179,9 +174,9 @@ Section sem.
     Proper ((≡) ==> (⊣⊢)) (inv' δ N).
   Proof. apply ne_proper, _. Qed.
 
-  (** ** [bsem]: Base semantics *)
-  Definition bsem δ s :
-    (idom s -d> iProp Σ) → (cdom s -d> cif Σ) → dataOF s $oi Σ → iProp Σ :=
+  (** ** Constructor semantics *)
+  Definition con_sem δ s : (con_idom s -d> iProp Σ) →
+    (con_cdom s -d> cif Σ) → con_data s $oi Σ → iProp Σ :=
     match s with
     | cifs_pointsto l dq v => λ _ _ _, l ↦{dq} v
     | cifs_inv N => λ _ Pxs _, inv_tok N (Pxs ())
@@ -194,28 +189,20 @@ Section sem.
     | cifs_pobor α q ξ => λ _ Φx _, pobor_tok α q ξ Φx
     | cifs_plend α xπ => λ _ Φx _, plend_tok α xπ Φx
     end%I.
-
-  (** [bsem] is non-expansive *)
-  #[export] Instance bsem_ne `{!NonExpansive δ} {s} : NonExpansive3 (bsem δ s).
-  Proof. case s; try solve_proper; move=> ?*?*?*?*/=; f_equiv; by move: (). Qed.
-
-  (** Parameterized semantics of [cif] *)
-  #[export] Instance cif_dsem : Dsem (judg Σ) (cif Σ) (iProp Σ) :=
-    DSEM (λ δ, cif_sem (bsem δ)) _.
-
-  (** [cif_sem] is non-expansive *)
-  #[export] Instance cif_sem_ne `{!NonExpansive δ} : NonExpansive ⟦⟧(δ)@{cif Σ}.
-  Proof. exact _. Qed.
-  #[export] Instance cif_sem_proper `{!NonExpansive δ} :
-    Proper ((≡) ==> (⊣⊢)) ⟦⟧(δ)@{cif Σ}.
-  Proof. exact _. Qed.
-
-  Context `{!heapGS_gen hlc Σ}.
+  #[export] Instance con_sem_ne `{!NonExpansive δ} {s} :
+    NonExpansive3 (con_sem δ s).
+  Proof.
+    move=> ?????? eqv ??? /=. destruct s=>//=; repeat f_equiv; apply eqv.
+  Qed.
+  #[export] Instance con_sem_cifcon : SemCifcon (judg Σ) con Σ :=
+    SEM_CIFCON con_sem _.
 
   (** Judgment semantics *)
-  #[export] Program Instance judg_jsem : Jsem (judg Σ) (iProp Σ) :=
-    DSEM (λ δ J, □ (⟦ J.1 ⟧(δ) ∗-∗ ⟦ J.2 ⟧(δ)))%I _.
-  Next Obligation. solve_proper. Qed.
+  Definition judg_sem δ (J : judg Σ) : iProp Σ := □ (⟦ J.1 ⟧(δ) ∗-∗ ⟦ J.2 ⟧(δ)).
+  #[export] Instance judg_sem_ne `{!NonExpansive δ} : NonExpansive (judg_sem δ).
+  Proof. solve_proper. Qed.
+  #[export] Instance judg_jsem : Jsem (judg Σ) (iProp Σ) :=
+    DSEM judg_sem _.
 
   (** Simplify [to_cit (of_cit Px)] *)
   Lemma sem_to_of_cit `{!NonExpansive δ} {Px} :
@@ -288,11 +275,11 @@ Section verify.
     [[{ l', RET #l'; ⟦ ilist N Φx l' ⟧ }]].
   Proof.
     iIntros (? Ψ) "/= #[_ itl] →Ψ". wp_rec. wp_pure.
-    iMod (inv_tok_acc with "itl") as "[↦ltl cl]"; [done|]. simpl.
-    setoid_rewrite to_of_cit=>/=. iDestruct "↦ltl" as (?) "[↦l' ltl]".
+    iMod (inv_tok_acc with "itl") as "[↦ltl cl]"; [done|].
+    rewrite sem_to_of_cit /=. iDestruct "↦ltl" as (?) "[↦l' ltl]".
     rewrite ilist'_unfold /=. iDestruct "ltl" as "#ltl". wp_load. iModIntro.
     iMod ("cl" with "[$↦l']") as "_"; [by rewrite ilist'_unfold|]. iModIntro.
-    rewrite !to_of_cit. iApply ("→Ψ" with "ltl").
+    iApply ("→Ψ" with "ltl").
   Qed.
 
   (** Iterate over a list *)
