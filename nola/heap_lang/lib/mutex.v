@@ -44,9 +44,13 @@ Section mutex.
   Local Definition mutex_sem (sm : FML $oi Σ -d> iProp Σ)
     : mutex_fml FML $oi Σ -d> iProp Σ :=
     λ '(l, Px), (∃ b, l ↦ #b ∗ if b then True else sm Px)%I.
-  #[export] Instance mutex_sem_ne `{!NonExpansive sm} :
-    NonExpansive (mutex_sem sm).
-  Proof. move=> ?[??][??][/=??]. solve_proper. Qed.
+  Local Lemma mutex_sem_ne {sm} :
+    □ (∀ Px Qx, Px ≡ Qx -∗ sm Px -∗ sm Qx) -∗
+      □ (∀ M M', M ≡ M' -∗ mutex_sem sm M -∗ mutex_sem sm M').
+  Proof.
+    iIntros "#Ne !>" ([??][??]). rewrite prod_equivI /=. iIntros "[<- eqv]".
+    iIntros "[%b[$ Px]]". case: b=>//=. iApply ("Ne" with "eqv Px").
+  Qed.
 
   (** World satisfaction for the mutex machinery *)
   Local Definition mutex_wsat_def (sm : FML $oi Σ -d> iProp Σ) : iProp Σ :=
@@ -65,11 +69,9 @@ Section mutex.
   #[export] Instance mutex_wsat_proper : Proper ((≡) ==> (≡)) mutex_wsat.
   Proof. apply ne_proper, _. Qed.
 
-  Context `{sm : Sem (FML $oi Σ) (iProp Σ), !NonExpansive sm}.
-
   (** Allocate a new mutex *)
-  Lemma alloc_mutex_tok {l Px} :
-    l ↦ #false -∗ ⟦ Px ⟧ =[mutex_wsat ⟦⟧]=∗ mutex_tok l Px.
+  Lemma alloc_mutex_tok {sm l Px} :
+    l ↦ #false -∗ sm Px =[mutex_wsat sm]=∗ mutex_tok l Px.
   Proof.
     rewrite mutex_wsat_unseal. iIntros "↦ Px".
     iApply (inv_tok_alloc (FML:=mutex_fml _) (l, Px) with "[↦ Px]").
@@ -77,8 +79,8 @@ Section mutex.
   Qed.
 
   (** Allocate a new mutex with the lock acquired *)
-  Lemma alloc_acquire_mutex_tok {l Px} :
-    l ↦ #true =[mutex_wsat ⟦⟧]=∗ mutex_tok l Px.
+  Lemma alloc_acquire_mutex_tok {sm l Px} :
+    l ↦ #true =[mutex_wsat sm]=∗ mutex_tok l Px.
   Proof.
     rewrite mutex_wsat_unseal. iIntros "↦".
     iApply (inv_tok_alloc (FML:=mutex_fml _) (l, Px) with "[↦]").
@@ -87,10 +89,10 @@ Section mutex.
 
   (** Try to acquire the lock on the mutex *)
   Definition try_acquire_mutex : val := λ: "l", CAS "l" #false #true.
-  Lemma twp_try_acquire_mutex_tok {l Px} :
-    [[{ mutex_tok l Px }]][mutex_wsat ⟦⟧]
+  Lemma twp_try_acquire_mutex_tok {sm l Px} :
+    [[{ mutex_tok l Px }]][mutex_wsat sm]
       try_acquire_mutex #l
-    [[{ b, RET #b; if b then ⟦ Px ⟧ else True }]].
+    [[{ b, RET #b; if b then sm Px else True }]].
   Proof.
     rewrite mutex_wsat_unseal. iIntros (Φ) "l →Φ". wp_lam.
     wp_bind (CmpXchg _ _ _).
@@ -107,10 +109,10 @@ Section mutex.
     rec: "self" "n" "l" :=
       if: "n" = #0 then #false else
       if: try_acquire_mutex "l" then #true else "self" ("n" - #1) "l".
-  Lemma twp_try_acquire_loop_mutex_tok {l Px n} :
-    [[{ mutex_tok l Px }]][mutex_wsat ⟦⟧]
+  Lemma twp_try_acquire_loop_mutex_tok {sm l Px n} :
+    [[{ mutex_tok l Px }]][mutex_wsat sm]
       try_acquire_loop_mutex #n #l
-    [[{ b, RET #b; if b then ⟦ Px ⟧ else True }]].
+    [[{ b, RET #b; if b then sm Px else True }]].
   Proof.
     iIntros (Φ) "#l →Φ". iInduction n as [|n] "IH".
     { wp_lam. wp_pures. by iApply "→Φ". }
@@ -122,8 +124,8 @@ Section mutex.
 
   (** Release the lock on the mutex *)
   Definition release_mutex : val := λ: "l", "l" <- #false.
-  Lemma twp_release_mutex_tok {l Px} :
-    [[{ mutex_tok l Px ∗ ⟦ Px ⟧ }]][mutex_wsat ⟦⟧]
+  Lemma twp_release_mutex_tok {sm l Px} :
+    [[{ mutex_tok l Px ∗ sm Px }]][mutex_wsat sm]
       release_mutex #l
     [[{ RET #(); True }]].
   Proof.
@@ -135,11 +137,13 @@ Section mutex.
 End mutex.
 
 (** Allocate [mutex_wsat] *)
-Lemma mutex_wsat_alloc `{!mutexGpreS FML Σ, !heapGS_gen hlc Σ} :
-  ⊢ |==> ∃ _ : mutexGS FML Σ, ∀ sm, mutex_wsat sm.
+Lemma mutex_wsat_alloc
+  `{!mutexGpreS FML Σ, !heapGS_gen hlc Σ} :
+  ⊢ |==> ∃ _ : mutexGS FML Σ,
+    ∀ sm, □ (∀ Px Qx, Px ≡ Qx -∗ sm Px -∗ sm Qx) -∗ mutex_wsat sm.
 Proof.
-  iMod inv_wsat_alloc as (?) "W". iModIntro. iExists _. iIntros (?).
-  rewrite mutex_wsat_unseal. iApply "W".
+  iMod inv_wsat_alloc as (?) "W". iModIntro. iExists _. iIntros (sm) "Ne".
+  rewrite mutex_wsat_unseal. iApply "W". by iApply mutex_sem_ne.
 Qed.
 
 (** ** Relax a mutex with derivability *)
