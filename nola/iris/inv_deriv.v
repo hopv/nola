@@ -48,9 +48,9 @@ Section inv_deriv.
   Implicit Type Px : FML $oi Σ.
 
   (** Accessor to the invariant body *)
-  Definition inv_acsr sm N Pi : iProp Σ :=
+  Definition inv_acsr sm N P : iProp Σ :=
     ∀ E, ⌜↑N ⊆ E⌝ → |=[inv_wsat sm]{E,E∖↑N}=>
-      Pi ∗ (Pi =[inv_wsat sm]{E∖↑N,E}=∗ True).
+      P ∗ (P =[inv_wsat sm]{E∖↑N,E}=∗ True).
 
   Context `{!InvPreDeriv (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
     !Dsem JUDGI (FML $oi Σ) (iProp Σ)}.

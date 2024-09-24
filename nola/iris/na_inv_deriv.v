@@ -51,10 +51,10 @@ Section na_inv_deriv.
   Implicit Type Px Qx PQx : FML $oi Σ.
 
   (** Accessor *)
-  Definition na_inv_acsr sm p N Pi : iProp Σ :=
+  Definition na_inv_acsr sm p N P : iProp Σ :=
     ∀ E F, ⌜↑N ⊆ E⌝ → ⌜↑N ⊆ F⌝ → na_own p F =[na_inv_wsat sm]{E}=∗
-      na_own p (F∖↑N) ∗ Pi ∗
-      (na_own p (F∖↑N) -∗ Pi =[na_inv_wsat sm]{E}=∗ na_own p F) .
+      na_own p (F∖↑N) ∗ P ∗
+      (na_own p (F∖↑N) -∗ P =[na_inv_wsat sm]{E}=∗ na_own p F) .
 
   Context `{!NaInvPreDeriv (FML $oi Σ) (JUDGI : judgi (iProp Σ)),
     !Dsem JUDGI (FML $oi Σ) (iProp Σ)}.
