@@ -191,6 +191,10 @@ Section pborrow.
     : iProp Σ := ∃ x', ⟨π, xπ π = x'⟩ ∗ sm (Φx x').
   Definition plend_body_var sm {X} (ξ : prvar X) (Φx : X -d> FML $oi Σ)
     : iProp Σ := plend_body sm (λ π, π ξ) Φx.
+  (** [plend_body] is non-expansive *)
+  #[export] Instance plend_body_ne `{!NonExpansive sm} {X n} :
+    Proper ((=) ==> (≡{n}≡) ==> (≡{n}≡)) (@plend_body sm X).
+  Proof. solve_proper. Qed.
 
   (** Semantics of [pborrow_fml] *)
   Local Definition pbsem sm : _ -d> iProp Σ := λ Pb, match Pb with
