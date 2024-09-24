@@ -3,7 +3,7 @@
 From nola.bi Require Export deriv.
 From nola.iris Require Export na_inv.
 From iris.proofmode Require Import proofmode.
-Import iPropAppNotation PsemNotation SemNotation UpdwNotation.
+Import iPropAppNotation UpdwNotation DsemNotation.
 
 (** Notation *)
 Notation na_inv_wsati δ := (na_inv_wsat ⟦⟧(δ)).

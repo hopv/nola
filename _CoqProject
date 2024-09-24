@@ -9,7 +9,6 @@ nola/util/gmultiset.v
 nola/util/prod.v
 nola/util/plist.v
 nola/util/proph.v
-nola/util/sem.v
 nola/util/order.v
 nola/util/psg.v
 nola/util/productive.v

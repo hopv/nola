@@ -65,7 +65,6 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`prod`](nola/util/prod.v) (Modified product),
     [`plist`](nola/util/plist.v) (Product list)
   + [`proph`](nola/util/proph.v) (Prophecy)
-  + [`sem`](nola/util/sem.v) (Semantics)
   + [`order`](nola/util/order.v) (Order theory),
     [`psg`](nola/util/psg.v) (Pseudo-gfp)
   + [`productive`](nola/util/productive.v) (Productivity)

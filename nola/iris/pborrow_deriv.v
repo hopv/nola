@@ -3,8 +3,8 @@
 From nola.bi Require Export deriv.
 From nola.iris Require Export pborrow.
 From iris.proofmode Require Import proofmode.
-Import ProdNotation PlistNotation iPropAppNotation PsemNotation SemNotation
-  UpdwNotation LftNotation ProphNotation.
+Import ProdNotation PlistNotation iPropAppNotation UpdwNotation LftNotation
+  ProphNotation DsemNotation.
 
 Implicit Type (TY : synty).
 

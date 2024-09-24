@@ -1,19 +1,28 @@
 (** * Derivability *)
 
-From nola.util Require Export sem psg.
+From nola.util Require Export psg.
 From nola.bi Require Export order.
 From iris.bi Require Import bi.
 From iris.proofmode Require Import proofmode.
-Import PsemNotation.
 
 (** ** [Dsem]: Semantics parameterized over derivability candidates *)
-Class Dsem (JUDG : ofe) (A : ofe) (PROP : bi) := DSEM {
-  dsem :: Psem (JUDG → PROP) A PROP;
+Record Dsem (JUDG : ofe) (A : ofe) (PROP : bi) := DSEM {
+  dsem :> (JUDG → PROP) → A → PROP;
   dsem_ne `{!NonExpansive δ} :: NonExpansive (dsem δ);
 }.
+Existing Class Dsem.
 Add Printing Constructor Dsem.
 Hint Mode Dsem - ! - : typeclass_instances.
 Arguments DSEM {_ _ _} _ {_}.
+Arguments dsem {_ _ _ _} _ _ /. Arguments dsem_ne {_ _ _ _}.
+
+Module DsemNotation'.
+  Notation "⟦ ⟧( x )" := (dsem x) (format "⟦ ⟧( x )").
+  Notation "⟦ ⟧( x )@{ A }" := (dsem (A:=A) x) (only parsing).
+  Notation "⟦ a ⟧( x )" := (dsem x a) (format "⟦  '[' a  ']' ⟧( x )").
+  Notation "⟦ a ⟧( x )@{ A }" := (dsem (A:=A) x a) (only parsing).
+End DsemNotation'.
+Import DsemNotation'.
 
 #[export] Instance dsem_proper `{!Dsem JUDG A PROP, !NonExpansive δ} :
   Proper ((≡) ==> (⊣⊢)) (@dsem JUDG A PROP _ δ).
@@ -41,7 +50,7 @@ Section deriv.
   (** ** [Deriv ih δ] : [δ] is a good derivability predicate
 
     [ih] is the inductive hypothesis, used for parameterized induction *)
-  Definition Deriv ih δ := Psgoidp (OT:=JUDGI → PROP) psem ih δ.
+  Definition Deriv ih δ := Psgoidp (OT:=JUDGI → PROP) dsem ih δ.
   Existing Class Deriv.
 
   (** [Deriv] is monotone over the inductive hypothesis *)
@@ -142,11 +151,7 @@ Section deriv.
   Qed.
 
   (** ** [der]: The best derivability predicate *)
-  Definition der : JUDGI → PROP := psg (OT:=JUDGI → PROP) psem.
-
-  (** [Sem] with [der] for [Dsem] *)
-  #[export] Instance Dsem_Sem `{!Dsem (JUDGI : judgi PROP) A PROP} : Sem A PROP
-    := ⟦⟧(der).
+  Definition der : JUDGI → PROP := psg (OT:=JUDGI → PROP) dsem.
 
   (** [der] satisfies [Deriv] *)
   #[export] Instance der_Deriv : Deriv (λ _, True) der.
@@ -156,3 +161,11 @@ Section deriv.
   Lemma der_sound {J} : der J ⊢ ⟦ J ⟧(der).
   Proof. move: J. exact (psg_post (OT:=JUDGI → PROP)). Qed.
 End deriv.
+
+Module DsemNotation.
+  Export DsemNotation'.
+  Notation "⟦ ⟧" := (⟦⟧(der)) (format "⟦ ⟧").
+  Notation "⟦ ⟧@{ A }" := (⟦ ⟧(der)@{ A }) (only parsing).
+  Notation "⟦ a ⟧" := (⟦ a ⟧(der)) (format "⟦  '[' a  ']' ⟧").
+  Notation "⟦ a ⟧@{ A }" := (⟦ a ⟧(der)@{ A }) (only parsing).
+End DsemNotation.

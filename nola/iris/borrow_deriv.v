@@ -3,8 +3,7 @@
 From nola.bi Require Export deriv.
 From nola.iris Require Export borrow.
 From iris.proofmode Require Import proofmode.
-Import ProdNotation iPropAppNotation PsemNotation SemNotation UpdwNotation
-  LftNotation.
+Import ProdNotation iPropAppNotation UpdwNotation LftNotation DsemNotation.
 
 (** Notation *)
 Notation borrow_wsati M δ := (borrow_wsat M ⟦⟧(δ)).

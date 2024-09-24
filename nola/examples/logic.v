@@ -4,8 +4,8 @@ From nola.iris Require Export cif inv pborrow.
 From nola.bi Require Import util.
 From nola.heap_lang Require Export notation proofmode lib.mutex.
 From nola.examples Require Export nsynty.
-Import ProdNotation UpdwNotation WpwNotation iPropAppNotation PsemNotation
-  SemNotation ProphNotation LftNotation NsyntyNotation FunPRNotation.
+Import ProdNotation UpdwNotation WpwNotation iPropAppNotation ProphNotation
+  LftNotation NsyntyNotation FunPRNotation DsemNotation.
 
 Implicit Type (N : namespace) (dq : dfrac) (l : loc) (b : bool) (α β : lft)
   (q : Qp) (X Y : nsynty).
@@ -223,7 +223,8 @@ Section sem.
   Canonical judgJ : judgi (iProp Σ) := Judgi (judg Σ).
 
   (** Simplify [to_cit (of_cit Px)] *)
-  Lemma sem_to_of_cit {Px} : ⟦ to_cit (of_cit Px) ⟧ ⊣⊢ ⟦ Px ⟧.
+  Lemma sem_to_of_cit `{!NonExpansive δ} {Px} :
+    ⟦ to_cit (of_cit Px) ⟧(δ) ⊣⊢ ⟦ Px ⟧(δ).
   Proof. by rewrite to_of_cit. Qed.
 End sem.
 

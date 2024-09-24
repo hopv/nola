@@ -4,8 +4,7 @@ From nola.heap_lang Require Import notation proofmode.
 From nola.util Require Import prod.
 From nola.bi Require Export deriv.
 From nola.iris Require Export iprop inv.
-Import ProdNotation iPropAppNotation UpdwNotation WpwNotation PsemNotation
-  SemNotation.
+Import ProdNotation iPropAppNotation UpdwNotation WpwNotation DsemNotation.
 
 Implicit Type (b : bool) (l : loc) (n : nat).
 
