@@ -250,6 +250,7 @@ Record SemCifcon (JUDG : ofe) CON Σ := SEM_CIFCON {
 Existing Class SemCifcon.
 Arguments SEM_CIFCON {_ _ _} _ _. Arguments sem_cifc {_ _ _ semc} : rename.
 Arguments sem_cifc_ne {_ _ _ semc _ _ _} : rename.
+Hint Mode SemCifcon - ! - : typeclass_instances.
 
 (** ** [cif_sem]: Semantics of [cif] *)
 Section iris.
@@ -283,15 +284,17 @@ End iris.
 
 (** [cif_sem]: Semantics of [cif] *)
 Notation cif_sem δ := (cit_fold (cif_bsem δ)).
+Notation cif_sem' CON δ := (cit_fold (cif_bsem (CON:=CON) δ)) (only parsing).
 
 Section iris.
   Context `{!SemCifcon JUDG CON Σ}.
 
   (** [cif_sem] is non-expansive *)
-  #[export] Instance cif_sem_ne `{!NonExpansive δ} : NonExpansive (cif_sem δ).
+  #[export] Instance cif_sem_ne `{!NonExpansive δ} :
+    NonExpansive (cif_sem' CON δ).
   Proof. move=> ?. apply cit_fold_ne_gen; solve_proper. Qed.
   #[export] Instance cif_sem_proper `{!NonExpansive δ} :
-    Proper ((≡) ==> (≡)) (cif_sem δ).
+    Proper ((≡) ==> (≡)) (cif_sem' CON δ).
   Proof. apply ne_proper, _. Qed.
   (** [Dsem] over [cif] *)
   #[export] Instance cif_dsem : Dsem JUDG (cifO CON Σ) (iProp Σ) :=
@@ -309,6 +312,7 @@ Class Ecifcon CON' CON := ECIFCON {
   ecifc_data {s} : CON.(cifc_data) (ecifc_sel s) = CON'.(cifc_data) s;
 }.
 Arguments ECIFCON {_ _}.
+Hint Mode Ecifcon ! ! : typeclass_instances.
 
 (** Inclusion into [sigTCC] *)
 #[export] Instance sigT_ecifcon {A CONF a} :
@@ -337,6 +341,7 @@ Existing Class SemEcifcon.
 Arguments SEM_ECIFCON {_ _ _ _} _ _.
 Arguments sem_ecifc {_ _ _ _ semec} : rename.
 Arguments sem_ecifc_ne {_ _ _ _ semec _ _ _} : rename.
+Hint Mode SemEcifcon - ! ! - : typeclass_instances.
 
 (** [SemCifcon] over [sigT] by [SemEcifcon] *)
 #[export] Program Instance sigT_sem_cifcon {JUDG A}
@@ -349,10 +354,11 @@ Next Obligation. solve_proper. Qed.
 Class EsemEcifcon JUDG CON' CON Σ `{!Ecifcon CON' CON}
   `{!SemEcifcon JUDG CON' CON Σ, !SemCifcon JUDG CON Σ} :=
   esem_ecifc : ∀ {δ s Φ Ψx d},
-    sem_cifc δ (ecifc_sel s) (λ i, Φ (rew[id] ecifc_idom in i))
+    sem_cifc (CON:=CON) δ (ecifc_sel s) (λ i, Φ (rew[id] ecifc_idom in i))
       (λ c, Ψx (rew[id] ecifc_cdom in c))
       (rew[λ F, F $oi Σ] eq_sym ecifc_data in d) =
-      sem_ecifc δ s Φ Ψx d.
+      sem_ecifc (CON':=CON') (CON:=CON) δ s Φ Ψx d.
+Hint Mode EsemEcifcon - ! ! - - - - : typeclass_instances.
 
 (** [EsemEcifcon] into [sigT] *)
 #[export] Instance sigT_esem_cifcon {JUDG A}

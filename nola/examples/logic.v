@@ -163,7 +163,7 @@ Definition judg Σ : ofe := (cif Σ * cif Σ)%type.
 Section sem.
   Context `{!inv'GS cifOF Σ, !mutexGS cifOF Σ, !pborrowGS nsynty cifOF Σ,
     !heapGS_gen hlc Σ}.
-  Implicit Type δ : judg Σ → iProp Σ.
+  Implicit Type (δ : judg Σ → iProp Σ) (Px : cif Σ).
 
   (** Relaxed invariant *)
   Definition inv' δ N Px : iProp Σ := ∃ Qx, δ (Px, Qx) ∗ inv_tok N Qx.
