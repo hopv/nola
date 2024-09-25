@@ -9,13 +9,13 @@ Import EqNotations iPropAppNotation FunPRNotation DsemNotation.
 
 (** ** [cifcon]: Custom constructor structure for [cif] *)
 #[projections(primitive)]
-Structure cifcon := Cifcon {
+Record cifcon := Cifcon {
   (** Selector of custom constructors *) cifc_sel :> Type;
-  (** Domain for inductive parts *) #[canonical=no] cifc_idom : cifc_sel → Type;
-  (** Domain for coinductive parts *) #[canonical=no]
+  (** Domain for inductive parts *) cifc_idom : cifc_sel → Type;
+  (** Domain for coinductive parts *)
     cifc_cdom : cifc_sel → Type;
-  (** Data [oFunctor] *) #[canonical=no] cifc_data : cifc_sel → oFunctor;
-  (** [cifc_data] is contractive *) #[canonical=no]
+  (** Data [oFunctor] *) cifc_data : cifc_sel → oFunctor;
+  (** [cifc_data] is contractive *)
     cifc_data_contractive {s} :: oFunctorContractive (cifc_data s);
 }.
 Add Printing Constructor cifcon.
@@ -25,7 +25,7 @@ Arguments cifc_data_contractive CON {_} : rename.
 Implicit Type CON : cifcon.
 
 (** Big sum of [cifcon]s *)
-Canonical sigTCC {A} (CONF : A → cifcon) := Cifcon (sigT CONF)
+Definition sigTCC {A} (CONF : A → cifcon) := Cifcon (sigT CONF)
   (λ ss, (CONF _).(cifc_idom) (projT2 ss))
   (λ ss, (CONF _).(cifc_cdom) (projT2 ss))
   (λ ss, (CONF _).(cifc_data) (projT2 ss)) _.
@@ -313,12 +313,13 @@ Class Ecifcon CON' CON := ECIFCON {
   ecifc_data {s} : CON.(cifc_data) (ecifc_sel s) = CON'.(cifc_data) s;
 }.
 Arguments ECIFCON {_ _}.
-Hint Mode Ecifcon ! ! : typeclass_instances.
+Hint Mode Ecifcon ! - : typeclass_instances.
 
 (** Inclusion into [sigTCC] *)
-#[export] Instance sigT_ecifcon {A CONF a} :
+Definition sigT_ecifcon {A CONF a} :
   Ecifcon (CONF a) (@sigTCC A CONF) :=
-  ECIFCON (existT a) (λ _, eq_refl) (λ _, eq_refl) (λ _, eq_refl).
+  ECIFCON (CON:=sigTCC _) (existT a)
+    (λ _, eq_refl) (λ _, eq_refl) (λ _, eq_refl).
 
 (** Custom constructor under [Ecifcon] *)
 Program Definition cif_ecustom `{!Ecifcon CON' CON} {Σ} (s : CON')
@@ -343,10 +344,10 @@ Add Printing Constructor SemEcifcon.
 Arguments SEM_ECIFCON {_ _ _ _} _ _.
 Arguments sem_ecifc {_ _ _ _ semec} : rename.
 Arguments sem_ecifc_ne {_ _ _ _ semec _ _ _} : rename.
-Hint Mode SemEcifcon - ! ! - : typeclass_instances.
+Hint Mode SemEcifcon - ! - - : typeclass_instances.
 
 (** [SemCifcon] over [sigT] by [SemEcifcon] *)
-#[export] Program Instance sigT_sem_cifcon {JUDG A}
+Program Definition sigT_sem_cifcon {JUDG A}
   `{semec : !∀ a, SemEcifcon JUDG (CONF a) (@sigTCC A CONF) Σ}
   : SemCifcon JUDG (sigTCC CONF) Σ :=
   SEM_CIFCON (λ δ s, semec _ δ (projT2 s)) _.
@@ -360,9 +361,11 @@ Class EsemEcifcon JUDG CON' CON Σ `{!Ecifcon CON' CON}
       (λ c, Ψx (rew[id] ecifc_cdom in c))
       (rew[λ F, F $oi Σ] eq_sym ecifc_data in d) =
       sem_ecifc (CON':=CON') (CON:=CON) δ s Φ Ψx d.
-Hint Mode EsemEcifcon - ! ! - - - - : typeclass_instances.
+Hint Mode EsemEcifcon - ! - - - - - : typeclass_instances.
 
 (** [EsemEcifcon] into [sigT] *)
-#[export] Instance sigT_esem_cifcon {JUDG A}
+Lemma sigT_esem_cifcon {JUDG A}
   `{semec : !∀ a, SemEcifcon JUDG (CONF a) (@sigTCC A CONF) Σ} {a} :
-  EsemEcifcon JUDG (CONF a) (sigTCC CONF) Σ := λ _ _ _ _ _, eq_refl.
+  EsemEcifcon (Ecifcon0:=sigT_ecifcon) (SemCifcon0:=sigT_sem_cifcon)
+    JUDG (CONF a) (sigTCC CONF) Σ.
+Proof. done. Qed.
