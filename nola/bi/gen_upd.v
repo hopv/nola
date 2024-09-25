@@ -184,6 +184,84 @@ Section gen_upd_b.
   Qed.
 End gen_upd_b.
 
+(** ** [GenUpdPlain]: General update behaving nicely over plain propositions
+
+  Analogous to [BiFupdPlainly] *)
+
+Class GenUpdPlain `{!BiPlainly PROP} M `{!@GenUpd PROP M}
+  : Prop := GEN_UPD_PLAIN {
+  (** Eliminate the modality over a plain proposition, keeping the premise *)
+  gen_upd_plain_keep_l `{!Plain P} {R} : (R -∗ M P) ∗ R ⊢ M (P ∗ R);
+  (** Eliminating a universal quantifier over the modality over plain
+    propositions *)
+  gen_upd_plain_forall_2 {A} {Φ : A → PROP} `{!∀ a, Plain (Φ a)} :
+    (∀ a, M (Φ a)) ⊢ M (∀ a, Φ a);
+}.
+Hint Mode GenUpdPlain + - ! - : typeclass_instances.
+
+(** [id] is [GenUpdPlain] *)
+#[export] Instance id_gen_upd_plain `{!BiPlainly PROP, !BiAffine PROP} :
+  GenUpdPlain (PROP:=PROP) id.
+Proof.
+  split=>/=; [|done]. move=> >. iIntros "[→P R]".
+  iDestruct ("→P" with "R") as "#?". by iFrame.
+Qed.
+
+(** [◇] is [GenUpdPlain] *)
+#[export] Instance except_0_gen_upd_plain `{!BiPlainly PROP, !BiAffine PROP} :
+  GenUpdPlain (PROP:=PROP) bi_except_0.
+Proof.
+  split.
+  { move=> >. iIntros "[→P R]". iDestruct ("→P" with "R") as "#?". by iFrame. }
+  { move=> >. by iIntros "? %". }
+Qed.
+
+(** [bupd] is [GenUpdPlain] under [BiBUpdPlainly] *)
+#[export] Instance bupd_gen_upd_plain
+  `{!BiBUpd PROP, !BiPlainly PROP, !BiBUpdPlainly PROP, !BiAffine PROP} :
+  GenUpdPlain (PROP:=PROP) bupd.
+Proof.
+  split.
+  - move=> >. iIntros "[→P R] !>". rewrite bupd_elim.
+    iDestruct ("→P" with "R") as "#?". by iFrame.
+  - move=> ? Φ ?. have ->: (∀ a, |==> Φ a) ⊢ (∀ a, Φ a); [|by iIntros].
+    f_equiv=> ?. by rewrite bupd_elim.
+Qed.
+
+(** [fupd] is [GenUpdPlain] under [BiFUpdPlainly] *)
+#[export] Instance fupd_gen_upd_plain
+  `{!BiFUpd PROP, !BiPlainly PROP, !BiFUpdPlainly PROP} {E} :
+  GenUpdPlain (PROP:=PROP) (fupd E E).
+Proof.
+  split=> >. { apply fupd_plain_keep_l, _. } { apply fupd_plain_forall_2, _. }
+Qed.
+
+(** Adding [◇] preserves [GenUpdPlain] *)
+#[export] Instance gen_upd_plain_except_0
+  `{!BiPlainly PROP, !@GenUpd PROP M, !GenUpdPlain M} :
+  GenUpdPlain (λ P, M (◇ P)%I).
+Proof.
+  split.
+  - move=> >. rewrite gen_upd_plain_keep_l. by iIntros ">[>$$]".
+  - move=> >. by rewrite gen_upd_plain_forall_2 bi.except_0_forall.
+Qed.
+
+Section gen_upd_plain.
+  Context `{!BiPlainly PROP, !@GenUpd PROP M, !GenUpdPlain M}.
+
+  (** Variant of [gen_upd_plain_keep_l] *)
+  Lemma gen_upd_plain_keep_r `{!Plain P} {R} : R ∗ (R -∗ M P) ⊢ M (R ∗ P).
+  Proof. rewrite comm [(_ ∗ P)%I]comm. apply gen_upd_plain_keep_l. Qed.
+
+  (** Variant of [gen_upd_plain_forall_2] *)
+  Lemma gen_upd_plain_forall {A} {Φ : A → PROP} `{!∀ a, Plain (Φ a)} :
+    M (∀ a, Φ a) ⊣⊢ ∀ a, M (Φ a).
+  Proof.
+    apply bi.equiv_entails. split; [|exact gen_upd_plain_forall_2].
+    iIntros "→Φ %". by iMod "→Φ".
+  Qed.
+End gen_upd_plain.
+
 Section mod_acsr.
   Context {PROP}.
 

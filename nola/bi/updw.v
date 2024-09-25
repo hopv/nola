@@ -125,7 +125,7 @@ Section lemmas.
     (∀ P Q, M P ∗ Q ⊢ M (P ∗ Q)) → Q ∗ modw M W P ⊢ modw M W (Q ∗ P).
   Proof. rewrite !(comm _ Q). apply modw_frame_r. Qed.
 
-  (** [modw] preserves [GenUpd] and [GenUpdB] *)
+  (** [modw] preserves [GenUpd], [GenUpdB] and [GenUpdPlain] *)
   #[export] Instance gen_upd_modw `{!GenUpd M} {W} : GenUpd (modw M W) | 10.
   Proof.
     split=> >. { exact _. } { by move=> ->. } { by iIntros "$$". }
@@ -135,6 +135,19 @@ Section lemmas.
   #[export] Instance gen_upd_b_modw
     `{!BiBUpd PROP, !GenUpd M, !GenUpdB M} {W} : GenUpdB (modw M W) | 10.
   Proof. by iIntros (?) ">$$". Qed.
+  #[export] Instance gen_upd_plain_modw `{!BiPlainly PROP, !BiBUpd PROP}
+    `{!GenUpd M, !GenUpdPlain M, !Affine W} :
+    GenUpdPlain (modw M W) | 10.
+  Proof.
+    split.
+    - move=> >. iIntros "[→P R] W". rewrite [(W ∗ _)%I]comm -assoc.
+      rewrite -gen_upd_plain_keep_l. iFrame "R W". iIntros "[R W]".
+      by iMod ("→P" with "R W") as "[_ $]".
+    - move=> ? Φ ?. iIntros "→Φ W".
+      iApply (gen_upd_plain_keep_r (M:=M) (P:=∀ a, Φ a)). iFrame "W".
+      iIntros "W". iApply (gen_upd_plain_forall (M:=M) (Φ:=Φ)). iIntros (a).
+      by iMod ("→Φ" $! a with "W") as "[_ $]".
+  Qed.
 
   (** Compose [modw]s accumulating the world satisfaction *)
   Lemma modw_modw_sep `{!Proper ((⊣⊢) ==> (⊣⊢)) M} {W W' P} :
