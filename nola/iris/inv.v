@@ -184,10 +184,16 @@ Section inv_wp.
 End inv_wp.
 
 (** Allocate [inv_wsat] *)
-Lemma inv_wsat_alloc `{!inv'GpreS FML Σ, !invGS_gen hlc Σ} :
+Lemma inv_wsat_alloc' `{!inv'GpreS FML Σ, !invGS_gen hlc Σ} :
   ⊢ |==> ∃ _ : inv'GS FML Σ,
     ∀ sm, □ (∀ Px Qx, Px ≡ Qx -∗ sm Px -∗ sm Qx) -∗ inv_wsat sm.
 Proof.
-  iMod sinv_wsat_alloc as (?) "W". iModIntro. iExists _. iIntros (?) "Ne".
+  iMod sinv_wsat_alloc' as (?) "W". iModIntro. iExists _. iIntros (?) "Ne".
   rewrite inv_wsat_unseal. iApply "W". by iApply inv_sem_ne.
+Qed.
+Lemma inv_wsat_alloc `{!inv'GpreS FML Σ, !invGS_gen hlc Σ} :
+  ⊢ |==> ∃ _ : inv'GS FML Σ, ∀ sm, ⌜NonExpansive sm⌝ -∗ inv_wsat sm.
+Proof.
+  iMod inv_wsat_alloc' as (?) "W". iModIntro. iExists _. iIntros (??).
+  iApply "W". iIntros "!> %% eqv ?". by iRewrite -"eqv".
 Qed.

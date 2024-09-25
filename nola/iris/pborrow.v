@@ -633,11 +633,18 @@ Section pborrow.
 End pborrow.
 
 (** Allocate [pborrow_wsat] *)
-Lemma pborrow_wsat_alloc `{!pborrowGpreS TY FML Σ} :
+Lemma pborrow_wsat_alloc' `{!pborrowGpreS TY FML Σ} :
   ⊢ |==> ∃ _ : pborrowGS TY FML Σ,
     ∀ M sm, □ (∀ Px Qx, Px ≡ Qx -∗ sm Px -∗ sm Qx) -∗ pborrow_wsat M sm.
 Proof.
-  iMod proph_init as (?) "_". iMod borrow_wsat_alloc as (?) "big".
+  iMod proph_init as (?) "_". iMod borrow_wsat_alloc' as (?) "big".
   iModIntro. iExists (PborrowGS _ _ _ _ _ _). iIntros (??) "Ne". iApply "big".
   by iApply pbsem_sem_ne.
+Qed.
+Lemma pborrow_wsat_alloc `{!pborrowGpreS TY FML Σ} :
+  ⊢ |==> ∃ _ : pborrowGS TY FML Σ,
+    ∀ M sm, ⌜NonExpansive sm⌝ -∗ pborrow_wsat M sm.
+Proof.
+  iMod pborrow_wsat_alloc' as (?) "W". iModIntro. iExists _. iIntros (???).
+  iApply "W". iIntros "!> %% eqv ?". by iRewrite -"eqv".
 Qed.

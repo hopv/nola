@@ -156,10 +156,16 @@ Proof.
   { apply gmap_view_auth_valid. } { iModIntro. by iExists (SinvGS _ _ _ γ). }
 Qed.
 (** Allocate [sinv_wsat] *)
-Lemma sinv_wsat_alloc `{!sinvGpreS FML Σ} :
+Lemma sinv_wsat_alloc' `{!sinvGpreS FML Σ} :
   ⊢ |==> ∃ _ : sinvGS FML Σ,
     ∀ sm, □ (∀ i Px Qx, Px ≡ Qx -∗ sm i Px -∗ sm i Qx) -∗ sinv_iwsat sm.
 Proof.
   iMod sinv_auth_tok_alloc_empty as (?) "●". iModIntro. iExists _.
   iIntros (?) "Ne". rewrite sinv_iwsat_unseal. by iFrame.
+Qed.
+Lemma sinv_wsat_alloc `{!sinvGpreS FML Σ} :
+  ⊢ |==> ∃ _ : sinvGS FML Σ, ∀ sm, ⌜∀ i, NonExpansive (sm i)⌝ -∗ sinv_iwsat sm.
+Proof.
+  iMod sinv_wsat_alloc' as (?) "W". iModIntro. iExists _. iIntros (??).
+  iApply "W". iIntros "!> %%% eqv ?". by iRewrite -"eqv".
 Qed.

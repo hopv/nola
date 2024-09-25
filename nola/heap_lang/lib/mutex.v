@@ -136,13 +136,18 @@ Section mutex.
 End mutex.
 
 (** Allocate [mutex_wsat] *)
-Lemma mutex_wsat_alloc
-  `{!mutexGpreS FML Σ, !heapGS_gen hlc Σ} :
+Lemma mutex_wsat_alloc' `{!mutexGpreS FML Σ, !heapGS_gen hlc Σ} :
   ⊢ |==> ∃ _ : mutexGS FML Σ,
     ∀ sm, □ (∀ Px Qx, Px ≡ Qx -∗ sm Px -∗ sm Qx) -∗ mutex_wsat sm.
 Proof.
-  iMod inv_wsat_alloc as (?) "W". iModIntro. iExists _. iIntros (sm) "Ne".
+  iMod inv_wsat_alloc' as (?) "W". iModIntro. iExists _. iIntros (sm) "Ne".
   rewrite mutex_wsat_unseal. iApply "W". by iApply mutex_sem_ne.
+Qed.
+Lemma mutex_wsat_alloc `{!mutexGpreS FML Σ, !heapGS_gen hlc Σ} :
+  ⊢ |==> ∃ _ : mutexGS FML Σ, ∀ sm, ⌜NonExpansive sm⌝ -∗ mutex_wsat sm.
+Proof.
+  iMod mutex_wsat_alloc' as (?) "W". iModIntro. iExists _. iIntros (??).
+  iApply "W". iIntros "!> %% eqv ?". by iRewrite -"eqv".
 Qed.
 
 (** ** Relax a mutex with derivability *)

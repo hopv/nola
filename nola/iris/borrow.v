@@ -857,7 +857,7 @@ Section borrow.
 End borrow.
 
 (** Allocate [borrow_wsat] *)
-Lemma borrow_wsat_alloc `{!borrowGpreS FML Σ} :
+Lemma borrow_wsat_alloc' `{!borrowGpreS FML Σ} :
   ⊢ |==> ∃ _ : borrowGS FML Σ,
     ∀ M sm, □ (∀ Px Qx, Px ≡ Qx -∗ sm Px -∗ sm Qx) -∗ borrow_wsat M sm.
 Proof.
@@ -865,4 +865,10 @@ Proof.
     [by apply auth_auth_valid|].
   iModIntro. iExists (BorrowGS _ _ _ _ γ). rewrite borrow_wsat_unseal.
   iIntros (??) "$". iExists []. by iFrame.
+Qed.
+Lemma borrow_wsat_alloc `{!borrowGpreS FML Σ} :
+  ⊢ |==> ∃ _ : borrowGS FML Σ, ∀ M sm, ⌜NonExpansive sm⌝ -∗ borrow_wsat M sm.
+Proof.
+  iMod borrow_wsat_alloc' as (?) "W". iModIntro. iExists _. iIntros (???).
+  iApply "W". iIntros "!> %% eqv ?". by iRewrite -"eqv".
 Qed.
