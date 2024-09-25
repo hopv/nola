@@ -72,6 +72,10 @@ Qed.
 Lemma fun_proeq {A PRF} :
   @proeq (@funPR A PRF) = λ k f g, ∀ a, proeq k (f a) (g a).
 Proof. done. Qed.
+(** Unfold [proeq_later] over [funPR] *)
+Lemma fun_proeq_later {A PRF k f g} :
+  @proeq_later (@funPR A PRF) k f g ↔ ∀ a, proeq_later k (f a) (g a).
+Proof. by case: k. Qed.
 
 Module FunPRNotation.
   Notation "A -pr> B" := (@funPR A (λ _, B))
