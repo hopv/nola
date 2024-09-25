@@ -12,22 +12,24 @@ Implicit Type Σ : gFunctors.
 (** ** [cifcon]: Custom constructor structure for [cif] *)
 #[projections(primitive)]
 Record cifcon := Cifcon {
+  (** Identifier *) cifc_id : Type;
   (** Selector of custom constructors *) cifc_sel :> Type;
   (** Domain for inductive parts *) cifc_idom : cifc_sel → Type;
-  (** Domain for coinductive parts *)
-    cifc_cdom : cifc_sel → Type;
+  (** Domain for coinductive parts *) cifc_cdom : cifc_sel → Type;
   (** Data [oFunctor] *) cifc_data : cifc_sel → oFunctor;
   (** [cifc_data] is contractive *)
     cifc_data_contractive {s} :: oFunctorContractive (cifc_data s);
 }.
 Add Printing Constructor cifcon.
-Arguments cifc_sel CON : rename. Arguments cifc_idom CON : rename.
-Arguments cifc_cdom CON : rename. Arguments cifc_data CON : rename.
+Arguments cifc_id CON : rename. Arguments cifc_sel CON : rename.
+Arguments cifc_idom CON : rename. Arguments cifc_cdom CON : rename.
+Arguments cifc_data CON : rename.
 Arguments cifc_data_contractive CON {_} : rename.
 Implicit Type CON : cifcon.
 
 (** Big sum of [cifcon]s *)
-Definition sigTCC {A} (CONF : A → cifcon) := Cifcon (sigT CONF)
+Variant sigTCC_id := .
+Canonical sigTCC {A} (CONF : A → cifcon) := Cifcon sigTCC_id (sigT CONF)
   (λ ss, (CONF _).(cifc_idom) (projT2 ss))
   (λ ss, (CONF _).(cifc_cdom) (projT2 ss))
   (λ ss, (CONF _).(cifc_data) (projT2 ss)) _.

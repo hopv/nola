@@ -12,8 +12,9 @@ Implicit Type (Σ : gFunctors) (N : namespace) (TY : synty) (dq : dfrac)
 
 (** ** Invariant *)
 (** [invCC]: Constructor *)
-Definition invCC : cifcon :=
-  Cifcon namespace (λ _, Empty_set) (λ _, unit) (λ _, unitO) _.
+Variant invCC_id := .
+Definition invCC :=
+  Cifcon invCC_id namespace (λ _, Empty_set) (λ _, unit) (λ _, unitO) _.
 (** [InvCon]: [invCC] registered *)
 Notation InvCon CON := (Ecifcon invCC CON).
 Section cif_inv.
@@ -44,8 +45,9 @@ Notation InvSem JUDG CON Σ := (EsemEcifcon JUDG invCC CON Σ).
 
 (** ** Borrow *)
 (** [borCC]: Constructor *)
+Variant borCC_id := .
 Definition borCC :=
-  Cifcon lft (λ _, Empty_set) (λ _, unit) (λ _, unitO) _.
+  Cifcon borCC_id lft (λ _, Empty_set) (λ _, unit) (λ _, unitO) _.
 (** [BorCon]: [borCC] registered *)
 Notation BorCon CON := (Ecifcon borCC CON).
 Section cif_bor.
@@ -76,8 +78,9 @@ Notation BorSem JUDG CON Σ := (EsemEcifcon JUDG borCC CON Σ).
 
 (** ** Prophetic borrow *)
 (** [pborCC]: Constructor *)
+Variant pborCC_id := .
 Definition pborCC TY :=
-  Cifcon (lft *' TY) (λ _, Empty_set) (λ '(_, X)', X)
+  Cifcon pborCC_id (lft *' TY) (λ _, Empty_set) (λ '(_, X)', X)
     (λ '(_, X)', leibnizO (X *' prvar X)) _.
 (** [PborCon]: [pborCC] registered *)
 Notation PborCon TY CON := (Ecifcon (pborCC TY) CON).
@@ -144,15 +147,16 @@ End iff_judg.
 
 (** ** Relaxed invariant *)
 (** [inv'CC]: Constructor *)
-Definition inv'CC : cifcon :=
-  Cifcon (namespace *' unit) (λ _, Empty_set) (λ _, unit) (λ _, unitO) _.
+Variant inv'CC_id := .
+Definition inv'CC :=
+  Cifcon inv'CC_id namespace (λ _, Empty_set) (λ _, unit) (λ _, unitO) _.
 (** [Inv'Con]: [inv'CC] registered *)
 Notation Inv'Con CON := (Ecifcon inv'CC CON).
 Section cif_inv'.
   Context `{!Inv'Con CON} {Σ}.
   (** [cif_inv']: Formula *)
   Definition cif_inv' N (Px : cif CON Σ) : cif CON Σ :=
-    cif_ecustom inv'CC (N, ())' nullary (unary Px) ().
+    cif_ecustom inv'CC N nullary (unary Px) ().
   (** [cif_inv'] is non-expansive *)
   #[export] Instance cif_inv'_ne {N} : NonExpansive (cif_inv' N).
   Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
@@ -177,7 +181,7 @@ Section cif_inv'.
   (** Semantics of [invCC] *)
   #[export] Program Instance inv'_sem_ecifcon
     : SemEcifcon JUDG inv'CC CON Σ :=
-    SEM_ECIFCON (λ δ '(N, _)' _ Φx _, inv' δ N (Φx ())) _.
+    SEM_ECIFCON (λ δ N _ Φx _, inv' δ N (Φx ())) _.
   Next Obligation. solve_proper. Qed.
 End cif_inv'.
 (** [inv'CC] semantics registered *)
