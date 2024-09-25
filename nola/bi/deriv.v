@@ -160,3 +160,36 @@ Module DsemNotation.
   Notation "⟦ a ⟧" := (⟦ a ⟧(der)) (format "⟦  '[' a  ']' ⟧").
   Notation "⟦ a ⟧@{ A }" := (⟦ a ⟧(der)@{ A }) (only parsing).
 End DsemNotation.
+
+(** ** [Ejudg]: Judgment inclusion *)
+Record Ejudg (JUDG' JUDG : ofe) := EJUDG {
+  ejudg :> JUDG' → JUDG;
+  ejudg_ne :: NonExpansive ejudg;
+}.
+Existing Class Ejudg.
+Add Printing Constructor Ejudg.
+Arguments EJUDG {_ _} _ _. Arguments ejudg _ {_ _}. Arguments ejudg_ne {_ _ _}.
+Hint Mode Ejudg ! - : typeclass_instances.
+
+(** Judgment inclusion into [sigT] *)
+Definition sigT_ejudg {A} {JUDGf : A → ofe} {a}
+  : Ejudg (JUDGf a) (sigTO JUDGf) := EJUDG (existT a) _.
+
+(** ** [Ejsem]: Judgment semantics inclusion *)
+Class Ejsem (JUDG' JUDG : ofe) PROP
+  `{!Ejudg JUDG' JUDG, !Jsem JUDG PROP, !Dsem JUDG JUDG' PROP} :=
+  sem_ejudg : ∀ {δ J}, ⟦ @ejudg JUDG' JUDG _ J ⟧(δ) = ⟦ J ⟧(δ).
+Hint Mode Ejsem ! - - - - - : typeclass_instances.
+
+(** Semantics over [sigT] *)
+Program Definition sigT_dsem {A} (F : A → ofe) {PROP JUDG}
+  `{!∀ a, Dsem JUDG (F a) PROP} : Dsem JUDG (sigT F) PROP :=
+  DSEM (λ δ s, ⟦ projT2 s ⟧(δ)) _.
+Next Obligation. move=> > [??][??][/=?]. subst=>/=. solve_proper. Qed.
+
+(** Judgment semantics inclusion into [sigT] *)
+Lemma sigT_ejsem {A} {JUDGf : A → ofe} {PROP}
+  (dsemf : ∀ a, Dsem (sigT JUDGf) (JUDGf a) PROP) {a} :
+  Ejsem (Ejudg0:=sigT_ejudg) (Jsem0:=sigT_dsem JUDGf)
+    (JUDGf a) (sigTO JUDGf) PROP.
+Proof. done. Qed.

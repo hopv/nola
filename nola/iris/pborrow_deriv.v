@@ -17,17 +17,11 @@ Definition pborrow_judgty TY (FM : ofe) : ofe := (
       (X -d> FM) * (Y -d> FM)))%type.
 
 (** ** [PborrowJudg]: Judgment structure for [pborrow] *)
-Class PborrowJudg TY (FM JUDG : ofe) := PBORROW_JUDG {
-  (** Inclusion of [borrow_judgty] *)
-  pborrow_judg : pborrow_judgty TY FM → JUDG;
-  (** [borrow_judg] is non-expansive *)
-  pborrow_judg_ne :: NonExpansive pborrow_judg;
-}.
-Hint Mode PborrowJudg - ! - : typeclass_instances.
-Arguments PBORROW_JUDG {_ _ _} _ _.
+Notation PborrowJudg TY FM JUDG := (Ejudg (pborrow_judgty TY FM) JUDG).
 
 Section pborrow_deriv.
-  Context `{!pborrowGS TY FML Σ, !PborrowJudg TY (FML $oi Σ) JUDG}.
+  Context `{!pborrowGS TY FML Σ,
+    pborrow_judg : !PborrowJudg TY (FML $oi Σ) JUDG}.
   Implicit Type (δ : JUDG → iProp Σ) (Px Qx : FML $oi Σ) (X Y : TY).
 
   (** Judgments *)
@@ -153,25 +147,15 @@ Section pborrow_deriv.
     move=> ???[?|]; [solve_proper|]. move=> [?[[??]?]][?[[??]?]][/=?].
     subst=>/=. move=> [/=[/=/leibniz_equiv_iff]]. solve_proper.
   Qed.
-
-  (** ** [PborrowJsem]: Judgment semantics for [pborrow] *)
-  Class PborrowJsem :=
-    (** Interpreting [pborrow_judg] *)
-    sem_pborrow_judg : ∀{δ J}, ⟦ pborrow_judg J ⟧(δ) ⊣⊢ pborrow_judg_sem δ J.
-
-  (** Interpreting [pborrow_jto] *)
-  Local Lemma sem_pborrow_jto `{!PborrowJsem} {δ Px Qx} :
-    ⟦ pborrow_jto Px Qx ⟧(δ) ⊣⊢ (⟦ Px ⟧(δ) ==∗ ⟦ Qx ⟧(δ)).
-  Proof. by rewrite sem_pborrow_judg. Qed.
-  (** Interpreting [pborrow_jlto] *)
-  Local Lemma sem_pborrow_jlto `{!PborrowJsem} {δ X Y xπ yπ}
-    {Φx Ψx : _ -d> FML $oi Σ} :
-    ⟦ pborrow_jlto (X:=X) (Y:=Y) xπ yπ Φx Ψx ⟧(δ) ⊣⊢
-      (plend_body ⟦ ⟧(δ) xπ Φx ==∗ plend_body ⟦ ⟧(δ) yπ Ψx).
-  Proof. by rewrite sem_pborrow_judg. Qed.
+  (** [Dsem] over [pborrow_judgty] *)
+  #[export] Instance pborrow_jto_dsem
+    : Dsem JUDG (pborrow_judgty TY (FML $oi Σ)) (iProp Σ) :=
+    DSEM pborrow_judg_sem _.
 End pborrow_deriv.
-Arguments PborrowJsem TY FML Σ {_} JUDG {_ _ _}.
-Hint Mode PborrowJsem - ! - - - - - - : typeclass_instances.
+
+(** ** [PborrowJsem]: Judgment semantics for [pborrow] *)
+Notation PborrowJsem TY FML Σ JUDG :=
+  (Ejsem (pborrow_judgty TY (FML $oi Σ)) JUDG (iProp Σ)).
 
 Section pborrow_deriv.
   Context `{!pborrowGS TY FML Σ, !PborrowJudg TY (FML $oi Σ) JUDG,
@@ -182,60 +166,61 @@ Section pborrow_deriv.
   (** ** Conversion *)
 
   (** Lemmas for [pborrow_jto] *)
-  Lemma pborrow_jto_refl {Px} : ⊢ δ (pborrow_jto Px Px).
+  Local Lemma pborrow_jto_refl {Px} : ⊢ δ (pborrow_jto Px Px).
   Proof.
-    iApply Deriv_factor. iIntros (????). rewrite sem_pborrow_jto.
+    iApply Deriv_factor. iIntros (????). rewrite sem_ejudg.
     by iIntros "$".
   Qed.
-  Lemma pborrow_jto_trans {Px Qx Rx} :
+  Local Lemma pborrow_jto_trans {Px Qx Rx} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
       ⟦ Px ⟧(δ') ==∗ ⟦ Qx ⟧(δ')) -∗
     δ (pborrow_jto Qx Rx) -∗ δ (pborrow_jto Px Rx).
   Proof.
-    iIntros "big". iApply Deriv_map. iIntros (????). rewrite !sem_pborrow_jto.
+    iIntros "big". iApply Deriv_map. iIntros (????). rewrite !sem_ejudg.
     iIntros "QR Px". iMod ("big" with "[//] [//] [//] Px"). by iApply "QR".
   Qed.
-  Lemma pborrow_jto_trans' {Px Qx Rx} :
+  Local Lemma pborrow_jto_trans' {Px Qx Rx} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ → ⟦ Qx ⟧(δ') ==∗ ⟦ Rx ⟧(δ'))
       -∗ δ (pborrow_jto Px Qx) -∗ δ (pborrow_jto Px Rx).
   Proof.
-    iIntros "big". iApply Deriv_map. iIntros (????). rewrite !sem_pborrow_jto.
+    iIntros "big". iApply Deriv_map. iIntros (????). rewrite !sem_ejudg.
     iIntros "PQ Px". iMod ("PQ" with "Px"). by iApply "big".
   Qed.
-  Lemma der_pborrow_jto {Px Qx} :
+  Local Lemma der_pborrow_jto {Px Qx} :
     der (pborrow_jto Px Qx) ⊢ (⟦ Px ⟧ ==∗ ⟦ Qx ⟧).
-  Proof. by rewrite der_sound sem_pborrow_jto. Qed.
+  Proof. by rewrite der_sound sem_ejudg. Qed.
 
   (** Lemmas for [pborrow_jlto] *)
-  Lemma pborrow_jlto_refl {X xπ Φx} : ⊢ δ (pborrow_jlto (X:=X) xπ xπ Φx Φx).
+  Local Lemma pborrow_jlto_refl {X xπ Φx} :
+    ⊢ δ (pborrow_jlto (X:=X) xπ xπ Φx Φx).
   Proof.
-    iApply Deriv_factor. iIntros (????). rewrite sem_pborrow_jlto.
+    iApply Deriv_factor. iIntros (????). rewrite sem_ejudg.
     by iIntros "$".
   Qed.
-  Lemma pborrow_jlto_trans {X Y Z xπ yπ zπ Φx Ψx Ω} :
+  Local Lemma pborrow_jlto_trans {X Y Z xπ yπ zπ Φx Ψx Ω} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
       plend_body ⟦ ⟧(δ') xπ Φx ==∗ plend_body ⟦ ⟧(δ') yπ Ψx) -∗
     δ (pborrow_jlto (X:=Y) (Y:=Z) yπ zπ Ψx Ω) -∗
     δ (pborrow_jlto (X:=X) xπ zπ Φx Ω).
   Proof.
     iIntros "big". iApply Deriv_map. iIntros (????).
-    rewrite !sem_pborrow_jlto. iIntros "ΨΩ Φx".
+    rewrite !sem_ejudg. iIntros "ΨΩ Φx".
     iMod ("big" with "[//] [//] [//] Φx"). by iApply "ΨΩ".
   Qed.
-  Lemma pborrow_jlto_trans' {X Y Z xπ yπ zπ Φx Ψx Ω} :
+  Local Lemma pborrow_jlto_trans' {X Y Z xπ yπ zπ Φx Ψx Ω} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
       plend_body ⟦ ⟧(δ') yπ Ψx ==∗ plend_body ⟦ ⟧(δ') zπ Ω) -∗
     δ (pborrow_jlto (X:=X) (Y:=Y) xπ yπ Φx Ψx) -∗
     δ (pborrow_jlto (Y:=Z) xπ zπ Φx Ω).
   Proof.
     iIntros "big". iApply Deriv_map. iIntros (????).
-    rewrite !sem_pborrow_jlto. iIntros "ΦΨ Φx". iMod ("ΦΨ" with "Φx").
+    rewrite !sem_ejudg. iIntros "ΦΨ Φx". iMod ("ΦΨ" with "Φx").
     by iApply "big".
   Qed.
-  Lemma der_pborrow_jlto {X Y xπ yπ Φx Ψx} :
+  Local Lemma der_pborrow_jlto {X Y xπ yπ Φx Ψx} :
     der (pborrow_jlto (X:=X) (Y:=Y) xπ yπ Φx Ψx) ⊢
       (plend_bodyid xπ Φx ==∗ plend_bodyid yπ Ψx).
-  Proof. by rewrite der_sound sem_pborrow_jlto. Qed.
+  Proof. by rewrite der_sound sem_ejudg. Qed.
 
   (** Convert the body of borrower and lender propositions *)
   Lemma nbor_to {α Px Qx} :

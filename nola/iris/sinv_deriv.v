@@ -10,22 +10,20 @@ Definition sinv_judgty (FM : ofe) : ofe :=
   (FM * FM)%type (** Accessor judgment *).
 
 (** ** [SinvJudg]: Judgment structure for [sinv] *)
-Class SinvJudg (FM JUDG : ofe) := SINV_JUDG {
-  (** Inclusion of [sinv_judgty] *)
-  sinv_judg : sinv_judgty FM → JUDG;
-  (** [sinv_judg] is non-expansive *)
-  sinv_judg_ne :: NonExpansive sinv_judg;
-}.
-Hint Mode SinvJudg ! - : typeclass_instances.
-Arguments SINV_JUDG {_ _} _ _.
+Notation SinvJudg FM JUDG := (Ejudg (sinv_judgty FM) JUDG).
 
 Section sinv_deriv.
-  Context `{!sinvGS FML Σ, !SinvJudg (FML $oi Σ) JUDG}.
+  Context `{!sinvGS FML Σ, sinv_judg : !SinvJudg (FML $oi Σ) JUDG}.
   Implicit Type δ : JUDG → iProp Σ.
+
+  (** Accessor judgment *)
+  Local Definition sinv_jacsr (Px Qx : FML $oi Σ) : JUDG := sinv_judg (Px, Qx).
+  Local Instance sinv_jacsr_ne : NonExpansive2 sinv_jacsr.
+  Proof. solve_proper. Qed.
 
   (** [sinv]: Relaxed simple invariant *)
   Local Definition sinv_def δ (Px : FML $oi Σ) : iProp Σ :=
-    ∃ Qx, □ δ (sinv_judg (Qx, Px)) ∗ sinv_tok Qx.
+    ∃ Qx, □ δ (sinv_jacsr Qx Px) ∗ sinv_tok Qx.
   Local Lemma sinv_aux : seal sinv_def. Proof. by eexists. Qed.
   Definition sinv := sinv_aux.(unseal).
   Local Lemma sinv_unseal : sinv = sinv_def. Proof. exact: seal_eq. Qed.
@@ -50,36 +48,35 @@ Notation sinv_wsatid := (sinv_wsati der).
 Section sinv_deriv.
   Context `{!SinvJudg (FML $oi Σ) JUDG, !Jsem JUDG (iProp Σ),
     !Dsem JUDG (FML $oi Σ) (iProp Σ)}.
-  Implicit Type (δ : JUDG → iProp Σ) (Px Qx : FML $oi Σ).
+  Implicit Type (δ : JUDG → iProp Σ).
 
   (** ** [sinv_judg_sem]: Semantics of [sinv_judgty] *)
-  Definition sinv_judg_sem M δ (PQx : sinv_judgty (FML $oi Σ)) : iProp Σ :=
-    mod_acsr M ⟦ PQx.1 ⟧(δ) ⟦ PQx.2 ⟧(δ).
+  Definition sinv_judg_sem δ (PQx : sinv_judgty (FML $oi Σ)) : iProp Σ :=
+    mod_acsr bupd ⟦ PQx.1 ⟧(δ) ⟦ PQx.2 ⟧(δ).
   (** [sinv_judg_sem] is non-expansive *)
-  #[export] Instance sinv_judg_sem_ne `{!NonExpansive M, !NonExpansive δ} :
-    NonExpansive (sinv_judg_sem M δ).
+  #[export] Instance sinv_judg_sem_ne `{!NonExpansive δ} :
+    NonExpansive (sinv_judg_sem δ).
   Proof. solve_proper. Qed.
+  (** [Dsem] over [sinv_judgty] *)
+  #[export] Instance sinv_judg_dsem
+    : Dsem JUDG (sinv_judgty (FML $oi Σ)) (iProp Σ) := DSEM sinv_judg_sem _.
+End sinv_deriv.
 
-  (** [SinvJsem]: Judgment semantics for [sinv] *)
-  Class SinvJsem := SINV_DERIV {
-    (** Modality for accessing the simple invariant *)
-    sinv_mod : iProp Σ → iProp Σ;
-    (** [sinv_mod] is [GenUpd] *)
-    sinv_mod_gen_upd :: GenUpd sinv_mod;
-    (** Interpreting [sinv_judg] *)
-    sem_sinv_judg {δ PQx} :
-      ⟦ sinv_judg PQx ⟧(δ) ⊣⊢ sinv_judg_sem sinv_mod δ PQx;
-  }.
+(** ** [SinvJsem]: Judgment semantics for [sinv] *)
+Notation SinvJsem FML Σ JUDG :=
+  (Ejsem (sinv_judgty (FML $oi Σ)) JUDG (iProp Σ)).
 
-  Context `{!sinvGS FML Σ, !SinvJsem}.
+Section sinv_deriv.
+  Context `{!sinvGS FML Σ, !SinvJudg (FML $oi Σ) JUDG, !Jsem JUDG (iProp Σ),
+    !Dsem JUDG (FML $oi Σ) (iProp Σ), !SinvJsem FML Σ JUDG}.
+  Implicit Type Px Qx : FML $oi Σ.
 
   (** Access [sinv] *)
   Lemma sinv_acc {Px} :
-    sinvd Px -∗ sinv_wsatid -∗ sinv_mod
-      (⟦ Px ⟧ ∗ (⟦ Px ⟧ -∗ sinv_mod sinv_wsatid)).
+    sinvd Px -∗ sinv_wsatid ==∗ (⟦ Px ⟧ ∗ (⟦ Px ⟧ ==∗ sinv_wsatid)).
   Proof.
     rewrite sinv_unseal. iIntros "[%Qx[QPQ s]] W".
-    iDestruct (der_sound with "QPQ") as "QPQ". rewrite sem_sinv_judg.
+    iDestruct (der_sound with "QPQ") as "QPQ". rewrite sem_ejudg /=.
     iDestruct (sinv_tok_acc with "s W") as "[Qx cl]".
     iMod ("QPQ" with "Qx") as "[$ PQx]". iIntros "!> Px".
     iMod ("PQx" with "Px") as "Qx". iModIntro. by iApply "cl".
@@ -91,7 +88,7 @@ Section sinv_deriv.
   Lemma sinv_tok_sinv {Px} : sinv_tok Px ⊢ sinv δ Px.
   Proof.
     rewrite sinv_unseal. iIntros "$ !>". iApply Deriv_factor. iIntros (? _ _ _).
-    rewrite sem_sinv_judg. iApply (mod_acsr_refl (M:=sinv_mod)).
+    rewrite sem_ejudg. iApply (mod_acsr_refl (M:=bupd)).
   Qed.
 
   (** Allocate [sinv] *)
@@ -101,12 +98,12 @@ Section sinv_deriv.
   (** Convert [sinv] with [mod_acsr] *)
   Lemma sinv_acsr {Px Qx} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      mod_acsr sinv_mod ⟦ Px ⟧(δ') ⟦ Qx ⟧(δ')) -∗
+      mod_acsr bupd ⟦ Px ⟧(δ') ⟦ Qx ⟧(δ')) -∗
       sinv δ Px -∗ sinv δ Qx.
   Proof.
     rewrite sinv_unseal. iIntros "#PQP [%R[#RPR $]] !>". iApply Deriv_factor.
-    iIntros (??? to). rewrite sem_sinv_judg.
-    iApply (mod_acsr_trans (M:=sinv_mod)). { by rewrite to sem_sinv_judg. }
+    iIntros (??? to). rewrite sem_ejudg.
+    iApply (mod_acsr_trans (M:=bupd)). { by rewrite to sem_ejudg. }
     by iApply "PQP".
   Qed.
 
@@ -115,7 +112,7 @@ Section sinv_deriv.
     (∀ δ', ⟦ PQx ⟧(δ') ≡ (⟦ Px ⟧(δ') ∗ ⟦ Qx ⟧(δ'))%I) → sinv δ PQx ⊢ sinv δ Px.
   Proof.
     move=> eq. iApply sinv_acsr. iIntros "!>" (????). rewrite eq.
-    iApply (mod_acsr_sep_l (M:=sinv_mod)).
+    iApply (mod_acsr_sep_l (M:=bupd)).
   Qed.
   Lemma sinv_sep {PQx Px Qx} :
     (∀ δ', ⟦ PQx ⟧(δ') ≡ (⟦ Px ⟧(δ') ∗ ⟦ Qx ⟧(δ'))%I) →
@@ -125,5 +122,3 @@ Section sinv_deriv.
     iApply (sinv_sep' with "s"). iIntros (?). by rewrite eq comm.
   Qed.
 End sinv_deriv.
-Arguments SinvJsem FML Σ JUDG {_ _ _}.
-Hint Mode SinvJsem ! - - - - - : typeclass_instances.

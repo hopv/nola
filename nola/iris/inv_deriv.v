@@ -13,21 +13,19 @@ Definition inv_judgty (FM : ofe) : ofe :=
   (leibnizO namespace * FM)%type (** Accessor judgment *).
 
 (** ** [InvJudg]: Judgment structure for [inv] *)
-Class InvJudg (FM JUDG : ofe) := INV_JUDG {
-  (** Inclusion of [inv_judgty] *)
-  inv_judg : inv_judgty FM → JUDG;
-  (** [inv_judg] is non-expansive *)
-  inv_judg_ne :: NonExpansive inv_judg;
-}.
-Hint Mode InvJudg ! - : typeclass_instances.
-Arguments INV_JUDG {_ _} _ _.
+Notation InvJudg FM JUDG := (Ejudg (inv_judgty FM) JUDG).
 
 Section inv_deriv.
-  Context `{!InvJudg FM JUDG} {Σ : gFunctors}.
+  Context `{inv_judg : !InvJudg FM JUDG} {Σ : gFunctors}.
   Implicit Type (δ : JUDG → iProp Σ) (Px : FM).
 
+  (** Accessor judgment *)
+  Local Definition inv_jacsr N Px : JUDG := inv_judg (N, Px).
+  Local Instance inv_jacsr_ne {N} : NonExpansive (inv_jacsr N).
+  Proof. unfold inv_jacsr=> ????. f_equiv. by split. Qed.
+
   (** [inv']: Relaxed invariant *)
-  Local Definition inv'_def δ N (Px : FM) : iProp Σ := □ δ (inv_judg (N, Px)).
+  Local Definition inv'_def δ N (Px : FM) : iProp Σ := □ δ (inv_jacsr N Px).
   Local Lemma inv'_aux : seal inv'_def. Proof. by eexists. Qed.
   Definition inv' := inv'_aux.(unseal).
   Local Lemma inv'_unseal : inv' = inv'_def. Proof. exact: seal_eq. Qed.
@@ -38,7 +36,7 @@ Section inv_deriv.
 
   (** [inv'] is non-expansive *)
   #[export] Instance inv'_ne `{!NonExpansive δ} {N} : NonExpansive (inv' δ N).
-  Proof. rewrite inv'_unseal /inv'_def=> ????. do 3 f_equiv. by split. Qed.
+  Proof. rewrite inv'_unseal. solve_proper. Qed.
   #[export] Instance inv'_proper `{!NonExpansive δ} {N} :
     Proper ((≡) ==> (⊣⊢)) (inv' δ N).
   Proof. apply ne_proper, _. Qed.
@@ -73,13 +71,19 @@ Section inv_deriv.
   #[export] Instance inv_judg_sem_ne `{!NonExpansive δ} :
     NonExpansive (inv_judg_sem δ).
   Proof. move=> ?[??][??][/=/leibniz_equiv_iff<-?]. solve_proper. Qed.
+  (** [Dsem] over [inv_judgty] *)
+  #[export] Instance inv_judg_dsem
+    : Dsem JUDG (inv_judgty (FML $oi Σ)) (iProp Σ) := DSEM inv_judg_sem _.
+End inv_deriv.
 
-  (** ** [InvJsem]: Judgment semantics for [inv] *)
-  Class InvJsem :=
-    (** Interpreting [inv_judg] *)
-    sem_inv_judg : ∀ {δ NPx}, ⟦ inv_judg NPx ⟧(δ) ⊣⊢ inv_judg_sem δ NPx.
+(** ** [InvJsem]: Judgment semantics for [inv] *)
+Notation InvJsem FML Σ JUDG := (Ejsem (inv_judgty (FML $oi Σ)) JUDG (iProp Σ)).
 
-  Context `{!InvJsem}.
+Section inv_deriv.
+  Context `{!inv'GS FML Σ, !invGS_gen hlc Σ, !InvJudg (FML $oi Σ) JUDG,
+    !Jsem JUDG (iProp Σ), !Dsem JUDG (FML $oi Σ) (iProp Σ),
+    !InvJsem FML Σ JUDG}.
+  Implicit Type Px Qx : FML $oi Σ.
 
   (** Access using [inv'] *)
   Lemma invd_acc {N Px E} : ↑N ⊆ E →
@@ -87,10 +91,10 @@ Section inv_deriv.
       ⟦ Px ⟧ ∗ (⟦ Px ⟧ =[inv_wsatid]{E∖↑N,E}=∗ True).
   Proof.
     rewrite inv'_unseal. iIntros (?) "accPx".
-    iDestruct (der_sound with "accPx") as "accPx". rewrite sem_inv_judg.
+    iDestruct (der_sound with "accPx") as "accPx". rewrite sem_ejudg.
     by iApply "accPx".
   Qed.
-  (** Access using [inv'] via *)
+  (** Access using [inv'] via view shift *)
   Lemma invd_acc_vs {N Px E Q R} : ↑N ⊆ E →
     □ (⟦ Px ⟧ -∗ Q =[inv_wsatid]{E∖↑N}=∗ ⟦ Px ⟧ ∗ R) -∗
     □ (invd N Px -∗ Q =[inv_wsatid]{E}=∗ R).
@@ -98,34 +102,8 @@ Section inv_deriv.
     iIntros (?) "#vs !> i Q". iMod (invd_acc with "i") as "[Px cl]"; [done|].
     iMod ("vs" with "Px Q") as "[Px $]". by iApply "cl".
   Qed.
-End inv_deriv.
-Arguments InvJsem FML Σ {_ _ _} JUDG {_ _ _}.
-Hint Mode InvJsem ! - - - - - - - - : typeclass_instances.
 
-Section inv_deriv_wp.
-  Context `{!inv'GS FML Σ, !iris'GS_gen hlc Λ Σ, !InvJudg (FML $oi Σ) JUDG,
-    !Jsem JUDG (iProp Σ), !Dsem JUDG (FML $oi Σ) (iProp Σ),
-    !InvJsem FML Σ JUDG}.
-  Implicit Type Px : FML $oi Σ.
-
-  (** Access using [invd] via [twp] *)
-  Lemma invd_acc_twp `{!Atomic (stuckness_to_atomicity s) e} {N Px E Q Ψ} :
-    ↑N ⊆ E → to_val e = None →
-    [[{ ⟦ Px ⟧ ∗ Q }]][inv_wsatid] e @ s; E∖↑N [[{ v, RET v; ⟦ Px ⟧ ∗ Ψ v }]] -∗
-      [[{ invd N Px ∗ Q }]][inv_wsatid] e @ s; E [[{ v, RET v; Ψ v }]].
-  Proof.
-    iIntros (??) "#twp %Φ !> [i Q] →Φ".
-    iMod (invd_acc with "i") as "[Px cl]"; [done..|].
-    iApply ("twp" with "[$Px $Q //]"). iIntros (?) "[Px Ψ]".
-    iMod ("cl" with "Px") as "_". iModIntro. by iApply "→Φ". Unshelve.
-  Qed.
-End inv_deriv_wp.
-
-Section inv_deriv.
-  Context `{!inv'GS FML Σ, !invGS_gen hlc Σ, !InvJudg (FML $oi Σ) JUDG,
-    !Jsem JUDG (iProp Σ), !Dsem JUDG (FML $oi Σ) (iProp Σ),
-    !InvJsem FML Σ JUDG, !Deriv (JUDG:=JUDG) ih δ}.
-  Implicit Type Px Qx PQx : FML $oi Σ.
+  Context `{!Deriv (JUDG:=JUDG) ih δ}.
 
   (** Turn [inv_acsr] into [inv'] *)
   Lemma inv_acsr_inv' {N Px} :
@@ -133,7 +111,7 @@ Section inv_deriv.
       inv_acsr ⟦⟧(δ') N ⟦ Px ⟧(δ')) ⊢ inv' δ N Px.
   Proof.
     rewrite inv'_unseal. iIntros "#big !>". iApply Deriv_factor. iIntros (????).
-    rewrite sem_inv_judg. by iApply "big".
+    rewrite sem_ejudg. by iApply "big".
   Qed.
 
   (** Turn [inv_tok] into [inv'] *)
@@ -161,7 +139,7 @@ Section inv_deriv.
       inv' δ N Px -∗ inv' δ N Qx.
   Proof.
     rewrite inv'_unseal. iIntros "#PQP #accPx !>". iApply Deriv_factor.
-    iIntros (??? to). rewrite to !sem_inv_judg. iIntros (? NE).
+    iIntros (??? to). rewrite to !sem_ejudg. iIntros (? NE).
     iMod ("accPx" $! _ NE) as "[Px cl]".
     iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
     iMod ("PQP" with "[//] [//] [//] Px") as "($& QP)". iMod "→E∖N" as "_".
@@ -200,10 +178,28 @@ Section inv_deriv.
   Proof.
     rewrite inv'_unseal. iIntros (?? eq) "#i #i' !>".
     iApply (Deriv_map2 with "[] i i'"). iIntros (????) "{i}i {i'}i'".
-    rewrite !sem_inv_judg. iIntros (??). rewrite eq.
+    rewrite !sem_ejudg. iIntros (??). rewrite eq.
     iMod ("i" with "[%]") as "[$ Px→]"; [set_solver|].
     iMod ("i'" with "[%]") as "[$ Qx→]"; [set_solver|].
     iApply fupdw_mask_intro; [set_solver|]. iIntros "cl [Px Qx]".
     iMod "cl" as "_". iMod ("Qx→" with "Qx") as "_". iApply ("Px→" with "Px").
   Qed.
 End inv_deriv.
+
+Section inv_deriv_wp.
+  Context `{!inv'GS FML Σ, !iris'GS_gen hlc Λ Σ, !InvJudg (FML $oi Σ) JUDG,
+    !Jsem JUDG (iProp Σ), !Dsem JUDG (FML $oi Σ) (iProp Σ),
+    !InvJsem FML Σ JUDG}.
+
+  (** Access using [invd] via [twp] *)
+  Lemma invd_acc_twp `{!Atomic (stuckness_to_atomicity s) e} {N Px E Q Ψ} :
+    ↑N ⊆ E → to_val e = None →
+    [[{ ⟦ Px ⟧ ∗ Q }]][inv_wsatid] e @ s; E∖↑N [[{ v, RET v; ⟦ Px ⟧ ∗ Ψ v }]] -∗
+      [[{ invd N Px ∗ Q }]][inv_wsatid] e @ s; E [[{ v, RET v; Ψ v }]].
+  Proof.
+    iIntros (??) "#twp %Φ !> [i Q] →Φ".
+    iMod (invd_acc with "i") as "[Px cl]"; [done..|].
+    iApply ("twp" with "[$Px $Q //]"). iIntros (?) "[Px Ψ]".
+    iMod ("cl" with "Px") as "_". iModIntro. by iApply "→Φ". Unshelve.
+  Qed.
+End inv_deriv_wp.
