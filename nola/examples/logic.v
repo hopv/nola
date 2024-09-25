@@ -191,7 +191,7 @@ Section sem.
 
   (** Simplify [to_cit (of_cit Px)] *)
   Lemma sem_to_of_cit `{!NonExpansive δ} {Px} :
-    ⟦ to_cit (of_cit Px) ⟧(δ) ⊣⊢ ⟦ Px ⟧(δ).
+    cif_sem δ (to_cit (of_cit Px)) ⊣⊢ ⟦ Px ⟧(δ).
   Proof. by rewrite to_of_cit. Qed.
 End sem.
 

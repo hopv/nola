@@ -6,6 +6,7 @@ From iris.bi Require Import bi.
 From iris.proofmode Require Import proofmode.
 
 (** ** [Dsem]: Semantics parameterized over derivability candidates *)
+#[projections(primitive)]
 Record Dsem (JUDG : ofe) (A : ofe) (PROP : bi) := DSEM {
   dsem :> (JUDG → PROP) → A → PROP;
   dsem_ne `{!NonExpansive δ} :: NonExpansive (dsem δ);
