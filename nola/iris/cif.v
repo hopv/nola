@@ -7,6 +7,8 @@ From nola.bi Require Import later.
 From nola.iris Require Export iprop.
 Import EqNotations iPropAppNotation FunPRNotation DsemNotation.
 
+Implicit Type Σ : gFunctors.
+
 (** ** [cifcon]: Custom constructor structure for [cif] *)
 #[projections(primitive)]
 Record cifcon := Cifcon {
@@ -106,7 +108,7 @@ Proof. exact _. Qed.
 
 (** ** Construct [cif] *)
 Section cif.
-  Context {CON} {Σ : gFunctors}.
+  Context {CON Σ}.
 
   (** Basic connectives *)
 

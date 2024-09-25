@@ -6,7 +6,7 @@ From nola.iris Require Export inv.
 From iris.proofmode Require Import proofmode.
 Import iPropAppNotation UpdwNotation WpwNotation DsemNotation.
 
-Implicit Type N : namespace.
+Implicit Type (Σ : gFunctors) (N : namespace).
 
 (** ** [inv_judgty]: Judgment type for [inv] *)
 Definition inv_judgty (FM : ofe) : ofe :=
@@ -16,7 +16,7 @@ Definition inv_judgty (FM : ofe) : ofe :=
 Notation InvJudg FM JUDG := (Ejudg (inv_judgty FM) JUDG).
 
 Section inv_deriv.
-  Context `{inv_judg : !InvJudg FM JUDG} {Σ : gFunctors}.
+  Context `{inv_judg : !InvJudg FM JUDG} {Σ}.
   Implicit Type (δ : JUDG → iProp Σ) (Px : FM).
 
   (** Accessor judgment *)

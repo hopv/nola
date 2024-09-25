@@ -7,8 +7,8 @@ From nola.examples Require Export nsynty.
 Import ProdNotation UpdwNotation WpwNotation iPropAppNotation ProphNotation
   LftNotation NsyntyNotation FunPRNotation DsemNotation.
 
-Implicit Type (N : namespace) (dq : dfrac) (l : loc) (b : bool) (α β : lft)
-  (q : Qp) (X Y : nsynty).
+Implicit Type (Σ : gFunctors) (N : namespace) (dq : dfrac) (l : loc) (b : bool)
+  (α β : lft) (q : Qp) (X Y : nsynty).
 
 (** ** Custom constructors *)
 
@@ -42,7 +42,7 @@ Notation cif Σ := (cif con Σ).
 
 (** Construct [cif] *)
 Section cif.
-  Context {Σ : gFunctors}.
+  Context {Σ}.
   Implicit Type Px : cif Σ.
   (** Points-to token *)
   Definition cif_pointsto l dq v : cif Σ :=
