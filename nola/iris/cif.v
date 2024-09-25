@@ -248,6 +248,7 @@ Record SemCifcon (JUDG : ofe) CON Σ := SEM_CIFCON {
   sem_cifc_ne `{!NonExpansive δ} {s} :: NonExpansive3 (sem_cifc δ s);
 }.
 Existing Class SemCifcon.
+Add Printing Constructor SemCifcon.
 Arguments SEM_CIFCON {_ _ _} _ _. Arguments sem_cifc {_ _ _ semc} : rename.
 Arguments sem_cifc_ne {_ _ _ semc _ _ _} : rename.
 Hint Mode SemCifcon - ! - : typeclass_instances.
@@ -338,6 +339,7 @@ Record SemEcifcon JUDG CON' CON Σ := SEM_ECIFCON {
   sem_ecifc_ne `{!NonExpansive δ} {s} :: NonExpansive3 (sem_ecifc δ s);
 }.
 Existing Class SemEcifcon.
+Add Printing Constructor SemEcifcon.
 Arguments SEM_ECIFCON {_ _ _ _} _ _.
 Arguments sem_ecifc {_ _ _ _ semec} : rename.
 Arguments sem_ecifc_ne {_ _ _ _ semec _ _ _} : rename.
