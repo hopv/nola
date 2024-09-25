@@ -430,15 +430,15 @@ Section cif_ecustom.
     !SemEcifcon JUDG CON' CON Σ, !EsemEcifcon JUDG CON' CON Σ}.
 
   (** Semantics of [cif_ecustom] *)
-  Lemma sem_cif_ecustom' `{!NonExpansive δ} {s Φx Ψx d} :
+  Lemma sem_ecustom `{!NonExpansive δ} {s Φx Ψx d} :
     cif_sem δ (cif_ecustom CON' s Φx Ψx d) ⊣⊢
       sem_ecifc (CON':=CON') (CON:=CON) δ s (λ i, ⟦ Φx i ⟧(δ)) Ψx d.
   Proof.
     rewrite cif_ecustom_unseal /= -esem_ecifc. f_equiv=>// ?.
     by rewrite to_of_cit.
   Qed.
-  Lemma sem_cif_ecustom `{!NonExpansive δ} {s Φx Ψx d} :
+  Lemma sem'_ecustom `{!NonExpansive δ} {s Φx Ψx d} :
     ⟦ cif_ecustom CON' s Φx Ψx d ⟧(δ) ⊣⊢
       sem_ecifc (CON':=CON') (CON:=CON) δ s (λ i, ⟦ Φx i ⟧(δ)) Ψx d.
-  Proof. exact sem_cif_ecustom'. Qed.
+  Proof. exact sem_ecustom. Qed.
 End cif_ecustom.
