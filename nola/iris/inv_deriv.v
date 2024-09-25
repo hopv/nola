@@ -1,5 +1,6 @@
 (** * Invariant machinery relaxed with derivability *)
 
+From nola.util Require Import tagged.
 From nola.bi Require Export deriv.
 From nola.bi Require Import wpw.
 From nola.iris Require Export inv.
@@ -9,8 +10,9 @@ Import iPropAppNotation UpdwNotation WpwNotation DsemNotation.
 Implicit Type (Σ : gFunctors) (N : namespace).
 
 (** ** [inv_judgty]: Judgment type for [inv] *)
+Variant inv_judg_id := .
 Definition inv_judgty (FM : ofe) : ofe :=
-  (leibnizO namespace * FM)%type (** Accessor judgment *).
+  (** Accessor judgment *) tagged inv_judg_id (leibnizO namespace * FM).
 
 (** ** [InvJudg]: Judgment structure for [inv] *)
 Notation InvJudg FM JUDG := (Ejudg (inv_judgty FM) JUDG).
@@ -20,7 +22,7 @@ Section inv_deriv.
   Implicit Type (δ : JUDG → iProp Σ) (Px : FM).
 
   (** Accessor judgment *)
-  Local Definition inv_jacsr N Px : JUDG := inv_judg (N, Px).
+  Local Definition inv_jacsr N Px : JUDG := inv_judg (Tagged (N, Px)).
   Local Instance inv_jacsr_ne {N} : NonExpansive (inv_jacsr N).
   Proof. unfold inv_jacsr=> ????. f_equiv. by split. Qed.
 
@@ -66,11 +68,11 @@ Section inv_deriv.
 
   (** ** [inv_judg_sem]: Semantics of [inv_judgty] *)
   Definition inv_judg_sem δ (NPx : inv_judgty (FML $oi Σ)) : iProp Σ :=
-    inv_acsr ⟦⟧(δ) NPx.1 ⟦ NPx.2 ⟧(δ).
+    inv_acsr ⟦⟧(δ) NPx.(untag).1 ⟦ NPx.(untag).2 ⟧(δ).
   (** [inv_judg_sem] is non-expansive *)
   #[export] Instance inv_judg_sem_ne `{!NonExpansive δ} :
     NonExpansive (inv_judg_sem δ).
-  Proof. move=> ?[??][??][/=/leibniz_equiv_iff<-?]. solve_proper. Qed.
+  Proof. move=> ?[[??]][[??]][/=/leibniz_equiv_iff<-?]. solve_proper. Qed.
   (** [Dsem] over [inv_judgty] *)
   #[export] Instance inv_judg_dsem
     : Dsem JUDG (inv_judgty (FML $oi Σ)) (iProp Σ) := DSEM inv_judg_sem _.

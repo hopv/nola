@@ -1,5 +1,6 @@
 (** * Main logic *)
 
+From nola.util Require Import tagged.
 From nola.iris Require Export cif inv pborrow.
 From nola.bi Require Import util.
 From nola.heap_lang Require Export notation proofmode.
@@ -112,18 +113,19 @@ End cif_pbor.
 Notation PborSem TY JUDG CON Σ := (EsemEcifcon JUDG (pborCC TY) CON Σ).
 
 (** ** Judgment *)
-Definition iff_judgty (FM : ofe) : ofe := (FM * FM)%type.
+Variant iff_judg_id := .
+Definition iff_judgty (FM : ofe) : ofe := tagged iff_judg_id (FM * FM).
 Notation IffJudg FM JUDG := (Ejudg (iff_judgty FM) JUDG).
 Section iff_judg.
   Context `{iff_judg : !IffJudg FM JUDG}.
-  Definition jiff (Px Qx : FM) : JUDG := iff_judg (Px, Qx).
+  Definition jiff (Px Qx : FM) : JUDG := iff_judg (Tagged (Px, Qx)).
   #[export] Instance jiff_ne : NonExpansive2 jiff.
   Proof. solve_proper. Qed.
 
   Context `{!Dsem JUDG FM (iProp Σ)}.
   (** ** [iff_judg_sem]: Semantics of [iff_judgty] *)
   Definition iff_judg_sem δ (PQx : iff_judgty FM) : iProp Σ :=
-    □ (⟦ PQx.1 ⟧(δ) ∗-∗ ⟦ PQx.2 ⟧(δ)).
+    □ (⟦ PQx.(untag).1 ⟧(δ) ∗-∗ ⟦ PQx.(untag).2 ⟧(δ)).
   (** [iff_judg_sem] is non-expansive *)
   #[export] Instance iff_judg_sem_ne `{!NonExpansive δ} :
     NonExpansive (iff_judg_sem δ).

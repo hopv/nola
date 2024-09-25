@@ -8,6 +8,7 @@ nola/util/gmap.v
 nola/util/gmultiset.v
 nola/util/prod.v
 nola/util/plist.v
+nola/util/tagged.v
 nola/util/proph.v
 nola/util/order.v
 nola/util/psg.v

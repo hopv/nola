@@ -1,13 +1,15 @@
 (** * Simple invariant machinery relaxed with derivability *)
 
+From nola.util Require Import tagged.
 From nola.bi Require Export deriv.
 From nola.iris Require Export sinv.
 From iris.proofmode Require Import proofmode.
 Import iPropAppNotation UpdwNotation DsemNotation.
 
 (** ** [sinv_judgty]: Judgment type for [sinv] *)
+Variant sinv_judg_id := .
 Definition sinv_judgty (FM : ofe) : ofe :=
-  (FM * FM)%type (** Accessor judgment *).
+  (** Accessor judgment *) tagged sinv_judg_id (FM * FM).
 
 (** ** [SinvJudg]: Judgment structure for [sinv] *)
 Notation SinvJudg FM JUDG := (Ejudg (sinv_judgty FM) JUDG).
@@ -17,7 +19,8 @@ Section sinv_deriv.
   Implicit Type δ : JUDG → iProp Σ.
 
   (** Accessor judgment *)
-  Local Definition sinv_jacsr (Px Qx : FML $oi Σ) : JUDG := sinv_judg (Px, Qx).
+  Local Definition sinv_jacsr (Px Qx : FML $oi Σ) : JUDG :=
+    sinv_judg (Tagged (Px, Qx)).
   Local Instance sinv_jacsr_ne : NonExpansive2 sinv_jacsr.
   Proof. solve_proper. Qed.
 
@@ -51,8 +54,8 @@ Section sinv_deriv.
   Implicit Type (δ : JUDG → iProp Σ).
 
   (** ** [sinv_judg_sem]: Semantics of [sinv_judgty] *)
-  Definition sinv_judg_sem δ (PQx : sinv_judgty (FML $oi Σ)) : iProp Σ :=
-    mod_acsr bupd ⟦ PQx.1 ⟧(δ) ⟦ PQx.2 ⟧(δ).
+  Definition sinv_judg_sem δ '(PQx : sinv_judgty (FML $oi Σ)) : iProp Σ :=
+    mod_acsr bupd ⟦ PQx.(untag).1 ⟧(δ) ⟦ PQx.(untag).2 ⟧(δ).
   (** [sinv_judg_sem] is non-expansive *)
   #[export] Instance sinv_judg_sem_ne `{!NonExpansive δ} :
     NonExpansive (sinv_judg_sem δ).

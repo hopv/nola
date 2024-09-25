@@ -1,5 +1,6 @@
 (** * Prophetic borrowing machinery relaxed with derivability *)
 
+From nola.util Require Import tagged.
 From nola.bi Require Export deriv.
 From nola.iris Require Export pborrow.
 From iris.proofmode Require Import proofmode.
@@ -9,7 +10,8 @@ Import ProdNotation PlistNotation iPropAppNotation UpdwNotation LftNotation
 Implicit Type (TY : synty).
 
 (** ** [pborrow_judgty]: Judgment type for [pborrow] *)
-Definition pborrow_judgty TY (FM : ofe) : ofe := (
+Variant pborrow_judg_id := .
+Definition pborrow_judgty TY (FM : ofe) : ofe := tagged pborrow_judg_id (
   (** Basic conversion *) FM * FM +
   (** Conversion judgment for [lend_body] *)
     @sigT (TY *' TY) (λ '(X, Y)',
@@ -26,10 +28,10 @@ Section pborrow_deriv.
 
   (** Judgments *)
   Local Definition pborrow_jto Px Qx : JUDG :=
-    pborrow_judg (inl (Px, Qx)).
+    pborrow_judg (Tagged (inl (Px, Qx))).
   Local Definition pborrow_jlto {X Y} (xπ : clair TY X) (yπ : clair TY Y)
     (Φx : X -d> FML $oi Σ) (Ψx : Y -d> FML $oi Σ) : JUDG :=
-    pborrow_judg (inr (existT (X, Y)' ((xπ, yπ)', Φx, Ψx))).
+    pborrow_judg (Tagged (inr (existT (X, Y)' ((xπ, yπ)', Φx, Ψx)))).
   #[export] Instance pborrow_jto_ne : NonExpansive2 pborrow_jto.
   Proof. solve_proper. Qed.
   #[export] Instance pborrow_jlto_ne {X Y xπ yπ} :
@@ -135,7 +137,7 @@ Section pborrow_deriv.
 
   (** ** [pborrow_judg_sem]: Semantics of [pborrow_judgty] *)
   Definition pborrow_judg_sem δ (J : pborrow_judgty TY (FML $oi Σ)) : iProp Σ :=
-    match J with
+    match J.(untag) with
     | inl PQx => ⟦ PQx.1 ⟧(δ) ==∗ ⟦ PQx.2 ⟧(δ)
     | inr (existT _ ((xπ, yπ)', Φx, Ψx)) =>
         plend_body ⟦ ⟧(δ) xπ Φx ==∗ plend_body ⟦ ⟧(δ) yπ Ψx
@@ -144,7 +146,7 @@ Section pborrow_deriv.
   #[export] Instance pborrow_judg_sem_ne `{!NonExpansive δ} :
     NonExpansive (pborrow_judg_sem δ).
   Proof.
-    move=> ???[?|]; [solve_proper|]. move=> [?[[??]?]][?[[??]?]][/=?].
+    move=> ?[?][?]/=[?|]; [solve_proper|]. move=> [?[[??]?]][?[[??]?]][/=?].
     subst=>/=. move=> [/=[/=/leibniz_equiv_iff]]. solve_proper.
   Qed.
   (** [Dsem] over [pborrow_judgty] *)

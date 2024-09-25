@@ -1,5 +1,6 @@
 (** * Non-atomic invariant machinery relaxed with derivability *)
 
+From nola.util Require Import tagged.
 From nola.util Require Export prod.
 From nola.bi Require Export deriv.
 From nola.iris Require Export na_inv.
@@ -9,8 +10,10 @@ Import ProdNotation iPropAppNotation UpdwNotation DsemNotation.
 Implicit Type (p : na_inv_pool_name) (N : namespace).
 
 (** ** [na_inv_judgty]: Judgment type for [na_inv] *)
+Variant na_inv_id := .
 Definition na_inv_judgty (FM : ofe) : ofe :=
-  (leibnizO (na_inv_pool_name *' namespace) * FM)%type (** Accessor judgment *).
+  (** Accessor judgment *)
+    tagged na_inv_id (leibnizO (na_inv_pool_name *' namespace) * FM).
 
 (** ** [NaInvJudg]: Judgment structure for [na_inv] *)
 Notation NaInvJudg FM JUDG := (Ejudg (na_inv_judgty FM) JUDG).
@@ -20,7 +23,8 @@ Section na_inv_deriv.
   Implicit Type δ : JUDG → iProp Σ.
 
   (** Accessor judgment *)
-  Local Definition na_inv_jacsr p N Px : JUDG := na_inv_judg ((p, N)', Px).
+  Local Definition na_inv_jacsr p N Px : JUDG :=
+    na_inv_judg (Tagged ((p, N)', Px)).
   Local Instance na_inv_jacsr_ne {p N} : NonExpansive (na_inv_jacsr p N).
   Proof. unfold na_inv_jacsr=> ????. f_equiv. by split. Qed.
 
@@ -71,11 +75,11 @@ Section na_inv_deriv.
 
   (** ** [na_inv_judg_sem]: Semantics of [na_inv_judgty] *)
   Definition na_inv_judg_sem δ (pNPx : na_inv_judgty (FML $oi Σ)) : iProp Σ :=
-    na_inv_acsr ⟦⟧(δ) pNPx.1.1' pNPx.1.2' ⟦ pNPx.2 ⟧(δ).
+    na_inv_acsr ⟦⟧(δ) pNPx.(untag).1.1' pNPx.(untag).1.2' ⟦ pNPx.(untag).2 ⟧(δ).
   (** [na_inv_judg_sem] is non-expansive *)
   #[export] Instance na_inv_judg_sem_ne `{!NonExpansive δ} :
     NonExpansive (na_inv_judg_sem δ).
-  Proof. move=> ?[??][??][/=/leibniz_equiv_iff<-?]. solve_proper. Qed.
+  Proof. move=> ?[[??]][[??]][/=/leibniz_equiv_iff<-?]. solve_proper. Qed.
   (** [Dsem] over [na_inv_judgty] *)
   #[export] Instance na_inv_judg_dsem
     : Dsem JUDG (na_inv_judgty (FML $oi Σ)) (iProp Σ) := DSEM na_inv_judg_sem _.

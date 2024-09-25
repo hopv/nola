@@ -1,13 +1,15 @@
 (** * Borrowing machinery relaxed with derivability *)
 
+From nola.util Require Import tagged.
 From nola.bi Require Export deriv.
 From nola.iris Require Export borrow.
 From iris.proofmode Require Import proofmode.
 Import ProdNotation iPropAppNotation UpdwNotation LftNotation DsemNotation.
 
 (** ** [borrow_judgty]: Judgment type for [borrow] *)
+Variant borrow_judg_id := .
 Definition borrow_judgty (FM : ofe) : ofe :=
-  (FM * FM)%type (** Accessor judgment *).
+  (** Accessor judgment *) tagged borrow_judg_id (FM * FM).
 
 (** ** [BorrowJudg]: Judgment structure for [borrow] *)
 Notation BorrowJudg FM JUDG := (Ejudg (borrow_judgty FM) JUDG).
@@ -17,7 +19,7 @@ Section borrow_deriv.
   Implicit Type δ : JUDG → iProp Σ.
 
   (** Accessor judgment *)
-  Local Definition borrow_jto Px Qx : JUDG := borrow_judg (Px, Qx).
+  Local Definition borrow_jto Px Qx : JUDG := borrow_judg (Tagged (Px, Qx)).
   Local Instance borrow_jto_ne : NonExpansive2 borrow_jto.
   Proof. solve_proper. Qed.
 
@@ -74,7 +76,7 @@ Section borrow_deriv.
 
   (** ** [borrow_judg_sem]: Semantics of [borrow_judgty] *)
   Definition borrow_judg_sem δ (PQx : borrow_judgty (FML $oi Σ)) : iProp Σ :=
-    ⟦ PQx.1 ⟧(δ) ==∗ ⟦ PQx.2 ⟧(δ).
+    ⟦ PQx.(untag).1 ⟧(δ) ==∗ ⟦ PQx.(untag).2 ⟧(δ).
   (** [borrow_judg_sem] is non-expansive *)
   #[export] Instance borrow_judg_sem_ne `{!NonExpansive δ} :
     NonExpansive (borrow_judg_sem δ).
