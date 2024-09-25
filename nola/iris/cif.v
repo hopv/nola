@@ -255,6 +255,14 @@ Arguments SEM_CIFCON {_ _ _} _ _. Arguments sem_cifc {_ _ _ semc} : rename.
 Arguments sem_cifc_ne {_ _ _ semc _ _ _} : rename.
 Hint Mode SemCifcon - ! - : typeclass_instances.
 
+(** [sem_cifc] is proper *)
+#[export] Instance sem_cifc_proper `{!SemCifcon JUDG CON Σ, !NonExpansive δ}
+  {s} :
+  Proper ((≡) ==> (≡) ==> (≡) ==> (⊣⊢)) (sem_cifc (CON:=CON) δ s).
+Proof.
+  move=> ?????????. apply equiv_dist=> ?. f_equiv; by apply equiv_dist.
+Qed.
+
 (** ** [cif_sem]: Semantics of [cif] *)
 Section iris.
   Context `{!SemCifcon JUDG CON Σ}.
@@ -310,9 +318,9 @@ End iris.
 #[projections(primitive)]
 Class Ecifcon CON' CON := ECIFCON {
   ecifc_sel : CON' → CON;
-  ecifc_idom {s} : CON.(cifc_idom) (ecifc_sel s) = CON'.(cifc_idom) s;
-  ecifc_cdom {s} : CON.(cifc_cdom) (ecifc_sel s) = CON'.(cifc_cdom) s;
-  ecifc_data {s} : CON.(cifc_data) (ecifc_sel s) = CON'.(cifc_data) s;
+  ecifc_idom s : CON.(cifc_idom) (ecifc_sel s) = CON'.(cifc_idom) s;
+  ecifc_cdom s : CON.(cifc_cdom) (ecifc_sel s) = CON'.(cifc_cdom) s;
+  ecifc_data s : CON.(cifc_data) (ecifc_sel s) = CON'.(cifc_data) s;
 }.
 Arguments ECIFCON {_ _}.
 Hint Mode Ecifcon ! - : typeclass_instances.
@@ -323,14 +331,59 @@ Definition sigT_ecifcon {A CONF a} :
   ECIFCON (CON:=sigTCC _) (existT a)
     (λ _, eq_refl) (λ _, eq_refl) (λ _, eq_refl).
 
-(** Custom constructor under [Ecifcon] *)
-Program Definition cif_ecustom `{!Ecifcon CON' CON} {Σ} (s : CON')
+(** ** [cif_ecustom]: Custom constructor under [Ecifcon] *)
+Definition cif_ecustom_def CON' `{!Ecifcon CON' CON} {Σ} (s : CON')
   (Φx : CON'.(cifc_idom) s -pr> cif CON Σ)
   (Ψx : CON'.(cifc_cdom) s -pr> cif CON Σ) (d : CON'.(cifc_data) s $oi Σ)
   : cif CON Σ :=
-  cif_custom (ecifc_sel s) (λ i, Φx (rew[id] ecifc_idom in i))
-    (λ c, Ψx (rew[id] ecifc_cdom in c))
-    (rew[λ F, F $oi Σ] eq_sym ecifc_data in d).
+  cif_custom (ecifc_sel s) (λ i, Φx (rew[id] ecifc_idom s in i))
+    (λ c, Ψx (rew[id] ecifc_cdom s in c))
+    (rew[λ F, F $oi Σ] eq_sym (ecifc_data s) in d).
+Lemma cif_ecustom_aux : seal (@cif_ecustom_def). Proof. by eexists _. Qed.
+Definition cif_ecustom CON' `{!Ecifcon CON' CON} {Σ} (s : CON')
+  (Φx : CON'.(cifc_idom) s -pr> cif CON Σ)
+  (Ψx : CON'.(cifc_cdom) s -pr> cif CON Σ) (d : CON'.(cifc_data) s $oi Σ)
+  : cif CON Σ :=
+  cif_ecustom_aux.(unseal) _ _ _ _ s Φx Ψx d.
+Lemma cif_ecustom_unseal : @cif_ecustom = @cif_ecustom_def.
+Proof. exact: seal_eq. Qed.
+
+Section cif_ecustom.
+  Context `{!Ecifcon CON' CON} {Σ}.
+
+  (** Custom connectives are size-preserving over the inductive arguments
+    and productive over the coinductive arguments *)
+  #[export] Instance cif_ecustom_preserv_productive {s n} :
+    Proper (proeq n ==> proeq_later n ==> (≡) ==> proeq n)
+      (cif_ecustom CON' (Σ:=Σ) s).
+  Proof.
+    rewrite cif_ecustom_unseal=> ????? /fun_proeq_later eqc ???.
+    apply cif_custom_preserv_productive.
+    { by move. } { by apply fun_proeq_later. }
+    move: (CON.(cifc_data) (ecifc_sel s)) (ecifc_data s)=> ??. by subst.
+  Qed.
+
+  (** Custom connectives are non-expansive *)
+  #[export] Instance cif_ecustom_ne {s} :
+    NonExpansive3 (cif_ecustom CON' (Σ:=Σ) s).
+  Proof.
+    rewrite cif_ecustom_unseal=> ??????????. apply cif_custom_ne.
+    { by move. } { by move. }
+    move: (CON.(cifc_data) (ecifc_sel s)) (ecifc_data s)=> ??. by subst.
+  Qed.
+  #[export] Instance cif_ecustom_proper {s} :
+    Proper ((≡) ==> (≡) ==> (≡) ==> (≡)) (cif_ecustom CON' (Σ:=Σ) s).
+  Proof. move=> ??????????. apply cif_ecustom_ne; by apply equiv_dist. Qed.
+
+  (** Discreteness of custom connectives *)
+  #[export] Instance cif_ecustom_discrete {s}
+    `{!∀ i, Discrete (Φx i), !∀ c, Discrete (Ψx c), !Discrete d} :
+    Discrete (cif_ecustom CON' (Σ:=Σ) s Φx Ψx d).
+  Proof.
+    rewrite cif_ecustom_unseal. apply: cif_custom_discrete.
+    move: (CON.(cifc_data) (ecifc_sel s)) (ecifc_data s)=> ??. by subst.
+  Qed.
+End cif_ecustom.
 
 (** Semantics of an element [cifcon] *)
 #[projections(primitive)]
@@ -359,9 +412,9 @@ Next Obligation. solve_proper. Qed.
 Class EsemEcifcon JUDG CON' CON Σ `{!Ecifcon CON' CON}
   `{!SemEcifcon JUDG CON' CON Σ, !SemCifcon JUDG CON Σ} :=
   esem_ecifc : ∀ {δ s Φ Ψx d},
-    sem_cifc (CON:=CON) δ (ecifc_sel s) (λ i, Φ (rew[id] ecifc_idom in i))
-      (λ c, Ψx (rew[id] ecifc_cdom in c))
-      (rew[λ F, F $oi Σ] eq_sym ecifc_data in d) =
+    sem_cifc (CON:=CON) δ (ecifc_sel s) (λ i, Φ (rew[id] ecifc_idom s in i))
+      (λ c, Ψx (rew[id] ecifc_cdom s in c))
+      (rew[λ F, F $oi Σ] eq_sym (ecifc_data s) in d) =
       sem_ecifc (CON':=CON') (CON:=CON) δ s Φ Ψx d.
 Hint Mode EsemEcifcon - ! - - - - - : typeclass_instances.
 
@@ -371,3 +424,21 @@ Lemma sigT_esem_cifcon {JUDG A}
   EsemEcifcon (Ecifcon0:=sigT_ecifcon) (SemCifcon0:=sigT_sem_cifcon)
     JUDG (CONF a) (sigTCC CONF) Σ.
 Proof. done. Qed.
+
+Section cif_ecustom.
+  Context `{!Ecifcon CON' CON, !SemCifcon JUDG CON Σ,
+    !SemEcifcon JUDG CON' CON Σ, !EsemEcifcon JUDG CON' CON Σ}.
+
+  (** Semantics of [cif_ecustom] *)
+  Lemma sem_cif_ecustom' `{!NonExpansive δ} {s Φx Ψx d} :
+    cif_sem δ (cif_ecustom CON' s Φx Ψx d) ⊣⊢
+      sem_ecifc (CON':=CON') (CON:=CON) δ s (λ i, ⟦ Φx i ⟧(δ)) Ψx d.
+  Proof.
+    rewrite cif_ecustom_unseal /= -esem_ecifc. f_equiv=>// ?.
+    by rewrite to_of_cit.
+  Qed.
+  Lemma sem_cif_ecustom `{!NonExpansive δ} {s Φx Ψx d} :
+    ⟦ cif_ecustom CON' s Φx Ψx d ⟧(δ) ⊣⊢
+      sem_ecifc (CON':=CON') (CON:=CON) δ s (λ i, ⟦ Φx i ⟧(δ)) Ψx d.
+  Proof. exact sem_cif_ecustom'. Qed.
+End cif_ecustom.
