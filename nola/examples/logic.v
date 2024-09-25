@@ -2,7 +2,7 @@
 
 From nola.iris Require Export cif inv pborrow.
 From nola.bi Require Import util.
-From nola.heap_lang Require Export notation proofmode lib.mutex.
+From nola.heap_lang Require Export notation proofmode.
 From nola.examples Require Export nsynty.
 Import ProdNotation UpdwNotation WpwNotation iPropAppNotation ProphNotation
   LftNotation NsyntyNotation FunPRNotation DsemNotation.
@@ -17,7 +17,6 @@ Variant con_sel :=
 | (** Points-to token *) cifs_pointsto (l : loc) (dq : dfrac) (v : val)
 | (** Invariant *) cifs_inv (N : namespace)
 | (** Relaxed invariant *) cifs_inv' (N : namespace)
-| (** Mutex *) cifs_mutex (l : loc)
 | (** Non-prophetic borrower *) cifs_bor (α : lft)
 | (** Non-prophetic open borrower *) cifs_obor (α : lft) (q : Qp)
 | (** Non-prophetic lender *) cifs_lend (α : lft)
@@ -29,8 +28,7 @@ Definition con_idom (_ : con_sel) : Type := Empty_set.
 (** [con_cdom]: Domain for coinductive parts *)
 Definition con_cdom (s : con_sel) : Type := match s with
   | cifs_pointsto _ _ _ => Empty_set
-  | cifs_inv _ | cifs_inv' _ | cifs_mutex _
-    | cifs_bor _ | cifs_obor _ _ | cifs_lend _ => unit
+  | cifs_inv _ | cifs_inv' _ | cifs_bor _ | cifs_obor _ _ | cifs_lend _ => unit
   | @cifs_pbor X _ _ _ | @cifs_pobor X _ _ _ | @cifs_plend X _ _ => X
   end.
 (** [con_data]: Data [oFunctor] *)
@@ -55,9 +53,6 @@ Section cif.
   (** Relaxed invariant *)
   Definition cif_inv' N Px : cif Σ :=
     cif_custom (cifs_inv' N) nullary (unary Px) ().
-  (** Mutex *)
-  Definition cif_mutex l Px : cif Σ :=
-    cif_custom (cifs_mutex l) nullary (unary Px) ().
   (** Non-prophetic borrower *)
   Definition cif_bor α Px : cif Σ :=
     cif_custom (cifs_bor α) nullary (unary Px) ().
@@ -83,10 +78,6 @@ Section cif.
     move=> n ???. apply cif_custom_preserv_productive=>//. by destruct n=> >.
   Qed.
   #[export] Instance cif_inv'_productive  {N} : Productive (cif_inv' N).
-  Proof.
-    move=> n ???. apply cif_custom_preserv_productive=>//. by destruct n=> >.
-  Qed.
-  #[export] Instance cif_mutex_productive {l} : Productive (cif_mutex l).
   Proof.
     move=> n ???. apply cif_custom_preserv_productive=>//. by destruct n=> >.
   Qed.
@@ -120,10 +111,6 @@ Section cif.
   #[export] Instance cif_inv'_ne {N} : NonExpansive (cif_inv' N).
   Proof. solve_proper. Qed.
   #[export] Instance cif_inv'_proper {N} : Proper ((≡) ==> (≡)) (cif_inv' N).
-  Proof. apply ne_proper, _. Qed.
-  #[export] Instance cif_mutex_ne {l} : NonExpansive (cif_mutex l).
-  Proof. solve_proper. Qed.
-  #[export] Instance cif_mutex_proper {l} : Proper ((≡) ==> (≡)) (cif_mutex l).
   Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_bor_ne {α} : NonExpansive (cif_bor α).
   Proof. solve_proper. Qed.
@@ -161,8 +148,7 @@ Notation "l ↦ dq v" := (cif_pointsto l dq v)
 Definition judg Σ : ofe := (cif Σ * cif Σ)%type.
 
 Section sem.
-  Context `{!inv'GS cifOF Σ, !mutexGS cifOF Σ, !pborrowGS nsynty cifOF Σ,
-    !heapGS_gen hlc Σ}.
+  Context `{!inv'GS cifOF Σ, !pborrowGS nsynty cifOF Σ, !heapGS_gen hlc Σ}.
   Implicit Type (δ : judg Σ → iProp Σ) (Px : cif Σ).
 
   (** Relaxed invariant *)
@@ -181,7 +167,6 @@ Section sem.
     | cifs_pointsto l dq v => λ _ _ _, l ↦{dq} v
     | cifs_inv N => λ _ Pxs _, inv_tok N (Pxs ())
     | cifs_inv' N => λ _ Pxs _, inv' δ N (Pxs ())
-    | cifs_mutex l => λ _ Pxs _, mutex_tok l (Pxs ())
     | cifs_bor α => λ _ Pxs _, nbor_tok α (Pxs ())
     | cifs_obor α q => λ _ Pxs _, nobor_tok α q (Pxs ())
     | cifs_lend α => λ _ Pxs _, nlend_tok α (Pxs ())
@@ -213,8 +198,7 @@ End sem.
 Notation invd := (inv' der).
 
 Section verify.
-  Context `{!inv'GS cifOF Σ, !mutexGS cifOF Σ,
-    !pborrowGS nsynty cifOF Σ, !heapGS_gen hlc Σ}.
+  Context `{!inv'GS cifOF Σ, !pborrowGS nsynty cifOF Σ, !heapGS_gen hlc Σ}.
   Implicit Type (Px Qx : cif Σ) (Φx Ψx : loc → cif Σ).
 
   (** ** Linked list *)
@@ -351,74 +335,16 @@ Section verify.
     by iApply "→Ψ".
   Qed.
 
-  (** ** Linked list with a mutex *)
-
-  (** [mlist]: Formula for a list with a mutex *)
-  Definition mlist_gen (Φx : loc -pr> cif Σ) (Mlist : loc -pr> cif Σ)
-    : loc -pr> cif Σ :=
-    λ l, cif_mutex l (Φx (l +ₗ 1) ∗ ∃ l', (l +ₗ 2) ↦ #l' ∗ Mlist l').
-  #[export] Instance mlist_gen_productive {Φx} : Productive (mlist_gen Φx).
-  Proof.
-    move=>/= n ?? eq ?. unfold mlist_gen. f_equiv. destruct n as [|n]=>//=.
-    (do 2 f_equiv)=> ?. f_equiv. apply eq.
-  Qed.
-  Definition mlist' Φx : loc → cif Σ := profix (mlist_gen Φx).
-  Definition mlist Φx : loc → cif Σ := mlist_gen Φx (mlist' Φx).
-  (** Unfold [mlist'] *)
-  Lemma mlist'_unfold {Φx l} : mlist' Φx l ≡ mlist Φx l.
-  Proof. by rewrite /mlist' (profix_unfold (f:=mlist_gen _) l). Qed.
-
-  (** Try to acquire the lock of [mlist] *)
-  Lemma twp_try_acquire_loop_mlist {Φx l} {k : nat} :
-    [[{ ⟦ mlist Φx l ⟧ }]][mutex_wsat ⟦⟧]
-      try_acquire_loop_mutex #k #l
-    [[{ b, RET #b; if negb b then True else
-        ⟦ Φx (l +ₗ 1) ⟧ ∗ ∃ l', (l +ₗ 2) ↦ #l' ∗ ⟦ mlist Φx l' ⟧ }]].
-  Proof.
-    iIntros (Ψ) "/= #m →Ψ". iApply twp_fupd.
-    wp_apply (twp_try_acquire_loop_mutex_tok with "m").
-    iIntros ([|]); last first. { iIntros (?). by iApply "→Ψ". }
-    rewrite sem_to_of_cit /=. iIntros "[Φx [%[↦ m']]]".
-    rewrite mlist'_unfold /=. iApply "→Ψ". by iFrame.
-  Qed.
-
-  (** Release the lock of [mlist] *)
-  Lemma twp_release_mlist {Φx l} :
-    [[{ ⟦ mlist Φx l ⟧ ∗ ⟦ Φx (l +ₗ 1) ⟧ ∗
-        ∃ l', (l +ₗ 2) ↦ #l' ∗ ⟦ mlist Φx l' ⟧ }]][mutex_wsat ⟦⟧]
-      release_mutex #l
-    [[{ RET #(); True }]].
-  Proof.
-    iIntros (Ψ) "(#m & Φx & %l' & ↦ & #mtl) →Ψ".
-    wp_apply (twp_release_mutex_tok with "[Φx ↦]"); [|done].
-    iSplit; [done|]. rewrite sem_to_of_cit /=. iFrame. by rewrite mlist'_unfold.
-  Qed.
-
-  (** Iterate over [mlist] *)
-  Definition iter_mlist : val := rec: "self" "f" "k" "c" "l" :=
-    if: !"c" ≤ #0 then #true else
-      if: try_acquire_loop_mutex "k" "l" then
-        "f" ("l" +ₗ #1);; let: "l'" := !("l" +ₗ #2) in release_mutex "l";;
-        "c" <- !"c" - #1;; "self" "f" "k" "c" "l'"
-      else #false.
-  Lemma twp_iter_mlist {Φx c l} {f : val} {k n : nat} :
-    (∀ l', [[{ ⟦ Φx (l' +ₗ 1) ⟧ }]][mutex_wsat ⟦⟧] f #(l' +ₗ 1)
-      [[{ RET #(); ⟦ Φx (l' +ₗ 1) ⟧ }]]) -∗
-    [[{ c ↦ #n ∗ ⟦ mlist Φx l ⟧ }]][mutex_wsat ⟦⟧]
-      iter_mlist f #k #c #l
-    [[{ b, RET #b; if b then c ↦ #0 else ∃ n', c ↦ #n' }]].
-  Proof.
-    iIntros "#f" (Ψ) "!> [c↦ #m] →Ψ". iInduction n as [|m] "IH" forall (l) "m".
-    { wp_rec. wp_load. wp_pures. by iApply "→Ψ". }
-    wp_rec. wp_load. wp_pures. wp_apply (twp_try_acquire_loop_mlist with "m").
-    iIntros ([|])=>/=; last first.
-    { iIntros (?). wp_pure. iModIntro. iApply "→Ψ". by iExists _. }
-    iIntros "(Φx & %l' & ↦ & #mtl)". wp_pures. wp_apply ("f" with "Φx").
-    iIntros "Φx". wp_load. wp_pures.
-    wp_apply (twp_release_mlist with "[Φx ↦]"). { iSplit; [done|]. by iFrame. }
-    iIntros "_". wp_load. wp_store. have -> : (S m - 1)%Z = m by lia.
-    iApply ("IH" with "c↦ →Ψ mtl").
-  Qed.
+  (** ** Mutex operations *)
+  (** Try to acquire the lock on the mutex *)
+  Definition try_acquire_mutex : val := λ: "l", CAS "l" #false #true.
+  (** Try to acquire the lock on the mutex repeatedly with a timeout *)
+  Definition try_acquire_loop_mutex : val :=
+    rec: "self" "n" "l" :=
+      if: "n" = #0 then #false else
+      if: try_acquire_mutex "l" then #true else "self" ("n" - #1) "l".
+  (** Release the lock on the mutex *)
+  Definition release_mutex : val := λ: "l", "l" <- #false.
 
   (** ** On borrows *)
 

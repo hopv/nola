@@ -62,7 +62,5 @@ nola/heap_lang/proofmode.v
 nola/heap_lang/adequacy.v
 nola/heap_lang/total_adequacy.v
 
-nola/heap_lang/lib/mutex.v
-
 nola/examples/nsynty.v
 nola/examples/logic.v
