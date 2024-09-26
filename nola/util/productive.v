@@ -78,8 +78,8 @@ Lemma fun_proeq_later {A PRF k f g} :
 Proof. by case: k. Qed.
 
 Module FunPRNotation.
-  Notation "A -pr> B" := (@funPR A (λ _, B))
-    (at level 99, B at level 200, right associativity).
+  Notation "A -pr> PR" := (@funPR A (λ _, PR))
+    (at level 99, PR at level 200, right associativity).
 End FunPRNotation.
 
 (** ** Productivity *)
