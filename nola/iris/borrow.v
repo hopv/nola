@@ -7,7 +7,7 @@ From nola.iris Require Export iprop lft.
 From iris.bi.lib Require Import cmra.
 From iris.algebra Require Import excl agree gmap auth.
 From iris.proofmode Require Import proofmode.
-Import ProdNotation iPropAppNotation LftNotation UpdwNotation.
+Import ProdNotation FunPNotation iPropAppNotation LftNotation UpdwNotation.
 
 Implicit Type (FML : oFunctor) (α : lft) (q : Qp).
 
@@ -476,13 +476,13 @@ Section borrow.
 
   (** [borrow_wsat] is monotone over the modality *)
   Local Instance depo_wsat_mono :
-    Mono (OT:=_ → _ : bi) (OT':=_ → _ → _ → _ → _ → _ : bi) depo_wsat.
+    Mono (OT:=_-p>_ : bi) (OT':=_-p>_-p>_-p>_-p>_-p>_ : bi) depo_wsat.
   Proof.
     move=> ?? to ?????. unfold depo_wsat, depo_wsat_bor, depo_wsat_ret.
     repeat f_equiv; exact: to.
   Qed.
   #[export] Instance borrow_wsat_mono :
-    Mono (OT:=_ → _ : bi) (OT':=_ → _ : bi) borrow_wsat.
+    Mono (OT:=_-p>_ : bi) (OT':=_-p>_ : bi) borrow_wsat.
   Proof.
     rewrite borrow_wsat_unseal /borrow_wsat_def /borrow_lwsat. move=> ????.
     repeat f_equiv. by apply: depo_wsat_mono.

@@ -7,7 +7,7 @@ From iris.proofmode Require Import proofmode.
 Implicit Type PROP : bi.
 
 (** ** Pre-order for [PROP] *)
-Program Canonical biP PROP := Poty PROP (⊢) (⊣⊢) _ _.
+Program Canonical biP PROP := Poty PROP (⊢) _ _.
 Next Obligation.
   move=> >. split; by [move/bi.equiv_entails|move=> ?; apply bi.equiv_entails].
 Qed.

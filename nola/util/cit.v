@@ -2,7 +2,7 @@
 
 From nola.util Require Export eq order productive.
 From iris.algebra Require Export ofe.
-Import EqNotations FunPRNotation.
+Import EqNotations FunPNotation FunPRNotation.
 
 Implicit Type SEL : Type.
 
@@ -28,7 +28,8 @@ Arguments citg_data {_ _ _ _ _}.
 (** [citg_Forall2]: Universal relation between [citg]s *)
 Section citg_Forall2.
   Context {SEL} {I C : SEL → Type} {D D' : SEL → ofe} {CIT CIT' : ofe}.
-  Context (R : ∀ s, D s → D' s → Prop) (CITF : CIT → CIT' → Prop).
+  Context (R : funP (λ s, D s -p> D' s -p> Prop))
+    (CITF : CIT -p> CIT' -p> Prop).
   Inductive citg_Forall2
     (t : citg I C D CIT) (t' : citg I C D' CIT') : Prop := Citgf2 {
     citgf2_sel : t.(citg_sel) = t'.(citg_sel);
@@ -62,14 +63,14 @@ Section citg_Forall2.
 
   (** [citg_Forall2] is monotone *)
   #[export] Instance citg_Forall2_mono {D D' CIT CIT'} :
-    Mono2 (@citg_Forall2 _ I C D D' CIT CIT').
+    Mono2 (OT'':=_-p>_-p>_) (@citg_Forall2 _ I C D D' CIT CIT').
   Proof.
     move=>/= ?? to ?? to' ??. elim=> ?? eq ? IH ??.
     apply (Citgf2 eq); [done|..]=> *; by [apply to'|apply to].
   Qed.
   #[export] Instance citg_Forall2_mono' {D D' CIT CIT' R} :
-    Mono (@citg_Forall2 _ I C D D' CIT CIT' R).
-  Proof. exact mono2_mono_2. Qed.
+    Mono (OT':=_-p>_-p>_) (@citg_Forall2 _ I C D D' CIT CIT' R).
+  Proof. exact _. Qed.
 
   (** [citg_Forall2] preserves reflexivity *)
   #[export] Instance citg_Forall2_refl {CIT}
@@ -239,8 +240,8 @@ Definition citi {SEL} (I C : SEL → Type) (D : SEL → ofe) (k : nat) : Type :=
 (** ** [citi_Forall2]: Universal relation between [citi]s *)
 Section citi_Forall2.
   Context {SEL} {I C : SEL → Type} {D D' : SEL → ofe}.
-  Context (R : ∀ s, D s → D' s → Prop).
-  Fixpoint citi_Forall2 {k k'} : citi I C D k → citi I C D' k' → Prop :=
+  Context (R : funP (λ s, D s -p> D' s -p> Prop)).
+  Fixpoint citi_Forall2 {k k'} : citi I C D k -p> citi I C D' k' -p> Prop :=
     match k, k' with
     | S _, S _ => citg_Forall2 R citi_Forall2
     | _, _ => λ _ _, True
@@ -259,8 +260,9 @@ Section citi_Forall2.
     apply citg_Forall2_mono; [done|]. apply IH.
   Qed.
   (** Turn [citi_Forall2 (λ _, (≡))] to [citi_Forall2 (λ _, (≡{n}≡))] *)
-  Lemma citi_Forall2_equiv_dist {D k k' n} :
-    @citi_Forall2 _ I C D _ (λ _, (≡)) k k' ⊑ citi_Forall2 (λ _, (≡{n}≡)).
+  Lemma citi_Forall2_equiv_dist {D k k' n t t'} :
+    @citi_Forall2 _ I C D _ (λ _, (≡)) k k' t t' →
+      citi_Forall2 (λ _, (≡{n}≡)) t t'.
   Proof. by apply citi_Forall2_mono=> ??? /equiv_dist. Qed.
 
   (** Unfold [≡{_}≡] over [citi] *)

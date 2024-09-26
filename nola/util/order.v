@@ -1,51 +1,30 @@
 (** * Order theory *)
 
 From nola Require Export prelude.
-
-(** ** [Iso]: Isomorphic relation *)
-Class Iso (A : Type) := iso : A → A → Prop.
-Hint Mode Iso ! : typeclass_instances.
-
-Module IsoNotation.
-  Infix "≃" := iso (at level 70).
-  Notation "(≃)" := iso (only parsing).
-  Infix "( o ≃.)" := (iso o) (at level 70, only parsing).
-  Infix "(.≃ o )" := (λ o', o' ≃ o) (at level 70, only parsing).
-  Infix "≃@{ OT }" := (@iso OT) (at level 70, only parsing).
-  Notation "(≃@{ OT } )" := (@iso OT) (only parsing).
-End IsoNotation.
-Import IsoNotation.
+From iris.algebra Require Export ofe.
 
 (** ** [poty]: Partially ordered type *)
 #[projections(primitive)]
 Structure poty := Poty {
-  poty_car :> Type;
+  poty_car :> ofe;
   #[canonical=no] ole :: SqSubsetEq poty_car;
-  #[canonical=no] oeqv :: Iso poty_car;
   #[canonical=no] ole_preorder :: PreOrder ole;
-  #[canonical=no] oeqv_ole {o o' : poty_car} :
-    o ≃ o' ↔ o ⊑ o' ∧ o' ⊑ o;
+  #[canonical=no] equiv_ole {o o' : poty_car} :
+    o ≡ o' ↔ o ⊑ o' ∧ o' ⊑ o;
 }.
 Add Printing Constructor poty.
 Arguments poty_car {OT} : rename.
-Arguments ole {OT} : rename. Arguments oeqv {OT} : rename.
-Arguments ole_preorder {OT} : rename. Arguments oeqv_ole {OT _ _} : rename.
-#[export] Typeclasses Transparent ole. #[export] Typeclasses Transparent oeqv.
+Arguments ole {OT} : rename. Arguments ole_preorder {OT} : rename.
+Arguments equiv_ole {OT _ _} : rename.
+#[export] Typeclasses Transparent ole.
 
 Implicit Type (OT : poty) (A : Type).
 
-(** [≃] is an equivalence relation *)
-#[export] Instance oeqv_equivalence {OT} : Equivalence (≃@{OT}).
-Proof.
-  constructor; move=> >; rewrite !oeqv_ole; [done|by case|].
-  move=> [??][??]. by split; etrans.
-Qed.
-
-(** [⊑] is a subrelation of [≃] *)
-#[export] Instance oeqv_ole_1 {OT} : subrelation (≃@{OT}) (⊑@{OT}).
-Proof. move=> >. apply oeqv_ole. Qed.
-#[export] Instance oeqv_ole_2 {OT} : subrelation (≃@{OT}) (flip (⊑@{OT})).
-Proof. move=> >. apply oeqv_ole. Qed.
+(** [⊑] is a subrelation of [≡] *)
+#[export] Instance equiv_ole_1 {OT} : subrelation (≡@{OT}) (⊑@{OT}).
+Proof. move=> >. apply equiv_ole. Qed.
+#[export] Instance equiv_ole_2 {OT} : subrelation (≡@{OT}) (flip (⊑@{OT})).
+Proof. move=> >. apply equiv_ole. Qed.
 
 (** [⊑] is proper *)
 #[export] Instance ole_proper_ole {OT} : Proper ((⊑) --> (⊑) ==> (→)) (⊑@{OT}).
@@ -53,7 +32,7 @@ Proof. move=>/= ???????. etrans; by [|etrans]. Qed.
 #[export] Instance ole_proper_ole_flip {OT} :
   Proper ((⊑) ==> (⊑) --> flip (→)) (⊑@{OT}).
 Proof. move=> ???????. by apply: ole_proper_ole. Qed.
-#[export] Instance ole_proper_oeqv {OT} : Proper ((≃) ==> (≃) ==> (↔)) (⊑@{OT}).
+#[export] Instance ole_proper {OT} : Proper ((≡) ==> (≡) ==> (↔)) (⊑@{OT}).
 Proof.
   move=> ?? eqv ?? eqv'. by split=> ?; [rewrite -eqv -eqv'|rewrite eqv eqv'].
 Qed.
@@ -61,70 +40,81 @@ Qed.
 (** ** Canonical structures of [poty] *)
 
 (** Natural number *)
-Program Canonical natP : poty := Poty nat (≤) (=) _ _.
+Program Canonical natP : poty := Poty natO (≤) _ _.
 Next Obligation.
   move=> >. split; [by move=> ->|]. case=> *. by apply Nat.le_antisymm.
 Qed.
 Lemma nat_ole {n m} : n ⊑ m ↔ n ≤ m.
 Proof. done. Qed.
-Lemma nat_oeqv {n m : nat} : n ≃ m ↔ n = m.
-Proof. done. Qed.
 
 (** Proposition *)
-Program Canonical PropP : poty := Poty Prop (→) (↔) _ _.
+Program Canonical PropP : poty := Poty PropO (→) _ _.
 Next Obligation. constructor; auto. Qed.
 Next Obligation. done. Qed.
 Lemma Prop_ole {P Q : Prop} : P ⊑ Q ↔ (P → Q).
 Proof. done. Qed.
-Lemma Prop_oeqv {P Q : Prop} : P ≃ Q ↔ (P ↔ Q).
-Proof. done. Qed.
 
 (** Unit *)
-Program Canonical unitP : poty := Poty unit (λ _ _, True) (λ _ _, True) _ _.
+Program Canonical unitP : poty := Poty unitO (λ _ _, True) _ _.
 Next Obligation. done. Qed.
 Lemma unit_ole {u u' : ()} : u ⊑ u' ↔ True.
-Proof. done. Qed.
-Lemma unit_oeqv {u u' : ()} : u ≃ u' ↔ True.
 Proof. done. Qed.
 
 (** Function *)
 Program Canonical funP {A} (OTF : A → poty) : poty :=
-  Poty (∀ a, OTF a) (λ f g, ∀ a, f a ⊑ g a) (λ f g, ∀ a, f a ≃ g a) _ _.
+  Poty (discrete_funO OTF) (λ f g, ∀ a, f a ⊑ g a) _ _.
 Next Obligation. constructor; [auto|]=> ??????. etrans; auto. Qed.
 Next Obligation.
   move=> ????. split.
-  - move=> ?. split=> ?; by apply oeqv_ole.
-  - move=> [??]?. by apply oeqv_ole.
+  - move=> ?. split=> ?; by apply equiv_ole.
+  - move=> [??]?. by apply equiv_ole.
 Qed.
+Module FunPNotation.
+  Notation "A -p> OT" := (@funP A (λ _, OT))
+    (at level 99, OT at level 200, right associativity).
+End FunPNotation.
+Import FunPNotation.
 
 (** Dual *)
 #[projections(primitive)]
 Record dual A := Dual { undual : A }.
 Add Printing Constructor dual.
 Arguments Dual {_} _. Arguments undual {_} _.
+(** [ofe] structure for [dual] *)
+Definition dual_equiv {A : ofe} : relation (dual A) :=
+  λ '(Dual a) '(Dual a'), a ≡ a'.
+Definition dual_dist {A : ofe} n : relation (dual A) :=
+  λ '(Dual a) '(Dual a'), a ≡{n}≡ a'.
+Program Canonical dualO (A : ofe) := @Ofe (dual A) dual_equiv dual_dist _.
+Next Obligation.
+  split=> >; [by apply equiv_dist| |by apply dist_lt]. unfold dist, dual_dist.
+  split; [by move..|]=> ???. apply transitivity.
+Qed.
+(** [Dual] is non-expansive *)
+#[export] Instance dual_ne {A : ofe} : NonExpansive (@Dual A).
+Proof. solve_proper. Qed.
+#[export] Instance dual_proper {A : ofe} : Proper ((≡) ==> (≡)) (@Dual A).
+Proof. solve_proper. Qed.
+(** [poty] structure for [dual] *)
 Program Canonical dualP OT : poty :=
-  Poty (dual OT) (λ o o', undual o' ⊑ undual o) (λ o o', undual o' ≃ undual o)
-    _ _.
+  Poty (dualO OT) (λ o o', o'.(undual) ⊑ o.(undual)) _ _.
 Next Obligation. move=> ?. constructor; [auto|]=> ?????. by etrans. Qed.
 Next Obligation.
-  move=> ???. split; by [move/oeqv_ole|move=> ?; apply oeqv_ole].
+  move=> ???. split; by [move/equiv_ole|move=> ?; apply equiv_ole].
 Qed.
-
-Lemma dual_ole {OT} {o o' : dual OT} : o ⊑ o' ↔ undual o' ⊑ undual o.
-Proof. done. Qed.
-Lemma dual_oeqv {OT} {o o' : dual OT} : o ≃ o' ↔ undual o' ≃ undual o.
+Lemma dual_ole {OT} {o o' : dual OT} : o ⊑ o' ↔ o'.(undual) ⊑ o.(undual).
 Proof. done. Qed.
 
 (** ** Monotonicity *)
 
-Class Mono {OT OT'} (f : OT → OT') := mono :: Proper ((⊑) ==> (⊑)) f.
+Class Mono {OT OT'} (f : OT -p> OT') := mono :: Proper ((⊑) ==> (⊑)) f.
 Hint Mode Mono - - ! : typeclass_instances.
-Class Anti {OT OT'} (f : OT → OT') := anti :: Proper ((⊑) --> (⊑)) f.
+Class Anti {OT OT'} (f : OT -p> OT') := anti :: Proper ((⊑) --> (⊑)) f.
 Hint Mode Anti - - ! : typeclass_instances.
-Class Mono2 {OT OT' OT''} (f : OT → OT' → OT'') :=
+Class Mono2 {OT OT' OT''} (f : OT -p> OT' -p> OT'') :=
   mono2 :: Proper ((⊑) ==> (⊑) ==> (⊑)) f.
 Hint Mode Mono2 - - - ! : typeclass_instances.
-Class AntiMono {OT OT' OT''} (f : OT → OT' → OT'') :=
+Class AntiMono {OT OT' OT''} (f : OT -p> OT' -p> OT'') :=
   antimono :: Proper ((⊑) --> (⊑) ==> (⊑)) f.
 Hint Mode AntiMono - - - ! : typeclass_instances.
 
@@ -151,20 +141,20 @@ Proof. solve_proper. Qed.
 Proof. solve_proper. Qed.
 
 (** Monotonicity implies properness *)
-#[export] Instance mono_proper `{!@Mono OT OT' f} : Proper ((≃) ==> (≃)) f.
-Proof. move=> > /oeqv_ole[??]. apply oeqv_ole. split; by apply mono. Qed.
-#[export] Instance anti_proper `{!@Anti OT OT' f} : Proper ((≃) ==> (≃)) f.
-Proof. move=> > /oeqv_ole[??]. apply oeqv_ole. split; by apply anti. Qed.
+#[export] Instance mono_proper `{!@Mono OT OT' f} : Proper ((≡) ==> (≡)) f.
+Proof. move=> > /equiv_ole[??]. apply equiv_ole. split; by apply mono. Qed.
+#[export] Instance anti_proper `{!@Anti OT OT' f} : Proper ((≡) ==> (≡)) f.
+Proof. move=> > /equiv_ole[??]. apply equiv_ole. split; by apply anti. Qed.
 #[export] Instance mono2_proper `{!@Mono2 OT OT' OT'' f} :
-  Proper ((≃) ==> (≃) ==> (≃)) f.
+  Proper ((≡) ==> (≡) ==> (≡)) f.
 Proof.
-  move=> > /oeqv_ole[??] ?? /oeqv_ole[??]. apply oeqv_ole.
+  move=> > /equiv_ole[??] ?? /equiv_ole[??]. apply equiv_ole.
   split; by apply mono2.
 Qed.
 #[export] Instance antimono_proper `{!@AntiMono OT OT' OT'' f} :
-  Proper ((≃) ==> (≃) ==> (≃)) f.
+  Proper ((≡) ==> (≡) ==> (≡)) f.
 Proof.
-  move=> > /oeqv_ole[??] ?? /oeqv_ole[??]. apply oeqv_ole.
+  move=> > /equiv_ole[??] ?? /equiv_ole[??]. apply equiv_ole.
   split; by apply antimono.
 Qed.
 
@@ -206,10 +196,10 @@ Next Obligation. done. Qed.
 
 (** The top and bottom for a function *)
 #[export] Program Instance otop_fun `{!∀ a : A, Otop (OTF a)} :
-  Otop (∀ a, OTF a) := OTOP (λ _, ⊤) _.
+  Otop (funP OTF) := OTOP (λ _, ⊤) _.
 Next Obligation. move=> *?. exact otop_intro. Qed.
 #[export] Program Instance obot_fun `{!∀ a : A, Obot (OTF a)} :
-  Obot (∀ a, OTF a) := OBOT (λ _, ⊥) _.
+  Obot (funP OTF) := OBOT (λ _, ⊥) _.
 Next Obligation. move=> *?. exact obot_elim. Qed.
 
 (** [dual] flips the top and bottom *)
@@ -253,22 +243,22 @@ Proof.
 Qed.
 
 (** The binary meet/join is commutative *)
-#[export] Instance bin_meet_comm `{!BinMeet OT} : Comm (≃) (meet (A:=OT)) | 20.
+#[export] Instance bin_meet_comm `{!BinMeet OT} : Comm (≡) (meet (A:=OT)) | 20.
 Proof.
-  move=> >. apply oeqv_ole. split; apply bin_meet_intro;
+  move=> >. apply equiv_ole. split; apply bin_meet_intro;
     by [apply bin_meet_elim_2|apply bin_meet_elim_1].
 Qed.
-#[export] Instance bin_join_comm `{!BinJoin OT} : Comm (≃) (join (A:=OT)) | 20.
+#[export] Instance bin_join_comm `{!BinJoin OT} : Comm (≡) (join (A:=OT)) | 20.
 Proof.
-  move=> >. apply oeqv_ole. split; apply bin_join_elim;
+  move=> >. apply equiv_ole. split; apply bin_join_elim;
     by [apply bin_join_intro_2|apply bin_join_intro_1].
 Qed.
 
 (** The binary meet/join is associative *)
 #[export] Instance bin_meet_assoc `{!BinMeet OT} :
-  Assoc (≃) (meet (A:=OT)) | 20.
+  Assoc (≡) (meet (A:=OT)) | 20.
 Proof.
-  move=> >. apply oeqv_ole. split; repeat apply bin_meet_intro;
+  move=> >. apply equiv_ole. split; repeat apply bin_meet_intro;
     try exact bin_meet_elim_1; try exact bin_meet_elim_2;
     try (etrans; [exact bin_meet_elim_2|
       try exact bin_meet_elim_1; exact bin_meet_elim_2]);
@@ -276,9 +266,9 @@ Proof.
       try exact bin_meet_elim_1; exact bin_meet_elim_2]).
 Qed.
 #[export] Instance bin_join_assoc `{!BinJoin OT} :
-  Assoc (≃) (join (A:=OT)) | 20.
+  Assoc (≡) (join (A:=OT)) | 20.
 Proof.
-  move=> >. apply oeqv_ole. split; repeat apply bin_join_elim;
+  move=> >. apply equiv_ole. split; repeat apply bin_join_elim;
     try exact bin_join_intro_1; try exact bin_join_intro_2;
     try (etrans; last first; [exact bin_join_intro_1|
       try exact bin_join_intro_1; exact bin_join_intro_2]);
@@ -288,22 +278,22 @@ Qed.
 
 (** The binary meet/join is unitary with [⊤]/[⊥] *)
 #[export] Instance bin_meet_top_l `{!BinMeet OT, !Otop OT} :
-  LeftId (≃) ⊤ (meet (A:=OT)) | 20.
+  LeftId (≡) ⊤ (meet (A:=OT)) | 20.
 Proof.
-  move=> ?. apply oeqv_ole. split; [exact bin_meet_elim_2|].
+  move=> ?. apply equiv_ole. split; [exact bin_meet_elim_2|].
   apply bin_meet_intro; by [exact otop_intro|].
 Qed.
 #[export] Instance bin_meet_top_r `{!BinMeet OT, !Otop OT} :
-  RightId (≃) ⊤ (meet (A:=OT)) | 20.
+  RightId (≡) ⊤ (meet (A:=OT)) | 20.
 Proof. move=> ?. by rewrite comm left_id. Qed.
 #[export] Instance bin_join_bot_l `{!BinJoin OT, !Obot OT} :
-  LeftId (≃) ⊥ (join (A:=OT)) | 20.
+  LeftId (≡) ⊥ (join (A:=OT)) | 20.
 Proof.
-  move=> ?. apply oeqv_ole. split; [|exact bin_join_intro_2].
+  move=> ?. apply equiv_ole. split; [|exact bin_join_intro_2].
   apply bin_join_elim; by [exact obot_elim|].
 Qed.
 #[export] Instance bin_join_bot_r `{!BinJoin OT, !Obot OT} :
-  RightId (≃) ⊥ (join (A:=OT)) | 20.
+  RightId (≡) ⊥ (join (A:=OT)) | 20.
 Proof. move=> ?. by rewrite comm left_id. Qed.
 
 (** [nat] has the binary meet and join *)
@@ -343,13 +333,13 @@ Solve All Obligations with done.
 (** The binary meet and join over functions *)
 
 #[export] Program Instance bin_meet_fun `{!∀ a : A, BinMeet (OTF a)} :
-  BinMeet (∀ a, OTF a) := BIN_MEET (λ f g a, f a ⊓ g a) _ _ _.
+  BinMeet (funP OTF) := BIN_MEET (λ f g a, f a ⊓ g a) _ _ _.
 Next Obligation. move=> *?. by apply bin_meet_elim_1. Qed.
 Next Obligation. move=> *?. by apply bin_meet_elim_2. Qed.
 Next Obligation. move=> *?. by apply bin_meet_intro. Qed.
 
 #[export] Program Instance bin_join_fun `{!∀ a : A, BinJoin (OTF a)} :
-  BinJoin (∀ a, OTF a) := BIN_JOIN (λ f g a, f a ⊔ g a) _ _ _.
+  BinJoin (funP OTF) := BIN_JOIN (λ f g a, f a ⊔ g a) _ _ _.
 Next Obligation. move=> *?. by apply bin_join_intro_1. Qed.
 Next Obligation. move=> *?. by apply bin_join_intro_2. Qed.
 Next Obligation. move=> *?. by apply bin_join_elim. Qed.
@@ -371,18 +361,18 @@ Next Obligation. move=> *. exact: bin_meet_intro. Qed.
 (** ** Big meet and join *)
 
 Class BigMeet OT := BIG_MEET {
-  big_meet {A : Type} : (A → Prop) → (A → OT) → OT;
-  big_meet_elim {A} {S : A → Prop} f {a} : S a → big_meet S f ⊑ f a;
-  big_meet_intro {A} {S : A → Prop} f {o} :
+  big_meet {A : Type} : (A -p> Prop) → (A -p> OT) → OT;
+  big_meet_elim {A} {S : A -p> Prop} f {a} : S a → big_meet S f ⊑ f a;
+  big_meet_intro {A} {S : A -p> Prop} f {o} :
     (∀ a, S a → o ⊑ f a) → o ⊑ big_meet S f;
 }.
 Hint Mode BigMeet ! : typeclass_instances.
 Arguments BIG_MEET {_} _ _ _.
 
 Class BigJoin OT := BIG_JOIN {
-  big_join {A : Type} : (A → Prop) → (A → OT) → OT;
-  big_join_intro {A} {S : A → Prop} f {a} : S a → f a ⊑ big_join S f;
-  big_join_elim {A} {S : A → Prop} f {o} :
+  big_join {A : Type} : (A -p> Prop) → (A -p> OT) → OT;
+  big_join_intro {A} {S : A -p> Prop} f {a} : S a → f a ⊑ big_join S f;
+  big_join_elim {A} {S : A -p> Prop} f {o} :
     (∀ a, S a → f a ⊑ o) → big_join S f ⊑ o;
 }.
 Hint Mode BigJoin ! : typeclass_instances.
@@ -397,11 +387,6 @@ Module BigMJNotation.
       format "[⊔]  a  ::  φ ,  o").
 End BigMJNotation.
 Import BigMJNotation.
-
-Module OrderNotation.
-  Export IsoNotation.
-  Export BigMJNotation.
-End OrderNotation.
 
 (** The big meet/join is monotone *)
 #[export] Instance big_meet_mono `{!BigMeet OT} {A} :
@@ -446,14 +431,14 @@ Next Obligation. move=>/= ???? all [?[??]]. exact: all. Qed.
 (** The big meet and join over functions *)
 
 #[export] Program Instance big_meet_fun `{!∀ a : A, BigMeet (OTF a)} :
-  BigMeet (∀ a, OTF a) := BIG_MEET (λ _ S F a, [⊓] b :: S b, F b a) _ _.
+  BigMeet (funP OTF) := BIG_MEET (λ _ S F a, [⊓] b :: S b, F b a) _ _.
 Next Obligation. move=> *?. exact: big_meet_elim. Qed.
 Next Obligation.
   move=> ??????? all o. apply big_meet_intro=> *. move: o. by apply all.
 Qed.
 
 #[export] Program Instance big_join_fun `{!∀ a : A, BigJoin (OTF a)} :
-  BigJoin (∀ a, OTF a) := BIG_JOIN (λ _ S F a, [⊔] b :: S b, F b a) _ _.
+  BigJoin (funP OTF) := BIG_JOIN (λ _ S F a, [⊔] b :: S b, F b a) _ _.
 Next Obligation. move=> *?. by exact: big_join_intro. Qed.
 Next Obligation.
   move=> ??????? all o. apply big_join_elim=> *. move: o. by apply all.
@@ -475,9 +460,9 @@ Next Obligation. move=> */=. by exact: (big_meet_intro (undual ∘ _)). Qed.
 
 Section lfp.
   Context `{!BigMeet OT}.
-  Implicit Type f : OT → OT.
+  Implicit Type f : OT -p> OT.
 
-  Local Definition lfp_def (f : OT → OT) : OT :=
+  Local Definition lfp_def (f : OT -p> OT) : OT :=
     [⊓] o :: f o ⊑ o, o.
   Local Lemma lfp_aux : seal lfp_def. Proof. by eexists. Qed.
   Definition lfp := lfp_aux.(unseal).
@@ -488,6 +473,8 @@ Section lfp.
   Proof.
     rewrite lfp_unseal=> ???. by apply big_meet_mono; [|done]=>/= ? {2}<-.
   Qed.
+  #[export] Instance lfp_proper : Proper ((≡) ==> (≡)) lfp.
+  Proof. apply mono_proper. Qed.
 
   (** Unfold [lfp] *)
   Lemma lfp_unfold_2 `{!Mono f} : f (lfp f) ⊑ lfp f.
@@ -499,24 +486,24 @@ Section lfp.
   Proof.
     rewrite {1}lfp_unseal. apply (big_meet_elim id), mono, lfp_unfold_2.
   Qed.
-  Lemma lfp_unfold `{!Mono f} : lfp f ≃ f (lfp f).
-  Proof. apply oeqv_ole. split; [apply lfp_unfold_1|apply lfp_unfold_2]. Qed.
+  Lemma lfp_unfold `{!Mono f} : lfp f ≡ f (lfp f).
+  Proof. apply equiv_ole. split; [apply lfp_unfold_1|apply lfp_unfold_2]. Qed.
 
   (** Basic induction principle *)
   Lemma lfp_ind `{!Mono f} {o} : f o ⊑ o → lfp f ⊑ o.
   Proof. rewrite lfp_unseal=> ?. by apply (big_meet_elim id). Qed.
 
   (** Augmenting a function with a meet *)
-  Definition aug_meet `{!BinMeet OT} (f : OT → OT) o o' := f (o' ⊓ o).
+  Definition aug_meet `{!BinMeet OT} (f : OT -p> OT) o : _ -p> _ :=
+    λ o', f (o' ⊓ o).
   #[export] Instance aug_meet_mono `{!BinMeet OT, !Mono f} : Mono2 (aug_meet f).
   Proof. move=> *?*. by apply (mono (f:=f)), mono2. Qed.
-  Lemma aug_meet_nest `{!BinMeet OT, !Mono f} {o o'} :
-    aug_meet (aug_meet f o') o ≃ aug_meet f (o ⊓ o').
-  Proof. apply oeqv_ole. split=> ?; apply (mono (f:=f)); by rewrite assoc. Qed.
-  Lemma aug_meet_top `{!BinMeet OT, !Mono f, !Otop OT} : aug_meet f ⊤ ≃ f.
-  Proof.
-    apply oeqv_ole. split=> ?; apply (mono (f:=f)); by rewrite right_id.
-  Qed.
+  Lemma aug_meet_nest `{!BinMeet OT, !Proper ((≡) ==> (≡)) f} {o o'} :
+    aug_meet (aug_meet f o') o ≡ aug_meet f (o ⊓ o').
+  Proof. unfold aug_meet=> ?. by rewrite assoc. Qed.
+  Lemma aug_meet_top `{!BinMeet OT, !Otop OT, !Proper ((≡) ==> (≡)) f} :
+    aug_meet f ⊤ ≡ f.
+  Proof. unfold aug_meet=> ?. by rewrite right_id. Qed.
 
   (** Parameterized induction principle *)
   Lemma lfp_para_ind `{!BinMeet OT, !BigMeet OT, !Mono f} {o} :
@@ -534,9 +521,9 @@ End lfp.
 
 Section gfp.
   Context `{!BigJoin OT}.
-  Implicit Type f : OT → OT.
+  Implicit Type f : OT -p> OT.
 
-  Local Definition gfp_def (f : OT → OT) : OT :=
+  Local Definition gfp_def (f : OT -p> OT) : OT :=
     [⊔] o :: o ⊑ f o, o.
   Local Lemma gfp_aux : seal gfp_def. Proof. by eexists. Qed.
   Definition gfp := gfp_aux.(unseal).
@@ -556,26 +543,25 @@ Section gfp.
   Qed.
   Lemma gfp_unfold_2 `{!Mono f} : f (gfp f) ⊑ gfp f.
   Proof.
-    rewrite {2}gfp_unseal. apply (big_join_intro id), mono, gfp_unfold_1.
+    rewrite {3}gfp_unseal. apply (big_join_intro id), mono, gfp_unfold_1.
   Qed.
-  Lemma gfp_unfold `{!Mono f} : gfp f ≃ f (gfp f).
-  Proof. apply oeqv_ole. split; [apply gfp_unfold_1|apply gfp_unfold_2]. Qed.
+  Lemma gfp_unfold `{!Mono f} : gfp f ≡ f (gfp f).
+  Proof. apply equiv_ole. split; [apply gfp_unfold_1|apply gfp_unfold_2]. Qed.
 
   (** Basic coinduction principle *)
   Lemma gfp_coind `{!Mono f} {o} : o ⊑ f o → o ⊑ gfp f.
   Proof. rewrite gfp_unseal=> ?. by apply (big_join_intro id). Qed.
 
   (** Augmenting a function with a join *)
-  Definition aug_join `{!BinJoin OT} f o o' := f (o' ⊔ o).
+  Definition aug_join `{!BinJoin OT} f o : _ -p> _ := λ o', f (o' ⊔ o).
   #[export] Instance aug_join_mono `{!BinJoin OT, !Mono f} : Mono2 (aug_join f).
   Proof. move=> *?*. apply (mono (f:=f)), mono2; by [apply _| |]. Qed.
-  Lemma aug_join_nest `{!BinJoin OT, !Mono f} {o o'} :
-    aug_join (aug_join f o') o ≃ aug_join f (o ⊔ o').
-  Proof. apply oeqv_ole. split=> ?; apply (mono (f:=f)); by rewrite assoc. Qed.
-  Lemma aug_join_bot `{!BinJoin OT, !Mono f, !Obot OT} : aug_join f ⊥ ≃ f.
-  Proof.
-    apply oeqv_ole. split=> ?; apply (mono (f:=f)); by rewrite right_id.
-  Qed.
+  Lemma aug_join_nest `{!BinJoin OT, !Proper ((≡) ==> (≡)) f} {o o'} :
+    aug_join (aug_join f o') o ≡ aug_join f (o ⊔ o').
+  Proof. unfold aug_join=> ?. by rewrite assoc. Qed.
+  Lemma aug_join_bot `{!BinJoin OT, !Proper ((≡) ==> (≡)) f, !Obot OT} :
+    aug_join f ⊥ ≡ f.
+  Proof. unfold aug_join=> ?. by rewrite right_id. Qed.
 
   (** Parameterized coinduction principle *)
   Lemma gfp_para_coind `{!BinJoin OT, !BigJoin OT, !Mono f} {o} :

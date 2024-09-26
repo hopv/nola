@@ -4,8 +4,8 @@ From nola.bi Require Export plist.
 From nola.bi Require Import order.
 From nola.iris Require Export borrow proph_ag.
 From iris.proofmode Require Import proofmode.
-Import ProdNotation PlistNotation iPropAppNotation LftNotation ProphNotation
-  UpdwNotation.
+Import ProdNotation PlistNotation FunPNotation iPropAppNotation LftNotation
+  ProphNotation UpdwNotation.
 
 Implicit Type (TY : synty) (FML : oFunctor) (α : lft) (q : Qp).
 
@@ -237,7 +237,7 @@ Section pborrow.
   Proof. solve_proper. Qed.
   (** [pborrow_wsat] is monotone over the modality *)
   #[export] Instance pborrow_wsat_mono :
-    Mono (OT:=_ → _ : bi) (OT':=_ → _ : bi) pborrow_wsat.
+    Mono (OT:=_-p>_ : bi) (OT':=_-p>_ : bi) pborrow_wsat.
   Proof. move=> ????. by apply: borrow_wsat_mono. Qed.
 
   (** ** For non-prophetic borrowing *)
