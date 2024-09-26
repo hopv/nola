@@ -5,7 +5,7 @@ From nola.bi Require Export deriv.
 From nola.bi Require Import wpw.
 From nola.iris Require Export inv.
 From iris.proofmode Require Import proofmode.
-Import iPropAppNotation UpdwNotation WpwNotation DsemNotation.
+Import FunNPNotation iPropAppNotation UpdwNotation WpwNotation DsemNotation.
 
 Implicit Type (Σ : gFunctors) (N : namespace).
 
@@ -19,7 +19,7 @@ Notation InvJudg FM JUDG := (Ejudg (inv_judgty FM) JUDG).
 
 Section inv_deriv.
   Context `{inv_judg : !InvJudg FM JUDG} {Σ}.
-  Implicit Type (δ : JUDG → iProp Σ) (Px : FM).
+  Implicit Type (δ : JUDG -np> iPropI Σ) (Px : FM).
 
   (** Accessor judgment *)
   Local Definition inv_jacsr N Px : JUDG := inv_judg (Tagged (N, Px)).
@@ -37,10 +37,9 @@ Section inv_deriv.
   Proof. rewrite inv'_unseal. exact _. Qed.
 
   (** [inv'] is non-expansive *)
-  #[export] Instance inv'_ne `{!NonExpansive δ} {N} : NonExpansive (inv' δ N).
+  #[export] Instance inv'_ne {δ N} : NonExpansive (inv' δ N).
   Proof. rewrite inv'_unseal. solve_proper. Qed.
-  #[export] Instance inv'_proper `{!NonExpansive δ} {N} :
-    Proper ((≡) ==> (⊣⊢)) (inv' δ N).
+  #[export] Instance inv'_proper {δ N} : Proper ((≡) ==> (⊣⊢)) (inv' δ N).
   Proof. apply ne_proper, _. Qed.
 End inv_deriv.
 
@@ -64,13 +63,13 @@ Section inv_deriv.
 
   Context `{!InvJudg (FML $oi Σ) JUDG, !Jsem JUDG (iProp Σ),
     !Dsem JUDG (FML $oi Σ) (iProp Σ)}.
-  Implicit Type δ : JUDG → iProp Σ.
+  Implicit Type δ : JUDG -np> iPropI Σ.
 
   (** ** [inv_judg_sem]: Semantics of [inv_judgty] *)
   Definition inv_judg_sem δ (NPx : inv_judgty (FML $oi Σ)) : iProp Σ :=
     inv_acsr ⟦⟧(δ) NPx.(untag).1 ⟦ NPx.(untag).2 ⟧(δ).
   (** [inv_judg_sem] is non-expansive *)
-  #[export] Instance inv_judg_sem_ne `{!NonExpansive δ} :
+  #[export] Instance inv_judg_sem_ne {δ} :
     NonExpansive (inv_judg_sem δ).
   Proof. move=> ?[[??]][[??]][/=/leibniz_equiv_iff<-?]. solve_proper. Qed.
   (** [Dsem] over [inv_judgty] *)

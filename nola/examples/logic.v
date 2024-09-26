@@ -5,8 +5,8 @@ From nola.iris Require Export cif inv pborrow.
 From nola.bi Require Import util.
 From nola.heap_lang Require Export notation proofmode.
 From nola.examples Require Export nsynty.
-Import ProdNotation UpdwNotation WpwNotation iPropAppNotation ProphNotation
-  LftNotation NsyntyNotation FunPRNotation DsemNotation.
+Import ProdNotation FunNPNotation UpdwNotation WpwNotation iPropAppNotation
+  ProphNotation LftNotation NsyntyNotation FunPRNotation DsemNotation.
 
 Implicit Type (Σ : gFunctors) (N : namespace) (TY : synty) (dq : dfrac)
   (l : loc) (b : bool) (α β : lft) (q : Qp).
@@ -39,7 +39,7 @@ Section cif_inv.
   #[export] Program Instance inv_sem_ecifcon {JUDG}
     : SemEcifcon JUDG invCC CON Σ :=
     SEM_ECIFCON (λ _ N _ Φx _, inv_tok N (Φx ())) _.
-  Next Obligation. move=>/= ?????????? eqv ???. f_equiv. apply eqv. Qed.
+  Next Obligation. move=>/= ????????? eqv ???. f_equiv. apply eqv. Qed.
 End cif_inv.
 (** [invCC] semantics registered *)
 Notation InvSem JUDG CON Σ := (EsemEcifcon JUDG invCC CON Σ).
@@ -72,7 +72,7 @@ Section cif_bor.
   #[export] Program Instance bor_sem_ecifcon {JUDG}
     : SemEcifcon JUDG borCC CON Σ :=
     SEM_ECIFCON (λ _ α _ Φx _, nbor_tok α (Φx ())) _.
-  Next Obligation. move=>/= ?????????? eqv ???. f_equiv. apply eqv. Qed.
+  Next Obligation. move=>/= ????????? eqv ???. f_equiv. apply eqv. Qed.
 End cif_bor.
 (** [borCC] semantics registered *)
 Notation BorSem JUDG CON Σ := (EsemEcifcon JUDG borCC CON Σ).
@@ -107,7 +107,7 @@ Section cif_pbor.
   #[export] Program Instance pbor_sem_ecifcon {JUDG}
     : SemEcifcon JUDG (pborCC TY) CON Σ :=
     SEM_ECIFCON (λ _ '(α, X)' _ Φx '(x, ξ)', pbor_tok α x ξ Φx) _.
-  Next Obligation. move=>/= ????????????? /leibniz_equiv_iff. solve_proper. Qed.
+  Next Obligation. move=>/= ???????????? /leibniz_equiv_iff. solve_proper. Qed.
 End cif_pbor.
 (** [pborCC] semantics registered *)
 Notation PborSem TY JUDG CON Σ := (EsemEcifcon JUDG (pborCC TY) CON Σ).
@@ -127,8 +127,7 @@ Section iff_judg.
   Definition iff_judg_sem δ (PQx : iff_judgty FM) : iProp Σ :=
     □ (⟦ PQx.(untag).1 ⟧(δ) ∗-∗ ⟦ PQx.(untag).2 ⟧(δ)).
   (** [iff_judg_sem] is non-expansive *)
-  #[export] Instance iff_judg_sem_ne `{!NonExpansive δ} :
-    NonExpansive (iff_judg_sem δ).
+  #[export] Instance iff_judg_sem_ne {δ} : NonExpansive (iff_judg_sem δ).
   Proof. solve_proper. Qed.
   (** [Dsem] over [iff_judgty] *)
   #[export] Instance iff_judg_dsem
@@ -172,19 +171,20 @@ Section cif_inv'.
   Qed.
 
   Context `{!inv'GS (cifOF CON) Σ, !IffJudg (cifO CON Σ) JUDG}.
+  Implicit Type δ : JUDG -np> iPropI Σ.
   (** [inv']: Relaxed invariant *)
   Definition inv' δ N Px : iProp Σ := ∃ Qx, δ (jiff Px Qx) ∗ inv_tok N Qx.
   (** [inv'] is non-expansive *)
-  #[export] Instance inv'_ne `{!NonExpansive δ} {N} : NonExpansive (inv' δ N).
+  #[export] Instance inv'_ne {δ N} : NonExpansive (inv' δ N).
   Proof. solve_proper. Qed.
-  #[export] Instance inv'_proper `{!NonExpansive δ} {N} :
+  #[export] Instance inv'_proper {δ N} :
     Proper ((≡) ==> (⊣⊢)) (inv' δ N).
   Proof. apply ne_proper, _. Qed.
   (** Semantics of [invCC] *)
   #[export] Program Instance inv'_sem_ecifcon
     : SemEcifcon JUDG inv'CC CON Σ :=
     SEM_ECIFCON (λ δ N _ Φx _, inv' δ N (Φx ())) _.
-  Next Obligation. solve_proper. Qed.
+  Next Obligation. move=> ???????? eqv ???. f_equiv. apply eqv. Qed.
 End cif_inv'.
 (** [inv'CC] semantics registered *)
 Notation Inv'Sem JUDG CON Σ := (EsemEcifcon JUDG inv'CC CON Σ).
@@ -223,7 +223,7 @@ Section verify.
   Definition ilist N Φx l : iProp Σ := inv_tok N (Φx l) ∗
     inv_tok N (∃ l', ▷ (l +ₗ 1) ↦ #l' ∗ cif_ilist N Φx l')%cif.
   (** Unfold semantics over [cif_ilist] *)
-  Lemma sem_ilist `{!NonExpansive δ} {N Φx l} :
+  Lemma sem_ilist {δ N Φx l} :
     cif_sem δ (cif_ilist N Φx l) ⊣⊢ ilist N Φx l.
   Proof. by rewrite cif_ilist_unfold /= !sem_ecustom /=. Qed.
 
@@ -532,7 +532,7 @@ Section verify.
   Definition mblist α Φx l : iProp Σ :=
     mutex_bor α l (Φx (l +ₗ 1) ∗ ∃ l', ▷ (l +ₗ 2) ↦ #l' ∗ cif_mblist α Φx l').
   (** Unfold semantics over [cif_ilist] *)
-  Lemma sem_mblist `{!NonExpansive δ} {α Φx l} :
+  Lemma sem_mblist {δ α Φx l} :
     cif_sem δ (cif_mblist α Φx l) ⊣⊢ mblist α Φx l.
   Proof. by rewrite cif_mblist_unfold !sem_ecustom /=. Qed.
 

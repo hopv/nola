@@ -4,7 +4,7 @@ From nola.util Require Import tagged.
 From nola.bi Require Export deriv.
 From nola.iris Require Export sinv.
 From iris.proofmode Require Import proofmode.
-Import iPropAppNotation UpdwNotation DsemNotation.
+Import FunNPNotation iPropAppNotation UpdwNotation DsemNotation.
 
 (** ** [sinv_judgty]: Judgment type for [sinv] *)
 Variant sinv_judg_id := .
@@ -16,7 +16,7 @@ Notation SinvJudg FM JUDG := (Ejudg (sinv_judgty FM) JUDG).
 
 Section sinv_deriv.
   Context `{!sinvGS FML Σ, sinv_judg : !SinvJudg (FML $oi Σ) JUDG}.
-  Implicit Type δ : JUDG → iProp Σ.
+  Implicit Type δ : JUDG -np> iPropI Σ.
 
   (** Accessor judgment *)
   Local Definition sinv_jacsr (Px Qx : FML $oi Σ) : JUDG :=
@@ -36,9 +36,9 @@ Section sinv_deriv.
   Proof. rewrite sinv_unseal. exact _. Qed.
 
   (** [sinv] is non-expansive *)
-  #[export] Instance sinv_ne `{!NonExpansive δ} : NonExpansive (sinv δ).
+  #[export] Instance sinv_ne {δ} : NonExpansive (sinv δ).
   Proof. rewrite sinv_unseal. solve_proper. Qed.
-  #[export] Instance sinv_proper `{!NonExpansive δ} :
+  #[export] Instance sinv_proper {δ} :
     Proper ((≡) ==> (⊣⊢)) (sinv δ).
   Proof. apply ne_proper, _. Qed.
 End sinv_deriv.
@@ -51,13 +51,13 @@ Notation sinv_wsatid := (sinv_wsati der).
 Section sinv_deriv.
   Context `{!SinvJudg (FML $oi Σ) JUDG, !Jsem JUDG (iProp Σ),
     !Dsem JUDG (FML $oi Σ) (iProp Σ)}.
-  Implicit Type (δ : JUDG → iProp Σ).
+  Implicit Type (δ : JUDG -np> iPropI Σ).
 
   (** ** [sinv_judg_sem]: Semantics of [sinv_judgty] *)
   Definition sinv_judg_sem δ '(PQx : sinv_judgty (FML $oi Σ)) : iProp Σ :=
     mod_acsr bupd ⟦ PQx.(untag).1 ⟧(δ) ⟦ PQx.(untag).2 ⟧(δ).
   (** [sinv_judg_sem] is non-expansive *)
-  #[export] Instance sinv_judg_sem_ne `{!NonExpansive δ} :
+  #[export] Instance sinv_judg_sem_ne {δ} :
     NonExpansive (sinv_judg_sem δ).
   Proof. solve_proper. Qed.
   (** [Dsem] over [sinv_judgty] *)

@@ -4,8 +4,8 @@ From nola.util Require Import tagged.
 From nola.bi Require Export deriv.
 From nola.iris Require Export pborrow.
 From iris.proofmode Require Import proofmode.
-Import ProdNotation PlistNotation iPropAppNotation UpdwNotation LftNotation
-  ProphNotation DsemNotation.
+Import ProdNotation PlistNotation FunNPNotation iPropAppNotation UpdwNotation
+  LftNotation ProphNotation DsemNotation.
 
 Implicit Type (TY : synty).
 
@@ -24,7 +24,7 @@ Notation PborrowJudg TY FM JUDG := (Ejudg (pborrow_judgty TY FM) JUDG).
 Section pborrow_deriv.
   Context `{!pborrowGS TY FML Σ,
     pborrow_judg : !PborrowJudg TY (FML $oi Σ) JUDG}.
-  Implicit Type (δ : JUDG → iProp Σ) (Px Qx : FML $oi Σ) (X Y : TY).
+  Implicit Type (δ : JUDG -np> iPropI Σ) (Px Qx : FML $oi Σ) (X Y : TY).
 
   (** Judgments *)
   Local Definition pborrow_jto Px Qx : JUDG :=
@@ -82,38 +82,31 @@ Section pborrow_deriv.
   Local Lemma plend_unseal : @plend = @plend_def. Proof. exact: seal_eq. Qed.
 
   (** Borrower and lender propositions are non-expansive *)
-  #[export] Instance nbor_ne `{!NonExpansive δ} {α} : NonExpansive (nbor δ α).
+  #[export] Instance nbor_ne {δ α} : NonExpansive (nbor δ α).
   Proof. rewrite nbor_unseal. solve_proper. Qed.
-  #[export] Instance nbor_proper `{!NonExpansive δ} {α} :
-    Proper ((≡) ==> (⊣⊢)) (nbor δ α).
+  #[export] Instance nbor_proper {δ α} : Proper ((≡) ==> (⊣⊢)) (nbor δ α).
   Proof. apply ne_proper, _. Qed.
-  #[export] Instance nobor_ne `{!NonExpansive δ} {α q} :
-    NonExpansive (nobor δ α q).
+  #[export] Instance nobor_ne {δ α q} : NonExpansive (nobor δ α q).
   Proof. rewrite nobor_unseal. solve_proper. Qed.
-  #[export] Instance nobor_proper `{!NonExpansive δ} {α q} :
-    Proper ((≡) ==> (⊣⊢)) (nobor δ α q).
+  #[export] Instance nobor_proper {δ α q} : Proper ((≡) ==> (⊣⊢)) (nobor δ α q).
   Proof. apply ne_proper, _. Qed.
-  #[export] Instance nlend_ne `{!NonExpansive δ} {α} : NonExpansive (nlend δ α).
+  #[export] Instance nlend_ne {δ α} : NonExpansive (nlend δ α).
   Proof. rewrite nlend_unseal. solve_proper. Qed.
-  #[export] Instance nlend_proper `{!NonExpansive δ} {α} :
-    Proper ((≡) ==> (⊣⊢)) (nlend δ α).
+  #[export] Instance nlend_proper {δ α} : Proper ((≡) ==> (⊣⊢)) (nlend δ α).
   Proof. apply ne_proper, _. Qed.
-  #[export] Instance pbor_ne `{!NonExpansive δ} {X α x ξ} :
-    NonExpansive (pbor (X:=X) δ α x ξ).
+  #[export] Instance pbor_ne {δ X α x ξ} : NonExpansive (pbor (X:=X) δ α x ξ).
   Proof. rewrite pbor_unseal. solve_proper. Qed.
-  #[export] Instance pbor_proper `{!NonExpansive δ} {X α x ξ} :
+  #[export] Instance pbor_proper {δ X α x ξ} :
     Proper ((≡) ==> (⊣⊢)) (pbor (X:=X) δ α x ξ).
   Proof. apply ne_proper, _. Qed.
-  #[export] Instance pobor_ne `{!NonExpansive δ} {X α q ξ} :
-    NonExpansive (pobor (X:=X) δ α q ξ).
+  #[export] Instance pobor_ne {δ X α q ξ} : NonExpansive (pobor (X:=X) δ α q ξ).
   Proof. rewrite pobor_unseal. solve_proper. Qed.
-  #[export] Instance pobor_proper `{!NonExpansive δ} {X α q ξ} :
+  #[export] Instance pobor_proper {δ X α q ξ} :
     Proper ((≡) ==> (⊣⊢)) (pobor (X:=X) δ α q ξ).
   Proof. apply ne_proper, _. Qed.
-  #[export] Instance plend_ne `{!NonExpansive δ} {X α xπ} :
-    NonExpansive (plend (X:=X) δ α xπ).
+  #[export] Instance plend_ne {δ X α xπ} : NonExpansive (plend (X:=X) δ α xπ).
   Proof. rewrite plend_unseal. solve_proper. Qed.
-  #[export] Instance plend_proper `{!NonExpansive δ} {X α xπ} :
+  #[export] Instance plend_proper {δ X α xπ} :
     Proper ((≡) ==> (⊣⊢)) (plend (X:=X) δ α xπ).
   Proof. apply ne_proper, _. Qed.
 End pborrow_deriv.
@@ -133,7 +126,7 @@ Notation plend_body_varid := (plend_body_vari der).
 Section pborrow_deriv.
   Context `{!pborrowGS TY FML Σ, !PborrowJudg TY (FML $oi Σ) JUDG,
     !Jsem JUDG (iProp Σ), !Dsem JUDG (FML $oi Σ) (iProp Σ)}.
-  Implicit Type (δ : JUDG → iProp Σ) (Px Qx : FML $oi Σ).
+  Implicit Type (δ : JUDG -np> iPropI Σ) (Px Qx : FML $oi Σ).
 
   (** ** [pborrow_judg_sem]: Semantics of [pborrow_judgty] *)
   Definition pborrow_judg_sem δ (J : pborrow_judgty TY (FML $oi Σ)) : iProp Σ :=
@@ -143,7 +136,7 @@ Section pborrow_deriv.
         plend_body ⟦ ⟧(δ) xπ Φx ==∗ plend_body ⟦ ⟧(δ) yπ Ψx
     end.
   (** [pborrow_judg_sem] is non-expansive *)
-  #[export] Instance pborrow_judg_sem_ne `{!NonExpansive δ} :
+  #[export] Instance pborrow_judg_sem_ne {δ} :
     NonExpansive (pborrow_judg_sem δ).
   Proof.
     move=> ?[?][?]/=[?|]; [solve_proper|]. move=> [?[[??]?]][?[[??]?]][/=?].
@@ -163,7 +156,7 @@ Section pborrow_deriv.
   Context `{!pborrowGS TY FML Σ, !PborrowJudg TY (FML $oi Σ) JUDG,
     !Jsem JUDG (iProp Σ), !Dsem JUDG (FML $oi Σ) (iProp Σ),
     !PborrowJsem TY FML Σ JUDG, !Deriv (JUDG:=JUDG) ih δ}.
-  Implicit Type (X Y Z : TY) (Px Qx Rx : FML $oi Σ) (δ : JUDG → iProp Σ).
+  Implicit Type (X Y Z : TY) (Px Qx Rx : FML $oi Σ) (δ : JUDG -np> iPropI Σ).
 
   (** ** Conversion *)
 

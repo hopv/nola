@@ -5,7 +5,7 @@ From nola.util Require Export nary cit.
 From nola.bi Require Export deriv.
 From nola.bi Require Import later.
 From nola.iris Require Export iprop.
-Import EqNotations iPropAppNotation FunPRNotation DsemNotation.
+Import EqNotations FunNPNotation iPropAppNotation FunPRNotation DsemNotation.
 
 Implicit Type Σ : gFunctors.
 
@@ -246,20 +246,19 @@ Implicit Type JUDG : ofe.
 #[projections(primitive)]
 Record SemCifcon (JUDG : ofe) CON Σ := SEM_CIFCON {
   (** Semantics *)
-  sem_cifc :> (JUDG → iProp Σ) → ∀ s, (CON.(cifc_idom) s -d> iProp Σ) →
+  sem_cifc :> (JUDG -np> iPropI Σ) → ∀ s, (CON.(cifc_idom) s -d> iProp Σ) →
     (CON.(cifc_cdom) s -d> cif CON Σ) → CON.(cifc_data) s $oi Σ → iProp Σ;
   (** [sem_cifc] is non-expansive *)
-  sem_cifc_ne `{!NonExpansive δ} {s} :: NonExpansive3 (sem_cifc δ s);
+  sem_cifc_ne {δ s} :: NonExpansive3 (sem_cifc δ s);
 }.
 Existing Class SemCifcon.
 Add Printing Constructor SemCifcon.
 Arguments SEM_CIFCON {_ _ _} _ _. Arguments sem_cifc {_ _ _ semc} : rename.
-Arguments sem_cifc_ne {_ _ _ semc _ _ _} : rename.
+Arguments sem_cifc_ne {_ _ _ semc _ _} : rename.
 Hint Mode SemCifcon - ! - : typeclass_instances.
 
 (** [sem_cifc] is proper *)
-#[export] Instance sem_cifc_proper `{!SemCifcon JUDG CON Σ, !NonExpansive δ}
-  {s} :
+#[export] Instance sem_cifc_proper `{!SemCifcon JUDG CON Σ} {δ s} :
   Proper ((≡) ==> (≡) ==> (≡) ==> (⊣⊢)) (sem_cifc (CON:=CON) δ s).
 Proof.
   move=> ?????????. apply equiv_dist=> ?. f_equiv; by apply equiv_dist.
@@ -290,8 +289,7 @@ Section iris.
     end%I.
 
   (** [cif_bsem] is non-expansive *)
-  #[export] Instance cif_bsem_ne `{!NonExpansive δ} {s} :
-    NonExpansive3 (cif_bsem δ s).
+  #[export] Instance cif_bsem_ne {δ s} : NonExpansive3 (cif_bsem δ s).
   Proof. case s=>/=; try solve_proper. move=> ???????. by apply laterl_ne. Qed.
 End iris.
 
@@ -303,11 +301,9 @@ Section iris.
   Context `{!SemCifcon JUDG CON Σ}.
 
   (** [cif_sem] is non-expansive *)
-  #[export] Instance cif_sem_ne `{!NonExpansive δ} :
-    NonExpansive (cif_sem' CON δ).
+  #[export] Instance cif_sem_ne {δ} : NonExpansive (cif_sem' CON δ).
   Proof. move=> ?. apply cit_fold_ne_gen; solve_proper. Qed.
-  #[export] Instance cif_sem_proper `{!NonExpansive δ} :
-    Proper ((≡) ==> (≡)) (cif_sem' CON δ).
+  #[export] Instance cif_sem_proper {δ} : Proper ((≡) ==> (≡)) (cif_sem' CON δ).
   Proof. apply ne_proper, _. Qed.
   (** [Dsem] over [cif] *)
   #[export] Instance cif_dsem : Dsem JUDG (cifO CON Σ) (iProp Σ) :=
@@ -391,16 +387,17 @@ End cif_ecustom.
 #[projections(primitive)]
 Record SemEcifcon JUDG CON' CON Σ := SEM_ECIFCON {
   (** Semantics *)
-  sem_ecifc :> (JUDG → iProp Σ) → ∀ s, (CON'.(cifc_idom) s -d> iProp Σ) →
-    (CON'.(cifc_cdom) s -d> cif CON Σ) → CON'.(cifc_data) s $oi Σ → iProp Σ;
+  sem_ecifc :> (JUDG -np> iPropI Σ) → ∀ s,
+    (CON'.(cifc_idom) s -d> iProp Σ) → (CON'.(cifc_cdom) s -d> cif CON Σ) →
+      CON'.(cifc_data) s $oi Σ → iProp Σ;
   (** [sem_ecifc] is non-expansive *)
-  sem_ecifc_ne `{!NonExpansive δ} {s} :: NonExpansive3 (sem_ecifc δ s);
+  sem_ecifc_ne {δ s} :: NonExpansive3 (sem_ecifc δ s);
 }.
 Existing Class SemEcifcon.
 Add Printing Constructor SemEcifcon.
 Arguments SEM_ECIFCON {_ _ _ _} _ _.
 Arguments sem_ecifc {_ _ _ _ semec} : rename.
-Arguments sem_ecifc_ne {_ _ _ _ semec _ _ _} : rename.
+Arguments sem_ecifc_ne {_ _ _ _ semec _ _} : rename.
 Hint Mode SemEcifcon - ! - - : typeclass_instances.
 
 (** [SemCifcon] over [sigT] by [SemEcifcon] *)
@@ -432,14 +429,14 @@ Section cif_ecustom.
     !SemEcifcon JUDG CON' CON Σ, !EsemEcifcon JUDG CON' CON Σ}.
 
   (** Semantics of [cif_ecustom] *)
-  Lemma sem_ecustom `{!NonExpansive δ} {s Φx Ψx d} :
+  Lemma sem_ecustom {δ s Φx Ψx d} :
     cif_sem δ (cif_ecustom CON' s Φx Ψx d) ⊣⊢
       sem_ecifc (CON':=CON') (CON:=CON) δ s (λ i, ⟦ Φx i ⟧(δ)) Ψx d.
   Proof.
     rewrite cif_ecustom_unseal /= -esem_ecifc. f_equiv=>// ?.
     by rewrite to_of_cit.
   Qed.
-  Lemma sem'_ecustom `{!NonExpansive δ} {s Φx Ψx d} :
+  Lemma sem'_ecustom {δ s Φx Ψx d} :
     ⟦ cif_ecustom CON' s Φx Ψx d ⟧(δ) ⊣⊢
       sem_ecifc (CON':=CON') (CON:=CON) δ s (λ i, ⟦ Φx i ⟧(δ)) Ψx d.
   Proof. exact sem_ecustom. Qed.
