@@ -38,8 +38,8 @@ Section cif_inv.
   (** Semantics of [invCC] *)
   #[export] Program Instance inv_sem_ecifcon {JUDG}
     : SemEcifcon JUDG invCC CON Σ :=
-    SEM_ECIFCON (λ _ N _ Φx _, inv_tok N (Φx ())) _.
-  Next Obligation. move=>/= ????????? eqv ???. f_equiv. apply eqv. Qed.
+    SEM_ECIFCON (λ _ _ N _ Φx _, inv_tok N (Φx ())) _.
+  Next Obligation. move=>/= ???*???*?? eqv ???. f_equiv. apply eqv. Qed.
 End cif_inv.
 (** [invCC] semantics registered *)
 Notation InvSem JUDG CON Σ := (EsemEcifcon JUDG invCC CON Σ).
@@ -71,8 +71,8 @@ Section cif_bor.
   (** Semantics of [borCC] *)
   #[export] Program Instance bor_sem_ecifcon {JUDG}
     : SemEcifcon JUDG borCC CON Σ :=
-    SEM_ECIFCON (λ _ α _ Φx _, nbor_tok α (Φx ())) _.
-  Next Obligation. move=>/= ????????? eqv ???. f_equiv. apply eqv. Qed.
+    SEM_ECIFCON (λ _ _ α _ Φx _, nbor_tok α (Φx ())) _.
+  Next Obligation. move=>/= ???*???*?? eqv ???. f_equiv. apply eqv. Qed.
 End cif_bor.
 (** [borCC] semantics registered *)
 Notation BorSem JUDG CON Σ := (EsemEcifcon JUDG borCC CON Σ).
@@ -106,8 +106,8 @@ Section cif_pbor.
   (** Semantics of [pborCC] *)
   #[export] Program Instance pbor_sem_ecifcon {JUDG}
     : SemEcifcon JUDG (pborCC TY) CON Σ :=
-    SEM_ECIFCON (λ _ '(α, X)' _ Φx '(x, ξ)', pbor_tok α x ξ Φx) _.
-  Next Obligation. move=>/= ???????????? /leibniz_equiv_iff. solve_proper. Qed.
+    SEM_ECIFCON (λ _ _ '(α, X)' _ Φx '(x, ξ)', pbor_tok α x ξ Φx) _.
+  Next Obligation. move=>/= ???*???*?*?? /leibniz_equiv_iff. solve_proper. Qed.
 End cif_pbor.
 (** [pborCC] semantics registered *)
 Notation PborSem TY JUDG CON Σ := (EsemEcifcon JUDG (pborCC TY) CON Σ).
@@ -183,8 +183,8 @@ Section cif_inv'.
   (** Semantics of [invCC] *)
   #[export] Program Instance inv'_sem_ecifcon
     : SemEcifcon JUDG inv'CC CON Σ :=
-    SEM_ECIFCON (λ δ N _ Φx _, inv' δ N (Φx ())) _.
-  Next Obligation. move=> ???????? eqv ???. f_equiv. apply eqv. Qed.
+    SEM_ECIFCON (λ _ δ N _ Φx _, inv' δ N (Φx ())) _.
+  Next Obligation. move=> ??*???*?? eqv ?*. f_equiv. apply eqv. Qed.
 End cif_inv'.
 (** [inv'CC] semantics registered *)
 Notation Inv'Sem JUDG CON Σ := (EsemEcifcon JUDG inv'CC CON Σ).

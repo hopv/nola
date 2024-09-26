@@ -246,30 +246,28 @@ Implicit Type JUDG : ofe.
 #[projections(primitive)]
 Record SemCifcon (JUDG : ofe) CON Σ := SEM_CIFCON {
   (** Semantics *)
-  sem_cifc :> (JUDG -np> iPropI Σ) → ∀ s, (CON.(cifc_idom) s -d> iProp Σ) →
+  sem_cifc :> ((JUDG -np> iPropI Σ) -d> cif CON Σ -d> iProp Σ) →
+    (JUDG -np> iPropI Σ) → ∀ s, (CON.(cifc_idom) s -d> iProp Σ) →
     (CON.(cifc_cdom) s -d> cif CON Σ) → CON.(cifc_data) s $oi Σ → iProp Σ;
-  (** [sem_cifc] is non-expansive *)
-  sem_cifc_ne {δ s} :: NonExpansive3 (sem_cifc δ s);
+  (** [sem_cifc] is non-expansive over usual arguments
+    and contractive over the self-reference *)
+  sem_cifc_ne {n} :: Proper
+    (dist_later n ==> pointwise_relation _ (forall_relation (λ _,
+      (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡)))) sem_cifc;
 }.
 Existing Class SemCifcon.
 Add Printing Constructor SemCifcon.
 Arguments SEM_CIFCON {_ _ _} _ _. Arguments sem_cifc {_ _ _ semc} : rename.
-Arguments sem_cifc_ne {_ _ _ semc _ _} : rename.
+Arguments sem_cifc_ne {_ _ _ semc _} : rename.
 Hint Mode SemCifcon - ! - : typeclass_instances.
-
-(** [sem_cifc] is proper *)
-#[export] Instance sem_cifc_proper `{!SemCifcon JUDG CON Σ} {δ s} :
-  Proper ((≡) ==> (≡) ==> (≡) ==> (⊣⊢)) (sem_cifc (CON:=CON) δ s).
-Proof.
-  move=> ?????????. apply equiv_dist=> ?. f_equiv; by apply equiv_dist.
-Qed.
 
 (** ** [cif_sem]: Semantics of [cif] *)
 Section iris.
   Context `{!SemCifcon JUDG CON Σ}.
+  Implicit Type sm : (JUDG -np> iPropI Σ) -d> cif CON Σ -d> iProp Σ.
 
   (** [cif_bsem]: Base semantics for [cif] *)
-  Definition cif_bsem δ s :
+  Definition cif_bsem sm δ s :
     (cif_idom CON s -d> iProp Σ) → (cif_cdom CON s -d> cif CON Σ) →
         cif_data CON s $oi Σ → iProp Σ :=
     match s with
@@ -285,25 +283,48 @@ Section iris.
         | cifs_except0 => ◇ P
         end
     | cifs_pure => λ _ _ φ, ⌜φ⌝ | cifs_later => λ _ _, laterl
-    | cifs_custom s => sem_cifc δ s
+    | cifs_custom s => sem_cifc sm δ s
     end%I.
 
-  (** [cif_bsem] is non-expansive *)
-  #[export] Instance cif_bsem_ne {δ s} : NonExpansive3 (cif_bsem δ s).
-  Proof. case s=>/=; try solve_proper. move=> ???????. by apply laterl_ne. Qed.
-End iris.
+  (** [cif_bsem] is non-expansive over usual arguments
+    and contractive over the self-reference *)
+  #[export] Instance cif_bsem_ne {n} : Proper
+    (dist_later n ==> pointwise_relation _ (forall_relation (λ _,
+      (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡)))) cif_bsem.
+  Proof.
+    move=> ????. case=>/=; try solve_proper.
+    { move=> ???????. by apply laterl_ne. } { by apply sem_cifc_ne. }
+  Qed.
 
-(** [cif_sem]: Semantics of [cif] *)
-Notation cif_sem δ := (cit_fold (cif_bsem δ)).
-Notation cif_sem' CON δ := (cit_fold (cif_bsem (CON:=CON) δ)) (only parsing).
+  (** [cif_sem_gen]: Generator of [cif_sem] *)
+  Definition cif_sem_gen sm : (JUDG -np> iPropI Σ) -d> cif CON Σ -d> iProp Σ :=
+    λ δ, cit_fold (cif_bsem sm δ).
+  #[export] Instance cif_sem_gen_contractive : Contractive cif_sem_gen.
+  Proof.
+    move=> ??????. apply cit_fold_ne_gen=>// ??????????. by apply cif_bsem_ne.
+  Qed.
 
-Section iris.
-  Context `{!SemCifcon JUDG CON Σ}.
+  (** [cif_sem]: Semantics of [cif] *)
+  Definition cif_sem' : (JUDG -np> iPropI Σ) -d> cif CON Σ -d> iProp Σ :=
+    fixpoint cif_sem_gen.
+  Definition cif_sem : (JUDG -np> iPropI Σ) -d> cif CON Σ -d> iProp Σ :=
+    cif_sem_gen cif_sem'.
+  (** Unfold [cif_sem'] *)
+  Lemma cif_sem'_unfold : cif_sem' ≡ cif_sem.
+  Proof. apply fixpoint_unfold. Qed.
+  Lemma cif_sem'_app_unfold {δ Px} : cif_sem' δ Px ≡ cif_sem δ Px.
+  Proof. apply cif_sem'_unfold. Qed.
 
   (** [cif_sem] is non-expansive *)
-  #[export] Instance cif_sem_ne {δ} : NonExpansive (cif_sem' CON δ).
-  Proof. move=> ?. apply cit_fold_ne_gen; solve_proper. Qed.
-  #[export] Instance cif_sem_proper {δ} : Proper ((≡) ==> (≡)) (cif_sem' CON δ).
+  #[export] Instance cif_sem_ne {δ} : NonExpansive (cif_sem δ).
+  Proof.
+    move=> ??*. apply: cit_fold_ne=>//. move=> ??*?*?*. by apply cif_bsem_ne.
+  Qed.
+  #[export] Instance cif_sem_proper {δ} : Proper ((≡) ==> (≡)) (cif_sem δ).
+  Proof. apply ne_proper, _. Qed.
+  #[export] Instance cif_sem'_ne {δ} : NonExpansive (cif_sem' δ).
+  Proof. move=> ???. rewrite !cif_sem'_app_unfold. solve_proper. Qed.
+  #[export] Instance cif_sem'_proper {δ} : Proper ((≡) ==> (≡)) (cif_sem' δ).
   Proof. apply ne_proper, _. Qed.
   (** [Dsem] over [cif] *)
   #[export] Instance cif_dsem : Dsem JUDG (cifO CON Σ) (iProp Σ) :=
@@ -387,11 +408,15 @@ End cif_ecustom.
 #[projections(primitive)]
 Record SemEcifcon JUDG CON' CON Σ := SEM_ECIFCON {
   (** Semantics *)
-  sem_ecifc :> (JUDG -np> iPropI Σ) → ∀ s,
+  sem_ecifc :> ((JUDG -np> iPropI Σ) -d> cif CON Σ -d> iProp Σ) →
+    (JUDG -np> iPropI Σ) → ∀ s,
     (CON'.(cifc_idom) s -d> iProp Σ) → (CON'.(cifc_cdom) s -d> cif CON Σ) →
       CON'.(cifc_data) s $oi Σ → iProp Σ;
-  (** [sem_ecifc] is non-expansive *)
-  sem_ecifc_ne {δ s} :: NonExpansive3 (sem_ecifc δ s);
+  (** [sem_ecifc] is non-expansive over usual arguments
+    and contractive over the self-reference *)
+  sem_ecifc_ne {n} :: Proper
+    (dist_later n ==> pointwise_relation _ (forall_relation (λ _,
+      (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡)))) sem_ecifc;
 }.
 Existing Class SemEcifcon.
 Add Printing Constructor SemEcifcon.
@@ -404,17 +429,17 @@ Hint Mode SemEcifcon - ! - - : typeclass_instances.
 Program Definition sigT_sem_cifcon {JUDG A}
   `{semec : !∀ a, SemEcifcon JUDG (CONF a) (@sigTCC A CONF) Σ}
   : SemCifcon JUDG (sigTCC CONF) Σ :=
-  SEM_CIFCON (λ δ s, semec _ δ (projT2 s)) _.
-Next Obligation. solve_proper. Qed.
+  SEM_CIFCON (λ sm δ s, semec _ sm δ (projT2 s)) _.
+Next Obligation. move=> *?*???*?*?*. by apply sem_ecifc_ne. Qed.
 
 (** Inclusion with respect to [SemEcifcon] and [SemCifcon] *)
 Class EsemEcifcon JUDG CON' CON Σ `{!Ecifcon CON' CON}
   `{!SemEcifcon JUDG CON' CON Σ, !SemCifcon JUDG CON Σ} :=
-  esem_ecifc : ∀ {δ s Φ Ψx d},
-    sem_cifc (CON:=CON) δ (ecifc_sel s) (λ i, Φ (rew[id] ecifc_idom s in i))
+  esem_ecifc : ∀ {sm δ s Φ Ψx d},
+    sem_cifc (CON:=CON) sm δ (ecifc_sel s) (λ i, Φ (rew[id] ecifc_idom s in i))
       (λ c, Ψx (rew[id] ecifc_cdom s in c))
       (rew[λ F, F $oi Σ] eq_sym (ecifc_data s) in d) =
-      sem_ecifc (CON':=CON') (CON:=CON) δ s Φ Ψx d.
+      sem_ecifc (CON':=CON') (CON:=CON) sm δ s Φ Ψx d.
 Hint Mode EsemEcifcon - ! - - - - - : typeclass_instances.
 
 (** [EsemEcifcon] into [sigT] *)
@@ -431,13 +456,14 @@ Section cif_ecustom.
   (** Semantics of [cif_ecustom] *)
   Lemma sem_ecustom {δ s Φx Ψx d} :
     cif_sem δ (cif_ecustom CON' s Φx Ψx d) ⊣⊢
-      sem_ecifc (CON':=CON') (CON:=CON) δ s (λ i, ⟦ Φx i ⟧(δ)) Ψx d.
+      sem_ecifc cif_sem δ s (λ i, ⟦ Φx i ⟧(δ)) Ψx d.
   Proof.
-    rewrite cif_ecustom_unseal /= -esem_ecifc. f_equiv=>// ?.
-    by rewrite to_of_cit.
+    rewrite cif_ecustom_unseal /= -esem_ecifc. apply equiv_dist=> n.
+    apply sem_cifc_ne=>// >; [|by rewrite to_of_cit].
+    apply dist_dist_later, equiv_dist, cif_sem'_unfold.
   Qed.
   Lemma sem'_ecustom {δ s Φx Ψx d} :
     ⟦ cif_ecustom CON' s Φx Ψx d ⟧(δ) ⊣⊢
-      sem_ecifc (CON':=CON') (CON:=CON) δ s (λ i, ⟦ Φx i ⟧(δ)) Ψx d.
+      sem_ecifc cif_sem δ s (λ i, ⟦ Φx i ⟧(δ)) Ψx d.
   Proof. exact sem_ecustom. Qed.
 End cif_ecustom.
