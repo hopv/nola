@@ -7,12 +7,12 @@ From iris.proofmode Require Import proofmode.
 Implicit Type PROP : bi.
 
 (** ** Pre-order for [PROP] *)
-Program Canonical biPro PROP := Poty PROP (⊢) (⊣⊢) _ _.
+Program Canonical biP PROP := Poty PROP (⊢) (⊣⊢) _ _.
 Next Obligation.
   move=> >. split; by [move/bi.equiv_entails|move=> ?; apply bi.equiv_entails].
 Qed.
 
-(** [biPro] has the top, bottom, meet and join *)
+(** [biP] has the top, bottom, meet and join *)
 #[export] Program Instance otop_bi {PROP} : Otop PROP := OTOP True%I _.
 Next Obligation. by iIntros. Qed.
 #[export] Program Instance obot_bi {PROP} : Obot PROP := OBOT False%I _.
