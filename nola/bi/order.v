@@ -18,24 +18,26 @@ Next Obligation. by iIntros. Qed.
 #[export] Program Instance obot_bi {PROP} : Obot PROP := OBOT False%I _.
 Next Obligation. by iIntros. Qed.
 #[export] Program Instance bin_meet_bi {PROP} : BinMeet PROP :=
-  BIN_MEET (∧)%I _ _ _.
+  BIN_MEET (∧)%I _ _ _ _.
 Next Obligation. move=> *. by iIntros "[? _]". Qed.
 Next Obligation. move=> *. by iIntros "[_ ?]". Qed.
 Next Obligation.
   move=> > le le'. iIntros "?". iSplit; by [iApply le|iApply le'].
 Qed.
 #[export] Program Instance bin_join_bi {PROP} : BinJoin PROP :=
-  BIN_JOIN (∨)%I _ _ _.
+  BIN_JOIN (∨)%I _ _ _ _.
 Next Obligation. move=> *. iIntros "?". by iLeft. Qed.
 Next Obligation. move=> *. iIntros "?". by iRight. Qed.
 Next Obligation.
   move=> > le le'. iIntros "[?|?]"; by [iApply le|iApply le'].
 Qed.
 #[export] Program Instance big_meet_bi {PROP} : BigMeet PROP :=
-  BIG_MEET (λ _ S Φ, ∀ a, ⌜S a⌝ → Φ a)%I _ _.
+  BIG_MEET (λ _ S Φ, ∀ a, ⌜S a⌝ → Φ a)%I _ _ _.
+Next Obligation. move=> *?? eqv. do 3 f_equiv. apply (eqv _). Qed.
 Next Obligation. move=> *. iIntros "to". by iApply "to". Qed.
 Next Obligation. move=> > to. iIntros "?" (??). iStopProof. by apply to. Qed.
 #[export] Program Instance big_join_bi {PROP} : BigJoin PROP :=
-  BIG_JOIN (λ _ S Φ, ∃ a, ⌜S a⌝ ∧ Φ a)%I _ _.
+  BIG_JOIN (λ _ S Φ, ∃ a, ⌜S a⌝ ∧ Φ a)%I _ _ _.
+Next Obligation. move=> *?? eqv. do 3 f_equiv. apply (eqv _). Qed.
 Next Obligation. move=> *. iIntros "?". iExists _. by iSplit. Qed.
 Next Obligation. move=> > to. iIntros "[%[% ?]]". iStopProof. by apply to. Qed.

@@ -75,21 +75,46 @@ Module FunPNotation.
 End FunPNotation.
 Import FunPNotation.
 
+(** Non-expansive map *)
+Program Canonical funNP (A : ofe) OT :=
+  Poty (A -n> OT) (λ f g, ∀ a, f a ⊑ g a) _ _.
+Next Obligation.
+  move=> ??. split; [by move|]. move=> [??][??][??]/= le le' ?.
+  etrans; [apply le|apply le'].
+Qed.
+Next Obligation.
+  move=> ??[??][??]/=. split.
+  - move=> ?. split=>/= ?; by apply equiv_ole.
+  - move=> [??]?. by apply equiv_ole.
+Qed.
+Module FunNPNotation.
+  Notation "A -np> PT" := (@funNP A PT)
+    (at level 99, PT at level 200, right associativity).
+End FunNPNotation.
+Import FunNPNotation.
+
 (** Dual *)
 #[projections(primitive)]
 Record dual A := Dual { undual : A }.
 Add Printing Constructor dual.
 Arguments Dual {_} _. Arguments undual {_} _.
 (** [ofe] structure for [dual] *)
-Definition dual_equiv {A : ofe} : relation (dual A) :=
+Definition dual_equiv_def {A : ofe} : relation (dual A) :=
   λ '(Dual a) '(Dual a'), a ≡ a'.
-Definition dual_dist {A : ofe} n : relation (dual A) :=
+Definition dual_dist_def {A : ofe} n : relation (dual A) :=
   λ '(Dual a) '(Dual a'), a ≡{n}≡ a'.
-Program Canonical dualO (A : ofe) := @Ofe (dual A) dual_equiv dual_dist _.
+Program Canonical dualO (A : ofe) :=
+  @Ofe (dual A) dual_equiv_def dual_dist_def _.
 Next Obligation.
-  split=> >; [by apply equiv_dist| |by apply dist_lt]. unfold dist, dual_dist.
-  split; [by move..|]=> ???. apply transitivity.
+  split=> >; [by apply equiv_dist| |by apply dist_lt].
+  unfold dist, dual_dist_def. split; [by move..|]=> ???. apply transitivity.
 Qed.
+Lemma dual_equiv {A : ofe} {a a' : dualO A} :
+  (a ≡ a') = (a.(undual) ≡ a'.(undual)).
+Proof. done. Qed.
+Lemma dual_dist {A : ofe} {a a' : dualO A} {n} :
+  (a ≡{n}≡ a') = (a.(undual) ≡{n}≡ a'.(undual)).
+Proof. done. Qed.
 (** [Dual] is non-expansive *)
 #[export] Instance dual_ne {A : ofe} : NonExpansive (@Dual A).
 Proof. solve_proper. Qed.
@@ -201,6 +226,12 @@ Next Obligation. move=> *?. exact otop_intro. Qed.
 #[export] Program Instance obot_fun `{!∀ a : A, Obot (OTF a)} :
   Obot (funP OTF) := OBOT (λ _, ⊥) _.
 Next Obligation. move=> *?. exact obot_elim. Qed.
+#[export] Program Instance otop_funN `{!Otop OT} {A : ofe} :
+  Otop (A -np> OT) := OTOP (OfeMor (λ _, ⊤)) _.
+Next Obligation. move=> *?. exact otop_intro. Qed.
+#[export] Program Instance obot_funN `{!Obot OT} {A : ofe} :
+  Obot (A -np> OT) := OBOT (OfeMor (λ _, ⊥)) _.
+Next Obligation. move=> *?. exact obot_elim. Qed.
 
 (** [dual] flips the top and bottom *)
 #[export] Program Instance otop_dual `{!Obot OT} : Otop (dual OT) :=
@@ -214,6 +245,7 @@ Next Obligation. move=> ???. exact otop_intro. Qed.
 
 Class BinMeet OT := BIN_MEET {
   bin_meet :: Meet OT;
+  bin_meet_ne :: NonExpansive2 bin_meet;
   bin_meet_elim_1 {o o' : OT} : o ⊓ o' ⊑ o;
   bin_meet_elim_2 {o o' : OT} : o ⊓ o' ⊑ o';
   bin_meet_intro {o o' o'' : OT} : o'' ⊑ o → o'' ⊑ o' → o'' ⊑ o ⊓ o';
@@ -223,6 +255,7 @@ Arguments BIN_MEET {_} _ _ _ _.
 
 Class BinJoin OT := BIN_JOIN {
   bin_join :: Join OT;
+  bin_join_ne :: NonExpansive2 bin_join;
   bin_join_intro_1 {o o' : OT} : o ⊑ o ⊔ o';
   bin_join_intro_2 {o o' : OT} : o' ⊑ o ⊔ o';
   bin_join_elim {o o' o'' : OT} : o ⊑ o'' → o' ⊑ o'' → o ⊔ o' ⊑ o'';
@@ -298,24 +331,24 @@ Proof. move=> ?. by rewrite comm left_id. Qed.
 
 (** [nat] has the binary meet and join *)
 
-#[export] Program Instance bin_meet_nat : BinMeet nat := BIN_MEET min _ _ _.
+#[export] Program Instance bin_meet_nat : BinMeet nat := BIN_MEET min _ _ _ _.
 Next Obligation. move=> >. rewrite nat_ole /meet. lia. Qed.
 Next Obligation. move=> >. rewrite nat_ole /meet. lia. Qed.
 Next Obligation. move=> >. rewrite !nat_ole /meet. lia. Qed.
 
-#[export] Program Instance bin_join_nat : BinJoin nat := BIN_JOIN max _ _ _.
+#[export] Program Instance bin_join_nat : BinJoin nat := BIN_JOIN max _ _ _ _.
 Next Obligation. move=> >. rewrite nat_ole /join. lia. Qed.
 Next Obligation. move=> >. rewrite nat_ole /join. lia. Qed.
 Next Obligation. move=> >. rewrite !nat_ole /join. lia. Qed.
 
 (** [Prop] has the binary meet and join *)
 
-#[export] Program Instance bin_meet_Prop : BinMeet Prop := BIN_MEET and _ _ _.
+#[export] Program Instance bin_meet_Prop : BinMeet Prop := BIN_MEET and _ _ _ _.
 Next Obligation. by move=> ??[??]. Qed.
 Next Obligation. by move=> ??[??]. Qed.
 Next Obligation. move=> ??????. split; auto. Qed.
 
-#[export] Program Instance bin_join_Prop : BinJoin Prop := BIN_JOIN or _ _ _.
+#[export] Program Instance bin_join_Prop : BinJoin Prop := BIN_JOIN or _ _ _ _.
 Next Obligation. move=> >. by left. Qed.
 Next Obligation. move=> >. by right. Qed.
 Next Obligation. move=> > ??[?|?]; auto. Qed.
@@ -323,23 +356,41 @@ Next Obligation. move=> > ??[?|?]; auto. Qed.
 (** [()] has the binary meet and join *)
 
 #[export] Program Instance bin_meet_unit : BinMeet unit :=
-  BIN_MEET (λ _ _, ()) _ _ _.
+  BIN_MEET (λ _ _, ()) _ _ _ _.
 Solve All Obligations with done.
 
 #[export] Program Instance bin_join_unit : BinJoin unit :=
-  BIN_JOIN (λ _ _, ()) _ _ _.
+  BIN_JOIN (λ _ _, ()) _ _ _ _.
 Solve All Obligations with done.
 
 (** The binary meet and join over functions *)
 
 #[export] Program Instance bin_meet_fun `{!∀ a : A, BinMeet (OTF a)} :
-  BinMeet (funP OTF) := BIN_MEET (λ f g a, f a ⊓ g a) _ _ _.
+  BinMeet (funP OTF) := BIN_MEET (λ f g a, f a ⊓ g a) _ _ _ _.
+Next Obligation. move=> *?*?*?. by f_equiv. Qed.
 Next Obligation. move=> *?. by apply bin_meet_elim_1. Qed.
 Next Obligation. move=> *?. by apply bin_meet_elim_2. Qed.
 Next Obligation. move=> *?. by apply bin_meet_intro. Qed.
-
 #[export] Program Instance bin_join_fun `{!∀ a : A, BinJoin (OTF a)} :
-  BinJoin (funP OTF) := BIN_JOIN (λ f g a, f a ⊔ g a) _ _ _.
+  BinJoin (funP OTF) := BIN_JOIN (λ f g a, f a ⊔ g a) _ _ _ _.
+Next Obligation. move=> *?*?*?. by f_equiv. Qed.
+Next Obligation. move=> *?. by apply bin_join_intro_1. Qed.
+Next Obligation. move=> *?. by apply bin_join_intro_2. Qed.
+Next Obligation. move=> *?. by apply bin_join_elim. Qed.
+
+#[export] Program Instance bin_meet_funN `{!BinMeet OT} {A : ofe} :
+  BinMeet (A -np> OT) :=
+  BIN_MEET (λ f g, OfeMor (λ a, f a ⊓ g a) (ofe_mor_ne:=_)) _ _ _ _.
+Next Obligation. solve_proper. Qed.
+Next Obligation. solve_proper. Qed.
+Next Obligation. move=> *?. by apply bin_meet_elim_1. Qed.
+Next Obligation. move=> *?. by apply bin_meet_elim_2. Qed.
+Next Obligation. move=> *?. by apply bin_meet_intro. Qed.
+#[export] Program Instance bin_join_funN `{!BinJoin OT} {A : ofe} :
+  BinJoin (A -np> OT) :=
+  BIN_JOIN (λ f g, OfeMor (λ a, f a ⊔ g a) (ofe_mor_ne:=_)) _ _ _ _.
+Next Obligation. solve_proper. Qed.
+Next Obligation. solve_proper. Qed.
 Next Obligation. move=> *?. by apply bin_join_intro_1. Qed.
 Next Obligation. move=> *?. by apply bin_join_intro_2. Qed.
 Next Obligation. move=> *?. by apply bin_join_elim. Qed.
@@ -347,13 +398,14 @@ Next Obligation. move=> *?. by apply bin_join_elim. Qed.
 (** The binary meet and join flipped with [dual] *)
 
 #[export] Program Instance bin_meet_dual `{!BinJoin OT} : BinMeet (dual OT) :=
-  BIN_MEET (λ o o', Dual (undual o ⊔ undual o')) _ _ _.
+  BIN_MEET (λ o o', Dual (undual o ⊔ undual o')) _ _ _ _.
+Next Obligation. solve_proper. Qed.
 Next Obligation. move=> *. exact bin_join_intro_1. Qed.
 Next Obligation. move=> *. exact bin_join_intro_2. Qed.
 Next Obligation. move=> *. exact: bin_join_elim. Qed.
-
 #[export] Program Instance bin_join_dual `{!BinMeet OT} : BinJoin (dual OT) :=
-  BIN_JOIN (λ o o', Dual (undual o ⊓ undual o')) _ _ _.
+  BIN_JOIN (λ o o', Dual (undual o ⊓ undual o')) _ _ _ _.
+Next Obligation. solve_proper. Qed.
 Next Obligation. move=> *. exact bin_meet_elim_1. Qed.
 Next Obligation. move=> *. exact bin_meet_elim_2. Qed.
 Next Obligation. move=> *. exact: bin_meet_intro. Qed.
@@ -362,18 +414,20 @@ Next Obligation. move=> *. exact: bin_meet_intro. Qed.
 
 Class BigMeet OT := BIG_MEET {
   big_meet {A : Type} : (A -p> Prop) → (A -p> OT) → OT;
-  big_meet_elim {A} {S : A -p> Prop} f {a} : S a → big_meet S f ⊑ f a;
-  big_meet_intro {A} {S : A -p> Prop} f {o} :
-    (∀ a, S a → o ⊑ f a) → o ⊑ big_meet S f;
+  big_meet_ne {A S} : NonExpansive (@big_meet A S);
+  big_meet_elim {A S} f {a} : S a → @big_meet A S f ⊑ f a;
+  big_meet_intro {A S} f {o} :
+    (∀ a, S a → o ⊑ f a) → o ⊑ @big_meet A S f;
 }.
 Hint Mode BigMeet ! : typeclass_instances.
 Arguments BIG_MEET {_} _ _ _.
 
 Class BigJoin OT := BIG_JOIN {
   big_join {A : Type} : (A -p> Prop) → (A -p> OT) → OT;
-  big_join_intro {A} {S : A -p> Prop} f {a} : S a → f a ⊑ big_join S f;
-  big_join_elim {A} {S : A -p> Prop} f {o} :
-    (∀ a, S a → f a ⊑ o) → big_join S f ⊑ o;
+  big_join_ne {A S} : NonExpansive (@big_join A S);
+  big_join_intro {A S} f {a} : S a → f a ⊑ @big_join A S f;
+  big_join_elim {A S} f {o} :
+    (∀ a, S a → f a ⊑ o) → @big_join A S f ⊑ o;
 }.
 Hint Mode BigJoin ! : typeclass_instances.
 Arguments BIG_JOIN {_} _ _ _.
@@ -402,43 +456,56 @@ Proof.
   by etrans; [|by apply big_join_intro].
 Qed.
 
-(** Inducing a binary meet/join from the big meet/join *)
-
-Program Definition bin_meet_big_meet `{!BigMeet OT} : BinMeet OT :=
-  BIN_MEET (λ o o', [⊓] o'' :: o'' = o ∨ o'' = o', o'') _ _ _.
-Next Obligation. move=> *. apply (big_meet_elim id). auto. Qed.
-Next Obligation. move=> *. apply (big_meet_elim id). auto. Qed.
-Next Obligation. move=> *. by apply big_meet_intro=> ?[->|->]. Qed.
-
-Program Definition bin_join_big_join `{!BigJoin OT} : BinJoin OT :=
-  BIN_JOIN (λ o o', [⊔] o'' :: o'' = o ∨ o'' = o', o'') _ _ _.
-Next Obligation. move=> *. apply (big_join_intro id). auto. Qed.
-Next Obligation. move=> *. apply (big_join_intro id). auto. Qed.
-Next Obligation. move=> *. by apply big_join_elim=> ?[->|->]. Qed.
-
 (** [Prop] has the big meet and join *)
 
 #[export] Program Instance big_meet_Prop : BigMeet Prop :=
-  BIG_MEET (λ _ S φ, ∀ o, S o → φ o) _ _.
+  BIG_MEET (λ _ S φ, ∀ o, S o → φ o) _ _ _.
 Next Obligation. move=>/= ??????. auto. Qed.
 Next Obligation. move=>/= ???? all ???. exact: all. Qed.
 
 #[export] Program Instance big_join_Prop : BigJoin Prop :=
-  BIG_JOIN (λ _ S φ, ∃ o, S o ∧ φ o) _ _.
+  BIG_JOIN (λ _ S φ, ∃ o, S o ∧ φ o) _ _ _.
+Next Obligation. move=> ????? eqv. do 3 f_equiv. apply (eqv _). Qed.
 Next Obligation. move=>/= ??????. eauto. Qed.
 Next Obligation. move=>/= ???? all [?[??]]. exact: all. Qed.
 
 (** The big meet and join over functions *)
 
 #[export] Program Instance big_meet_fun `{!∀ a : A, BigMeet (OTF a)} :
-  BigMeet (funP OTF) := BIG_MEET (λ _ S F a, [⊓] b :: S b, F b a) _ _.
+  BigMeet (funP OTF) := BIG_MEET (λ _ S F a, [⊓] b :: S b, F b a) _ _ _.
+Next Obligation.
+  move=> ???????? eqv ?. apply big_meet_ne=> ?. apply (eqv _ _).
+Qed.
 Next Obligation. move=> *?. exact: big_meet_elim. Qed.
 Next Obligation.
   move=> ??????? all o. apply big_meet_intro=> *. move: o. by apply all.
 Qed.
-
 #[export] Program Instance big_join_fun `{!∀ a : A, BigJoin (OTF a)} :
-  BigJoin (funP OTF) := BIG_JOIN (λ _ S F a, [⊔] b :: S b, F b a) _ _.
+  BigJoin (funP OTF) := BIG_JOIN (λ _ S F a, [⊔] b :: S b, F b a) _ _ _.
+Next Obligation.
+  move=> ???????? eqv ?. apply big_join_ne=> ?. apply (eqv _ _).
+Qed.
+Next Obligation. move=> *?. by exact: big_join_intro. Qed.
+Next Obligation.
+  move=> ??????? all o. apply big_join_elim=> *. move: o. by apply all.
+Qed.
+
+#[export] Program Instance big_meet_funN `{!BigMeet OT} {A : ofe} :
+  BigMeet (A -np> OT) :=
+  BIG_MEET (λ _ S F, OfeMor (λ a, [⊓] b :: S b, F b a) (ofe_mor_ne:=_)) _ _ _.
+Next Obligation. move=> *?*. apply big_meet_ne=> ?; solve_proper. Qed.
+Next Obligation.
+  move=> *?? eqv ?. apply big_meet_ne=>// ?. apply (eqv _ _).
+Qed.
+Next Obligation. move=> *?. exact: big_meet_elim. Qed.
+Next Obligation.
+  move=> ??????? all o. apply big_meet_intro=> *. move: o. by apply all.
+Qed.
+#[export] Program Instance big_join_funN `{!∀ a : A, BigJoin (OTF a)} :
+  BigJoin (funP OTF) := BIG_JOIN (λ _ S F a, [⊔] b :: S b, F b a) _ _ _.
+Next Obligation.
+  move=> *?? eqv ?. apply big_join_ne=>// ?. apply (eqv _ _).
+Qed.
 Next Obligation. move=> *?. by exact: big_join_intro. Qed.
 Next Obligation.
   move=> ??????? all o. apply big_join_elim=> *. move: o. by apply all.
@@ -447,12 +514,14 @@ Qed.
 (** The big meet and join flipped with [dual] *)
 
 #[export] Program Instance big_meet_dual `{!BigJoin OT} : BigMeet (dual OT) :=
-  BIG_MEET (λ _ S f, Dual ([⊔] o :: S o, undual (f o))) _ _.
+  BIG_MEET (λ _ S f, Dual ([⊔] o :: S o, undual (f o))) _ _ _.
+Next Obligation. move=> *?*. by apply big_join_ne. Qed.
 Next Obligation. move=> */=. by exact: (big_join_intro (undual ∘ _)). Qed.
 Next Obligation. move=> */=. by exact: (big_join_elim (undual ∘ _)). Qed.
 
 #[export] Program Instance big_join_dual `{!BigMeet OT} : BigJoin (dual OT) :=
-  BIG_JOIN (λ _ S f, Dual ([⊓] o :: S o, undual (f o))) _ _.
+  BIG_JOIN (λ _ S f, Dual ([⊓] o :: S o, undual (f o))) _ _ _.
+Next Obligation. move=> *?*. by apply big_meet_ne. Qed.
 Next Obligation. move=> */=. by exact: (big_meet_elim (undual ∘ _)). Qed.
 Next Obligation. move=> */=. by exact: (big_meet_intro (undual ∘ _)). Qed.
 
