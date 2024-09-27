@@ -171,7 +171,7 @@ Section cif_inv'.
   Qed.
 
   Context `{!inv'GS (cifOF CON) Σ, !IffJudg (cifO CON Σ) JUDG}.
-  Implicit Type δ : JUDG -np> iPropI Σ.
+  Implicit Type δ : JUDG -n> iProp Σ.
   (** [inv']: Relaxed invariant *)
   Definition inv' δ N Px : iProp Σ := ∃ Qx, δ (jiff Px Qx) ∗ inv_tok N Qx.
   (** [inv'] is non-expansive *)

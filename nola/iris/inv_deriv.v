@@ -19,7 +19,7 @@ Notation InvJudg FM JUDG := (Ejudg (inv_judgty FM) JUDG).
 
 Section inv_deriv.
   Context `{inv_judg : !InvJudg FM JUDG} {Σ}.
-  Implicit Type (δ : JUDG -np> iPropI Σ) (Px : FM).
+  Implicit Type (δ : JUDG -n> iProp Σ) (Px : FM).
 
   (** Accessor judgment *)
   Local Definition inv_jacsr N Px : JUDG := inv_judg (Tagged (N, Px)).
@@ -63,7 +63,7 @@ Section inv_deriv.
 
   Context `{!InvJudg (FML $oi Σ) JUDG, !Jsem JUDG (iProp Σ),
     !Dsem JUDG (FML $oi Σ) (iProp Σ)}.
-  Implicit Type δ : JUDG -np> iPropI Σ.
+  Implicit Type δ : JUDG -n> iProp Σ.
 
   (** ** [inv_judg_sem]: Semantics of [inv_judgty] *)
   Definition inv_judg_sem δ (NPx : inv_judgty (FML $oi Σ)) : iProp Σ :=

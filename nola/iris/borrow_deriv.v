@@ -17,7 +17,7 @@ Notation BorrowJudg FM JUDG := (Ejudg (borrow_judgty FM) JUDG).
 
 Section borrow_deriv.
   Context `{!borrowGS FML Σ, borrow_judg : !BorrowJudg (FML $oi Σ) JUDG}.
-  Implicit Type δ : JUDG -np> iPropI Σ.
+  Implicit Type δ : JUDG -n> iProp Σ.
 
   (** Accessor judgment *)
   Local Definition borrow_jto Px Qx : JUDG := borrow_judg (Tagged (Px, Qx)).
@@ -69,7 +69,7 @@ Notation borrow_wsatid M := (borrow_wsati M der).
 Section borrow_deriv.
   Context `{!BorrowJudg (FML $oi Σ) JUDG, !Jsem JUDG (iProp Σ),
     !Dsem JUDG (FML $oi Σ) (iProp Σ)}.
-  Implicit Type (δ : JUDG -np> iPropI Σ) (Px Qx : FML $oi Σ).
+  Implicit Type (δ : JUDG -n> iProp Σ) (Px Qx : FML $oi Σ).
 
   (** ** [borrow_judg_sem]: Semantics of [borrow_judgty] *)
   Definition borrow_judg_sem δ (PQx : borrow_judgty (FML $oi Σ)) : iProp Σ :=
@@ -90,7 +90,7 @@ Section borrow_deriv.
   Context `{!borrowGS FML Σ, !BorrowJudg (FML $oi Σ) JUDG, !Jsem JUDG (iProp Σ),
     !Dsem JUDG (FML $oi Σ) (iProp Σ), !BorrowJsem FML Σ JUDG,
     !Deriv (JUDG:=JUDG) ih δ}.
-  Implicit Type (Px Qx : FML $oi Σ) (δ : JUDG -np> iPropI Σ).
+  Implicit Type (Px Qx : FML $oi Σ) (δ : JUDG -n> iProp Σ).
 
   (** Lemmas for [borrow_judg] *)
   Local Lemma borrow_jto_refl {Px} : ⊢ δ (borrow_jto Px Px).

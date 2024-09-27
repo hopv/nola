@@ -20,7 +20,7 @@ Notation NaInvJudg FM JUDG := (Ejudg (na_inv_judgty FM) JUDG).
 
 Section na_inv_deriv.
   Context `{na_inv_judg : !NaInvJudg FM JUDG} {Σ : gFunctors}.
-  Implicit Type δ : JUDG -np> iPropI Σ.
+  Implicit Type δ : JUDG -n> iProp Σ.
 
   (** Accessor judgment *)
   Local Definition na_inv_jacsr p N Px : JUDG :=
@@ -70,7 +70,7 @@ Section na_inv_deriv.
 
   Context `{!NaInvJudg (FML $oi Σ) JUDG, !Jsem JUDG (iProp Σ),
     !Dsem JUDG (FML $oi Σ) (iProp Σ)}.
-  Implicit Type δ : JUDG -np> iPropI Σ.
+  Implicit Type δ : JUDG -n> iProp Σ.
 
   (** ** [na_inv_judg_sem]: Semantics of [na_inv_judgty] *)
   Definition na_inv_judg_sem δ (pNPx : na_inv_judgty (FML $oi Σ)) : iProp Σ :=

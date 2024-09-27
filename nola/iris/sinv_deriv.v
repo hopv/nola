@@ -16,7 +16,7 @@ Notation SinvJudg FM JUDG := (Ejudg (sinv_judgty FM) JUDG).
 
 Section sinv_deriv.
   Context `{!sinvGS FML Σ, sinv_judg : !SinvJudg (FML $oi Σ) JUDG}.
-  Implicit Type δ : JUDG -np> iPropI Σ.
+  Implicit Type δ : JUDG -n> iProp Σ.
 
   (** Accessor judgment *)
   Local Definition sinv_jacsr (Px Qx : FML $oi Σ) : JUDG :=
@@ -51,7 +51,7 @@ Notation sinv_wsatid := (sinv_wsati der).
 Section sinv_deriv.
   Context `{!SinvJudg (FML $oi Σ) JUDG, !Jsem JUDG (iProp Σ),
     !Dsem JUDG (FML $oi Σ) (iProp Σ)}.
-  Implicit Type (δ : JUDG -np> iPropI Σ).
+  Implicit Type (δ : JUDG -n> iProp Σ).
 
   (** ** [sinv_judg_sem]: Semantics of [sinv_judgty] *)
   Definition sinv_judg_sem δ '(PQx : sinv_judgty (FML $oi Σ)) : iProp Σ :=

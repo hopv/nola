@@ -246,8 +246,8 @@ Implicit Type JUDG : ofe.
 #[projections(primitive)]
 Record SemCifcon (JUDG : ofe) CON Σ := SEM_CIFCON {
   (** Semantics *)
-  sem_cifc :> ((JUDG -np> iPropI Σ) -d> cif CON Σ -d> iProp Σ) →
-    (JUDG -np> iPropI Σ) → ∀ s, (CON.(cifc_idom) s -d> iProp Σ) →
+  sem_cifc :> ((JUDG -n> iProp Σ) -d> cif CON Σ -d> iProp Σ) →
+    (JUDG -n> iProp Σ) → ∀ s, (CON.(cifc_idom) s -d> iProp Σ) →
     (CON.(cifc_cdom) s -d> cif CON Σ) → CON.(cifc_data) s $oi Σ → iProp Σ;
   (** [sem_cifc] is non-expansive over usual arguments
     and contractive over the self-reference *)
@@ -264,7 +264,7 @@ Hint Mode SemCifcon - ! - : typeclass_instances.
 (** ** [cif_sem]: Semantics of [cif] *)
 Section iris.
   Context `{!SemCifcon JUDG CON Σ}.
-  Implicit Type sm : (JUDG -np> iPropI Σ) -d> cif CON Σ -d> iProp Σ.
+  Implicit Type sm : (JUDG -n> iProp Σ) -d> cif CON Σ -d> iProp Σ.
 
   (** [cif_bsem]: Base semantics for [cif] *)
   Definition cif_bsem sm δ s :
@@ -297,7 +297,7 @@ Section iris.
   Qed.
 
   (** [cif_sem_gen]: Generator of [cif_sem] *)
-  Definition cif_sem_gen sm : (JUDG -np> iPropI Σ) -d> cif CON Σ -d> iProp Σ :=
+  Definition cif_sem_gen sm : (JUDG -n> iProp Σ) -d> cif CON Σ -d> iProp Σ :=
     λ δ, cit_fold (cif_bsem sm δ).
   #[export] Instance cif_sem_gen_contractive : Contractive cif_sem_gen.
   Proof.
@@ -305,9 +305,9 @@ Section iris.
   Qed.
 
   (** [cif_sem]: Semantics of [cif] *)
-  Definition cif_sem' : (JUDG -np> iPropI Σ) -d> cif CON Σ -d> iProp Σ :=
+  Definition cif_sem' : (JUDG -n> iProp Σ) -d> cif CON Σ -d> iProp Σ :=
     fixpoint cif_sem_gen.
-  Definition cif_sem : (JUDG -np> iPropI Σ) -d> cif CON Σ -d> iProp Σ :=
+  Definition cif_sem : (JUDG -n> iProp Σ) -d> cif CON Σ -d> iProp Σ :=
     cif_sem_gen cif_sem'.
   (** Unfold [cif_sem'] *)
   Lemma cif_sem'_unfold : cif_sem' ≡ cif_sem.
@@ -408,8 +408,8 @@ End cif_ecustom.
 #[projections(primitive)]
 Record SemEcifcon JUDG CON' CON Σ := SEM_ECIFCON {
   (** Semantics *)
-  sem_ecifc :> ((JUDG -np> iPropI Σ) -d> cif CON Σ -d> iProp Σ) →
-    (JUDG -np> iPropI Σ) → ∀ s,
+  sem_ecifc :> ((JUDG -n> iProp Σ) -d> cif CON Σ -d> iProp Σ) →
+    (JUDG -n> iProp Σ) → ∀ s,
     (CON'.(cifc_idom) s -d> iProp Σ) → (CON'.(cifc_cdom) s -d> cif CON Σ) →
       CON'.(cifc_data) s $oi Σ → iProp Σ;
   (** [sem_ecifc] is non-expansive over usual arguments
