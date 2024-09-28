@@ -147,6 +147,21 @@ Section iff_judg.
 End iff_judg.
 
 (** ** Relaxed invariant *)
+(** [inv']: Proposition *)
+Section inv'.
+  Context `{!inv'GS (cifOF CON) Σ, !IffJudg (cifO CON Σ) JUDG}.
+  Implicit Type δ : JUDG -n> iProp Σ.
+  (** [inv']: Relaxed invariant *)
+  Definition inv' δ N Px : iProp Σ := ∃ Qx, δ (jiff Px Qx) ∗ inv_tok N Qx.
+  (** [inv'] is non-expansive *)
+  #[export] Instance inv'_ne {δ N} : NonExpansive (inv' δ N).
+  Proof. solve_proper. Qed.
+  #[export] Instance inv'_proper {δ N} :
+    Proper ((≡) ==> (⊣⊢)) (inv' δ N).
+  Proof. apply ne_proper, _. Qed.
+End inv'.
+(** Notation *)
+Notation invd := (inv' der).
 (** [inv'CC]: Constructor *)
 Variant inv'CC_id := .
 Definition inv'CC :=
@@ -171,15 +186,6 @@ Section cif_inv'.
   Qed.
 
   Context `{!inv'GS (cifOF CON) Σ, !IffJudg (cifO CON Σ) JUDG}.
-  Implicit Type δ : JUDG -n> iProp Σ.
-  (** [inv']: Relaxed invariant *)
-  Definition inv' δ N Px : iProp Σ := ∃ Qx, δ (jiff Px Qx) ∗ inv_tok N Qx.
-  (** [inv'] is non-expansive *)
-  #[export] Instance inv'_ne {δ N} : NonExpansive (inv' δ N).
-  Proof. solve_proper. Qed.
-  #[export] Instance inv'_proper {δ N} :
-    Proper ((≡) ==> (⊣⊢)) (inv' δ N).
-  Proof. apply ne_proper, _. Qed.
   (** Semantics of [invCC] *)
   #[export] Program Instance inv'_sem_ecifcon
     : SemEcifcon JUDG inv'CC CON Σ :=
@@ -188,8 +194,6 @@ Section cif_inv'.
 End cif_inv'.
 (** [inv'CC] semantics registered *)
 Notation Inv'Sem JUDG CON Σ := (EsemEcifcon JUDG inv'CC CON Σ).
-(** Notation *)
-Notation invd := (inv' der).
 
 Section verify.
   Context `{!heapGS_gen hlc Σ, !SemCifcon JUDG CON Σ, !Jsem JUDG (iProp Σ)}.
