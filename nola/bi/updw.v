@@ -405,8 +405,7 @@ Use [iMod (fupd_mask_subseteq E')] to adjust the mask of your goal to [E']")
   Proof. case. Qed.
   #[export] Instance elim_modal_bupdw_fupdw {p E E' P Q}
     `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP, !WsatIncl W W' Wr} :
-    ElimModal True p false (|=[W']=> P) P (|=[W]{E,E'}=> Q) (|=[W]{E,E'}=> Q)
-    | 10.
+    ElimModal True p false (|=[W']=> P) P (|=[W]{E,E'}=> Q) (|=[W]{E,E'}=> Q).
   Proof. move=> ?. by rewrite (bupdw_fupdw E) elim_modal_fupdw_fupdw. Qed.
   #[export] Instance elim_modal_bupdw_fupdw_wrong_wsat {p E E' P Q W W'}
     `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} :
@@ -427,7 +426,7 @@ Use [iMod (fupd_mask_subseteq E')] to adjust the mask of your goal to [E']")
   Proof. case. Qed.
   #[export] Instance elim_modal_bupd_fupdw
     `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {p W E E' P Q} :
-    ElimModal True p false (|==> P) P (|=[W]{E,E'}=> Q) (|=[W]{E,E'}=> Q) | 10.
+    ElimModal True p false (|==> P) P (|=[W]{E,E'}=> Q) (|=[W]{E,E'}=> Q).
   Proof. exact _. Qed.
   #[export] Instance add_modal_fupdw `{!BiFUpd PROP} {W E E' P Q} :
     AddModal (|=[W]{E}=> P) P (|=[W]{E,E'}=> Q).
@@ -491,7 +490,7 @@ Use [iMod (fupd_mask_subseteq E')] to adjust the mask of your goal to [E']")
   Qed.
   #[export] Instance elim_acc_fupdw `{!BiFUpd PROP} {X E E' E'' W α β γ P} :
     ElimAcc (X:=X) True (fupd E E') (fupd E' E) α β γ (|=[W]{E,E''}=> P)
-      (λ x, |=[W]{E'}=> β x ∗ (γ x -∗? |=[W]{E,E''}=> P))%I | 10.
+      (λ x, |=[W]{E'}=> β x ∗ (γ x -∗? |=[W]{E,E''}=> P))%I.
   Proof.
     iIntros (_) "→P ∝ W". iMod "∝" as (x) "[α β→]".
     iMod ("→P" with "α W") as "[W[β γ→]]".
