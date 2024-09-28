@@ -151,72 +151,71 @@ Section gen_upd.
   Proof. by rewrite (big_opMS_commute _). Qed.
 End gen_upd.
 
-(** ** [GenUpdB]: General update subsuming [bupd] *)
+(** ** [FromBUpd]: Modality subsuming [bupd] *)
 
-Class GenUpdB `{!BiBUpd PROP} M `{!@GenUpd PROP M} : Prop :=
-  gen_upd_from_bupd : ∀{P}, (|==> P) ⊢ M P.
-Hint Mode GenUpdB + - ! - : typeclass_instances.
+Class FromBUpd `{!BiBUpd PROP} (M : PROP → PROP) : Prop :=
+  from_bupd : ∀{P}, (|==> P) ⊢ M P.
+Hint Mode FromBUpd + - ! : typeclass_instances.
 
-(** [bupd] and [fupd] satisfy [GenUpd] *)
-#[export] Instance bupd_gen_upd_b `{!BiBUpd PROP} : GenUpdB (PROP:=PROP) bupd.
+(** [bupd] and [fupd] satisfy [FromBUpd] *)
+#[export] Instance bupd_from_bupd `{!BiBUpd PROP} : FromBUpd (PROP:=PROP) bupd.
 Proof. by move=> ?. Qed.
-#[export] Instance fupd_gen_upd_b
+#[export] Instance fupd_from_bupd
   `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {E} :
-  GenUpdB (PROP:=PROP) (fupd E E).
+  FromBUpd (PROP:=PROP) (fupd E E).
 Proof. by iIntros (?) ">?". Qed.
 
-Section gen_upd_b.
-  Context `{!BiBUpd PROP, !GenUpd (PROP:=PROP) M, !GenUpdB M}.
+Section from_bupd.
+  Context `{!BiBUpd PROP, !FromBUpd (PROP:=PROP) M, !GenUpd (PROP:=PROP) M}.
 
-  (** Eliminate [bupd] *)
-  #[export] Instance elim_modal_gen_upd_from_bupd {p P Q} :
+  (** [◇] preserves [FromBUpd] *)
+  #[export] Instance from_bupd_except_0 : FromBUpd (λ P, M (◇ P))%I | 10.
+  Proof. move=> ?. rewrite (from_bupd (M:=M)). f_equiv. by iIntros. Qed.
+
+  (** Eliminate [bupd] under [FromBupd] *)
+  #[export] Instance elim_modal_from_bupd {p P Q} :
     ElimModal True p false (|==> P) P (M Q) (M Q) | 10.
   Proof.
     by rewrite /ElimModal bi.intuitionistically_if_elim gen_upd_frame_r
-      bi.wand_elim_r (gen_upd_from_bupd (M:=M)) gen_upd_trans.
+      bi.wand_elim_r (from_bupd (M:=M)) gen_upd_trans.
   Qed.
+End from_bupd.
 
-  (** [◇] preserves [GenUpd] *)
-  #[export] Instance gen_upd_b_except_0 : GenUpdB (λ P, M (◇ P))%I | 10.
-  Proof. move=> ?. rewrite (gen_upd_from_bupd (M:=M)). f_equiv. by iIntros. Qed.
-End gen_upd_b.
-
-(** ** [GenUpdPlain]: General update behaving nicely over plain propositions
+(** ** [ModPlain]: Modality behaving nicely over plain propositions
 
   Analogous to [BiFupdPlainly] *)
 
-Class GenUpdPlain `{!BiPlainly PROP} M `{!@GenUpd PROP M}
-  : Prop := GEN_UPD_PLAIN {
+Class ModPlain `{!BiPlainly PROP} M : Prop := GEN_UPD_PLAIN {
   (** Eliminate the modality over a plain proposition, keeping the premise *)
-  gen_upd_plain_keep_l `{!Plain P} {R} : (R -∗ M P) ∗ R ⊢ M (P ∗ R);
+  mod_plain_keep_l `{!Plain P} {R} : (R -∗ M P) ∗ R ⊢ M (P ∗ R);
   (** Eliminating a universal quantifier over the modality over plain
     propositions *)
-  gen_upd_plain_forall_2 {A} {Φ : A → PROP} `{!∀ a, Plain (Φ a)} :
+  mod_plain_forall_2 {A} {Φ : A → PROP} `{!∀ a, Plain (Φ a)} :
     (∀ a, M (Φ a)) ⊢ M (∀ a, Φ a);
 }.
-Hint Mode GenUpdPlain + - ! - : typeclass_instances.
+Hint Mode ModPlain + - ! : typeclass_instances.
 
-(** [id] is [GenUpdPlain] *)
-#[export] Instance id_gen_upd_plain `{!BiPlainly PROP, !BiAffine PROP} :
-  GenUpdPlain (PROP:=PROP) id.
+(** [id] is [ModPlain] *)
+#[export] Instance id_mod_plain `{!BiPlainly PROP, !BiAffine PROP} :
+  ModPlain (PROP:=PROP) id.
 Proof.
   split=>/=; [|done]. move=> >. iIntros "[→P R]".
   iDestruct ("→P" with "R") as "#?". by iFrame.
 Qed.
 
-(** [◇] is [GenUpdPlain] *)
-#[export] Instance except_0_gen_upd_plain `{!BiPlainly PROP, !BiAffine PROP} :
-  GenUpdPlain (PROP:=PROP) bi_except_0.
+(** [◇] is [ModPlain] *)
+#[export] Instance except_0_mod_plain `{!BiPlainly PROP, !BiAffine PROP} :
+  ModPlain (PROP:=PROP) bi_except_0.
 Proof.
   split.
   { move=> >. iIntros "[→P R]". iDestruct ("→P" with "R") as "#?". by iFrame. }
   { move=> >. by iIntros "? %". }
 Qed.
 
-(** [bupd] is [GenUpdPlain] under [BiBUpdPlainly] *)
-#[export] Instance bupd_gen_upd_plain
+(** [bupd] is [ModPlain] under [BiBUpdPlainly] *)
+#[export] Instance bupd_mod_plain
   `{!BiBUpd PROP, !BiPlainly PROP, !BiBUpdPlainly PROP, !BiAffine PROP} :
-  GenUpdPlain (PROP:=PROP) bupd.
+  ModPlain (PROP:=PROP) bupd.
 Proof.
   split.
   - move=> >. iIntros "[→P R] !>". rewrite bupd_elim.
@@ -225,39 +224,39 @@ Proof.
     f_equiv=> ?. by rewrite bupd_elim.
 Qed.
 
-(** [fupd] is [GenUpdPlain] under [BiFUpdPlainly] *)
-#[export] Instance fupd_gen_upd_plain
+(** [fupd] is [ModPlain] under [BiFUpdPlainly] *)
+#[export] Instance fupd_mod_plain
   `{!BiFUpd PROP, !BiPlainly PROP, !BiFUpdPlainly PROP} {E} :
-  GenUpdPlain (PROP:=PROP) (fupd E E).
+  ModPlain (PROP:=PROP) (fupd E E).
 Proof.
   split=> >. { apply fupd_plain_keep_l, _. } { apply fupd_plain_forall_2, _. }
 Qed.
 
-(** Adding [◇] preserves [GenUpdPlain] *)
-#[export] Instance gen_upd_plain_except_0
-  `{!BiPlainly PROP, !@GenUpd PROP M, !GenUpdPlain M} :
-  GenUpdPlain (λ P, M (◇ P)%I).
+(** Adding [◇] preserves [ModPlain] *)
+#[export] Instance mod_plain_except_0
+  `{!BiPlainly PROP, !@GenUpd PROP M, !ModPlain M} :
+  ModPlain (λ P, M (◇ P)%I).
 Proof.
   split.
-  - move=> >. rewrite gen_upd_plain_keep_l. by iIntros ">[>$$]".
-  - move=> >. by rewrite gen_upd_plain_forall_2 bi.except_0_forall.
+  - move=> >. rewrite mod_plain_keep_l. by iIntros ">[>$$]".
+  - move=> >. by rewrite mod_plain_forall_2 bi.except_0_forall.
 Qed.
 
-Section gen_upd_plain.
-  Context `{!BiPlainly PROP, !@GenUpd PROP M, !GenUpdPlain M}.
+Section mod_plain.
+  Context `{!BiPlainly PROP, !@GenUpd PROP M, !ModPlain M}.
 
-  (** Variant of [gen_upd_plain_keep_l] *)
-  Lemma gen_upd_plain_keep_r `{!Plain P} {R} : R ∗ (R -∗ M P) ⊢ M (R ∗ P).
-  Proof. rewrite comm [(_ ∗ P)%I]comm. apply gen_upd_plain_keep_l. Qed.
+  (** Variant of [mod_plain_keep_l] *)
+  Lemma mod_plain_keep_r `{!Plain P} {R} : R ∗ (R -∗ M P) ⊢ M (R ∗ P).
+  Proof. rewrite comm [(_ ∗ P)%I]comm. apply mod_plain_keep_l. Qed.
 
-  (** Variant of [gen_upd_plain_forall_2] *)
-  Lemma gen_upd_plain_forall {A} {Φ : A → PROP} `{!∀ a, Plain (Φ a)} :
+  (** Variant of [mod_plain_forall_2] *)
+  Lemma mod_plain_forall {A} {Φ : A → PROP} `{!∀ a, Plain (Φ a)} :
     M (∀ a, Φ a) ⊣⊢ ∀ a, M (Φ a).
   Proof.
-    apply bi.equiv_entails. split; [|exact gen_upd_plain_forall_2].
+    apply bi.equiv_entails. split; [|exact mod_plain_forall_2].
     iIntros "→Φ %". by iMod "→Φ".
   Qed.
-End gen_upd_plain.
+End mod_plain.
 
 Section mod_acsr.
   Context {PROP}.
