@@ -158,8 +158,7 @@ Class GenUpdB `{!BiBUpd PROP} M `{!@GenUpd PROP M} : Prop :=
 Hint Mode GenUpdB + - ! - : typeclass_instances.
 
 (** [bupd] and [fupd] satisfy [GenUpd] *)
-#[export] Instance bupd_gen_upd_b `{!BiBUpd PROP} :
-  GenUpdB (PROP:=PROP) bupd.
+#[export] Instance bupd_gen_upd_b `{!BiBUpd PROP} : GenUpdB (PROP:=PROP) bupd.
 Proof. by move=> ?. Qed.
 #[export] Instance fupd_gen_upd_b
   `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {E} :
@@ -173,15 +172,13 @@ Section gen_upd_b.
   #[export] Instance elim_modal_gen_upd_from_bupd {p P Q} :
     ElimModal True p false (|==> P) P (M Q) (M Q) | 10.
   Proof.
-  by rewrite /ElimModal bi.intuitionistically_if_elim gen_upd_frame_r
-    bi.wand_elim_r (gen_upd_from_bupd (M:=M)) gen_upd_trans.
+    by rewrite /ElimModal bi.intuitionistically_if_elim gen_upd_frame_r
+      bi.wand_elim_r (gen_upd_from_bupd (M:=M)) gen_upd_trans.
   Qed.
 
   (** [◇] preserves [GenUpd] *)
   #[export] Instance gen_upd_b_except_0 : GenUpdB (λ P, M (◇ P))%I | 10.
-  Proof.
-    move=> ?. rewrite (gen_upd_from_bupd (M:=M)). f_equiv. by iIntros.
-  Qed.
+  Proof. move=> ?. rewrite (gen_upd_from_bupd (M:=M)). f_equiv. by iIntros. Qed.
 End gen_upd_b.
 
 (** ** [GenUpdPlain]: General update behaving nicely over plain propositions
