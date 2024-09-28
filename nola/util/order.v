@@ -9,8 +9,7 @@ Structure poty := Poty {
   poty_car :> ofe;
   #[canonical=no] ole :: SqSubsetEq poty_car;
   #[canonical=no] ole_preorder :: PreOrder ole;
-  #[canonical=no] equiv_ole {o o' : poty_car} :
-    o ≡ o' ↔ o ⊑ o' ∧ o' ⊑ o;
+  #[canonical=no] equiv_ole {o o' : poty_car} : o ≡ o' ↔ o ⊑ o' ∧ o' ⊑ o;
 }.
 Add Printing Constructor poty.
 Arguments poty_car {OT} : rename.
@@ -416,8 +415,7 @@ Class BigMeet OT := BIG_MEET {
   big_meet {A : Type} : (A -p> Prop) → (A -p> OT) → OT;
   big_meet_ne {A S} : NonExpansive (@big_meet A S);
   big_meet_elim {A S} f {a} : S a → @big_meet A S f ⊑ f a;
-  big_meet_intro {A S} f {o} :
-    (∀ a, S a → o ⊑ f a) → o ⊑ @big_meet A S f;
+  big_meet_intro {A S} f {o} : (∀ a, S a → o ⊑ f a) → o ⊑ @big_meet A S f;
 }.
 Hint Mode BigMeet ! : typeclass_instances.
 Arguments BIG_MEET {_} _ _ _.
@@ -426,8 +424,7 @@ Class BigJoin OT := BIG_JOIN {
   big_join {A : Type} : (A -p> Prop) → (A -p> OT) → OT;
   big_join_ne {A S} : NonExpansive (@big_join A S);
   big_join_intro {A S} f {a} : S a → f a ⊑ @big_join A S f;
-  big_join_elim {A S} f {o} :
-    (∀ a, S a → f a ⊑ o) → @big_join A S f ⊑ o;
+  big_join_elim {A S} f {o} : (∀ a, S a → f a ⊑ o) → @big_join A S f ⊑ o;
 }.
 Hint Mode BigJoin ! : typeclass_instances.
 Arguments BIG_JOIN {_} _ _ _.
@@ -531,8 +528,7 @@ Section lfp.
   Context `{!BigMeet OT}.
   Implicit Type f : OT -p> OT.
 
-  Local Definition lfp_def (f : OT -p> OT) : OT :=
-    [⊓] o :: f o ⊑ o, o.
+  Local Definition lfp_def (f : OT -p> OT) : OT := [⊓] o :: f o ⊑ o, o.
   Local Lemma lfp_aux : seal lfp_def. Proof. by eexists. Qed.
   Definition lfp := lfp_aux.(unseal).
   Local Lemma lfp_unseal : lfp = lfp_def. Proof. exact: seal_eq. Qed.
@@ -592,8 +588,7 @@ Section gfp.
   Context `{!BigJoin OT}.
   Implicit Type f : OT -p> OT.
 
-  Local Definition gfp_def (f : OT -p> OT) : OT :=
-    [⊔] o :: o ⊑ f o, o.
+  Local Definition gfp_def (f : OT -p> OT) : OT := [⊔] o :: o ⊑ f o, o.
   Local Lemma gfp_aux : seal gfp_def. Proof. by eexists. Qed.
   Definition gfp := gfp_aux.(unseal).
   Local Lemma gfp_unseal : gfp = gfp_def. Proof. exact: seal_eq. Qed.
