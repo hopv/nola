@@ -9,7 +9,7 @@ Import ProdNotation FunNPNotation UpdwNotation WpwNotation iPropAppNotation
   ProphNotation LftNotation NsyntyNotation FunPRNotation DsemNotation.
 
 Implicit Type (Σ : gFunctors) (N : namespace) (TY : synty) (dq : dfrac)
-  (l : loc) (b : bool) (α β : lft) (q : Qp).
+  (l : loc) (b : bool) (α β : lft) (q : Qp) (FM : ofe).
 
 (** ** Invariant *)
 (** [invCC]: Constructor *)
@@ -91,9 +91,9 @@ Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
 
 (** ** Prophetic borrow *)
 (** [pborCC]: Constructor *)
-Variant pborCC_id := .
+Variant pborCC_id TY := .
 Definition pborCC TY :=
-  Cifcon pborCC_id (lft *' TY) (λ _, Empty_set) (λ '(_, X)', X)
+  Cifcon (pborCC_id TY) (lft *' TY) (λ _, Empty_set) (λ '(_, X)', X)
     (λ '(_, X)', leibnizO (X *' prvar X)) _.
 (** [PborCon]: [pborCC] registered *)
 Notation PborCon TY CON := (Ecifcon (pborCC TY) CON).
@@ -132,8 +132,8 @@ Notation PborSem TY JUDG CON Σ := (EsemEcifcon JUDG (pborCC TY) CON Σ).
 Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
 
 (** ** Judgment *)
-Variant iff_judg_id := .
-Definition iff_judgty (FM : ofe) : ofe := tagged iff_judg_id (FM * FM).
+Variant iff_judg_id FM := .
+Definition iff_judgty (FM : ofe) : ofe := tagged (iff_judg_id FM) (FM * FM).
 Notation IffJudg FM JUDG := (Ejudg (iff_judgty FM) JUDG).
 Section iff_judg.
   Context `{iff_judg : !IffJudg FM JUDG}.

@@ -7,13 +7,13 @@ From nola.iris Require Export na_inv.
 From iris.proofmode Require Import proofmode.
 Import ProdNotation FunNPNotation iPropAppNotation UpdwNotation DsemNotation.
 
-Implicit Type (p : na_inv_pool_name) (N : namespace).
+Implicit Type (p : na_inv_pool_name) (N : namespace) (FM : ofe).
 
 (** ** [na_inv_judgty]: Judgment type for [na_inv] *)
-Variant na_inv_id := .
+Variant na_inv_id FM := .
 Definition na_inv_judgty (FM : ofe) : ofe :=
   (** Accessor judgment *)
-    tagged na_inv_id (leibnizO (na_inv_pool_name *' namespace) * FM).
+    tagged (na_inv_id FM) (leibnizO (na_inv_pool_name *' namespace) * FM).
 
 (** ** [NaInvJudg]: Judgment structure for [na_inv] *)
 Notation NaInvJudg FM JUDG := (Ejudg (na_inv_judgty FM) JUDG).

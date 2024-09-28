@@ -27,8 +27,8 @@ Arguments cifc_data_contractive CON {_} : rename.
 Implicit Type CON : cifcon.
 
 (** Big sum of [cifcon]s *)
-Variant sigTCC_id := .
-Canonical sigTCC {A} (CONF : A → cifcon) := Cifcon sigTCC_id (sigT CONF)
+Variant sigTCC_id {A} (CONF : A → cifcon) := .
+Canonical sigTCC {A} (CONF : A → cifcon) := Cifcon (sigTCC_id CONF) (sigT CONF)
   (λ ss, (CONF _).(cifc_idom) (projT2 ss))
   (λ ss, (CONF _).(cifc_cdom) (projT2 ss))
   (λ ss, (CONF _).(cifc_data) (projT2 ss)) _.

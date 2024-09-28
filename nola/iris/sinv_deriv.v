@@ -6,10 +6,12 @@ From nola.iris Require Export sinv.
 From iris.proofmode Require Import proofmode.
 Import FunNPNotation iPropAppNotation UpdwNotation DsemNotation.
 
+Implicit Type FM : ofe.
+
 (** ** [sinv_judgty]: Judgment type for [sinv] *)
-Variant sinv_judg_id := .
+Variant sinv_judg_id FM := .
 Definition sinv_judgty (FM : ofe) : ofe :=
-  (** Accessor judgment *) tagged sinv_judg_id (FM * FM).
+  (** Accessor judgment *) tagged (sinv_judg_id FM) (FM * FM).
 
 (** ** [SinvJudg]: Judgment structure for [sinv] *)
 Notation SinvJudg FM JUDG := (Ejudg (sinv_judgty FM) JUDG).

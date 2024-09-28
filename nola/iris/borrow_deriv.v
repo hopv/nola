@@ -7,10 +7,12 @@ From iris.proofmode Require Import proofmode.
 Import ProdNotation FunNPNotation iPropAppNotation UpdwNotation LftNotation
   DsemNotation.
 
+Implicit Type FM : ofe.
+
 (** ** [borrow_judgty]: Judgment type for [borrow] *)
-Variant borrow_judg_id := .
+Variant borrow_judg_id FM := .
 Definition borrow_judgty (FM : ofe) : ofe :=
-  (** Accessor judgment *) tagged borrow_judg_id (FM * FM).
+  (** Accessor judgment *) tagged (borrow_judg_id FM) (FM * FM).
 
 (** ** [BorrowJudg]: Judgment structure for [borrow] *)
 Notation BorrowJudg FM JUDG := (Ejudg (borrow_judgty FM) JUDG).

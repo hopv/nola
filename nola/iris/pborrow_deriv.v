@@ -7,12 +7,12 @@ From iris.proofmode Require Import proofmode.
 Import ProdNotation PlistNotation FunNPNotation iPropAppNotation UpdwNotation
   LftNotation ProphNotation DsemNotation.
 
-Implicit Type (TY : synty).
+Implicit Type (TY : synty) (FM : ofe).
 
 (** ** [pborrow_judgty]: Judgment type for [pborrow] *)
-Variant pborrow_judg_id := .
-Definition pborrow_judgty TY (FM : ofe) : ofe := tagged pborrow_judg_id (
-  (** Basic conversion *) FM * FM +
+Variant pborrow_judg_id TY FM := .
+Definition pborrow_judgty TY (FM : ofe) : ofe := tagged (pborrow_judg_id TY FM)
+  ((** Basic conversion *) FM * FM +
   (** Conversion judgment for [lend_body] *)
     @sigT (TY *' TY) (λ '(X, Y)',
       leibnizO (clair TY X *' clair TY Y) *
