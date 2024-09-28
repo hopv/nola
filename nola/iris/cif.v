@@ -3,7 +3,6 @@
 From nola.util Require Export uip (** Assume UIP over any type *).
 From nola.util Require Export nary cit.
 From nola.bi Require Export deriv.
-From nola.bi Require Import later.
 From nola.iris Require Export iprop.
 Import EqNotations FunNPNotation iPropAppNotation FunPRNotation DsemNotation.
 
@@ -282,7 +281,7 @@ Section iris.
         | cifs_plain => ■ P | cifs_pers => □ P | cifs_bupd => |==> P
         | cifs_except0 => ◇ P
         end
-    | cifs_pure => λ _ _ φ, ⌜φ⌝ | cifs_later => λ _ _, laterl
+    | cifs_pure => λ _ _ φ, ⌜φ⌝ | cifs_later => λ _ _ lP, ▷ later_car lP
     | cifs_custom s => sem_cifc sm δ s
     end%I.
 
@@ -293,7 +292,7 @@ Section iris.
       (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡)))) cif_bsem.
   Proof.
     move=> ????. case=>/=; try solve_proper.
-    { move=> ???????. by apply laterl_ne. } { by apply sem_cifc_ne. }
+    { move=> ????????. by apply later_contractive. } { by apply sem_cifc_ne. }
   Qed.
 
   (** [cif_sem_gen]: Generator of [cif_sem] *)

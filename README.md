@@ -73,7 +73,6 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     [`cit`](nola/util/cit.v) (Coinductive-inductive tree)
 - [`bi/`](nola/bi/) : Libraries for bunched implication logic
   + [`util`](nola/bi/util.v) (Utilities)
-  + [`later`](nola/bi/ofe.v) (Later modality)
   + [`gmap`](nola/bi/gmap.v) (On `gmap`),
     [`plist`](nola/bi/plist.v) (On `plist`)
   + [`order`](nola/bi/order.v) (Order theory),
