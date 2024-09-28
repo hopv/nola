@@ -1,39 +1,24 @@
-(** * For non-atomic invariants *)
+(** * Non-atomic invariants *)
 
-From nola.util Require Import prod.
-From nola.iris Require Export inv.
+From nola.iris Require Export inv cif.
 From iris.base_logic.lib Require Export na_invariants.
 From iris.algebra Require Import gset coPset.
 From iris.proofmode Require Import proofmode.
-Import ProdNotation iPropAppNotation UpdwNotation.
+Import iPropAppNotation UpdwNotation DsemNotation.
 
 Implicit Type (FML : oFunctor) (p : na_inv_pool_name) (i : positive).
 
-(** Formula data type for [na_inv] *)
-Local Definition na_inv_fml FML : oFunctor :=
-  leibnizO (na_inv_pool_name *' positive) * FML.
-
-Class na_inv'GS FML Σ := na_inv'GS_in : inv'GS (na_inv_fml FML) Σ.
-Local Existing Instance na_inv'GS_in.
-Class na_inv'GpreS FML Σ := na_inv'GpreS_in : inv'GpreS (na_inv_fml FML) Σ.
-Local Existing Instance na_inv'GpreS_in.
-Definition na_inv'Σ FML `{!oFunctorContractive FML} :=
-  #[inv'Σ (na_inv_fml FML)].
-#[export] Instance subG_na_inv'Σ
-  `{!oFunctorContractive FML, !subG (na_inv'Σ FML) Σ} : na_inv'GpreS FML Σ.
-Proof. solve_inG. Qed.
-
 Section na_inv.
-  Context `{!na_inv'GS FML Σ, !invGS_gen hlc Σ, !na_invG Σ}.
+  Context `{!inv'GS (cifOF CON) Σ, !invGS_gen hlc Σ, !na_invG Σ,
+    !SemCifcon JUDG CON Σ}.
   Local Existing Instance na_inv_inG.
-  Implicit Type (sm : FML $oi Σ → iProp Σ) (Px : FML $oi Σ) (P : iProp Σ).
+  Implicit Type (Px : cif CON Σ) (δ : JUDG -n> iProp Σ).
 
   (** Access lock of an non-atomic invariant *)
   Local Definition na_lock p i : iProp Σ := own p (ε, GSet {[i]}).
 
   (** Allocate [na_lock] *)
-  Local Lemma na_lock_alloc p N :
-    ⊢ |==> ∃ i, ⌜i ∈ (↑N:coPset)⌝ ∧ na_lock p i.
+  Local Lemma na_lock_alloc p N : ⊢ |==> ∃ i, ⌜i ∈ (↑N:coPset)⌝ ∧ na_lock p i.
   Proof.
     iMod (own_unit (prodUR coPset_disjUR (gset_disjUR positive)) p) as "ε".
     iMod (own_updateP with "ε") as ([m1 m2]) "[%cond l]".
@@ -45,7 +30,7 @@ Section na_inv.
   Qed.
 
   (** Access [na_own] *)
-  Local Lemma na_own_subset {p E F} : F ⊆ E →
+  Lemma na_own_subset {p E F} : F ⊆ E →
     na_own p E ⊣⊢ na_own p F ∗ na_own p (E∖F).
   Proof.
     move=> ?. rewrite {1}(union_difference_L F E); [|done].
@@ -63,11 +48,14 @@ Section na_inv.
   Qed.
 
   (** What to be put in a non-atomic invariant *)
-  Local Definition na_body p i P : iProp Σ := P ∗ na_lock p i ∨ na_own p {[i]}.
+  Local Definition na_body p i P : iProp Σ :=
+    P ∗ ▷ na_lock p i ∨ ▷ na_own p {[i]}.
+  Local Definition cif_na_body p i Px : cif CON Σ :=
+    as_cif (λ δ, na_body p i ⟦ Px ⟧(δ)).
 
   (** Token for a non-atomic invariant *)
   Local Definition na_inv_tok_def p N Px : iProp Σ :=
-    ∃ i, ⌜i ∈ (↑N:coPset)⌝ ∗ inv_tok N ((p, i)', Px).
+    ∃ i, ⌜i ∈ (↑N:coPset)⌝ ∗ inv_tok N (cif_na_body p i Px).
   Local Lemma na_inv_tok_aux : seal na_inv_tok_def. Proof. by eexists. Qed.
   Definition na_inv_tok := na_inv_tok_aux.(unseal).
   Local Lemma na_inv_tok_unseal : na_inv_tok = na_inv_tok_def.
@@ -76,7 +64,7 @@ Section na_inv.
   (** [na_inv_tok] is non-expansive *)
   #[export] Instance na_inv_tok_ne {p N} : NonExpansive (na_inv_tok p N).
   Proof.
-    rewrite na_inv_tok_unseal /na_inv_tok_def=> ????. do 4 f_equiv. by split.
+    rewrite na_inv_tok_unseal /na_inv_tok_def /cif_na_body /=. solve_proper.
   Qed.
   #[export] Instance na_inv_tok_proper {p N} :
     Proper ((≡) ==> (⊣⊢)) (na_inv_tok p N).
@@ -85,114 +73,63 @@ Section na_inv.
   #[export] Instance na_inv_tok_persistent {p N Px} :
     Persistent (na_inv_tok p N Px).
   Proof. rewrite na_inv_tok_unseal. exact _. Qed.
-  (** [na_inv_tok] is timeless for discrete formulas *)
-  #[export] Instance na_inv_tok_timeless `{!Discrete Px} {p N} :
-    Timeless (na_inv_tok p N Px).
-  Proof. rewrite na_inv_tok_unseal. exact _. Qed.
-
-  (** Semantics *)
-  Local Definition na_inv_sem (sm : FML $oi Σ -d> iProp Σ)
-    : na_inv_fml FML $oi Σ -d> iProp Σ :=
-    λ '((p, i)', Px), na_body p i (sm Px).
-  (** [na_inv_sem sm] is non-expansive if [sm] is *)
-  Local Lemma na_inv_sem_ne {sm} :
-    □ (∀ Px Qx, Px ≡ Qx -∗ sm Px -∗ sm Qx) ⊢
-      □ (∀ nPx nQx, nPx ≡ nQx -∗ na_inv_sem sm nPx -∗ na_inv_sem sm nQx).
-  Proof.
-    iIntros "#Ne !>" ([??][??]). rewrite prod_equivI /=.
-    iIntros "[<- #eqv] [[Px na]|?]"; [|by iRight]. iLeft. iFrame "na".
-    iApply ("Ne" with "eqv Px").
-  Qed.
-
-  (** World satisfaction for non-atomic invariants *)
-  Local Definition na_inv_wsat_def (sm : FML $oi Σ -d> iProp Σ) : iProp Σ :=
-    inv_wsat (na_inv_sem sm).
-  Local Lemma na_inv_wsat_aux : seal na_inv_wsat_def. Proof. by eexists. Qed.
-  Definition na_inv_wsat := na_inv_wsat_aux.(unseal).
-  Local Lemma na_inv_wsat_unseal : na_inv_wsat = na_inv_wsat_def.
-  Proof. exact: seal_eq. Qed.
-
-  (** [na_inv_wsat] is non-expansive *)
-  #[export] Instance na_inv_wsat_ne : NonExpansive na_inv_wsat.
-  Proof.
-    rewrite na_inv_wsat_unseal /na_inv_wsat_def=> ????. f_equiv. case=> ??.
-    unfold na_inv_sem. solve_proper.
-  Qed.
-  #[export] Instance na_inv_wsat_proper : Proper ((≡) ==> (≡)) inv_wsat.
-  Proof. apply ne_proper, _. Qed.
 
   (** Allocate [na_inv_tok] *)
-  Lemma na_inv_tok_alloc_rec {sm} Px p N :
-    (na_inv_tok p N Px -∗ sm Px) =[na_inv_wsat sm]=∗ na_inv_tok p N Px.
+  Lemma na_inv_tok_alloc_rec {δ} Px p N :
+    (na_inv_tok p N Px -∗ ⟦ Px ⟧(δ)) =[inv_wsat ⟦⟧(δ)]=∗ na_inv_tok p N Px.
   Proof.
-    rewrite na_inv_tok_unseal na_inv_wsat_unseal.
-    iIntros "→Px". iMod (na_lock_alloc p N) as (i ?) "l".
+    rewrite na_inv_tok_unseal. iIntros "→Px".
+    iMod (na_lock_alloc p N) as (i ?) "l".
     iMod (inv_tok_alloc_rec with "[→Px l]"); last first.
     { iModIntro. iExists _. by iSplit. }
     iIntros "i". iLeft. iFrame "l". iApply "→Px". iExists _. by iSplit.
   Qed.
-  Lemma na_inv_tok_alloc {sm} Px p N :
-    sm Px =[na_inv_wsat sm]=∗ na_inv_tok p N Px.
+  Lemma na_inv_tok_alloc {δ} Px p N :
+    ⟦ Px ⟧(δ) =[inv_wsat ⟦⟧(δ)]=∗ na_inv_tok p N Px.
   Proof. iIntros "?". iApply na_inv_tok_alloc_rec. by iIntros. Qed.
 
   (** Allocate [inv_tok] before storing the content *)
-  Lemma na_inv_tok_alloc_open {sm p N E F Px} : ↑N ⊆ E → ↑N ⊆ F →
-    na_own p F =[na_inv_wsat sm]{E}=∗
+  Lemma na_inv_tok_alloc_open {δ p N E F Px} : ↑N ⊆ E → ↑N ⊆ F →
+    na_own p F =[inv_wsat ⟦⟧(δ)]{E}=∗
       na_own p (F∖↑N) ∗ na_inv_tok p N Px ∗
-      (na_own p (F∖↑N) -∗ sm Px =[na_inv_wsat sm]{E}=∗ na_own p F).
+      (na_own p (F∖↑N) -∗ ⟦ Px ⟧(δ) =[inv_wsat ⟦⟧(δ)]{E}=∗ na_own p F).
   Proof.
-    rewrite na_inv_tok_unseal na_inv_wsat_unseal=> NE NF.
-    iMod (na_lock_alloc p N) as (i iN) "l".
+    rewrite na_inv_tok_unseal=> NE NF. iMod (na_lock_alloc p N) as (i iN) "l".
     rewrite (na_own_subset NF) (na_own_in iN). iIntros "[[i $]$] W".
-    iMod (inv_tok_alloc_open (FML:=na_inv_fml _) ((p, i)', Px) N NE with "W")
-      as "[W[sm cl]]".
+    iMod (inv_tok_alloc_open (FML:=cifOF _) (cif_na_body p i Px) N NE with "W")
+      as "[W[inv cl]]".
     iMod ("cl" with "[$i//] W") as "[$ _]". iModIntro.
     iSplit; [iExists _; by iFrame|]. iIntros "$ Px W".
-    iMod (inv_tok_acc NE with "sm W") as "[W[[[_ l']|$]cl]]".
+    iMod (inv_tok_acc NE with "inv W") as "/=[W[[[_ >l']|>$]cl]]".
     { iDestruct (na_lock_2_no with "l l'") as %[]. }
     iMod ("cl" with "[l Px] W") as "[$ _]"; [|done]. iLeft. iFrame.
   Qed.
 
   (** Access [Px] from [na_body] *)
   Local Lemma na_body_acc {p i N P} : i ∈ (↑N:coPset) →
-    na_own p (↑N) -∗ na_body p i P -∗
-      na_body p i P ∗ P ∗ (na_body p i P -∗ P -∗ na_own p (↑N) ∗ na_body p i P).
+    na_own p (↑N) -∗ na_body p i P -∗ ◇
+      (na_body p i P ∗ P ∗
+        (na_body p i P -∗ P -∗ ◇ (na_own p (↑N) ∗ na_body p i P))).
   Proof.
-    move=> iN. rewrite (na_own_in iN). iIntros "[i $] [[$ l]|i']"; last first.
+    move=> iN. rewrite (na_own_in iN). iIntros "[i $][[$ >l]|>i']"; last first.
     { iDestruct (na_own_disjoint with "i i'") as %?. set_solver. }
-    iSplitL "i"; [by iRight|]. iIntros "[[_ l']|$] Px".
-    { iDestruct (na_lock_2_no with "l l'") as %[]. }
-    iLeft. iFrame.
+    iSplitL "i"; [by iRight|]. iIntros "!> [[_ >l']|>$] P !>".
+    { iDestruct (na_lock_2_no with "l l'") as %[]. } { iLeft. iFrame. }
   Qed.
 
   (** Access via [na_inv_tok] *)
-  Lemma na_inv_tok_acc {sm p N E F Px} : ↑N ⊆ E → ↑N ⊆ F →
-    na_own p F -∗ na_inv_tok p N Px =[na_inv_wsat sm]{E}=∗
-      na_own p (F∖↑N) ∗ sm Px ∗
-      (na_own p (F∖↑N) -∗ sm Px =[na_inv_wsat sm]{E}=∗ na_own p F).
+  Lemma na_inv_tok_acc {δ p N E F Px} : ↑N ⊆ E → ↑N ⊆ F →
+    na_own p F -∗ na_inv_tok p N Px =[inv_wsat ⟦⟧(δ)]{E}=∗
+      na_own p (F∖↑N) ∗ ⟦ Px ⟧(δ) ∗
+      (na_own p (F∖↑N) -∗ ⟦ Px ⟧(δ) =[inv_wsat ⟦⟧(δ)]{E}=∗ na_own p F).
   Proof.
-    rewrite na_inv_tok_unseal na_inv_wsat_unseal=> NE NF.
-    rewrite (na_own_subset NF). iIntros "[N $] [%i[%iN #sm]] W".
-    iMod (inv_tok_acc NE with "sm W") as "[W[bd cl]]".
-    iDestruct (na_body_acc iN with "N bd") as "[bd[$ →bd]]".
+    rewrite na_inv_tok_unseal=> NE NF. rewrite (na_own_subset NF).
+    iIntros "[N $] [%i[%iN #inv]] W".
+    iMod (inv_tok_acc NE with "inv W") as "/=[W[bd cl]]".
+    iMod (na_body_acc iN with "N bd") as "[bd[$ →bd]]".
     iMod ("cl" with "bd W") as "[$ _]". iIntros "!> F∖N Px W".
-    iMod (inv_tok_acc NE with "sm W") as "[W[bd cl]]".
-    iDestruct ("→bd" with "bd Px") as "[$ bd]".
+    iMod (inv_tok_acc NE with "inv W") as "[W[bd cl]]".
+    iMod ("→bd" with "bd Px") as "[$ bd]".
     by iMod ("cl" with "bd W") as "[$ _]".
   Qed.
 End na_inv.
-
-(** Allocate [na_inv_wsat] *)
-Lemma na_inv_wsat_alloc' `{!na_inv'GpreS FML Σ, !invGS_gen hlc Σ, !na_invG Σ} :
-  ⊢ |==> ∃ _ : na_inv'GS FML Σ,
-    ∀ sm, □ (∀ Px Qx, Px ≡ Qx -∗ sm Px -∗ sm Qx) -∗ na_inv_wsat sm.
-Proof.
-  iMod inv_wsat_alloc' as (?) "W". iModIntro. iExists _. iIntros (?) "Ne".
-  rewrite na_inv_wsat_unseal. iApply "W". by iApply na_inv_sem_ne.
-Qed.
-Lemma na_inv_wsat_alloc `{!na_inv'GpreS FML Σ, !invGS_gen hlc Σ, !na_invG Σ} :
-  ⊢ |==> ∃ _ : na_inv'GS FML Σ, ∀ sm, ⌜NonExpansive sm⌝ -∗ na_inv_wsat sm.
-Proof.
-  iMod na_inv_wsat_alloc' as (?) "W". iModIntro. iExists _. iIntros (??).
-  iApply "W". iIntros "!> %% eqv ?". by iRewrite -"eqv".
-Qed.

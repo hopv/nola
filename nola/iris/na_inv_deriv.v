@@ -53,25 +53,25 @@ End na_inv_deriv.
 Notation na_invd := (na_inv' der).
 
 Section na_inv_deriv.
-  Context `{!na_inv'GS FML Σ, !invGS_gen hlc Σ, !na_invG Σ}.
-  Implicit Type Px Qx PQx : FML $oi Σ.
+  Context `{!inv'GS (cifOF CON) Σ, !invGS_gen hlc Σ, !na_invG Σ}.
+  Implicit Type Px Qx PQx : cif CON Σ.
 
   (** Accessor *)
   Definition na_inv_acsr sm p N P : iProp Σ :=
-    ∀ E F, ⌜↑N ⊆ E⌝ → ⌜↑N ⊆ F⌝ → na_own p F =[na_inv_wsat sm]{E}=∗
+    ∀ E F, ⌜↑N ⊆ E⌝ → ⌜↑N ⊆ F⌝ → na_own p F =[inv_wsat sm]{E}=∗
       na_own p (F∖↑N) ∗ P ∗
-      (na_own p (F∖↑N) -∗ P =[na_inv_wsat sm]{E}=∗ na_own p F) .
+      (na_own p (F∖↑N) -∗ P =[inv_wsat sm]{E}=∗ na_own p F) .
   (** [na_inv_acsr] is non-expansive *)
   #[export] Instance na_inv_acsr_ne {n} :
     Proper ((≡{n}≡) ==> (=) ==> (=) ==> (≡{n}≡) ==> (≡{n}≡)) na_inv_acsr.
   Proof. solve_proper. Qed.
 
-  Context `{!NaInvJudg (FML $oi Σ) JUDG, !Jsem JUDG (iProp Σ),
-    !Dsem JUDG (FML $oi Σ) (iProp Σ)}.
+  Context `{!NaInvJudg (cif CON Σ) JUDG, !Jsem JUDG (iProp Σ),
+    !Dsem JUDG (cif CON Σ) (iProp Σ)}.
   Implicit Type δ : JUDG -n> iProp Σ.
 
   (** ** [na_inv_judg_sem]: Semantics of [na_inv_judgty] *)
-  Definition na_inv_judg_sem δ (pNPx : na_inv_judgty (FML $oi Σ)) : iProp Σ :=
+  Definition na_inv_judg_sem δ (pNPx : na_inv_judgty (cif CON Σ)) : iProp Σ :=
     na_inv_acsr ⟦⟧(δ) pNPx.(untag).1.1' pNPx.(untag).1.2' ⟦ pNPx.(untag).2 ⟧(δ).
   (** [na_inv_judg_sem] is non-expansive *)
   #[export] Instance na_inv_judg_sem_ne {δ} :
@@ -79,24 +79,24 @@ Section na_inv_deriv.
   Proof. move=> ?[[??]][[??]][/=/leibniz_equiv_iff<-?]. solve_proper. Qed.
   (** [Dsem] over [na_inv_judgty] *)
   #[export] Instance na_inv_judg_dsem
-    : Dsem JUDG (na_inv_judgty (FML $oi Σ)) (iProp Σ) := DSEM na_inv_judg_sem _.
+    : Dsem JUDG (na_inv_judgty (cif CON Σ)) (iProp Σ) := DSEM na_inv_judg_sem _.
 End na_inv_deriv.
 
 (** ** [NaInvJsem]: Judgment semantics for [na_inv] *)
-Notation NaInvJsem FML Σ JUDG :=
-  (Ejsem (na_inv_judgty (FML $oi Σ)) JUDG (iProp Σ)).
+Notation NaInvJsem CON Σ JUDG :=
+  (Ejsem (na_inv_judgty (cif CON Σ)) JUDG (iProp Σ)).
 
 Section na_inv_deriv.
-  Context `{!na_inv'GS FML Σ, !invGS_gen hlc Σ, !na_invG Σ,
-    !NaInvJudg (FML $oi Σ) JUDG, !Jsem JUDG (iProp Σ),
-    !Dsem JUDG (FML $oi Σ) (iProp Σ), !NaInvJsem FML Σ JUDG}.
-  Implicit Type Px Qx : FML $oi Σ.
+  Context `{!inv'GS (cifOF CON) Σ, !invGS_gen hlc Σ, !na_invG Σ,
+    !NaInvJudg (cif CON Σ) JUDG, !Jsem JUDG (iProp Σ), !SemCifcon JUDG CON Σ,
+    !NaInvJsem CON Σ JUDG}.
+  Implicit Type Px Qx : cif CON Σ.
 
   (** Access using [na_invd] *)
   Lemma na_invd_acc {p N Px E F} : ↑N ⊆ E → ↑N ⊆ F →
-    na_own p F -∗ na_invd p N Px =[na_inv_wsat ⟦⟧]{E}=∗
+    na_own p F -∗ na_invd p N Px =[inv_wsat ⟦⟧]{E}=∗
       na_own p (F∖↑N) ∗ ⟦ Px ⟧ ∗
-      (na_own p (F∖↑N) -∗ ⟦ Px ⟧ =[na_inv_wsat ⟦⟧]{E}=∗ na_own p F).
+      (na_own p (F∖↑N) -∗ ⟦ Px ⟧ =[inv_wsat ⟦⟧]{E}=∗ na_own p F).
   Proof.
     rewrite na_inv'_unseal. iIntros (NE NF) "F accP".
     iDestruct (der_sound with "accP") as "accP". rewrite sem_ejudg.
@@ -118,21 +118,21 @@ Section na_inv_deriv.
   Lemma na_inv_tok_na_inv' {p N Px} : na_inv_tok p N Px ⊢ na_inv' δ p N Px.
   Proof.
     rewrite -na_inv_acsr_inv'. iIntros "#i !>" (δ' ???????) "F".
-    by iApply (na_inv_tok_acc (sm:=⟦⟧(δ')) with "F i").
+    by iApply (na_inv_tok_acc with "F i").
   Qed.
 
   (** Allocate [na_inv'] *)
   Lemma na_inv'_alloc_rec p Px N :
-    (na_inv' δ p N Px -∗ ⟦ Px ⟧(δ)) =[na_inv_wsat ⟦⟧(δ)]=∗ na_inv' δ p N Px.
+    (na_inv' δ p N Px -∗ ⟦ Px ⟧(δ)) =[inv_wsat ⟦⟧(δ)]=∗ na_inv' δ p N Px.
   Proof. rewrite -na_inv_tok_na_inv'. exact: na_inv_tok_alloc_rec. Qed.
   Lemma na_inv'_alloc p Px N :
-    ⟦ Px ⟧(δ) =[na_inv_wsat ⟦⟧(δ)]=∗ na_inv' δ p N Px.
+    ⟦ Px ⟧(δ) =[inv_wsat ⟦⟧(δ)]=∗ na_inv' δ p N Px.
   Proof. rewrite -na_inv_tok_na_inv'. exact: na_inv_tok_alloc. Qed.
   Lemma na_inv'_alloc_open p N E F Px :
     ↑N ⊆ E → ↑N ⊆ F →
-    na_own p F =[na_inv_wsat ⟦⟧(δ)]{E}=∗
+    na_own p F =[inv_wsat ⟦⟧(δ)]{E}=∗
       na_own p (F∖↑N) ∗ na_inv' δ p N Px ∗
-      (na_own p (F∖↑N) -∗ ⟦ Px ⟧(δ) =[na_inv_wsat ⟦⟧(δ)]{E}=∗ na_own p F).
+      (na_own p (F∖↑N) -∗ ⟦ Px ⟧(δ) =[inv_wsat ⟦⟧(δ)]{E}=∗ na_own p F).
   Proof. rewrite -na_inv_tok_na_inv'. exact: na_inv_tok_alloc_open. Qed.
 
   (** Convert [na_inv'] with [mod_acsr] *)
