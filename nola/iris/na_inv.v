@@ -28,7 +28,7 @@ Section na_inv.
   Local Existing Instance na_inv_inG.
   Implicit Type (sm : FML $oi Σ → iProp Σ) (Px : FML $oi Σ) (P : iProp Σ).
 
-  (** Access l of an non-atomic invariant *)
+  (** Access lock of an non-atomic invariant *)
   Local Definition na_lock p i : iProp Σ := own p (ε, GSet {[i]}).
 
   (** Allocate [na_lock] *)
