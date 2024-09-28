@@ -186,34 +186,34 @@ Module UpdwNotation.
 
   Notation "|=[ W ] { E , E' }=> P" := (fupdw E E' W P)
     (at level 99, P at level 200,
-      format "'[  ' |=[ W ] '/' { E , E' }=>  '/' P ']'") : bi_scope.
+      format "'[  ' |=[ W ] { E , E' }=>  '/' P ']'") : bi_scope.
   Notation "|=[ W ] { E }=> P" := (fupdw E E W P)
-    (at level 99, P at level 200, format "'[  ' |=[ W ] '/' { E }=>  '/' P ']'")
+    (at level 99, P at level 200, format "'[  ' |=[ W ] { E }=>  '/' P ']'")
     : bi_scope.
   Notation "P =[ W ] { E , E' }=∗ Q" := (P -∗ |=[W]{E,E'}=> Q)%I
     (at level 99, Q at level 200,
-      format "'[' P  =[ W ] '/' { E , E' }=∗  '/' '[' Q ']' ']'") : bi_scope.
+      format "'[' P  =[ W ] { E , E' }=∗  '/' '[' Q ']' ']'") : bi_scope.
   Notation "P =[ W ] { E , E' }=∗ Q" := (P -∗ |=[W]{E,E'}=> Q) : stdpp_scope.
   Notation "P =[ W ] { E }=∗ Q" := (P -∗ |=[W]{E}=> Q)%I
     (at level 99, Q at level 200,
-      format "'[' P  =[ W ] '/' { E }=∗  '/' '[' Q ']' ']'") : bi_scope.
+      format "'[' P  =[ W ] { E }=∗  '/' '[' Q ']' ']'") : bi_scope.
   Notation "P =[ W ] { E }=∗ Q" := (P -∗ |=[W]{E}=> Q) : stdpp_scope.
 
   (** We move the position of [▷] to make the notation work *)
   Notation "|=[ W ] { E }▷[ E' ] => P" := (|=[W]{E,E'}=> ▷ |=[W]{E',E}=> P)%I
     (at level 99, P at level 200,
-      format "'[  ' |=[ W ] '/' { E }▷[ E' ] =>  '/' P ']'") : bi_scope.
+      format "'[  ' |=[ W ] { E }▷[ E' ] =>  '/' P ']'") : bi_scope.
   Notation "|=[ W ] { E }▷=> P" := (|=[W]{E}=> ▷ |=[W]{E}=> P)%I
     (at level 99, P at level 200,
-      format "'[  ' |=[ W ] '/' { E }▷=>  '/' P ']'") : bi_scope.
+      format "'[  ' |=[ W ] { E }▷=>  '/' P ']'") : bi_scope.
   Notation "|=[ W ] { E }▷[ E' ] =>^ n P" :=
     (Nat.iter n (λ Q, |=[W]{E}▷[E'] => Q) P)%I
     (at level 99, P at level 200, n at level 9,
-      format "'[  ' |=[ W ] '/' { E }▷[ E' ] =>^ n  '/' P ']'") : bi_scope.
+      format "'[  ' |=[ W ] { E }▷[ E' ] =>^ n  '/' P ']'") : bi_scope.
   Notation "|=[ W ] { E }▷=>^ n P" :=
     (Nat.iter n (λ Q, |=[W]{E}▷=> Q) P)%I
     (at level 99, P at level 200, n at level 9,
-      format "'[  ' |=[ W ] '/' { E }▷=>^ n  '/' P ']'") : bi_scope.
+      format "'[  ' |=[ W ] { E }▷=>^ n  '/' P ']'") : bi_scope.
 End UpdwNotation.
 Import UpdwNotation.
 
