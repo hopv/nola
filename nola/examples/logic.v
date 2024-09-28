@@ -206,7 +206,7 @@ Section verify.
   Definition cif_ilist_gen N (Φx : loc -pr> cif CON Σ)
     (Ilist : loc -pr> cif CON Σ) : loc -pr> cif CON Σ :=
     λ l, (cif_inv N (Φx l) ∗ cif_inv N (∃ l', ▷ (l +ₗ 1) ↦ #l' ∗ Ilist l'))%cif.
-  #[export] Instance ilist_gen_productive {n N} :
+  #[export] Instance cif_ilist_gen_productive {n N} :
     Proper (proeq_later n ==> proeq_later n ==> proeq n) (cif_ilist_gen N).
   Proof.
     move=>/= ?? eq ?? eq' ?. unfold cif_ilist_gen.
@@ -216,7 +216,7 @@ Section verify.
   Qed.
   #[export] Instance cif_ilist_gen_productive' {N Φx} :
     Productive (cif_ilist_gen N Φx).
-  Proof. move=> ?. by apply ilist_gen_productive. Qed.
+  Proof. move=> ?. by apply cif_ilist_gen_productive. Qed.
   Definition cif_ilist N (Φx : loc -pr> cif CON Σ) : loc -pr> cif CON Σ :=
     profix (cif_ilist_gen N Φx).
   (** Unfold [cif_ilist] *)
