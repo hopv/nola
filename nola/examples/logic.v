@@ -44,6 +44,12 @@ End cif_inv.
 (** [invCC] semantics registered *)
 Notation InvSem JUDG CON Σ := (EsemEcifcon JUDG invCC CON Σ).
 
+(** Reify [inv_tok] *)
+#[export] Program Instance inv_tok_as_cif `{!SemCifcon JUDG CON Σ, !InvCon CON}
+  `{!inv'GS (cifOF CON) Σ, !InvSem JUDG CON Σ} {N Px} :
+  AsCif CON (λ _, inv_tok N Px) := AS_CIF (cif_inv N Px) _.
+Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
+
 (** ** Borrow *)
 (** [borCC]: Constructor *)
 Variant borCC_id := .
@@ -76,6 +82,12 @@ Section cif_bor.
 End cif_bor.
 (** [borCC] semantics registered *)
 Notation BorSem JUDG CON Σ := (EsemEcifcon JUDG borCC CON Σ).
+
+(** Reify [nbor_tok] *)
+#[export] Program Instance nbor_tok_as_cif `{!SemCifcon JUDG CON Σ, !BorCon CON}
+  `{!pborrowGS TY (cifOF CON) Σ, !BorSem JUDG CON Σ} {α Px} :
+  AsCif CON (λ _, nbor_tok α Px) := AS_CIF (cif_bor α Px) _.
+Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
 
 (** ** Prophetic borrow *)
 (** [pborCC]: Constructor *)
@@ -111,6 +123,13 @@ Section cif_pbor.
 End cif_pbor.
 (** [pborCC] semantics registered *)
 Notation PborSem TY JUDG CON Σ := (EsemEcifcon JUDG (pborCC TY) CON Σ).
+
+(** Reify [pbor_tok] *)
+#[export] Program Instance pbor_tok_as_cif `{!SemCifcon JUDG CON Σ}
+  `{!PborCon TY CON, !pborrowGS TY (cifOF CON) Σ, !PborSem TY JUDG CON Σ}
+  {X α x ξ Φx} :
+  AsCif CON (λ _, pbor_tok (X:=X) α x ξ Φx) := AS_CIF (cif_pbor α x ξ Φx) _.
+Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
 
 (** ** Judgment *)
 Variant iff_judg_id := .
@@ -195,6 +214,13 @@ End cif_inv'.
 (** [inv'CC] semantics registered *)
 Notation Inv'Sem JUDG CON Σ := (EsemEcifcon JUDG inv'CC CON Σ).
 
+(** Reify [inv'] *)
+#[export] Program Instance inv'_as_cif `{!SemCifcon JUDG CON Σ, !Inv'Con CON}
+  `{!inv'GS (cifOF CON) Σ, !IffJudg (cifO CON Σ) JUDG, !Inv'Sem JUDG CON Σ}
+  {N Px} :
+  AsCif CON (λ δ, inv' δ N Px) := AS_CIF (cif_inv' N Px) _.
+Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
+
 Section verify.
   Context `{!heapGS_gen hlc Σ, !SemCifcon JUDG CON Σ, !Jsem JUDG (iProp Σ)}.
   Context `{!inv'GS (cifOF CON) Σ, !InvCon CON, !InvSem JUDG CON Σ}.
@@ -203,13 +229,16 @@ Section verify.
   (** ** Linked list *)
 
   (** [cif_ilist]: Formula for a list *)
-  Definition cif_ilist_gen N (Φx : loc -pr> cif CON Σ)
-    (Ilist : loc -pr> cif CON Σ) : loc -pr> cif CON Σ :=
-    λ l, (cif_inv N (Φx l) ∗ cif_inv N (∃ l', ▷ (l +ₗ 1) ↦ #l' ∗ Ilist l'))%cif.
+  Definition ilist_gen N (Φx : loc -pr> cif CON Σ)
+    (Ilist : loc -pr> cif CON Σ) l : iProp Σ :=
+    inv_tok N (Φx l) ∗ inv_tok N (∃ l', ▷ (l +ₗ 1) ↦ #l' ∗ Ilist l')%cif.
+  Definition cif_ilist_gen N (Φx : loc -pr> cif CON Σ) Ilist
+    : loc -pr> cif CON Σ :=
+    λ l, as_cif (λ _, ilist_gen N Φx Ilist l).
   #[export] Instance cif_ilist_gen_productive {k N} :
     Proper (proeq_later k ==> proeq_later k ==> proeq k) (cif_ilist_gen N).
   Proof.
-    move=>/= ?? eq ?? eq' ?. unfold cif_ilist_gen.
+    unfold cif_ilist_gen=>/= ?? eq ?? eq' ?.
     f_equiv; apply cif_inv_productive; (destruct k as [|k]; [done|]);
       [apply eq|]=>/=.
     f_equiv=> ?. by f_equiv.
@@ -224,8 +253,7 @@ Section verify.
     cif_ilist N Φx l ≡ cif_ilist_gen N Φx (cif_ilist N Φx) l.
   Proof. by rewrite /cif_ilist (profix_unfold (f:=cif_ilist_gen _ _) l). Qed.
   (** Semantics *)
-  Definition ilist N Φx l : iProp Σ := inv_tok N (Φx l) ∗
-    inv_tok N (∃ l', ▷ (l +ₗ 1) ↦ #l' ∗ cif_ilist N Φx l')%cif.
+  Definition ilist N Φx := ilist_gen N Φx (cif_ilist N Φx).
   (** Unfold semantics over [cif_ilist] *)
   Lemma sem_ilist {δ N Φx l} : cif_sem δ (cif_ilist N Φx l) ⊣⊢ ilist N Φx l.
   Proof. by rewrite cif_ilist_unfold /= !sem_ecustom /=. Qed.
@@ -236,7 +264,7 @@ Section verify.
   (** [cif_ilist_gen] is non-expansive *)
   #[export] Instance cif_ilist_gen_ne {N} : NonExpansive2 (cif_ilist_gen N).
   Proof.
-    unfold cif_ilist_gen=> ????????. (do 3 f_equiv=>//)=> ?. by f_equiv.
+    unfold cif_ilist_gen=>/= ??*?*?. (do 3 f_equiv=>//)=> ?. by f_equiv.
   Qed.
   #[export] Instance cif_ilist_gen_proper {N} :
     Proper ((≡) ==> (≡) ==> (≡)) (cif_ilist_gen N).
@@ -412,7 +440,7 @@ Section verify.
   Definition cif_mutex_bor' α l Px :=
     cif_bor α ((▷ l ↦ #false ∗ cif_bor α Px) ∨ ▷ l ↦ #true).
   Definition mutex_bor α l Px := inv_tok nroot (cif_mutex_bor' α l Px).
-  Definition cif_mutex_bor α l Px := cif_inv nroot (cif_mutex_bor' α l Px).
+  Definition cif_mutex_bor α l Px := as_cif (λ _, mutex_bor α l Px).
   (** [cif_mutex_bor'] is productive *)
   #[export] Instance cif_mutex_bor'_productive {α l} :
     Productive (cif_mutex_bor' α l).
@@ -423,7 +451,7 @@ Section verify.
   #[export] Instance cif_mutex_bor_productive {α l} :
     Productive (cif_mutex_bor α l).
   Proof.
-    unfold cif_mutex_bor=> n ?? eq. f_equiv. destruct n as [|n]=>//=. f_equiv.
+    unfold cif_mutex_bor=>/= n ?? eq. f_equiv. destruct n as [|n]=>//=. f_equiv.
     move: eq. apply proeq_later_anti. lia.
   Qed.
   (** [cif_mutex_bor'] is non-expansive *)
@@ -515,10 +543,12 @@ Section verify.
   (** ** Linked list with a shared borrow over a mutex *)
 
   (** [cif_mblist]: Formula for a list with a shared borrow over a mutex *)
-  Definition cif_mblist_gen α (Φx : loc -pr> cif CON Σ)
-    (Mblist : loc -pr> cif CON Σ) : loc -pr> cif CON Σ :=
-    λ l, cif_mutex_bor α l (Φx (l +ₗ 1) ∗ ∃ l', ▷ (l +ₗ 2) ↦ #l' ∗ Mblist l').
-  #[export] Instance cif_mblist_gen_productive' {α Φx} :
+  Definition mblist_gen α (Φx : loc -pr> cif CON Σ)
+    (Mblist : loc -pr> cif CON Σ) l : iProp Σ :=
+    mutex_bor α l (Φx (l +ₗ 1) ∗ ∃ l', ▷ (l +ₗ 2) ↦ #l' ∗ Mblist l').
+  Definition cif_mblist_gen α Φx Mblist : loc -pr> cif CON Σ :=
+    λ l, as_cif (λ _, mblist_gen α Φx Mblist l).
+  #[export] Instance cif_mblist_gen_productive {α Φx} :
     Productive (cif_mblist_gen α Φx).
   Proof.
     move=>/= k ?? eq ?. unfold cif_mblist_gen. apply cif_mutex_bor_productive.
@@ -531,8 +561,7 @@ Section verify.
     cif_mblist α Φx l ≡ cif_mblist_gen α Φx (cif_mblist α Φx) l.
   Proof. by rewrite /cif_mblist (profix_unfold (f:=cif_mblist_gen _ _) l). Qed.
   (** Semantics *)
-  Definition mblist α Φx l : iProp Σ :=
-    mutex_bor α l (Φx (l +ₗ 1) ∗ ∃ l', ▷ (l +ₗ 2) ↦ #l' ∗ cif_mblist α Φx l').
+  Definition mblist α Φx := mblist_gen α Φx (cif_mblist α Φx).
   (** Unfold semantics over [cif_ilist] *)
   Lemma sem_mblist {δ α Φx l} : cif_sem δ (cif_mblist α Φx l) ⊣⊢ mblist α Φx l.
   Proof. by rewrite cif_mblist_unfold !sem_ecustom /=. Qed.
