@@ -154,18 +154,18 @@ Section cif.
   Proof. move=> ????. by apply Citg_preserv_productive. Qed.
   #[export] Instance cif_ex_preserv {A} : Preserv (@cif_ex A).
   Proof. move=> ????. by apply Citg_preserv_productive. Qed.
-  #[export] Instance cif_bin_preserv {s n} :
-    Proper (proeq n ==> proeq n ==> proeq n) (cif_bin s).
+  #[export] Instance cif_bin_preserv {s k} :
+    Proper (proeq k ==> proeq k ==> proeq k) (cif_bin s).
   Proof. move=> ??????. apply Citg_preserv_productive=>//. by f_equiv. Qed.
   #[export] Instance cif_un_preserv {s} : Preserv (cif_un s).
   Proof. move=> ????. apply Citg_preserv_productive=>//. by f_equiv. Qed.
 
   (** Custom connectives are size-preserving over the inductive arguments
     and productive over the coinductive arguments *)
-  #[export] Instance cif_custom_preserv_productive {s n} :
-    Proper (proeq n ==> proeq_later n ==> (≡) ==> proeq n) (cif_custom s).
+  #[export] Instance cif_custom_preserv_productive {s k} :
+    Proper (proeq k ==> proeq_later k ==> (≡) ==> proeq k) (cif_custom s).
   Proof.
-    move=> ?????????. apply Citg_preserv_productive=>//. by destruct n as [|n].
+    move=> ?????????. apply Citg_preserv_productive=>//. by destruct k as [|k].
   Qed.
 
   (** Non-expansiveness *)
@@ -372,8 +372,8 @@ Section cif_ecustom.
 
   (** Custom connectives are size-preserving over the inductive arguments
     and productive over the coinductive arguments *)
-  #[export] Instance cif_ecustom_preserv_productive {s n} :
-    Proper (proeq n ==> proeq_later n ==> (≡) ==> proeq n)
+  #[export] Instance cif_ecustom_preserv_productive {s k} :
+    Proper (proeq k ==> proeq_later k ==> (≡) ==> proeq k)
       (cif_ecustom CON' (Σ:=Σ) s).
   Proof.
     rewrite cif_ecustom_unseal=> ????? /fun_proeq_later eqc ???.

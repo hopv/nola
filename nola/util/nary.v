@@ -38,6 +38,6 @@ Proof. by case: b. Qed.
 (** N-ary maps are size-preserving *)
 #[export] Instance unary_preserv {A : prost} : Preserv' _ (funPR _) (@unary A).
 Proof. solve_proper. Qed.
-#[export] Instance binary_preserv {A : prost} {n} :
-  Proper (proeq n ==> proeq n ==> @proeq (funPR _) n) (@binary A).
+#[export] Instance binary_preserv {A : prost} {k} :
+  Proper (proeq k ==> proeq k ==> @proeq (funPR _) k) (@binary A).
 Proof. solve_proper. Qed.

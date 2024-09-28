@@ -206,11 +206,11 @@ Section verify.
   Definition cif_ilist_gen N (Φx : loc -pr> cif CON Σ)
     (Ilist : loc -pr> cif CON Σ) : loc -pr> cif CON Σ :=
     λ l, (cif_inv N (Φx l) ∗ cif_inv N (∃ l', ▷ (l +ₗ 1) ↦ #l' ∗ Ilist l'))%cif.
-  #[export] Instance cif_ilist_gen_productive {n N} :
-    Proper (proeq_later n ==> proeq_later n ==> proeq n) (cif_ilist_gen N).
+  #[export] Instance cif_ilist_gen_productive {k N} :
+    Proper (proeq_later k ==> proeq_later k ==> proeq k) (cif_ilist_gen N).
   Proof.
     move=>/= ?? eq ?? eq' ?. unfold cif_ilist_gen.
-    f_equiv; apply cif_inv_productive; (destruct n as [|n]; [done|]);
+    f_equiv; apply cif_inv_productive; (destruct k as [|k]; [done|]);
       [apply eq|]=>/=.
     f_equiv=> ?. by f_equiv.
   Qed.
@@ -520,11 +520,11 @@ Section verify.
   Definition cif_mblist_gen α (Φx : loc -pr> cif CON Σ)
     (Mblist : loc -pr> cif CON Σ) : loc -pr> cif CON Σ :=
     λ l, cif_mutex_bor α l (Φx (l +ₗ 1) ∗ ∃ l', ▷ (l +ₗ 2) ↦ #l' ∗ Mblist l').
-  #[export] Instance cif_mblist_gen_productive {α Φx} :
+  #[export] Instance cif_mblist_gen_productive' {α Φx} :
     Productive (cif_mblist_gen α Φx).
   Proof.
-    move=>/= n ?? eq ?. unfold cif_mblist_gen. apply cif_mutex_bor_productive.
-    destruct n as [|n]=>//=. (do 2 f_equiv)=> ?. f_equiv. apply eq.
+    move=>/= k ?? eq ?. unfold cif_mblist_gen. apply cif_mutex_bor_productive.
+    destruct k as [|k]=>//=. (do 2 f_equiv)=> ?. f_equiv. apply eq.
   Qed.
   Definition cif_mblist α Φx : loc → cif CON Σ :=
     profix (cif_mblist_gen α Φx).
