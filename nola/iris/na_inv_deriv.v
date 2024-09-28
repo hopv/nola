@@ -51,8 +51,6 @@ End na_inv_deriv.
 
 (** Notation *)
 Notation na_invd := (na_inv' der).
-Notation na_inv_wsati δ := (na_inv_wsat ⟦⟧(δ)).
-Notation na_inv_wsatid := (na_inv_wsati der).
 
 Section na_inv_deriv.
   Context `{!na_inv'GS FML Σ, !invGS_gen hlc Σ, !na_invG Σ}.
@@ -96,9 +94,9 @@ Section na_inv_deriv.
 
   (** Access using [na_invd] *)
   Lemma na_invd_acc {p N Px E F} : ↑N ⊆ E → ↑N ⊆ F →
-    na_own p F -∗ na_invd p N Px =[na_inv_wsatid]{E}=∗
+    na_own p F -∗ na_invd p N Px =[na_inv_wsat ⟦⟧]{E}=∗
       na_own p (F∖↑N) ∗ ⟦ Px ⟧ ∗
-      (na_own p (F∖↑N) -∗ ⟦ Px ⟧ =[na_inv_wsatid]{E}=∗ na_own p F).
+      (na_own p (F∖↑N) -∗ ⟦ Px ⟧ =[na_inv_wsat ⟦⟧]{E}=∗ na_own p F).
   Proof.
     rewrite na_inv'_unseal. iIntros (NE NF) "F accP".
     iDestruct (der_sound with "accP") as "accP". rewrite sem_ejudg.
@@ -125,15 +123,16 @@ Section na_inv_deriv.
 
   (** Allocate [na_inv'] *)
   Lemma na_inv'_alloc_rec p Px N :
-    (na_inv' δ p N Px -∗ ⟦ Px ⟧(δ)) =[na_inv_wsati δ]=∗ na_inv' δ p N Px.
+    (na_inv' δ p N Px -∗ ⟦ Px ⟧(δ)) =[na_inv_wsat ⟦⟧(δ)]=∗ na_inv' δ p N Px.
   Proof. rewrite -na_inv_tok_na_inv'. exact: na_inv_tok_alloc_rec. Qed.
-  Lemma na_inv'_alloc p Px N : ⟦ Px ⟧(δ) =[na_inv_wsati δ]=∗ na_inv' δ p N Px.
+  Lemma na_inv'_alloc p Px N :
+    ⟦ Px ⟧(δ) =[na_inv_wsat ⟦⟧(δ)]=∗ na_inv' δ p N Px.
   Proof. rewrite -na_inv_tok_na_inv'. exact: na_inv_tok_alloc. Qed.
   Lemma na_inv'_alloc_open p N E F Px :
     ↑N ⊆ E → ↑N ⊆ F →
-    na_own p F =[na_inv_wsati δ]{E}=∗
+    na_own p F =[na_inv_wsat ⟦⟧(δ)]{E}=∗
       na_own p (F∖↑N) ∗ na_inv' δ p N Px ∗
-      (na_own p (F∖↑N) -∗ ⟦ Px ⟧(δ) =[na_inv_wsati δ]{E}=∗ na_own p F).
+      (na_own p (F∖↑N) -∗ ⟦ Px ⟧(δ) =[na_inv_wsat ⟦⟧(δ)]{E}=∗ na_own p F).
   Proof. rewrite -na_inv_tok_na_inv'. exact: na_inv_tok_alloc_open. Qed.
 
   (** Convert [na_inv'] with [mod_acsr] *)

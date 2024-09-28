@@ -45,8 +45,6 @@ End inv_deriv.
 
 (** Notation *)
 Notation invd := (inv' der).
-Notation inv_wsati δ := (inv_wsat ⟦⟧(δ)).
-Notation inv_wsatid := (inv_wsati der).
 
 Section inv_deriv.
   Context `{!inv'GS FML Σ, !invGS_gen hlc Σ}.
@@ -88,8 +86,8 @@ Section inv_deriv.
 
   (** Access using [inv'] *)
   Lemma invd_acc {N Px E} : ↑N ⊆ E →
-    invd N Px =[inv_wsatid]{E,E∖↑N}=∗
-      ⟦ Px ⟧ ∗ (⟦ Px ⟧ =[inv_wsatid]{E∖↑N,E}=∗ True).
+    invd N Px =[inv_wsat ⟦⟧]{E,E∖↑N}=∗
+      ⟦ Px ⟧ ∗ (⟦ Px ⟧ =[inv_wsat ⟦⟧]{E∖↑N,E}=∗ True).
   Proof.
     rewrite inv'_unseal. iIntros (?) "accPx".
     iDestruct (der_sound with "accPx") as "accPx". rewrite sem_ejudg.
@@ -97,8 +95,8 @@ Section inv_deriv.
   Qed.
   (** Access using [inv'] via view shift *)
   Lemma invd_acc_vs {N Px E Q R} : ↑N ⊆ E →
-    □ (⟦ Px ⟧ -∗ Q =[inv_wsatid]{E∖↑N}=∗ ⟦ Px ⟧ ∗ R) -∗
-    □ (invd N Px -∗ Q =[inv_wsatid]{E}=∗ R).
+    □ (⟦ Px ⟧ -∗ Q =[inv_wsat ⟦⟧]{E∖↑N}=∗ ⟦ Px ⟧ ∗ R) -∗
+    □ (invd N Px -∗ Q =[inv_wsat ⟦⟧]{E}=∗ R).
   Proof.
     iIntros (?) "#vs !> i Q". iMod (invd_acc with "i") as "[Px cl]"; [done|].
     iMod ("vs" with "Px Q") as "[Px $]". by iApply "cl".
@@ -124,13 +122,13 @@ Section inv_deriv.
 
   (** Allocate [inv'] *)
   Lemma inv'_alloc_rec Px N :
-    (inv' δ N Px -∗ ⟦ Px ⟧(δ)) =[inv_wsati δ]=∗ inv' δ N Px.
+    (inv' δ N Px -∗ ⟦ Px ⟧(δ)) =[inv_wsat ⟦⟧(δ)]=∗ inv' δ N Px.
   Proof. rewrite -inv_tok_inv'. exact: inv_tok_alloc_rec. Qed.
-  Lemma inv'_alloc Px N : ⟦ Px ⟧(δ) =[inv_wsati δ]=∗ inv' δ N Px.
+  Lemma inv'_alloc Px N : ⟦ Px ⟧(δ) =[inv_wsat ⟦⟧(δ)]=∗ inv' δ N Px.
   Proof. rewrite -inv_tok_inv'. exact: inv_tok_alloc. Qed.
   Lemma inv'_alloc_open Px N E : ↑N ⊆ E →
-    ⊢ |=[inv_wsati δ]{E, E∖↑N}=> inv' δ N Px ∗
-      (⟦ Px ⟧(δ) =[inv_wsati δ]{E∖↑N, E}=∗ True).
+    ⊢ |=[inv_wsat ⟦⟧(δ)]{E, E∖↑N}=> inv' δ N Px ∗
+      (⟦ Px ⟧(δ) =[inv_wsat ⟦⟧(δ)]{E∖↑N, E}=∗ True).
   Proof. rewrite -inv_tok_inv'. exact: inv_tok_alloc_open. Qed.
 
   (** Convert [inv'] with [mod_acsr] *)
@@ -195,8 +193,10 @@ Section inv_deriv_wp.
   (** Access using [invd] via [twp] *)
   Lemma invd_acc_twp `{!Atomic (stuckness_to_atomicity s) e} {N Px E Q Ψ} :
     ↑N ⊆ E → to_val e = None →
-    [[{ ⟦ Px ⟧ ∗ Q }]][inv_wsatid] e @ s; E∖↑N [[{ v, RET v; ⟦ Px ⟧ ∗ Ψ v }]] -∗
-      [[{ invd N Px ∗ Q }]][inv_wsatid] e @ s; E [[{ v, RET v; Ψ v }]].
+    [[{ ⟦ Px ⟧ ∗ Q }]][inv_wsat ⟦⟧]
+      e @ s; E∖↑N
+    [[{ v, RET v; ⟦ Px ⟧ ∗ Ψ v }]] -∗
+      [[{ invd N Px ∗ Q }]][inv_wsat ⟦⟧] e @ s; E [[{ v, RET v; Ψ v }]].
   Proof.
     iIntros (??) "#twp %Φ !> [i Q] →Φ".
     iMod (invd_acc with "i") as "[Px cl]"; [done..|].

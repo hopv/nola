@@ -63,8 +63,6 @@ End borrow_deriv.
 (** Notation *)
 Notation bord := (bor der). Notation obord := (obor der).
 Notation lendd := (lend der).
-Notation borrow_wsati M δ := (borrow_wsat M ⟦⟧(δ)).
-Notation borrow_wsatid M := (borrow_wsati M der).
 
 Section borrow_deriv.
   Context `{!BorrowJudg (FML $oi Σ) JUDG, !Jsem JUDG (iProp Σ),
@@ -184,7 +182,7 @@ Section borrow_deriv.
   Lemma bor_lend_new_list α Pxl Qxl :
     ([∗ list] Px ∈ Pxl, ⟦ Px ⟧(δ)) -∗
     ([†α] -∗ ([∗ list] Px ∈ Pxl, ⟦ Px ⟧(δ)) -∗ M ([∗ list] Qx ∈ Qxl, ⟦ Qx ⟧(δ)))
-      =[borrow_wsati M δ]=∗
+      =[borrow_wsat M ⟦⟧(δ)]=∗
       ([∗ list] Px ∈ Pxl, bor δ α Px) ∗ [∗ list] Qx ∈ Qxl, lend δ α Qx.
   Proof.
     setoid_rewrite <-bor_tok_bor. setoid_rewrite <-lend_tok_lend.
@@ -192,7 +190,7 @@ Section borrow_deriv.
   Qed.
   (** Simply create a borrower and a lender *)
   Lemma bor_lend_new α Px :
-    ⟦ Px ⟧(δ) =[borrow_wsati M δ]=∗ bor δ α Px ∗ lend δ α Px.
+    ⟦ Px ⟧(δ) =[borrow_wsat M ⟦⟧(δ)]=∗ bor δ α Px ∗ lend δ α Px.
   Proof. rewrite -bor_tok_bor -lend_tok_lend. exact: bor_lend_tok_new. Qed.
 End borrow_deriv.
 
@@ -204,8 +202,8 @@ Section borrow_deriv.
 
   (** Split a lender *)
   Lemma lendd_split {α Px} Qxl :
-    lendd α Px -∗ (⟦ Px ⟧ -∗ M ([∗ list] Qx ∈ Qxl, ⟦ Qx ⟧)) =[borrow_wsatid M]=∗
-      [∗ list] Qx ∈ Qxl, lendd α Qx.
+    lendd α Px -∗ (⟦ Px ⟧ -∗ M ([∗ list] Qx ∈ Qxl, ⟦ Qx ⟧))
+      =[borrow_wsat M ⟦⟧]=∗ [∗ list] Qx ∈ Qxl, lendd α Qx.
   Proof.
     rewrite {1}lend_unseal. setoid_rewrite <-lend_tok_lend.
     iIntros "(%Rx & #RP & l) →Qxl".
@@ -215,7 +213,7 @@ Section borrow_deriv.
 
   (** Retrive from [lendd] *)
   Lemma lendd_retrieve {α Px} :
-    [†α] -∗ lendd α Px -∗ modw M (borrow_wsatid M) ⟦ Px ⟧.
+    [†α] -∗ lendd α Px -∗ modw M (borrow_wsat M ⟦⟧) ⟦ Px ⟧.
   Proof.
     rewrite lend_unseal. iIntros "† (%Qx & #QP & l)".
     iMod (lend_tok_retrieve (M:=M) with "† l") as "Qx".
@@ -224,7 +222,7 @@ Section borrow_deriv.
 
   (** Open a borrower *)
   Lemma bord_open {α q Px} :
-    q.[α] -∗ bord α Px -∗ modw M (borrow_wsatid M) (obord α q Px ∗ ⟦ Px ⟧).
+    q.[α] -∗ bord α Px -∗ modw M (borrow_wsat M ⟦⟧) (obord α q Px ∗ ⟦ Px ⟧).
   Proof.
     rewrite bor_unseal obor_unseal. iIntros "α (%Qx & $ & #QP & b)".
     iMod (bor_tok_open (M:=M) with "α b") as "[$ Qx]".
@@ -257,7 +255,7 @@ Section borrow_deriv.
     ([∗ list] '(α, q, Px)' ∈ αqPxl, β ⊑□ α ∗ obord α q Px) -∗
     ([∗ list] Qx ∈ Qxl, ⟦ Qx ⟧) -∗
     ([†β] -∗ ([∗ list] Qx ∈ Qxl, ⟦ Qx ⟧) -∗ M
-      ([∗ list] '(_, _, Px)' ∈ αqPxl, ⟦ Px ⟧)) =[borrow_wsatid M]=∗
+      ([∗ list] '(_, _, Px)' ∈ αqPxl, ⟦ Px ⟧)) =[borrow_wsat M ⟦⟧]=∗
       ([∗ list] '(α, q, Px)' ∈ αqPxl, q.[α] ∗ ([†β] -∗ bord α Px)) ∗
       ([∗ list] Qx ∈ Qxl, bord β Qx).
   Proof.
@@ -272,7 +270,7 @@ Section borrow_deriv.
   (** Subdivide/reborrow a borrower *)
   Lemma obord_subdiv {α q Px} Qxl β :
     β ⊑□ α -∗ obord α q Px -∗ ([∗ list] Qx ∈ Qxl, ⟦ Qx ⟧) -∗
-    ([†β] -∗ ([∗ list] Qx ∈ Qxl, ⟦ Qx ⟧) -∗ M ⟦ Px ⟧) =[borrow_wsatid M]=∗
+    ([†β] -∗ ([∗ list] Qx ∈ Qxl, ⟦ Qx ⟧) -∗ M ⟦ Px ⟧) =[borrow_wsat M ⟦⟧]=∗
       q.[α] ∗ ([†β] -∗ bord α Px) ∗ ([∗ list] Qx ∈ Qxl, bord β Qx).
   Proof.
     iIntros "⊑ o Qxl →Px".
@@ -282,7 +280,7 @@ Section borrow_deriv.
 
   (** Reborrow a borrower *)
   Lemma obord_reborrow {α q Px} β :
-    β ⊑□ α -∗ obord α q Px -∗ ⟦ Px ⟧ =[borrow_wsatid M]=∗
+    β ⊑□ α -∗ obord α q Px -∗ ⟦ Px ⟧ =[borrow_wsat M ⟦⟧]=∗
       q.[α] ∗ ([†β] -∗ bord α Px) ∗ bord β Px.
   Proof.
     iIntros "⊑ o Px".
@@ -290,7 +288,7 @@ Section borrow_deriv.
       by [iFrame|iIntros "_ [$ _]"|].
   Qed.
   Lemma bord_reborrow {α q Px} β :
-    β ⊑□ α -∗ q.[α] -∗ bord α Px -∗ modw M (borrow_wsatid M)
+    β ⊑□ α -∗ q.[α] -∗ bord α Px -∗ modw M (borrow_wsat M ⟦⟧)
       (q.[α] ∗ ([†β] -∗ bord α Px) ∗ bord β Px).
   Proof.
     iIntros "⊑ α b". iMod (bord_open with "α b") as "[o Px]".
@@ -298,7 +296,7 @@ Section borrow_deriv.
   Qed.
   (** Simply close a borrower *)
   Lemma obord_close {α q Px} :
-    obord α q Px -∗ ⟦ Px ⟧ =[borrow_wsatid M]=∗ q.[α] ∗ bord α Px.
+    obord α q Px -∗ ⟦ Px ⟧ =[borrow_wsat M ⟦⟧]=∗ q.[α] ∗ bord α Px.
   Proof.
     iIntros "o Px".
     iMod (obord_reborrow with "[] o Px") as "($ & _ & $)";

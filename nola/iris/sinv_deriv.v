@@ -45,8 +45,6 @@ End sinv_deriv.
 
 (** Notation *)
 Notation sinvd := (sinv der).
-Notation sinv_wsati δ := (sinv_wsat ⟦⟧(δ)).
-Notation sinv_wsatid := (sinv_wsati der).
 
 Section sinv_deriv.
   Context `{!SinvJudg (FML $oi Σ) JUDG, !Jsem JUDG (iProp Σ),
@@ -76,7 +74,7 @@ Section sinv_deriv.
 
   (** Access [sinv] *)
   Lemma sinv_acc {Px} :
-    sinvd Px -∗ sinv_wsatid ==∗ (⟦ Px ⟧ ∗ (⟦ Px ⟧ ==∗ sinv_wsatid)).
+    sinvd Px -∗ sinv_wsat ⟦⟧ ==∗ (⟦ Px ⟧ ∗ (⟦ Px ⟧ ==∗ sinv_wsat ⟦⟧)).
   Proof.
     rewrite sinv_unseal. iIntros "[%Qx[QPQ s]] W".
     iDestruct (der_sound with "QPQ") as "QPQ". rewrite sem_ejudg /=.
@@ -95,7 +93,8 @@ Section sinv_deriv.
   Qed.
 
   (** Allocate [sinv] *)
-  Lemma sinv_alloc Px : sinv_wsati δ ==∗ sinv δ Px ∗ (⟦ Px ⟧(δ) -∗ sinv_wsati δ).
+  Lemma sinv_alloc Px :
+    sinv_wsat ⟦⟧(δ) ==∗ sinv δ Px ∗ (⟦ Px ⟧(δ) -∗ sinv_wsat ⟦⟧(δ)).
   Proof. rewrite -sinv_tok_sinv. exact: sinv_tok_alloc. Qed.
 
   (** Convert [sinv] with [mod_acsr] *)
