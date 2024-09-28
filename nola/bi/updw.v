@@ -169,10 +169,9 @@ End lemmas.
 (** ** Update with a custom world satisfaction [W] *)
 
 (** Basic update with a world satisfaction *)
-Definition bupdw `{!BiBUpd PROP} (W P : PROP) : PROP := modw bupd W P.
+Notation bupdw := (modw bupd).
 (** Fancy update with a world satisfaction *)
-Definition fupdw `{!BiFUpd PROP} (W : PROP) E E' (P : PROP) : PROP :=
-  modw (fupd E E') W P.
+Notation fupdw E E' := (modw (fupd E E')).
 
 (** *** Notation *)
 
@@ -185,10 +184,10 @@ Module UpdwNotation.
     : bi_scope.
   Notation "P =[ W ]=∗ Q" := (P -∗ |=[W]=> Q) : stdpp_scope.
 
-  Notation "|=[ W ] { E , E' }=> P" := (fupdw W E E' P)
+  Notation "|=[ W ] { E , E' }=> P" := (fupdw E E' W P)
     (at level 99, P at level 200,
       format "'[  ' |=[ W ] '/' { E , E' }=>  '/' P ']'") : bi_scope.
-  Notation "|=[ W ] { E }=> P" := (fupdw W E E P)
+  Notation "|=[ W ] { E }=> P" := (fupdw E E W P)
     (at level 99, P at level 200, format "'[  ' |=[ W ] '/' { E }=>  '/' P ']'")
     : bi_scope.
   Notation "P =[ W ] { E , E' }=∗ Q" := (P -∗ |=[W]{E,E'}=> Q)%I
@@ -223,16 +222,16 @@ Section lemmas.
   Context {PROP}.
   Implicit Type (M : PROP → PROP) (W P Q R : PROP).
 
-  (** [bupdw W] and [fupdw W E E] satisfy [GenUpd] and [GenUpdW] *)
+  (** [bupdw] and [fupdw E E] satisfy [GenUpd] and [GenUpdW] *)
   #[export] Instance bupdw_gen_upd `{!BiBUpd PROP} {W} : GenUpd (bupdw W).
   Proof. exact _. Qed.
-  #[export] Instance fupdw_gen_upd `{!BiFUpd PROP} {W E} : GenUpd (fupdw W E E).
+  #[export] Instance fupdw_gen_upd `{!BiFUpd PROP} {E W} : GenUpd (fupdw E E W).
   Proof. exact _. Qed.
   #[export] Instance bupdw_gen_upd_B `{!BiBUpd PROP} {W} : GenUpdB (bupdw W).
   Proof. exact gen_upd_b_modw. Qed.
   #[export] Instance fupdw_gen_upd_B
-    `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {W E} :
-    GenUpdB (fupdw W E E).
+    `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {E W} :
+    GenUpdB (fupdw E E W).
   Proof. exact gen_upd_b_modw. Qed.
 
   (** For [modw M] over [GenUpdB] [M] *)
@@ -253,42 +252,25 @@ Section lemmas.
     move=> ?. by rewrite (bupdw_modw_gen_upd (M:=M)) elim_modal_modw_gen_upd.
   Qed.
 
-  (** [bupdw] is non-expansive *)
-  #[export] Instance bupdw_ne `{!BiBUpd PROP} :
-    NonExpansive2 (bupdw (PROP:=PROP)).
-  Proof. exact _. Qed.
-  #[export] Instance bupdw_proper `{!BiBUpd PROP} :
-    Proper ((⊣⊢) ==> (⊣⊢) ==> (⊣⊢)) (bupdw (PROP:=PROP)).
-  Proof. exact _. Qed.
-
-  (** [fupdw] is non-expansive *)
-  #[export] Instance fupdw_ne `{!BiFUpd PROP} {n} :
-    Proper ((≡{n}≡) ==> (=) ==> (=) ==> (≡{n}≡) ==> (≡{n}≡))
-      (fupdw (PROP:=PROP)).
-  Proof. solve_proper. Qed.
-  #[export] Instance fupdw_proper `{!BiFUpd PROP} :
-    Proper ((⊣⊢) ==> (=) ==> (=) ==> (⊣⊢) ==> (⊣⊢)) (fupdw (PROP:=PROP)).
-  Proof. solve_proper. Qed.
-
   (** [fupdw] absorbs [◇] *)
-  #[export] Instance is_except_0_fupdw `{!BiFUpd PROP} {W E E' P} :
+  #[export] Instance is_except_0_fupdw `{!BiFUpd PROP} {E E' W P} :
     IsExcept0 (|=[W]{E,E'}=> P).
   Proof. rewrite /IsExcept0. by iIntros ">?". Qed.
 
   (** [bupdw] is monotone *)
   #[export] Instance bupdw_mono `{!BiBUpd PROP} {W} :
-    Proper ((⊢) ==> (⊢)) (bupdw (PROP:=PROP) W).
+    Proper ((⊢) ==> (⊢)) (bupdw W).
   Proof. exact _. Qed.
   #[export] Instance bupdw_flip_mono `{!BiBUpd PROP} {W} :
-    Proper (flip (⊢) ==> flip (⊢)) (bupdw (PROP:=PROP) W).
+    Proper (flip (⊢) ==> flip (⊢)) (bupdw W).
   Proof. exact _. Qed.
 
   (** [fupdw] is monotone *)
-  #[export] Instance fupdw_mono `{!BiFUpd PROP} {W E E'} :
-    Proper ((⊢) ==> (⊢)) (fupdw (PROP:=PROP) W E E').
+  #[export] Instance fupdw_mono `{!BiFUpd PROP} {E E' W} :
+    Proper ((⊢) ==> (⊢)) (fupdw E E' W).
   Proof. exact _. Qed.
-  #[export] Instance fupdw_flip_mono `{!BiFUpd PROP} {W E E'} :
-    Proper (flip (⊢) ==> flip (⊢)) (fupdw (PROP:=PROP) W E E').
+  #[export] Instance fupdw_flip_mono `{!BiFUpd PROP} {E E' W} :
+    Proper (flip (⊢) ==> flip (⊢)) (fupdw E E' W).
   Proof. exact _. Qed.
 
   (** Modify the world satisfaction of [bupdw] *)
@@ -326,23 +308,23 @@ Section lemmas.
   Proof. exact _. Qed.
 
   (** Introduce [fupdw] *)
-  #[export] Instance from_modal_fupdw `{!BiFUpd PROP} {W E P} :
+  #[export] Instance from_modal_fupdw `{!BiFUpd PROP} {E W P} :
     FromModal True modality_id (|=[W]{E}=> P) (|=[W]{E}=> P) P.
   Proof. apply from_modal_modw. iIntros. by iModIntro. Qed.
-  #[export] Instance from_modal_fupdw_wrong_mask `{!BiFUpd PROP} {W E E' P} :
+  #[export] Instance from_modal_fupdw_wrong_mask `{!BiFUpd PROP} {E E' W P} :
     FromModal (pm_error
       "Only non-mask-changing update modalities can be introduced directly.
 Use [iApply fupdw_mask_intro] to introduce mask-changing update modalities")
       modality_id (|=[W]{E,E'}=> P) (|=[W]{E,E'}=> P) P | 100.
   Proof. by case. Qed.
   #[export] Instance from_assumption_fupdw
-    `{!BiFUpd PROP, !FromAssumption p P Q} {W E} :
+    `{!BiFUpd PROP, !FromAssumption p P Q} {E W} :
     KnownRFromAssumption p P (|=[W]{E}=> Q).
   Proof. apply from_assumption_modw. iIntros. by iModIntro. Qed.
-  #[export] Instance from_pure_fupdw `{!BiFUpd PROP, !FromPure a P φ} {W E} :
+  #[export] Instance from_pure_fupdw `{!BiFUpd PROP, !FromPure a P φ} {E W} :
     FromPure a (|=[W]{E}=> P) φ.
   Proof. apply from_pure_modw. iIntros. by iModIntro. Qed.
-  Lemma fupdw_mask_intro `{!BiFUpd PROP} {W E E' P} : E' ⊆ E →
+  Lemma fupdw_mask_intro `{!BiFUpd PROP} {E E' W P} : E' ⊆ E →
     ((|={E',E}=> emp) -∗ P) ⊢ |=[W]{E,E'}=> P.
   Proof. iIntros (?) "? $". by iApply fupd_mask_intro. Qed.
   Lemma bupdw_fupdw `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} E {W P} :
@@ -355,10 +337,10 @@ Use [iApply fupdw_mask_intro] to introduce mask-changing update modalities")
   Proof. exact _. Qed.
 
   (** Frame over [fupdw] *)
-  #[export] Instance frame_fupdw `{!BiFUpd PROP, !Frame p R P Q} {W E E'} :
+  #[export] Instance frame_fupdw `{!BiFUpd PROP, !Frame p R P Q} {E E' W} :
     Frame p R (|=[W]{E,E'}=> P) (|=[W]{E,E'}=> Q) | 2.
   Proof. exact _. Qed.
-  Lemma fupdw_frame_r `{!BiFUpd PROP} {W E E' P Q} :
+  Lemma fupdw_frame_r `{!BiFUpd PROP} {E E' W P Q} :
     (|=[W]{E,E'}=> P) ∗ Q ⊢ |=[W]{E,E'}=> P ∗ Q.
   Proof. by iIntros "[? $]". Qed.
 
@@ -425,13 +407,13 @@ Use [iMod (fupd_mask_subseteq E')] to adjust the mask of your goal to [E']")
       p false (|={E,E'}=> P) False (|=[W]{E'',E'''}=> Q) False | 100.
   Proof. case. Qed.
   #[export] Instance elim_modal_bupd_fupdw
-    `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {p W E E' P Q} :
+    `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {p E E' W P Q} :
     ElimModal True p false (|==> P) P (|=[W]{E,E'}=> Q) (|=[W]{E,E'}=> Q).
   Proof. exact _. Qed.
-  #[export] Instance add_modal_fupdw `{!BiFUpd PROP} {W E E' P Q} :
+  #[export] Instance add_modal_fupdw `{!BiFUpd PROP} {E E' W P Q} :
     AddModal (|=[W]{E}=> P) P (|=[W]{E,E'}=> Q).
   Proof. by rewrite /AddModal fupdw_frame_r bi.wand_elim_r fupdw_trans. Qed.
-  #[export] Instance add_modal_fupd_fupdw `{!BiFUpd PROP} {W E E' P Q} :
+  #[export] Instance add_modal_fupd_fupdw `{!BiFUpd PROP} {E E' W P Q} :
     AddModal (|={E}=> P) P (|=[W]{E,E'}=> Q).
   Proof. rewrite /AddModal fupd_frame_r bi.wand_elim_r. iIntros ">$". Qed.
 
@@ -441,7 +423,7 @@ Use [iMod (fupd_mask_subseteq E')] to adjust the mask of your goal to [E']")
   Proof. exact modw_modw_sep. Qed.
   (** [modw] over [fupdw] *)
   Lemma modw_fupdw `{!BiFUpd PROP} {W W' E E' P} :
-    modw (fupdw W E E') W' P ⊣⊢ |=[W ∗ W']{E,E'}=> P.
+    modw (fupdw E E' W) W' P ⊣⊢ |=[W ∗ W']{E,E'}=> P.
   Proof. exact modw_modw_sep. Qed.
 
   (** More instances for [bupdw] *)
@@ -462,28 +444,28 @@ Use [iMod (fupd_mask_subseteq E')] to adjust the mask of your goal to [E']")
   Proof. exact _. Qed.
 
   (** More instances for [fupdw] *)
-  #[export] Instance from_sep_fupdw `{!BiFUpd PROP, !FromSep P Q Q'} {W E} :
+  #[export] Instance from_sep_fupdw `{!BiFUpd PROP, !FromSep P Q Q'} {E W} :
     FromSep (|=[W]{E}=> P) (|=[W]{E}=> Q) (|=[W]{E}=> Q').
   Proof. rewrite /FromSep -(from_sep P). by iIntros "[>$ >$]". Qed.
-  #[export] Instance from_or_fupdw `{!BiFUpd PROP, !FromOr P Q Q'} {W E} :
+  #[export] Instance from_or_fupdw `{!BiFUpd PROP, !FromOr P Q Q'} {E W} :
     FromOr (|=[W]{E}=> P) (|=[W]{E}=> Q) (|=[W]{E}=> Q').
   Proof.
     rewrite /FromOr -(from_or P). iIntros "[>?|>?] !>"; by [iLeft|iRight].
   Qed.
   #[export] Instance from_exist_fupdw `{!BiFUpd PROP, !FromExist (A:=A) P Φ}
-    {W E E'} : FromExist (|=[W]{E,E'}=> P) (λ x, |=[W]{E,E'}=> (Φ x))%I.
+    {E E' W} : FromExist (|=[W]{E,E'}=> P) (λ x, |=[W]{E,E'}=> (Φ x))%I.
   Proof.
     rewrite /FromExist -(from_exist P). iIntros "[% >?] !>". by iExists _.
   Qed.
   #[export] Instance into_and_fupdw
-    `{!BiFUpd PROP, !IntoAnd false P Q R} {W E E'} :
+    `{!BiFUpd PROP, !IntoAnd false P Q R} {E E' W} :
     IntoAnd false (|=[W]{E,E'}=> P) (|=[W]{E,E'}=> Q) (|=[W]{E,E'}=> R).
   Proof.
     move: IntoAnd0. rewrite /IntoAnd=>/=->. iIntros "∧".
     iSplit; by [iMod "∧" as "[$ _]"|iMod "∧" as "[_ $]"].
   Qed.
   #[export] Instance into_forall_fupdw
-    `{!BiFUpd PROP, !IntoForall (A:=A) P Φ} {W E E'} :
+    `{!BiFUpd PROP, !IntoForall (A:=A) P Φ} {E E' W} :
     IntoForall (|=[W]{E,E'}=> P) (λ x, |=[W]{E,E'}=> (Φ x))%I.
   Proof.
     rewrite /IntoForall (into_forall P). iIntros "Φ %". iMod "Φ". iApply "Φ".
