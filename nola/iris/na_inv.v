@@ -9,16 +9,16 @@ Import ProdNotation iPropAppNotation UpdwNotation.
 
 Implicit Type (FML : oFunctor) (p : na_inv_pool_name) (i : positive).
 
-(** Proposition data type *)
-Local Definition na_inv_prop FML : oFunctor :=
+(** Formula data type for [na_inv] *)
+Local Definition na_inv_fml FML : oFunctor :=
   leibnizO (na_inv_pool_name *' positive) * FML.
 
-Class na_inv'GS FML Σ := na_inv'GS_in : inv'GS (na_inv_prop FML) Σ.
+Class na_inv'GS FML Σ := na_inv'GS_in : inv'GS (na_inv_fml FML) Σ.
 Local Existing Instance na_inv'GS_in.
-Class na_inv'GpreS FML Σ := na_inv'GpreS_in : inv'GpreS (na_inv_prop FML) Σ.
+Class na_inv'GpreS FML Σ := na_inv'GpreS_in : inv'GpreS (na_inv_fml FML) Σ.
 Local Existing Instance na_inv'GpreS_in.
 Definition na_inv'Σ FML `{!oFunctorContractive FML} :=
-  #[inv'Σ (na_inv_prop FML)].
+  #[inv'Σ (na_inv_fml FML)].
 #[export] Instance subG_na_inv'Σ
   `{!oFunctorContractive FML, !subG (na_inv'Σ FML) Σ} : na_inv'GpreS FML Σ.
 Proof. solve_inG. Qed.
@@ -92,7 +92,7 @@ Section na_inv.
 
   (** Semantics *)
   Local Definition na_inv_sem (sm : FML $oi Σ -d> iProp Σ)
-    : na_inv_prop FML $oi Σ -d> iProp Σ :=
+    : na_inv_fml FML $oi Σ -d> iProp Σ :=
     λ '((p, i)', Px), na_body p i (sm Px).
   (** [na_inv_sem sm] is non-expansive if [sm] is *)
   Local Lemma na_inv_sem_ne {sm} :
@@ -144,7 +144,7 @@ Section na_inv.
     rewrite na_inv_tok_unseal na_inv_wsat_unseal=> NE NF.
     iMod (na_lock_alloc p N) as (i iN) "l".
     rewrite (na_own_subset NF) (na_own_in iN). iIntros "[[i $]$] W".
-    iMod (inv_tok_alloc_open (FML:=na_inv_prop _) ((p, i)', Px) N NE with "W")
+    iMod (inv_tok_alloc_open (FML:=na_inv_fml _) ((p, i)', Px) N NE with "W")
       as "[W[sm cl]]".
     iMod ("cl" with "[$i//] W") as "[$ _]". iModIntro.
     iSplit; [iExists _; by iFrame|]. iIntros "$ Px W".
