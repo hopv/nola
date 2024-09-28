@@ -227,10 +227,8 @@ Section verify.
   Definition ilist N Φx l : iProp Σ := inv_tok N (Φx l) ∗
     inv_tok N (∃ l', ▷ (l +ₗ 1) ↦ #l' ∗ cif_ilist N Φx l')%cif.
   (** Unfold semantics over [cif_ilist] *)
-  Lemma sem_ilist {δ N Φx l} :
-    cif_sem δ (cif_ilist N Φx l) ⊣⊢ ilist N Φx l.
+  Lemma sem_ilist {δ N Φx l} : cif_sem δ (cif_ilist N Φx l) ⊣⊢ ilist N Φx l.
   Proof. by rewrite cif_ilist_unfold /= !sem_ecustom /=. Qed.
-
   (** [cif_ilist] is productive *)
   #[export] Instance cif_ilist_productive {N} : Productive (cif_ilist N).
   Proof. move=> ????. apply profix_preserv=> ?. by f_equiv. Qed.
@@ -536,8 +534,7 @@ Section verify.
   Definition mblist α Φx l : iProp Σ :=
     mutex_bor α l (Φx (l +ₗ 1) ∗ ∃ l', ▷ (l +ₗ 2) ↦ #l' ∗ cif_mblist α Φx l').
   (** Unfold semantics over [cif_ilist] *)
-  Lemma sem_mblist {δ α Φx l} :
-    cif_sem δ (cif_mblist α Φx l) ⊣⊢ mblist α Φx l.
+  Lemma sem_mblist {δ α Φx l} : cif_sem δ (cif_mblist α Φx l) ⊣⊢ mblist α Φx l.
   Proof. by rewrite cif_mblist_unfold !sem_ecustom /=. Qed.
 
   (** Iterate over [cif_mblist] *)
