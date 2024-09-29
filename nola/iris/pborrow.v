@@ -602,7 +602,7 @@ Section pborrow.
       as "[o'[%[pc[vo' vox']]]]".
     iDestruct (vo_vo_agree with "vox vox'") as %<-.
     iDestruct (vo_pc_agree with "vo' pc'") as %<-.
-    iMod (proph_alloc y) as (η') "η'". iApply modw_fold. iExists η'.
+    iMod (proph_alloc y) as (η') "η'". iExists η'.
     iMod (vo_pc_preresolve (λ π, f (π η')) [Aprvar _ η'] with "[$η' //] vo pc")
       as "[[η' _][$ →pc]]".
     { apply proph_dep_constr, proph_dep_one. }
@@ -618,8 +618,7 @@ Section pborrow.
       iSplitL "pc' Ψx"; [iExists _; by iFrame|]. iSplit; [|done]. iExists _.
       iFrame "vo' vox". iApply "→pc".
       by iApply (proph_obs_impl with "obs")=> ? ->. }
-    iApply modw_fold. iModIntro. rewrite pbor_tok_unseal. iRight. iExists _.
-    iFrame.
+    iModIntro. rewrite pbor_tok_unseal. iRight. iExists _. iFrame.
   Qed.
   Lemma pobor_pbor_tok_reborrow {sm X Y α q ξ Φx β r y η Ψx} f : β ⊑□ α -∗
     pobor_tok (X:=X) β q ξ Φx -∗ r.[α] -∗ pbor_tok (X:=Y) α y η Ψx -∗

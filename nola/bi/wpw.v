@@ -328,7 +328,7 @@ Section wpw.
     ElimModal (to_val e = None) p false (|=[W']{E}=> P) P
       (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E {{ Φ }}).
   Proof.
-    move=> ?. by rewrite /ElimModal bi.intuitionistically_if_elim fupdw_frame_r
+    move=> ?. by rewrite /ElimModal bi.intuitionistically_if_elim mod_frame_r
       bi.wand_elim_r (fupdw_incl (W:=W)) fupdw_wpw_nonval.
   Qed.
   #[export] Instance elim_modal_bupdw_wpw_nonval
@@ -361,7 +361,7 @@ Section wpw.
     ElimModal (to_val e = None) p false (|=[W']{E}=> P) P
       (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E [{ Φ }]).
   Proof.
-    move=> ?. by rewrite /ElimModal bi.intuitionistically_if_elim fupdw_frame_r
+    move=> ?. by rewrite /ElimModal bi.intuitionistically_if_elim mod_frame_r
       bi.wand_elim_r (fupdw_incl (W:=W)) fupdw_twpw_nonval.
   Qed.
   #[export] Instance elim_modal_bupdw_twpw_nonval
@@ -395,7 +395,7 @@ Section wpw.
       (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E' {{ v, |=[W]{E',E}=> Φ v }})%I
     | 100.
   Proof.
-    move=> ?. by  rewrite bi.intuitionistically_if_elim fupdw_frame_r
+    move=> ?. by  rewrite bi.intuitionistically_if_elim mod_frame_r
       bi.wand_elim_r (fupdw_incl (W:=W)) wpw_atomic.
   Qed.
 
@@ -422,7 +422,7 @@ Section wpw.
       (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E' [{ v, |=[W]{E',E}=> Φ v }])%I
     | 100.
   Proof.
-    move=> ?. by rewrite bi.intuitionistically_if_elim fupdw_frame_r
+    move=> ?. by rewrite bi.intuitionistically_if_elim mod_frame_r
       bi.wand_elim_r (fupdw_incl (W:=W)) twpw_atomic.
   Qed.
 

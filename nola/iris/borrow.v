@@ -612,7 +612,7 @@ Section borrow.
   Proof.
     unfold depo_wsat_ret'. case (decide (β ⊑ α)); [|by iIntros "_ _ ?"]=> ?.
     iIntros "#† [[Bl →Lm]|?]"; [|done]. rewrite lft_incl_dead; [|done].
-    iFrame "†". iApply modw_fold. iDestruct ("→Lm" with "†") as "→Lm".
+    iFrame "†". iDestruct ("→Lm" with "†") as "→Lm".
     iMod (bor_wsatl_retrieve with "† Bl") as "Bl"; [done|].
     iMod ("→Lm" with "Bl") as "$". by iIntros "$".
   Qed.
@@ -720,10 +720,10 @@ Section borrow.
     iDestruct "b" as (???) "[#⊑ b]".
     iMod (lft_sincl_live_acc with "⊑ α") as (r) "[α' →α]".
     iDestruct "b" as "[b|[%β[#† r]]]".
-    - iMod (bor_open_core with "α' b") as "[o $]". iApply modw_fold.
+    - iMod (bor_open_core with "α' b") as "[o $]".
       iApply (obor_tok_lft with "⊑ →α o").
     - iMod (bor_open_core with "α' r") as "[o [%[%[_ l]]]]".
-      iDestruct (obor_tok_lft with "⊑ →α o") as "$". iApply modw_fold.
+      iDestruct (obor_tok_lft with "⊑ →α o") as "$".
       iApply (lend_itok_retrieve with "† l").
   Qed.
 
