@@ -222,6 +222,26 @@ Section mod_frame.
   Proof. exact _. Qed.
 End mod_frame.
 
+(** Eliminate [modw] from [modw] *)
+#[export] Instance elim_modal_modw_modw `{!@Mod PROP M', !@Mod PROP M''} {φ}
+  `{!∀ R R', ElimModal φ false false (M R) R (M' R') (M'' R')}
+  `{!WsatIncl W W' Wr} {p P Q} :
+  ElimModal φ p false (@modw PROP M W' P) P (modw M' W Q) (modw M'' W Q).
+Proof.
+  rewrite /ElimModal bi.intuitionistically_if_elim /= (wsat_incl W W')=> ?.
+  iIntros "[→P →Q][W' Wr]". iMod ("→P" with "W'") as "[W' P]".
+  iApply ("→Q" with "P"). iFrame.
+Qed.
+
+(** Eliminate a usual modality from [modw] *)
+#[export] Instance elim_modal_mod_modw `{!@Mod PROP M', !@Mod PROP M''} {φ}
+  `{!∀ R R', ElimModal φ false false (M R) R (M' R') (M'' R')} {p P Q W} :
+  ElimModal φ p false (M P) P (modw M' W Q) (modw M'' W Q) | 50.
+Proof.
+  rewrite /ElimModal bi.intuitionistically_if_elim=>/= ?. iIntros "[>P →Q]W".
+  iApply ("→Q" with "P W").
+Qed.
+
 (** Under [ModTrans] and [ModFrame] *)
 Section mod_upd.
   Context `{!@Mod PROP M, !ModTrans M, !ModFrame M}.
@@ -230,14 +250,6 @@ Section mod_upd.
   #[export] Instance from_sep_modw_upd `{!FromSep P Q Q'} {W} :
     FromSep (modw M W P) (modw M W Q) (modw M W Q').
   Proof. exact _. Qed.
-
-  (** Eliminate [modw] of the same [M] *)
-  #[export] Instance elim_modal_modw_mod_upd {p P Q} `{!WsatIncl W W' Wr} :
-    ElimModal True p false (modw M W' P) P (modw M W Q) (modw M W Q) | 10.
-  Proof.
-    by rewrite /ElimModal bi.intuitionistically_if_elim mod_frame_r
-      bi.wand_elim_r (modw_incl (W:=W)) mod_trans.
-  Qed.
 End mod_upd.
 
 (** Under [AbsorbBUpd] *)
@@ -253,6 +265,12 @@ Section absorb_bupd.
   Lemma from_bupdw `{!ModIntro M} {W P} : (|=[W]=> P) ⊢ modw M W P.
   Proof. by rewrite /bupdw /modw -(absorb_bupd (M:=M)) -(mod_intro (M:=M)). Qed.
 
+  (** Eliminate [bupdw] *)
+  #[export] Instance elim_modal_bupdw_modw_mod_upd `{!WsatIncl W W' Wr}
+    {p P Q} :
+    ElimModal True p false (|=[W']=> P) P (modw M W Q) (modw M W Q).
+  Proof. exact _. Qed.
+
   (** Plus under [ModFrame] *)
   Context `{!ModFrame M}.
 
@@ -262,15 +280,6 @@ Section absorb_bupd.
   Proof.
     rewrite (wsat_incl W W'). iIntros "→P [W' Wr]".
     iMod ("→P" with "W'") as "[W' →P]". iApply "→P". iFrame.
-  Qed.
-
-  (** Eliminate [bupdw] *)
-  #[export] Instance elim_modal_bupdw_modw_mod_upd `{!WsatIncl W W' Wr}
-    {p P Q} :
-    ElimModal True p false (|=[W']=> P) P (modw M W Q) (modw M W Q) | 10.
-  Proof.
-    by rewrite /ElimModal bi.intuitionistically_if_elim mod_frame_r
-      bi.wand_elim_r absorb_bupdw.
   Qed.
 End absorb_bupd.
 
@@ -289,7 +298,7 @@ Section bupdw.
   Lemma bupdw_incl `{!WsatIncl W W' Wr} {P} : (|=[W']=> P) ⊢ |=[W]=> P.
   Proof. exact modw_incl. Qed.
 
-  (** Compose with [bupdw] *)
+  (** [ElimModal] *)
   #[export] Instance elim_modal_bupdw_bupdw `{!WsatIncl W W' Wr} {p P Q} :
     ElimModal True p false (|=[W']=> P) P (|=[W]=> Q) (|=[W]=> Q).
   Proof. exact _. Qed.
@@ -298,6 +307,7 @@ Section bupdw.
       (pm_error "The target world satisfaction doesn't satisfy [WsatIncl]")
       p false (|=[W']=> P) False (|=[W]=> Q) False | 100.
   Proof. case. Qed.
+  (** [AddModal] *)
   #[export] Instance add_modal_bupdw {W P Q} :
     AddModal (|=[W]=> P) P (|=[W]=> Q).
   Proof. exact _. Qed.
@@ -349,10 +359,7 @@ Use [iApply fupdw_mask_intro] to introduce mask-changing update modalities")
     {p E E' E'' P Q} :
     ElimModal True p false (|=[W']{E,E'}=> P) P
       (|=[W]{E,E''}=> Q) (|=[W]{E',E''}=> Q).
-  Proof.
-    by rewrite /ElimModal bi.intuitionistically_if_elim mod_frame_r
-      bi.wand_elim_r (fupdw_incl (W:=W)) fupdw_trans.
-  Qed.
+  Proof. exact _. Qed.
   #[export] Instance elim_modal_fupdw_fupdw_wrong_mask `{!WsatIncl W W' Wr}
     {p E E' E'' E''' P Q} :
     ElimModal
