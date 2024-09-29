@@ -55,6 +55,8 @@ Qed.
 #[export] Instance modw_mod_frame `{!@Mod PROP M, !ModFrame M} {W} :
   ModFrame (modw M W).
 Proof. by iIntros "%%[$?]". Qed.
+#[export] Instance modw_mod_upd `{!@ModUpd PROP M} {W} : ModUpd (modw M W).
+Proof. split; exact _. Qed.
 #[export] Instance absorb_bupd_modw
   `{!BiBUpd PROP, !AbsorbBUpd (PROP:=PROP) M} {W} :
   AbsorbBUpd (modw M W) | 10.

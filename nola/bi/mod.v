@@ -232,6 +232,22 @@ Section mod_upd.
   Proof. by rewrite (big_opMS_commute _). Qed.
 End mod_upd.
 
+(** ** [ModUpd]: Modality behaving like the update modality *)
+Class ModUpd {PROP} (M : PROP → PROP) : Prop := MOD_UPD {
+  mod_upd_mod :: Mod M;
+  mod_upd_intro :: ModIntro M;
+  mod_upd_trans :: ModTrans M;
+  mod_upd_frame :: ModFrame M;
+}.
+
+(** Instances of [ModUpd] *)
+#[export] Instance bupd_mod_upd `{!BiBUpd PROP} : @ModUpd PROP bupd.
+Proof. split; exact _. Qed.
+#[export] Instance fupd_mod_upd `{!BiFUpd PROP} {E} : @ModUpd PROP (fupd E E).
+Proof. split; exact _. Qed.
+#[export] Instance relax_0_mod_upd `{!@ModUpd PROP M} : ModUpd (relax_0 M).
+Proof. split; exact _. Qed.
+
 (** ** [AbsorbBUpd]: Modality absorbing [bupd] *)
 
 Class AbsorbBUpd `{!BiBUpd PROP} (M : PROP → PROP) : Prop :=
