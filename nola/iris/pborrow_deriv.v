@@ -344,7 +344,8 @@ Section pborrow_deriv.
   Lemma nbor_fake {α} Px : [†α] ⊢ nbor δ α Px.
   Proof. by rewrite nbor_tok_fake nbor_tok_nbor. Qed.
 
-  Context `{!GenUpd (PROP:=iProp Σ) M, !AbsorbBUpd M}.
+  Context `{!@Mod (iProp Σ) M, !ModIntro M, !ModTrans M, !ModFrame M,
+    !AbsorbBUpd M}.
 
   (** ** Rules that work under [Deriv ih δ] *)
 
@@ -393,7 +394,8 @@ End pborrow_deriv.
 Section pborrow_deriv.
   Context `{!pborrowGS TY FML Σ, !PborrowJudg TY (FML $oi Σ) JUDG,
     !Jsem JUDG (iProp Σ), !Dsem JUDG (FML $oi Σ) (iProp Σ),
-    !PborrowJsem TY FML Σ JUDG, !GenUpd (PROP:=iProp Σ) M, !AbsorbBUpd M}.
+    !PborrowJsem TY FML Σ JUDG, !@Mod (iProp Σ) M, !ModIntro M, !ModTrans M,
+    !ModFrame M, !AbsorbBUpd M}.
   Implicit Type (X Y : TY) (Px Qx : FML $oi Σ).
 
   (** ** On non-prophetic borrowing *)

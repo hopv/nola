@@ -47,7 +47,8 @@ Definition pborrowΣ TY FML `{!oFunctorContractive FML} :=
 Proof. solve_inG. Qed.
 
 Section pborrow.
-  Context `{!pborrowGS TY FML Σ, !GenUpd (PROP:=iProp Σ) M, !AbsorbBUpd M}.
+  Context `{!pborrowGS TY FML Σ, !@Mod (iProp Σ) M, !ModIntro M, !ModTrans M,
+    !ModFrame M, !AbsorbBUpd M}.
   Implicit Type (sm : FML $oi Σ -d> iProp Σ) (X Y : TY) (Xl Yl : list TY)
     (Px : FML $oi Σ) (Pb : pborrow_fml TY FML $oi Σ).
 

@@ -490,7 +490,7 @@ Section borrow.
 
   (** ** Proof rules *)
 
-  Context `{!GenUpd M, !AbsorbBUpd M}.
+  Context `{!Mod M, !ModIntro M, !ModTrans M, !ModFrame M, !AbsorbBUpd M}.
 
   (** Create new borrowers and lenders *)
   Local Lemma bor_lend_tok_new_list' {sm Dl} α Pxl Qxl :
