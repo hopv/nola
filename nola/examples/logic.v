@@ -392,7 +392,7 @@ Section verify.
     iDestruct ("→β'" with "α") as "β'".
     iMod (nobor_tok_subdiv (M:=bupd) [] with "[] o [] [↦ →b']") as "[β _]"=>/=.
     { iApply lft_sincl_refl. } { done. }
-    { iIntros "† _". iModIntro. iExists _. iFrame "↦". rewrite sem_ecustom /=.
+    { iIntros "† _ !>". iExists _. iFrame "↦". rewrite sem_ecustom /=.
       by iApply "→b'". }
     iModIntro. iApply "→Ψ". iFrame.
   Qed.
