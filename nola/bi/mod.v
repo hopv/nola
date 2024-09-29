@@ -259,7 +259,7 @@ Section absorb_bupd.
   Context `{!BiBUpd PROP, !AbsorbBUpd (PROP:=PROP) M}.
 
   (** Eliminate [bupd] under [AbsorbBUpd] *)
-  #[export] Instance elim_modal_absorb_bupd {p P Q} :
+  #[export] Instance elim_modal_bupd_absorb_bupd {p P Q} :
     ElimModal True p false (|==> P) P (M Q) (M Q) | 10.
   Proof.
     by rewrite /ElimModal bi.intuitionistically_if_elim mod_frame_r
