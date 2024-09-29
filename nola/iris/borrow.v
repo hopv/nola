@@ -1,7 +1,7 @@
 (** * Borrowing machinery *)
 
 From nola.util Require Export prod.
-From nola.bi Require Export gen_upd updw.
+From nola.bi Require Export modw.
 From nola.bi Require Import order gmap.
 From nola.iris Require Export iprop lft.
 From iris.bi.lib Require Import cmra.

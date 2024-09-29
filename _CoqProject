@@ -21,8 +21,8 @@ nola/bi/gmap.v
 nola/bi/plist.v
 nola/bi/order.v
 nola/bi/deriv.v
-nola/bi/gen_upd.v
-nola/bi/updw.v
+nola/bi/mod.v
+nola/bi/modw.v
 nola/bi/wpw.v
 nola/bi/paradox.v
 

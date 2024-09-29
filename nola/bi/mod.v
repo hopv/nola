@@ -1,4 +1,4 @@
-(** * General update *)
+(** * Modality classes *)
 
 From nola Require Export prelude.
 From nola.bi Require Import util.

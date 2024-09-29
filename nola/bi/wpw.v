@@ -1,6 +1,6 @@
 (** * Weakest precondition with a custom world satisfaction *)
 
-From nola.bi Require Export updw.
+From nola.bi Require Export modw.
 From nola.bi Require Import util.
 From iris.program_logic Require Export weakestpre total_weakestpre adequacy
   total_adequacy.

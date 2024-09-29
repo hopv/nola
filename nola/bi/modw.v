@@ -1,6 +1,6 @@
-(** * Update with a custom world satisfaction *)
+(** * Modality with a custom world satisfaction *)
 
-From nola.bi Require Export gen_upd.
+From nola.bi Require Export mod.
 From iris.bi Require Export bi.
 From iris.proofmode Require Import proofmode.
 

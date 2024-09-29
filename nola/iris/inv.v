@@ -1,6 +1,6 @@
 (** * Nola later-free invariant *)
 
-From nola.bi Require Export updw.
+From nola.bi Require Export modw.
 From nola.bi Require Import wpw.
 From nola.iris Require Export iprop.
 From nola.iris Require Import sinv.
