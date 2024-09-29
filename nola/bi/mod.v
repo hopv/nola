@@ -11,6 +11,15 @@ Implicit Type PROP : bi.
 Definition relax_0 {PROP} (M : PROP → PROP) (P : PROP) : PROP := M (◇ P)%I.
 Notation bupd_0 := (relax_0 bupd).
 
+Module BUpd0Notation.
+  Notation "|==>◇ P" := (bupd_0 P) (at level 99, P at level 200,
+    format "'[  ' |==>◇  '/' P ']'") : bi_scope.
+  Notation "P ==∗◇ Q" := (P -∗ |==>◇ Q)%I (at level 99, Q at level 200,
+    format "'[' P  ==∗◇  '/' Q ']'") : bi_scope.
+  Notation "P ==∗◇ Q" := (P -∗ |==>◇ Q) : stdpp_scope.
+End BUpd0Notation.
+Import BUpd0Notation.
+
 (** ** [Mod]: Modality *)
 Class Mod {PROP} (M : PROP → PROP) : Prop := MOD {
   mod_ne :: NonExpansive M; (** Non-expansive *)
@@ -269,6 +278,16 @@ Section absorb_bupd.
   (** Turn from [bupd] *)
   Lemma from_bupd `{!ModIntro M} {P} : (|==> P) ⊢ M P.
   Proof. rewrite -(absorb_bupd (M:=M)). f_equiv. exact mod_intro. Qed.
+
+  (** Absorb [bupd_0] *)
+  Lemma absorb_bupd_0 `{!IsExcept0 (M P)} : (|==>◇ M P) ⊢ M P.
+  Proof. by rewrite /bupd_0 is_except_0 absorb_bupd. Qed.
+  #[export] Instance elim_modal_bupd0_absorb_bupd {p P Q} `{!IsExcept0 (M Q)} :
+    ElimModal True p false (|==>◇ P) P (M Q) (M Q) | 10.
+  Proof.
+    by rewrite /ElimModal bi.intuitionistically_if_elim mod_frame_r
+      bi.wand_elim_r absorb_bupd_0.
+  Qed.
 End absorb_bupd.
 
 (** [bupd] and [fupd] satisfy [AbsorbBUpd] *)
@@ -352,6 +371,56 @@ Section mod_plain.
     by rewrite mod_forall.
   Qed.
 End mod_plain.
+
+(** ** Instances for [bupd_0] *)
+Section bupd_0.
+  Context `{!BiBUpd PROP}.
+  Implicit Type P : PROP.
+
+  #[export] Instance from_or_bupd_0 `{!FromOr P Q Q'} :
+    FromOr (|==>◇ P) (|==>◇ Q) (|==>◇ Q').
+  Proof. exact _. Qed.
+  #[export] Instance from_exist_bupd_0 `{!FromExist (A:=A) P Φ} :
+    FromExist (|==>◇ P) (λ x, |==>◇ Φ x)%I.
+  Proof. exact _. Qed.
+  #[export] Instance into_and_bupd_0 `{!IntoAnd false P Q R} :
+    IntoAnd false (|==>◇ P) (|==>◇ Q) (|==>◇ R).
+  Proof. exact _. Qed.
+  #[export] Instance into_forall_bupd_0 `{!IntoForall (A:=A) P Φ} :
+    IntoForall (|==>◇ P) (λ x, |==>◇ (Φ x))%I.
+  Proof. exact _. Qed.
+
+  #[export] Instance from_modal_bupd_0 {P} :
+    FromModal True modality_id (|==>◇ P) (|==>◇ P) P.
+  Proof. exact _. Qed.
+  #[export] Instance from_assumption_bupd_0 `{!FromAssumption p P Q} :
+    KnownRFromAssumption p P (|==>◇ Q).
+  Proof. exact _. Qed.
+  #[export] Instance from_pure_bupd_0 `{!FromPure a P φ} :
+    FromPure a (|==>◇ P) φ.
+  Proof. exact _. Qed.
+  #[export] Instance bupd_0_intro_or_homomorphism :
+    MonoidHomomorphism (@bi_or PROP) bi_or (flip (⊢)) bupd_0.
+  Proof. exact _. Qed.
+
+  #[export] Instance frame_bupd_0 `{!Frame p R P Q} :
+    Frame p R (|==>◇ P) (|==>◇ Q).
+  Proof. exact _. Qed.
+
+  #[export] Instance elim_modal_bupd_0 {p P Q} :
+    ElimModal True p false (|==>◇ P) P (|==>◇ Q) (|==>◇ Q).
+  Proof. exact _. Qed.
+  #[export] Instance add_modal_bupd_0 {P Q} :
+    AddModal (|==>◇ P) P (|==>◇ Q).
+  Proof. exact _. Qed.
+  #[export] Instance from_sep_bupd_0 `{!FromSep P Q Q'} :
+    FromSep (|==>◇ P) (|==>◇ Q) (|==>◇ Q').
+  Proof. exact _. Qed.
+
+  #[export] Instance bupd_0_sep_homomorphism :
+    MonoidHomomorphism (@bi_sep PROP) bi_sep (flip (⊢)) bupd_0.
+  Proof. exact _. Qed.
+End bupd_0.
 
 Section mod_acsr.
   Context {PROP}.

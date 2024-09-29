@@ -3,6 +3,7 @@
 From nola.bi Require Export mod.
 From iris.bi Require Export bi.
 From iris.proofmode Require Import proofmode.
+Import BUpd0Notation.
 
 Implicit Type PROP : bi.
 
@@ -42,6 +43,7 @@ Arguments modw : simpl never.
 
 (** Basic update with a world satisfaction *)
 Notation bupdw := (modw bupd).
+Notation bupdw_0 := (modw bupd_0).
 (** Fancy update with a world satisfaction *)
 Notation fupdw E E' := (modw (fupd E E')).
 
@@ -55,6 +57,14 @@ Module UpdwNotation.
     (at level 99, Q at level 200, format "'[' P  =[ W ]=∗  '/' '[' Q ']' ']'")
     : bi_scope.
   Notation "P =[ W ]=∗ Q" := (P -∗ |=[W]=> Q) : stdpp_scope.
+
+  Notation "|=[ W ] =>◇ P" := (bupdw_0 W P)
+    (at level 99, P at level 200, format "'[  ' |=[ W ] =>◇  '/' P ']'")
+    : bi_scope.
+  Notation "P =[ W ]=∗◇ Q" := (P -∗ |=[W]=>◇ Q)%I
+    (at level 99, Q at level 200, format "'[' P  =[ W ]=∗◇  '/' '[' Q ']' ']'")
+    : bi_scope.
+  Notation "P =[ W ]=∗◇ Q" := (P -∗ |=[W]=>◇ Q) : stdpp_scope.
 
   Notation "|=[ W ] { E , E' }=> P" := (fupdw E E' W P)
     (at level 99, P at level 200,
@@ -261,9 +271,23 @@ Section absorb_bupd.
     ElimModal True p false (|==> P) P (modw M W Q) (modw M W Q).
   Proof. exact _. Qed.
 
+  (** Eliminate [bupd_0] *)
+  #[export] Instance elim_modal_bupd_0_modw_absorb_bupd
+    `{!∀ R, IsExcept0 (modw M W R)} {p P Q} :
+    ElimModal True p false (|==>◇ P) P (modw M W Q) (modw M W Q).
+  Proof. exact _. Qed.
+
   (** Turn from [bupdw] under [ModIntro] *)
   Lemma from_bupdw `{!ModIntro M} {W P} : (|=[W]=> P) ⊢ modw M W P.
   Proof. by rewrite /bupdw /modw -(absorb_bupd (M:=M)) -(mod_intro (M:=M)). Qed.
+
+  (** Turn from [bupdw_0] under [ModIntro] *)
+  Lemma from_bupdw_0 `{!ModIntro M, !IsExcept0 (M (W ∗ P))} :
+    (|=[W]=>◇ P) ⊢ modw M W P.
+  Proof.
+    by rewrite /bupdw_0 /modw -(absorb_bupd (M:=M)) -[M _]is_except_0
+      -(mod_intro (M:=M)).
+  Qed.
 
   (** Eliminate [bupdw] *)
   #[export] Instance elim_modal_bupdw_modw_modw_upd `{!WsatIncl W W' Wr}
@@ -271,16 +295,21 @@ Section absorb_bupd.
     ElimModal True p false (|=[W']=> P) P (modw M W Q) (modw M W Q).
   Proof. exact _. Qed.
 
-  (** Plus under [ModFrame] *)
-  Context `{!ModFrame M}.
+  (** Eliminate [bupdw_0] *)
+  #[export] Instance elim_modal_bupdw_0_modw_modw_upd `{!WsatIncl W W' Wr}
+    `{!∀ R, IsExcept0 (M R)} {p P Q} :
+    ElimModal True p false (|=[W']=>◇ P) P (modw M W Q) (modw M W Q).
+  Proof. exact _. Qed.
 
   (** Absorb [bupdw] *)
   Lemma absorb_bupdw `{!WsatIncl W W' Wr} {P} :
     (|=[W']=> modw M W P) ⊢ modw M W P.
-  Proof.
-    rewrite (wsat_incl W W'). iIntros "→P [W' Wr]".
-    iMod ("→P" with "W'") as "[W' →P]". iApply "→P". iFrame.
-  Qed.
+  Proof. by iIntros ">?". Qed.
+
+  (** Absorb [bupdw_0] *)
+  Lemma absorb_bupdw_0 `{!WsatIncl W W' Wr, !∀ R, IsExcept0 (M R)} {P} :
+    (|=[W']=>◇ modw M W P) ⊢ modw M W P.
+  Proof. by iIntros ">?". Qed.
 End absorb_bupd.
 
 (** ** Lemmas on [bupdw] *)
@@ -314,6 +343,42 @@ Section bupdw.
   Proof. exact modw_modw_sep. Qed.
 End bupdw.
 
+(** ** Lemmas on [bupdw_0] *)
+Section bupdw_0.
+  Context `{!BiBUpd PROP}.
+  Implicit Type W P Q : PROP.
+
+  (** Modify the world satisfaction of [bupdw_0] *)
+  Lemma bupdw_0_incl_bupd {W W' P} :
+    (W ==∗◇ W' ∗ (W' ==∗◇ W)) -∗ (|=[W']=>◇ P) =[W]=∗◇ P.
+  Proof.
+    iIntros "∝ →P W". iMod ("∝" with "W") as "[W' →W]".
+    iMod ("→P" with "W'") as "[W' $]". by iApply "→W".
+  Qed.
+  Lemma bupdw_0_incl `{!WsatIncl W W' Wr} {P} : (|=[W']=>◇ P) ⊢ |=[W]=>◇ P.
+  Proof. exact modw_incl. Qed.
+
+  (** [ElimModal] *)
+  #[export] Instance elim_modal_bupdw_bupdw_0_wrong_wsat {p P Q W W'} :
+    ElimModal
+      (pm_error "The target world satisfaction doesn't satisfy [WsatIncl]")
+      p false (|=[W']=> P) False (|=[W]=>◇ Q) False | 100.
+  Proof. case. Qed.
+  #[export] Instance elim_modal_bupdw_0_bupdw_0_wrong_wsat {p P Q W W'} :
+    ElimModal
+      (pm_error "The target world satisfaction doesn't satisfy [WsatIncl]")
+      p false (|=[W']=>◇ P) False (|=[W]=>◇ Q) False | 100.
+  Proof. case. Qed.
+  (** [AddModal] *)
+  #[export] Instance add_modal_bupdw_0 {W P Q} :
+    AddModal (|=[W]=>◇ P) P (|=[W]=>◇ Q).
+  Proof. exact _. Qed.
+
+  (** [modw] over [bupdw_0] *)
+  Lemma modw_bupdw_0 {W W' P} : modw (bupdw_0 W) W' P ⊣⊢ |=[W ∗ W']=>◇ P.
+  Proof. exact modw_modw_sep. Qed.
+End bupdw_0.
+
 (** ** Lemmas on [fupdw] *)
 
 Section fupdw.
@@ -338,6 +403,9 @@ Section fupdw.
   Lemma bupdw_fupdw `{!BiBUpd PROP, !BiBUpdFUpd PROP} E {W P} :
     (|=[W]=> P) ⊢ |=[W]{E}=> P.
   Proof. exact from_bupdw. Qed.
+  Lemma bupdw_0_fupdw `{!BiBUpd PROP, !BiBUpdFUpd PROP} E {W P} :
+    (|=[W]=>◇ P) ⊢ |=[W]{E}=> P.
+  Proof. exact from_bupdw_0. Qed.
 
   (** Compose [fupdw]s *)
   Lemma fupdw_trans {E E' E'' W P} :
@@ -374,6 +442,12 @@ Use [iMod (fupd_mask_subseteq E')] to adjust the mask of your goal to [E']")
     ElimModal
       (pm_error "The target world satisfaction doesn't satisfy [WsatIncl]")
       p false (|=[W']=> P) False (|=[W]{E,E'}=> Q) False | 100.
+  Proof. case. Qed.
+  #[export] Instance elim_modal_bupdw_0_fupdw_wrong_wsat {p E E' P Q W W'}
+    `{!BiBUpd PROP, !BiBUpdFUpd PROP} :
+    ElimModal
+      (pm_error "The target world satisfaction doesn't satisfy [WsatIncl]")
+      p false (|=[W']=>◇ P) False (|=[W]{E,E'}=> Q) False | 100.
   Proof. case. Qed.
   #[export] Instance elim_modal_fupd_fupdw {p E E' E'' W P Q} :
     ElimModal True p false (|={E,E'}=> P) P

@@ -6,7 +6,7 @@ From iris.program_logic Require Export weakestpre total_weakestpre adequacy
   total_adequacy.
 From iris.bi Require Import fixpoint.
 From iris.proofmode Require Import proofmode.
-Import UpdwNotation.
+Import BUpd0Notation UpdwNotation.
 
 (** ** [iris'GS_gen]: Language ghost state for a custom world satisfaction *)
 Class iris'GS_gen (hlc : has_lc) (Λ : language) Σ := Iris'G {
@@ -336,6 +336,13 @@ Section wpw.
     ElimModal (to_val e = None) p false (|=[W']=> P) P
       (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E {{ Φ }}).
   Proof. move=> ?. by rewrite (bupdw_fupdw E) elim_modal_fupdw_wpw_nonval. Qed.
+  #[export] Instance elim_modal_bupdw_0_wpw_nonval
+    `{!WsatIncl W W' Wr} {p e s E P Φ} :
+    ElimModal (to_val e = None) p false (|=[W']=>◇ P) P
+      (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E {{ Φ }}).
+  Proof.
+    move=> ?. by rewrite (bupdw_0_fupdw E) elim_modal_fupdw_wpw_nonval.
+  Qed.
 
   (** Eliminate [fupdw] over [twpw] *)
   Lemma fupdw_twpw_nonval {e s E W Φ} : to_val e = None →
@@ -369,6 +376,13 @@ Section wpw.
     ElimModal (to_val e = None) p false (|=[W']=> P) P
       (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E [{ Φ }]).
   Proof. move=> ?. by rewrite (bupdw_fupdw E) elim_modal_fupdw_twpw_nonval. Qed.
+  #[export] Instance elim_modal_bupdw_0_twpw_nonval
+    `{!WsatIncl W W' Wr} {p e s E P Φ} :
+    ElimModal (to_val e = None) p false (|=[W']=>◇ P) P
+      (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E [{ Φ }]).
+  Proof.
+    move=> ?. by rewrite (bupdw_0_fupdw E) elim_modal_fupdw_twpw_nonval.
+  Qed.
 
   (** Mask-changing [fupdw] over atomic [wpw] *)
   Lemma wpw_atomic `{!Atomic (stuckness_to_atomicity s) e} {E E' W Φ} :

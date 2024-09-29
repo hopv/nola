@@ -5,8 +5,9 @@ From nola.iris Require Export cif inv pborrow.
 From nola.bi Require Import util.
 From nola.heap_lang Require Export notation proofmode.
 From nola.examples Require Export nsynty.
-Import ProdNotation FunNPNotation UpdwNotation WpwNotation iPropAppNotation
-  ProphNotation LftNotation NsyntyNotation FunPRNotation DsemNotation.
+Import ProdNotation FunNPNotation BUpd0Notation UpdwNotation WpwNotation
+  iPropAppNotation ProphNotation LftNotation NsyntyNotation FunPRNotation
+  DsemNotation.
 
 Implicit Type (Σ : gFunctors) (N : namespace) (TY : synty) (dq : dfrac)
   (l : loc) (b : bool) (α β : lft) (q : Qp) (FM : ofe).
@@ -379,19 +380,19 @@ Section verify.
   Lemma bor_bor_deref {α β l Φx q} :
     [[{ β ⊑□ α ∗ q.[β] ∗
       nbor_tok β (∃ l', ▷ l ↦ #l' ∗ cif_bor α (Φx l'))%cif }]]
-      [pborrow_wsat bupd ⟦⟧]
+      [pborrow_wsat bupd_0 ⟦⟧]
       !#l
     [[{ l', RET #l'; q.[β] ∗ nbor_tok β (Φx l') }]].
   Proof.
     iIntros (Ψ) "(#⊑ & [β β'] & b) →Ψ".
-    iMod (nbor_tok_open (M:=bupd) with "β b") as "/=[o [%l'[>↦ b']]]".
+    iMod (nbor_tok_open (M:=bupd_0) with "β b") as "/=[o [%l'[>↦ b']]]".
     iApply twpw_fupdw_nonval; [done|]. wp_load. iModIntro.
     iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
     rewrite sem_ecustom /=.
-    iMod (nbor_tok_reborrow (M:=bupd) with "⊑ α b'") as "(α & →b' & b')".
+    iMod (nbor_tok_reborrow (M:=bupd_0) with "⊑ α b'") as "(α & →b' & b')".
     iDestruct ("→β'" with "α") as "β'".
-    iMod (nobor_tok_subdiv (M:=bupd) [] with "[] o [] [↦ →b']") as "[β _]"=>/=.
-    { iApply lft_sincl_refl. } { done. }
+    iMod (nobor_tok_subdiv (M:=bupd_0) [] with "[] o [] [↦ →b']")
+      as "[β _]"=>/=. { iApply lft_sincl_refl. } { done. }
     { iIntros "† _ !>". iExists _. iFrame "↦". rewrite sem_ecustom /=.
       by iApply "→b'". }
     iModIntro. iApply "→Ψ". iFrame.
@@ -405,18 +406,18 @@ Section verify.
     [[{ β ⊑□ α ∗ q.[β] ∗
         pbor_tok β ((x, ξ)' : _ *'ₛ prvarₛ _) η
           (λ '(x', ξ')', ∃ l', ▷ l ↦ #l' ∗ cif_pbor α x' ξ' (Φxx l'))%cif }]]
-      [pborrow_wsat bupd ⟦⟧]
+      [pborrow_wsat bupd_0 ⟦⟧]
       !#l
     [[{ l', RET #l';
         q.[β] ∗ ∃ ξ' : prvar X,
           ⟨π, π η = (π ξ', ξ)'⟩ ∗ pbor_tok β x ξ' (Φxx l') }]].
   Proof.
     iIntros (Ψ) "(#⊑ & [β β'] & b) →Ψ".
-    iMod (pbor_tok_open (M:=bupd) with "β b") as "/=[o[%l'[>↦ b']]]".
+    iMod (pbor_tok_open (M:=bupd_0) with "β b") as "/=[o[%l'[>↦ b']]]".
     iApply twpw_fupdw_nonval; [done|]. wp_load. iModIntro.
     iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
     rewrite sem_ecustom /=.
-    iMod (pobor_pbor_tok_reborrow (TY:=nsynty) (M:=bupd)
+    iMod (pobor_pbor_tok_reborrow (TY:=nsynty) (M:=bupd_0)
       (λ _, (_,_)' : _ *'ₛ _) with "⊑ o α b' [↦]") as (?) "(β & α & obs & b)".
     { iIntros "/=% _ ? !>". iExists _. iFrame "↦". by rewrite sem_ecustom /=. }
     iModIntro. iApply "→Ψ". iDestruct ("→β'" with "α") as "$". iFrame.
@@ -425,14 +426,15 @@ Section verify.
   (** Load from an immutable shared borrow *)
   Lemma imbor_load {l α q} {n : Z} :
     [[{ q.[α] ∗ inv_tok nroot (cif_bor α (▷ l ↦ #n)) }]]
-      [inv_wsat ⟦⟧ ∗ pborrow_wsat bupd ⟦⟧]
+      [inv_wsat ⟦⟧ ∗ pborrow_wsat bupd_0 ⟦⟧]
       !#l
     [[{ RET #n; q.[α] }]].
   Proof.
     iIntros (Φ) "[α #i] →Φ". iMod (inv_tok_acc with "i") as "/=[b cl]"; [done|].
     rewrite sem_ecustom /=.
-    iMod (nbor_tok_open (M:=bupd) with "α b") as "/=[o >↦]". wp_load. iModIntro.
-    iMod (nobor_tok_close (M:=bupd) with "o [↦]") as "[α b]"=>/=; [done|].
+    iMod (nbor_tok_open (M:=bupd_0) with "α b") as "/=[o >↦]". wp_load.
+    iModIntro.
+    iMod (nobor_tok_close (M:=bupd_0) with "o [↦]") as "[α b]"=>/=; [done|].
     iMod ("cl" with "b") as "_". iModIntro. by iApply "→Φ".
   Qed.
 
@@ -469,23 +471,23 @@ Section verify.
 
   (** Try to acquire a lock from a shared borrow over a mutex *)
   Lemma mutex_bor_try_acquire {α l Px q} :
-    [[{ mutex_bor α l Px ∗ q.[α] }]][inv_wsat ⟦⟧ ∗ pborrow_wsat bupd ⟦⟧]
+    [[{ mutex_bor α l Px ∗ q.[α] }]][inv_wsat ⟦⟧ ∗ pborrow_wsat bupd_0 ⟦⟧]
       try_acquire_mutex #l
     [[{ b, RET #b; (if b then nbor_tok α Px else True) ∗ q.[α] }]].
   Proof.
     iIntros (Φ) "[#m [α α']] →Φ". wp_lam. wp_bind (CmpXchg _ _ _).
     iMod (inv_tok_acc with "m") as "/=[b cl]"; [done|]. rewrite sem_ecustom /=.
-    iMod (nbor_tok_open (M:=bupd) with "α b") as "[o big]".
+    iMod (nbor_tok_open (M:=bupd_0) with "α b") as "[o big]".
     rewrite /= sem_ecustom.
     iDestruct "big" as "[[>↦ b']|>↦]"; [wp_cmpxchg_suc|wp_cmpxchg_fail];
       iModIntro;
-      (iMod (nobor_tok_close (M:=bupd) with "o [↦]") as "[α b]"=>/=;
+      (iMod (nobor_tok_close (M:=bupd_0) with "o [↦]") as "[α b]"=>/=;
         [by iFrame|]);
       iMod ("cl" with "b") as "_"; iModIntro; wp_pure; iApply "→Φ"; by iFrame.
   Qed.
   (** [mutex_bor_try_acquire], repeatedly with a timeout *)
   Lemma mutex_bor_try_acquire_loop {α l Px q} {n : nat} :
-    [[{ mutex_bor α l Px ∗ q.[α] }]][inv_wsat ⟦⟧ ∗ pborrow_wsat bupd ⟦⟧]
+    [[{ mutex_bor α l Px ∗ q.[α] }]][inv_wsat ⟦⟧ ∗ pborrow_wsat bupd_0 ⟦⟧]
       try_acquire_loop_mutex #n #l
     [[{ b, RET #b; (if b then nbor_tok α Px else True) ∗ q.[α] }]].
   Proof.
@@ -501,37 +503,38 @@ Section verify.
   (** Release a lock from a shared borrow over a mutex *)
   Lemma mutex_bor_release {α l Px q} :
     [[{ mutex_bor α l Px ∗ nbor_tok α Px ∗ q.[α] }]]
-      [inv_wsat ⟦⟧ ∗ pborrow_wsat bupd ⟦⟧]
+      [inv_wsat ⟦⟧ ∗ pborrow_wsat bupd_0 ⟦⟧]
       release_mutex #l
     [[{ RET #(); q.[α] }]].
   Proof.
     iIntros (Φ) "(#m & b' & α) →Φ". wp_lam.
     iMod (inv_tok_acc with "m") as "/=[b cl]"; [done|].
     rewrite sem_ecustom /=.
-    iMod (nbor_tok_open (M:=bupd) with "α b") as "[o big]"=>/=.
+    iMod (nbor_tok_open (M:=bupd_0) with "α b") as "[o big]"=>/=.
     iAssert (∃ b, ▷ l ↦ #b)%I with "[big]" as (?) ">↦".
     { iDestruct "big" as "[[$ _]|$]". }
     wp_store. iModIntro.
-    iMod (nobor_tok_close (M:=bupd) with "o [b' ↦]") as "[α b]"=>/=.
+    iMod (nobor_tok_close (M:=bupd_0) with "o [b' ↦]") as "[α b]"=>/=.
     { iLeft. rewrite sem_ecustom /=. iFrame. }
     iMod ("cl" with "b") as "_". iModIntro. by iApply "→Φ".
   Qed.
 
   (** Create a shared borrow and a lender of a mutex *)
   Lemma mutex_bor_lend_new {α l Px b q} :
-    l ↦ #b -∗ ⟦ Px ⟧ -∗ q.[α] =[inv_wsat ⟦⟧ ∗ pborrow_wsat bupd ⟦⟧]=∗
+    l ↦ #b -∗ ⟦ Px ⟧ -∗ q.[α] =[inv_wsat ⟦⟧ ∗ pborrow_wsat bupd_0 ⟦⟧]=∗◇
       mutex_bor α l Px ∗ nlend_tok α (∃ b', ▷ l ↦ #b' ∗ Px)%cif ∗ q.[α].
   Proof.
     iIntros "↦ Px α".
-    iMod (nbor_nlend_tok_new (M:=bupd) with "[↦ Px]") as "[b $]"; [by iFrame|].
-    iMod (nbor_tok_open (M:=bupd) with "α b") as "/=[o[%b'[↦ Px]]]".
-    iMod (nobor_tok_subdiv (FML:=cifOF CON) (M:=bupd)
+    iMod (nbor_nlend_tok_new (M:=bupd_0) with "[↦ Px]") as "[b $]";
+      [by iFrame|].
+    iMod (nbor_tok_open (M:=bupd_0) with "α b") as "/=[o[%b'[↦ Px]]]".
+    iMod (nobor_tok_subdiv (FML:=cifOF CON) (M:=bupd_0)
       [∃ b', ▷ l ↦ #b'; Px]%cif with "[] o [↦ Px] []")
       as "(α & _ & (b & b' & _))"=>/=.
     { iApply lft_sincl_refl. } { iSplitL "↦"; iFrame. }
     { by iIntros "_ [[% $][$ _]]". }
-    iMod (nbor_tok_open (M:=bupd) with "α b") as "/=[o ↦]".
-    iMod (nobor_tok_subdiv (FML:=cifOF CON) (M:=bupd)
+    iMod (nbor_tok_open (M:=bupd_0) with "α b") as "/=[o ↦]".
+    iMod (nobor_tok_subdiv (FML:=cifOF CON) (M:=bupd_0)
       [(▷ l ↦ #false ∗ cif_bor α Px) ∨ ▷ l ↦ #true]%cif with "[] o [↦ b'] []")
       as "($ & _ & [b _])"=>/=. { iApply lft_sincl_refl. }
     { iSplit; [|done]. rewrite sem_ecustom /=.
@@ -574,10 +577,10 @@ Section verify.
         "c" <- !"c" - #1;; "self" "f" "k" "c" "l'"
       else #false.
   Lemma twp_iter_mblist {α Φx c l q} {f : val} {k n : nat} :
-    (∀ l', [[{ ⟦ Φx (l' +ₗ 1) ⟧ }]][inv_wsat ⟦⟧ ∗ pborrow_wsat bupd ⟦⟧]
+    (∀ l', [[{ ⟦ Φx (l' +ₗ 1) ⟧ }]][inv_wsat ⟦⟧ ∗ pborrow_wsat bupd_0 ⟦⟧]
         f #(l' +ₗ 1) [[{ RET #(); ⟦ Φx (l' +ₗ 1) ⟧ }]]) -∗
     [[{ c ↦ #n ∗ mblist α Φx l ∗ q.[α] }]]
-      [inv_wsat ⟦⟧ ∗ pborrow_wsat bupd ⟦⟧]
+      [inv_wsat ⟦⟧ ∗ pborrow_wsat bupd_0 ⟦⟧]
       iter_mblist f #k #c #l
     [[{ b, RET #b; (if b then c ↦ #0 else ∃ n', c ↦ #n') ∗ q.[α] }]].
   Proof.
@@ -589,10 +592,11 @@ Section verify.
     iIntros ([|])=>/=; last first.
     { iIntros "[_ α]". wp_pure. iModIntro. iApply "→Ψ". iFrame. }
     iIntros "[b α]". wp_pures.
-    iMod (nbor_tok_open (M:=bupd) with "α b") as "/=[o (Φx & %l' & >↦ & mtl)]".
+    iMod (nbor_tok_open (M:=bupd_0) with "α b")
+      as "/=[o (Φx & %l' & >↦ & mtl)]".
     rewrite sem_mblist. iDestruct "mtl" as "#mtl". wp_apply ("f" with "Φx").
     iIntros "Φx". wp_load. wp_pures.
-    iMod (nobor_tok_close (M:=bupd) with "o [Φx ↦]") as "[α b]"=>/=.
+    iMod (nobor_tok_close (M:=bupd_0) with "o [Φx ↦]") as "[α b]"=>/=.
     { iFrame. by rewrite sem_mblist. }
     wp_apply (mutex_bor_release with "[$b $α //]"). iIntros "α". wp_load.
     wp_store. have -> : (S m - 1)%Z = m by lia.
