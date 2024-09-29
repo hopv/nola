@@ -189,8 +189,8 @@ Proof.
   move=> ??. rewrite /relax_0 mod_frame_l. f_equiv. by iIntros "[$ >$]".
 Qed.
 
+(** Under [ModFrame] and [ModTrans] *)
 Section mod_upd.
-  (** Under [ModFrame] and [ModTrans] *)
   Context `{!@Mod PROP M, !ModFrame M, !ModTrans M}.
 
   (** Instances *)
@@ -209,6 +209,7 @@ Section mod_upd.
     FromSep (M P) (M Q) (M Q') | 10.
   Proof. by rewrite /FromSep -(from_sep P) mod_upd_sep. Qed.
 
+  (** Plus under [ModIntro] *)
   Context `{!ModIntro M}.
 
   #[export] Instance mod_upd_sep_homomorphism :
