@@ -27,10 +27,14 @@ Section util.
   Qed.
 End util.
 
-(** Adding [◇] inside lets [M] absorb [◇] for introduceable [M] *)
+(** ** Relax modality with [◇] *)
+Definition relax_0 {PROP} (M : PROP → PROP) (P : PROP) : PROP := M (◇ P)%I.
+Notation bupd_0 := (relax_0 bupd).
+
+(** [relax_0] lets [M] absorb [◇] for introduceable [M] *)
 Lemma is_except_0_intro {PROP} {M : PROP → PROP} {P} :
-  (∀ P, P ⊢ M P) → IsExcept0 (M (◇ P))%I.
+  (∀ P, P ⊢ M P) → IsExcept0 (relax_0 M P)%I.
 Proof.
-  rewrite /IsExcept0 /bi_except_0=> intro. iIntros "[?|$]". iApply intro.
-  by iLeft.
+  rewrite /IsExcept0 /bi_except_0=> intro. iIntros "[F|$]". iApply intro.
+  iDestruct "F" as ">[]".
 Qed.

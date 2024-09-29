@@ -108,13 +108,13 @@ Section gen_upd.
     rewrite /IntoForall (into_forall P). iIntros "Φ %". iMod "Φ". iApply "Φ".
   Qed.
 
-  (** [GenUpd] [M] after [◇] absorbs [◇] *)
-  #[export] Instance gen_upd_except_0_is_except_0 {P} :
-    IsExcept0 (M (◇ P))%I | 10.
+  (** [GenUpd] [M] with [relax_0] absorbs [◇] *)
+  #[export] Instance gen_upd_relax_0_is_except_0 {P} :
+    IsExcept0 (relax_0 M P)%I | 10.
   Proof. apply is_except_0_intro. by iIntros. Qed.
 
-  (** [◇] preserves [GenUpd] *)
-  #[export] Instance gen_upd_except_0 : GenUpd (λ P, M (◇ P))%I | 10.
+  (** [relax_0] preserves [GenUpd] *)
+  #[export] Instance gen_upd_relax_0 : GenUpd (relax_0 M)%I | 10.
   Proof.
     split=> >. { solve_proper. } { solve_proper. } { by iIntros. }
     { iIntros ">>$". } { by iIntros "[?$]". }
@@ -168,9 +168,11 @@ Proof. by iIntros (?) ">?". Qed.
 Section from_bupd.
   Context `{!BiBUpd PROP, !FromBUpd (PROP:=PROP) M, !GenUpd (PROP:=PROP) M}.
 
-  (** [◇] preserves [FromBUpd] *)
-  #[export] Instance from_bupd_except_0 : FromBUpd (λ P, M (◇ P))%I | 10.
-  Proof. move=> ?. rewrite (from_bupd (M:=M)). f_equiv. by iIntros. Qed.
+  (** [relax_0] preserves [FromBUpd] *)
+  #[export] Instance from_bupd_relax_0 : FromBUpd (relax_0 M)%I | 10.
+  Proof.
+    move=> ?. rewrite (from_bupd (M:=M)) /relax_0. f_equiv. by iIntros.
+  Qed.
 
   (** Eliminate [bupd] under [FromBupd] *)
   #[export] Instance elim_modal_from_bupd {p P Q} :
@@ -232,12 +234,12 @@ Proof.
   split=> >. { apply fupd_plain_keep_l, _. } { apply fupd_plain_forall_2, _. }
 Qed.
 
-(** Adding [◇] preserves [ModPlain] *)
+(** [relax_0] preserves [ModPlain] *)
 #[export] Instance mod_plain_except_0
   `{!BiPlainly PROP, !@GenUpd PROP M, !ModPlain M} :
-  ModPlain (λ P, M (◇ P)%I).
+  ModPlain (relax_0 M).
 Proof.
-  split.
+  unfold relax_0. split.
   - move=> >. rewrite mod_plain_keep_l. by iIntros ">[>$$]".
   - move=> >. by rewrite mod_plain_forall_2 bi.except_0_forall.
 Qed.
