@@ -106,11 +106,11 @@ Qed.
 Proof. by iIntros "%%[$?]". Qed.
 #[export] Instance modw_mod_upd `{!@ModUpd PROP M} {W} : ModUpd (modw M W).
 Proof. split; exact _. Qed.
-#[export] Instance absorb_bupd_modw
+#[export] Instance modw_absorb_bupd
   `{!BiBUpd PROP, !AbsorbBUpd (PROP:=PROP) M} {W} :
   AbsorbBUpd (modw M W) | 10.
 Proof. by iIntros (?) ">$$". Qed.
-#[export] Instance mod_plain_modw `{!BiPlainly PROP, !BiBUpd PROP}
+#[export] Instance modw_mod_plain `{!BiPlainly PROP, !BiBUpd PROP}
   `{!@Mod PROP M, !ModPlain M, !Affine W} :
   ModPlain (modw M W) | 10.
 Proof.
@@ -266,7 +266,7 @@ Section absorb_bupd.
   Proof. by rewrite /bupdw /modw -(absorb_bupd (M:=M)) -(mod_intro (M:=M)). Qed.
 
   (** Eliminate [bupdw] *)
-  #[export] Instance elim_modal_bupdw_modw_mod_upd `{!WsatIncl W W' Wr}
+  #[export] Instance elim_modal_bupdw_modw_modw_upd `{!WsatIncl W W' Wr}
     {p P Q} :
     ElimModal True p false (|=[W']=> P) P (modw M W Q) (modw M W Q).
   Proof. exact _. Qed.

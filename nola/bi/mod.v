@@ -280,7 +280,7 @@ Proof. by iIntros "% >?". Qed.
   AbsorbBUpd (PROP:=PROP) (fupd E E').
 Proof. by iIntros "% >?". Qed.
 (** [relax_0] preserves [AbsorbBUpd] *)
-#[export] Instance absorb_bupd_relax_0
+#[export] Instance relax_0_absorb_bupd
   `{!BiBUpd PROP, !AbsorbBUpd (PROP:=PROP) M} : AbsorbBUpd (relax_0 M) | 10.
 Proof. move=> ?. by rewrite /relax_0 absorb_bupd. Qed.
 
@@ -328,7 +328,7 @@ Qed.
 Proof.
   split=> >. { apply fupd_plain_keep_l, _. } { apply fupd_plain_forall_2, _. }
 Qed.
-#[export] Instance mod_plain_relax_0
+#[export] Instance relax_0_mod_plain
   `{!BiPlainly PROP, !@Mod PROP M, !ModPlain M} :
   ModPlain (relax_0 M).
 Proof.
