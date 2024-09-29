@@ -8,8 +8,7 @@ Implicit Type PROP : bi.
 
 (** ** World satisfaction inclusion *)
 
-Class WsatIncl {PROP} (W W' Wr : PROP) : Prop :=
-  wsat_incl : W ⊣⊢ W' ∗ Wr.
+Class WsatIncl {PROP} (W W' Wr : PROP) : Prop := wsat_incl : W ⊣⊢ W' ∗ Wr.
 Hint Mode WsatIncl + ! ! - : typeclass_instances.
 Arguments WsatIncl {_} _%_I _%_I _%_I : simpl never.
 Arguments wsat_incl {_} _%_I _%_I _%_I {_}.
