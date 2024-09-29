@@ -258,7 +258,7 @@ Hint Mode AbsorbBUpd + - ! : typeclass_instances.
 Section absorb_bupd.
   Context `{!BiBUpd PROP, !AbsorbBUpd (PROP:=PROP) M}.
 
-  (** Eliminate [bupd] under [FromBupd] *)
+  (** Eliminate [bupd] under [AbsorbBUpd] *)
   #[export] Instance elim_modal_absorb_bupd {p P Q} :
     ElimModal True p false (|==> P) P (M Q) (M Q) | 10.
   Proof.
