@@ -299,9 +299,6 @@ Section bupdw.
   Proof. exact modw_incl. Qed.
 
   (** [ElimModal] *)
-  #[export] Instance elim_modal_bupdw_bupdw `{!WsatIncl W W' Wr} {p P Q} :
-    ElimModal True p false (|=[W']=> P) P (|=[W]=> Q) (|=[W]=> Q).
-  Proof. exact _. Qed.
   #[export] Instance elim_modal_bupdw_bupdw_wrong_wsat {p P Q W W'} :
     ElimModal
       (pm_error "The target world satisfaction doesn't satisfy [WsatIncl]")
