@@ -151,37 +151,36 @@ Section gen_upd.
   Proof. by rewrite (big_opMS_commute _). Qed.
 End gen_upd.
 
-(** ** [FromBUpd]: Modality subsuming [bupd] *)
+(** ** [AbsorbBUpd]: Modality absorbing [bupd] *)
 
-Class FromBUpd `{!BiBUpd PROP} (M : PROP → PROP) : Prop :=
-  from_bupd : ∀{P}, (|==> P) ⊢ M P.
-Hint Mode FromBUpd + - ! : typeclass_instances.
+Class AbsorbBUpd `{!BiBUpd PROP} (M : PROP → PROP) : Prop :=
+  absorb_bupd : ∀{P}, (|==> M P) ⊢ M P.
+Hint Mode AbsorbBUpd + - ! : typeclass_instances.
 
-(** [bupd] and [fupd] satisfy [FromBUpd] *)
-#[export] Instance bupd_from_bupd `{!BiBUpd PROP} : FromBUpd (PROP:=PROP) bupd.
-Proof. by move=> ?. Qed.
-#[export] Instance fupd_from_bupd
-  `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {E} :
-  FromBUpd (PROP:=PROP) (fupd E E).
-Proof. by iIntros (?) ">?". Qed.
+(** [bupd] and [fupd] satisfy [AbsorbBUpd] *)
+#[export] Instance bupd_absorb_bupd `{!BiBUpd PROP} :
+  AbsorbBUpd (PROP:=PROP) bupd.
+Proof. by iIntros "% >?". Qed.
+#[export] Instance fupd_absorb_bupd
+  `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {E E'} :
+  AbsorbBUpd (PROP:=PROP) (fupd E E').
+Proof. by iIntros "% >?". Qed.
 
-Section from_bupd.
-  Context `{!BiBUpd PROP, !FromBUpd (PROP:=PROP) M, !GenUpd (PROP:=PROP) M}.
+Section absorb_bupd.
+  Context `{!BiBUpd PROP, !AbsorbBUpd (PROP:=PROP) M}.
 
-  (** [relax_0] preserves [FromBUpd] *)
-  #[export] Instance from_bupd_relax_0 : FromBUpd (relax_0 M)%I | 10.
-  Proof.
-    move=> ?. rewrite (from_bupd (M:=M)) /relax_0. f_equiv. by iIntros.
-  Qed.
+  (** [◇] preserves [AbsorbBUpd] *)
+  #[export] Instance absorb_bupd_relax_0 : AbsorbBUpd (relax_0 M) | 10.
+  Proof. move=> ?. by rewrite /relax_0 absorb_bupd. Qed.
 
   (** Eliminate [bupd] under [FromBupd] *)
-  #[export] Instance elim_modal_from_bupd {p P Q} :
+  #[export] Instance elim_modal_absorb_bupd {p P Q} :
     ElimModal True p false (|==> P) P (M Q) (M Q) | 10.
   Proof.
     by rewrite /ElimModal bi.intuitionistically_if_elim gen_upd_frame_r
-      bi.wand_elim_r (from_bupd (M:=M)) gen_upd_trans.
+      bi.wand_elim_r (absorb_bupd (M:=M)).
   Qed.
-End from_bupd.
+End absorb_bupd.
 
 (** ** [ModPlain]: Modality behaving nicely over plain propositions
 
