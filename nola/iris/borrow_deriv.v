@@ -199,7 +199,7 @@ End borrow_deriv.
 Section borrow_deriv.
   Context `{!borrowGS FML Σ, !BorrowJudg (FML $oi Σ) JUDG,
     !Jsem JUDG (iProp Σ), !Dsem JUDG (FML $oi Σ) (iProp Σ),
-    !BorrowJsem FML Σ JUDG, !@ModUpd (iProp Σ) M, !AbsorbBUpd M}.
+    !BorrowJsem FML Σ JUDG, !@ModUpd (iProp Σ) M, !ModBUpd M}.
   Implicit Type (Px Qx : FML $oi Σ).
 
   (** Split a lender *)

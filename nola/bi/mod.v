@@ -259,50 +259,59 @@ Proof. split; exact _. Qed.
 #[export] Instance relax_0_mod_upd `{!@ModUpd PROP M} : ModUpd (relax_0 M).
 Proof. split; exact _. Qed.
 
-(** ** [AbsorbBUpd]: Modality absorbing [bupd] *)
+(** ** [IsBUpd]: Proposition absorbing [bupd] *)
 
-Class AbsorbBUpd `{!BiBUpd PROP} (M : PROP → PROP) : Prop :=
-  absorb_bupd : ∀{P}, (|==> M P) ⊢ M P.
-Hint Mode AbsorbBUpd + - ! : typeclass_instances.
+Class IsBUpd `{!BiBUpd PROP} (P : PROP) : Prop :=
+  is_bupd : (|==> P) ⊢ P.
+Hint Mode IsBUpd + - ! : typeclass_instances.
 
-Section absorb_bupd.
-  Context `{!BiBUpd PROP, !AbsorbBUpd (PROP:=PROP) M}.
+(** [ModBUpd]: Modality absorbing [bupd] *)
+Notation ModBUpd M := (∀ P, IsBUpd (M P)).
 
-  (** Eliminate [bupd] under [AbsorbBUpd] *)
-  #[export] Instance elim_modal_bupd_absorb_bupd {p P Q} :
-    ElimModal True p false (|==> P) P (M Q) (M Q).
+Section is_bupd.
+  Context `{!BiBUpd PROP, !IsBUpd (PROP:=PROP) P}.
+
+  (** Eliminate [bupd] under [ModBUpd] *)
+  #[export] Instance elim_modal_bupd_is_bupd {p Q} :
+    ElimModal True p false (|==> Q) Q P P.
   Proof.
     by rewrite /ElimModal bi.intuitionistically_if_elim mod_frame_r
-      bi.wand_elim_r (absorb_bupd (M:=M)).
+      bi.wand_elim_r (is_bupd (P:=P)).
   Qed.
-
-  (** Turn from [bupd] *)
-  Lemma from_bupd `{!ModIntro M} {P} : (|==> P) ⊢ M P.
-  Proof. rewrite -(absorb_bupd (M:=M)). f_equiv. exact mod_intro. Qed.
 
   (** Absorb [bupd_0] *)
-  Lemma absorb_bupd_0 `{!ModExcept0 M} {P} : (|==>◇ M P) ⊢ M P.
-  Proof. by rewrite /bupd_0 is_except_0 absorb_bupd. Qed.
-  #[export] Instance elim_modal_bupd_0_absorb_bupd `{!ModExcept0 M} {p P Q} :
-    ElimModal True p false (|==>◇ P) P (M Q) (M Q).
+  Lemma is_bupd_0 `{!IsExcept0 P} : (|==>◇ P) ⊢ P.
+  Proof. by rewrite /bupd_0 is_except_0 is_bupd. Qed.
+  #[export] Instance elim_modal_bupd_0_is_bupd_except_0 `{!IsExcept0 P} {p Q} :
+    ElimModal True p false (|==>◇ Q) Q P P.
   Proof.
     by rewrite /ElimModal bi.intuitionistically_if_elim mod_frame_r
-      bi.wand_elim_r absorb_bupd_0.
+      bi.wand_elim_r is_bupd_0.
   Qed.
-End absorb_bupd.
+End is_bupd.
 
-(** [bupd] and [fupd] satisfy [AbsorbBUpd] *)
-#[export] Instance bupd_absorb_bupd `{!BiBUpd PROP} :
-  AbsorbBUpd (PROP:=PROP) bupd.
-Proof. by iIntros "% >?". Qed.
-#[export] Instance fupd_absorb_bupd
+Section mod_bupd.
+  Context `{!BiBUpd PROP, !ModBUpd M, !@ModIntro PROP M}.
+
+  (** Turn from [bupd] *)
+  Lemma from_bupd {P} : (|==> P) ⊢ M P.
+  Proof. by rewrite {1}[P](mod_intro (M:=M)) is_bupd. Qed.
+  Lemma from_bupd_0 `{!ModExcept0 M} {P} : (|==>◇ P) ⊢ M P.
+  Proof. by rewrite {1}[P](mod_intro (M:=M)) is_bupd_0. Qed.
+End mod_bupd.
+
+(** [bupd] and [fupd] satisfy [ModBUpd] *)
+#[export] Instance bupd_mod_bupd `{!BiBUpd PROP} :
+  ModBUpd (bupd (PROP:=PROP)).
+Proof. unfold IsBUpd. by iIntros "% >?". Qed.
+#[export] Instance fupd_mod_bupd
   `{!BiBUpd PROP, !BiFUpd PROP, !BiBUpdFUpd PROP} {E E'} :
-  AbsorbBUpd (PROP:=PROP) (fupd E E').
-Proof. by iIntros "% >?". Qed.
-(** [relax_0] preserves [AbsorbBUpd] *)
-#[export] Instance relax_0_absorb_bupd
-  `{!BiBUpd PROP, !AbsorbBUpd (PROP:=PROP) M} : AbsorbBUpd (relax_0 M).
-Proof. move=> ?. by rewrite /relax_0 absorb_bupd. Qed.
+  ModBUpd (fupd (PROP:=PROP) E E').
+Proof. unfold IsBUpd. by iIntros "% >?". Qed.
+(** [relax_0] preserves [ModBUpd] *)
+#[export] Instance relax_0_mod_bupd
+  `{!BiBUpd PROP, !ModBUpd M} : ModBUpd (relax_0 (PROP:=PROP) M).
+Proof. move=> ?. by rewrite /IsBUpd /relax_0 is_bupd. Qed.
 
 (** ** [ModPlain]: Modality behaving nicely over plain propositions
 

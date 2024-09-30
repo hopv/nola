@@ -116,10 +116,9 @@ Qed.
 Proof. by iIntros "%%[$?]". Qed.
 #[export] Instance modw_mod_upd `{!@ModUpd PROP M} {W} : ModUpd (modw M W).
 Proof. split; exact _. Qed.
-#[export] Instance modw_absorb_bupd
-  `{!BiBUpd PROP, !AbsorbBUpd (PROP:=PROP) M} {W} :
-  AbsorbBUpd (modw M W) | 10.
-Proof. by iIntros (?) ">$$". Qed.
+#[export] Instance modw_mod_bupd `{!BiBUpd PROP, !ModBUpd M} {W} :
+  ModBUpd (modw (PROP:=PROP) M W) | 10.
+Proof. move=> ?. unfold IsBUpd. iIntros ">$$". Qed.
 #[export] Instance modw_mod_plain `{!BiPlainly PROP, !BiBUpd PROP}
   `{!@Mod PROP M, !ModPlain M, !Affine W} :
   ModPlain (modw M W) | 10.
@@ -262,19 +261,19 @@ Section mod_upd.
   Proof. exact _. Qed.
 End mod_upd.
 
-(** Under [AbsorbBUpd] *)
-Section absorb_bupd.
-  Context `{!BiBUpd PROP, !@Mod PROP M, !AbsorbBUpd M}.
+(** Under [ModBUpd] *)
+Section mod_bupd.
+  Context `{!BiBUpd PROP, !@Mod PROP M, !ModBUpd M}.
 
   (** Turn from [bupdw] under [ModIntro] *)
   Lemma from_bupdw `{!ModIntro M} {W P} : (|=[W]=> P) ⊢ modw M W P.
-  Proof. by rewrite /bupdw /modw -(absorb_bupd (M:=M)) -(mod_intro (M:=M)). Qed.
+  Proof. by rewrite /bupdw /modw -(is_bupd (P:=M _)) -(mod_intro (M:=M)). Qed.
 
   (** Turn from [bupdw_0] under [ModIntro] *)
   Lemma from_bupdw_0 `{!ModIntro M, !ModExcept0 M} {W P} :
     (|=[W]=>◇ P) ⊢ modw M W P.
   Proof.
-    by rewrite /bupdw_0 /modw -(absorb_bupd (M:=M)) -[M _]is_except_0
+    by rewrite /bupdw_0 /modw -(is_bupd (P:=M _)) -[M _]is_except_0
       -(mod_intro (M:=M)).
   Qed.
 
@@ -291,15 +290,15 @@ Section absorb_bupd.
   Proof. exact _. Qed.
 
   (** Absorb [bupdw] *)
-  Lemma absorb_bupdw `{!WsatIncl W W' Wr} {P} :
+  Lemma is_bupdw `{!WsatIncl W W' Wr} {P} :
     (|=[W']=> modw M W P) ⊢ modw M W P.
   Proof. by iIntros ">?". Qed.
 
   (** Absorb [bupdw_0] *)
-  Lemma absorb_bupdw_0 `{!WsatIncl W W' Wr, !ModExcept0 M} {P} :
+  Lemma is_bupdw_0 `{!WsatIncl W W' Wr, !ModExcept0 M} {P} :
     (|=[W']=>◇ modw M W P) ⊢ modw M W P.
   Proof. by iIntros ">?". Qed.
-End absorb_bupd.
+End mod_bupd.
 
 (** ** Lemmas on [bupdw] *)
 Section bupdw.
