@@ -159,10 +159,10 @@ Section modw.
     modw M W' P ⊢ modw M W P.
   Proof. rewrite (wsat_incl W W'). iIntros "→P [W' $]". by iApply "→P". Qed.
 
-  (** [modw] preserves [IsExcept0] *)
-  #[export] Instance is_except_0_modw `{!∀ P, IsExcept0 (M P)} {W P} :
-    IsExcept0 (modw M W P).
-  Proof. unfold IsExcept0. by iIntros ">?". Qed.
+  (** [modw] preserves [ModExcept0] *)
+  #[export] Instance mod_except_0_modw `{!ModExcept0 M} {W} :
+    ModExcept0 (modw M W).
+  Proof. unfold IsExcept0. by iIntros "% >?". Qed.
 
   (** Compose [modw]s composing the modalities *)
   Lemma modw_compose {M' M'' W P} :
@@ -271,7 +271,7 @@ Section absorb_bupd.
   Proof. by rewrite /bupdw /modw -(absorb_bupd (M:=M)) -(mod_intro (M:=M)). Qed.
 
   (** Turn from [bupdw_0] under [ModIntro] *)
-  Lemma from_bupdw_0 `{!ModIntro M, !∀ R, IsExcept0 (M R)} {W P} :
+  Lemma from_bupdw_0 `{!ModIntro M, !ModExcept0 M} {W P} :
     (|=[W]=>◇ P) ⊢ modw M W P.
   Proof.
     by rewrite /bupdw_0 /modw -(absorb_bupd (M:=M)) -[M _]is_except_0
@@ -285,8 +285,8 @@ Section absorb_bupd.
   Proof. exact _. Qed.
 
   (** Eliminate [bupdw_0] *)
-  #[export] Instance elim_modal_bupdw_0_modw_modw_upd `{!WsatIncl W W' Wr}
-    `{!∀ R, IsExcept0 (M R)} {p P Q} :
+  #[export] Instance elim_modal_bupdw_0_modw_modw_upd
+    `{!WsatIncl W W' Wr, !ModExcept0 M} {p P Q} :
     ElimModal True p false (|=[W']=>◇ P) P (modw M W Q) (modw M W Q).
   Proof. exact _. Qed.
 
@@ -296,7 +296,7 @@ Section absorb_bupd.
   Proof. by iIntros ">?". Qed.
 
   (** Absorb [bupdw_0] *)
-  Lemma absorb_bupdw_0 `{!WsatIncl W W' Wr, !∀ R, IsExcept0 (M R)} {P} :
+  Lemma absorb_bupdw_0 `{!WsatIncl W W' Wr, !ModExcept0 M} {P} :
     (|=[W']=>◇ modw M W P) ⊢ modw M W P.
   Proof. by iIntros ">?". Qed.
 End absorb_bupd.

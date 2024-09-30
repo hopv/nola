@@ -11,6 +11,9 @@ Implicit Type PROP : bi.
 Definition relax_0 {PROP} (M : PROP → PROP) (P : PROP) : PROP := M (◇ P)%I.
 Notation bupd_0 := (relax_0 bupd).
 
+(** ** [ModExcept0]: Modality absorbing [◇] *)
+Notation ModExcept0 M := (∀ P, IsExcept0 (M P)).
+
 Module BUpd0Notation.
   Notation "|==>◇ P" := (bupd_0 P) (at level 99, P at level 200,
     format "'[  ' |==>◇  '/' P ']'") : bi_scope.
@@ -115,10 +118,9 @@ Section mod_intro.
   Qed.
 
   (** [relax_0 M] absorbs [◇] *)
-  #[export] Instance mod_intro_relax_0_is_except_0 {P} :
-    IsExcept0 (relax_0 M P)%I.
+  #[export] Instance relax_0_mod_intro_except_0 : ModExcept0 (relax_0 M).
   Proof.
-    rewrite /IsExcept0 /bi_except_0. iIntros "[F|$] !>". iDestruct "F" as ">[]".
+    unfold IsExcept0, bi_except_0. iIntros "% [F|$] !>". iDestruct "F" as ">[]".
   Qed.
 
   (** Eat [◇] *)
@@ -279,9 +281,9 @@ Section absorb_bupd.
   Proof. rewrite -(absorb_bupd (M:=M)). f_equiv. exact mod_intro. Qed.
 
   (** Absorb [bupd_0] *)
-  Lemma absorb_bupd_0 `{!IsExcept0 (M P)} : (|==>◇ M P) ⊢ M P.
+  Lemma absorb_bupd_0 `{!ModExcept0 M} {P} : (|==>◇ M P) ⊢ M P.
   Proof. by rewrite /bupd_0 is_except_0 absorb_bupd. Qed.
-  #[export] Instance elim_modal_bupd_0_absorb_bupd `{!IsExcept0 (M Q)} {p P} :
+  #[export] Instance elim_modal_bupd_0_absorb_bupd `{!ModExcept0 M} {p P Q} :
     ElimModal True p false (|==>◇ P) P (M Q) (M Q).
   Proof.
     by rewrite /ElimModal bi.intuitionistically_if_elim mod_frame_r
