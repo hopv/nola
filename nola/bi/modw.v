@@ -290,8 +290,7 @@ Section mod_bupd.
   Proof. exact _. Qed.
 
   (** Absorb [bupdw] *)
-  Lemma is_bupdw `{!WsatIncl W W' Wr} {P} :
-    (|=[W']=> modw M W P) ⊢ modw M W P.
+  Lemma is_bupdw `{!WsatIncl W W' Wr} {P} : (|=[W']=> modw M W P) ⊢ modw M W P.
   Proof. by iIntros ">?". Qed.
 
   (** Absorb [bupdw_0] *)
