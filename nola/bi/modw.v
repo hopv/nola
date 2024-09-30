@@ -266,23 +266,12 @@ End mod_upd.
 Section absorb_bupd.
   Context `{!BiBUpd PROP, !@Mod PROP M, !AbsorbBUpd M}.
 
-  (** Eliminate [bupd] *)
-  #[export] Instance elim_modal_bupd_modw_absorb_bupd {p P Q W} :
-    ElimModal True p false (|==> P) P (modw M W Q) (modw M W Q).
-  Proof. exact _. Qed.
-
-  (** Eliminate [bupd_0] *)
-  #[export] Instance elim_modal_bupd_0_modw_absorb_bupd
-    `{!∀ R, IsExcept0 (modw M W R)} {p P Q} :
-    ElimModal True p false (|==>◇ P) P (modw M W Q) (modw M W Q).
-  Proof. exact _. Qed.
-
   (** Turn from [bupdw] under [ModIntro] *)
   Lemma from_bupdw `{!ModIntro M} {W P} : (|=[W]=> P) ⊢ modw M W P.
   Proof. by rewrite /bupdw /modw -(absorb_bupd (M:=M)) -(mod_intro (M:=M)). Qed.
 
   (** Turn from [bupdw_0] under [ModIntro] *)
-  Lemma from_bupdw_0 `{!ModIntro M, !IsExcept0 (M (W ∗ P))} :
+  Lemma from_bupdw_0 `{!ModIntro M, !∀ R, IsExcept0 (M R)} {W P} :
     (|=[W]=>◇ P) ⊢ modw M W P.
   Proof.
     by rewrite /bupdw_0 /modw -(absorb_bupd (M:=M)) -[M _]is_except_0

@@ -27,10 +27,9 @@ Class Mod {PROP} (M : PROP → PROP) : Prop := MOD {
 }.
 Hint Mode Mod + ! : typeclass_instances.
 #[export] Instance mod_flip_mono `{!@Mod PROP M} :
-  Proper (flip (⊢) ==> flip (⊢)) M | 10.
+  Proper (flip (⊢) ==> flip (⊢)) M.
 Proof. move=>/= ??. apply mod_mono. Qed.
-#[export] Instance mod_proper `{!@Mod PROP M} :
-  Proper ((⊣⊢) ==> (⊣⊢)) M.
+#[export] Instance mod_proper `{!@Mod PROP M} : Proper ((⊣⊢) ==> (⊣⊢)) M.
 Proof. apply ne_proper, _. Qed.
 
 (** Under [Mod] *)
@@ -117,7 +116,7 @@ Section mod_intro.
 
   (** [relax_0 M] absorbs [◇] *)
   #[export] Instance mod_intro_relax_0_is_except_0 {P} :
-    IsExcept0 (relax_0 M P)%I | 10.
+    IsExcept0 (relax_0 M P)%I.
   Proof.
     rewrite /IsExcept0 /bi_except_0. iIntros "[F|$] !>". iDestruct "F" as ">[]".
   Qed.
@@ -269,7 +268,7 @@ Section absorb_bupd.
 
   (** Eliminate [bupd] under [AbsorbBUpd] *)
   #[export] Instance elim_modal_bupd_absorb_bupd {p P Q} :
-    ElimModal True p false (|==> P) P (M Q) (M Q) | 10.
+    ElimModal True p false (|==> P) P (M Q) (M Q).
   Proof.
     by rewrite /ElimModal bi.intuitionistically_if_elim mod_frame_r
       bi.wand_elim_r (absorb_bupd (M:=M)).
@@ -282,8 +281,8 @@ Section absorb_bupd.
   (** Absorb [bupd_0] *)
   Lemma absorb_bupd_0 `{!IsExcept0 (M P)} : (|==>◇ M P) ⊢ M P.
   Proof. by rewrite /bupd_0 is_except_0 absorb_bupd. Qed.
-  #[export] Instance elim_modal_bupd0_absorb_bupd {p P Q} `{!IsExcept0 (M Q)} :
-    ElimModal True p false (|==>◇ P) P (M Q) (M Q) | 10.
+  #[export] Instance elim_modal_bupd_0_absorb_bupd `{!IsExcept0 (M Q)} {p P} :
+    ElimModal True p false (|==>◇ P) P (M Q) (M Q).
   Proof.
     by rewrite /ElimModal bi.intuitionistically_if_elim mod_frame_r
       bi.wand_elim_r absorb_bupd_0.
@@ -300,7 +299,7 @@ Proof. by iIntros "% >?". Qed.
 Proof. by iIntros "% >?". Qed.
 (** [relax_0] preserves [AbsorbBUpd] *)
 #[export] Instance relax_0_absorb_bupd
-  `{!BiBUpd PROP, !AbsorbBUpd (PROP:=PROP) M} : AbsorbBUpd (relax_0 M) | 10.
+  `{!BiBUpd PROP, !AbsorbBUpd (PROP:=PROP) M} : AbsorbBUpd (relax_0 M).
 Proof. move=> ?. by rewrite /relax_0 absorb_bupd. Qed.
 
 (** ** [ModPlain]: Modality behaving nicely over plain propositions
@@ -410,8 +409,7 @@ Section bupd_0.
   #[export] Instance elim_modal_bupd_0 {p P Q} :
     ElimModal True p false (|==>◇ P) P (|==>◇ Q) (|==>◇ Q).
   Proof. exact _. Qed.
-  #[export] Instance add_modal_bupd_0 {P Q} :
-    AddModal (|==>◇ P) P (|==>◇ Q).
+  #[export] Instance add_modal_bupd_0 {P Q} : AddModal (|==>◇ P) P (|==>◇ Q).
   Proof. exact _. Qed.
   #[export] Instance from_sep_bupd_0 `{!FromSep P Q Q'} :
     FromSep (|==>◇ P) (|==>◇ Q) (|==>◇ Q').
