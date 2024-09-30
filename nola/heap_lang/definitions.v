@@ -106,8 +106,7 @@ Qed.
 
 (** ** Helper instances
   TODO: Can we remove these? *)
-
-  Section instances.
+Section instances.
   Context `{!heapGS_gen hlc Σ}.
   Let iris := heapGS_iris'GS.
 
