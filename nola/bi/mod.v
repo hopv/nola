@@ -393,7 +393,7 @@ Section mod_plain.
   Qed.
 End mod_plain.
 
-(** ** Instances for [bupd_0] *)
+(** ** For [bupd_0] *)
 Section bupd_0.
   Context `{!BiBUpd PROP}.
   Implicit Type P : PROP.
@@ -440,6 +440,11 @@ Section bupd_0.
   #[export] Instance bupd_0_sep_homomorphism :
     MonoidHomomorphism (@bi_sep PROP) bi_sep (flip (⊢)) bupd_0.
   Proof. exact _. Qed.
+
+  (** Eliminate [bupd_0] over a plain proposition *)
+  Lemma bupd_0_elim `{!BiPlainly PROP, !BiBUpdPlainly PROP, !Plain P} :
+    (|==>◇ P) ⊢ ◇ P.
+  Proof. by rewrite /bupd_0 bupd_elim. Qed.
 End bupd_0.
 
 Section mod_acsr.
