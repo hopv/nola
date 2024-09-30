@@ -121,7 +121,7 @@ Section mod_intro.
   (** [relax_0 M] absorbs [◇] *)
   #[export] Instance relax_0_mod_intro_except_0 : ModExcept0 (relax_0 M).
   Proof.
-    unfold IsExcept0, bi_except_0. iIntros "% [F|$] !>". iDestruct "F" as ">[]".
+    unfold IsExcept0, bi_except_0. iIntros "% [F|$] !>". iMod "F" as %[].
   Qed.
 
   (** Eat [◇] *)
