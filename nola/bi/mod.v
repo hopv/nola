@@ -4,6 +4,7 @@ From nola Require Export prelude.
 From nola.bi Require Import util.
 From iris.bi Require Export bi.
 From iris.proofmode Require Import proofmode.
+From iris.program_logic Require Import weakestpre total_weakestpre.
 
 Implicit Type PROP : bi.
 
@@ -312,6 +313,16 @@ Proof. unfold IsBUpd. by iIntros "% >?". Qed.
 #[export] Instance relax_0_mod_bupd
   `{!BiBUpd PROP, !ModBUpd M} : ModBUpd (relax_0 (PROP:=PROP) M).
 Proof. move=> ?. by rewrite /IsBUpd /relax_0 is_bupd. Qed.
+
+Section program.
+  Context `{!irisGS_gen hlc Λ Σ}.
+
+  (** [wp] and [twp] are [IsBUpd] *)
+  #[export] Instance wp_is_bupd {s E e Φ} : IsBUpd (WP e @ s; E {{ Φ }}).
+  Proof. by rewrite /IsBUpd -{2}fupd_wp -bupd_fupd. Qed.
+  #[export] Instance twp_is_bupd {s E e Φ} : IsBUpd (WP e @ s; E [{ Φ }]).
+  Proof. by rewrite /IsBUpd -{2}fupd_twp -bupd_fupd. Qed.
+End program.
 
 (** ** [ModPlain]: Modality behaving nicely over plain propositions
 
