@@ -107,6 +107,9 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`cif`](nola/iris/cif.v) (Coinductive-inductive formula)
 - [`heap_lang/`](nola/heap_lang/) : Variant of Iris HeapLang, supporting `Ndnat`
     (infinite non-determinism) and program logic with custom world satisfactions
+- [`rust_lang/`](nola/lrust/) : Variant of RustBelt's language, supporting
+    `Ndnat` and program logic with termination sensitivity and custom world
+    satisfactions
 - [`examples/`](nola/examples/) : Examples
   + [`nsynty`](nola/examples/nsynty.v) (Syntactic type),
     [`con`](nola/examples/con.v) (Constructors),

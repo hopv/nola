@@ -62,6 +62,15 @@ nola/heap_lang/proofmode.v
 nola/heap_lang/adequacy.v
 nola/heap_lang/total_adequacy.v
 
+nola/rust_lang/lang.v
+nola/rust_lang/notation.v
+nola/rust_lang/heap.v
+nola/rust_lang/tactics.v
+nola/rust_lang/lifting.v
+nola/rust_lang/proofmode.v
+nola/rust_lang/adequacy.v
+nola/rust_lang/races.v
+
 nola/examples/nsynty.v
 nola/examples/con.v
 nola/examples/ilist.v

@@ -1,11 +1,11 @@
 (** * Derivability *)
 
 From nola.examples Require Export nsynty con.
-From nola.heap_lang Require Export notation proofmode.
+From nola.rust_lang Require Export notation proofmode.
 Import UpdwNotation WpwNotation DsemNotation LftNotation NsyntyNotation.
 
 Section deriv.
-  Context `{!heapGS_gen hlc Σ, !SemCifcon JUDG CON Σ, !Jsem JUDG (iProp Σ),
+  Context `{!lrustGS_gen hlc Σ, !SemCifcon JUDG CON Σ, !Jsem JUDG (iProp Σ),
     !inv'GS (cifOF CON) Σ, !InvCon CON, !InvSem JUDG CON Σ,
     !pborrowGS nsynty (cifOF CON) Σ, !BorCon CON, !BorSem JUDG CON Σ,
     !Inv'Con CON, !IffJudg (cifO CON Σ) JUDG, !Inv'Sem JUDG CON Σ,
