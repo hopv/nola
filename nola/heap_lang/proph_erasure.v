@@ -581,7 +581,7 @@ Proof.
       * (** e1 is of the form ([Resolve] e10 e11 v0) and e11 takes a base_step. *)
         inversion Hhstp'; simplify_eq.
         edestruct (IH K) as (?&?&?&?&?&Hpstp&?&?&?&?);
-          [rewrite !app_length /=; lia|done|by eapply base_step_not_stuck|];
+          [rewrite !length_app /=; lia|done|by eapply base_step_not_stuck|];
             simplify_eq/=.
         apply base_reducible_prim_step in Hpstp; simpl in *;
           last by rewrite /base_reducible /=; eauto 10.
@@ -598,7 +598,7 @@ Proof.
            (non-head) prim_step. *)
         rewrite fill_app in Hrs; simplify_eq/=.
         edestruct (IH K) as (?&?&?&?&?&Hpstp&Hprstps&?&?&?);
-          [rewrite !app_length; lia|done| |].
+          [rewrite !length_app; lia|done| |].
         { change (fill_item Ki) with (fill [Ki]).
           by rewrite -fill_app; eapply prim_step_not_stuck, Ectx_step. }
         simplify_eq/=.
@@ -623,11 +623,11 @@ Proof.
             end
         end.
       apply (prim_step_matched_by_erased_steps_ectx [ResolveMCtx _ _]).
-      apply IH; [rewrite !app_length /=; lia|done|
+      apply IH; [rewrite !length_app /=; lia|done|
                  by eapply (not_stuck_fill_inv (fill [ResolveMCtx _ _])); simpl].
   - (** e1 is of the form ([Resolve] e1_ e1_2 e13) and e1_3 takes a prim_step. *)
     apply (prim_step_matched_by_erased_steps_ectx [ResolveRCtx _ _]).
-    apply IH; [rewrite !app_length /=; lia|done|
+    apply IH; [rewrite !length_app /=; lia|done|
                  by eapply (not_stuck_fill_inv (fill [ResolveRCtx _ _])); simpl].
 Qed.
 
@@ -645,7 +645,7 @@ Proof.
   { apply erased_base_step_base_step in Hhstp as (?&?&?&?&?&<-&?&<-).
     eexists _, _, _, _, _; repeat split;
       first (by apply base_prim_step); auto using rtc_refl. }
-  rewrite app_length in IHm; simpl in *.
+  rewrite length_app in IHm; simpl in *.
   rewrite fill_app /=; rewrite fill_app /= in He1.
   eapply prim_step_matched_by_erased_steps_ectx_item; eauto; [].
   { intros K' **; simpl in *. apply (IHm (length K')); auto with lia. }
