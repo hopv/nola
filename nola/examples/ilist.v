@@ -142,15 +142,4 @@ Section ilist.
     wp_apply (twp_forks_iter_list with "f [$↦ $l //]"). iIntros "_".
     by iApply "→Ψ".
   Qed.
-
-  (** ** Mutex operations *)
-  (** Try to acquire the lock on the mutex *)
-  Definition try_acquire_mutex : val := λ: "l", CAS "l" #false #true.
-  (** Try to acquire the lock on the mutex repeatedly with a timeout *)
-  Definition try_acquire_loop_mutex : val :=
-    rec: "self" "n" "l" :=
-      if: "n" = #0 then #false else
-      if: try_acquire_mutex "l" then #true else "self" ("n" - #1) "l".
-  (** Release the lock on the mutex *)
-  Definition release_mutex : val := λ: "l", "l" <- #false.
 End ilist.
