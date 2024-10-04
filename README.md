@@ -108,4 +108,9 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
 - [`heap_lang/`](nola/heap_lang/) : Variant of Iris HeapLang, supporting `Ndnat`
     (infinite non-determinism) and program logic with custom world satisfactions
 - [`examples/`](nola/examples/) : Examples
-  + [`logic`](nola/examples/logic.v) (Logic)
+  + [`nsynty`](nola/examples/nsynty.v) (Syntactic type),
+    [`con`](nola/examples/con.v) (Constructors),
+    [`ilist`](nola/examples/ilist.v) (Infinite list),
+    [`borrow`](nola/examples/borrow.v) (Borrow),
+    [`mutex`](nola/examples/mutex.v) (Mutex),
+    [`deriv`](nola/examples/deriv.v) (Derivability)

@@ -63,4 +63,8 @@ nola/heap_lang/adequacy.v
 nola/heap_lang/total_adequacy.v
 
 nola/examples/nsynty.v
-nola/examples/logic.v
+nola/examples/con.v
+nola/examples/ilist.v
+nola/examples/borrow.v
+nola/examples/mutex.v
+nola/examples/deriv.v
