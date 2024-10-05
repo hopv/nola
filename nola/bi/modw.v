@@ -41,6 +41,8 @@ Definition modw {PROP} (M : PROP → PROP) (W P : PROP) : PROP :=
   W -∗ M (W ∗ P)%I.
 Arguments modw : simpl never.
 
+(** Just with a world satisfaction *)
+Notation idw := (modw id).
 (** Basic update with a world satisfaction *)
 Notation bupdw := (modw bupd).
 Notation bupdw_0 := (modw bupd_0).
@@ -50,6 +52,14 @@ Notation fupdw E E' := (modw (fupd E E')).
 (** ** Notation for [modw] *)
 
 Module ModwNotation.
+  Notation "|->[ W ] P" := (idw W P)
+    (at level 99, P at level 200, format "'[  ' |->[ W ]  '/' P ']'")
+    : bi_scope.
+  Notation "P -∗[ W ] Q" := (P -∗ |->[W] Q)
+    (at level 99, Q at level 200, format "'[' P  -∗[ W ]  '/' '[' Q ']' ']'")
+    : bi_scope.
+  Notation "P -∗[ W ] Q" := (P -∗ |->[W] Q) : stdpp_scope.
+
   Notation "|=[ W ] => P" := (bupdw W P)
     (at level 99, P at level 200, format "'[  ' |=[ W ] =>  '/' P ']'")
     : bi_scope.
@@ -219,6 +229,16 @@ Section mod_intro.
   #[export] Instance from_pure_modw_intro `{!FromPure a P φ} {W} :
     FromPure a (modw M W P) φ.
   Proof. exact _. Qed.
+
+  (** Eliminate [idw] *)
+  #[export] Instance elim_modal_idw_modw_modw_upd `{!WsatIncl W W' Wr}
+    {p P Q} :
+    ElimModal True p false (|->[W'] P) P (modw M W Q) (modw M W Q).
+  Proof.
+    rewrite /ElimModal bi.intuitionistically_if_elim /= (wsat_incl W W')=> ?.
+    iIntros "[→P →Q][W' Wr]". iDestruct ("→P" with "W'") as "[W' P]".
+    iApply ("→Q" with "P"). iFrame.
+  Qed.
 End mod_intro.
 
 (** Under [ModFrame] *)
