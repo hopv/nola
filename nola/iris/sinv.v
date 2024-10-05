@@ -114,6 +114,7 @@ Section sinv.
     iModIntro. iSplitR; [by rewrite sinv_itok_unseal|]. iIntros "Px".
     iFrame "Ne ●". iApply (big_sepM_insert_2 with "Px M").
   Qed.
+  (** Allocate [sinv_tok] *)
   Lemma sinv_tok_alloc {sm} Px :
     sinv_wsat sm ==∗ sinv_tok Px ∗ (sm Px -∗ sinv_wsat sm).
   Proof.
@@ -122,7 +123,7 @@ Section sinv.
     iModIntro. by iExists _.
   Qed.
 
-  (** Lemma for [sinv_tok_acc'] *)
+  (** Lemma for [sinv_itok_acc] *)
   Local Lemma sinv_auth_tok_lookup {M i Px} :
     sinv_auth_tok M -∗ sinv_itok i Px -∗ ∃ Px', ⌜M !! i = Some Px'⌝ ∗ Px ≡ Px'.
   Proof.
@@ -132,8 +133,8 @@ Section sinv.
     move: eq. rewrite lookup_fmap. case: (M !! i); [|done]=> Px' [<-].
     iExists Px'. iSplit; [done|]. by rewrite to_agree_includedI.
   Qed.
-  (** Access via [sinv_tok] *)
-  Lemma sinv_tok_acc' {i sm Px} :
+  (** Access via [sinv_itok] *)
+  Lemma sinv_itok_acc {i sm Px} :
     sinv_itok i Px -∗ sinv_iwsat sm -∗ sm i Px ∗ (sm i Px -∗ sinv_iwsat sm).
   Proof.
     rewrite sinv_iwsat_unseal. iIntros "i [#Ne[%M[● M]]]".
@@ -143,29 +144,30 @@ Section sinv.
     iIntros "Px". iDestruct ("Ne" with "≡ Px") as "Px'". iFrame "Ne ●".
     by iApply "→M".
   Qed.
+  (** Access via [sinv_tok] *)
   Lemma sinv_tok_acc {sm Px} :
     sinv_tok Px -∗ sinv_wsat sm -∗ sm Px ∗ (sm Px -∗ sinv_wsat sm).
-  Proof. iIntros "[%i i]". iApply (sinv_tok_acc' with "i"). Qed.
+  Proof. iIntros "[%i i]". iApply (sinv_itok_acc with "i"). Qed.
 End sinv.
 
-(** Lemma for [sinv_wsat_alloc] *)
+(** Lemma for [sinv_iwsat_alloc] *)
 Local Lemma sinv_auth_tok_alloc_empty `{!sinvGpreS FML Σ} :
   ⊢ |==> ∃ _ : sinvGS FML Σ, sinv_auth_tok ∅.
 Proof.
   iMod (own_alloc (gmap_view_auth (DfracOwn 1) ∅)) as (γ) "●".
   { apply gmap_view_auth_valid. } { iModIntro. by iExists (SinvGS _ _ _ γ). }
 Qed.
-(** Allocate [sinv_wsat] *)
-Lemma sinv_wsat_alloc' `{!sinvGpreS FML Σ} :
+(** Allocate [sinv_iwsat] *)
+Lemma sinv_iwsat_alloc' `{!sinvGpreS FML Σ} :
   ⊢ |==> ∃ _ : sinvGS FML Σ,
     ∀ sm, □ (∀ i Px Qx, Px ≡ Qx -∗ sm i Px -∗ sm i Qx) -∗ sinv_iwsat sm.
 Proof.
   iMod sinv_auth_tok_alloc_empty as (?) "●". iModIntro. iExists _.
   iIntros (?) "Ne". rewrite sinv_iwsat_unseal. by iFrame.
 Qed.
-Lemma sinv_wsat_alloc `{!sinvGpreS FML Σ} :
+Lemma sinv_iwsat_alloc `{!sinvGpreS FML Σ} :
   ⊢ |==> ∃ _ : sinvGS FML Σ, ∀ sm, ⌜∀ i, NonExpansive (sm i)⌝ -∗ sinv_iwsat sm.
 Proof.
-  iMod sinv_wsat_alloc' as (?) "W". iModIntro. iExists _. iIntros (??).
+  iMod sinv_iwsat_alloc' as (?) "W". iModIntro. iExists _. iIntros (??).
   iApply "W". iIntros "!> %%% eqv ?". by iRewrite -"eqv".
 Qed.
