@@ -35,7 +35,7 @@ Section inv.
   (** [inv_tok] is non-expansive *)
   #[export] Instance inv_tok_ne N : NonExpansive (inv_tok N).
   Proof. rewrite inv_tok_unseal. solve_proper. Qed.
-  #[export] Instance inv_tok_proper N : Proper ((≡) ==> (⊣⊢))  (inv_tok N).
+  #[export] Instance inv_tok_proper N : Proper ((≡) ==> (⊣⊢)) (inv_tok N).
   Proof. apply ne_proper, _. Qed.
   (** [inv_tok] is persistent *)
   #[export] Instance inv_tok_persistent {N Px} : Persistent (inv_tok N Px).
