@@ -5,7 +5,7 @@ From iris.base_logic.lib Require Import mono_nat.
 From iris.base_logic.lib Require Export gen_heap proph_map gen_inv_heap.
 From nola.bi Require Export wpw.
 From nola.heap_lang Require Export class_instances.
-Import UpdwNotation WpwNotation.
+Import ModwNotation WpwNotation.
 
 Class heapGS_gen hlc Σ := HeapGS {
   heapGS_invGS :: invGS_gen hlc Σ;

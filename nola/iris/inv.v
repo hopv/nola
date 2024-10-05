@@ -7,7 +7,7 @@ From nola.iris Require Import sinv.
 From iris.base_logic.lib Require Export wsat invariants.
 From iris.algebra Require Import gset.
 From iris.proofmode Require Import proofmode.
-Import iPropAppNotation UpdwNotation WpwNotation.
+Import iPropAppNotation ModwNotation WpwNotation.
 
 Implicit Type (FML : oFunctor) (i : positive) (N : namespace).
 

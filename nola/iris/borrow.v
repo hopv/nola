@@ -7,7 +7,7 @@ From nola.iris Require Export iprop lft.
 From iris.bi.lib Require Import cmra.
 From iris.algebra Require Import excl agree gmap auth.
 From iris.proofmode Require Import proofmode.
-Import ProdNotation FunPNotation iPropAppNotation LftNotation UpdwNotation.
+Import ProdNotation FunPNotation iPropAppNotation LftNotation ModwNotation.
 
 Implicit Type (FML : oFunctor) (α : lft) (q : Qp).
 

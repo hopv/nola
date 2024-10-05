@@ -5,7 +5,7 @@ From nola.bi Require Export deriv.
 From nola.bi Require Import wpw.
 From nola.iris Require Export inv.
 From iris.proofmode Require Import proofmode.
-Import FunNPNotation iPropAppNotation UpdwNotation WpwNotation DsemNotation.
+Import FunNPNotation iPropAppNotation ModwNotation WpwNotation DsemNotation.
 
 Implicit Type (Σ : gFunctors) (N : namespace) (FM : ofe).
 

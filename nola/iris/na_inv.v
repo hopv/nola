@@ -4,7 +4,7 @@ From nola.iris Require Export inv cif.
 From iris.base_logic.lib Require Export na_invariants.
 From iris.algebra Require Import gset coPset.
 From iris.proofmode Require Import proofmode.
-Import iPropAppNotation UpdwNotation DsemNotation.
+Import iPropAppNotation ModwNotation DsemNotation.
 
 Implicit Type (FML : oFunctor) (p : na_inv_pool_name) (i : positive).
 

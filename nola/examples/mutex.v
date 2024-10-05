@@ -2,7 +2,7 @@
 
 From nola.examples Require Export nsynty con.
 From nola.rust_lang Require Export notation proofmode.
-Import FunPRNotation UpdwNotation WpwNotation DsemNotation LftNotation
+Import FunPRNotation ModwNotation WpwNotation DsemNotation LftNotation
   NsyntyNotation.
 
 Section mutex_bor.

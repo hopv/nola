@@ -47,9 +47,9 @@ Notation bupdw_0 := (modw bupd_0).
 (** Fancy update with a world satisfaction *)
 Notation fupdw E E' := (modw (fupd E E')).
 
-(** ** Notation for [bupdw] and [fupdw] *)
+(** ** Notation for [modw] *)
 
-Module UpdwNotation.
+Module ModwNotation.
   Notation "|=[ W ] => P" := (bupdw W P)
     (at level 99, P at level 200, format "'[  ' |=[ W ] =>  '/' P ']'")
     : bi_scope.
@@ -96,8 +96,8 @@ Module UpdwNotation.
     (Nat.iter n (λ Q, |=[W]{E}▷=> Q) P)%I
     (at level 99, P at level 200, n at level 9,
       format "'[  ' |=[ W ] { E }▷=>^ n  '/' P ']'") : bi_scope.
-End UpdwNotation.
-Import UpdwNotation.
+End ModwNotation.
+Import ModwNotation.
 
 (** ** Modality classes of [modw] *)
 #[export] Instance modw_mod `{!@Mod PROP M} {W} : Mod (modw M W).

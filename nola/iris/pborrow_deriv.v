@@ -4,7 +4,7 @@ From nola.util Require Import tagged.
 From nola.bi Require Export deriv.
 From nola.iris Require Export pborrow.
 From iris.proofmode Require Import proofmode.
-Import ProdNotation PlistNotation FunNPNotation iPropAppNotation UpdwNotation
+Import ProdNotation PlistNotation FunNPNotation iPropAppNotation ModwNotation
   LftNotation ProphNotation DsemNotation.
 
 Implicit Type (TY : synty) (FM : ofe).

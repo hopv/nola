@@ -5,7 +5,7 @@ From nola.bi Require Import order.
 From nola.iris Require Export borrow proph_ag.
 From iris.proofmode Require Import proofmode.
 Import ProdNotation PlistNotation FunPNotation iPropAppNotation LftNotation
-  ProphNotation UpdwNotation.
+  ProphNotation ModwNotation.
 
 Implicit Type (TY : synty) (FML : oFunctor) (α : lft) (q : Qp).
 

@@ -2,7 +2,7 @@
 
 From nola.examples Require Export nsynty con.
 From nola.rust_lang Require Export notation proofmode.
-Import UpdwNotation WpwNotation DsemNotation LftNotation NsyntyNotation.
+Import ModwNotation WpwNotation DsemNotation LftNotation NsyntyNotation.
 
 Section deriv.
   Context `{!lrustGS_gen hlc Σ, !SemCifcon JUDG CON Σ, !Jsem JUDG (iProp Σ),

@@ -4,7 +4,7 @@ From iris.program_logic Require Import ectx_lifting total_ectx_lifting.
 From nola.rust_lang Require Export lang heap.
 From nola.rust_lang Require Import tactics.
 From iris.prelude Require Import options.
-Import uPred UpdwNotation WpwNotation.
+Import uPred ModwNotation WpwNotation.
 
 Class lrustGS_gen hlc Σ := LRustGS {
   lrustGS_invGS : invGS_gen hlc Σ;
