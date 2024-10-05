@@ -1,6 +1,6 @@
 (** * Nola later-free invariant *)
 
-From nola.bi Require Export modw.
+From nola.bi Require Export internal modw.
 From nola.bi Require Import wpw.
 From nola.iris Require Export iprop.
 From nola.iris Require Import sinv.
@@ -22,7 +22,7 @@ Proof. solve_inG. Qed.
 
 Section inv.
   Context `{!inv'GS FML Σ, !invGS_gen hlc Σ}.
-  Implicit Type (Px : FML $oi Σ).
+  Implicit Type (Px : FML $oi Σ) (sm : FML $oi Σ -d> iProp Σ).
 
   (** [inv_tok]: Invariant token *)
   Local Definition inv_tok_def (N : namespace) (Px : FML $oi Σ) : iProp Σ :=
@@ -46,20 +46,17 @@ Section inv.
   Proof. rewrite inv_tok_unseal. exact _. Qed.
 
   (** Semantics *)
-  Local Definition inv_sem (sm : FML $oi Σ → iProp Σ) i Px : iProp Σ :=
+  Local Definition inv_sem sm i Px : iProp Σ :=
     sm Px ∗ ownD {[i]} ∨ ownE {[i]}.
   (** [inv_sem sm] is non-expansive when [sm] is *)
   Local Lemma inv_sem_ne {sm} :
-    □ (∀ Px Qx, Px ≡ Qx -∗ sm Px -∗ sm Qx) ⊢
-      □ (∀ i Px Qx, Px ≡ Qx -∗ inv_sem sm i Px -∗ inv_sem sm i Qx).
+    internal_ne sm ⊢@{iProp Σ} ∀ i, internal_ne (inv_sem sm i).
   Proof.
-    iIntros "#Ne !> %%% eqv [[Px i]|?]"; [|by iRight]. iLeft. iFrame "i".
-    iApply ("Ne" with "eqv Px").
+    iIntros "#Ne" (???) "≡". unfold inv_sem. by iRewrite ("Ne" with "≡").
   Qed.
 
   (** World satisfaction *)
-  Local Definition inv_wsat_def (sm : FML $oi Σ -d> iProp Σ) : iProp Σ :=
-    sinv_wsat (inv_sem sm).
+  Local Definition inv_wsat_def sm : iProp Σ := sinv_wsat (inv_sem sm).
   Local Definition inv_wsat_aux : seal inv_wsat_def. Proof. by eexists. Qed.
   Definition inv_wsat := inv_wsat_aux.(unseal).
   Local Lemma inv_wsat_unseal : inv_wsat = inv_wsat_def.
@@ -67,9 +64,7 @@ Section inv.
 
   (** [inv_wsat] is non-expansive *)
   #[export] Instance inv_wsat_ne : NonExpansive inv_wsat.
-  Proof.
-    rewrite inv_wsat_unseal. unfold inv_wsat_def, inv_sem. solve_proper.
-  Qed.
+  Proof. rewrite inv_wsat_unseal /inv_wsat_def /inv_sem. solve_proper. Qed.
   #[export] Instance inv_wsat_proper : Proper ((≡) ==> (≡)) inv_wsat.
   Proof. apply ne_proper, _. Qed.
 
@@ -184,16 +179,9 @@ Section inv_wp.
 End inv_wp.
 
 (** Allocate [inv_wsat] *)
-Lemma inv_wsat_alloc' `{!inv'GpreS FML Σ, !invGS_gen hlc Σ} :
-  ⊢ |==> ∃ _ : inv'GS FML Σ,
-    ∀ sm, □ (∀ Px Qx, Px ≡ Qx -∗ sm Px -∗ sm Qx) -∗ inv_wsat sm.
-Proof.
-  iMod sinv_wsat_alloc' as (?) "W". iModIntro. iExists _. iIntros (?) "Ne".
-  rewrite inv_wsat_unseal. iApply "W". by iApply inv_sem_ne.
-Qed.
 Lemma inv_wsat_alloc `{!inv'GpreS FML Σ, !invGS_gen hlc Σ} :
-  ⊢ |==> ∃ _ : inv'GS FML Σ, ∀ sm, ⌜NonExpansive sm⌝ -∗ inv_wsat sm.
+  ⊢ |==> ∃ _ : inv'GS FML Σ, ∀ sm, internal_ne sm -∗ inv_wsat sm.
 Proof.
-  iMod inv_wsat_alloc' as (?) "W". iModIntro. iExists _. iIntros (??).
-  iApply "W". iIntros "!> %% eqv ?". by iRewrite -"eqv".
+  iMod sinv_wsat_alloc as (?) "W". iModIntro. iExists _. iIntros (?) "Ne".
+  rewrite inv_wsat_unseal. iApply "W". iApply (inv_sem_ne with "Ne").
 Qed.

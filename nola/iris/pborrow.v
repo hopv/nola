@@ -210,22 +210,20 @@ Section pborrow.
   Proof. move=> ????[[[?|[?[??]]]|[?[??]]]|?]//=; solve_proper. Qed.
   (** [pbsem sm] is non-expansive if [sm] is *)
   Local Lemma pbsem_sem_ne {sm} :
-    □ (∀ Px Qx, Px ≡ Qx -∗ sm Px -∗ sm Qx) ⊢
-      □ (∀ Pb Pb', Pb ≡ Pb' -∗ pbsem sm Pb -∗ pbsem sm Pb').
+    internal_ne sm ⊢@{iProp Σ} internal_ne (pbsem sm).
   Proof.
-    iIntros "#Ne !>" ([s|?][s'|?]) "eqv"; rewrite sum_equivI //=; last first.
-    { iDestruct "eqv" as "<-". iIntros "$". }
-    rewrite sum_equivI; case: s=> [s|[?[??]]]; case: s'=> [s'|[?[??]]]//=;
+    iIntros "#Ne" ([s|?][s'|?]) "≡"; rewrite sum_equivI //=; [|by iRewrite "≡"].
+    rewrite sum_equivI; case: s=> [s|[?[? Φx]]]; case: s'=> [s'|[?[??]]]//=;
       last first.
-    { rewrite sigT_equivI /=. iDestruct "eqv" as (?) "eqv". subst=>/=.
+    { rewrite sigT_equivI /=. iDestruct "≡" as (?) "≡". subst=>/=.
       rewrite prod_equivI /= discrete_fun_equivI.
-      iDestruct "eqv" as "[<- #eqv]". iIntros "[%[$ Φx]]".
-      by iApply ("Ne" with "[] Φx"). }
-    rewrite sum_equivI; case: s=> [?|[?[??]]]; case: s'=> [?|[?[??]]]//=.
-    { iApply ("Ne" with "eqv"). }
-    rewrite sigT_equivI /=. iDestruct "eqv" as (?) "eqv". subst=>/=.
-    rewrite prod_equivI /= discrete_fun_equivI. iDestruct "eqv" as "[<- #eqv]".
-    iIntros "[%[$ Φx]]". by iApply ("Ne" with "[] Φx").
+      iDestruct "≡" as "[<- ≡]". iApply f_equivI_exist. iIntros (x).
+      by iRewrite ("Ne" $! (Φx x) with "≡"). }
+    rewrite sum_equivI; case: s=> [?|[?[? Φx]]]; case: s'=> [?|[?[??]]]//=.
+    { iApply ("Ne" with "≡"). }
+    rewrite sigT_equivI /=. iDestruct "≡" as (?) "≡". subst=>/=.
+    rewrite prod_equivI /= discrete_fun_equivI. iDestruct "≡" as "[<- ≡]".
+    iApply f_equivI_exist. iIntros (x). by iRewrite ("Ne" $! (Φx x) with "≡").
   Qed.
 
   (** World satisfaction *)
@@ -632,18 +630,10 @@ Section pborrow.
 End pborrow.
 
 (** Allocate [pborrow_wsat] *)
-Lemma pborrow_wsat_alloc' `{!pborrowGpreS TY FML Σ} :
-  ⊢ |==> ∃ _ : pborrowGS TY FML Σ,
-    ∀ M sm, □ (∀ Px Qx, Px ≡ Qx -∗ sm Px -∗ sm Qx) -∗ pborrow_wsat M sm.
+Lemma pborrow_wsat_alloc `{!pborrowGpreS TY FML Σ} :
+  ⊢ |==> ∃ _ : pborrowGS TY FML Σ, ∀ M sm, internal_ne sm -∗ pborrow_wsat M sm.
 Proof.
-  iMod proph_init as (?) "_". iMod borrow_wsat_alloc' as (?) "big".
+  iMod proph_init as (?) "_". iMod borrow_wsat_alloc as (?) "big".
   iModIntro. iExists (PborrowGS _ _ _ _ _ _). iIntros (??) "Ne". iApply "big".
   by iApply pbsem_sem_ne.
-Qed.
-Lemma pborrow_wsat_alloc `{!pborrowGpreS TY FML Σ} :
-  ⊢ |==> ∃ _ : pborrowGS TY FML Σ,
-    ∀ M sm, ⌜NonExpansive sm⌝ -∗ pborrow_wsat M sm.
-Proof.
-  iMod pborrow_wsat_alloc' as (?) "W". iModIntro. iExists _. iIntros (???).
-  iApply "W". iIntros "!> %% eqv ?". by iRewrite -"eqv".
 Qed.

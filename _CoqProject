@@ -17,6 +17,7 @@ nola/util/nary.v
 nola/util/cit.v
 
 nola/bi/util.v
+nola/bi/internal.v
 nola/bi/gmap.v
 nola/bi/plist.v
 nola/bi/order.v

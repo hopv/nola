@@ -1,6 +1,6 @@
 (** * Stored propositions *)
 
-From nola.bi Require Export modw.
+From nola.bi Require Export internal modw.
 From nola.iris Require Export iprop.
 From nola.iris Require Import sinv.
 From iris.proofmode Require Import proofmode.
@@ -76,13 +76,11 @@ Section store.
   Arguments store_sem _ _ _ /.
   (** [store_sem sm] is non-expansive when [sm] is *)
   Local Lemma store_sem_ne {sm} :
-    □ (∀ Px Qx, Px ≡ Qx -∗ sm Px -∗ sm Qx) ⊢
-      □ (∀ i bPx bQx, bPx ≡ bQx -∗ store_sem sm i bPx -∗ store_sem sm i bQx).
+    internal_ne sm ⊢@{iProp Σ} ∀ i, internal_ne (store_sem sm i).
   Proof.
-    iIntros "#Ne !>" (?[b ?][??]). rewrite prod_equivI /= discrete_eq.
-    rewrite leibniz_equiv_iff. iIntros "[%eq #eqv]". move: eq=> <-. case: b.
-    - iIntros "[Px|$]". iLeft. iApply ("Ne" with "eqv Px").
-    - iIntros "#Px !>". iApply ("Ne" with "eqv Px").
+    iIntros "#Ne" (?[b ?][??]). rewrite prod_equivI /= discrete_eq.
+    rewrite leibniz_equiv_iff. iIntros "[%eq ≡]". move: eq=> <-.
+    case: b; by iRewrite ("Ne" with "≡").
   Qed.
 
   (** World satisfaction *)
@@ -143,17 +141,10 @@ Section store.
 End store.
 
 (** Allocate [store_wsat] *)
-Lemma store_wsat_alloc' `{!storeGpreS FML Σ} :
-  ⊢ |==> ∃ _ : storeGS FML Σ,
-    ∀ sm, □ (∀ Px Qx, Px ≡ Qx -∗ sm Px -∗ sm Qx) -∗ store_wsat sm.
+Lemma store_wsat_alloc `{!storeGpreS FML Σ} :
+  ⊢ |==> ∃ _ : storeGS FML Σ, ∀ sm, internal_ne sm -∗ store_wsat sm.
 Proof.
-  iMod sinv_wsat_alloc' as (γ) "W". iModIntro. iExists (StoreGS _ _ _ _).
+  iMod sinv_wsat_alloc as (γ) "W". iModIntro. iExists (StoreGS _ _ _ _).
   iIntros (?) "Ne". rewrite store_wsat_unseal. iApply "W".
   by iApply store_sem_ne.
-Qed.
-Lemma store_wsat_alloc `{!storeGpreS FML Σ} :
-  ⊢ |==> ∃ _ : storeGS FML Σ, ∀ sm, ⌜NonExpansive sm⌝ -∗ store_wsat sm.
-Proof.
-  iMod store_wsat_alloc' as (?) "W". iModIntro. iExists _. iIntros (??).
-  iApply "W". iIntros "!> %% eqv ?". by iRewrite -"eqv".
 Qed.

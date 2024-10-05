@@ -1,6 +1,6 @@
 (** * Simple invariant *)
 
-From nola.bi Require Export modw.
+From nola.bi Require Export internal modw.
 From nola.iris Require Export iprop.
 From iris.algebra Require Import agree gmap_view.
 From iris.base_logic.lib Require Export own.
@@ -25,7 +25,7 @@ Proof. solve_inG. Qed.
 
 Section sinv.
   Context `{!sinvGS FML Σ}.
-  Implicit Type Px : FML $oi Σ.
+  Implicit Type (Px : FML $oi Σ) (sm : positive → FML $oi Σ → iProp Σ).
 
   (** Simple invariant token *)
   Local Definition sinv_tok_def i Px : iProp Σ :=
@@ -40,7 +40,7 @@ Section sinv.
     own sinv_name (gmap_view_auth (DfracOwn 1) (to_agree <$> M)).
   (** World satisfaction *)
   Definition sinv_wsat_def sm : iProp Σ :=
-    □ (∀ i Px Qx, Px ≡ Qx -∗ sm i Px -∗ sm i Qx) ∗
+    (∀ i, internal_ne (sm i)) ∗
     ∃ M, sinv_auth_tok M ∗ [∗ map] i ↦ Px ∈ M, sm i Px.
   Local Lemma sinv_wsat_aux : seal sinv_wsat_def. Proof. by eexists. Qed.
   Definition sinv_wsat := sinv_wsat_aux.(unseal).
@@ -70,10 +70,15 @@ Section sinv.
   #[export] Instance sinv_wsat_ne {n} :
     Proper (pointwise_relation _ (pointwise_relation _ (≡{n}≡)) ==> (≡{n}≡))
       sinv_wsat.
-  Proof. rewrite sinv_wsat_unseal. solve_proper. Qed.
+  Proof.
+    rewrite sinv_wsat_unseal /sinv_wsat_def=> ?? eqv. repeat f_equiv. apply eqv.
+  Qed.
   #[export] Instance sinv_wsat_proper :
-    Proper (pointwise_relation _ (pointwise_relation _ (≡)) ==> (≡)) sinv_wsat.
-  Proof. rewrite sinv_wsat_unseal. solve_proper. Qed.
+    Proper (pointwise_relation _ (pointwise_relation _ (≡)) ==> (≡))
+      sinv_wsat.
+  Proof.
+    rewrite sinv_wsat_unseal /sinv_wsat_def=> ?? eqv. repeat f_equiv. apply eqv.
+  Qed.
 
   (** [sinv_wsat] is timeless if [sm] is always timeless
     and the underlying ofe is discrete *)
@@ -117,10 +122,9 @@ Section sinv.
   Proof.
     rewrite sinv_wsat_unseal. iIntros "i [#Ne[%M[● M]]]".
     iDestruct (sinv_auth_tok_lookup with "● i") as (Px' eq) "#≡".
-    iDestruct (big_sepM_lookup_acc with "M") as "[Px' →M]"; [done|].
-    iDestruct ("Ne" with "[] Px'") as "$"; [by iApply internal_eq_sym|].
-    iIntros "Px". iDestruct ("Ne" with "≡ Px") as "Px'". iFrame "Ne ●".
-    by iApply "→M".
+    iRewrite ("Ne" $! i with "≡").
+    iDestruct (big_sepM_lookup_acc with "M") as "[$ →M]"; [done|]. iIntros "Px".
+    iFrame "Ne ●". by iApply "→M".
   Qed.
 End sinv.
 
@@ -132,16 +136,9 @@ Proof.
   { apply gmap_view_auth_valid. } { iModIntro. by iExists (SinvGS _ _ _ γ). }
 Qed.
 (** Allocate [sinv_wsat] *)
-Lemma sinv_wsat_alloc' `{!sinvGpreS FML Σ} :
-  ⊢ |==> ∃ _ : sinvGS FML Σ,
-    ∀ sm, □ (∀ i Px Qx, Px ≡ Qx -∗ sm i Px -∗ sm i Qx) -∗ sinv_wsat sm.
+Lemma sinv_wsat_alloc `{!sinvGpreS FML Σ} :
+  ⊢ |==> ∃ _ : sinvGS FML Σ, ∀ sm, (∀ i, internal_ne (sm i)) -∗ sinv_wsat sm.
 Proof.
   iMod sinv_auth_tok_alloc_empty as (?) "●". iModIntro. iExists _.
   iIntros (?) "Ne". rewrite sinv_wsat_unseal. by iFrame.
-Qed.
-Lemma sinv_wsat_alloc `{!sinvGpreS FML Σ} :
-  ⊢ |==> ∃ _ : sinvGS FML Σ, ∀ sm, ⌜∀ i, NonExpansive (sm i)⌝ -∗ sinv_wsat sm.
-Proof.
-  iMod sinv_wsat_alloc' as (?) "W". iModIntro. iExists _. iIntros (??).
-  iApply "W". iIntros "!> %%% eqv ?". by iRewrite -"eqv".
 Qed.
