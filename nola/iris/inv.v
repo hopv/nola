@@ -26,7 +26,7 @@ Section inv.
 
   (** [inv_tok]: Invariant token *)
   Local Definition inv_tok_def (N : namespace) (Px : FML $oi Σ) : iProp Σ :=
-    ∃ i, ⌜i ∈ (↑N:coPset)⌝ ∗ sinv_itok i Px.
+    ∃ i, ⌜i ∈ (↑N:coPset)⌝ ∗ sinv_tok i Px.
   Local Definition inv_tok_aux : seal inv_tok_def. Proof. by eexists. Qed.
   Definition inv_tok := inv_tok_aux.(unseal).
   Local Lemma inv_tok_unseal : inv_tok = inv_tok_def.
@@ -59,7 +59,7 @@ Section inv.
 
   (** World satisfaction *)
   Local Definition inv_wsat_def (sm : FML $oi Σ -d> iProp Σ) : iProp Σ :=
-    sinv_iwsat (inv_sem sm).
+    sinv_wsat (inv_sem sm).
   Local Definition inv_wsat_aux : seal inv_wsat_def. Proof. by eexists. Qed.
   Definition inv_wsat := inv_wsat_aux.(unseal).
   Local Lemma inv_wsat_unseal : inv_wsat = inv_wsat_def.
@@ -112,7 +112,7 @@ Section inv.
     (inv_tok N Px -∗ sm Px) =[inv_wsat sm]=∗ inv_tok N Px.
   Proof.
     rewrite inv_tok_unseal inv_wsat_unseal. iIntros "→Px W".
-    iDestruct (sinv_itok_alloc Px with "W") as (I) "big".
+    iDestruct (sinv_tok_alloc Px with "W") as (I) "big".
     iMod (alloc_ownD I N) as (???) "D". iMod ("big" with "[//]") as "[#i →W]".
     iModIntro. iSplitL; [|iExists _; by iSplit]. iApply "→W". iLeft.
     iSplitR "D"; [|done]. iApply "→Px". iExists _; by iSplit.
@@ -128,13 +128,13 @@ Section inv.
       (sm Px =[inv_wsat sm]{E∖↑N, E}=∗ True).
   Proof.
     rewrite inv_tok_unseal inv_wsat_unseal=> NE. iIntros "W".
-    iDestruct (sinv_itok_alloc Px with "W") as (I) "big".
+    iDestruct (sinv_tok_alloc Px with "W") as (I) "big".
     iMod (alloc_ownD I N) as (?? iN) "D".
     iMod ("big" with "[//]") as "[#sm →W]".
     iMod (fupd_ownE_acc_in iN NE) as "[i cl]".
     iDestruct ("→W" with "[$i]") as "$". iModIntro.
     iSplit; [iExists _; by iSplit|]. iIntros "Px W".
-    iDestruct (sinv_itok_acc with "sm W") as "[[[_ D']|i] →W]".
+    iDestruct (sinv_tok_acc with "sm W") as "[[[_ D']|i] →W]".
     { iDestruct (ownD_singleton_twice with "[$D $D']") as %[]. }
     iMod ("cl" with "i") as "_". iModIntro. iSplit; [|done]. iApply "→W".
     iLeft. iFrame.
@@ -147,11 +147,11 @@ Section inv.
   Proof.
     rewrite inv_tok_unseal inv_wsat_unseal=> NE. iIntros "[%i[%iN #sm]] W".
     iMod (fupd_ownE_acc_in iN NE) as "[i cl]".
-    iDestruct (sinv_itok_acc with "sm W") as "[in →W]".
+    iDestruct (sinv_tok_acc with "sm W") as "[in →W]".
     iDestruct "in" as "[[$ D]|i']"; last first.
     { iDestruct (ownE_singleton_twice with "[$i $i']") as %[]. }
     iDestruct ("→W" with "[$i]") as "$". iIntros "!> Px W".
-    iDestruct (sinv_itok_acc with "sm W") as "[[[_ D']|i] →W]".
+    iDestruct (sinv_tok_acc with "sm W") as "[[[_ D']|i] →W]".
     { iDestruct (ownD_singleton_twice with "[$D $D']") as %[]. }
     iMod ("cl" with "i") as "_". iModIntro. iSplit; [|done]. iApply "→W".
     iLeft. iFrame.
@@ -188,7 +188,7 @@ Lemma inv_wsat_alloc' `{!inv'GpreS FML Σ, !invGS_gen hlc Σ} :
   ⊢ |==> ∃ _ : inv'GS FML Σ,
     ∀ sm, □ (∀ Px Qx, Px ≡ Qx -∗ sm Px -∗ sm Qx) -∗ inv_wsat sm.
 Proof.
-  iMod sinv_iwsat_alloc' as (?) "W". iModIntro. iExists _. iIntros (?) "Ne".
+  iMod sinv_wsat_alloc' as (?) "W". iModIntro. iExists _. iIntros (?) "Ne".
   rewrite inv_wsat_unseal. iApply "W". by iApply inv_sem_ne.
 Qed.
 Lemma inv_wsat_alloc `{!inv'GpreS FML Σ, !invGS_gen hlc Σ} :
