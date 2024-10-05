@@ -89,9 +89,7 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`option`](nola/iris/option.v) (On `option`),
     [`agree`](nola/iris/agree.v) (On `agree`),
     [`csum`](nola/iris/csum.v) (On `csum`)
-  + [`sinv`](nola/iris/sinv.v) (Simple invariant),
-    [`sinv_deriv`](nola/iris/sinv_deriv.v) (Simple invariant relaxed with
-      derivability)
+  + [`sinv`](nola/iris/sinv.v) (Simple invariant)
   + [`inv`](nola/iris/inv.v) (Invariant),
     [`inv_deriv`](nola/iris/inv_deriv.v) (Invariant relaxed with derivability),
     [`na_inv`](nola/iris/na_inv.v) (Non-atomic invariant),

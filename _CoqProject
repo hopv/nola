@@ -33,7 +33,6 @@ nola/iris/option.v
 nola/iris/agree.v
 nola/iris/csum.v
 nola/iris/sinv.v
-nola/iris/sinv_deriv.v
 nola/iris/inv.v
 nola/iris/inv_deriv.v
 nola/iris/na_inv.v
