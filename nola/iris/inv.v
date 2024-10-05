@@ -15,7 +15,7 @@ Class inv'GpreS FML Σ := inv'GpreS_sinv : sinvGpreS FML Σ.
 Local Existing Instance inv'GpreS_sinv.
 Class inv'GS FML Σ := inv'GS_sinv : sinvGS FML Σ.
 Local Existing Instance inv'GS_sinv.
-Definition inv'Σ FML `{!oFunctorContractive FML} := #[sinvΣ FML].
+Definition inv'Σ FML `{!oFunctorContractive FML} := sinvΣ FML.
 #[export] Instance subG_inv'Σ
   `{!oFunctorContractive FML, !subG (inv'Σ FML) Σ} : inv'GpreS FML Σ.
 Proof. solve_inG. Qed.

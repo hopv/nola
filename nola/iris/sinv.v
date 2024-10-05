@@ -17,8 +17,8 @@ Class sinvGS FML Σ := SinvGS {
   sinv_name : gname;
 }.
 Local Existing Instance sinvGS_pre.
-Definition sinvΣ FML `{!oFunctorContractive FML} :=
-  #[GFunctor (gmap_viewRF positive (agreeRF FML))].
+Definition sinvΣ FML `{!oFunctorContractive FML} : gFunctors :=
+  GFunctor (gmap_viewRF positive (agreeRF FML)).
 #[export] Instance subG_sinvΣ
   `{!oFunctorContractive FML, !subG (sinvΣ FML) Σ} : sinvGpreS FML Σ.
 Proof. solve_inG. Qed.
