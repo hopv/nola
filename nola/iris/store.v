@@ -3,8 +3,8 @@
 From nola.bi Require Export internal modw.
 From nola.iris Require Export iprop.
 From nola.iris Require Import sinv.
-From iris.proofmode Require Import proofmode.
 From iris.base_logic Require Import lib.token.
+From iris.proofmode Require Import proofmode.
 Import iPropAppNotation ModwNotation.
 
 Implicit Type (FML : oFunctor) (i : positive).
