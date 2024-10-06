@@ -407,6 +407,8 @@ Section fupdw.
   Lemma fupdw_mask_intro {E E' W P} : E' ⊆ E →
     ((|={E',E}=> emp) -∗ P) ⊢ |=[W]{E,E'}=> P.
   Proof. iIntros (?) "? $". by iApply fupd_mask_intro. Qed.
+  Lemma idw_fupdw E {W P} : (|->[W] P) ⊢ |=[W]{E}=> P.
+  Proof. iIntros "→P W !>". by iApply "→P". Qed.
   Lemma bupdw_fupdw `{!BiBUpd PROP, !BiBUpdFUpd PROP} E {W P} :
     (|=[W]=> P) ⊢ |=[W]{E}=> P.
   Proof. exact from_bupdw. Qed.
