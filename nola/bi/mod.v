@@ -284,7 +284,7 @@ Section is_bupd.
   Lemma is_bupd_0 `{!IsExcept0 P} : (|==>◇ P) ⊢ P.
   Proof. by rewrite /bupd_0 is_except_0 is_bupd. Qed.
   #[export] Instance elim_modal_bupd_0_is_bupd_except_0 `{!IsExcept0 P} {p Q} :
-    ElimModal True p false (|==>◇ Q) Q P P.
+    ElimModal True p false (|==>◇ Q) Q P P | 0.
   Proof.
     by rewrite /ElimModal bi.intuitionistically_if_elim mod_frame_r
       bi.wand_elim_r is_bupd_0.
@@ -428,13 +428,11 @@ Section bupd_0.
     Frame p R (|==>◇ P) (|==>◇ Q).
   Proof. exact _. Qed.
 
-  #[export] Instance elim_modal_bupd_0 {p P Q} :
-    ElimModal True p false (|==>◇ P) P (|==>◇ Q) (|==>◇ Q).
-  Proof. exact _. Qed.
-  #[export] Instance add_modal_bupd_0 {P Q} : AddModal (|==>◇ P) P (|==>◇ Q).
+  #[export] Instance add_modal_bupd_0 {P Q} :
+    AddModal (|==>◇ P) P (|==>◇ Q) | 2.
   Proof. exact _. Qed.
   #[export] Instance from_sep_bupd_0 `{!FromSep P Q Q'} :
-    FromSep (|==>◇ P) (|==>◇ Q) (|==>◇ Q').
+    FromSep (|==>◇ P) (|==>◇ Q) (|==>◇ Q') | 2.
   Proof. exact _. Qed.
 
   #[export] Instance bupd_0_sep_homomorphism :

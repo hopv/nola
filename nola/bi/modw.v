@@ -306,7 +306,7 @@ Section mod_bupd.
   (** Eliminate [bupdw_0] *)
   #[export] Instance elim_modal_bupdw_0_modw_modw_upd
     `{!WsatIncl W W' Wr, !ModExcept0 M} {p P Q} :
-    ElimModal True p false (|=[W']=>◇ P) P (modw M W Q) (modw M W Q).
+    ElimModal True p false (|=[W']=>◇ P) P (modw M W Q) (modw M W Q) | 2.
   Proof. exact _. Qed.
 
   (** Absorb [bupdw] *)

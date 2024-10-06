@@ -339,7 +339,7 @@ Section wpw.
   #[export] Instance elim_modal_bupdw_0_wpw
     `{!WsatIncl W W' Wr} {p e s E P Φ} :
     ElimModal (to_val e = None) p false (|=[W']=>◇ P) P
-      (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E {{ Φ }}).
+      (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E {{ Φ }}) | 2.
   Proof. move=> ?. by rewrite (bupdw_0_fupdw E) elim_modal_fupdw_wpw. Qed.
 
   (** Eliminate [fupdw] over [twpw] *)
@@ -377,7 +377,7 @@ Section wpw.
   #[export] Instance elim_modal_bupdw_0_twpw
     `{!WsatIncl W W' Wr} {p e s E P Φ} :
     ElimModal (to_val e = None) p false (|=[W']=>◇ P) P
-      (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E [{ Φ }]).
+      (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E [{ Φ }]) | 2.
   Proof. move=> ?. by rewrite (bupdw_0_fupdw E) elim_modal_fupdw_twpw. Qed.
 
   (** Mask-changing [fupdw] over atomic [wpw] *)
