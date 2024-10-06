@@ -1,13 +1,13 @@
 (** * Derivability *)
 
-From nola.examples Require Export nsynty con.
+From nola.examples Require Export con.
 From nola.rust_lang Require Export notation proofmode.
-Import ModwNotation WpwNotation DsemNotation LftNotation NsyntyNotation.
+Import ModwNotation WpwNotation DsemNotation LftNotation.
 
 Section deriv.
   Context `{!lrustGS_gen hlc Σ, !SemCifcon JUDG CON Σ, !Jsem JUDG (iProp Σ),
     !inv'GS (cifOF CON) Σ, !InvCon CON, !InvSem JUDG CON Σ,
-    !pborrowGS nsynty (cifOF CON) Σ, !BorCon CON, !BorSem JUDG CON Σ,
+    !borrowGS (cifOF CON) Σ, !BorCon CON, !BorSem JUDG CON Σ,
     !Inv'Con CON, !IffJudg (cifO CON Σ) JUDG, !Inv'Sem JUDG CON Σ,
     !IffJsem (cifO CON Σ) Σ JUDG}.
   Implicit Type (Px Qx : cif CON Σ) (Φx Ψx : loc → cif CON Σ).
@@ -101,7 +101,7 @@ Section deriv.
     α ⊑□ β -∗ β ⊑□ α -∗ inv' δ N (cif_bor α Px) -∗ inv' δ N (cif_bor β Px).
   Proof.
     iIntros "#? #?". iApply inv'_iff. iIntros "!>" (????).
-    rewrite /= !sem_ecustom /=. iSplit; by iApply nbor_tok_lft.
+    rewrite /= !sem_ecustom /=. iSplit; by iApply bor_tok_lft.
   Qed.
   Lemma inv'_bor_lft `{!Deriv ih δ} {N α β Px} :
     α ⊑□ β -∗ β ⊑□ α -∗ inv' δ N (cif_bor α Px) ∗-∗ inv' δ N (cif_bor β Px).

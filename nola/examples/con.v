@@ -68,20 +68,20 @@ Section cif_bor.
     move=> ????. apply cif_ecustom_preserv_productive=>//.
     by apply fun_proeq_later.
   Qed.
-  Context `{!pborrowGS TY (cifOF CON) Σ}.
+  Context `{!borrowGS (cifOF CON) Σ}.
   (** Semantics of [borCC] *)
   #[export] Program Instance bor_sem_ecifcon {JUDG}
     : SemEcifcon JUDG borCC CON Σ :=
-    SEM_ECIFCON (λ _ _ α _ Φx _, nbor_tok α (Φx ())) _.
+    SEM_ECIFCON (λ _ _ α _ Φx _, bor_tok α (Φx ())) _.
   Next Obligation. move=>/= ???*???*?? eqv ???. f_equiv. apply eqv. Qed.
 End cif_bor.
 (** [borCC] semantics registered *)
 Notation BorSem JUDG CON Σ := (EsemEcifcon JUDG borCC CON Σ).
 
-(** Reify [nbor_tok] *)
-#[export] Program Instance nbor_tok_as_cif `{!SemCifcon JUDG CON Σ, !BorCon CON}
-  `{!pborrowGS TY (cifOF CON) Σ, !BorSem JUDG CON Σ} {α Px} :
-  AsCif CON (λ _, nbor_tok α Px) := AS_CIF (cif_bor α Px) _.
+(** Reify [bor_tok] *)
+#[export] Program Instance bor_tok_as_cif `{!SemCifcon JUDG CON Σ, !BorCon CON}
+  `{!borrowGS (cifOF CON) Σ, !BorSem JUDG CON Σ} {α Px} :
+  AsCif CON (λ _, bor_tok α Px) := AS_CIF (cif_bor α Px) _.
 Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
 
 (** ** Prophetic borrow *)
@@ -109,7 +109,7 @@ Section cif_pbor.
   #[export] Instance cif_pbor_productive {X α x ξ} :
     Productive (@cif_pbor X α x ξ).
   Proof. solve_proper. Qed.
-  Context `{!pborrowGS TY (cifOF CON) Σ}.
+  Context `{!borrowGS (cifOF CON) Σ, !prophGS TY Σ, !proph_agG TY Σ}.
   (** Semantics of [pborCC] *)
   #[export] Program Instance pbor_sem_ecifcon {JUDG}
     : SemEcifcon JUDG (pborCC TY) CON Σ :=
@@ -120,8 +120,9 @@ End cif_pbor.
 Notation PborSem TY JUDG CON Σ := (EsemEcifcon JUDG (pborCC TY) CON Σ).
 
 (** Reify [pbor_tok] *)
-#[export] Program Instance pbor_tok_as_cif `{!SemCifcon JUDG CON Σ}
-  `{!PborCon TY CON, !pborrowGS TY (cifOF CON) Σ, !PborSem TY JUDG CON Σ}
+#[export] Program Instance pbor_tok_as_cif
+  `{!PborCon TY CON, !borrowGS (cifOF CON) Σ, !prophGS TY Σ, !proph_agG TY Σ,
+    !SemCifcon JUDG CON Σ, !PborSem TY JUDG CON Σ}
   {X α x ξ Φx} :
   AsCif CON (λ _, pbor_tok (X:=X) α x ξ Φx) := AS_CIF (cif_pbor α x ξ Φx) _.
 Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
