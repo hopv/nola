@@ -594,12 +594,9 @@ Section lemmas.
         { move=> ?. right. apply sim. move: eq. rewrite !lookup_op.
           by rewrite !lookup_singleton_ne; [|done..]. }
         move=> eqi. move: eq. rewrite eqi lookup_op lookup_singleton.
-        move=> /aitem_eq_agree. move: eqi. clear. move: xπ yπ.
-        have ->: ξ = Aprvar ξ.(aprvar_ty) ξ.(aprvar_var); [done|].
-        have ->: ζ = Aprvar ζ.(aprvar_ty) ζ.(aprvar_var); [done|].
-        move: (ξ.(aprvar_ty)) (ξ.(aprvar_var)) (ζ.(aprvar_ty))
-          (ζ.(aprvar_var))=> ?[h ?]?[h' ?]/=??.
-        left. simplify_eq. by rewrite (proof_irrel h h').
+        move=> /aitem_eq_agree. move: eqi. clear.
+        move: ξ ζ xπ yπ=> [?[h ?]][?[h' ?]]/= ??. left. simplify_eq.
+        by rewrite (proof_irrel h h').
     - apply (proph_sim_op_l val) in sim. apply cmra_valid_op_l in val.
       split; [|split; [|done]].
       { apply (proph_sim_op_l val) in sim. apply sim. exists 1%Qp.
