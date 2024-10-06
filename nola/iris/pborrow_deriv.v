@@ -2,7 +2,7 @@
 
 From nola.util Require Import tagged.
 From nola.bi Require Export deriv.
-From nola.iris Require Export pborrow borrow_deriv.
+From nola.iris Require Export pborrow.
 From iris.proofmode Require Import proofmode.
 Import ProdNotation PlistNotation FunNPNotation iPropAppNotation ModwNotation
   LftNotation ProphNotation DsemNotation.
@@ -277,9 +277,8 @@ End pborrow_deriv.
 
 Section pborrow_deriv.
   Context `{!borrowGS (cifOF CON) Σ, !prophGS TY Σ, !proph_agG TY Σ,
-    !PborrowJudg TY CON Σ JUDG, !BorrowJudg (cif CON Σ) JUDG,
-    !Jsem JUDG (iProp Σ), !SemCifcon JUDG CON Σ, !PborrowJsem TY CON Σ JUDG,
-    !BorrowJsem (cifOF CON) Σ JUDG,
+    !PborrowJudg TY CON Σ JUDG, !Jsem JUDG (iProp Σ), !SemCifcon JUDG CON Σ,
+    !PborrowJsem TY CON Σ JUDG,
     !@ModUpd (iProp Σ) M, !ModBUpd M, !ModExcept0 M}.
   Implicit Type (X Y : TY) (Px Qx : cif CON Σ).
 
@@ -352,12 +351,11 @@ Section pborrow_deriv.
       ([∗ plist] '(_, _, ξ, _, f)' ∈ αqξΦxfl,
         ⟨π, π (Aprvar _ ξ) = f (app_plist_prvar π ηl)⟩) ∗
       ([∗ plist] '(η, y, Ψx)' ∈ plist_zip ηl yΨxl, pbord β y η Ψx) ∗
-      [∗ list] Rx ∈ Rxl, bord β Rx.
+      [∗ list] Rx ∈ Rxl, bor_tok β Rx.
   Proof.
     rewrite from_sincl_pobords /=.
     iIntros "(% & %eq & %eq' & ol & →) Ψxl Rxl →Φxl". setoid_rewrite eq.
     setoid_rewrite eq'. setoid_rewrite <-pbor_tok_pbor.
-    setoid_rewrite <-bor_tok_bor.
     iApply (pobor_tok_merge_subdiv (M:=M) with "ol Ψxl Rxl").
     iIntros "% † Ψxl Rxl". iMod ("→Φxl" with "† Ψxl Rxl") as "Φxl".
     by iMod ("→" with "Φxl").
@@ -371,7 +369,7 @@ Section pborrow_deriv.
       ∃ ηl,
       q.[α] ∗ ⟨π, π (Aprvar _ ξ) = f (app_plist_prvar π ηl)⟩ ∗
       ([∗ plist] '(η, y, Ψx)' ∈ plist_zip ηl yΨxl, pbord β y η Ψx) ∗
-      [∗ list] Rx ∈ Rxl, bord β Rx.
+      [∗ list] Rx ∈ Rxl, bor_tok β Rx.
   Proof.
     iIntros "⊑ o Ψxl Rxl →Φx".
     iMod (pobord_merge_subdiv [_] _ ((_,_,_,_,_)',())'
@@ -382,7 +380,7 @@ Section pborrow_deriv.
   (** Resolve the prophecy of a prophetic borrower *)
   Lemma pobord_resolve {X α q ξ Φx} (x : X) :
     pobord α q ξ Φx -∗ ⟦ Φx x ⟧ =[borrow_wsat M ⟦⟧]=∗◇
-      q.[α] ∗ ⟨π, π ξ = x⟩ ∗ bord α (Φx x).
+      q.[α] ∗ ⟨π, π ξ = x⟩ ∗ bor_tok α (Φx x).
   Proof.
     iIntros "o Φx".
     iMod (pobord_subdiv [] (λ _, x) () [Φx x] with "[] o [//] [Φx] []")
@@ -391,7 +389,7 @@ Section pborrow_deriv.
   Qed.
   Lemma pbord_resolve {X α q x ξ} {Φx : X → _} :
     q.[α] -∗ pbord α x ξ Φx -∗ modw M (borrow_wsat M ⟦⟧)
-      (q.[α] ∗ ⟨π, π ξ = x⟩ ∗ bord α (Φx x)).
+      (q.[α] ∗ ⟨π, π ξ = x⟩ ∗ bor_tok α (Φx x)).
   Proof.
     iIntros "α b". iMod (pbord_open with "α b") as "[o Φx]".
     iMod (pobord_resolve with "o Φx") as "$". by iIntros.
