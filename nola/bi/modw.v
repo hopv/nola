@@ -172,6 +172,10 @@ Section modw.
   #[export] Instance mod_except_0_modw `{!ModExcept0 M} {W} :
     ModExcept0 (modw M W).
   Proof. unfold IsExcept0. by iIntros "% >?". Qed.
+  #[export] Instance elim_modal_except_0_modw
+    `{!ModExcept0 M, !IntoExcept0 P P'} {p W Q} :
+    ElimModal True p p P P' (modw M W Q) (modw M W Q) | 0.
+  Proof. exact _. Qed.
 
   (** Compose [modw]s composing the modalities *)
   Lemma modw_compose {M' M'' W P} :
