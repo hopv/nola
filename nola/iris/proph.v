@@ -357,7 +357,7 @@ Section lemmas.
 
   (** On [proph_toks] *)
   Lemma proph_toks_singleton {ξ q} : q:[ξ] ⊣⊢ q:∗[[ξ]].
-  Proof. by rewrite/= right_id. Qed.
+  Proof. by rewrite /= right_id. Qed.
   Lemma proph_toks_combine {ξl ηl q r} :
     q:∗[ξl] -∗ r:∗[ηl] -∗ ∃ s,
       s:∗[ξl ++ ηl] ∗ (s:∗[ξl ++ ηl] -∗ q:∗[ξl] ∗ r:∗[ηl]).

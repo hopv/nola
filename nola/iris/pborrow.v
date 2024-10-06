@@ -446,7 +446,7 @@ Section pborrow.
       ∀ yl', ⟨π, app_plist_prvar π ηl = yl'⟩ -∗
         [∗ plist] '(γ, _, _, ξ, _, f)' ∈ γαqξΦxfl, proph_ctrl γ (f yl') ξ.
   Proof.
-    rewrite/= pobor_tok_unseal. elim: Xl αqξΦxfl=>/=.
+    rewrite /= pobor_tok_unseal. elim: Xl αqξΦxfl=>/=.
     { iIntros (_) "$ _ !>". iExists (). do 2 (iSplit; [done|]). by iIntros. }
     move=> X Xl IH [[α[q[ξ[Φx f]]]] αqξΦxfl].
     iIntros "ηl [[$[%[[%[vo pc]]o]]] ol]".

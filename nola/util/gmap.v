@@ -110,7 +110,7 @@ Section map_with.
   Lemma map_with_without {A} {m : gmap K A} {l} :
     map_with m l = map_without m l ∪ m.
   Proof.
-    elim: l; [by rewrite/= left_id|]=>/= a l IH.
+    elim: l; [by rewrite /= left_id|]=>/= a l IH.
     by rewrite -insert_union_l -IH.
   Qed.
 
