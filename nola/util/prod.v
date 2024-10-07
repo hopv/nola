@@ -2,8 +2,8 @@
 
 From nola Require Export prelude.
 
-(** [prod']: Modified [prod],
-  using primitive projections and right-associative notations *)
+(** ** [prod']: Modified [prod] with primitive projections and
+  right-associative notations *)
 #[projections(primitive)]
 Record prod' (A B : Type) : Type := pair' { fst' : A; snd' : B; }.
 Add Printing Constructor prod'.
