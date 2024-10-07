@@ -695,19 +695,18 @@ Section proph_eqz.
   Qed.
 
   (** Construct [proph_eqz] using an injective function *)
-  Lemma proph_eqz_constr {A B} f `{!@Inj A B (=) (=) f} aπ aπ' :
+  Lemma proph_eqz_f {A B} f `{!@Inj A B (=) (=) f} aπ aπ' :
     proph_eqz aπ aπ' ⊢ proph_eqz (λ π, f (aπ π)) (λ π, f (aπ' π)).
   Proof.
-    iIntros "eqz" (?? dep). move: dep=> /proph_dep_destr ?.
+    iIntros "eqz" (?? dep). move: dep=> /proph_dep_unf ?.
     iMod ("eqz" with "[//]") as "obs". iModIntro.
     by iApply (proph_obs_impl with "obs")=> ?->.
   Qed.
-  Lemma proph_eqz_constr2 {A B C} f `{!@Inj2 A B C (=) (=) (=) f}
-    aπ aπ' bπ bπ' :
+  Lemma proph_eqz_f2 {A B C} f `{!@Inj2 A B C (=) (=) (=) f} aπ aπ' bπ bπ' :
     proph_eqz aπ aπ' -∗ proph_eqz bπ bπ' -∗
       proph_eqz (λ π, f (aπ π) (bπ π)) (λ π, f (aπ' π) (bπ' π)).
   Proof.
-    iIntros "eqz eqz'" (?? dep). move: dep=> /proph_dep_destr2[??].
+    iIntros "eqz eqz'" (?? dep). move: dep=> /proph_dep_unf2[??].
     iMod ("eqz" with "[//]") as "obs". iMod ("eqz'" with "[//]") as "obs'".
     iModIntro. by iApply (proph_obs_impl2 with "obs obs'")=> ? -> ->.
   Qed.

@@ -249,7 +249,7 @@ Section pborrow.
     iMod (IH with "ηl ol") as (γl) "[ηl[$[ol →pcl]]]". iExists (γ, γl)'=>/=.
     iFrame "o ol".
     iMod (vo_pc_preresolve (λ π, f (app_plist_prvar π ηl)) with "ηl vo pc")
-      as "[$[$ →pc]]"; [exact: proph_dep_plist|]. iModIntro.
+      as "[$[$ →pc]]"; [exact: proph_dep_f_plist_prvar|]. iModIntro.
     iIntros (yl') "#obs". iDestruct ("→pcl" with "obs") as "$". iApply "→pc".
     by iApply (proph_obs_impl with "obs")=> ? ->.
   Qed.
@@ -400,7 +400,7 @@ Section pborrow.
     iMod (proph_alloc y) as (η') "η'". iExists η'.
     iMod (vo_pc_preresolve (λ π, f (π η')) [Aprvar _ η'] with "[$η' //] vo pc")
       as "[[η' _][$ →pc]]".
-    { apply proph_dep_constr, proph_dep_one. }
+    { apply proph_dep_f, proph_dep_one. }
     iMod (vo_pc_alloc with "η'") as (γ'') "[vo'' pc'']".
     iMod (obor_tok_merge_subdiv (FML:=cifOF _) (M:=M) [(_,_,_)';(_,_,_)']
       [cif_xpbor γ'' η' Ψx] with "[$o $o'] [pc'' Ψx] [→pc vo' pc' vox vox']")
