@@ -147,7 +147,7 @@ Section lemmas.
   Lemma proph_dep_const {A} a : @proph_dep A TY (λ _, a) [].
   Proof. done. Qed.
 
-  (** On [(.$ ξ)] *)
+  (** On the clairvoyant value for a prophecy variable *)
   Lemma proph_dep_one ξ : proph_dep (λ π, π ξ) [ξ].
   Proof. move=> ?? eqv. apply eqv. constructor. Qed.
 
