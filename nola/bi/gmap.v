@@ -77,9 +77,9 @@ Section big_sepM.
 
   (** [[∗ map]] over [map_by] *)
   Lemma big_sepM_map_by `{!Infinite K} l (Φ : A → PROP) :
-    ([∗ map] x ∈ map_by K l, Φ x) ⊣⊢ [∗ list] x ∈ l, Φ x.
+    ([∗ map] x ∈ map_by (K:=K) l, Φ x) ⊣⊢ [∗ list] x ∈ l, Φ x.
   Proof. by rewrite big_sepM_map_with big_sepM_empty right_id. Qed.
   Lemma big_sepM_map_by' `{!Infinite K} l (Φ : K → A → PROP) :
-    ([∗ map] i ↦ x ∈ map_by K l, Φ i x) ⊢ [∗ list] x ∈ l, ∃ i, Φ i x.
+    ([∗ map] i ↦ x ∈ map_by (K:=K) l, Φ i x) ⊢ [∗ list] x ∈ l, ∃ i, Φ i x.
   Proof. by rewrite big_sepM_map_with' big_sepM_empty right_id. Qed.
 End big_sepM.

@@ -7,10 +7,13 @@ Import ProdNotation.
 
 Implicit Type PROP : bi.
 
-Fixpoint big_sepPL {PROP A} {F : A → Type} {al} (Φ : ∀ a, F a → PROP)
-  : plist F al → PROP :=
+(** Separating conjunction over [plist] *)
+Section big_sepPL.
+  Context {PROP A} {F : A → Type} (Φ : ∀ a, F a → PROP).
+  Fixpoint big_sepPL {al} : plist F al → PROP :=
   match al with [] => λ _, emp | _ :: _ =>
-    λ '(x, xl)', Φ _ x ∗ big_sepPL Φ xl end%I.
+    λ '(x, xl)', Φ _ x ∗ big_sepPL xl end%I.
+End big_sepPL.
 
 Module PlistNotation.
   Notation "[∗ plist] a ∈ al ; x ∈ xl , P" := (big_sepPL (al:=al) (λ a x, P) xl)
@@ -29,37 +32,36 @@ Section big_sepPL.
   Context {PROP A} {F : A → Type}.
 
   (** [big_sepPL] is non-expansive *)
-  #[export] Instance big_sepPL_ne {n al} :
-    Proper
-      (forall_relation (λ _, pointwise_relation _ (≡{n}≡)) ==> (=) ==> (≡{n}≡))
-      (@big_sepPL PROP A F al).
+  #[export] Instance big_sepPL_ne {n} :
+    Proper (forall_relation (λ _, pointwise_relation _ (≡{n}≡)) ==>
+      forall_relation (λ _, (=) ==> (≡{n}≡)))
+      (@big_sepPL PROP A F).
   Proof.
-    move=> ?? eq xl _<-. elim: al xl; [done|]=>/= ?? IH ?. by rewrite eq IH.
+    move=> ?? eq al xl _ <-. elim: al xl; [done|]=>/= ?? IH ?. by rewrite eq IH.
   Qed.
   (** [big_sepPL] is proper *)
-  #[export] Instance big_sepPL_proper {al} :
-    Proper
-      (forall_relation (λ _, pointwise_relation _ (⊣⊢)) ==> (=) ==> (⊣⊢))
-      (@big_sepPL PROP A F al).
+  #[export] Instance big_sepPL_proper :
+    Proper (forall_relation (λ _, pointwise_relation _ (⊣⊢)) ==>
+      forall_relation (λ _, (=) ==> (⊣⊢)))
+      (@big_sepPL PROP A F).
   Proof.
-    move=> ?? eq xl _<-. elim: al xl; [done|]=>/= ?? IH ?. by rewrite eq IH.
+    move=> ?? eq al xl _ <-. elim: al xl; [done|]=>/= ?? IH ?. by rewrite eq IH.
   Qed.
   (** [big_sepPL] is monotone *)
-  #[export] Instance big_sepPL_mono {al} :
+  #[export] Instance big_sepPL_mono :
     Proper
-      (forall_relation (λ _, pointwise_relation _ (⊢)) ==> (=) ==> (⊢))
-      (@big_sepPL PROP A F al).
+      (forall_relation (λ _, pointwise_relation _ (⊢)) ==>
+        forall_relation (λ _, (=) ==> (⊢)))
+      (@big_sepPL PROP A F).
   Proof.
-    move=> ?? eq xl _<-. elim: al xl; [done|]=>/= ?? IH ?. by rewrite eq IH.
+    move=> ?? eq al xl _ <-. elim: al xl; [done|]=>/= ?? IH ?. by rewrite eq IH.
   Qed.
-  #[export] Instance big_sepPL_flip_mono {al} :
+  #[export] Instance big_sepPL_flip_mono :
     Proper
-      (forall_relation (λ _, pointwise_relation _ (flip (⊢))) ==> (=) ==>
-        flip (⊢))
-      (@big_sepPL PROP A F al).
-  Proof.
-    move=> ?? eq xl _<-. elim: al xl; [done|]=>/= ?? IH ?. by rewrite eq IH.
-  Qed.
+      (forall_relation (λ _, pointwise_relation _ (flip (⊢))) ==>
+        forall_relation (λ _, (=) ==> flip (⊢)))
+      (@big_sepPL PROP A F).
+  Proof. move=> ???????. by apply big_sepPL_mono. Qed.
 
   (** [big_sepL] over [of_plist] as [big_sepPL] *)
   Lemma big_sepL_of_plist {B}

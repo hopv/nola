@@ -23,9 +23,12 @@ End gmap.
 (** ** [list_to_gmap] *)
 
 (** [list_to_gmap]: [list] to [gmap nat] *)
-Fixpoint list_to_gmap' {A : Type} (i : nat) (l : list A) : gmap nat A :=
-  match l with [] => ∅ | x :: l => <[i := x]> (list_to_gmap' (S i) l) end.
-Definition list_to_gmap {A} := list_to_gmap' (A:=A) 0.
+Section list_to_gmap'.
+  Context {A : Type}.
+  Fixpoint list_to_gmap' (i : nat) (l : list A) : gmap nat A :=
+    match l with [] => ∅ | x :: l => <[i := x]> (list_to_gmap' (S i) l) end.
+  Definition list_to_gmap := list_to_gmap' 0.
+End list_to_gmap'.
 
 (** [!!] over [list_to_gmap] *)
 Lemma lookup_list_to_gmap' {A i l j} :
@@ -89,22 +92,25 @@ End insdel.
 
 (** ** [map_with], [map_without] and [map_by] *)
 
-(** [map_with m l]: [m] with [l] freshly added *)
-Fixpoint map_with `{!EqDecision K, !Countable K, !Infinite K} {A}
-  (m : gmap K A) (l : list A) : gmap K A :=
-  match l with [] => m | x :: l =>
-    let m' := map_with m l in <[fresh (dom m'):=x]> m' end.
-(** [map_by]: Map initialized by [l] *)
-Notation map_by K := (map_with (K:=K) ∅).
+Section map_with.
+  Context `{!EqDecision K, !Countable K, !Infinite K} {A : Type} (m : gmap K A).
 
-(** [map_without m]: [map_with m l] minus [m] *)
-Fixpoint map_without `{!EqDecision K, !Countable K, !Infinite K} {A}
-  (m : gmap K A) (l : list A) : gmap K A :=
-  match l with [] => ∅ | x :: l =>
-    <[fresh (dom (map_with m l)):=x]> (map_without m l) end.
+  (** [map_with m l]: [m] with [l] freshly added *)
+  Fixpoint map_with (l : list A) : gmap K A :=
+    match l with [] => m | x :: l =>
+      let m' := map_with l in <[fresh (dom m'):=x]> m' end.
+
+  (** [map_without m]: [map_with m l] minus [m] *)
+  Fixpoint map_without (l : list A) : gmap K A :=
+    match l with [] => ∅ | x :: l =>
+      <[fresh (dom (map_with l)):=x]> (map_without l) end.
+End map_with.
 
 Section map_with.
   Context `{!EqDecision K, !Countable K, !Infinite K}.
+
+  (** [map_by]: Map initialized by [l] *)
+  Definition map_by {A} := map_with (K:=K) (A:=A) ∅.
 
   (** [map_with m l] is the union of [map_without m l] and [m] *)
   Lemma map_with_without {A} {m : gmap K A} {l} :
