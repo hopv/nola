@@ -21,6 +21,10 @@ Module ProdNotation.
     (at level 2, left associativity, format "pl .*2'").
 End ProdNotation.
 
+(** [pair'] is injective *)
+#[export] Instance pair'_inj {A B} : Inj2 (=) (=) (=) (@pair' A B).
+Proof. by move=> ????[]. Qed.
+
 (** ** [sigT']: Modified [sigT] as a record with primitive projections *)
 #[projections(primitive)]
 Record sigT' {A : Type} (F : A → Type) : Type :=
