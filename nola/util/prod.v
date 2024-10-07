@@ -1,4 +1,4 @@
-(** * Modified product type *)
+(** * Modified product types *)
 
 From nola Require Export prelude.
 
@@ -20,3 +20,11 @@ Module ProdNotation.
   Notation "pl .*2'" := (fmap (M:=list) snd' pl)
     (at level 2, left associativity, format "pl .*2'").
 End ProdNotation.
+
+(** ** [sigT']: Modified [sigT] as a record with primitive projections *)
+#[projections(primitive)]
+Record sigT' {A : Type} (F : A → Type) : Type :=
+  existT' { projT1' : A; projT2' : F projT1'; }.
+Add Printing Constructor sigT'.
+Arguments existT' {_ _} _ _.
+Arguments projT1' {_ _} _. Arguments projT2' {_ _} _.

@@ -1,14 +1,17 @@
 (** * Prophetic agreement *)
 
 From nola.iris Require Export proph.
+From nola.util Require Import prod.
 From iris.bi Require Import fractional.
 From iris.base_logic.lib Require Import ghost_var.
 From iris.proofmode Require Import proofmode.
 Import ProphNotation.
 
+Implicit Type TY : synty.
+
 (** Ghost state *)
-Class proph_agG TY Σ := proph_agG_in :: ghost_varG Σ (anyty TY id).
-Definition proph_agΣ TY := ghost_varΣ (anyty TY id).
+Class proph_agG TY Σ := proph_agG_in :: ghost_varG Σ (sigT' (@id TY)).
+Definition proph_agΣ TY := ghost_varΣ (sigT' (@id TY)).
 #[export] Instance subG_proph_agΣ `{!subG (proph_agΣ TY) Σ} : proph_agG TY Σ.
 Proof. solve_inG. Qed.
 
@@ -19,14 +22,14 @@ Section proph_ag.
 
   (** Value observer *)
   Local Definition val_obs_def {X} γ x : iProp Σ :=
-    ghost_var γ (1/2) (Anyty X x).
+    ghost_var γ (1/2) (existT' X x).
   Local Lemma val_obs_aux : seal (@val_obs_def). Proof. by eexists. Qed.
   Definition val_obs {X} := val_obs_aux.(unseal) X.
   Local Lemma val_obs_unseal : @val_obs = @val_obs_def.
   Proof. exact: seal_eq. Qed.
 
   (** Double value observer *)
-  Local Definition val_obs2 {X} γ x : iProp Σ := ghost_var γ 1 (Anyty X x).
+  Local Definition val_obs2 {X} γ x : iProp Σ := ghost_var γ 1 (existT' X x).
 
   (** Prophecy controller *)
   Local Definition proph_ctrl_def {X} γ x (ξ : prvar X) : iProp Σ :=

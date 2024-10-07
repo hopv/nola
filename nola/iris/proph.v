@@ -1,7 +1,7 @@
 (** * Prophecy *)
 
 From nola.util Require Export proph.
-From nola.util Require Import plist.
+From nola.util Require Import prod plist.
 From nola.bi Require Import gmap.
 From nola.iris Require Import own list option agree csum.
 From iris.algebra Require Import gmap frac.
@@ -110,7 +110,7 @@ Proof. exists (:<[L]> inhabitant). by apply proph_valid_upds_sat. Qed.
 
 (** Algebra for a prophecy variable *)
 Local Definition proph_aitemR TY :=
-  agreeR (leibnizO (anyty TY (λ A, clair TY A))).
+  agreeR (leibnizO (sigT' (λ X : TY, clair TY X))).
 Local Definition proph_itemR TY := csumR fracR (proph_aitemR TY).
 (** Base algebra for the prophecy machinery *)
 Local Definition proph_mapUR TY := gmapUR positive (proph_itemR TY).
@@ -171,7 +171,7 @@ Proof. by rewrite proph_included. Qed.
 Local Definition fitem {TY} q : proph_itemR TY := Cinl q.
 (** Agreement item *)
 Local Definition aitem {TY X} xπ : proph_itemR TY :=
-  Cinr (to_agree (Anyty X xπ)).
+  Cinr (to_agree (existT' X xπ)).
 
 (** A prophecy map simulating a prophecy log *)
 Local Definition proph_sim {TY} (M : proph_mapUR TY) L :=
@@ -410,7 +410,7 @@ Section lemmas.
   (** Preliminaries for [proph_obs_forall] *)
   Local Definition proph_aitem_log_item (i : positive) (ai : proph_aitemR TY)
     : proph_log_item TY :=
-    let: Anyty _ xπ := unagree ai in
+    let: xπ := (unagree ai).(projT2') in
     .{Prvar (synty_to_inhab (xπ inhabitant)) i := xπ}.
   Local Definition proph_item_log (p : positive * proph_itemR TY)
     : proph_log TY :=
@@ -429,7 +429,7 @@ Section lemmas.
   Local Lemma elem_of_proph_map_log {ξ xπ M} :
     .{ξ := xπ} ∈ proph_map_log M ↔
       ∃ ai : proph_aitemR TY, M !! aprvar_id ξ = Some (Cinr ai) ∧
-        Anyty _ xπ = unagree ai.
+        existT' _ xπ = unagree ai.
   Proof.
     rewrite elem_of_list_join. split.
     - move=> [L[el /elem_of_list_fmap[[i it][? /elem_of_map_to_list eq]]]].
@@ -561,7 +561,7 @@ Section lemmas.
   Qed.
   Local Lemma aitem_eq_agree {X xπ Y yπ o} :
     Some (aitem xπ) ⋅ o ≡ Some (aitem yπ) →
-    Anyty (F:=λ A, _ → A) X xπ = Anyty Y yπ.
+      existT' (F:=λ X, _ → X) X xπ = existT' Y yπ.
   Proof.
     move=> eq. have: Some (aitem xπ) ≼ Some (aitem yπ) by eexists _.
     move=> /Some_included[/Cinr_inj/to_agree_inj ?|[it ?]]; [done|].
