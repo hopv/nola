@@ -130,7 +130,8 @@ Definition proph_dep {TY A} (aπ : clair TY A) (ξl: list (aprvar TY)) :=
 
 Section lemmas.
   Context {TY}.
-  Implicit Type (ξ η ζ : aprvar TY) (ξl ηl ζl : list (aprvar TY)).
+  Implicit Type (ξ η ζ : aprvar TY) (ξl ηl ζl : list (aprvar TY))
+    (Xl : list TY).
 
   (** Monotonicity of [proph_dep] over the list set *)
   #[export] Instance proph_dep_mono {A} :
@@ -166,15 +167,14 @@ Section lemmas.
     move=> dep dep' π π' eqv.
     rewrite (dep π π') ?(dep' π π') //; move=> ??; apply eqv; set_solver.
   Qed.
-  Lemma proph_dep_plist_prvar {Xl : list TY} (ξl : plist prvar Xl) :
+  Lemma proph_dep_plist_prvar {Xl} (ξl : plist prvar Xl) :
     proph_dep (λ π, app_plist_prvar π ξl) (of_plist_prvar ξl).
   Proof.
     elim: Xl ξl; [done|]=>/= ?? IH [ξ ξl] ?? eqv.
     unfold app_plist_prvar=>/=. f_equal.
     { apply (eqv ξ). set_solver. } { apply IH=> ??. apply eqv. set_solver. }
   Qed.
-  Lemma proph_dep_f_plist_prvar {A} {Xl : list TY}
-    (f : _ → A) (ξl : plist prvar Xl) :
+  Lemma proph_dep_f_plist_prvar {A Xl} (f : _ → A) (ξl : plist prvar Xl) :
     proph_dep (λ π, f (app_plist_prvar π ξl)) (of_plist_prvar ξl).
   Proof. apply proph_dep_f, proph_dep_plist_prvar. Qed.
 
