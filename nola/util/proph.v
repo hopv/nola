@@ -60,7 +60,7 @@ Coercion Aprvar : prvar >-> aprvar.
 Notation aprvar_id ξ := ξ.(aprvar_var).(prvar_id).
 
 (** Equality decision over [aprvar] *)
-#[export] Instance aprvar_eq_dec {TY} : EqDecision (aprvar TY).
+#[export] Instance aprvar_eq_dec {PTY} : EqDecision (aprvar PTY).
 Proof.
   move=> [X [h i]] [Y [h' j]]. case: (decide (X = Y)); last first.
   { move=> ?. right. by case. }
@@ -69,12 +69,12 @@ Proof.
 Defined.
 
 (** Inhabitant of [aprvar] by [synpty_inhab] *)
-Definition aprvar_by_inhab {TY : synpty} (X : TY) (h : synpty_inhab X)
-  : aprvar TY := prvar_by_inhab X h.
+Definition aprvar_by_inhab {PTY} (X : PTY) (h : synpty_inhab X)
+  : aprvar PTY := prvar_by_inhab X h.
 
 (** [plist prvar] as [list aprvar] *)
-Definition of_plist_prvar {TY : synpty} {Xl : list TY}
-  : plist prvar Xl → list (aprvar TY) := of_plist Aprvar.
+Definition of_plist_prvar {PTY} {Xl : list PTY}
+  : plist prvar Xl → list (aprvar PTY) := of_plist Aprvar.
 
 (** ** Syntactic type *)
 
