@@ -166,14 +166,6 @@ Section lemmas.
     move=> dep dep' π π' eqv.
     rewrite (dep π π') ?(dep' π π') //; move=> ??; apply eqv; set_solver.
   Qed.
-  Lemma proph_dep_constr3 {A B C D} (f: A → B → C → D) aπ bπ cπ ξl ηl ζl :
-    proph_dep aπ ξl → proph_dep bπ ηl → proph_dep cπ ζl →
-      proph_dep (λ π, f (aπ π) (bπ π) (cπ π)) (ξl ++ ηl ++ ζl).
-  Proof.
-    move=> dep dep' dep'' π π' eqv.
-    rewrite (dep π π') ?(dep' π π') ?(dep'' π π') //;
-      move=> ??; apply eqv; set_solver.
-  Qed.
   Lemma proph_dep_plist' {Xl : list TY} (ξl : plist prvar Xl) :
     proph_dep (λ π, app_plist_prvar π ξl) (of_plist_prvar ξl).
   Proof.
