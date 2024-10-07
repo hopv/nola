@@ -398,8 +398,8 @@ Section lemmas.
   #[export] Instance proph_obs_combine {φπ ψπ} :
     CombineSepAs .⟨φπ⟩ .⟨ψπ⟩ ⟨π, φπ π ∧ ψπ π⟩.
   Proof. rewrite /CombineSepAs. iIntros "#[??]". by iApply proph_obs_and. Qed.
-  Lemma proph_obs_impl {φπ ψπ} : (∀ π, φπ π → ψπ π) → .⟨φπ⟩ -∗ .⟨ψπ⟩.
-  Proof. iIntros "% ?". iStopProof. by f_equiv. Qed.
+  Lemma proph_obs_impl {φπ ψπ} : (∀ π, φπ π → ψπ π) → .⟨φπ⟩ ⊢ .⟨ψπ⟩.
+  Proof. move=> ?. by f_equiv. Qed.
   Lemma proph_obs_impl2 {φπ φπ' ψπ} :
     (∀ π, φπ π → φπ' π → ψπ π) → .⟨φπ⟩ -∗ .⟨φπ'⟩ -∗ .⟨ψπ⟩.
   Proof.
