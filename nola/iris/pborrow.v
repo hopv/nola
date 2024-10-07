@@ -249,9 +249,9 @@ Section pborrow.
     iMod (IH with "ηl ol") as (γl) "[ηl[$[ol →pcl]]]". iExists (γ, γl)'=>/=.
     iFrame "o ol".
     iMod (vo_pc_preresolve (λ π, f (app_plist_prvar π ηl)) with "ηl vo pc")
-      as "[$[$ →pc]]"; [exact: proph_dep_f_plist_prvar|]. iModIntro.
-    iIntros (yl') "#obs". iDestruct ("→pcl" with "obs") as "$". iApply "→pc".
-    by iApply (proph_obs_impl with "obs")=> ? ->.
+      as "[$[$ →pc]]"; [by apply proph_dep_f, proph_dep_plist_prvar|].
+    iModIntro. iIntros (yl') "#obs". iDestruct ("→pcl" with "obs") as "$".
+    iApply "→pc". by iApply (proph_obs_impl with "obs")=> ? ->.
   Qed.
   Local Lemma cif_xpbors_sem_to_obs_sem {δ Yl γl' ηl} {yΨxl : plist _ Yl} :
     ([∗ list] Qx ∈ cif_xpbors (plist_zip γl' (plist_zip ηl yΨxl)), ⟦ Qx ⟧(δ))
