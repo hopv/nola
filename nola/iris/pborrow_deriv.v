@@ -261,9 +261,8 @@ Section pborrow_deriv.
         ([∗ plist] '(ξ, x, Φx)' ∈ ξxΦxl, pbor δ α x ξ Φx) ∗
         ([∗ plist] '(yπ, Ψx)' ∈ yπΨxl, plend δ α yπ Ψx).
   Proof.
-    iMod (pbor_plend_tok_new_list (M:=M)) as (?) "big". iModIntro. iExists _.
-    iIntros (??). setoid_rewrite <-pbor_tok_pbor.
-    setoid_rewrite <-plend_tok_plend. iApply "big".
+    simpl. setoid_rewrite <-pbor_tok_pbor. setoid_rewrite <-plend_tok_plend.
+    exact: pbor_plend_tok_new_list.
   Qed.
   (** Simply create a prophetic borrower and a prophetic lender *)
   Lemma pbor_plend_new α X (x : X) Φx :
