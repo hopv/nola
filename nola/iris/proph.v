@@ -668,7 +668,7 @@ Section proph_eqz.
   (** [proph_eqz aπ aπ']: Prophecy equalizer, yielding [⟨π, aπ π = aπ' π⟩] once
     the dependencies of [aπ'] are available *)
   Definition proph_eqz {A} (aπ aπ' : clair TY A) : iProp Σ :=
-    ∀ξl q, ⌜proph_dep aπ' ξl⌝ =[q:∗[ξl]]=∗ ⟨π, aπ π = aπ' π⟩.
+    ∀ ξl q, ⌜proph_dep aπ' ξl⌝ =[q:∗[ξl]]=∗ ⟨π, aπ π = aπ' π⟩.
 
   (** [proph_eqz] is proper *)
   #[export] Instance proph_eqz_proper {A} :
