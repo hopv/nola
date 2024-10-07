@@ -186,8 +186,7 @@ Section modw.
   Qed.
 
   (** Compose [modw]s accumulating the world satisfaction *)
-  Lemma modw_modw_sep {W W' P} :
-    modw (modw M W) W' P ⊣⊢ modw M (W ∗ W') P.
+  Lemma modw_modw_sep {W W' P} : modw (modw M W) W' P ⊣⊢ modw M (W ∗ W') P.
   Proof.
     iSplit.
     - iIntros "→P [W W']". iDestruct ("→P" with "W'") as "→P".
