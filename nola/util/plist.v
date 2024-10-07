@@ -93,3 +93,15 @@ Lemma plist_sep_app {A} {F : A → Type} {al bl}
   {xl : plist F (al ++ bl)} :
   plist_app (plist_sep xl).1' (plist_sep xl).2' = xl.
 Proof. elim: al xl; [done|]=>/= ?? IH [??]. by rewrite IH. Qed.
+
+(** Map and fold over [plist] *)
+Section plist_foldmap.
+  Context {R} (e : R) (op : R → R → R) {A} {F : A → Type} (f : ∀ a, F a → R).
+  Fixpoint plist_foldmap {al : list A} : plist F al → R :=
+    match al with [] => λ _, e | _ :: _ =>
+      λ '(x, xl)', op (f _ x) (plist_foldmap xl) end.
+End plist_foldmap.
+
+(** Universal quantification over [plist] *)
+Definition plist_forall {A F} (Φ : ∀ a, F a → Prop) {al} : plist F al → Prop :=
+  plist_foldmap True (∧) (A:=A) Φ (al:=al).

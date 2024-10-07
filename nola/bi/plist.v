@@ -7,13 +7,13 @@ Import ProdNotation.
 
 Implicit Type PROP : bi.
 
-(** Separating conjunction over [plist] *)
-Section big_sepPL.
-  Context {PROP A} {F : A → Type} (Φ : ∀ a, F a → PROP).
-  Fixpoint big_sepPL {al} : plist F al → PROP :=
-  match al with [] => λ _, emp | _ :: _ =>
-    λ '(x, xl)', Φ _ x ∗ big_sepPL xl end%I.
-End big_sepPL.
+(** Iteration over [plist] *)
+Definition big_opPL {M : ofe} (o : M → M → M) `{!Monoid o}
+  {A F} (f : ∀ a, F a → M) {al} : plist (A:=A) F al → M :=
+  plist_foldmap monoid_unit o f.
+Definition big_sepPL {PROP A F} (f : ∀ a, F a → PROP) {al}
+  : plist F al → PROP :=
+  big_opPL bi_sep f (A:=A) (al:=al).
 
 Module PlistNotation.
   Notation "[∗ plist] a ∈ al ; x ∈ xl , P" := (big_sepPL (al:=al) (λ a x, P) xl)
