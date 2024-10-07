@@ -2,13 +2,13 @@
 
 From nola.util Require Export proph.
 From nola.util Require Import prod plist.
-From nola.bi Require Import gmap.
+From nola.bi Require Import gmap modw.
 From nola.iris Require Import own list option agree csum.
 From iris.algebra Require Import gmap frac.
 From iris.bi Require Import fractional.
 From iris.base_logic.lib Require Import own.
 From iris.proofmode Require Import proofmode.
-Import EqNotations ProdNotation.
+Import EqNotations ProdNotation ModwNotation.
 
 Implicit Type (TY : synty) (q : Qp).
 
@@ -615,7 +615,7 @@ Section lemmas.
   Qed.
   (** Resolve a prophecy *)
   Lemma proph_resolve_dep ηl ξ xπ q : proph_dep xπ ηl →
-    1:[ξ] -∗ q:∗[ηl] ==∗ q:∗[ηl] ∗ ⟨π, π ξ = xπ π⟩.
+    1:[ξ] =[q:∗[ηl]]=∗ ⟨π, π ξ = xπ π⟩.
   Proof.
     iIntros (dep) "ξ ηl". rewrite proph_tok_unseal.
     iMod (big_opL_own_2 with "ηl") as "ηl". iCombine "ξ ηl" as "ξηl".
