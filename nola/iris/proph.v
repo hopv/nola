@@ -660,3 +660,55 @@ Section lemmas.
   Lemma proph_obs_const {φ} : .⟨λ _, φ⟩ ⊢ ⌜φ⌝.
   Proof. by apply proph_obs_elim. Qed.
 End lemmas.
+
+(** ** Prophecy equalizer *)
+Section proph_eqz.
+  Context `{!prophGS TY Σ}.
+
+  (** [proph_eqz aπ aπ']: Prophecy equalizer, yielding [⟨π, aπ π = aπ' π⟩] once
+    the dependencies of [aπ'] are available *)
+  Definition proph_eqz {A} (aπ aπ' : clair TY A) : iProp Σ :=
+    ∀ξl q, ⌜proph_dep aπ' ξl⌝ =[q:∗[ξl]]=∗ ⟨π, aπ π = aπ' π⟩.
+
+  (** [proph_eqz] is proper *)
+  #[export] Instance proph_eqz_proper {A} :
+    Proper (pointwise_relation _ (=) ==> pointwise_relation _ (=) ==> (⊣⊢))
+      (@proph_eqz A).
+  Proof. solve_proper. Qed.
+
+  (** Prophecy equalizer from a prophecy token *)
+  Lemma proph_eqz_tok ξ xπ : 1:[ξ] ⊢ proph_eqz (λ π, π ξ) xπ.
+  Proof. iIntros "ξ" (???). by iApply (proph_resolve_dep with "ξ"). Qed.
+
+  (** Prophecy equalizer from a prophecy observation *)
+  Lemma proph_eqz_obs {A aπ aπ'} : ⟨π, aπ π = aπ' π⟩ ⊢ @proph_eqz A aπ aπ'.
+  Proof. by iIntros "?" (???). Qed.
+  Lemma proph_eqz_refl {A aπ} : ⊢ @proph_eqz A aπ aπ.
+  Proof. rewrite -proph_eqz_obs. by apply proph_obs_true. Qed.
+
+  (** Modify the assignee of a prophecy equalizer *)
+  Lemma proph_eqz_modify {A aπ aπ' aπ''} :
+    ⟨π, aπ π = aπ' π⟩ -∗ @proph_eqz A aπ' aπ'' -∗ proph_eqz aπ aπ''.
+  Proof.
+    iIntros "obs eqz" (???). iMod ("eqz" with "[//]") as "obs'". iModIntro.
+    by iApply (proph_obs_impl2 with "obs obs'")=> ? ->.
+  Qed.
+
+  (** Construct [proph_eqz] using an injective function *)
+  Lemma proph_eqz_constr {A B} f `{!@Inj A B (=) (=) f} aπ aπ' :
+    proph_eqz aπ aπ' ⊢ proph_eqz (λ π, f (aπ π)) (λ π, f (aπ' π)).
+  Proof.
+    iIntros "eqz" (?? dep). move: dep=> /proph_dep_destr ?.
+    iMod ("eqz" with "[//]") as "obs". iModIntro.
+    by iApply (proph_obs_impl with "obs")=> ?->.
+  Qed.
+  Lemma proph_eqz_constr2 {A B C} f `{!@Inj2 A B C (=) (=) (=) f}
+    aπ aπ' bπ bπ' :
+    proph_eqz aπ aπ' -∗ proph_eqz bπ bπ' -∗
+      proph_eqz (λ π, f (aπ π) (bπ π)) (λ π, f (aπ' π) (bπ' π)).
+  Proof.
+    iIntros "eqz eqz'" (?? dep). move: dep=> /proph_dep_destr2[??].
+    iMod ("eqz" with "[//]") as "obs". iMod ("eqz'" with "[//]") as "obs'".
+    iModIntro. by iApply (proph_obs_impl2 with "obs obs'")=> ? -> ->.
+  Qed.
+End proph_eqz.
