@@ -434,8 +434,8 @@ Section lemmas.
     rewrite elem_of_list_join. split.
     - move=> [L[el /elem_of_list_fmap[[i it][? /elem_of_map_to_list eq]]]].
       subst. move: el eq. case: it=> [?|ai|]/=; try by move=>/elem_of_nil.
-      move=> /elem_of_list_singleton. unfold proph_aitem_log_item=> ?.
-      simplify_eq. by exists ai.
+      move=> /elem_of_list_singleton. unfold proph_aitem_log_item=> ??.
+      simplify_eq=>/=. by exists ai.
     - move=> [ai[/elem_of_map_to_list ? eq]]. exists [.{ξ := xπ}].
       split; [by apply elem_of_list_singleton|].
       apply elem_of_list_fmap. exists (aprvar_id ξ, Cinr ai)=>/=.
