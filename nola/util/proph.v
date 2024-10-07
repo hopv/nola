@@ -54,8 +54,7 @@ Record aprvar PTY := Aprvar {
   (* Variable *) aprvar_var :> prvar aprvar_ty;
 }.
 Add Printing Constructor aprvar.
-Arguments aprvar_ty {_}. Arguments aprvar_var {_}.
-Arguments Aprvar {_} _ _.
+Arguments Aprvar {_} _ _. Arguments aprvar_ty {_}. Arguments aprvar_var {_}.
 Coercion Aprvar : prvar >-> aprvar.
 Notation aprvar_id ξ := ξ.(aprvar_var).(prvar_id).
 
@@ -69,12 +68,13 @@ Proof.
 Defined.
 
 (** Inhabitant of [aprvar] by [synpty_inhab] *)
-Definition aprvar_by_inhab {PTY} (X : PTY) (h : synpty_inhab X)
-  : aprvar PTY := prvar_by_inhab X h.
+Definition aprvar_by_inhab {PTY} (X : PTY) (h : synpty_inhab X) : aprvar PTY :=
+  prvar_by_inhab X h.
 
 (** [plist prvar] as [list aprvar] *)
 Definition of_plist_prvar {PTY} {Xl : list PTY}
-  : plist prvar Xl → list (aprvar PTY) := of_plist Aprvar.
+  : plist prvar Xl → list (aprvar PTY) :=
+  of_plist Aprvar.
 
 (** ** Syntactic type *)
 
