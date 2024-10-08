@@ -111,7 +111,7 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     `Ndnat` and program logic with termination sensitivity and custom world
     satisfactions
 - [`examples/`](nola/examples/) : Examples
-  + [`nsynty`](nola/examples/nsynty.v) (Syntactic type),
+  + [`xty`](nola/examples/xty.v) (Syntactic type),
     [`con`](nola/examples/con.v) (Constructors),
     [`ilist`](nola/examples/ilist.v) (Infinite list),
     [`borrow`](nola/examples/borrow.v) (Borrow),

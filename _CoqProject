@@ -72,7 +72,7 @@ nola/rust_lang/proofmode.v
 nola/rust_lang/adequacy.v
 nola/rust_lang/races.v
 
-nola/examples/nsynty.v
+nola/examples/xty.v
 nola/examples/con.v
 nola/examples/ilist.v
 nola/examples/borrow.v

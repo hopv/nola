@@ -1,6 +1,6 @@
 (** * Borrow examples *)
 
-From nola.examples Require Export nsynty con.
+From nola.examples Require Export xty con.
 From nola.rust_lang Require Export notation proofmode.
 Import ProdNotation FunPRNotation ModwNotation WpwNotation DsemNotation
   LftNotation ProphNotation NsyntyNotation.
@@ -46,15 +46,15 @@ Section borrow.
     iMod ("cl" with "b") as "_". iModIntro. by iApply "→Φ".
   Qed.
 
-  Context `{!prophGS nsynty Σ, !proph_agG unit nsynty Σ,
-    !PborrowCon unit nsynty CON, !PborCon unit nsynty CON,
-    !PborrowSem unit nsynty JUDG CON Σ, !PborSem unit nsynty JUDG CON Σ}.
-  Implicit Type X : nsynty.
+  Context `{!prophGS xty Σ, !proph_agG unit xty Σ, !PborrowCon unit xty CON,
+    !PborCon unit xty CON, !PborrowSem unit xty JUDG CON Σ,
+    !PborSem unit xty JUDG CON Σ}.
+  Implicit Type X : xty.
 
   (** Dereference a nested prophetic mutable reference *)
   Lemma pbor_pbor_deref {X η α β l Φxx q xxπ} :
     [[{ β ⊑□ α ∗ q.[β] ∗
-        pbor_tok (X:=X *'ₛ X) β () xxπ η
+        pbor_tok (X:=X *'ₓ X) β () xxπ η
           (λ _ xxπ, ∃ l' (xπ : clair _ X) (ξ : prvar X),
             ⌜xxπ = λ π, (xπ π, π ξ)'⌝ ∗
             ▷ l ↦ #l' ∗ cif_pbor α () xπ ξ (Φxx l'))%cif }]]
@@ -69,7 +69,7 @@ Section borrow.
     iDestruct "big" as (l' xπ ξ ->) "[>↦ b]". rewrite sem_ecustom /=.
     iApply twpw_fupdw_nonval; [done|]. wp_read.
     iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
-    iMod (pobor_pbor_tok_reborrow (M:=bupd) (λ π x, (x, π ξ)' : _ *'ₛ _)
+    iMod (pobor_pbor_tok_reborrow (M:=bupd) (λ π x, (x, π ξ)' : _ *'ₓ _)
       with "⊑ α o b [↦]") as "(ξ & Φxx & big)"=>/=. { by move=> ????[]. }
     { iIntros ([]?) "_ ? !>". iExists _, _, _. rewrite sem_ecustom /=.
       by iFrame. }
