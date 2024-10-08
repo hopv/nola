@@ -111,6 +111,10 @@ Proof. move=> ?. by apply synty_inhabited, prvar_inhab. Qed.
 #[export] Instance proph_asn_inhabited {TY} : Inhabited (proph_asn TY).
 Proof. apply populate. move=> [??]. by apply prvar_to_inhabited. Qed.
 
+(** Instantiate [plist] over [clair] with [proph_asn] *)
+Definition app_plist_clair {TY} {Xl : list TY} (π : proph_asn TY)
+  (xπl : plist (λ X : TY, clair TY X) Xl) : plist synty_ty Xl :=
+  plist_map (λ _ xπ, xπ π) xπl.
 (** Evaluate [plist prvar] with [proph_asn] *)
 Definition app_plist_prvar {TY} {Xl : list TY}
   (π : proph_asn TY) (ξl : plist prvar Xl) : plist synty_ty Xl :=

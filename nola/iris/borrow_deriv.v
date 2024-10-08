@@ -22,8 +22,8 @@ Section borrow_deriv.
   Implicit Type δ : JUDG -n> iProp Σ.
 
   (** Accessor judgment *)
-  Local Definition borrow_jto Px Qx : JUDG := borrow_judg (Tagged (Px, Qx)).
-  Local Instance borrow_jto_ne : NonExpansive2 borrow_jto.
+  Definition borrow_jto Px Qx : JUDG := borrow_judg (Tagged (Px, Qx)).
+  #[export] Instance borrow_jto_ne : NonExpansive2 borrow_jto.
   Proof. solve_proper. Qed.
 
   (** [bor]: Relaxed borrower *)
@@ -93,11 +93,11 @@ Section borrow_deriv.
   Implicit Type (Px Qx : FML $oi Σ) (δ : JUDG -n> iProp Σ).
 
   (** Lemmas for [borrow_judg] *)
-  Local Lemma borrow_jto_refl {Px} : ⊢ δ (borrow_jto Px Px).
+  Lemma borrow_jto_refl {Px} : ⊢ δ (borrow_jto Px Px).
   Proof.
     iApply Deriv_factor. iIntros (????). rewrite sem_ejudg. by iIntros "$".
   Qed.
-  Local Lemma borrow_jto_trans {Px Qx Rx} :
+  Lemma borrow_jto_trans {Px Qx Rx} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
       ⟦ Px ⟧(δ') ==∗ ⟦ Qx ⟧(δ')) -∗
     δ (borrow_jto Qx Rx) -∗ δ (borrow_jto Px Rx).
@@ -105,14 +105,14 @@ Section borrow_deriv.
     iIntros "big". iApply Deriv_map. iIntros (????). rewrite !sem_ejudg.
     iIntros "QR Px". iMod ("big" with "[//] [//] [//] Px"). by iApply "QR".
   Qed.
-  Local Lemma borrow_jto_trans' {Px Qx Rx} :
+  Lemma borrow_jto_trans' {Px Qx Rx} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ → ⟦ Qx ⟧(δ') ==∗ ⟦ Rx ⟧(δ'))
       -∗ δ (borrow_jto Px Qx) -∗ δ (borrow_jto Px Rx).
   Proof.
     iIntros "big". iApply Deriv_map. iIntros (????). rewrite !sem_ejudg.
     iIntros "PQ Px". iMod ("PQ" with "Px"). by iApply "big".
   Qed.
-  Local Lemma der_borrow_jto {Px Qx} :
+  Lemma der_borrow_jto {Px Qx} :
     der (borrow_jto Px Qx) ⊢ (⟦ Px ⟧ ==∗ ⟦ Qx ⟧).
   Proof. by rewrite der_sound sem_ejudg. Qed.
 

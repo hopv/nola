@@ -4,7 +4,8 @@ From nola.util Require Import tagged.
 From nola.iris Require Export cif inv pborrow.
 Import ProdNotation FunPRNotation DsemNotation.
 
-Implicit Type (Σ : gFunctors) (N : namespace) (TY : synty) (α : lft) (FM : ofe).
+Implicit Type (Σ : gFunctors) (N : namespace) (TY : synty) (α : lft) (FM : ofe)
+  (A : Type).
 
 (** ** Invariant *)
 (** [invCC]: Constructor *)
@@ -86,45 +87,54 @@ Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
 
 (** ** Prophetic borrow *)
 (** [pborCC]: Constructor *)
-Variant pborCC_id TY := .
-Definition pborCC TY :=
-  Cifcon (pborCC_id TY) (lft *' TY) (λ _, Empty_set) (λ '(_, X)', X)
-    (λ '(_, X)', leibnizO (X *' prvar X)) _.
+Variant pborCC_id A TY := .
+Definition pborCC A TY :=
+  Cifcon (pborCC_id A TY) TY (λ _, Empty_set) (λ X, A *' clair TY X)%type
+    (λ X, leibnizO (lft *' A *' clair TY X *' prvar X)) _.
 (** [PborCon]: [pborCC] registered *)
-Notation PborCon TY CON := (Ecifcon (pborCC TY) CON).
+Notation PborCon A TY CON := (Ecifcon (pborCC A TY) CON).
 Section cif_pbor.
-  Context `{!PborCon TY CON} {Σ}.
+  Context `{!PborCon A TY CON} {Σ}.
   Implicit Type X : TY.
   (** [cif_pbor]: Formula *)
-  Definition cif_pbor {X} α (x : X) (ξ : prvar X) (Φx : X -pr> cif CON Σ)
+  Definition cif_pbor {X} α a xπ ξ (Φx : A -pr> clair TY X -pr> cif CON Σ)
     : cif CON Σ :=
-    cif_ecustom (pborCC TY) (α, X)' nullary Φx (x, ξ)'.
+    cif_ecustom (pborCC A TY) X nullary (λ '(a, xπ)', Φx a xπ) (α, a, xπ, ξ)'.
   (** [cif_pbor] is non-expansive *)
-  #[export] Instance cif_pbor_ne {X α x ξ} : NonExpansive (@cif_pbor X α x ξ).
-  Proof. solve_proper. Qed.
-  #[export] Instance cif_pbor_proper {X α x ξ} :
-    Proper ((≡) ==> (≡)) (@cif_pbor X α x ξ).
+  #[export] Instance cif_pbor_ne {X α a xπ ξ} :
+    NonExpansive (@cif_pbor X α a xπ ξ).
+  Proof. unfold cif_pbor=> ??? eqv. f_equiv=> ?. apply (eqv _ _). Qed.
+  #[export] Instance cif_pbor_proper {X α a xπ ξ} :
+    Proper ((≡) ==> (≡)) (@cif_pbor X α a xπ ξ).
   Proof. apply ne_proper, _. Qed.
   (** [cif_pbor] is productive *)
-  #[export] Instance cif_pbor_productive {X α x ξ} :
-    Productive (@cif_pbor X α x ξ).
-  Proof. solve_proper. Qed.
-  Context `{!borrowGS (cifOF CON) Σ, !prophGS TY Σ, !proph_agG TY Σ}.
+  #[export] Instance cif_pbor_productive {X α a xπ ξ} :
+    Productive (@cif_pbor X α a xπ ξ).
+  Proof.
+    unfold cif_pbor=> k ?? eqv. f_equiv. destruct k as [|k]=>//= ?. apply eqv.
+  Qed.
+  Context `{!borrowGS (cifOF CON) Σ, !prophGS TY Σ, !proph_agG A TY Σ,
+    !PborrowCon A TY CON}.
   (** Semantics of [pborCC] *)
   #[export] Program Instance pbor_sem_ecifcon {JUDG}
-    : SemEcifcon JUDG (pborCC TY) CON Σ :=
-    SEM_ECIFCON (λ _ _ '(α, X)' _ Φx '(x, ξ)', pbor_tok α x ξ Φx) _.
-  Next Obligation. move=>/= ???*???*?*?? /leibniz_equiv_iff. solve_proper. Qed.
+    : SemEcifcon JUDG (pborCC A TY) CON Σ :=
+    SEM_ECIFCON (λ _ _ X _ Φx '(α, a, xπ, ξ)',
+      pbor_tok α a xπ ξ (λ a xπ, Φx (a, xπ)')) _.
+  Next Obligation.
+    move=>/= ???*???*?*?? /leibniz_equiv_iff<-. by f_equiv=> ??.
+  Qed.
 End cif_pbor.
 (** [pborCC] semantics registered *)
-Notation PborSem TY JUDG CON Σ := (EsemEcifcon JUDG (pborCC TY) CON Σ).
+Notation PborSem A TY JUDG CON Σ := (EsemEcifcon JUDG (pborCC A TY) CON Σ).
 
 (** Reify [pbor_tok] *)
 #[export] Program Instance pbor_tok_as_cif
-  `{!PborCon TY CON, !borrowGS (cifOF CON) Σ, !prophGS TY Σ, !proph_agG TY Σ,
-    !SemCifcon JUDG CON Σ, !PborSem TY JUDG CON Σ}
-  {X α x ξ Φx} :
-  AsCif CON (λ _, pbor_tok (X:=X) α x ξ Φx) := AS_CIF (cif_pbor α x ξ Φx) _.
+  `{!PborCon A TY CON, !borrowGS (cifOF CON) Σ, !prophGS TY Σ,
+    !proph_agG A TY Σ, !PborrowCon A TY CON, !SemCifcon JUDG CON Σ,
+    !PborSem A TY JUDG CON Σ}
+  {X α a xπ ξ Φx} :
+  AsCif CON (λ _, pbor_tok (X:=X) α a xπ ξ Φx) :=
+  AS_CIF (cif_pbor α a xπ ξ Φx) _.
 Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
 
 (** ** Judgment *)
