@@ -99,5 +99,5 @@ Program Canonical nsynty_synty : synty :=
 Next Obligation. by move=> ? /of_nsynty_inhab. Qed.
 Next Obligation. by move=> ? /to_nsynty_inhab. Qed.
 
-Notation proph_asnn := (proph_asn nsynty).
+Notation prasnn := (prasn nsynty).
 Notation clairn A := (clair nsynty A).

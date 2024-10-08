@@ -98,37 +98,37 @@ Implicit Type TY : synty.
 (** ** Prophecy assignment *)
 
 (** Prophecy assignment *)
-Definition proph_asn TY := ∀ ξ : aprvar TY, ξ.(aprvar_ty).
+Definition prasn TY := ∀ ξ : aprvar TY, ξ.(aprvar_ty).
 
 (** Clairvoyant monad, i.e., reader monad over the prophecy assignment *)
-Notation clair TY A := (proph_asn TY → A).
+Notation clair TY A := (prasn TY → A).
 
 (** [prvar X] entails [Inhabited X] *)
 Lemma prvar_to_inhabited {TY} {X : TY} : prvar X → Inhabited X.
 Proof. move=> ?. by apply synty_inhabited, prvar_inhab. Qed.
 
-(** [proph_asn] is inhabited *)
-#[export] Instance proph_asn_inhabited {TY} : Inhabited (proph_asn TY).
+(** [prasn] is inhabited *)
+#[export] Instance prasn_inhabited {TY} : Inhabited (prasn TY).
 Proof. apply populate. move=> [??]. by apply prvar_to_inhabited. Qed.
 
-(** Instantiate [plist] over [clair] with [proph_asn] *)
-Definition app_plist_clair {TY} {Xl : list TY} (π : proph_asn TY)
+(** Instantiate [plist] over [clair] with [prasn] *)
+Definition app_plist_clair {TY} {Xl : list TY} (π : prasn TY)
   (xπl : plist (λ X : TY, clair TY X) Xl) : plist synty_ty Xl :=
   plist_map (λ _ xπ, xπ π) xπl.
-(** Evaluate [plist prvar] with [proph_asn] *)
+(** Evaluate [plist prvar] with [prasn] *)
 Definition app_plist_prvar {TY} {Xl : list TY}
-  (π : proph_asn TY) (ξl : plist prvar Xl) : plist synty_ty Xl :=
+  (π : prasn TY) (ξl : plist prvar Xl) : plist synty_ty Xl :=
   plist_map (λ _ (ξ : prvar _), π ξ) ξl.
 
 (** ** Prophecy Dependency *)
 
 (** Equivalence of prophecy assignments over a set of prophecy variables *)
-Definition proph_asn_eqv {TY} (φ : aprvar TY → Prop) (π π' : proph_asn TY) :=
+Definition prasn_eqv {TY} (φ : aprvar TY → Prop) (π π' : prasn TY) :=
   ∀ ξ : aprvar TY, φ ξ → π ξ = π' ξ.
 
 (** Prophecy dependency *)
 Definition proph_dep {TY A} (aπ : clair TY A) (ξl: list (aprvar TY)) :=
-  ∀ π π', proph_asn_eqv (.∈ ξl) π π' → aπ π = aπ π'.
+  ∀ π π', prasn_eqv (.∈ ξl) π π' → aπ π = aπ π'.
 
 (** Lemmas *)
 

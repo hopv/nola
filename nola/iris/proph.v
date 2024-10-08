@@ -39,7 +39,7 @@ Local Definition pl_ids {TY} (L : proph_log TY) : gset positive :=
 (** Prophecy dependency over the complement of a list set *)
 Local Definition proph_dep_out {TY A}
   (aπ : clair TY A) (ξl : list (aprvar TY)) :=
-  ∀ π π', proph_asn_eqv (.∉ ξl) π π' → aπ π = aπ π'.
+  ∀ π π', prasn_eqv (.∉ ξl) π π' → aπ π = aπ π'.
 
 (** Validity of a prophecy log *)
 Local Fixpoint proph_log_valid {TY} (L : proph_log TY) :=
@@ -51,13 +51,13 @@ Local Fixpoint proph_log_valid {TY} (L : proph_log TY) :=
 Local Notation ".✓ L" := (proph_log_valid L) (at level 20, format ".✓  L").
 
 (** A prophecy assignment satisfying a prophecy log *)
-Local Definition proph_sat {TY} (π : proph_asn TY) (L : proph_log TY) :=
+Local Definition proph_sat {TY} (π : prasn TY) (L : proph_log TY) :=
   Forall (λ pli, π pli.(pli_var) = pli.(pli_val) π) L.
 Local Notation "π ◁ L" := (proph_sat π L) (at level 70, format "π  ◁  L").
 
 (** A prophecy assignment updated at a prophecy variable *)
 Local Definition proph_upd {TY}
-  (ξ : aprvar TY) (xπ : clair TY ξ.(aprvar_ty)) π : proph_asn TY := λ η,
+  (ξ : aprvar TY) (xπ : clair TY ξ.(aprvar_ty)) π : prasn TY := λ η,
   match decide (ξ = η) with
   | left eq => rew[aprvar_ty] eq in xπ π
   | right _ => π η
@@ -66,18 +66,18 @@ Local Notation ":<[ ξ := xπ ]>" := (proph_upd ξ xπ)
   (at level 5, format ":<[ ξ  :=  xπ ]>").
 
 (** Applying [proph_upd] *)
-Local Lemma proph_upd_self {TY} {π : proph_asn TY} {ξ xπ} :
+Local Lemma proph_upd_self {TY} {π : prasn TY} {ξ xπ} :
   :<[ξ := xπ]> π ξ = xπ π.
 Proof.
   unfold proph_upd. case: (decide (ξ = ξ)); [|done]=> eq.
   by rewrite (proof_irrel eq eq_refl).
 Qed.
-Local Lemma proph_upd_ne {TY} {π : proph_asn TY} {ξ xπ η} :
+Local Lemma proph_upd_ne {TY} {π : prasn TY} {ξ xπ η} :
   ξ ≠ η → :<[ξ := xπ]> π η = π η.
 Proof. unfold proph_upd. by case (decide (ξ = η)). Qed.
 
 (** Prophecy assignment updated by a prophecy log *)
-Local Fixpoint proph_upds {TY} L (π : proph_asn TY) :=
+Local Fixpoint proph_upds {TY} L (π : prasn TY) :=
   match L with
   | [] => π
   | .{ξ := xπ} :: L' => proph_upds L' (:<[ξ := xπ]> π)
@@ -86,7 +86,7 @@ Local Notation ":<[ L ]>" := (proph_upds L) (at level 5, format ":<[ L ]>").
 
 (** Equivalence out of [L] for [proph_upds] *)
 Local Lemma proph_upds_eqv_out {TY} (L : proph_log TY) :
-  ∀ π, proph_asn_eqv (.∉ pl_vars L) (:<[L]> π) π.
+  ∀ π, prasn_eqv (.∉ pl_vars L) (:<[L]> π) π.
 Proof.
   elim L=>/= [|[??]? IH]; [done|]=> > /not_elem_of_cons [??].
   rewrite IH; [|done]. by apply proph_upd_ne.
