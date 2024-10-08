@@ -24,10 +24,9 @@ Arguments equiv_proeq {PR _ _} : rename.
 Implicit Type PR : prost.
 
 (** [proeq] is proper *)
-Local Lemma proeq_proper' {PR k} :
-  Proper ((≡) ==> (≡) ==> (→)) (@proeq PR k).
+Local Lemma proeq_proper' {PR k} : Proper ((≡) ==> (≡) ==> impl) (@proeq PR k).
 Proof.
-  move=> ?? /equiv_proeq eq ?? /equiv_proeq eq'.
+  move=> ?? /equiv_proeq eq ?? /equiv_proeq eq' ?.
   etrans; [symmetry; by apply eq|]. by etrans.
 Qed.
 #[export] Instance proeq_proper {PR k} :

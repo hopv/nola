@@ -26,10 +26,10 @@ Proof. move=> >. apply equiv_ole. Qed.
 Proof. move=> >. apply equiv_ole. Qed.
 
 (** [⊑] is proper *)
-#[export] Instance ole_proper_ole {OT} : Proper ((⊑) --> (⊑) ==> (→)) (⊑@{OT}).
+#[export] Instance ole_proper_ole {OT} : Proper ((⊑) --> (⊑) ==> impl) (⊑@{OT}).
 Proof. move=>/= ???????. etrans; by [|etrans]. Qed.
 #[export] Instance ole_proper_ole_flip {OT} :
-  Proper ((⊑) ==> (⊑) --> flip (→)) (⊑@{OT}).
+  Proper ((⊑) ==> (⊑) --> flip impl) (⊑@{OT}).
 Proof. move=> ???????. by apply: ole_proper_ole. Qed.
 #[export] Instance ole_proper {OT} : Proper ((≡) ==> (≡) ==> (↔)) (⊑@{OT}).
 Proof.

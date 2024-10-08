@@ -135,13 +135,13 @@ Section lemmas.
 
   (** Monotonicity of [proph_dep] over the list set *)
   #[export] Instance proph_dep_mono {A} :
-    Proper (pointwise_relation _ (=) ==> (⊆) ==> (→)) (@proph_dep TY A).
+    Proper (pointwise_relation _ (=) ==> (⊆) ==> impl) (@proph_dep TY A).
   Proof.
     move=> ?? eq ?? sub dep ?? eqv. rewrite -eq. apply dep=> ??.
     by apply eqv, sub.
   Qed.
   #[export] Instance proph_dep_flip_mono {A} :
-    Proper (pointwise_relation _ (=) ==> flip (⊆) ==> flip (→))
+    Proper (pointwise_relation _ (=) ==> flip (⊆) ==> flip impl)
       (@proph_dep TY A).
   Proof. move=> ??????/=. by apply proph_dep_mono. Qed.
   #[export] Instance proph_dep_proper {A} :
