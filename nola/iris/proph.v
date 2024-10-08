@@ -695,13 +695,17 @@ Section proph_eqz.
   Qed.
 
   (** Construct [proph_eqz] using an injective function *)
-  Lemma proph_eqz_f {A B} f `{!@Inj A B (=) (=) f} aπ aπ' :
-    proph_eqz aπ aπ' ⊢ proph_eqz (λ π, f (aπ π)) (λ π, f (aπ' π)).
+  Lemma proph_eqz_fpi {A B} (fπ : clair TY (A → B)) aπ aπ' :
+    (∀ π π' a a', fπ π a = fπ π' a' → a = a') →
+    proph_eqz aπ aπ' ⊢ proph_eqz (λ π, fπ π (aπ π)) (λ π, fπ π (aπ' π)).
   Proof.
-    iIntros "eqz" (?? dep). move: dep=> /proph_dep_unf ?.
+    move=> inj. iIntros "eqz" (?? dep). apply proph_dep_unfpi in dep; [|done].
     iMod ("eqz" with "[//]") as "obs". iModIntro.
     by iApply (proph_obs_impl with "obs")=> ?->.
   Qed.
+  Lemma proph_eqz_f {A B} f `{!@Inj A B (=) (=) f} aπ aπ' :
+    proph_eqz aπ aπ' ⊢ proph_eqz (λ π, f (aπ π)) (λ π, f (aπ' π)).
+  Proof. by apply proph_eqz_fpi. Qed.
   Lemma proph_eqz_f2 {A B C} f `{!@Inj2 A B C (=) (=) (=) f} aπ aπ' bπ bπ' :
     proph_eqz aπ aπ' -∗ proph_eqz bπ bπ' -∗
       proph_eqz (λ π, f (aπ π) (bπ π)) (λ π, f (aπ' π) (bπ' π)).

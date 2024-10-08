@@ -145,7 +145,7 @@ Section lemmas.
       (@proph_dep TY A).
   Proof. move=> ??????/=. by apply proph_dep_mono. Qed.
   #[export] Instance proph_dep_proper {A} :
-    Proper (pointwise_relation _ (=) ==> (≡ₚ) ==> iff) (@proph_dep TY A).
+    Proper (pointwise_relation _ (=) ==> (≡ₚ) ==> (↔)) (@proph_dep TY A).
   Proof. move=> ????? eq. split; apply proph_dep_mono=>//; by rewrite eq. Qed.
 
   (** On a constant *)
@@ -157,6 +157,14 @@ Section lemmas.
   Proof. move=> ?? eqv. apply eqv. constructor. Qed.
 
   (** Construct with a function *)
+  Lemma proph_dep_fpi {A B} (fπ : clair TY (A → B)) aπ ξl ηl :
+    (∀ a, proph_dep (λ π, fπ π a) ξl) → proph_dep aπ ηl →
+      proph_dep (λ π, fπ π (aπ π)) (ξl ++ ηl).
+  Proof.
+    move=> dep dep' π π' eqv.
+    have <-: aπ π = aπ π'. { apply dep'=> ??. apply eqv. set_solver. }
+    apply dep=> ??. apply eqv. set_solver.
+  Qed.
   Lemma proph_dep_f {A B} (f : A → B) aπ ξl :
     proph_dep aπ ξl → proph_dep (λ π, f (aπ π)) ξl.
   Proof. move=> dep ?? /dep ?. by apply (f_equal f). Qed.
@@ -176,9 +184,13 @@ Section lemmas.
   Qed.
 
   (** Destruct from an injective function *)
+  Lemma proph_dep_unfpi {A B} (fπ : clair TY (A → B)) aπ ξl :
+    (∀ π π' a a', fπ π a = fπ π' a' → a = a') →
+    proph_dep (λ π, fπ π (aπ π)) ξl → proph_dep aπ ξl.
+  Proof. by move=> inj dep ?? /dep/inj. Qed.
   Lemma proph_dep_unf {A B} f `{!@Inj A B (=) (=) f} aπ ξl :
     proph_dep (λ π, f (aπ π)) ξl → proph_dep aπ ξl.
-  Proof. by move=> dep ?? /dep/(inj f). Qed.
+  Proof. by apply proph_dep_unfpi. Qed.
   Lemma proph_dep_unf2 {A B C} f `{!@Inj2 A B C (=) (=) (=) f} aπ bπ ξl :
     proph_dep (λ π, f (aπ π) (bπ π)) ξl → proph_dep aπ ξl ∧ proph_dep bπ ξl.
   Proof.
