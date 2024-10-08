@@ -9,7 +9,7 @@ Section borrow.
   Context `{!lrustGS_gen hlc Σ, !SemCifcon JUDG CON Σ, !Jsem JUDG (iProp Σ),
     !inv'GS (cifOF CON) Σ, !InvCon CON, !InvSem JUDG CON Σ,
     !borrowGS (cifOF CON) Σ, !BorCon CON, !BorSem JUDG CON Σ}.
-  Implicit Type (Px Qx : cif CON Σ) (Φx Ψx : loc → cif CON Σ) (l : loc).
+  Implicit Type l : loc.
 
   (** Dereference a nested mutable reference *)
   Lemma bor_bor_deref {α β l Φx q} :
@@ -52,17 +52,17 @@ Section borrow.
   Implicit Type X : xty.
 
   (** Dereference a nested prophetic mutable reference *)
-  Lemma pbor_pbor_deref {X η α β l Φxx q xxπ} :
+  Lemma pbor_pbor_deref {X η α β l Φx q pπ} :
     [[{ β ⊑□ α ∗ q.[β] ∗
-        pbor_tok (X:=X *'ₓ X) β () xxπ η
-          (λ _ xxπ, ∃ l' (xπ : clair _ X) (ξ : prvar X),
-            ⌜xxπ = λ π, (xπ π, π ξ)'⌝ ∗
-            ▷ l ↦ #l' ∗ cif_pbor α () xπ ξ (Φxx l'))%cif }]]
+        pbor_tok (X:=X *'ₓ X) β () pπ η
+          (λ _ pπ, ∃ l' (xπ : clair _ X) (ξ : prvar X),
+            ⌜pπ = λ π, (xπ π, π ξ)'⌝ ∗
+            ▷ l ↦ #l' ∗ cif_pbor α () xπ ξ (Φx l'))%cif }]]
       [borrow_wsat bupd ⟦⟧]
       !#l
     [[{ l', RET #l'; ∃ (xπ : clair _ X) (ξ ξ' : prvar X),
-        ⌜xxπ = λ π, (xπ π, π ξ)'⌝ ∗ ⟨π, π η = (π ξ', π ξ)'⟩ ∗ q.[β] ∗
-        pbor_tok β () xπ ξ' (Φxx l') }]].
+        ⌜pπ = λ π, (xπ π, π ξ)'⌝ ∗ ⟨π, π η = (π ξ', π ξ)'⟩ ∗ q.[β] ∗
+        pbor_tok β () xπ ξ' (Φx l') }]].
   Proof.
     iIntros (Ψ) "(#⊑ & [β β'] & b) →Ψ".
     iMod (pbor_tok_open (M:=bupd) with "β b") as "/=[o big]".
@@ -70,13 +70,13 @@ Section borrow.
     iApply twpw_fupdw_nonval; [done|]. wp_read.
     iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
     iMod (pobor_pbor_tok_reborrow (M:=bupd) (λ π x, (x, π ξ)' : _ *'ₓ _)
-      with "⊑ α o b [↦]") as "(ξ & Φxx & big)"=>/=. { by move=> ????[]. }
+      with "⊑ α o b [↦]") as "(ξ & Φx & big)"=>/=. { by move=> ????[]. }
     { iIntros ([]?) "_ ? !>". iExists _, _, _. rewrite sem_ecustom /=.
       by iFrame. }
-    iMod ("big" $! [Aprvar _ ξ] _ with "[%] [$ξ //]")
+    iMod ("big" $! [Aprvar _ ξ] with "[%] [$ξ //]")
       as (?) "(obs & [ξ _ ] & big)".
     { move=> ?. apply proph_dep_f. apply: proph_dep_one. }
-    iMod ("big" with "ξ Φxx") as "(β & α & b)". iModIntro. iApply "→Ψ".
+    iMod ("big" with "ξ Φx") as "(β & α & b)". iModIntro. iApply "→Ψ".
     iDestruct ("→β'" with "α") as "$". by iFrame.
   Qed.
 End borrow.
