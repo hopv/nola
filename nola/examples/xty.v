@@ -49,8 +49,7 @@ Fixpoint xpty_ty (X : xpty) : Type :=
   | Empty_setₓ => Empty_set | unitₓ => () | boolₓ => bool | natₓ => nat
   | Zₓ => Z | Propₓ => Prop
   | optionₓ X => option (xpty_ty X) | listₓ X => list (xpty_ty X)
-  | X *'ₓ Y => xpty_ty X *' xpty_ty Y
-  | X +ₓ Y => xpty_ty X + xpty_ty Y
+  | X *'ₓ Y => xpty_ty X *' xpty_ty Y | X +ₓ Y => xpty_ty X + xpty_ty Y
   | X →ₓ Y => xpty_ty X → xpty_ty Y
   end.
 Coercion xpty_ty: xpty >-> Sortclass.
@@ -65,8 +64,7 @@ Proof.
     + move=> X h. exact (prvar_by_inhab X h).
     + move=> ?? /andb_True[??]. constructor; by apply FIX.
     + move=> X ?. case eq: (xpty_inhab X)=>/= H.
-      * apply inl, FIX. by rewrite eq.
-      * by apply inr, FIX.
+      { apply inl, FIX. by rewrite eq. } { by apply inr, FIX. }
     + move=> X ?. case eq: (xpty_inhab X)=>/= ??; [by apply FIX|].
       exfalso. eapply FIX; [|done]. by rewrite eq.
   - case: X=>//=.
@@ -85,8 +83,8 @@ Lemma of_neg_xpty_inhab {X} : negb (xpty_inhab X) → X → False.
 Proof. apply of_either_xpty_inhab. Qed.
 Lemma to_xpty_inhab {X} (x : X) : xpty_inhab X.
 Proof.
-  case eq: (xpty_inhab X); [done|]. exfalso.
-  eapply of_neg_xpty_inhab; [|done]. by rewrite eq.
+  case eq: (xpty_inhab X); [done|]. exfalso. eapply of_neg_xpty_inhab; [|done].
+  by rewrite eq.
 Qed.
 Lemma to_neg_xpty_inhab {X} (f : X → False) : negb (xpty_inhab X).
 Proof.
@@ -95,7 +93,6 @@ Proof.
 Qed.
 
 (** Syntactic type structure *)
-Program Canonical xty : synty :=
-  {| synty_pty := xpty; synty_ty := xpty_ty; |}.
+Program Canonical xty : synty := {| synty_pty := xpty; synty_ty := xpty_ty; |}.
 Next Obligation. by move=> ? /of_xpty_inhab. Qed.
 Next Obligation. by move=> ? /to_xpty_inhab. Qed.
