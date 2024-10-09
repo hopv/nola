@@ -78,3 +78,5 @@ nola/examples/ilist.v
 nola/examples/borrow.v
 nola/examples/mutex.v
 nola/examples/deriv.v
+
+nola/examples/rust/ty.v
