@@ -61,6 +61,15 @@ Lemma discrete_proeq_later {A k a a'} :
   @proeq_later (discretePR A) k a a' ↔ k = 0 ∨ a ≡ a'.
 Proof. case: k=>/= >; [split; by [left|]|split; by [right|case]]. Qed.
 
+(** Product *)
+Program Canonical prodPR (A B : prost) : prost :=
+  Prost (prodO A B) (λ k, prod_relation (proeq k) (proeq k)) _ _ _.
+Next Obligation. move=> ???????[??]. split; by eapply proeq_anti. Qed.
+Next Obligation.
+  move=> ????. split. { move=> [??]?. split; by apply equiv_proeq. }
+  { move=> eq. split; apply equiv_proeq; apply eq. }
+Qed.
+
 (** Function *)
 Program Canonical funPR {A} (PRF : A → prost) : prost :=
   Prost (discrete_funO PRF) (λ k f g, ∀ a, proeq k (f a) (g a)) _ _ _.
@@ -102,6 +111,11 @@ Notation Preserv' PR PR' f := (∀ k, Proper (@proeq PR k ==> @proeq PR' k) f)
 Lemma productive_preserv `{!Productive' PR PR' f} : Preserv f.
 Proof. move=> ????. f_equiv. by apply proeq_to_later. Qed.
 
+(** [pair] is size-preserving *)
+#[export] Instance pair_preserv {A B : prost} {k} :
+  Proper (proeq k ==> proeq k ==> proeq k) (@pair A B).
+Proof. exact _. Qed.
+
 (** ** Completeness *)
 
 (** [prochain]: Chain / Cauchy sequence over [prost] *)
@@ -139,6 +153,22 @@ Qed.
   Cprost (discretePR A) := CPROST (λ c, c 0) _ _.
 Next Obligation. move=> ???. apply: prochain_eq. lia. Qed.
 Next Obligation. move=> ???? eq. apply eq. Qed.
+
+(** Project [prochain] over [prodPR] *)
+Program Definition prochain_proj1 {A B} (c : prochain (prodPR A B))
+  : prochain A :=
+  Prochain (λ k, (c k).1) _.
+Next Obligation. move=> ?? c ???/=. by apply c.(prochain_eq). Qed.
+Program Definition prochain_proj2 {A B} (c : prochain (prodPR A B))
+  : prochain B :=
+  Prochain (λ k, (c k).2) _.
+Next Obligation. move=> ?? c ???/=. by apply c.(prochain_eq). Qed.
+(** [Cprost] over [prodPR] *)
+#[export] Program Instance prod_cprost {A B} `{!Cprost A, !Cprost B} :
+  Cprost (prodPR A B) :=
+  CPROST (λ c, (prolimit (prochain_proj1 c), prolimit (prochain_proj2 c))) _ _.
+Next Obligation. move=> ??????. split; exact prolimit_eq. Qed.
+Next Obligation. move=> ??????? eq. split; apply prolimit_ne=> ?; apply eq. Qed.
 
 (** Turn [prochain] over [funPR] *)
 Program Definition prochain_app {A PRF}
