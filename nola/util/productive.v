@@ -50,10 +50,16 @@ Proof. case: k'=>//= ?. case: k; [lia|]=>/= ??. apply proeq_anti. lia. Qed.
 (** ** Productivity structures *)
 
 (** Discrete structure *)
-Definition discrete_proeq {A : ofe} : nat → relation A := λ _, (≡).
-Program Definition discretePR (A : ofe) : prost := Prost A discrete_proeq _ _ _.
+Program Definition discretePR (A : ofe) : prost := Prost A (λ _, (≡)) _ _ _.
 Next Obligation. done. Qed.
 Next Obligation. move=> ???. split=>// eq. apply eq, 0. Qed.
+(** Unfold [proeq] over [discretePR] *)
+Lemma discrete_proeq {A} : @proeq (discretePR A) = λ _, (≡).
+Proof. done. Qed.
+(** Unfold [proeq_later] over [discretePR] *)
+Lemma discrete_proeq_later {A k a a'} :
+  @proeq_later (discretePR A) k a a' ↔ k = 0 ∨ a ≡ a'.
+Proof. case: k=>/= >; [split; by [left|]|split; by [right|case]]. Qed.
 
 (** Function *)
 Program Canonical funPR {A} (PRF : A → prost) : prost :=
@@ -127,6 +133,12 @@ Arguments CPROST {_}.
 Proof.
   move=> ???. apply equiv_dist=> ?. apply prolimit_ne=> ?. by apply equiv_dist.
 Qed.
+
+(** [Cprost] over [discretePR] *)
+#[export] Program Instance discrete_cprost {A : ofe} :
+  Cprost (discretePR A) := CPROST (λ c, c 0) _ _.
+Next Obligation. move=> ???. apply: prochain_eq. lia. Qed.
+Next Obligation. move=> ???? eq. apply eq. Qed.
 
 (** Turn [prochain] over [funPR] *)
 Program Definition prochain_app {A PRF}
