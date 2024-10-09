@@ -1,7 +1,7 @@
-# Nola: Parameterizing Higher-Order Ghost State to Clear the Later Modality
+# Nola: Clearing the Later Modality from Higher-Order Ghost State
 
-Nola is a library for _parameterizing higher-order ghost state_, which enables
-wiping out the _later modality_.
+Nola is a framework for _higher-order ghost state_ with the _later modality_
+_cleared_.
 It is fully mechanized in [Coq](https://coq.inria.fr/) with the
 [Iris](https://iris-project.org/) separation logic framework.
 
