@@ -7,7 +7,7 @@ Import ProdNotation.
 Inductive xpty :=
 | aprvarₓ | prvarₓ (X : xpty) | xptyₓ
 | Empty_setₓ | unitₓ | boolₓ | natₓ | Zₓ | Propₓ
-| optionₓ (X : xpty) | listₓ (X : xpty)
+| optionₓ (X : xpty) | listₓ (X : xpty) | vecₓ (X : xpty) (n : nat)
 | prod'ₓ (X Y : xpty) | sumₓ (X Y : xpty) | funₓ (X Y : xpty).
 Implicit Type (X Y : xpty).
 
@@ -29,7 +29,8 @@ Proof. solve_decision. Defined.
 (** Decidable inhabitedness *)
 Fixpoint xpty_inhab X : bool :=
   match X with
-  | prvarₓ X => xpty_inhab X | Empty_setₓ => false
+  | Empty_setₓ => false
+  | prvarₓ X | vecₓ X (S _) => xpty_inhab X
   | X *'ₓ Y => xpty_inhab X && xpty_inhab Y
   | X +ₓ Y => xpty_inhab X || xpty_inhab Y
   | X →ₓ Y => negb (xpty_inhab X) || xpty_inhab Y
@@ -49,6 +50,7 @@ Fixpoint xpty_ty (X : xpty) : Type :=
   | Empty_setₓ => Empty_set | unitₓ => () | boolₓ => bool | natₓ => nat
   | Zₓ => Z | Propₓ => Prop
   | optionₓ X => option (xpty_ty X) | listₓ X => list (xpty_ty X)
+  | vecₓ X n => vec (xpty_ty X) n
   | X *'ₓ Y => xpty_ty X *' xpty_ty Y | X +ₓ Y => xpty_ty X + xpty_ty Y
   | X →ₓ Y => xpty_ty X → xpty_ty Y
   end.
@@ -62,6 +64,7 @@ Proof.
   - case: X=>//=; try by (move=> *; exact inhabitant).
     + move=> ?. by apply (aprvar_by_inhab unitₓ).
     + move=> X h. exact (prvar_by_inhab X h).
+    + move=> ?[|?]?; [exact inhabitant|]. by apply vreplicate, FIX.
     + move=> ?? /andb_True[??]. constructor; by apply FIX.
     + move=> X ?. case eq: (xpty_inhab X)=>/= H.
       { apply inl, FIX. by rewrite eq. } { by apply inr, FIX. }
@@ -69,6 +72,7 @@ Proof.
       exfalso. eapply FIX; [|done]. by rewrite eq.
   - case: X=>//=.
     + move=> X /negb_True. apply (prvar_neg_inhab X).
+    + move=> X ? + v. case: v; [done|]=> ????. by eapply FIX.
     + move=> X ?. rewrite negb_andb.
       case eq: (xpty_inhab X)=>/= ?[a b]; [by eapply FIX|].
       eapply FIX; [|apply a]. by rewrite eq.
