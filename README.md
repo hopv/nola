@@ -105,6 +105,7 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     [`proph_ag`](nola/iris/proph_ag.v) (Prophetic agreement),
     [`pborrow`](nola/iris/pborrow.v) (Prophetic borrowing)
   + [`cif`](nola/iris/cif.v) (Coinductive-inductive formula)
+  + [`paradox`](nola/iris/paradox.v) (Paradox)
 - [`heap_lang/`](nola/heap_lang/) : Variant of Iris HeapLang, supporting `Ndnat`
     (infinite non-determinism) and program logic with custom world satisfactions
 - [`rust_lang/`](nola/lrust/) : Variant of RustBelt's language, supporting

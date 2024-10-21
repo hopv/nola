@@ -239,3 +239,14 @@ Module inv_landin. Section inv_landin.
     by iApply twp_badcall.
   Qed.
 End inv_landin. End inv_landin.
+
+(** ** Anti-adequacy over [∃ n : nat, ▷^n P], proved using Löb induction and
+  [▷]'s commutativity over [∃] *)
+Module exist_laterN. Section exist_laterN.
+  Context `{!BiLöb PROP}.
+
+  (** Anti-adequacy over [∃ n : nat, ▷^n P], saying that a proposition weakened
+    by unboundedly many laters trivially holds *)
+  Lemma exist_laterN {P : PROP} : ⊢ ∃ n : nat, ▷^n P.
+  Proof. iLöb as "IH". iDestruct "IH" as (n) "?". by iExists (S n). Qed.
+End exist_laterN. End exist_laterN.
