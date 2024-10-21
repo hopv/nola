@@ -250,3 +250,58 @@ Module exist_laterN. Section exist_laterN.
   Lemma exist_laterN {P : PROP} : ⊢ ∃ n : nat, ▷^n P.
   Proof. iLöb as "IH". iDestruct "IH" as (n) "?". by iExists (S n). Qed.
 End exist_laterN. End exist_laterN.
+
+(** ** Anti-adequacy for [∃ α : SI, ▷^α P], proved in an axiomatized model of
+  transfinite step-indexing *)
+Module exist_laterSI. Section exist_laterSI.
+  (** Ordinal number for step-indexing *)
+  Context {SI : Type} (lt : SI → SI → Prop).
+  Infix "≺" := lt (at level 80).
+  Context (zero : SI) (succ : SI → SI) (is_limit : SI → Prop).
+  Implicit Type α β γ : SI.
+
+  (** Lemmas on [≺] *)
+  Hypothesis zero_lt_no : ∀ {α}, ¬ (α ≺ zero).
+  Hypothesis lt_succ : ∀ {α}, α ≺ succ α.
+  Hypothesis lt_le_lt : ∀ {α β γ}, α ≺ β → β ≺ succ γ → α ≺ γ.
+  Hypothesis is_limit_lt : ∀ {β α}, is_limit α → β ≺ α → succ β ≺ α.
+
+  (** Transfinite recursion *)
+  Hypothesis rec : ∀ (F : SI → Type) (z : F zero) (s : ∀ α, F α → F (succ α))
+    (l : ∀ α, is_limit α → (∀ β, β ≺ α → F β) → F α), ∀ α, F α.
+  Hypothesis rec_zero : ∀ {F z s l}, rec F z s l zero = z.
+  Hypothesis rec_succ : ∀ {F z s l α},
+    rec F z s l (succ α) = s α (rec F z s l α).
+  Hypothesis rec_limit : ∀ {F z s l α} (lα : is_limit α),
+    rec F z s l α = l α lα (λ β _, rec F z s l β).
+
+  (** Separation-logic proposition *)
+  Context {PROP RES : Type} (holds : PROP → SI → RES → Prop).
+  Implicit Type (P : PROP) (x : RES).
+  Context (later : PROP → PROP) (exist : ∀ A : Type, (A → PROP) → PROP).
+  Hypothesis holds_later : ∀ {P α x},
+    holds (later P) α x ↔ ∀ β, lt β α → holds P β x.
+  Hypothesis holds_exist : ∀ {A Φ α x},
+    holds (exist A Φ) α x ↔ ∃ a, holds (Φ a) α x.
+
+  (** Iterative later *)
+  Definition laterSI α P :=
+    rec (λ _, PROP) P (λ _, later) (λ α _ Φ,
+      exist (sigT (λ β, lt β α)) (λ βlt, Φ (projT1 βlt) (projT2 βlt))) α.
+
+  (** [holds] over [laterSI P (succ α)] *)
+  Lemma holds_laterSI_S {P α x} : holds (laterSI (succ α) P) α x.
+  Proof.
+    rewrite /laterSI rec_succ holds_later. move: α. apply: rec.
+    - move=> ? /zero_lt_no [].
+    - move=> ? IH ??. rewrite rec_succ holds_later=> ??. apply IH.
+      by eapply lt_le_lt.
+    - move=> α ? IH β βα. rewrite rec_limit // holds_exist.
+      apply is_limit_lt in βα=>//. exists (existT (succ β) βα)=>/=. by apply IH.
+  Qed.
+
+  (** Anti-adequacy for [∃ α : SI, ▷^α P]], saying that a proposition weakened
+    by unboundedly many laters trivially holds *)
+  Lemma exist_laterSI {P α x} : holds (exist SI (λ α, laterSI α P)) α x.
+  Proof. apply holds_exist. exists (succ α). exact holds_laterSI_S. Qed.
+End exist_laterSI. End exist_laterSI.
