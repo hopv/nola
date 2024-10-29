@@ -4,8 +4,8 @@ From nola.util Require Import tagged.
 From nola.bi Require Export deriv.
 From nola.iris Require Export pborrow borrow_deriv.
 From iris.proofmode Require Import proofmode.
-Import ProdNotation PlistNotation FunNPNotation iPropAppNotation ModwNotation
-  LftNotation ProphNotation DsemNotation.
+Import ProdNotation PlistNotation iPropAppNotation ModwNotation LftNotation
+  ProphNotation DsemNotation.
 
 Section pborrow_deriv.
   Context `{!borrowGS (cifOF CON) Σ, !prophGS TY Σ, !proph_agG A TY Σ,

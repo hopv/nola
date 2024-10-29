@@ -4,7 +4,7 @@ From nola.util Require Export uip (** Assume UIP over any type *).
 From nola.util Require Export nary cit.
 From nola.bi Require Export deriv.
 From nola.iris Require Export iprop.
-Import EqNotations FunNPNotation iPropAppNotation FunPRNotation DsemNotation.
+Import EqNotations iPropAppNotation FunPRNotation DsemNotation.
 
 Implicit Type Σ : gFunctors.
 

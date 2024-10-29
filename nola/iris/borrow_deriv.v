@@ -4,8 +4,7 @@ From nola.util Require Import tagged.
 From nola.bi Require Export deriv.
 From nola.iris Require Export borrow.
 From iris.proofmode Require Import proofmode.
-Import ProdNotation FunNPNotation iPropAppNotation ModwNotation LftNotation
-  DsemNotation.
+Import ProdNotation iPropAppNotation ModwNotation LftNotation DsemNotation.
 
 Implicit Type FM : ofe.
 

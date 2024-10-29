@@ -5,7 +5,7 @@ From nola.util Require Export prod.
 From nola.bi Require Export deriv.
 From nola.iris Require Export na_inv.
 From iris.proofmode Require Import proofmode.
-Import ProdNotation FunNPNotation iPropAppNotation ModwNotation DsemNotation.
+Import ProdNotation iPropAppNotation ModwNotation DsemNotation.
 
 Implicit Type (p : na_inv_pool_name) (N : namespace) (FM : ofe).
 

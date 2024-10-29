@@ -4,12 +4,11 @@ From nola.util Require Export psg.
 From nola.bi Require Export order.
 From iris.bi Require Import bi.
 From iris.proofmode Require Import proofmode.
-Import FunNPNotation.
 
 (** ** [Dsem]: Semantics parameterized over derivability candidates *)
 #[projections(primitive)]
 Record Dsem (JUDG : ofe) (A : ofe) (PROP : bi) := DSEM {
-  dsem :> (JUDG -np> PROP) → A → PROP;
+  dsem :> (JUDG -n> PROP) → A → PROP;
   dsem_ne {δ} :: NonExpansive (dsem δ);
 }.
 Existing Class Dsem.
@@ -38,12 +37,12 @@ Notation dinto δ δ' := (∀ J, δ J ⊢ ⟦ J ⟧(δ')) (only parsing).
 
 Section deriv.
   Context `{!Jsem JUDG PROP}.
-  Implicit Type (J : JUDG) (δ : JUDG -np> PROP) (ih : (JUDG -n> PROP) → Prop).
+  Implicit Type (J : JUDG) (δ : JUDG -n> PROP) (ih : (JUDG -n> PROP) → Prop).
 
   (** ** [Deriv ih δ] : [δ] is a good derivability predicate
 
     [ih] is the inductive hypothesis, used for parameterized induction *)
-  Definition Deriv := Psgoidp (OT:=JUDG -np> PROP) (λ δ, OfeMor (dsem δ)).
+  Definition Deriv := Psgoidp (OT:=JUDG -n> PROP) (λ δ, OfeMor (dsem δ)).
   Existing Class Deriv.
 
   (** [Deriv] is monotone over the inductive hypothesis *)
@@ -137,8 +136,8 @@ Section deriv.
   Qed.
 
   (** ** [der]: The best derivability predicate *)
-  Definition der : JUDG -np> PROP :=
-    psg (OT:=JUDG -np> PROP) (λ δ, OfeMor (dsem δ)).
+  Definition der : JUDG -n> PROP :=
+    psg (OT:=JUDG -n> PROP) (λ δ, OfeMor (dsem δ)).
 
   (** [der] satisfies [Deriv] *)
   #[export] Instance der_Deriv : Deriv (λ _, True) der.
@@ -146,7 +145,7 @@ Section deriv.
 
   (** [der] is sound w.r.t. the semantics at [der] *)
   Lemma der_sound {J} : der J ⊢ ⟦ J ⟧(der).
-  Proof. move: J. exact (psg_post (OT:=JUDG -np> PROP)). Qed.
+  Proof. move: J. exact (psg_post (OT:=JUDG -n> PROP)). Qed.
 End deriv.
 
 Module DsemNotation.
