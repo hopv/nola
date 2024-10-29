@@ -55,7 +55,7 @@ Module ModwNotation.
   Notation "|->[ W ] P" := (idw W P)
     (at level 99, P at level 200, format "'[  ' |->[ W ]  '/' P ']'")
     : bi_scope.
-  Notation "P -∗[ W ] Q" := (P -∗ |->[W] Q)
+  Notation "P -∗[ W ] Q" := (P -∗ |->[W] Q)%I
     (at level 99, Q at level 200, format "'[' P  -∗[ W ]  '/' '[' Q ']' ']'")
     : bi_scope.
   Notation "P -∗[ W ] Q" := (P -∗ |->[W] Q) : stdpp_scope.
