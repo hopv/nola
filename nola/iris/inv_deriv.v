@@ -141,7 +141,7 @@ Section inv_deriv.
     iIntros (??? to). rewrite to !sem_ejudg. iIntros (? NE).
     iMod ("accPx" $! _ NE) as "[Px cl]".
     iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
-    iMod ("PQP" with "[//] [//] [//] Px") as "($& QP)". iMod "→E∖N" as "_".
+    iMod ("PQP" with "[//] [//] [//] Px") as "[$ QP]". iMod "→E∖N" as "_".
     iIntros "!> Qx". iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
     iMod ("QP" with "Qx") as "Px". iMod "→E∖N" as "_". iApply ("cl" with "Px").
   Qed.
