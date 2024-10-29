@@ -84,7 +84,7 @@ Section inv_deriv.
     !InvJsem FML Σ JUDG}.
   Implicit Type Px Qx : FML $oi Σ.
 
-  (** Access using [inv'] *)
+  (** Access using [invd] *)
   Lemma invd_acc {N Px E} : ↑N ⊆ E →
     invd N Px =[inv_wsat ⟦⟧]{E,E∖↑N}=∗
       ⟦ Px ⟧ ∗ (⟦ Px ⟧ =[inv_wsat ⟦⟧]{E∖↑N,E}=∗ True).
@@ -93,7 +93,7 @@ Section inv_deriv.
     iDestruct (der_sound with "accPx") as "accPx". rewrite sem_ejudg.
     by iApply "accPx".
   Qed.
-  (** Access using [inv'] via view shift *)
+  (** Access using [invd] via view shift *)
   Lemma invd_acc_vs {N Px E Q R} : ↑N ⊆ E →
     □ (⟦ Px ⟧ -∗ Q =[inv_wsat ⟦⟧]{E∖↑N}=∗ ⟦ Px ⟧ ∗ R) -∗
     □ (invd N Px -∗ Q =[inv_wsat ⟦⟧]{E}=∗ R).
