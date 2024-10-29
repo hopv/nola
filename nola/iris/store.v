@@ -128,16 +128,16 @@ Section store.
     by iApply "→W".
   Qed.
 
-  (** Use [store_tok] *)
-  Lemma store_tok_use {sm} Px : store_tok Px -∗[store_wsat sm] sm Px.
+  (** Access the content of [store_tok] *)
+  Lemma store_tok_acc {sm} Px : store_tok Px -∗[store_wsat sm] sm Px.
   Proof.
     rewrite store_tok_unseal store_wsat_unseal. iIntros "[%[tok inv]] W".
     iDestruct (sinv_tok_acc with "inv W") as "/=[[$|tok'] →W]"; last first.
     { iDestruct (token_exclusive with "tok tok'") as %[]. }
     iApply "→W". by iRight.
   Qed.
-  (** Use [pstore_tok] *)
-  Lemma pstore_tok_use {sm} Px : pstore_tok Px -∗[store_wsat sm] □ sm Px.
+  (** Access the content of [pstore_tok] *)
+  Lemma pstore_tok_acc {sm} Px : pstore_tok Px -∗[store_wsat sm] □ sm Px.
   Proof.
     rewrite pstore_tok_unseal store_wsat_unseal. iIntros "[% inv] W".
     iDestruct (sinv_tok_acc with "inv W") as "/=[#Px →W]". iFrame "Px".
