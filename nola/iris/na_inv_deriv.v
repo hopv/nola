@@ -108,7 +108,8 @@ Section na_inv_deriv.
   (** Turn [na_inv_acsr] into [na_inv'] *)
   Lemma na_inv_acsr_inv' {p N Px} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      na_inv_acsr ⟦⟧(δ') p N ⟦ Px ⟧(δ')) ⊢ na_inv' δ p N Px.
+      na_inv_acsr ⟦⟧(δ') p N ⟦ Px ⟧(δ')) ⊢
+      na_inv' δ p N Px.
   Proof.
     rewrite na_inv'_unseal. iIntros "#big !>". iApply Deriv_factor.
     iIntros (????). rewrite sem_ejudg. by iApply "big".

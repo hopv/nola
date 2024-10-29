@@ -107,7 +107,8 @@ Section inv_deriv.
   (** Turn [inv_acsr] into [inv'] *)
   Lemma inv_acsr_inv' {N Px} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      inv_acsr ⟦⟧(δ') N ⟦ Px ⟧(δ')) ⊢ inv' δ N Px.
+      inv_acsr ⟦⟧(δ') N ⟦ Px ⟧(δ')) ⊢
+      inv' δ N Px.
   Proof.
     rewrite inv'_unseal. iIntros "#big !>". iApply Deriv_factor. iIntros (????).
     rewrite sem_ejudg. by iApply "big".
