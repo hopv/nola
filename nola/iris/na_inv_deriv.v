@@ -54,7 +54,7 @@ Notation na_invd := (na_inv' der).
 
 Section na_inv_deriv.
   Context `{!inv'GS (cifOF CON) Σ, !invGS_gen hlc Σ, !na_invG Σ}.
-  Implicit Type Px Qx PQx : cif CON Σ.
+  Implicit Type (P : iProp Σ) (Px Qx PQx : cif CON Σ).
 
   (** Accessor *)
   Definition na_inv_acsr sm p N P : iProp Σ :=
