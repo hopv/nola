@@ -121,9 +121,9 @@ Section inv_deriv.
   Qed.
 
   (** Allocate [inv'] *)
-  Lemma inv'_alloc_rec Px N :
-    (inv' δ N Px -∗ ⟦ Px ⟧(δ)) =[inv_wsat ⟦⟧(δ)]=∗ inv' δ N Px.
-  Proof. rewrite -inv_tok_inv'. exact: inv_tok_alloc_rec. Qed.
+  Lemma inv'_alloc_suspend Px N :
+    inv_wsat ⟦⟧(δ) ==∗ inv' δ N Px ∗ (⟦ Px ⟧(δ) -∗ inv_wsat ⟦⟧(δ)).
+  Proof. rewrite -inv_tok_inv'. exact: inv_tok_alloc_suspend. Qed.
   Lemma inv'_alloc Px N : ⟦ Px ⟧(δ) =[inv_wsat ⟦⟧(δ)]=∗ inv' δ N Px.
   Proof. rewrite -inv_tok_inv'. exact: inv_tok_alloc. Qed.
   Lemma inv'_alloc_open Px N E : ↑N ⊆ E →

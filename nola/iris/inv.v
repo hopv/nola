@@ -102,19 +102,21 @@ Section inv.
     iDestruct "F" as "[$ F∖i]". iIntros "!> i". iApply ("cl" with "[$]").
   Qed.
 
-  (** Allocate [inv_tok] *)
-  Lemma inv_tok_alloc_rec {sm} Px N :
-    (inv_tok N Px -∗ sm Px) =[inv_wsat sm]=∗ inv_tok N Px.
+  (** Allocate [inv_tok] suspending the world satisfaction *)
+  Lemma inv_tok_alloc_suspend {sm} Px N :
+    inv_wsat sm ==∗ inv_tok N Px ∗ (sm Px -∗ inv_wsat sm).
   Proof.
-    rewrite inv_tok_unseal inv_wsat_unseal. iIntros "→Px W".
+    rewrite inv_tok_unseal inv_wsat_unseal. iIntros "W".
     iDestruct (sinv_tok_alloc Px with "W") as (I) "big".
     iMod (alloc_ownD I N) as (???) "D". iMod ("big" with "[//]") as "[#i →W]".
-    iModIntro. iSplitL; [|iExists _; by iSplit]. iApply "→W". iLeft.
-    iSplitR "D"; [|done]. iApply "→Px". iExists _; by iSplit.
+    iModIntro. iSplitR; [by iFrame "i"|]. iIntros "?". iApply "→W". iLeft.
+    iFrame.
   Qed.
+  (** Allocate [inv_tok] *)
   Lemma inv_tok_alloc {sm} Px N : sm Px =[inv_wsat sm]=∗ inv_tok N Px.
   Proof.
-    iIntros "Px W". iApply (inv_tok_alloc_rec with "[Px] W"). by iIntros.
+    iIntros "? W". iMod (inv_tok_alloc_suspend with "W") as "[$ →W]". iModIntro.
+    by iApply "→W".
   Qed.
 
   (** Allocate [inv_tok] before storing the content *)

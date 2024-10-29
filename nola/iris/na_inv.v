@@ -74,19 +74,22 @@ Section na_inv.
     Persistent (na_inv_tok p N Px).
   Proof. rewrite na_inv_tok_unseal. exact _. Qed.
 
-  (** Allocate [na_inv_tok] *)
-  Lemma na_inv_tok_alloc_rec {δ} Px p N :
-    (na_inv_tok p N Px -∗ ⟦ Px ⟧(δ)) =[inv_wsat ⟦⟧(δ)]=∗ na_inv_tok p N Px.
+  (** Allocate [na_inv_tok] suspending the world satisfaction *)
+  Lemma na_inv_tok_alloc_suspend {δ} Px p N :
+    inv_wsat ⟦⟧(δ) ==∗ na_inv_tok p N Px ∗ (⟦Px⟧(δ) -∗ inv_wsat ⟦⟧(δ)).
   Proof.
-    rewrite na_inv_tok_unseal. iIntros "→Px".
+    rewrite na_inv_tok_unseal. iIntros "I".
     iMod (na_lock_alloc p N) as (i ?) "l".
-    iMod (inv_tok_alloc_rec with "[→Px l]"); last first.
-    { iModIntro. iExists _. by iSplit. }
-    iIntros "i". iLeft. iFrame "l". iApply "→Px". iExists _. by iSplit.
+    iMod (inv_tok_alloc_suspend with "I") as "[$ →W]"=>/=. iModIntro.
+    iSplit; [done|]. iIntros "Px". iApply "→W". iLeft. iFrame.
   Qed.
+  (** Allocate [na_inv_tok] *)
   Lemma na_inv_tok_alloc {δ} Px p N :
     ⟦ Px ⟧(δ) =[inv_wsat ⟦⟧(δ)]=∗ na_inv_tok p N Px.
-  Proof. iIntros "?". iApply na_inv_tok_alloc_rec. by iIntros. Qed.
+  Proof.
+    iIntros "? W". iMod (na_inv_tok_alloc_suspend with "W") as "[$ →W]". iModIntro.
+    by iApply "→W".
+  Qed.
 
   (** Allocate [inv_tok] before storing the content *)
   Lemma na_inv_tok_alloc_open {δ p N E F Px} : ↑N ⊆ E → ↑N ⊆ F →

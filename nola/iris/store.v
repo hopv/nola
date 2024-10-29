@@ -110,18 +110,23 @@ Section store.
       apply not_elem_of_union, is_fresh. }
     iMod ("big" with "[//]") as "[$ →W]". iModIntro. iApply "→W". by iLeft.
   Qed.
-  (** Allocate [pstore_tok] *)
-  Lemma pstore_tok_alloc_rec {sm} Px :
-    (pstore_tok Px -∗ □ sm Px) =[store_wsat sm]=∗ pstore_tok Px.
+
+  (** Allocate [pstore_tok] suspending the world satisfaction *)
+  Lemma pstore_tok_alloc_suspend {sm} Px :
+    store_wsat sm ==∗ pstore_tok Px ∗ (□ sm Px -∗ store_wsat sm).
   Proof.
-    rewrite pstore_tok_unseal store_wsat_unseal. iIntros "→Px W".
+    rewrite pstore_tok_unseal store_wsat_unseal. iIntros "W".
     iDestruct (sinv_tok_alloc (FML:=store_fml _) (false, Px) with "W")
       as (I) "big".
     iMod ("big" $! (fresh I) with "[%]") as "[#inv →W]". { apply is_fresh. }
-    iModIntro. iFrame "inv". iApply "→W". iApply "→Px". by iExists _.
+    iModIntro. iFrame "inv". iIntros "?". by iApply "→W".
   Qed.
+  (** Allocate [pstore_tok] *)
   Lemma pstore_tok_alloc {sm} Px : □ sm Px =[store_wsat sm]=∗ pstore_tok Px.
-  Proof. iIntros "Px". iApply pstore_tok_alloc_rec. by iIntros. Qed.
+  Proof.
+    iIntros "? W". iMod (pstore_tok_alloc_suspend with "W") as "[$ →W]". iModIntro.
+    by iApply "→W".
+  Qed.
 
   (** Use [store_tok] *)
   Lemma store_tok_use {sm} Px : store_tok Px -∗[store_wsat sm] sm Px.
