@@ -117,8 +117,7 @@ Section inv_deriv.
   (** Turn [inv_tok] into [inv'] *)
   Lemma inv_tok_inv' {N Px} : inv_tok N Px ⊢ inv' δ N Px.
   Proof.
-    rewrite -inv_acsr_inv'. iIntros "#i !>" (δ' ?????).
-    by iApply (inv_tok_acc (sm:=⟦⟧(δ')) with "i").
+    rewrite -inv_acsr_inv'. iIntros "#? !>" (??????). by iApply inv_tok_acc.
   Qed.
 
   (** Allocate [inv'] *)

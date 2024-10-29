@@ -118,7 +118,7 @@ Section na_inv_deriv.
   (** Turn [na_inv_tok] into [na_inv'] *)
   Lemma na_inv_tok_na_inv' {p N Px} : na_inv_tok p N Px ⊢ na_inv' δ p N Px.
   Proof.
-    rewrite -na_inv_acsr_inv'. iIntros "#i !>" (δ' ???????) "F".
+    rewrite -na_inv_acsr_inv'. iIntros "#i !>" (????????) "F".
     by iApply (na_inv_tok_acc with "F i").
   Qed.
 
