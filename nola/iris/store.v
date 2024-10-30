@@ -103,7 +103,7 @@ Section store.
   Lemma store_tok_alloc {sm} Px : sm Px =[store_wsat sm]=∗ store_tok Px.
   Proof.
     rewrite store_tok_unseal store_wsat_unseal. iIntros "Px W".
-    iDestruct (sinv_tok_alloc (FML:=store_fml _) (true, Px) with "W")
+    iDestruct (sinv_tok_alloc_suspend (FML:=store_fml _) (true, Px) with "W")
       as (I) "big".
     iMod (token_alloc_strong (.∉ I)) as (??) "$".
     { apply (pred_infinite_set (C:=gset positive))=> X. exists (fresh (I ∪ X)).
@@ -116,7 +116,7 @@ Section store.
     store_wsat sm ==∗ pstore_tok Px ∗ (□ sm Px -∗ store_wsat sm).
   Proof.
     rewrite pstore_tok_unseal store_wsat_unseal. iIntros "W".
-    iDestruct (sinv_tok_alloc (FML:=store_fml _) (false, Px) with "W")
+    iDestruct (sinv_tok_alloc_suspend (FML:=store_fml _) (false, Px) with "W")
       as (I) "big".
     iMod ("big" $! (fresh I) with "[%]") as "[#inv →W]". { apply is_fresh. }
     iModIntro. iFrame "inv". iIntros "?". by iApply "→W".

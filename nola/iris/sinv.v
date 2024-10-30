@@ -87,7 +87,7 @@ Section sinv.
     Timeless (sinv_wsat sm).
   Proof. rewrite sinv_wsat_unseal. exact _. Qed.
 
-  (** Lemma for [sinv_tok_alloc] *)
+  (** Lemma for [sinv_tok_alloc_suspend] *)
   Local Lemma sinv_auth_tok_alloc {M i Px} : i ∉ dom M →
     sinv_auth_tok M ==∗ sinv_auth_tok (<[i:=Px]> M) ∗ sinv_tok i Px.
   Proof.
@@ -95,8 +95,8 @@ Section sinv.
     iApply own_update; [|done]. rewrite fmap_insert.
     apply gmap_view_alloc; [|done..]. by rewrite lookup_fmap eq.
   Qed.
-  (** Allocate [sinv_tok] *)
-  Lemma sinv_tok_alloc {sm} Px :
+  (** Allocate [sinv_tok] suspending the world satisfaction *)
+  Lemma sinv_tok_alloc_suspend {sm} Px :
     sinv_wsat sm -∗ ∃ I, ∀ i, ⌜i ∉ I⌝ ==∗
       sinv_tok i Px ∗ (sm i Px -∗ sinv_wsat sm).
   Proof.

@@ -107,7 +107,7 @@ Section inv.
     inv_wsat sm ==∗ inv_tok N Px ∗ (sm Px -∗ inv_wsat sm).
   Proof.
     rewrite inv_tok_unseal inv_wsat_unseal. iIntros "W".
-    iDestruct (sinv_tok_alloc Px with "W") as (I) "big".
+    iDestruct (sinv_tok_alloc_suspend Px with "W") as (I) "big".
     iMod (alloc_ownD I N) as (???) "D". iMod ("big" with "[//]") as "[#i →W]".
     iModIntro. iSplitR; [by iFrame "i"|]. iIntros "?". iApply "→W". iLeft.
     iFrame.
@@ -125,7 +125,7 @@ Section inv.
       (sm Px =[inv_wsat sm]{E∖↑N, E}=∗ True).
   Proof.
     rewrite inv_tok_unseal inv_wsat_unseal=> NE. iIntros "W".
-    iDestruct (sinv_tok_alloc Px with "W") as (I) "big".
+    iDestruct (sinv_tok_alloc_suspend Px with "W") as (I) "big".
     iMod (alloc_ownD I N) as (?? iN) "D".
     iMod ("big" with "[//]") as "[#sm →W]".
     iMod (fupd_ownE_acc_in iN NE) as "[i cl]".
