@@ -124,8 +124,8 @@ Section store.
   (** Allocate [pstore_tok] *)
   Lemma pstore_tok_alloc {sm} Px : □ sm Px =[store_wsat sm]=∗ pstore_tok Px.
   Proof.
-    iIntros "? W". iMod (pstore_tok_alloc_suspend with "W") as "[$ →W]". iModIntro.
-    by iApply "→W".
+    iIntros "? W". iMod (pstore_tok_alloc_suspend with "W") as "[$ →W]".
+    iModIntro. by iApply "→W".
   Qed.
 
   (** Access the content of [store_tok] *)

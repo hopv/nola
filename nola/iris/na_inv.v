@@ -87,8 +87,8 @@ Section na_inv.
   Lemma na_inv_tok_alloc {δ} Px p N :
     ⟦ Px ⟧(δ) =[inv_wsat ⟦⟧(δ)]=∗ na_inv_tok p N Px.
   Proof.
-    iIntros "? W". iMod (na_inv_tok_alloc_suspend with "W") as "[$ →W]". iModIntro.
-    by iApply "→W".
+    iIntros "? W". iMod (na_inv_tok_alloc_suspend with "W") as "[$ →W]".
+    iModIntro. by iApply "→W".
   Qed.
 
   (** Allocate [inv_tok] before storing the content *)
