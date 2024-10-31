@@ -9,22 +9,23 @@ Import ProdNotation iPropAppNotation ModwNotation DsemNotation.
 
 Implicit Type (p : na_inv_pool_name) (N : namespace) (FM : ofe).
 
-(** ** [na_inv_judgty]: Judgment type for [na_inv] *)
-Variant na_inv_id FM := .
-Definition na_inv_judgty (FM : ofe) : ofe :=
+(** ** Judgment for [na_inv] *)
+
+(** [na_invJT]: Judgment type for [na_inv] *)
+Variant na_invJT_id FM := .
+Definition na_invJT (FM : ofe) : ofe :=
   (** Accessor judgment *)
-    tagged (na_inv_id FM) (leibnizO (na_inv_pool_name *' namespace) * FM).
+    tagged (na_invJT_id FM) (leibnizO (na_inv_pool_name *' namespace) * FM).
+(** [na_invJ]: [na_invJT] registered *)
+Notation na_invJ FM JUDG := (inJ (na_invJT FM) JUDG).
 
-(** ** [NaInvJudg]: Judgment structure for [na_inv] *)
-Notation NaInvJudg FM JUDG := (Ejudg (na_inv_judgty FM) JUDG).
-
-Section na_inv_deriv.
-  Context `{na_inv_judg : !NaInvJudg FM JUDG} {Σ : gFunctors}.
+Section na_invJ.
+  Context `{na_inv_j : !na_invJ FM JUDG} {Σ : gFunctors}.
   Implicit Type δ : JUDG -n> iProp Σ.
 
   (** Accessor judgment *)
   Local Definition na_inv_jacsr p N Px : JUDG :=
-    na_inv_judg (Tagged ((p, N)', Px)).
+    na_inv_j (Tagged ((p, N)', Px)).
   Local Instance na_inv_jacsr_ne {p N} : NonExpansive (na_inv_jacsr p N).
   Proof. unfold na_inv_jacsr=> ????. f_equiv. by split. Qed.
 
@@ -47,12 +48,12 @@ Section na_inv_deriv.
   #[export] Instance na_inv'_proper {δ p N} :
     Proper ((≡) ==> (⊣⊢)) (na_inv' δ p N).
   Proof. apply ne_proper, _. Qed.
-End na_inv_deriv.
+End na_invJ.
 
 (** Notation *)
 Notation na_invd := (na_inv' der).
 
-Section na_inv_deriv.
+Section na_invJ.
   Context `{!inv'GS (cifOF CON) Σ, !invGS_gen hlc Σ, !na_invG Σ}.
   Implicit Type (P : iProp Σ) (Px Qx PQx : cif CON Σ).
 
@@ -66,30 +67,27 @@ Section na_inv_deriv.
     Proper ((≡{n}≡) ==> (=) ==> (=) ==> (≡{n}≡) ==> (≡{n}≡)) na_inv_acsr.
   Proof. solve_proper. Qed.
 
-  Context `{!NaInvJudg (cif CON Σ) JUDG, !Jsem JUDG (iProp Σ),
-    !Dsem JUDG (cif CON Σ) (iProp Σ)}.
+  Context `{!na_invJ (cif CON Σ) JUDG, !Dsem JUDG (cif CON Σ) (iProp Σ),
+    !Jsem JUDG (iProp Σ)}.
   Implicit Type δ : JUDG -n> iProp Σ.
 
-  (** ** [na_inv_judg_sem]: Semantics of [na_inv_judgty] *)
-  Definition na_inv_judg_sem δ (pNPx : na_inv_judgty (cif CON Σ)) : iProp Σ :=
+  (** ** [na_invJT_sem]: Semantics of [na_invJT] *)
+  Definition na_invJT_sem δ (pNPx : na_invJT (cif CON Σ)) : iProp Σ :=
     na_inv_acsr ⟦⟧(δ) pNPx.(untag).1.1' pNPx.(untag).1.2' ⟦ pNPx.(untag).2 ⟧(δ).
-  (** [na_inv_judg_sem] is non-expansive *)
-  #[export] Instance na_inv_judg_sem_ne {δ} :
-    NonExpansive (na_inv_judg_sem δ).
+  (** [na_invJT_sem] is non-expansive *)
+  #[export] Instance na_invJT_sem_ne {δ} : NonExpansive (na_invJT_sem δ).
   Proof. move=> ?[[??]][[??]][/=/leibniz_equiv_iff<-?]. solve_proper. Qed.
-  (** [Dsem] over [na_inv_judgty] *)
-  #[export] Instance na_inv_judg_dsem
-    : Dsem JUDG (na_inv_judgty (cif CON Σ)) (iProp Σ) := DSEM na_inv_judg_sem _.
-End na_inv_deriv.
-
-(** ** [NaInvJsem]: Judgment semantics for [na_inv] *)
-Notation NaInvJsem CON Σ JUDG :=
-  (Ejsem (na_inv_judgty (cif CON Σ)) JUDG (iProp Σ)).
+  (** [Dsem] over [na_invJT] *)
+  #[export] Instance na_invJT_dsem
+    : Dsem JUDG (na_invJT (cif CON Σ)) (iProp Σ) := DSEM na_invJT_sem _.
+End na_invJ.
+(** [na_invJS]: Semantics of [na_invJT] registered *)
+Notation na_invJS CON JUDG Σ := (inJS (na_invJT (cif CON Σ)) JUDG (iProp Σ)).
 
 Section na_inv_deriv.
   Context `{!inv'GS (cifOF CON) Σ, !invGS_gen hlc Σ, !na_invG Σ,
-    !NaInvJudg (cif CON Σ) JUDG, !Jsem JUDG (iProp Σ), !SemCifcon CON JUDG Σ,
-    !NaInvJsem CON Σ JUDG}.
+    !na_invJ (cif CON Σ) JUDG, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ),
+    !na_invJS CON JUDG Σ}.
   Implicit Type Px Qx : cif CON Σ.
 
   (** Access using [na_invd] *)
@@ -99,7 +97,7 @@ Section na_inv_deriv.
       (na_own p (F∖↑N) -∗ ⟦ Px ⟧ =[inv_wsat ⟦⟧]{E}=∗ na_own p F).
   Proof.
     rewrite na_inv'_unseal. iIntros (NE NF) "F accP".
-    iDestruct (der_sound with "accP") as "accP". rewrite sem_ejudg.
+    iDestruct (der_sound with "accP") as "accP". rewrite in_js.
     iApply ("accP" $! _ _ NE NF with "F").
   Qed.
 
@@ -112,7 +110,7 @@ Section na_inv_deriv.
       na_inv' δ p N Px.
   Proof.
     rewrite na_inv'_unseal. iIntros "#big !>". iApply Deriv_factor.
-    iIntros (????). rewrite sem_ejudg. by iApply "big".
+    iIntros (????). rewrite in_js. by iApply "big".
   Qed.
 
   (** Turn [na_inv_tok] into [na_inv'] *)
@@ -143,7 +141,7 @@ Section na_inv_deriv.
       na_inv' δ p N Px -∗ na_inv' δ p N Qx.
   Proof.
     rewrite na_inv'_unseal. iIntros "#PQP #accP !>". iApply Deriv_factor.
-    iIntros (??? to). rewrite to !sem_ejudg. iIntros (?? NE NF) "F".
+    iIntros (??? to). rewrite to !in_js. iIntros (?? NE NF) "F".
     iMod ("accP" $! _ _ NE NF with "F") as "($ & Px & cl)".
     iMod (fupd_mask_subseteq ∅) as "→E∖N"; [set_solver|].
     iMod ("PQP" with "[//] [//] [//] Px") as "[$ QP]". iMod "→E∖N" as "_".
@@ -184,7 +182,7 @@ Section na_inv_deriv.
   Proof.
     rewrite na_inv'_unseal. iIntros (?? eq) "#i #i' !>".
     iApply (Deriv_map2 with "[] i i'"). iIntros (????) "{i}i {i'}i'".
-    rewrite !sem_ejudg. iIntros (????) "F". rewrite eq.
+    rewrite !in_js. iIntros (????) "F". rewrite eq.
     iMod ("i" with "[%] [%] F") as "(F∖N1 & $ & P→)"; [set_solver..|].
     iMod ("i'" with "[%] [%] F∖N1") as "(F∖N12 & $ & Q→)"; [set_solver..|].
     iDestruct (na_own_acc with "F∖N12") as "[$ F∖N→]"; [set_solver|].

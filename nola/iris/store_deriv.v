@@ -8,20 +8,21 @@ Import iPropAppNotation ModwNotation DsemNotation.
 
 Implicit Type (Σ : gFunctors) (FM : ofe) (b : bool).
 
-(** ** [store_judgty]: Judgment type for [store] *)
-Variant store_judg_id FM := .
-Definition store_judgty (FM : ofe) : ofe :=
-  (** Accessor judgment *) tagged (store_judg_id FM) (bool * FM).
+(** ** Judgment *)
 
-(** ** [StoreJudg]: Judgment structure for [store] *)
-Notation StoreJudg FM JUDG := (Ejudg (store_judgty FM) JUDG).
+(* [storeJT]: Judgment type for [store] *)
+Variant storeJT_id FM := .
+Definition storeJT (FM : ofe) : ofe :=
+  (** Accessor judgment *) tagged (storeJT_id FM) (bool * FM).
+(** [storeJ]: [storeJT] registered *)
+Notation storeJ FM JUDG := (inJ (storeJT FM) JUDG).
 
-Section store_deriv.
-  Context `{store_judg : !StoreJudg FM JUDG} {Σ}.
+Section storeJ.
+  Context `{store_j : !storeJ FM JUDG} {Σ}.
   Implicit Type (δ : JUDG -n> iProp Σ) (Px : FM).
 
   (** Accessor judgment *)
-  Local Definition store_jacsr b Px : JUDG := store_judg (Tagged (b, Px)).
+  Local Definition store_jacsr b Px : JUDG := store_j (Tagged (b, Px)).
   Local Instance store_jacsr_ne {N} : NonExpansive (store_jacsr N).
   Proof. unfold store_jacsr=> ????. f_equiv. by split. Qed.
 
@@ -51,53 +52,51 @@ Section store_deriv.
   Proof. rewrite pstore_unseal. solve_proper. Qed.
   #[export] Instance pstore_proper {δ} : Proper ((≡) ==> (⊣⊢)) (pstore δ).
   Proof. apply ne_proper, _. Qed.
-End store_deriv.
+End storeJ.
 
 (** Notation *)
 Notation stored := (store der).
 Notation pstored := (pstore der).
 
-Section store_deriv.
+Section storeJ.
   Context `{!storeGS FML Σ}.
   Implicit Type (P : iProp Σ) (Px : FML $oi Σ).
 
-  Context `{!StoreJudg (FML $oi Σ) JUDG, !Jsem JUDG (iProp Σ),
-    !Dsem JUDG (FML $oi Σ) (iProp Σ)}.
+  Context `{!storeJ (FML $oi Σ) JUDG, !Dsem JUDG (FML $oi Σ) (iProp Σ),
+    !Jsem JUDG (iProp Σ)}.
   Implicit Type δ : JUDG -n> iProp Σ.
 
-  (** ** [store_judg_sem]: Semantics of [store_judgty] *)
-  Definition store_judg_sem δ (bPx : store_judgty (FML $oi Σ)) : iProp Σ :=
+  (** [storeJT_sem]: Semantics of [storeJT] *)
+  Definition storeJT_sem δ (bPx : storeJT (FML $oi Σ)) : iProp Σ :=
     |->[store_wsat ⟦⟧(δ)] (□?(negb bPx.(untag).1) ⟦ bPx.(untag).2 ⟧(δ)).
-  (** [store_judg_sem] is non-expansive *)
-  #[export] Instance store_judg_sem_ne {δ} :
-    NonExpansive (store_judg_sem δ).
+  (** [storeJT_sem] is non-expansive *)
+  #[export] Instance storeJT_sem_ne {δ} : NonExpansive (storeJT_sem δ).
   Proof. move=> ?[[??]][[??]][/=/leibniz_equiv_iff<-?]. solve_proper. Qed.
-  (** [Dsem] over [store_judgty] *)
-  #[export] Instance store_judg_dsem
-    : Dsem JUDG (store_judgty (FML $oi Σ)) (iProp Σ) := DSEM store_judg_sem _.
-End store_deriv.
-Arguments store_judg_sem {_ _ _ _} _ _ /.
-
-(** ** [StoreJsem]: Judgment semantics for [store] *)
-Notation StoreJsem FML Σ JUDG :=
-  (Ejsem (store_judgty (FML $oi Σ)) JUDG (iProp Σ)).
+  (** [Dsem] over [storeJT] *)
+  #[export] Instance storeJT_dsem : Dsem JUDG (storeJT (FML $oi Σ)) (iProp Σ) :=
+    DSEM storeJT_sem _.
+End storeJ.
+Arguments storeJT_sem {_ _ _ _} _ _ /.
+(** [storeJS]: Semantics of [storeJT] registered *)
+Notation storeJS FML JUDG Σ := (inJS (storeJT (FML $oi Σ)) JUDG (iProp Σ)).
 
 Section store_deriv.
-  Context `{!storeGS FML Σ, !StoreJudg (FML $oi Σ) JUDG, !Jsem JUDG (iProp Σ),
-    !Dsem JUDG (FML $oi Σ) (iProp Σ), !StoreJsem FML Σ JUDG}.
+  Context `{!storeGS FML Σ, !storeJ (FML $oi Σ) JUDG,
+    !Dsem JUDG (FML $oi Σ) (iProp Σ), !Jsem JUDG (iProp Σ),
+    !storeJS FML JUDG Σ}.
   Implicit Type Px Qx Rx : FML $oi Σ.
 
   (** Access using [stored] *)
   Lemma stored_acc {Px} : stored Px -∗[store_wsat ⟦⟧] ⟦ Px ⟧.
   Proof.
     rewrite store_unseal. iIntros "accPx".
-    iDestruct (der_sound with "accPx") as "accPx". by rewrite sem_ejudg.
+    iDestruct (der_sound with "accPx") as "accPx". by rewrite in_js.
   Qed.
   (** Access using [pstored] *)
   Lemma pstored_acc {Px} : pstored Px -∗[store_wsat ⟦⟧] □ ⟦ Px ⟧.
   Proof.
     rewrite pstore_unseal. iIntros "accPx".
-    iDestruct (der_sound with "accPx") as "accPx". by rewrite sem_ejudg.
+    iDestruct (der_sound with "accPx") as "accPx". by rewrite in_js.
   Qed.
 
   Context `{!Deriv (JUDG:=JUDG) ih δ}.
@@ -109,7 +108,7 @@ Section store_deriv.
       store δ Px.
   Proof.
     rewrite store_unseal. iIntros "big". iApply Deriv_factor. iIntros (????).
-    rewrite sem_ejudg /=. by iApply "big".
+    rewrite in_js /=. by iApply "big".
   Qed.
   (** Turn [store_acsr] into [pstore] *)
   Lemma store_acsr_pstore {Px} :
@@ -118,7 +117,7 @@ Section store_deriv.
       pstore δ Px.
   Proof.
     rewrite pstore_unseal. iIntros "#big !>". iApply Deriv_factor.
-    iIntros (????). rewrite sem_ejudg /=. by iApply "big".
+    iIntros (????). rewrite in_js /=. by iApply "big".
   Qed.
 
   (** Turn [store_tok] into [store] *)
@@ -150,7 +149,7 @@ Section store_deriv.
       store δ Px -∗ store δ Qx.
   Proof.
     rewrite store_unseal. iIntros "PQ accPx". iApply Deriv_factor.
-    iIntros (??? to). rewrite /store_def to !sem_ejudg /=. iMod "accPx" as "Px".
+    iIntros (??? to). rewrite /store_def to !in_js /=. iMod "accPx" as "Px".
     by iApply "PQ".
   Qed.
   (** Convert [pstore] with [-∗] *)
@@ -160,7 +159,7 @@ Section store_deriv.
       pstore δ Px -∗ pstore δ Qx.
   Proof.
     rewrite pstore_unseal. iIntros "#PQ #accPx !>". iApply Deriv_factor.
-    iIntros (??? to). rewrite /store_def to !sem_ejudg /=. iMod "accPx" as "Px".
+    iIntros (??? to). rewrite /store_def to !in_js /=. iMod "accPx" as "Px".
     by iApply "PQ".
   Qed.
 
@@ -171,7 +170,7 @@ Section store_deriv.
       store δ Px -∗ store δ Qx -∗ store δ Rx.
   Proof.
     rewrite store_unseal. iIntros "PQR accPx accQx". iApply Deriv_factor.
-    iIntros (??? to). rewrite /store_def !to !sem_ejudg /=.
+    iIntros (??? to). rewrite /store_def !to !in_js /=.
     iMod "accPx" as "Px". iMod "accQx" as "Qx".
     iApply ("PQR" with "[//] [//] [//] Px Qx").
   Qed.
@@ -182,7 +181,7 @@ Section store_deriv.
       pstore δ Px -∗ pstore δ Qx -∗ pstore δ Rx.
   Proof.
     rewrite pstore_unseal. iIntros "#PQR #accPx #accQx !>". iApply Deriv_factor.
-    iIntros (??? to). rewrite /store_def !to !sem_ejudg /=.
+    iIntros (??? to). rewrite /store_def !to !in_js /=.
     iMod "accPx" as "Px". iMod "accQx" as "Qx".
     iApply ("PQR" with "[//] [//] [//] Px Qx").
   Qed.

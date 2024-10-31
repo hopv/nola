@@ -5,9 +5,9 @@ From nola.rust_lang Require Export notation proofmode.
 Import FunPRNotation ModwNotation WpwNotation DsemNotation LftNotation.
 
 Section mutex_bor.
-  Context `{!lrustGS_gen hlc Σ, !SemCifcon CON JUDG Σ, !Jsem JUDG (iProp Σ),
-    !inv'GS (cifOF CON) Σ, !InvCon CON, !InvSem CON JUDG Σ,
-    !borrowGS (cifOF CON) Σ, !BorCon CON, !BorSem CON JUDG Σ}.
+  Context `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), !lrustGS_gen hlc Σ,
+    !inv'GS (cifOF CON) Σ, !inv_tokC CON, !inv_tokCS CON JUDG Σ,
+    !borrowGS (cifOF CON) Σ, !bor_tokC CON, !bor_tokCS CON JUDG Σ}.
   Implicit Type (Px Qx : cif CON Σ) (Φx Ψx : loc → cif CON Σ) (b : bool)
     (l : loc).
 
@@ -24,7 +24,7 @@ Section mutex_bor.
 
   (** Shared borrow of a mutex *)
   Definition cif_mutex_bor' α l Px :=
-    cif_bor α ((▷ l ↦ #false ∗ cif_bor α Px) ∨ ▷ l ↦ #true).
+    cif_bor_tok α ((▷ l ↦ #false ∗ cif_bor_tok α Px) ∨ ▷ l ↦ #true).
   Definition mutex_bor α l Px := inv_tok nroot (cif_mutex_bor' α l Px).
   Definition cif_mutex_bor α l Px := as_cif (λ _, mutex_bor α l Px).
   (** [cif_mutex_bor'] is productive *)
@@ -119,7 +119,7 @@ Section mutex_bor.
     { by iIntros "_ [[% $][$ _]]". }
     iMod (bor_tok_open (M:=bupd) with "α b") as "/=[o ↦]".
     iMod (obor_tok_subdiv (FML:=cifOF CON) (M:=bupd)
-      [(▷ l ↦ #false ∗ cif_bor α Px) ∨ ▷ l ↦ #true]%cif with "[] o [↦ b'] []")
+      [(▷ l ↦ #false ∗ cif_bor_tok α Px) ∨ ▷ l ↦ #true]%cif with "[] o [↦ b'] []")
       as "($ & _ & [b _])"=>/=. { iApply lft_sincl_refl. }
     { iSplit; [|done]. rewrite sem_ecustom /=.
       iDestruct "↦" as ([|]) "↦"; [|iLeft]; iFrame. }

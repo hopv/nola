@@ -156,25 +156,26 @@ Module DsemNotation.
   Notation "⟦ a ⟧@{ A }" := (⟦ a ⟧(der)@{ A }) (only parsing).
 End DsemNotation.
 
-(** ** [Ejudg]: Judgment inclusion *)
-Record Ejudg (JUDG' JUDG : ofe) := EJUDG {
-  ejudg :> JUDG' → JUDG;
-  ejudg_ne :: NonExpansive ejudg;
+(** ** [inJ]: Judgment inclusion *)
+Record inJ (JUDG' JUDG : ofe) := IN_J {
+  in_j :> JUDG' → JUDG;
+  in_j_ne :: NonExpansive in_j;
 }.
-Existing Class Ejudg.
-Add Printing Constructor Ejudg.
-Arguments EJUDG {_ _} _ _. Arguments ejudg _ {_ _}. Arguments ejudg_ne {_ _ _}.
-Hint Mode Ejudg ! - : typeclass_instances.
+Existing Class inJ.
+Add Printing Constructor inJ.
+Arguments IN_J {_ _} _ _.
+Arguments in_j {_ _ inj} : rename. Arguments in_j_ne {_ _ inj} : rename.
+Hint Mode inJ ! - : typeclass_instances.
 
 (** Judgment inclusion into [sigT] *)
-Definition sigT_ejudg {A} {JUDGf : A → ofe} {a}
-  : Ejudg (JUDGf a) (sigTO JUDGf) := EJUDG (existT a) _.
+Definition sigT_inJ {A} {JUDGf : A → ofe} {a} : inJ (JUDGf a) (sigTO JUDGf) :=
+  IN_J (existT a) _.
 
-(** ** [Ejsem]: Judgment semantics inclusion *)
-Class Ejsem (JUDG' JUDG : ofe) PROP
-  `{!Ejudg JUDG' JUDG, !Jsem JUDG PROP, !Dsem JUDG JUDG' PROP} :=
-  sem_ejudg : ∀ {δ J}, ⟦ @ejudg JUDG' JUDG _ J ⟧(δ) = ⟦ J ⟧(δ).
-Hint Mode Ejsem ! - - - - - : typeclass_instances.
+(** ** [inJS]: Judgment semantics inclusion *)
+Class inJS (JUDG' JUDG : ofe) PROP
+  `{!inJ JUDG' JUDG, !Dsem JUDG JUDG' PROP, !Jsem JUDG PROP} :=
+  in_js : ∀ {δ J}, ⟦ @in_j JUDG' JUDG _ J ⟧(δ) = ⟦ J ⟧(δ).
+Hint Mode inJS ! - - - - - : typeclass_instances.
 
 (** Semantics over [sigT] *)
 Program Definition sigT_dsem {A} (F : A → ofe) {PROP JUDG}
@@ -183,8 +184,7 @@ Program Definition sigT_dsem {A} (F : A → ofe) {PROP JUDG}
 Next Obligation. move=> > [??][??][/=?]. subst=>/=. solve_proper. Qed.
 
 (** Judgment semantics inclusion into [sigT] *)
-Lemma sigT_ejsem {A} {JUDGf : A → ofe} {PROP}
+Lemma sigT_inJS {A} {JUDGf : A → ofe} {PROP}
   (dsemf : ∀ a, Dsem (sigT JUDGf) (JUDGf a) PROP) {a} :
-  Ejsem (Ejudg0:=sigT_ejudg) (Jsem0:=sigT_dsem JUDGf)
-    (JUDGf a) (sigTO JUDGf) PROP.
+  inJS (JUDGf a) (sigTO JUDGf) PROP (inJ0:=sigT_inJ) (Jsem0:=sigT_dsem JUDGf).
 Proof. done. Qed.

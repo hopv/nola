@@ -8,173 +8,191 @@ Implicit Type (Σ : gFunctors) (N : namespace) (TY : synty) (α : lft) (FM : ofe
   (A : Type).
 
 (** ** Invariant *)
-(** [invCC]: Constructor *)
-Variant invCC_id := .
-Definition invCC :=
-  Cifcon invCC_id namespace (λ _, Empty_set) (λ _, unit) (λ _, unitO) _.
-(** [InvCon]: [invCC] registered *)
-Notation InvCon := (Ecifcon invCC).
-Section cif_inv.
-  Context `{!InvCon CON} {Σ}.
-  (** [cif_inv]: Formula *)
-  Definition cif_inv N (Px : cif CON Σ) : cif CON Σ :=
-    cif_ecustom invCC N nullary (unary Px) ().
+
+(** [inv_tokCT]: Constructor for [inv_tok] *)
+Variant inv_tokCT_id := .
+Definition inv_tokCT :=
+  Cifcon inv_tokCT_id namespace (λ _, Empty_set) (λ _, unit) (λ _, unitO) _.
+(** [inv_tokC]: [inv_tokCT] registered *)
+Notation inv_tokC := (inC inv_tokCT).
+
+Section inv_tokC.
+  Context `{!inv_tokC CON} {Σ}.
+  (** [cif_inv_tok]: Formula *)
+  Definition cif_inv_tok N (Px : cif CON Σ) : cif CON Σ :=
+    cif_ecustom inv_tokCT N nullary (unary Px) ().
   (** [cif_inv] is non-expansive *)
-  #[export] Instance cif_inv_ne {N} : NonExpansive (cif_inv N).
+  #[export] Instance cif_inv_tok_ne {N} : NonExpansive (cif_inv_tok N).
   Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
-  #[export] Instance cif_inv_proper {N} : Proper ((≡) ==> (≡)) (cif_inv N).
+  #[export] Instance cif_inv_tok_proper {N} :
+    Proper ((≡) ==> (≡)) (cif_inv_tok N).
   Proof. apply ne_proper, _. Qed.
   (** [cif_inv] is productive *)
-  #[export] Instance cif_inv_productive {N} : Productive (cif_inv N).
+  #[export] Instance cif_inv_tok_productive {N} : Productive (cif_inv_tok N).
   Proof.
     move=> ????. apply cif_ecustom_preserv_productive=>//.
     by apply fun_proeq_later.
   Qed.
+
   Context `{!inv'GS (cifOF CON) Σ}.
-  (** Semantics of [invCC] *)
-  #[export] Program Instance inv_sem_ecifcon {JUDG}
-    : SemEcifcon invCC CON JUDG Σ :=
-    SEM_ECIFCON (λ _ _ N _ Φx _, inv_tok N (Φx ())) _.
+  (** Semantics of [inv_tokCT] *)
+  #[export] Program Instance inv_tokCT_ecsem {JUDG}
+    : Ecsem inv_tokCT CON JUDG Σ :=
+    ECSEM (λ _ _ N _ Φx _, inv_tok N (Φx ())) _.
   Next Obligation. move=>/= ???*???*?? eqv ???. f_equiv. apply eqv. Qed.
-End cif_inv.
-(** [invCC] semantics registered *)
-Notation InvSem := (EsemEcifcon invCC).
+End inv_tokC.
+(** [inv_tokCS]: Semantics of [inv_tokCT] registered *)
+Notation inv_tokCS := (inCS inv_tokCT).
 
 (** Reify [inv_tok] *)
-#[export] Program Instance inv_tok_as_cif `{!SemCifcon CON JUDG Σ, !InvCon CON}
-  `{!inv'GS (cifOF CON) Σ, !InvSem CON JUDG Σ} {N Px} :
-  AsCif CON (λ _, inv_tok N Px) := AS_CIF (cif_inv N Px) _.
+#[export] Program Instance inv_tok_as_cif `{!Csem CON JUDG Σ}
+  `{!inv_tokC CON, !inv'GS (cifOF CON) Σ, !inv_tokCS CON JUDG Σ} {N Px} :
+  AsCif CON (λ _, inv_tok N Px) := AS_CIF (cif_inv_tok N Px) _.
 Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
 
 (** ** Borrow *)
-(** [borCC]: Constructor *)
-Variant borCC_id := .
-Definition borCC :=
-  Cifcon borCC_id lft (λ _, Empty_set) (λ _, unit) (λ _, unitO) _.
-(** [BorCon]: [borCC] registered *)
-Notation BorCon := (Ecifcon borCC).
-Section cif_bor.
-  Context `{!BorCon CON} {Σ}.
-  (** [cif_bor]: Formula *)
-  Definition cif_bor α (Px : cif CON Σ) : cif CON Σ :=
-    cif_ecustom borCC α nullary (unary Px) ().
-  (** [cif_bor] is non-expansive *)
-  #[export] Instance cif_bor_ne {α} : NonExpansive (cif_bor α).
+
+(** [bor_tokCT]: Constructor for [bor_tok] *)
+Variant bor_tokCT_id := .
+Definition bor_tokCT :=
+  Cifcon bor_tokCT_id lft (λ _, Empty_set) (λ _, unit) (λ _, unitO) _.
+(** [bor_tokC]: [bor_tokCT] registered *)
+Notation bor_tokC := (inC bor_tokCT).
+
+Section bor_tokC.
+  Context `{!bor_tokC CON} {Σ}.
+  (** [cif_bor_tok]: Formula *)
+  Definition cif_bor_tok α (Px : cif CON Σ) : cif CON Σ :=
+    cif_ecustom bor_tokCT α nullary (unary Px) ().
+  (** [cif_bor_tok] is non-expansive *)
+  #[export] Instance cif_bor_tok_ne {α} : NonExpansive (cif_bor_tok α).
   Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
-  #[export] Instance cif_bor_proper {α} : Proper ((≡) ==> (≡)) (cif_bor α).
+  #[export] Instance cif_bor_tok_proper {α} :
+    Proper ((≡) ==> (≡)) (cif_bor_tok α).
   Proof. apply ne_proper, _. Qed.
-  (** [cif_bor] is productive *)
-  #[export] Instance cif_bor_productive {α} : Productive (cif_bor α).
+  (** [cif_bor_tok] is productive *)
+  #[export] Instance cif_bor_tok_productive {α} : Productive (cif_bor_tok α).
   Proof.
     move=> ????. apply cif_ecustom_preserv_productive=>//.
     by apply fun_proeq_later.
   Qed.
+
   Context `{!borrowGS (cifOF CON) Σ}.
-  (** Semantics of [borCC] *)
-  #[export] Program Instance bor_sem_ecifcon {JUDG}
-    : SemEcifcon borCC CON JUDG Σ :=
-    SEM_ECIFCON (λ _ _ α _ Φx _, bor_tok α (Φx ())) _.
+  (** Semantics of [bor_tokCT] *)
+  #[export] Program Instance bor_tokCT_ecsem {JUDG}
+    : Ecsem bor_tokCT CON JUDG Σ :=
+    ECSEM (λ _ _ α _ Φx _, bor_tok α (Φx ())) _.
   Next Obligation. move=>/= ???*???*?? eqv ???. f_equiv. apply eqv. Qed.
-End cif_bor.
-(** [borCC] semantics registered *)
-Notation BorSem := (EsemEcifcon borCC).
+End bor_tokC.
+(** Semantics of [bor_tokCT] registered *)
+Notation bor_tokCS := (inCS bor_tokCT).
 
 (** Reify [bor_tok] *)
-#[export] Program Instance bor_tok_as_cif `{!SemCifcon CON JUDG Σ, !BorCon CON}
-  `{!borrowGS (cifOF CON) Σ, !BorSem CON JUDG Σ} {α Px} :
-  AsCif CON (λ _, bor_tok α Px) := AS_CIF (cif_bor α Px) _.
+#[export] Program Instance bor_tok_as_cif `{!Csem CON JUDG Σ}
+  `{!bor_tokC CON, !borrowGS (cifOF CON) Σ, !bor_tokCS CON JUDG Σ} {α Px} :
+  AsCif CON (λ _, bor_tok α Px) := AS_CIF (cif_bor_tok α Px) _.
 Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
 
 (** ** Prophetic borrow *)
-(** [pborCC]: Constructor *)
-Variant pborCC_id A TY := .
-Definition pborCC A TY :=
-  Cifcon (pborCC_id A TY) TY (λ _, Empty_set) (λ X, A *' clair TY X)%type
+
+(** [pbor_tokCT]: Constructor for [pbor_tok] *)
+Variant pbor_tokCT_id A TY := .
+Definition pbor_tokCT A TY :=
+  Cifcon (pbor_tokCT_id A TY) TY (λ _, Empty_set) (λ X, A *' clair TY X)%type
     (λ X, leibnizO (lft *' A *' clair TY X *' prvar X)) _.
-(** [PborCon]: [pborCC] registered *)
-Notation PborCon A TY := (Ecifcon (pborCC A TY)).
-Section cif_pbor.
-  Context `{!PborCon A TY CON} {Σ}.
+(** [pbor_tokC]: [pbor_tokCT] registered *)
+Notation pbor_tokC A TY := (inC (pbor_tokCT A TY)).
+Section pbor_tokCT.
+  Context `{!pbor_tokC A TY CON} {Σ}.
   Implicit Type X : TY.
-  (** [cif_pbor]: Formula *)
-  Definition cif_pbor {X} α a xπ ξ (Φx : A -pr> clair TY X -pr> cif CON Σ)
+  (** [cif_pbor_tok]: Formula *)
+  Definition cif_pbor_tok {X} α a xπ ξ (Φx : A -pr> clair TY X -pr> cif CON Σ)
     : cif CON Σ :=
-    cif_ecustom (pborCC A TY) X nullary (λ '(a, xπ)', Φx a xπ) (α, a, xπ, ξ)'.
-  (** [cif_pbor] is non-expansive *)
-  #[export] Instance cif_pbor_ne {X α a xπ ξ} :
-    NonExpansive (@cif_pbor X α a xπ ξ).
-  Proof. unfold cif_pbor=> ??? eqv. f_equiv=> ?. apply (eqv _ _). Qed.
-  #[export] Instance cif_pbor_proper {X α a xπ ξ} :
-    Proper ((≡) ==> (≡)) (@cif_pbor X α a xπ ξ).
+    cif_ecustom (pbor_tokCT A TY) X nullary (λ '(a, xπ)', Φx a xπ)
+      (α, a, xπ, ξ)'.
+  (** [cif_pbor_tok] is non-expansive *)
+  #[export] Instance cif_pbor_tok_ne {X α a xπ ξ} :
+    NonExpansive (@cif_pbor_tok X α a xπ ξ).
+  Proof. unfold cif_pbor_tok=> ??? eqv. f_equiv=> ?. apply (eqv _ _). Qed.
+  #[export] Instance cif_pbor_tok_proper {X α a xπ ξ} :
+    Proper ((≡) ==> (≡)) (@cif_pbor_tok X α a xπ ξ).
   Proof. apply ne_proper, _. Qed.
-  (** [cif_pbor] is productive *)
-  #[export] Instance cif_pbor_productive {X α a xπ ξ} :
-    Productive (@cif_pbor X α a xπ ξ).
+  (** [cif_pbor_tok] is productive *)
+  #[export] Instance cif_pbor_tok_productive {X α a xπ ξ} :
+    Productive (@cif_pbor_tok X α a xπ ξ).
   Proof.
-    unfold cif_pbor=> k ?? eqv. f_equiv. destruct k as [|k]=>//= ?. apply eqv.
+    unfold cif_pbor_tok=> k ?? eqv. f_equiv. destruct k as [|k]=>//= ?.
+    apply eqv.
   Qed.
+
   Context `{!borrowGS (cifOF CON) Σ, !prophGS TY Σ, !proph_agG A TY Σ,
-    !PborrowCon A TY CON}.
-  (** Semantics of [pborCC] *)
-  #[export] Program Instance pbor_sem_ecifcon {JUDG}
-    : SemEcifcon (pborCC A TY) CON JUDG Σ :=
-    SEM_ECIFCON (λ _ _ X _ Φx '(α, a, xπ, ξ)',
+    !proph_agC A TY CON}.
+  (** Semantics of [pbor_tokCT] *)
+  #[export] Program Instance pbor_tokCT_ecsem {JUDG}
+    : Ecsem (pbor_tokCT A TY) CON JUDG Σ :=
+    ECSEM (λ _ _ X _ Φx '(α, a, xπ, ξ)',
       pbor_tok α a xπ ξ (λ a xπ, Φx (a, xπ)')) _.
   Next Obligation.
     move=>/= ???*???*?*?? /leibniz_equiv_iff<-. by f_equiv=> ??.
   Qed.
-End cif_pbor.
-(** [pborCC] semantics registered *)
-Notation PborSem A TY := (EsemEcifcon (pborCC A TY)).
+End pbor_tokCT.
+(** Semantics of [pbor_tokCT] registered *)
+Notation pbor_tokCS A TY := (inCS (pbor_tokCT A TY)).
 
 (** Reify [pbor_tok] *)
 #[export] Program Instance pbor_tok_as_cif
-  `{!PborCon A TY CON, !borrowGS (cifOF CON) Σ, !prophGS TY Σ,
-    !proph_agG A TY Σ, !PborrowCon A TY CON, !SemCifcon CON JUDG Σ,
-    !PborSem A TY CON JUDG Σ}
+  `{!pbor_tokC A TY CON, !borrowGS (cifOF CON) Σ, !prophGS TY Σ,
+    !proph_agG A TY Σ, !proph_agC A TY CON, !Csem CON JUDG Σ,
+    !pbor_tokCS A TY CON JUDG Σ}
   {X α a xπ ξ Φx} :
   AsCif CON (λ _, pbor_tok (X:=X) α a xπ ξ Φx) :=
-  AS_CIF (cif_pbor α a xπ ξ Φx) _.
+  AS_CIF (cif_pbor_tok α a xπ ξ Φx) _.
 Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
 
-(** ** Judgment *)
-Variant iff_judg_id FM := .
-Definition iff_judgty (FM : ofe) : ofe := tagged (iff_judg_id FM) (FM * FM).
-Notation IffJudg FM := (Ejudg (iff_judgty FM)).
-Section iff_judg.
-  Context `{iff_judg : !IffJudg FM JUDG}.
-  Definition jiff (Px Qx : FM) : JUDG := iff_judg (Tagged (Px, Qx)).
+(** ** Judgment for [iff] *)
+
+(** [iffJT]: Judgment for [iff] *)
+Variant iffJT_id FM := .
+Definition iffJT (FM : ofe) : ofe := tagged (iffJT_id FM) (FM * FM).
+(** [iffJ] : [iffJT] registered *)
+Notation iffJ FM := (inJ (iffJT FM)).
+
+Section iffJ.
+  Context `{iff_j : !iffJ FM JUDG}.
+
+  (** [jiff]: Judgment for [iff] *)
+  Definition jiff (Px Qx : FM) : JUDG := iff_j (Tagged (Px, Qx)).
   #[export] Instance jiff_ne : NonExpansive2 jiff.
   Proof. solve_proper. Qed.
 
   Context `{!Dsem JUDG FM (iProp Σ)}.
-  (** ** [iff_judg_sem]: Semantics of [iff_judgty] *)
-  Definition iff_judg_sem δ (PQx : iff_judgty FM) : iProp Σ :=
+  (** [iffJT_sem]: Semantics of [iffJT] *)
+  Definition iffJT_sem δ (PQx : iffJT FM) : iProp Σ :=
     □ (⟦ PQx.(untag).1 ⟧(δ) ∗-∗ ⟦ PQx.(untag).2 ⟧(δ)).
-  (** [iff_judg_sem] is non-expansive *)
-  #[export] Instance iff_judg_sem_ne {δ} : NonExpansive (iff_judg_sem δ).
+  (** [iffJT_sem] is non-expansive *)
+  #[export] Instance iffJT_sem_ne {δ} : NonExpansive (iffJT_sem δ).
   Proof. solve_proper. Qed.
-  (** [Dsem] over [iff_judgty] *)
-  #[export] Instance iff_judg_dsem
-    : Dsem JUDG (iff_judgty FM) (iProp Σ) := DSEM iff_judg_sem _.
-End iff_judg.
-(** ** [IffJsem]: Judgment semantics for [iff] *)
-Notation IffJsem FM JUDG Σ := (Ejsem (iff_judgty FM) JUDG (iProp Σ)).
+  (** [Dsem] over [iffJT] *)
+  #[export] Instance iffJT_dsem
+    : Dsem JUDG (iffJT FM) (iProp Σ) := DSEM iffJT_sem _.
+End iffJ.
+(** [iffJS]: Judgment semantics for [iff] *)
+Notation iffJS FM JUDG Σ := (inJS (iffJT FM) JUDG (iProp Σ)).
 
-Section iff_judg.
-  Context `{!Jsem JUDG (iProp Σ), !Dsem JUDG FM (iProp Σ), !IffJudg FM JUDG,
-    !IffJsem FM JUDG Σ}.
+Section iffJ.
+  Context `{!Dsem JUDG FM (iProp Σ), !Jsem JUDG (iProp Σ), !iffJ FM JUDG,
+    !iffJS FM JUDG Σ}.
 
   (** Derivability of [jiff] is persistent *)
   #[export] Instance Deriv_jiff_persistent `{!Deriv (JUDG:=JUDG) ih δ} {Px Qx} :
     Persistent (δ (jiff Px Qx)).
-  Proof. apply: Deriv_persistent=> ????. rewrite sem_ejudg. exact _. Qed.
-End iff_judg.
+  Proof. apply: Deriv_persistent=> ????. rewrite in_js. exact _. Qed.
+End iffJ.
 
 (** ** Relaxed invariant *)
 (** [inv']: Proposition *)
 Section inv'.
-  Context `{!inv'GS (cifOF CON) Σ, !IffJudg (cifO CON Σ) JUDG}.
+  Context `{!inv'GS (cifOF CON) Σ, !iffJ (cifO CON Σ) JUDG}.
   Implicit Type δ : JUDG -n> iProp Σ.
   (** [inv']: Relaxed invariant *)
   Definition inv' δ N Px : iProp Σ := ∃ Qx, δ (jiff Px Qx) ∗ inv_tok N Qx.
@@ -187,42 +205,44 @@ Section inv'.
 End inv'.
 (** Notation *)
 Notation invd := (inv' der).
-(** [inv'CC]: Constructor *)
-Variant inv'CC_id := .
-Definition inv'CC :=
-  Cifcon inv'CC_id namespace (λ _, Empty_set) (λ _, unit) (λ _, unitO) _.
-(** [Inv'Con]: [inv'CC] registered *)
-Notation Inv'Con := (Ecifcon inv'CC).
-Section cif_inv'.
-  Context `{!Inv'Con CON} {Σ}.
-  (** [cif_inv']: Formula *)
-  Definition cif_inv' N (Px : cif CON Σ) : cif CON Σ :=
-    cif_ecustom inv'CC N nullary (unary Px) ().
-  (** [cif_inv'] is non-expansive *)
-  #[export] Instance cif_inv'_ne {N} : NonExpansive (cif_inv' N).
+
+(** [invCT]: Constructor for [inv'] *)
+Variant invCT_id := .
+Definition invCT :=
+  Cifcon invCT_id namespace (λ _, Empty_set) (λ _, unit) (λ _, unitO) _.
+(** [invC]: [invCT] registered *)
+Notation invC := (inC invCT).
+
+Section invC.
+  Context `{!invC CON} {Σ}.
+  (** [cif_inv]: Formula for [inv'] *)
+  Definition cif_inv N (Px : cif CON Σ) : cif CON Σ :=
+    cif_ecustom invCT N nullary (unary Px) ().
+  (** [cif_inv] is non-expansive *)
+  #[export] Instance cif_inv_ne {N} : NonExpansive (cif_inv N).
   Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
-  #[export] Instance cif_inv'_proper {N} : Proper ((≡) ==> (≡)) (cif_inv' N).
+  #[export] Instance cif_inv_proper {N} : Proper ((≡) ==> (≡)) (cif_inv N).
   Proof. apply ne_proper, _. Qed.
-  (** [cif_inv'] is productive *)
-  #[export] Instance cif_inv'_productive {N} : Productive (cif_inv' N).
+  (** [cif_inv] is productive *)
+  #[export] Instance cif_inv_productive {N} : Productive (cif_inv N).
   Proof.
     move=> ????. apply cif_ecustom_preserv_productive=>//.
     by apply fun_proeq_later.
   Qed.
 
-  Context `{!inv'GS (cifOF CON) Σ, !IffJudg (cifO CON Σ) JUDG}.
-  (** Semantics of [invCC] *)
-  #[export] Program Instance inv'_sem_ecifcon
-    : SemEcifcon inv'CC CON JUDG Σ :=
-    SEM_ECIFCON (λ _ δ N _ Φx _, inv' δ N (Φx ())) _.
+  Context `{!inv'GS (cifOF CON) Σ, !iffJ (cifO CON Σ) JUDG}.
+  (** Semantics of [invCT] *)
+  #[export] Program Instance invCT_ecsem
+    : Ecsem invCT CON JUDG Σ :=
+    ECSEM (λ _ δ N _ Φx _, inv' δ N (Φx ())) _.
   Next Obligation. move=> ??*???*?? eqv ?*. f_equiv. apply eqv. Qed.
-End cif_inv'.
-(** [inv'CC] semantics registered *)
-Notation Inv'Sem := (EsemEcifcon inv'CC).
+End invC.
+(** [invC] semantics registered *)
+Notation invCS := (inCS invCT).
 
 (** Reify [inv'] *)
-#[export] Program Instance inv'_as_cif `{!SemCifcon CON JUDG Σ, !Inv'Con CON}
-  `{!inv'GS (cifOF CON) Σ, !IffJudg (cifO CON Σ) JUDG, !Inv'Sem CON JUDG Σ}
+#[export] Program Instance inv'_as_cif `{!Csem CON JUDG Σ, !invC CON}
+  `{!inv'GS (cifOF CON) Σ, !iffJ (cifO CON Σ) JUDG, !invCS CON JUDG Σ}
   {N Px} :
-  AsCif CON (λ δ, inv' δ N Px) := AS_CIF (cif_inv' N Px) _.
+  AsCif CON (λ δ, inv' δ N Px) := AS_CIF (cif_inv N Px) _.
 Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.

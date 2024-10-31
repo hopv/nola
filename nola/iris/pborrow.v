@@ -10,53 +10,55 @@ Import ProdNotation PlistNotation FunPNotation BUpd0Notation iPropAppNotation
 Implicit Type (A : Type) (TY : synty) (FML : oFunctor) (γ : positive) (α : lft)
   (q : Qp) (Σ : gFunctors).
 
-(** ** Constructors for prophetic borrowing *)
-Variant pborrowCC_id A TY := .
-Variant pborrowCC_sel {A TY} :=
+(** ** Constructors for prophetic agreement *)
+
+(** [proph_agCT]: Constructor *)
+Variant proph_agCT_id A TY := .
+Variant proph_agCT_sel {A TY} :=
 | (** Prophecy controller *) cifs_proph_ctrl
     {X : TY} γ (a : A) (xπ : clair TY X) (ξ : prvar X)
 | (** Prophecy equalizer *) cifs_proph_eqz {X : TY} (xπ xπ' : clair TY X)
 | (** Value observer *) cifs_val_obs {X : TY} γ (a : A) (xπ : clair TY X).
-Arguments pborrowCC_sel : clear implicits.
-Definition pborrowCC A TY :=
-  Cifcon (pborrowCC_id A TY) (pborrowCC_sel A TY)
+Arguments proph_agCT_sel : clear implicits.
+Definition proph_agCT A TY :=
+  Cifcon (proph_agCT_id A TY) (proph_agCT_sel A TY)
     (λ _, Empty_set) (λ _, Empty_set) (λ _, unitO) _.
-(** [PborrowCon]: [pborrowCC] registered *)
-Notation PborrowCon A TY := (Ecifcon (pborrowCC A TY)).
-Section cif_pborrow.
-  Context `{!PborrowCon A TY CON} {Σ}.
+(** [proph_agC]: [proph_agCT] registered *)
+Notation proph_agC A TY := (inC (proph_agCT A TY)).
+Section proph_agC.
+  Context `{!proph_agC A TY CON} {Σ}.
   (** [cif_proph_ctrl]: Prophecy controller *)
   Definition cif_proph_ctrl {X} γ a xπ ξ : cif CON Σ :=
-    cif_ecustom (pborrowCC A TY)
+    cif_ecustom (proph_agCT A TY)
       (cifs_proph_ctrl (X:=X) γ a xπ ξ) nullary nullary ().
   (** [cif_proph_eqz]: Prophecy controller *)
   Definition cif_proph_eqz {X} xπ xπ' : cif CON Σ :=
-    cif_ecustom (pborrowCC A TY)
+    cif_ecustom (proph_agCT A TY)
       (cifs_proph_eqz (X:=X) xπ xπ') nullary nullary ().
   (** [cif_val_obs]: Value observer *)
   Definition cif_val_obs {X} γ a xπ : cif CON Σ :=
-    cif_ecustom (pborrowCC A TY)
+    cif_ecustom (proph_agCT A TY)
       (cifs_val_obs (X:=X) γ a xπ) nullary nullary ().
 
   Context `{!prophGS TY Σ, !proph_agG A TY Σ}.
-  (** Semantics of [pborrowCC] *)
-  Definition pborrow_sem (s : pborrowCC_sel A TY) : iProp Σ :=
+  (** Semantics of [proph_agCT] *)
+  Definition proph_agCT_sem (s : proph_agCT_sel A TY) : iProp Σ :=
     match s with
     | cifs_proph_ctrl γ a xπ ξ => proph_ctrl γ a xπ ξ
     | cifs_proph_eqz xπ xπ' => proph_eqz xπ xπ'
     | cifs_val_obs γ a xπ => val_obs γ a xπ
     end.
-  #[export] Program Instance pborrow_sem_ecifcon {JUDG}
-    : SemEcifcon (pborrowCC A TY) CON JUDG Σ :=
-    SEM_ECIFCON (λ _ _ s _ _ _, pborrow_sem s) _.
+  #[export] Program Instance proph_agCT_ecsem {JUDG}
+    : Ecsem (proph_agCT A TY) CON JUDG Σ :=
+    ECSEM (λ _ _ s _ _ _, proph_agCT_sem s) _.
   Next Obligation. done. Qed.
-End cif_pborrow.
-(** [pborrowCC] semantics registered *)
-Notation PborrowSem A TY := (EsemEcifcon (pborrowCC A TY)).
+End proph_agC.
+(** [proph_agC] semantics registered *)
+Notation proph_agCS A TY := (inCS (proph_agCT A TY)).
 
 Section pborrow.
   Context `{!borrowGS (cifOF CON) Σ, !prophGS TY Σ, !proph_agG A TY Σ,
-    !PborrowCon A TY CON}.
+    !proph_agC A TY CON}.
   Implicit Type (a : A) (X Y : TY) (Xl Yl : list TY) (Px : cif CON Σ).
 
   (** ** Tokens *)
@@ -161,7 +163,7 @@ Section pborrow.
 
   (** ** Borrows *)
 
-  Context `{!SemCifcon CON JUDG Σ, !PborrowSem A TY CON JUDG Σ,
+  Context `{!Csem CON JUDG Σ, !proph_agCS A TY CON JUDG Σ,
     !@ModUpd (iProp Σ) M, !ModBUpd M}.
   Implicit Type δ : JUDG -n> iProp Σ.
 

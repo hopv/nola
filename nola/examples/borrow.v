@@ -6,14 +6,15 @@ Import ProdNotation FunPRNotation ModwNotation WpwNotation DsemNotation
   LftNotation ProphNotation NsyntyNotation.
 
 Section borrow.
-  Context `{!lrustGS_gen hlc Σ, !SemCifcon CON JUDG Σ, !Jsem JUDG (iProp Σ),
-    !inv'GS (cifOF CON) Σ, !InvCon CON, !InvSem CON JUDG Σ,
-    !borrowGS (cifOF CON) Σ, !BorCon CON, !BorSem CON JUDG Σ}.
+  Context `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), !lrustGS_gen hlc Σ,
+    !borrowGS (cifOF CON) Σ, !bor_tokC CON, !bor_tokCS CON JUDG Σ,
+    !inv'GS (cifOF CON) Σ, !inv_tokC CON, !inv_tokCS CON JUDG Σ}.
   Implicit Type l : loc.
 
   (** Dereference a nested mutable reference *)
   Lemma bor_bor_deref {α β l Φx q} :
-    [[{ β ⊑□ α ∗ q.[β] ∗ bor_tok β (∃ l', ▷ l ↦ #l' ∗ cif_bor α (Φx l'))%cif }]]
+    [[{ β ⊑□ α ∗ q.[β] ∗
+      bor_tok β (∃ l', ▷ l ↦ #l' ∗ cif_bor_tok α (Φx l'))%cif }]]
       [borrow_wsat bupd ⟦⟧]
       !#l
     [[{ l', RET #l'; q.[β] ∗ bor_tok β (Φx l') }]].
@@ -34,7 +35,7 @@ Section borrow.
 
   (** Load from an immutable shared borrow *)
   Lemma imbor_load {l α q} {n : Z} :
-    [[{ q.[α] ∗ inv_tok nroot (cif_bor α (▷ l ↦ #n)) }]]
+    [[{ q.[α] ∗ inv_tok nroot (cif_bor_tok α (▷ l ↦ #n)) }]]
       [inv_wsat ⟦⟧ ∗ borrow_wsat bupd ⟦⟧]
       !ˢᶜ#l
     [[{ RET #n; q.[α] }]].
@@ -46,9 +47,9 @@ Section borrow.
     iMod ("cl" with "b") as "_". iModIntro. by iApply "→Φ".
   Qed.
 
-  Context `{!prophGS xty Σ, !proph_agG unit xty Σ, !PborrowCon unit xty CON,
-    !PborCon unit xty CON, !PborrowSem unit xty CON JUDG Σ,
-    !PborSem unit xty CON JUDG Σ}.
+  Context `{!prophGS xty Σ, !proph_agG unit xty Σ, !proph_agC unit xty CON,
+    !proph_agCS unit xty CON JUDG Σ, !pbor_tokC unit xty CON,
+    !pbor_tokCS unit xty CON JUDG Σ}.
   Implicit Type X : xty.
 
   (** Dereference a nested prophetic mutable reference *)
@@ -57,7 +58,7 @@ Section borrow.
         pbor_tok (X:=X *'ₓ X) β () pπ η
           (λ _ pπ, ∃ l' (xπ : clair _ X) (ξ : prvar X),
             ⌜pπ = λ π, (xπ π, π ξ)'⌝ ∗
-            ▷ l ↦ #l' ∗ cif_pbor α () xπ ξ (Φx l'))%cif }]]
+            ▷ l ↦ #l' ∗ cif_pbor_tok α () xπ ξ (Φx l'))%cif }]]
       [borrow_wsat bupd ⟦⟧]
       !#l
     [[{ l', RET #l'; ∃ (xπ : clair _ X) (ξ ξ' : prvar X),

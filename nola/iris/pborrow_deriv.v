@@ -9,7 +9,7 @@ Import ProdNotation PlistNotation iPropAppNotation ModwNotation LftNotation
 
 Section pborrow_deriv.
   Context `{!borrowGS (cifOF CON) Σ, !prophGS TY Σ, !proph_agG A TY Σ,
-    !PborrowCon A TY CON, borrow_judg : !BorrowJudg (cifOF CON $oi Σ) JUDG}.
+    !proph_agC A TY CON, !borrowJ (cifOF CON $oi Σ) JUDG}.
   Implicit Type (δ : JUDG -n> iProp Σ) (Px Qx : cif CON Σ) (X Y : TY).
 
   (** [pbor]: Relaxed prophetic borrower *)
@@ -59,9 +59,9 @@ Notation plendd := (plend der).
 
 Section pborrow_deriv.
   Context `{!borrowGS (cifOF CON) Σ, !prophGS TY Σ, !proph_agG A TY Σ,
-    !PborrowCon A TY CON, !BorrowJudg (cifOF CON $oi Σ) JUDG,
-    !Jsem JUDG (iProp Σ), !SemCifcon CON JUDG Σ, !PborrowSem A TY CON JUDG Σ,
-    !BorrowJsem (cifOF CON) Σ JUDG, !Deriv (JUDG:=JUDG) ih δ}.
+    !proph_agC A TY CON, !borrowJ (cifOF CON $oi Σ) JUDG, !Csem CON JUDG Σ,
+    !Jsem JUDG (iProp Σ), !proph_agCS A TY CON JUDG Σ,
+    !borrowJS (cifOF CON) JUDG Σ, !Deriv (JUDG:=JUDG) ih δ}.
   Implicit Type (X Y Z : TY) (Px Qx Rx : cif CON Σ) (δ : JUDG -n> iProp Σ).
 
   (** ** Conversion *)
@@ -167,10 +167,10 @@ End pborrow_deriv.
 
 Section pborrow_deriv.
   Context `{!borrowGS (cifOF CON) Σ, !prophGS TY Σ, !proph_agG A TY Σ,
-    !PborrowCon A TY CON, !BorrowJudg (cifOF CON $oi Σ) JUDG,
-    !Jsem JUDG (iProp Σ), !SemCifcon CON JUDG Σ, !PborrowSem A TY CON JUDG Σ,
-    !BorrowJsem (cifOF CON) Σ JUDG,
-    !@ModUpd (iProp Σ) M, !ModBUpd M, !ModExcept0 M}.
+    !proph_agC A TY CON, !borrowJ (cifOF CON $oi Σ) JUDG, !Csem CON JUDG Σ,
+    !Jsem JUDG (iProp Σ), !proph_agCS A TY CON JUDG Σ,
+    !borrowJS (cifOF CON) JUDG Σ, !@ModUpd (iProp Σ) M, !ModBUpd M,
+    !ModExcept0 M}.
   Implicit Type (X Y : TY) (Px Qx : cif CON Σ).
 
   (** Split a prophetic lender *)

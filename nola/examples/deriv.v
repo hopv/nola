@@ -5,11 +5,10 @@ From nola.rust_lang Require Export notation proofmode.
 Import ModwNotation WpwNotation DsemNotation LftNotation.
 
 Section deriv.
-  Context `{!lrustGS_gen hlc Σ, !SemCifcon CON JUDG Σ, !Jsem JUDG (iProp Σ),
-    !inv'GS (cifOF CON) Σ, !InvCon CON, !InvSem CON JUDG Σ,
-    !borrowGS (cifOF CON) Σ, !BorCon CON, !BorSem CON JUDG Σ,
-    !Inv'Con CON, !IffJudg (cifO CON Σ) JUDG, !Inv'Sem CON JUDG Σ,
-    !IffJsem (cifO CON Σ) JUDG Σ}.
+  Context `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), !lrustGS_gen hlc Σ,
+    !inv'GS (cifOF CON) Σ, !invC CON, !iffJ (cifO CON Σ) JUDG,
+    !invCS CON JUDG Σ, !iffJS (cifO CON Σ) JUDG Σ, !borrowGS (cifOF CON) Σ,
+    !bor_tokC CON, !bor_tokCS CON JUDG Σ}.
   Implicit Type (Px Qx : cif CON Σ) (Φx Ψx : loc → cif CON Σ).
 
   (** ** On derivability *)
@@ -22,7 +21,7 @@ Section deriv.
   (** Turn [inv_tok] into [inv'] *)
   Lemma inv_tok_inv' `{!Deriv ih δ} {N Px} : inv_tok N Px ⊢ inv' δ N Px.
   Proof.
-    iIntros "$". iApply Deriv_factor. iIntros. rewrite sem_ejudg. iModIntro.
+    iIntros "$". iApply Deriv_factor. iIntros. rewrite in_js. iModIntro.
     iSplit; by iIntros.
   Qed.
 
@@ -32,7 +31,7 @@ Section deriv.
       ⟦ Px ⟧ ∗ (⟦ Px ⟧ =[inv_wsat ⟦⟧]{E∖↑N,E}=∗ True).
   Proof.
     iIntros (?) "[%Qx[#PQ i]]". iDestruct (der_sound with "PQ") as "{PQ}PQ".
-    iMod (inv_tok_acc with "i") as "[Qx cl]"; [done|]. rewrite sem_ejudg /=.
+    iMod (inv_tok_acc with "i") as "[Qx cl]"; [done|]. rewrite in_js /=.
     iDestruct ("PQ" with "Qx") as "$". iIntros "!> Px". iApply "cl".
     by iApply "PQ".
   Qed.
@@ -64,7 +63,7 @@ Section deriv.
       inv' δ N Px -∗ inv' δ N Qx.
   Proof.
     iIntros "#iff [%Rx[PR i]]". iExists Rx. iFrame "i".
-    iApply Deriv_map; [|done]. iIntros (????). rewrite !sem_ejudg /=.
+    iApply Deriv_map; [|done]. iIntros (????). rewrite !in_js /=.
     iIntros "#[PR RP] !>". iSplit.
     - iIntros "Qx". iApply "PR". by iApply "iff".
     - iIntros "Rx". iApply "iff"; [done..|]. by iApply "RP".
@@ -89,21 +88,23 @@ Section deriv.
     inv' δ N (Px ∗ Qx)%cif ⊣⊢ inv' δ N (Qx ∗ Px)%cif.
   Proof. apply bi.equiv_entails. split; exact inv'_sep_comm'. Qed.
   Local Lemma inv'_inv'_sep_comm' `{!Deriv ih δ} {N N' Px Qx} :
-    inv' δ N (cif_inv' N' (Px ∗ Qx)) ⊢ inv' δ N (cif_inv' N' (Qx ∗ Px)).
+    inv' δ N (cif_inv N' (Px ∗ Qx)) ⊢ inv' δ N (cif_inv N' (Qx ∗ Px)).
   Proof.
     iApply inv'_iff. iIntros "!> /=" (????). rewrite !sem_ecustom /=.
     rewrite inv'_sep_comm. iApply bi.wand_iff_refl.
   Qed.
   Lemma inv'_inv'_sep_comm `{!Deriv ih δ} {N N' Px Qx} :
-    inv' δ N (cif_inv' N' (Px ∗ Qx)) ⊣⊢ inv' δ N (cif_inv' N' (Qx ∗ Px)).
+    inv' δ N (cif_inv N' (Px ∗ Qx)) ⊣⊢ inv' δ N (cif_inv N' (Qx ∗ Px)).
   Proof. apply bi.equiv_entails. split; exact inv'_inv'_sep_comm'. Qed.
   Local Lemma inv'_bor_lft' `{!Deriv ih δ} {N α β Px} :
-    α ⊑□ β -∗ β ⊑□ α -∗ inv' δ N (cif_bor α Px) -∗ inv' δ N (cif_bor β Px).
+    α ⊑□ β -∗ β ⊑□ α -∗
+      inv' δ N (cif_bor_tok α Px) -∗ inv' δ N (cif_bor_tok β Px).
   Proof.
     iIntros "#? #?". iApply inv'_iff. iIntros "!>" (????).
     rewrite /= !sem_ecustom /=. iSplit; by iApply bor_tok_lft.
   Qed.
   Lemma inv'_bor_lft `{!Deriv ih δ} {N α β Px} :
-    α ⊑□ β -∗ β ⊑□ α -∗ inv' δ N (cif_bor α Px) ∗-∗ inv' δ N (cif_bor β Px).
+    α ⊑□ β -∗ β ⊑□ α -∗
+      inv' δ N (cif_bor_tok α Px) ∗-∗ inv' δ N (cif_bor_tok β Px).
   Proof. iIntros "#? #?". iSplit; by iApply inv'_bor_lft'. Qed.
 End deriv.
