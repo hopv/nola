@@ -876,7 +876,7 @@ Section citPR.
   (** [Citg] is size-preserving over the inductive arguments
     and [Productive] over the coinductive arguments *)
   #[export] Instance Citg_preserv_productive `{!Uip SEL} {s k} :
-    Proper (@proeq (funPR (λ _, citPR I C D)) k ==>
+    Proper (@proeq (_ -pr> citPR I C D) k ==>
       @proeq_later (_ -pr> _) k ==> (≡) ==> @proeq (citPR I C D) k) (Citg s).
   Proof.
     move=> ?? eq ?? eq' ??<-. rewrite /proeq /= cit_proeq of_cit_unseal in eq.
