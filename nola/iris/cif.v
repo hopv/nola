@@ -336,25 +336,30 @@ End iris.
 #[projections(primitive)]
 Class inC CON' CON := IN_C {
   in_c_sel : CON' → CON;
-  in_c_idom s : CON.(cifc_idom) (in_c_sel s) = CON'.(cifc_idom) s;
-  in_c_cdom s : CON.(cifc_cdom) (in_c_sel s) = CON'.(cifc_cdom) s;
-  in_c_data s : CON.(cifc_data) (in_c_sel s) = CON'.(cifc_data) s;
+  in_c_idom {s} : CON.(cifc_idom) (in_c_sel s) → CON'.(cifc_idom) s;
+  in_c_cdom {s} : CON.(cifc_cdom) (in_c_sel s) → CON'.(cifc_cdom) s;
+  in_c_data {s Σ} :
+    CON'.(cifc_data) s $oi Σ → CON.(cifc_data) (in_c_sel s) $oi Σ;
+  in_c_data_ne {s Σ} :: NonExpansive (@in_c_data s Σ);
+  in_c_data_discrete {s Σ} `{!Discrete d} :: Discrete (@in_c_data s Σ d);
 }.
 Arguments IN_C {_ _}.
 Hint Mode inC ! - : typeclass_instances.
+#[export] Instance in_c_data_proper `{!inC CON' CON} {s Σ} :
+  Proper ((≡) ==> (≡)) (@in_c_data CON' CON _ s Σ).
+Proof. apply ne_proper, _. Qed.
 
 (** Inclusion into [sigTCT] *)
 Definition sigTCT_inC {A CONF a} : inC (CONF a) (@sigTCT A CONF) :=
-  IN_C (CON:=sigTCT _) (existT a) (λ _, eq_refl) (λ _, eq_refl) (λ _, eq_refl).
+  IN_C (CON:=sigTCT _) (existT a) (λ _, id) (λ _, id) (λ _ _, id) _ _.
 
 (** ** [cif_ecustom]: Custom constructor under [inC] *)
 Definition cif_ecustom_def CON' `{!inC CON' CON} {Σ} (s : CON')
   (Φx : CON'.(cifc_idom) s -pr> cif CON Σ)
   (Ψx : CON'.(cifc_cdom) s -pr> cif CON Σ) (d : CON'.(cifc_data) s $oi Σ)
   : cif CON Σ :=
-  cif_custom (in_c_sel s) (λ i, Φx (rew[id] in_c_idom s in i))
-    (λ c, Ψx (rew[id] in_c_cdom s in c))
-    (rew[λ F, F $oi Σ] eq_sym (in_c_data s) in d).
+  cif_custom (in_c_sel s) (λ i, Φx (in_c_idom i)) (λ c, Ψx (in_c_cdom c))
+    (in_c_data d).
 Lemma cif_ecustom_aux : seal (@cif_ecustom_def). Proof. by eexists _. Qed.
 Definition cif_ecustom CON' `{!inC CON' CON} {Σ} (s : CON')
   (Φx : CON'.(cifc_idom) s -pr> cif CON Σ)
@@ -375,8 +380,7 @@ Section cif_ecustom.
   Proof.
     rewrite cif_ecustom_unseal=> ????? /fun_proeq_later eqc ???.
     apply cif_custom_preserv_productive.
-    { by move. } { by apply fun_proeq_later. }
-    move: (CON.(cifc_data) (in_c_sel s)) (in_c_data s)=> ??. by subst.
+    { by move. } { by apply fun_proeq_later. } { by f_equiv. }
   Qed.
 
   (** Custom connectives are non-expansive *)
@@ -384,8 +388,7 @@ Section cif_ecustom.
     NonExpansive3 (cif_ecustom CON' (Σ:=Σ) s).
   Proof.
     rewrite cif_ecustom_unseal=> ??????????. apply cif_custom_ne.
-    { by move. } { by move. }
-    move: (CON.(cifc_data) (in_c_sel s)) (in_c_data s)=> ??. by subst.
+    { by move. } { by move. } { by f_equiv. }
   Qed.
   #[export] Instance cif_ecustom_proper {s} :
     Proper ((≡) ==> (≡) ==> (≡) ==> (≡)) (cif_ecustom CON' (Σ:=Σ) s).
@@ -395,10 +398,7 @@ Section cif_ecustom.
   #[export] Instance cif_ecustom_discrete {s}
     `{!∀ i, Discrete (Φx i), !∀ c, Discrete (Ψx c), !Discrete d} :
     Discrete (cif_ecustom CON' (Σ:=Σ) s Φx Ψx d).
-  Proof.
-    rewrite cif_ecustom_unseal. apply: cif_custom_discrete.
-    move: (CON.(cifc_data) (in_c_sel s)) (in_c_data s)=> ??. by subst.
-  Qed.
+  Proof. rewrite cif_ecustom_unseal. apply: cif_custom_discrete. Qed.
 End cif_ecustom.
 
 (** Semantics of an element [cifcon] *)
@@ -433,9 +433,8 @@ Next Obligation. move=> *?*???*?*?*. by apply ecsem_ne. Qed.
 Class inCS CON' CON JUDG Σ `{!inC CON' CON}
   `{!Ecsem CON' CON JUDG Σ, !Csem CON JUDG Σ} :=
   in_cs : ∀ {sm δ s Φ Ψx d},
-    csem (CON:=CON) sm δ (in_c_sel s) (λ i, Φ (rew[id] in_c_idom s in i))
-      (λ c, Ψx (rew[id] in_c_cdom s in c))
-      (rew[λ F, F $oi Σ] eq_sym (in_c_data s) in d) =
+    csem (CON:=CON) sm δ (in_c_sel s) (λ i, Φ (in_c_idom i))
+      (λ c, Ψx (in_c_cdom c)) (in_c_data d) =
       ecsem (CON':=CON') (CON:=CON) sm δ s Φ Ψx d.
 Hint Mode inCS ! - - - - - - : typeclass_instances.
 
