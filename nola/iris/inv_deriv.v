@@ -201,3 +201,46 @@ Section inv_deriv_wp.
     iMod ("cl" with "Px") as "_". iModIntro. by iApply "→Φ". Unshelve.
   Qed.
 End inv_deriv_wp.
+
+(** ** Constructor *)
+
+From nola.iris Require Import cif.
+
+(** [invCT]: Constructor for [inv'] *)
+Variant invCT_id := .
+Definition invCT :=
+  Cifcon invCT_id namespace (λ _, Empty_set) (λ _, unit) (λ _, unitO) _.
+(** [invC]: [invCT] registered *)
+Notation invC := (inC invCT).
+
+Section invC.
+  Context `{!invC CON} {Σ}.
+  (** [cif_inv]: Formula for [inv'] *)
+  Definition cif_inv N (Px : cif CON Σ) : cif CON Σ :=
+    cif_ecustom invCT N nullary (unary Px) ().
+  (** [cif_inv] is non-expansive *)
+  #[export] Instance cif_inv_ne {N} : NonExpansive (cif_inv N).
+  Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
+  #[export] Instance cif_inv_proper {N} : Proper ((≡) ==> (≡)) (cif_inv N).
+  Proof. apply ne_proper, _. Qed.
+  (** [cif_inv] is productive *)
+  #[export] Instance cif_inv_productive {N} : Productive (cif_inv N).
+  Proof.
+    move=> ????. apply cif_ecustom_preserv_productive=>//.
+    by apply fun_proeq_later.
+  Qed.
+
+  Context `{!inv'GS (cifOF CON) Σ, !invJ (cifO CON Σ) JUDG}.
+  (** Semantics of [invCT] *)
+  #[export] Program Instance invCT_ecsem : Ecsem invCT CON JUDG Σ :=
+    ECSEM (λ _ δ N _ Φx _, inv' δ N (Φx ())) _.
+  Next Obligation. move=> ??*???*?? eqv ?*. f_equiv. apply eqv. Qed.
+End invC.
+(** [invC] semantics registered *)
+Notation invCS := (inCS invCT).
+
+(** Reify [inv'] *)
+#[export] Program Instance inv'_as_cif `{!Csem CON JUDG Σ, !invC CON}
+  `{!inv'GS (cifOF CON) Σ, !invJ (cifO CON Σ) JUDG, !invCS CON JUDG Σ} {N Px} :
+  AsCif CON (λ δ, inv' δ N Px) := AS_CIF (cif_inv N Px) _.
+Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.

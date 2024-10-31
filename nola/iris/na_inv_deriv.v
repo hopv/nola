@@ -7,7 +7,7 @@ From nola.iris Require Export na_inv.
 From iris.proofmode Require Import proofmode.
 Import ProdNotation iPropAppNotation ModwNotation DsemNotation.
 
-Implicit Type (p : na_inv_pool_name) (N : namespace) (FM : ofe).
+Implicit Type (p : na_inv_pool_name) (N : namespace) (FM : ofe) (Σ : gFunctors).
 
 (** ** Judgment for [na_inv] *)
 
@@ -191,3 +191,50 @@ Section na_inv_deriv.
     iMod ("Q→" with "F∖N12 Qx") as "F∖N". iApply ("P→" with "F∖N Px").
   Qed.
 End na_inv_deriv.
+
+(** ** Constructor *)
+
+From nola.iris Require Import cif.
+
+(** [na_invCT]: Constructor for [na_inv'] *)
+Variant na_invCT_id := .
+Definition na_invCT :=
+  Cifcon na_invCT_id (na_inv_pool_name *' namespace) (λ _, Empty_set)
+    (λ _, unit) (λ _, unitO) _.
+(** [na_invC]: [na_invCT] registered *)
+Notation na_invC := (inC na_invCT).
+
+Section na_invC.
+  Context `{!na_invC CON} {Σ}.
+  (** [cif_na_inv]: Formula for [na_inv'] *)
+  Definition cif_na_inv p N (Px : cif CON Σ) : cif CON Σ :=
+    cif_ecustom na_invCT (p, N)' nullary (unary Px) ().
+  (** [cif_na_inv] is non-expansive *)
+  #[export] Instance cif_na_inv_ne {p N} : NonExpansive (cif_na_inv p N).
+  Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
+  #[export] Instance cif_na_inv_proper {p N} :
+    Proper ((≡) ==> (≡)) (cif_na_inv p N).
+  Proof. apply ne_proper, _. Qed.
+  (** [cif_na_inv] is productive *)
+  #[export] Instance cif_na_inv_productive {p N} : Productive (cif_na_inv p N).
+  Proof.
+    move=> ????. apply cif_ecustom_preserv_productive=>//.
+    by apply fun_proeq_later.
+  Qed.
+
+  Context `{!inv'GS (cifOF CON) Σ, !na_invGS (cifOF CON) Σ,
+    !na_invJ (cifO CON Σ) JUDG}.
+  (** Semantics of [na_invCT] *)
+  #[export] Program Instance na_invCT_ecsem : Ecsem na_invCT CON JUDG Σ :=
+    ECSEM (λ _ δ '(p, N)' _ Φx _, na_inv' δ p N (Φx ())) _.
+  Next Obligation. move=>/= ??*???*?? eqv ?*. f_equiv. apply eqv. Qed.
+End na_invC.
+(** [na_invC] semantics registered *)
+Notation na_invCS := (inCS na_invCT).
+
+(** Reify [na_inv'] *)
+#[export] Program Instance na_inv'_as_cif `{!Csem CON JUDG Σ, !na_invC CON}
+  `{!inv'GS (cifOF CON) Σ, !na_invGS (cifOF CON) Σ, !na_invJ (cifO CON Σ) JUDG,
+    !na_invCS CON JUDG Σ} {p N Px} :
+  AsCif CON (λ δ, na_inv' δ p N Px) := AS_CIF (cif_na_inv p N Px) _.
+Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.

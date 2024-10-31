@@ -7,6 +7,8 @@ From iris.proofmode Require Import proofmode.
 Import ProdNotation PlistNotation iPropAppNotation ModwNotation LftNotation
   ProphNotation DsemNotation.
 
+Implicit Type (A : Type) (TY : synty) (α : lft) (q : Qp) (Σ : gFunctors).
+
 Section pborrow_deriv.
   Context `{!borrowGS (cifOF CON) Σ, !prophGS TY Σ, !proph_agG A TY Σ,
     !proph_agC A TY CON, !borrowJ (cifOF CON $oi Σ) JUDG}.
@@ -296,3 +298,111 @@ Section pborrow_deriv.
     iMod ("big" with "η Ψx'") as "($ & $ & $)". iModIntro. by iSplit.
   Qed.
 End pborrow_deriv.
+
+(** ** Constructor *)
+
+From nola.iris Require Import cif.
+
+(** [pborrowCT]: Constructor *)
+Variant pborrowCT_id A TY := .
+Variant pborrowCT_sel A TY :=
+| cifs_pbor (X : TY) α (a : A) (xπ : clair TY X) (ξ : prvar X)
+| cifs_pobor (X : TY) α q (ξ : prvar X)
+| cifs_plend (X : TY) α (xπ : clair TY X).
+Arguments cifs_pbor {_ _}. Arguments cifs_pobor {_ _}.
+Arguments cifs_plend {_ _}.
+Definition pborrowCT_cdom {A TY} (s : pborrowCT_sel A TY) :=
+  match s with
+  | cifs_pbor X _ _ _ _ | cifs_pobor X _ _ _ => A *' clair TY X
+  | cifs_plend X _ _ => clair TY X
+  end.
+Definition pborrowCT A TY :=
+  Cifcon (pborrowCT_id A TY) (pborrowCT_sel A TY) (λ _, Empty_set)
+    pborrowCT_cdom (λ _, unitO) _.
+(** [pborrowC]: [pborrowCT] registered *)
+Notation pborrowC A TY := (inC (pborrowCT A TY)).
+
+Section pborrowC.
+  Context `{!pborrowC A TY CON} {Σ}.
+  Implicit Type Px : cif CON Σ.
+  (** Formulas *)
+  Definition cif_pbor {X} α a xπ ξ (Φx : _ -d> _ -d> _) : cif CON Σ :=
+    cif_ecustom (pborrowCT A TY) (cifs_pbor X α a xπ ξ) nullary
+      (λ '(a, xπ)', Φx a xπ) ().
+  Definition cif_pobor {X} α q ξ (Φx : _ -d> _ -d> _) : cif CON Σ :=
+    cif_ecustom (pborrowCT A TY) (cifs_pobor X α q ξ) nullary
+      (λ '(a, xπ)', Φx a xπ) ().
+  Definition cif_plend {X} α xπ (Φx : clair _ _ -d> cif CON Σ) : cif CON Σ :=
+    cif_ecustom (pborrowCT A TY) (cifs_plend X α xπ) nullary Φx ().
+  (** The formulas are non-expansive *)
+  #[export] Instance cif_pbor_ne {X α a xπ ξ} :
+    NonExpansive (@cif_pbor X α a xπ ξ).
+  Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
+  #[export] Instance cif_pbor_proper {X α a xπ ξ} :
+    Proper ((≡) ==> (≡)) (@cif_pbor X α a xπ ξ).
+  Proof. apply ne_proper, _. Qed.
+  #[export] Instance cif_pobor_ne {X α q ξ} :
+    NonExpansive (@cif_pobor X α q ξ).
+  Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
+  #[export] Instance cif_pobor_proper {X α q ξ} :
+    Proper ((≡) ==> (≡)) (@cif_pobor X α q ξ).
+  Proof. apply ne_proper, _. Qed.
+  #[export] Instance cif_plend_ne {X α xπ} : NonExpansive (@cif_plend X α xπ).
+  Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
+  #[export] Instance cif_plend_proper {X α xπ} :
+    Proper ((≡) ==> (≡)) (@cif_plend X α xπ).
+  Proof. apply ne_proper, _. Qed.
+  (** The formulas are productive *)
+  #[export] Instance cif_pbor_productive {X α a xπ ξ} :
+    Productive (@cif_pbor X α a xπ ξ).
+  Proof.
+    move=> k ?? eq. apply cif_ecustom_preserv_productive=>//=.
+    destruct k=>//= ?. apply eq.
+  Qed.
+  #[export] Instance cif_pobor_productive {X α q ξ} :
+    Productive (@cif_pobor X α q ξ).
+  Proof.
+    move=> k ?? eq. apply cif_ecustom_preserv_productive=>//=.
+    destruct k=>//= ?. apply eq.
+  Qed.
+  #[export] Instance cif_plend_productive {X α xπ} :
+    Productive (@cif_plend X α xπ).
+  Proof. move=> ????. by apply cif_ecustom_preserv_productive. Qed.
+
+  Context `{!borrowGS (cifOF CON) Σ, !borrowJ (cif CON Σ) JUDG, !prophGS TY Σ,
+    !proph_agG A TY Σ, !proph_agC A TY CON}.
+  (** Semantics of [pborrowCT] *)
+  Definition pborrowCT_sem δ (s : pborrowCT_sel A TY) :
+    (pborrowCT_cdom s → cif CON Σ) → iProp Σ :=
+    match s with
+    | cifs_pbor _ α a xπ ξ => λ Φx, pbor δ α a xπ ξ (λ a xπ, Φx (a, xπ)')
+    | cifs_pobor _ α q ξ => λ Φx, pobor δ α q ξ (λ a xπ, Φx (a, xπ)')
+    | cifs_plend _ α xπ => plend δ α xπ
+    end.
+  #[export] Program Instance pborrowCT_ecsem :
+    Ecsem (pborrowCT A TY) CON JUDG Σ :=
+    ECSEM (λ _ δ s _ Φx _, pborrowCT_sem δ s Φx) _.
+  Next Obligation. move=>/= ???*?. case=>/= > ?*?? eqv ?*; by f_equiv=> >. Qed.
+End pborrowC.
+(** [pborrowCS]: Semantics of [pborrowCT] registered *)
+Notation pborrowCS A TY := (inCS (pborrowCT A TY)).
+
+(** Reify into formulas *)
+Section pborrowC.
+  Context `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), !borrowGS (cifOF CON) Σ,
+    !prophGS TY Σ, !proph_agG A TY Σ, !proph_agC A TY CON,
+    !proph_agCS A TY CON JUDG Σ, !borrowJ (cifO CON Σ) JUDG,
+    !borrowJS (cifOF CON) JUDG Σ, !pborrowC A TY CON,
+    !pborrowCS A TY CON JUDG Σ}.
+
+  #[export] Program Instance pbor_as_cif {X α a xπ ξ Φx} :
+    AsCif CON (λ δ, pbor (X:=X) δ α a xπ ξ Φx) :=
+    AS_CIF (cif_pbor α a xπ ξ Φx) _.
+  Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
+  #[export] Program Instance pobor_as_cif {X α q ξ Φx} :
+    AsCif CON (λ δ, pobor (X:=X) δ α q ξ Φx) := AS_CIF (cif_pobor α q ξ Φx) _.
+  Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
+  #[export] Program Instance plend_as_cif {X α xπ Φx} :
+    AsCif CON (λ δ, plend (X:=X) δ α xπ Φx) := AS_CIF (cif_plend α xπ Φx) _.
+  Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
+End pborrowC.

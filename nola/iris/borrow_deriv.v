@@ -6,7 +6,7 @@ From nola.iris Require Export borrow.
 From iris.proofmode Require Import proofmode.
 Import ProdNotation iPropAppNotation ModwNotation LftNotation DsemNotation.
 
-Implicit Type FM : ofe.
+Implicit Type (FM : ofe) (α : lft) (q : Qp) (Σ : gFunctors).
 
 (** ** Judgment *)
 
@@ -301,3 +301,89 @@ Section borrow_deriv.
       by [iApply lft_sincl_refl|].
   Qed.
 End borrow_deriv.
+
+(** ** Constructor *)
+
+From nola.iris Require Import cif.
+
+(** [borrowCT]: Constructor *)
+Variant borrowCT_id := .
+Variant borrowCT_sel := cifs_bor α | cifs_obor α q | cifs_lend α.
+Definition borrowCT :=
+  Cifcon borrowCT_id borrowCT_sel (λ _, Empty_set) (λ _, unit) (λ _, unitO) _.
+(** [borrowC]: [borrowCT] registered *)
+Notation borrowC := (inC borrowCT).
+
+Section borrowC.
+  Context `{!borrowC CON} {Σ}.
+  Implicit Type Px : cif CON Σ.
+  (** Formulas *)
+  Definition cif_bor α Px : cif CON Σ :=
+    cif_ecustom borrowCT (cifs_bor α) nullary (unary Px) ().
+  Definition cif_obor α q Px : cif CON Σ :=
+    cif_ecustom borrowCT (cifs_obor α q) nullary (unary Px) ().
+  Definition cif_lend α Px : cif CON Σ :=
+    cif_ecustom borrowCT (cifs_lend α) nullary (unary Px) ().
+  (** The formulas are non-expansive *)
+  #[export] Instance cif_bor_ne {α} : NonExpansive (cif_bor α).
+  Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
+  #[export] Instance cif_bor_proper {α} : Proper ((≡) ==> (≡)) (cif_bor α).
+  Proof. apply ne_proper, _. Qed.
+  #[export] Instance cif_obor_ne {α q} : NonExpansive (cif_obor α q).
+  Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
+  #[export] Instance cif_obor_proper {α q} :
+    Proper ((≡) ==> (≡)) (cif_obor α q).
+  Proof. apply ne_proper, _. Qed.
+  #[export] Instance cif_lend_ne {α} : NonExpansive (cif_lend α).
+  Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
+  #[export] Instance cif_lend_proper {α} : Proper ((≡) ==> (≡)) (cif_lend α).
+  Proof. apply ne_proper, _. Qed.
+  (** The formulas are productive *)
+  #[export] Instance cif_bor_productive {α} : Productive (cif_bor α).
+  Proof.
+    move=> ????. apply cif_ecustom_preserv_productive=>//.
+    by apply fun_proeq_later.
+  Qed.
+  #[export] Instance cif_obor_productive {α q} : Productive (cif_obor α q).
+  Proof.
+    move=> ????. apply cif_ecustom_preserv_productive=>//.
+    by apply fun_proeq_later.
+  Qed.
+  #[export] Instance cif_lend_productive {α} : Productive (cif_lend α).
+  Proof.
+    move=> ????. apply cif_ecustom_preserv_productive=>//.
+    by apply fun_proeq_later.
+  Qed.
+
+  Context `{!borrowGS (cifOF CON) Σ, !borrowJ (cif CON Σ) JUDG}.
+  (** Semantics of [borrowCT] *)
+  Definition borrowCT_sem δ (s : borrowCT_sel) : cif CON Σ → iProp Σ :=
+    match s with
+    | cifs_bor α => bor δ α | cifs_obor α q => obor δ α q
+    | cifs_lend α => lend δ α
+    end.
+  #[export] Program Instance borrowCT_ecsem : Ecsem borrowCT CON JUDG Σ :=
+    ECSEM (λ _ δ s _ Φx _, borrowCT_sem δ s (Φx ())) _.
+  Next Obligation.
+    move=>/= ???*? s ?*?? eqv ?*. case s=>/= >; f_equiv; apply eqv.
+  Qed.
+End borrowC.
+(** [borrowCS]: Semantics of [borrowCT] registered *)
+Notation borrowCS := (inCS borrowCT).
+
+(** Reify into formulas *)
+Section borrowC.
+  Context `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), !borrowGS (cifOF CON) Σ,
+    !borrowC CON, !borrowJ (cifO CON Σ) JUDG, !borrowCS CON JUDG Σ,
+    !borrowJS (cifOF CON) JUDG Σ}.
+
+  #[export] Program Instance bor_as_cif {α Px} :
+    AsCif CON (λ δ, bor δ α Px) := AS_CIF (cif_bor α Px) _.
+  Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
+  #[export] Program Instance obor_as_cif {α q Px} :
+    AsCif CON (λ δ, obor δ α q Px) := AS_CIF (cif_obor α q Px) _.
+  Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
+  #[export] Program Instance lend_as_cif {α Px} :
+    AsCif CON (λ δ, lend δ α Px) := AS_CIF (cif_lend α Px) _.
+  Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
+End borrowC.
