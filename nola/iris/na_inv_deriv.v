@@ -208,18 +208,17 @@ Section na_invC.
   Context `{!na_invC CON} {Σ}.
   (** [cif_na_inv]: Formula for [na_inv'] *)
   Definition cif_na_inv p N (Px : cif CON Σ) : cif CON Σ :=
-    cif_ecustom na_invCT (p, N)' nullary (unary Px) ().
+    cif_in na_invCT (p, N)' nullary (unary Px) ().
   (** [cif_na_inv] is non-expansive *)
   #[export] Instance cif_na_inv_ne {p N} : NonExpansive (cif_na_inv p N).
-  Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
+  Proof. move=> ????. apply cif_in_ne; solve_proper. Qed.
   #[export] Instance cif_na_inv_proper {p N} :
     Proper ((≡) ==> (≡)) (cif_na_inv p N).
   Proof. apply ne_proper, _. Qed.
   (** [cif_na_inv] is productive *)
   #[export] Instance cif_na_inv_productive {p N} : Productive (cif_na_inv p N).
   Proof.
-    move=> ????. apply cif_ecustom_preserv_productive=>//.
-    by apply fun_proeq_later.
+    move=> ????. apply cif_in_preserv_productive=>//. by apply fun_proeq_later.
   Qed.
 
   Context `{!inv'GS (cifOF CON) Σ, !na_invGS (cifOF CON) Σ,
@@ -237,4 +236,4 @@ Notation na_invCS := (inCS na_invCT).
   `{!inv'GS (cifOF CON) Σ, !na_invGS (cifOF CON) Σ, !na_invJ (cifO CON Σ) JUDG,
     !na_invCS CON JUDG Σ} {p N Px} :
   AsCif CON (λ δ, na_inv' δ p N Px) := AS_CIF (cif_na_inv p N Px) _.
-Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
+Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.

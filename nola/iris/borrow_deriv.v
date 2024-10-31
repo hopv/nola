@@ -319,40 +319,37 @@ Section borrowC.
   Implicit Type Px : cif CON Σ.
   (** Formulas *)
   Definition cif_bor α Px : cif CON Σ :=
-    cif_ecustom borrowCT (cifs_bor α) nullary (unary Px) ().
+    cif_in borrowCT (cifs_bor α) nullary (unary Px) ().
   Definition cif_obor α q Px : cif CON Σ :=
-    cif_ecustom borrowCT (cifs_obor α q) nullary (unary Px) ().
+    cif_in borrowCT (cifs_obor α q) nullary (unary Px) ().
   Definition cif_lend α Px : cif CON Σ :=
-    cif_ecustom borrowCT (cifs_lend α) nullary (unary Px) ().
+    cif_in borrowCT (cifs_lend α) nullary (unary Px) ().
   (** The formulas are non-expansive *)
   #[export] Instance cif_bor_ne {α} : NonExpansive (cif_bor α).
-  Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
+  Proof. move=> ????. apply cif_in_ne; solve_proper. Qed.
   #[export] Instance cif_bor_proper {α} : Proper ((≡) ==> (≡)) (cif_bor α).
   Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_obor_ne {α q} : NonExpansive (cif_obor α q).
-  Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
+  Proof. move=> ????. apply cif_in_ne; solve_proper. Qed.
   #[export] Instance cif_obor_proper {α q} :
     Proper ((≡) ==> (≡)) (cif_obor α q).
   Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_lend_ne {α} : NonExpansive (cif_lend α).
-  Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
+  Proof. move=> ????. apply cif_in_ne; solve_proper. Qed.
   #[export] Instance cif_lend_proper {α} : Proper ((≡) ==> (≡)) (cif_lend α).
   Proof. apply ne_proper, _. Qed.
   (** The formulas are productive *)
   #[export] Instance cif_bor_productive {α} : Productive (cif_bor α).
   Proof.
-    move=> ????. apply cif_ecustom_preserv_productive=>//.
-    by apply fun_proeq_later.
+    move=> ????. apply cif_in_preserv_productive=>//. by apply fun_proeq_later.
   Qed.
   #[export] Instance cif_obor_productive {α q} : Productive (cif_obor α q).
   Proof.
-    move=> ????. apply cif_ecustom_preserv_productive=>//.
-    by apply fun_proeq_later.
+    move=> ????. apply cif_in_preserv_productive=>//. by apply fun_proeq_later.
   Qed.
   #[export] Instance cif_lend_productive {α} : Productive (cif_lend α).
   Proof.
-    move=> ????. apply cif_ecustom_preserv_productive=>//.
-    by apply fun_proeq_later.
+    move=> ????. apply cif_in_preserv_productive=>//. by apply fun_proeq_later.
   Qed.
 
   Context `{!borrowGS (cifOF CON) Σ, !borrowJ (cif CON Σ) JUDG}.
@@ -379,11 +376,11 @@ Section borrowC.
 
   #[export] Program Instance bor_as_cif {α Px} :
     AsCif CON (λ δ, bor δ α Px) := AS_CIF (cif_bor α Px) _.
-  Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
+  Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
   #[export] Program Instance obor_as_cif {α q Px} :
     AsCif CON (λ δ, obor δ α q Px) := AS_CIF (cif_obor α q Px) _.
-  Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
+  Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
   #[export] Program Instance lend_as_cif {α Px} :
     AsCif CON (λ δ, lend δ α Px) := AS_CIF (cif_lend α Px) _.
-  Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
+  Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
 End borrowC.

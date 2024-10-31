@@ -60,9 +60,9 @@ Section mutex_bor.
     [[{ b, RET #b; (if b then bor_tok α Px else True) ∗ q.[α] }]].
   Proof.
     iIntros (Φ) "[#m [α α']] →Φ". wp_lam.
-    iMod (inv_tok_acc with "m") as "/=[b cl]"; [done|]. rewrite sem_ecustom /=.
+    iMod (inv_tok_acc with "m") as "/=[b cl]"; [done|]. rewrite sem_cif_in /=.
     iMod (bor_tok_open (M:=bupd) with "α b") as "[o big]".
-    rewrite /= sem_ecustom.
+    rewrite /= sem_cif_in.
     iDestruct "big" as "[[>↦ b']|>↦]";
       [wp_apply (twp_cas_suc with "↦")|wp_apply (twp_cas_int_fail with "↦")]
       =>//; iIntros "↦";
@@ -93,14 +93,13 @@ Section mutex_bor.
     [[{ RET #☠; q.[α] }]].
   Proof.
     iIntros (Φ) "(#m & b' & α) →Φ". wp_lam.
-    iMod (inv_tok_acc with "m") as "/=[b cl]"; [done|].
-    rewrite sem_ecustom /=.
+    iMod (inv_tok_acc with "m") as "/=[b cl]"; [done|]. rewrite sem_cif_in /=.
     iMod (bor_tok_open (M:=bupd) with "α b") as "[o big]"=>/=.
     iAssert (∃ b, ▷ l ↦ #b)%I with "[big]" as (?) ">↦".
     { iDestruct "big" as "[[$ _]|$]". }
     wp_write.
     iMod (obor_tok_close (M:=bupd) with "o [b' ↦]") as "[α b]"=>/=.
-    { iLeft. rewrite sem_ecustom /=. iFrame. }
+    { iLeft. rewrite sem_cif_in /=. iFrame. }
     iMod ("cl" with "b") as "_". iModIntro. by iApply "→Φ".
   Qed.
 
@@ -122,10 +121,10 @@ Section mutex_bor.
       [(▷ l ↦ #false ∗ cif_bor_tok α Px) ∨ ▷ l ↦ #true]%cif
       with "[] o [↦ b'] []") as "($ & _ & [b _])"=>/=.
     { iApply lft_sincl_refl. }
-    { iSplit; [|done]. rewrite sem_ecustom /=.
+    { iSplit; [|done]. rewrite sem_cif_in /=.
       iDestruct "↦" as ([|]) "↦"; [|iLeft]; iFrame. }
     { by iIntros "_ [[[$ _]|$]_]". }
-    iMod (inv_tok_alloc with "[b]") as "$"=>//=. by rewrite sem_ecustom.
+    iMod (inv_tok_alloc with "[b]") as "$"=>//=. by rewrite sem_cif_in.
   Qed.
 
   (** ** Linked list with a shared borrow over a mutex *)
@@ -152,7 +151,7 @@ Section mutex_bor.
   Definition mblist α Φx := mblist_gen α Φx (cif_mblist α Φx).
   (** Unfold semantics over [cif_ilist] *)
   Lemma sem_mblist {δ α Φx l} : cif_sem δ (cif_mblist α Φx l) ⊣⊢ mblist α Φx l.
-  Proof. by rewrite cif_mblist_unfold !sem_ecustom /=. Qed.
+  Proof. by rewrite cif_mblist_unfold !sem_cif_in /=. Qed.
 
   (** Iterate over [cif_mblist] *)
   Definition iter_mblist : val := rec: "self" ["f"; "k"; "c"; "l"] :=

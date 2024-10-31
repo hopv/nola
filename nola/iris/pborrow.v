@@ -29,16 +29,14 @@ Section proph_agC.
   Context `{!proph_agC A TY CON} {Σ}.
   (** [cif_proph_ctrl]: Prophecy controller *)
   Definition cif_proph_ctrl {X} γ a xπ ξ : cif CON Σ :=
-    cif_ecustom (proph_agCT A TY)
-      (cifs_proph_ctrl (X:=X) γ a xπ ξ) nullary nullary ().
+    cif_in (proph_agCT A TY) (cifs_proph_ctrl (X:=X) γ a xπ ξ) nullary nullary
+      ().
   (** [cif_proph_eqz]: Prophecy controller *)
   Definition cif_proph_eqz {X} xπ xπ' : cif CON Σ :=
-    cif_ecustom (proph_agCT A TY)
-      (cifs_proph_eqz (X:=X) xπ xπ') nullary nullary ().
+    cif_in (proph_agCT A TY) (cifs_proph_eqz (X:=X) xπ xπ') nullary nullary ().
   (** [cif_val_obs]: Value observer *)
   Definition cif_val_obs {X} γ a xπ : cif CON Σ :=
-    cif_ecustom (proph_agCT A TY)
-      (cifs_val_obs (X:=X) γ a xπ) nullary nullary ().
+    cif_in (proph_agCT A TY) (cifs_val_obs (X:=X) γ a xπ) nullary nullary ().
 
   Context `{!prophGS TY Σ, !proph_agG A TY Σ}.
   (** Semantics of [proph_agCT] *)
@@ -187,7 +185,7 @@ Section pborrow.
     move=> X Xl IH [ξ ξl] [axπΦx axπΦxl]. iIntros "[ξ ξl] [Φx Φxl]".
     iMod (IH with "ξl Φxl") as (γl) "[vol xpbl]".
     iMod (vo_pc_alloc with "ξ") as (γ) "[vo pc]". iModIntro. iExists (γ, γl)'.
-    iFrame "vo vol xpbl". iExists _, _. iFrame "Φx". by rewrite sem_ecustom.
+    iFrame "vo vol xpbl". iExists _, _. iFrame "Φx". by rewrite sem_cif_in.
   Qed.
   Local Lemma of_vol_bl {α Xl γl} {ξaxπΦxl : plist _ Xl} :
     ([∗ plist] '(γ, _, a, xπ, _)' ∈ plist_zip γl ξaxπΦxl, val_obs γ a xπ) -∗
@@ -226,7 +224,7 @@ Section pborrow.
   Proof.
     elim: Xl γl ξaxπΦxl=>/=; [by iIntros|]=> X Xl IH [γ γl] [ξaxπΦx ξaxπΦxl].
     iIntros "[(% & % & pc & Φx) xpbl]". iMod (IH with "xpbl") as "$".
-    rewrite sem_ecustom /= pc_eqz. iModIntro. iExists _. iFrame.
+    rewrite sem_cif_in /= pc_eqz. iModIntro. iExists _. iFrame.
   Qed.
   (** Create new prophetic borrowers and lenders *)
   Lemma pbor_plend_tok_new_list {δ} Xl α (axπΦxl : plist _ Xl) :
@@ -248,7 +246,7 @@ Section pborrow.
     iMod (bor_lend_tok_new_list (FML:=cifOF _) (M:=M) α _ (cif_xplendl yπΨxl)
       with "xpbl [→Ψxl]") as "[bl ll]".
     { iStopProof. f_equiv. iIntros "→Ψxl xpbl". iMod (xpbl_to_xpll with "xpbl").
-      rewrite big_sepL_of_plist /=. setoid_rewrite sem_ecustom.
+      rewrite big_sepL_of_plist /=. setoid_rewrite sem_cif_in.
       by iApply "→Ψxl". }
     iModIntro. rewrite -big_sepL_of_plist. iFrame "ll".
     iApply (of_vol_bl with "vol bl").
@@ -275,7 +273,7 @@ Section pborrow.
     iIntros "/=l →Ψxl".
     iMod (lend_tok_split (FML:=cifOF _) (M:=M) (cif_xplendl yπΨxl)
       with "l [→Ψxl]"); rewrite big_sepL_of_plist //=.
-    by setoid_rewrite sem_ecustom=>/=.
+    by setoid_rewrite sem_cif_in=>/=.
   Qed.
 
   (** Retrieve from a prophetic lender *)
@@ -284,7 +282,7 @@ Section pborrow.
       (xplend δ xπ Φx).
   Proof.
     iIntros "† l". iMod (lend_tok_retrieve with "† l")=>/=.
-    by setoid_rewrite sem_ecustom.
+    by setoid_rewrite sem_cif_in.
   Qed.
 
   (** Open a prophetic borrower *)
@@ -295,7 +293,7 @@ Section pborrow.
     rewrite pbor_tok_unseal pobor_tok_unseal. iIntros "α [†|[%[vo b]]]".
     { iDestruct (lft_live_dead with "α †") as %[]. }
     iMod (bor_tok_open (M:=M) with "α b") as "/=[o (% & % & pc & Φx)]".
-    iModIntro. rewrite sem_ecustom.
+    iModIntro. rewrite sem_cif_in.
     iDestruct (vo_pc_agree with "vo pc") as %[<-<-]. iFrame.
   Qed.
 
@@ -310,7 +308,7 @@ Section pborrow.
     iMod (vo_pc_update with "vo pc") as "[vo pc]".
     iMod (obor_tok_subdiv (FML:=cifOF _) (M:=M) [cif_xpbor _ _ Ψx]
       with "⊑ o [pc Ψx] [→Φx]") as "[$[_[? _]]]"=>/=.
-    { iFrame "Ψx". by rewrite sem_ecustom /=. }
+    { iFrame "Ψx". by rewrite sem_cif_in /=. }
     { iIntros "† [(% & % & $ & Ψx) _]". iApply ("→Φx" with "† Ψx"). }
     iModIntro. iRight. iExists _. iFrame.
   Qed.
@@ -335,7 +333,7 @@ Section pborrow.
     { iIntros "_ _ _ _ !>". iExists (). iSplit=>//. iApply proph_eqz_obs.
       by iApply proph_obs_true. }
     move=> Y Yl IH [γ' γl'] [η ηl] [ayπΨx ayπΨxl].
-    iIntros "[(%a' & %yπ' & eqz & Ψx) xpbl]". rewrite sem_ecustom /= pc_eqz.
+    iIntros "[(%a' & %yπ' & eqz & Ψx) xpbl]". rewrite sem_cif_in /= pc_eqz.
     iMod (IH with "xpbl") as (yπl') "[eqz' Ψxl]". iModIntro. iExists (_, _)'.
     iFrame "Ψx Ψxl". iApply (proph_eqz_f2 with "eqz eqz'").
   Qed.
@@ -372,7 +370,7 @@ Section pborrow.
       as "($ & _ & big)"; rewrite big_sepL_app. { by iStopProof. }
     { iIntros "† [xpbl Rxl] /=".
       iMod (of_xpbl with "xpbl") as (?) "[eqz Ψxl]".
-      iMod ("→Φx" with "† Ψxl Rxl") as (?) "$". iModIntro. rewrite sem_ecustom.
+      iMod ("→Φx" with "† Ψxl Rxl") as (?) "$". iModIntro. rewrite sem_cif_in.
       iApply "→pc". by iApply proph_eqz_fpi. }
     iModIntro. iDestruct "big" as "[bl $]". iApply (of_vol_bl with "vol bl").
   Qed.
@@ -412,22 +410,21 @@ Section pborrow.
     iMod (vo_pc_update with "vo pc") as "[vo pc]".
     iMod (vo_pc_update with "vo' pc'") as "[vo' pc']".
     iMod (obor_tok_reborrow (M:=M) β with "⊑ o' [pc' Ψx]") as "($ & →b' & b)".
-    { rewrite /=. iExists _, _. rewrite sem_ecustom /=. iFrame. }
+    { rewrite /=. iExists _, _. rewrite sem_cif_in /=. iFrame. }
     iMod vo_vo_alloc as (γx) "[vox vox']".
     iMod (obor_tok_subdiv (FML:=cifOF _) (M:=M)
       [∃ a yπ, cif_proph_ctrl γ a (λ π, fπ π (yπ π)) ξ ∗
         cif_val_obs γ' a yπ ∗ cif_val_obs γx a yπ]%cif
       with "[] o [pc vo' vox'] [→Φx →b']") as "[[β β'][_[b' _]]]"=>/=.
     { iApply lft_sincl_refl. }
-    { iSplit; [|done]. iExists _, _. rewrite !sem_ecustom /=. iFrame. }
+    { iSplit; [|done]. iExists _, _. rewrite !sem_cif_in /=. iFrame. }
     { iIntros "#† [(% & % & pc & vo' & _) _]". iFrame "pc".
       iApply ("→Φx" with "†"). rewrite pbor_tok_unseal. iRight. iExists _.
-      rewrite sem_ecustom /=. iFrame "vo'". by iApply "→b'". }
+      rewrite sem_cif_in /=. iFrame "vo'". by iApply "→b'". }
     iMod (bor_tok_open (M:=M) with "β b") as "/=[o (% & % & pc' & Ψx)]".
     iMod (bor_tok_open (M:=M) with "β' b'")
       as "/=[o' (% & % & pc & vo' & vox')]".
-    rewrite !sem_ecustom /=.
-    iDestruct (vo_vo_agree with "vox vox'") as %[<-<-].
+    rewrite !sem_cif_in /=. iDestruct (vo_vo_agree with "vox vox'") as %[<-<-].
     iDestruct (vo_pc_agree with "vo' pc'") as %[<-<-]. iFrame "Ψx".
     iDestruct (vo_pc_proph with "vo' pc'") as "(vo' & →pc' & $)". iModIntro.
     iIntros (ζl s ?) "ζl". iMod (proph_alloc (yπ inhabitant)) as (η') "η'".
@@ -443,13 +440,13 @@ Section pborrow.
       [cif_xpbor γ'' η' Ψx] with "[$o $o'] [pc'' Ψx] [→pc vo' pc' vox vox']")
       as "[([$ _] & [$ _] & _) [b _]]"=>/=.
     { iSplit; [|iSplit=>//]; iApply lft_sincl_refl. }
-    { iSplit; [|done]. iExists _, _. iFrame "Ψx". by rewrite sem_ecustom /=. }
+    { iSplit; [|done]. iExists _, _. iFrame "Ψx". by rewrite sem_cif_in /=. }
     { iIntros "_ [(% & % & eqz & Ψx) _]".
       iMod (vo_pc_update with "vo' pc'") as "[vo' pc']".
       iMod (vo_vo_update with "vox vox'") as "[vox _]". iModIntro.
-      rewrite sem_ecustom /= (pc_eqz (γ:=γ'')). iSplitL "pc' Ψx".
-      { iExists _, _. rewrite sem_ecustom /=. iFrame. }
-      iSplit; [|done]. iExists _, _. rewrite !sem_ecustom /=. iFrame "vo' vox".
+      rewrite sem_cif_in /= (pc_eqz (γ:=γ'')). iSplitL "pc' Ψx".
+      { iExists _, _. rewrite sem_cif_in /=. iFrame. }
+      iSplit; [|done]. iExists _, _. rewrite !sem_cif_in /=. iFrame "vo' vox".
       iApply "→pc". by iApply proph_eqz_fpi. }
     iModIntro. rewrite pbor_tok_unseal. iRight. iExists _. iFrame.
   Qed.

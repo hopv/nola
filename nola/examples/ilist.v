@@ -39,7 +39,7 @@ Section ilist.
   Definition ilist N Φx := ilist_gen N Φx (cif_ilist N Φx).
   (** Unfold semantics over [cif_ilist] *)
   Lemma sem_ilist {δ N Φx l} : cif_sem δ (cif_ilist N Φx l) ⊣⊢ ilist N Φx l.
-  Proof. by rewrite cif_ilist_unfold /= !sem_ecustom /=. Qed.
+  Proof. by rewrite cif_ilist_unfold /= !sem_cif_in /=. Qed.
   (** [cif_ilist] is productive *)
   #[export] Instance cif_ilist_productive {N} : Productive (cif_ilist N).
   Proof. move=> ????. apply profix_preserv=> ?. by f_equiv. Qed.

@@ -139,7 +139,7 @@ Section cif.
     Citg cifs_later nullary nullary (Next P%I).
 
   (** Custom connective *)
-  Definition cif_custom (s : CON) (Φx : CON.(cifc_idom) s -pr> cif CON Σ)
+  Definition cif_con (s : CON) (Φx : CON.(cifc_idom) s -pr> cif CON Σ)
     (Ψx : CON.(cifc_cdom) s -pr> cif CON Σ) (d : CON.(cifc_data) s $oi Σ)
     : cif CON Σ :=
     Citg (cifs_custom s) Φx (λ c, of_cit (Ψx c)) d.
@@ -161,8 +161,8 @@ Section cif.
 
   (** Custom connectives are size-preserving over the inductive arguments
     and productive over the coinductive arguments *)
-  #[export] Instance cif_custom_preserv_productive {s k} :
-    Proper (proeq k ==> proeq_later k ==> (≡) ==> proeq k) (cif_custom s).
+  #[export] Instance cif_con_preserv_productive {s k} :
+    Proper (proeq k ==> proeq_later k ==> (≡) ==> proeq k) (cif_con s).
   Proof.
     move=> ?????????. apply Citg_preserv_productive=>//. by destruct k as [|k].
   Qed.
@@ -193,11 +193,11 @@ Section cif.
   Proof. move=> ????. by apply Citg_ne. Qed.
   #[export] Instance cif_later_proper : Proper ((≡) ==> (≡)) cif_later.
   Proof. apply ne_proper, _. Qed.
-  #[export] Instance cif_custom_ne {s} : NonExpansive3 (cif_custom s).
+  #[export] Instance cif_con_ne {s} : NonExpansive3 (cif_con s).
   Proof. move=> ??????????. apply Citg_ne=>// ?. by f_equiv. Qed.
-  #[export] Instance cif_custom_proper {s} :
-    Proper ((≡) ==> (≡) ==> (≡) ==> (≡)) (cif_custom s).
-  Proof. move=> ??????????. apply cif_custom_ne; by apply equiv_dist. Qed.
+  #[export] Instance cif_con_proper {s} :
+    Proper ((≡) ==> (≡) ==> (≡) ==> (≡)) (cif_con s).
+  Proof. move=> ??????????. apply cif_con_ne; by apply equiv_dist. Qed.
 
   (** Discreteness *)
   #[export] Instance cif_all_discrete {A} `{!∀ a : A, Discrete (Φx a)} :
@@ -214,9 +214,9 @@ Section cif.
   Proof. exact _. Qed.
   #[export] Instance cif_pure_discrete {φ} : Discrete (cif_pure φ).
   Proof. exact _. Qed.
-  #[export] Instance cif_custom_discrete {s}
+  #[export] Instance cif_con_discrete {s}
     `{!∀ i, Discrete (Φx i), !∀ c, Discrete (Ψx c), !Discrete d} :
-    Discrete (cif_custom s Φx Ψx d).
+    Discrete (cif_con s Φx Ψx d).
   Proof. exact _. Qed.
 End cif.
 
@@ -353,53 +353,51 @@ Proof. apply ne_proper, _. Qed.
 Definition sigTCT_inC {A CONF a} : inC (CONF a) (@sigTCT A CONF) :=
   IN_C (CON:=sigTCT _) (existT a) (λ _, id) (λ _, id) (λ _ _, id) _ _.
 
-(** ** [cif_ecustom]: Custom constructor under [inC] *)
-Definition cif_ecustom_def CON' `{!inC CON' CON} {Σ} (s : CON')
+(** ** [cif_in]: Custom constructor under [inC] *)
+Definition cif_in_def CON' `{!inC CON' CON} {Σ} (s : CON')
   (Φx : CON'.(cifc_idom) s -pr> cif CON Σ)
   (Ψx : CON'.(cifc_cdom) s -pr> cif CON Σ) (d : CON'.(cifc_data) s $oi Σ)
   : cif CON Σ :=
-  cif_custom (in_c_sel s) (λ i, Φx (in_c_idom i)) (λ c, Ψx (in_c_cdom c))
+  cif_con (in_c_sel s) (λ i, Φx (in_c_idom i)) (λ c, Ψx (in_c_cdom c))
     (in_c_data d).
-Lemma cif_ecustom_aux : seal (@cif_ecustom_def). Proof. by eexists _. Qed.
-Definition cif_ecustom CON' `{!inC CON' CON} {Σ} (s : CON')
+Lemma cif_in_aux : seal (@cif_in_def). Proof. by eexists _. Qed.
+Definition cif_in CON' `{!inC CON' CON} {Σ} (s : CON')
   (Φx : CON'.(cifc_idom) s -pr> cif CON Σ)
   (Ψx : CON'.(cifc_cdom) s -pr> cif CON Σ) (d : CON'.(cifc_data) s $oi Σ)
   : cif CON Σ :=
-  cif_ecustom_aux.(unseal) _ _ _ _ s Φx Ψx d.
-Lemma cif_ecustom_unseal : @cif_ecustom = @cif_ecustom_def.
-Proof. exact: seal_eq. Qed.
+  cif_in_aux.(unseal) _ _ _ _ s Φx Ψx d.
+Lemma cif_in_unseal : @cif_in = @cif_in_def. Proof. exact: seal_eq. Qed.
 
-Section cif_ecustom.
+Section cif_in.
   Context `{!inC CON' CON} {Σ}.
 
   (** Custom connectives are size-preserving over the inductive arguments
     and productive over the coinductive arguments *)
-  #[export] Instance cif_ecustom_preserv_productive {s k} :
+  #[export] Instance cif_in_preserv_productive {s k} :
     Proper (proeq k ==> proeq_later k ==> (≡) ==> proeq k)
-      (cif_ecustom CON' (Σ:=Σ) s).
+      (cif_in CON' (Σ:=Σ) s).
   Proof.
-    rewrite cif_ecustom_unseal=> ????? /fun_proeq_later eqc ???.
-    apply cif_custom_preserv_productive.
+    rewrite cif_in_unseal=> ????? /fun_proeq_later eqc ???.
+    apply cif_con_preserv_productive.
     { by move. } { by apply fun_proeq_later. } { by f_equiv. }
   Qed.
 
   (** Custom connectives are non-expansive *)
-  #[export] Instance cif_ecustom_ne {s} :
-    NonExpansive3 (cif_ecustom CON' (Σ:=Σ) s).
+  #[export] Instance cif_in_ne {s} : NonExpansive3 (cif_in CON' (Σ:=Σ) s).
   Proof.
-    rewrite cif_ecustom_unseal=> ??????????. apply cif_custom_ne.
+    rewrite cif_in_unseal=> ??????????. apply cif_con_ne.
     { by move. } { by move. } { by f_equiv. }
   Qed.
-  #[export] Instance cif_ecustom_proper {s} :
-    Proper ((≡) ==> (≡) ==> (≡) ==> (≡)) (cif_ecustom CON' (Σ:=Σ) s).
-  Proof. move=> ??????????. apply cif_ecustom_ne; by apply equiv_dist. Qed.
+  #[export] Instance cif_in_proper {s} :
+    Proper ((≡) ==> (≡) ==> (≡) ==> (≡)) (cif_in CON' (Σ:=Σ) s).
+  Proof. move=> ??????????. apply cif_in_ne; by apply equiv_dist. Qed.
 
   (** Discreteness of custom connectives *)
-  #[export] Instance cif_ecustom_discrete {s}
+  #[export] Instance cif_in_discrete {s}
     `{!∀ i, Discrete (Φx i), !∀ c, Discrete (Ψx c), !Discrete d} :
-    Discrete (cif_ecustom CON' (Σ:=Σ) s Φx Ψx d).
-  Proof. rewrite cif_ecustom_unseal. apply: cif_custom_discrete. Qed.
-End cif_ecustom.
+    Discrete (cif_in CON' (Σ:=Σ) s Φx Ψx d).
+  Proof. rewrite cif_in_unseal. apply: cif_con_discrete. Qed.
+End cif_in.
 
 (** Semantics of an element [cifcon] *)
 #[projections(primitive)]
@@ -444,24 +442,23 @@ Lemma sigTCT_inCS {JUDG A}
   inCS (CONF a) (sigTCT CONF) JUDG Σ (inC0:=sigTCT_inC) (Csem0:=sigTCT_Csem).
 Proof. done. Qed.
 
-Section cif_ecustom.
+Section cif_in.
   Context `{!inC CON' CON, !Csem CON JUDG Σ, !Ecsem CON' CON JUDG Σ,
     !inCS CON' CON JUDG Σ}.
 
-  (** Semantics of [cif_ecustom] *)
-  Lemma sem_ecustom {δ s Φx Ψx d} :
-    cif_sem δ (cif_ecustom CON' s Φx Ψx d) ⊣⊢
+  (** Semantics of [cif_in] *)
+  Lemma sem_cif_in {δ s Φx Ψx d} :
+    cif_sem δ (cif_in CON' s Φx Ψx d) ⊣⊢
       ecsem cif_sem δ s (λ i, ⟦ Φx i ⟧(δ)) Ψx d.
   Proof.
-    rewrite cif_ecustom_unseal /= -in_cs. apply equiv_dist=> n.
+    rewrite cif_in_unseal /= -in_cs. apply equiv_dist=> n.
     apply csem_ne=>// >; [|by rewrite to_of_cit].
     apply dist_dist_later, equiv_dist, cif_sem'_unfold.
   Qed.
-  Lemma sem'_ecustom {δ s Φx Ψx d} :
-    ⟦ cif_ecustom CON' s Φx Ψx d ⟧(δ) ⊣⊢
-      ecsem cif_sem δ s (λ i, ⟦ Φx i ⟧(δ)) Ψx d.
-  Proof. exact sem_ecustom. Qed.
-End cif_ecustom.
+  Lemma sem'_cif_in {δ s Φx Ψx d} :
+    ⟦ cif_in CON' s Φx Ψx d ⟧(δ) ⊣⊢ ecsem cif_sem δ s (λ i, ⟦ Φx i ⟧(δ)) Ψx d.
+  Proof. exact sem_cif_in. Qed.
+End cif_in.
 
 (** ** [AsCif]: Reify [iProp] into [cif] *)
 Class AsCif `{!Csem CON JUDG Σ} (Φ : (JUDG -n> iProp Σ) → iProp Σ) := AS_CIF {

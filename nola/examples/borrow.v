@@ -23,12 +23,12 @@ Section borrow.
     iMod (bor_tok_open (M:=bupd) with "β b") as "/=[o [%l'[>↦ b']]]".
     iApply twpw_fupdw_nonval; [done|]. wp_read.
     iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
-    rewrite sem_ecustom /=.
+    rewrite sem_cif_in /=.
     iMod (bor_tok_reborrow (M:=bupd) with "⊑ α b'") as "(α & →b' & b')".
     iDestruct ("→β'" with "α") as "β'".
     iMod (obor_tok_subdiv (M:=bupd) [] with "[] o [] [↦ →b']") as "[β _]"=>/=.
     { iApply lft_sincl_refl. } { done. }
-    { iIntros "† _ !>". iExists _. iFrame "↦". rewrite sem_ecustom /=.
+    { iIntros "† _ !>". iExists _. iFrame "↦". rewrite sem_cif_in /=.
       by iApply "→b'". }
     iModIntro. iApply "→Ψ". iFrame.
   Qed.
@@ -41,7 +41,7 @@ Section borrow.
     [[{ RET #n; q.[α] }]].
   Proof.
     iIntros (Φ) "[α #i] →Φ". iMod (inv_tok_acc with "i") as "/=[b cl]"; [done|].
-    rewrite sem_ecustom /=.
+    rewrite sem_cif_in /=.
     iMod (bor_tok_open (M:=bupd) with "α b") as "/=[o >↦]". wp_read.
     iMod (obor_tok_close (M:=bupd) with "o [↦]") as "[α b]"=>/=; [done|].
     iMod ("cl" with "b") as "_". iModIntro. by iApply "→Φ".
@@ -67,13 +67,13 @@ Section borrow.
   Proof.
     iIntros (Ψ) "(#⊑ & [β β'] & b) →Ψ".
     iMod (pbor_tok_open (M:=bupd) with "β b") as "/=[o big]".
-    iDestruct "big" as (l' xπ ξ ->) "[>↦ b]". rewrite sem_ecustom /=.
+    iDestruct "big" as (l' xπ ξ ->) "[>↦ b]". rewrite sem_cif_in /=.
     iApply twpw_fupdw_nonval; [done|]. wp_read.
     iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
     iMod (pobor_pbor_tok_reborrow (M:=bupd) (λ π x, (x, π ξ)' : _ *'ₓ _)
       with "⊑ α o b [↦]") as "(ξ & Φx & big)"=>/=. { by move=> ????[]. }
-    { iIntros ([]?) "_ ? !>". iExists _, _, _. rewrite sem_ecustom /=.
-      by iFrame. }
+    { iIntros ([]?) "_ ? !>". iExists _, _, _. rewrite sem_cif_in /=.
+    by iFrame. }
     iMod ("big" $! [Aprvar _ ξ] with "[%] [$ξ //]")
       as (?) "(obs & [ξ _ ] & big)".
     { move=> ?. apply proph_dep_f. apply: proph_dep_one. }

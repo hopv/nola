@@ -203,28 +203,26 @@ Section storeC.
   Implicit Type Px : cif CON Σ.
   (** Formulas *)
   Definition cif_store Px : cif CON Σ :=
-    cif_ecustom storeCT true nullary (unary Px) ().
+    cif_in storeCT true nullary (unary Px) ().
   Definition cif_pstore Px : cif CON Σ :=
-    cif_ecustom storeCT false nullary (unary Px) ().
+    cif_in storeCT false nullary (unary Px) ().
   (** The formulas are non-expansive *)
   #[export] Instance cif_store_ne : NonExpansive cif_store.
-  Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
+  Proof. move=> ????. apply cif_in_ne; solve_proper. Qed.
   #[export] Instance cif_store_proper : Proper ((≡) ==> (≡)) cif_store.
   Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_pstore_ne : NonExpansive cif_pstore.
-  Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
+  Proof. move=> ????. apply cif_in_ne; solve_proper. Qed.
   #[export] Instance cif_pstore_proper : Proper ((≡) ==> (≡)) cif_pstore.
   Proof. apply ne_proper, _. Qed.
   (** The formulas are productive *)
   #[export] Instance cif_store_productive : Productive cif_store.
   Proof.
-    move=> ????. apply cif_ecustom_preserv_productive=>//.
-    by apply fun_proeq_later.
+    move=> ????. apply cif_in_preserv_productive=>//. by apply fun_proeq_later.
   Qed.
   #[export] Instance cif_pstore_productive : Productive cif_pstore.
   Proof.
-    move=> ????. apply cif_ecustom_preserv_productive=>//.
-    by apply fun_proeq_later.
+    move=> ????. apply cif_in_preserv_productive=>//. by apply fun_proeq_later.
   Qed.
 
   Context `{!storeGS (cifOF CON) Σ, !storeJ (cifO CON Σ) JUDG}.
@@ -248,8 +246,8 @@ Section storeC.
 
   #[export] Program Instance store_as_cif {Px} :
     AsCif CON (λ δ, store δ Px) := AS_CIF (cif_store Px) _.
-  Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
+  Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
   #[export] Program Instance pstore_as_cif {Px} :
     AsCif CON (λ δ, pstore δ Px) := AS_CIF (cif_pstore Px) _.
-  Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
+  Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
 End storeC.

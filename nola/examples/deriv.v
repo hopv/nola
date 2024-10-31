@@ -90,7 +90,7 @@ Section deriv.
   Local Lemma inv'_inv'_sep_comm' `{!Deriv ih δ} {N N' Px Qx} :
     inv' δ N (cif_inv N' (Px ∗ Qx)) ⊢ inv' δ N (cif_inv N' (Qx ∗ Px)).
   Proof.
-    iApply inv'_iff. iIntros "!> /=" (????). rewrite !sem_ecustom /=.
+    iApply inv'_iff. iIntros "!> /=" (????). rewrite !sem_cif_in /=.
     rewrite inv'_sep_comm. iApply bi.wand_iff_refl.
   Qed.
   Lemma inv'_inv'_sep_comm `{!Deriv ih δ} {N N' Px Qx} :
@@ -101,7 +101,7 @@ Section deriv.
       inv' δ N (cif_bor_tok α Px) -∗ inv' δ N (cif_bor_tok β Px).
   Proof.
     iIntros "#? #?". iApply inv'_iff. iIntros "!>" (????).
-    rewrite /= !sem_ecustom /=. iSplit; by iApply bor_tok_lft.
+    rewrite /= !sem_cif_in /=. iSplit; by iApply bor_tok_lft.
   Qed.
   Lemma inv'_bor_lft `{!Deriv ih δ} {N α β Px} :
     α ⊑□ β -∗ β ⊑□ α -∗

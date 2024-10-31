@@ -217,16 +217,16 @@ Section invC.
   Context `{!invC CON} {Σ}.
   (** [cif_inv]: Formula for [inv'] *)
   Definition cif_inv N (Px : cif CON Σ) : cif CON Σ :=
-    cif_ecustom invCT N nullary (unary Px) ().
+    cif_in invCT N nullary (unary Px) ().
   (** [cif_inv] is non-expansive *)
   #[export] Instance cif_inv_ne {N} : NonExpansive (cif_inv N).
-  Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
+  Proof. move=> ????. apply cif_in_ne; solve_proper. Qed.
   #[export] Instance cif_inv_proper {N} : Proper ((≡) ==> (≡)) (cif_inv N).
   Proof. apply ne_proper, _. Qed.
   (** [cif_inv] is productive *)
   #[export] Instance cif_inv_productive {N} : Productive (cif_inv N).
   Proof.
-    move=> ????. apply cif_ecustom_preserv_productive=>//.
+    move=> ????. apply cif_in_preserv_productive=>//.
     by apply fun_proeq_later.
   Qed.
 
@@ -243,4 +243,4 @@ Notation invCS := (inCS invCT).
 #[export] Program Instance inv'_as_cif `{!Csem CON JUDG Σ, !invC CON}
   `{!inv'GS (cifOF CON) Σ, !invJ (cifO CON Σ) JUDG, !invCS CON JUDG Σ} {N Px} :
   AsCif CON (λ δ, inv' δ N Px) := AS_CIF (cif_inv N Px) _.
-Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
+Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.

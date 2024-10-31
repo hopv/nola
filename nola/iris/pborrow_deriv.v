@@ -100,9 +100,7 @@ Section pborrow_deriv.
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
       xplend δ' xπ Φx ==∗ xplend δ' yπ Ψx) -∗
     plend (X:=X) δ α xπ Φx -∗ plend (X:=Y) δ α yπ Ψx.
-  Proof.
-    iIntros "?". iApply lend_to=>/=. by setoid_rewrite sem_ecustom=>/=.
-  Qed.
+  Proof. iIntros "?". iApply lend_to=>/=. by setoid_rewrite sem_cif_in=>/=. Qed.
 
   (** Modify the lifetime of borrower and lender propositions *)
   Lemma pbor_lft {X α β a xπ ξ Φx} :
@@ -186,7 +184,7 @@ Section pborrow_deriv.
     iMod (lendd_split (FML:=cifOF _) (M:=M)
       (nola.iris.pborrow.cif_xplendl yπΨxl) with "l [→Ψxl]");
       rewrite big_sepL_of_plist //=.
-    by setoid_rewrite sem_ecustom=>/=.
+    by setoid_rewrite sem_cif_in=>/=.
   Qed.
 
   (** Retrieve from a prophetic lender *)
@@ -194,7 +192,7 @@ Section pborrow_deriv.
     [†α] -∗ plendd α xπ Φx -∗ modw M (borrow_wsat M ⟦⟧) (xplendd xπ Φx).
   Proof.
     iIntros "† l". iMod (lendd_retrieve with "† l")=>/=.
-    by setoid_rewrite sem_ecustom.
+    by setoid_rewrite sem_cif_in.
   Qed.
 
   (** Open a prophetic borrower *)
@@ -327,28 +325,28 @@ Section pborrowC.
   Implicit Type Px : cif CON Σ.
   (** Formulas *)
   Definition cif_pbor {X} α a xπ ξ (Φx : _ -d> _ -d> _) : cif CON Σ :=
-    cif_ecustom (pborrowCT A TY) (cifs_pbor X α a xπ ξ) nullary
+    cif_in (pborrowCT A TY) (cifs_pbor X α a xπ ξ) nullary
       (λ '(a, xπ)', Φx a xπ) ().
   Definition cif_pobor {X} α q ξ (Φx : _ -d> _ -d> _) : cif CON Σ :=
-    cif_ecustom (pborrowCT A TY) (cifs_pobor X α q ξ) nullary
-      (λ '(a, xπ)', Φx a xπ) ().
+    cif_in (pborrowCT A TY) (cifs_pobor X α q ξ) nullary (λ '(a, xπ)', Φx a xπ)
+      ().
   Definition cif_plend {X} α xπ (Φx : clair _ _ -d> cif CON Σ) : cif CON Σ :=
-    cif_ecustom (pborrowCT A TY) (cifs_plend X α xπ) nullary Φx ().
+    cif_in (pborrowCT A TY) (cifs_plend X α xπ) nullary Φx ().
   (** The formulas are non-expansive *)
   #[export] Instance cif_pbor_ne {X α a xπ ξ} :
     NonExpansive (@cif_pbor X α a xπ ξ).
-  Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
+  Proof. move=> ????. apply cif_in_ne; solve_proper. Qed.
   #[export] Instance cif_pbor_proper {X α a xπ ξ} :
     Proper ((≡) ==> (≡)) (@cif_pbor X α a xπ ξ).
   Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_pobor_ne {X α q ξ} :
     NonExpansive (@cif_pobor X α q ξ).
-  Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
+  Proof. move=> ????. apply cif_in_ne; solve_proper. Qed.
   #[export] Instance cif_pobor_proper {X α q ξ} :
     Proper ((≡) ==> (≡)) (@cif_pobor X α q ξ).
   Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_plend_ne {X α xπ} : NonExpansive (@cif_plend X α xπ).
-  Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
+  Proof. move=> ????. apply cif_in_ne; solve_proper. Qed.
   #[export] Instance cif_plend_proper {X α xπ} :
     Proper ((≡) ==> (≡)) (@cif_plend X α xπ).
   Proof. apply ne_proper, _. Qed.
@@ -356,18 +354,18 @@ Section pborrowC.
   #[export] Instance cif_pbor_productive {X α a xπ ξ} :
     Productive (@cif_pbor X α a xπ ξ).
   Proof.
-    move=> k ?? eq. apply cif_ecustom_preserv_productive=>//=.
-    destruct k=>//= ?. apply eq.
+    move=> k ?? eq. apply cif_in_preserv_productive=>//=. destruct k=>//= ?.
+    apply eq.
   Qed.
   #[export] Instance cif_pobor_productive {X α q ξ} :
     Productive (@cif_pobor X α q ξ).
   Proof.
-    move=> k ?? eq. apply cif_ecustom_preserv_productive=>//=.
-    destruct k=>//= ?. apply eq.
+    move=> k ?? eq. apply cif_in_preserv_productive=>//=. destruct k=>//= ?.
+    apply eq.
   Qed.
   #[export] Instance cif_plend_productive {X α xπ} :
     Productive (@cif_plend X α xπ).
-  Proof. move=> ????. by apply cif_ecustom_preserv_productive. Qed.
+  Proof. move=> ????. by apply cif_in_preserv_productive. Qed.
 
   Context `{!borrowGS (cifOF CON) Σ, !borrowJ (cif CON Σ) JUDG, !prophGS TY Σ,
     !proph_agG A TY Σ, !proph_agC A TY CON}.
@@ -398,11 +396,11 @@ Section pborrowC.
   #[export] Program Instance pbor_as_cif {X α a xπ ξ Φx} :
     AsCif CON (λ δ, pbor (X:=X) δ α a xπ ξ Φx) :=
     AS_CIF (cif_pbor α a xπ ξ Φx) _.
-  Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
+  Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
   #[export] Program Instance pobor_as_cif {X α q ξ Φx} :
     AsCif CON (λ δ, pobor (X:=X) δ α q ξ Φx) := AS_CIF (cif_pobor α q ξ Φx) _.
-  Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
+  Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
   #[export] Program Instance plend_as_cif {X α xπ Φx} :
     AsCif CON (λ δ, plend (X:=X) δ α xπ Φx) := AS_CIF (cif_plend α xπ Φx) _.
-  Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
+  Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
 End pborrowC.

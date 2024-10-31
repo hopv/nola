@@ -20,18 +20,17 @@ Section inv_tokC.
   Context `{!inv_tokC CON} {Σ}.
   (** [cif_inv_tok]: Formula *)
   Definition cif_inv_tok N (Px : cif CON Σ) : cif CON Σ :=
-    cif_ecustom inv_tokCT N nullary (unary Px) ().
+    cif_in inv_tokCT N nullary (unary Px) ().
   (** [cif_inv] is non-expansive *)
   #[export] Instance cif_inv_tok_ne {N} : NonExpansive (cif_inv_tok N).
-  Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
+  Proof. move=> ????. apply cif_in_ne; solve_proper. Qed.
   #[export] Instance cif_inv_tok_proper {N} :
     Proper ((≡) ==> (≡)) (cif_inv_tok N).
   Proof. apply ne_proper, _. Qed.
   (** [cif_inv] is productive *)
   #[export] Instance cif_inv_tok_productive {N} : Productive (cif_inv_tok N).
   Proof.
-    move=> ????. apply cif_ecustom_preserv_productive=>//.
-    by apply fun_proeq_later.
+    move=> ????. apply cif_in_preserv_productive=>//. by apply fun_proeq_later.
   Qed.
 
   Context `{!inv'GS (cifOF CON) Σ}.
@@ -48,7 +47,7 @@ Notation inv_tokCS := (inCS inv_tokCT).
 #[export] Program Instance inv_tok_as_cif `{!Csem CON JUDG Σ}
   `{!inv_tokC CON, !inv'GS (cifOF CON) Σ, !inv_tokCS CON JUDG Σ} {N Px} :
   AsCif CON (λ _, inv_tok N Px) := AS_CIF (cif_inv_tok N Px) _.
-Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
+Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
 
 (** ** Borrow *)
 
@@ -63,17 +62,17 @@ Section bor_tokC.
   Context `{!bor_tokC CON} {Σ}.
   (** [cif_bor_tok]: Formula *)
   Definition cif_bor_tok α (Px : cif CON Σ) : cif CON Σ :=
-    cif_ecustom bor_tokCT α nullary (unary Px) ().
+    cif_in bor_tokCT α nullary (unary Px) ().
   (** [cif_bor_tok] is non-expansive *)
   #[export] Instance cif_bor_tok_ne {α} : NonExpansive (cif_bor_tok α).
-  Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
+  Proof. move=> ????. apply cif_in_ne; solve_proper. Qed.
   #[export] Instance cif_bor_tok_proper {α} :
     Proper ((≡) ==> (≡)) (cif_bor_tok α).
   Proof. apply ne_proper, _. Qed.
   (** [cif_bor_tok] is productive *)
   #[export] Instance cif_bor_tok_productive {α} : Productive (cif_bor_tok α).
   Proof.
-    move=> ????. apply cif_ecustom_preserv_productive=>//.
+    move=> ????. apply cif_in_preserv_productive=>//.
     by apply fun_proeq_later.
   Qed.
 
@@ -91,7 +90,7 @@ Notation bor_tokCS := (inCS bor_tokCT).
 #[export] Program Instance bor_tok_as_cif `{!Csem CON JUDG Σ}
   `{!bor_tokC CON, !borrowGS (cifOF CON) Σ, !bor_tokCS CON JUDG Σ} {α Px} :
   AsCif CON (λ _, bor_tok α Px) := AS_CIF (cif_bor_tok α Px) _.
-Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
+Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
 
 (** ** Prophetic borrow *)
 
@@ -108,8 +107,7 @@ Section pbor_tokCT.
   (** [cif_pbor_tok]: Formula *)
   Definition cif_pbor_tok {X} α a xπ ξ (Φx : A -pr> clair TY X -pr> cif CON Σ)
     : cif CON Σ :=
-    cif_ecustom (pbor_tokCT A TY) X nullary (λ '(a, xπ)', Φx a xπ)
-      (α, a, xπ, ξ)'.
+    cif_in (pbor_tokCT A TY) X nullary (λ '(a, xπ)', Φx a xπ) (α, a, xπ, ξ)'.
   (** [cif_pbor_tok] is non-expansive *)
   #[export] Instance cif_pbor_tok_ne {X α a xπ ξ} :
     NonExpansive (@cif_pbor_tok X α a xπ ξ).
@@ -147,7 +145,7 @@ Notation pbor_tokCS A TY := (inCS (pbor_tokCT A TY)).
   {X α a xπ ξ Φx} :
   AsCif CON (λ _, pbor_tok (X:=X) α a xπ ξ Φx) :=
   AS_CIF (cif_pbor_tok α a xπ ξ Φx) _.
-Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
+Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
 
 (** ** Judgment for [iff] *)
 
@@ -217,17 +215,16 @@ Section invC.
   Context `{!invC CON} {Σ}.
   (** [cif_inv]: Formula for [inv'] *)
   Definition cif_inv N (Px : cif CON Σ) : cif CON Σ :=
-    cif_ecustom invCT N nullary (unary Px) ().
+    cif_in invCT N nullary (unary Px) ().
   (** [cif_inv] is non-expansive *)
   #[export] Instance cif_inv_ne {N} : NonExpansive (cif_inv N).
-  Proof. move=> ????. apply cif_ecustom_ne; solve_proper. Qed.
+  Proof. move=> ????. apply cif_in_ne; solve_proper. Qed.
   #[export] Instance cif_inv_proper {N} : Proper ((≡) ==> (≡)) (cif_inv N).
   Proof. apply ne_proper, _. Qed.
   (** [cif_inv] is productive *)
   #[export] Instance cif_inv_productive {N} : Productive (cif_inv N).
   Proof.
-    move=> ????. apply cif_ecustom_preserv_productive=>//.
-    by apply fun_proeq_later.
+    move=> ????. apply cif_in_preserv_productive=>//. by apply fun_proeq_later.
   Qed.
 
   Context `{!inv'GS (cifOF CON) Σ, !iffJ (cifO CON Σ) JUDG}.
@@ -243,4 +240,4 @@ Notation invCS := (inCS invCT).
 #[export] Program Instance inv'_as_cif `{!Csem CON JUDG Σ, !invC CON}
   `{!inv'GS (cifOF CON) Σ, !iffJ (cifO CON Σ) JUDG, !invCS CON JUDG Σ} {N Px} :
   AsCif CON (λ δ, inv' δ N Px) := AS_CIF (cif_inv N Px) _.
-Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
+Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
