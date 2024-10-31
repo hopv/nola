@@ -119,8 +119,9 @@ Section mutex_bor.
     { by iIntros "_ [[% $][$ _]]". }
     iMod (bor_tok_open (M:=bupd) with "α b") as "/=[o ↦]".
     iMod (obor_tok_subdiv (FML:=cifOF CON) (M:=bupd)
-      [(▷ l ↦ #false ∗ cif_bor_tok α Px) ∨ ▷ l ↦ #true]%cif with "[] o [↦ b'] []")
-      as "($ & _ & [b _])"=>/=. { iApply lft_sincl_refl. }
+      [(▷ l ↦ #false ∗ cif_bor_tok α Px) ∨ ▷ l ↦ #true]%cif
+      with "[] o [↦ b'] []") as "($ & _ & [b _])"=>/=.
+    { iApply lft_sincl_refl. }
     { iSplit; [|done]. rewrite sem_ecustom /=.
       iDestruct "↦" as ([|]) "↦"; [|iLeft]; iFrame. }
     { by iIntros "_ [[[$ _]|$]_]". }
