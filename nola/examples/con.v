@@ -2,7 +2,7 @@
 
 From nola.util Require Import tagged.
 From nola.iris Require Export cif inv pborrow.
-Import ProdNotation FunPRNotation DsemNotation.
+Import ProdNotation FunPRNotation DsemNotation iPropAppNotation.
 
 Implicit Type (Σ : gFunctors) (N : namespace) (TY : synty) (α : lft) (FM : ofe)
   (A : Type).
@@ -177,11 +177,11 @@ Section iffJ.
     : Dsem JUDG (iffJT FM) (iProp Σ) := DSEM iffJT_sem _.
 End iffJ.
 (** [iffJS]: Judgment semantics for [iff] *)
-Notation iffJS FM JUDG Σ := (inJS (iffJT FM) JUDG (iProp Σ)).
+Notation iffJS FML JUDG Σ := (inJS (iffJT (FML $oi Σ)) JUDG (iProp Σ)).
 
 Section iffJ.
-  Context `{!Dsem JUDG FM (iProp Σ), !Jsem JUDG (iProp Σ), !iffJ FM JUDG,
-    !iffJS FM JUDG Σ}.
+  Context `{!Dsem JUDG (FML $oi Σ) (iProp Σ), !Jsem JUDG (iProp Σ),
+    !iffJ (FML $oi Σ) JUDG, !iffJS FML JUDG Σ}.
 
   (** Derivability of [jiff] is persistent *)
   #[export] Instance Deriv_jiff_persistent `{!Deriv (JUDG:=JUDG) ih δ} {Px Qx} :

@@ -7,7 +7,7 @@ Import ModwNotation WpwNotation DsemNotation LftNotation.
 Section deriv.
   Context `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), !lrustGS_gen hlc Σ,
     !inv'GS (cifOF CON) Σ, !invC CON, !iffJ (cifO CON Σ) JUDG,
-    !invCS CON JUDG Σ, !iffJS (cifO CON Σ) JUDG Σ, !borrowGS (cifOF CON) Σ,
+    !invCS CON JUDG Σ, !iffJS (cifOF CON) JUDG Σ, !borrowGS (cifOF CON) Σ,
     !bor_tokC CON, !bor_tokCS CON JUDG Σ}.
   Implicit Type (Px Qx : cif CON Σ) (Φx Ψx : loc → cif CON Σ).
 
