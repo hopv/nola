@@ -5,11 +5,11 @@ From nola.rust_lang Require Export notation proofmode.
 Import ModwNotation WpwNotation DsemNotation LftNotation.
 
 Section deriv.
-  Context `{!lrustGS_gen hlc Σ, !SemCifcon JUDG CON Σ, !Jsem JUDG (iProp Σ),
-    !inv'GS (cifOF CON) Σ, !InvCon CON, !InvSem JUDG CON Σ,
-    !borrowGS (cifOF CON) Σ, !BorCon CON, !BorSem JUDG CON Σ,
-    !Inv'Con CON, !IffJudg (cifO CON Σ) JUDG, !Inv'Sem JUDG CON Σ,
-    !IffJsem (cifO CON Σ) Σ JUDG}.
+  Context `{!lrustGS_gen hlc Σ, !SemCifcon CON JUDG Σ, !Jsem JUDG (iProp Σ),
+    !inv'GS (cifOF CON) Σ, !InvCon CON, !InvSem CON JUDG Σ,
+    !borrowGS (cifOF CON) Σ, !BorCon CON, !BorSem CON JUDG Σ,
+    !Inv'Con CON, !IffJudg (cifO CON Σ) JUDG, !Inv'Sem CON JUDG Σ,
+    !IffJsem (cifO CON Σ) JUDG Σ}.
   Implicit Type (Px Qx : cif CON Σ) (Φx Ψx : loc → cif CON Σ).
 
   (** ** On derivability *)

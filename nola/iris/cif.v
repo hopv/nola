@@ -243,7 +243,7 @@ Implicit Type JUDG : ofe.
 
 (** ** Semantics for [cifcon] *)
 #[projections(primitive)]
-Record SemCifcon (JUDG : ofe) CON Σ := SEM_CIFCON {
+Record SemCifcon CON JUDG Σ := SEM_CIFCON {
   (** Semantics *)
   sem_cifc :> ((JUDG -n> iProp Σ) -d> cif CON Σ -d> iProp Σ) →
     (JUDG -n> iProp Σ) → ∀ s, (CON.(cifc_idom) s -d> iProp Σ) →
@@ -258,11 +258,11 @@ Existing Class SemCifcon.
 Add Printing Constructor SemCifcon.
 Arguments SEM_CIFCON {_ _ _} _ _. Arguments sem_cifc {_ _ _ semc} : rename.
 Arguments sem_cifc_ne {_ _ _ semc _} : rename.
-Hint Mode SemCifcon - ! - : typeclass_instances.
+Hint Mode SemCifcon ! - - : typeclass_instances.
 
 (** ** [cif_sem]: Semantics of [cif] *)
 Section iris.
-  Context `{!SemCifcon JUDG CON Σ}.
+  Context `{!SemCifcon CON JUDG Σ}.
   Implicit Type sm : (JUDG -n> iProp Σ) -d> cif CON Σ -d> iProp Σ.
 
   (** [cif_bsem]: Base semantics for [cif] *)
@@ -405,7 +405,7 @@ End cif_ecustom.
 
 (** Semantics of an element [cifcon] *)
 #[projections(primitive)]
-Record SemEcifcon JUDG CON' CON Σ := SEM_ECIFCON {
+Record SemEcifcon CON' CON JUDG Σ := SEM_ECIFCON {
   (** Semantics *)
   sem_ecifc :> ((JUDG -n> iProp Σ) -d> cif CON Σ -d> iProp Σ) →
     (JUDG -n> iProp Σ) → ∀ s,
@@ -422,35 +422,35 @@ Add Printing Constructor SemEcifcon.
 Arguments SEM_ECIFCON {_ _ _ _} _ _.
 Arguments sem_ecifc {_ _ _ _ semec} : rename.
 Arguments sem_ecifc_ne {_ _ _ _ semec _ _} : rename.
-Hint Mode SemEcifcon - ! - - : typeclass_instances.
+Hint Mode SemEcifcon ! - - - : typeclass_instances.
 
 (** [SemCifcon] over [sigT] by [SemEcifcon] *)
 Program Definition sigT_sem_cifcon {JUDG A}
-  `{semec : !∀ a, SemEcifcon JUDG (CONF a) (@sigTCC A CONF) Σ}
-  : SemCifcon JUDG (sigTCC CONF) Σ :=
+  `{semec : !∀ a, SemEcifcon (CONF a) (@sigTCC A CONF) JUDG Σ}
+  : SemCifcon (sigTCC CONF) JUDG Σ :=
   SEM_CIFCON (λ sm δ s, semec _ sm δ (projT2 s)) _.
 Next Obligation. move=> *?*???*?*?*. by apply sem_ecifc_ne. Qed.
 
 (** Inclusion with respect to [SemEcifcon] and [SemCifcon] *)
-Class EsemEcifcon JUDG CON' CON Σ `{!Ecifcon CON' CON}
-  `{!SemEcifcon JUDG CON' CON Σ, !SemCifcon JUDG CON Σ} :=
+Class EsemEcifcon CON' CON JUDG Σ `{!Ecifcon CON' CON}
+  `{!SemEcifcon CON' CON JUDG Σ, !SemCifcon CON JUDG Σ} :=
   esem_ecifc : ∀ {sm δ s Φ Ψx d},
     sem_cifc (CON:=CON) sm δ (ecifc_sel s) (λ i, Φ (rew[id] ecifc_idom s in i))
       (λ c, Ψx (rew[id] ecifc_cdom s in c))
       (rew[λ F, F $oi Σ] eq_sym (ecifc_data s) in d) =
       sem_ecifc (CON':=CON') (CON:=CON) sm δ s Φ Ψx d.
-Hint Mode EsemEcifcon - ! - - - - - : typeclass_instances.
+Hint Mode EsemEcifcon ! - - - - - - : typeclass_instances.
 
 (** [EsemEcifcon] into [sigT] *)
 Lemma sigT_esem_cifcon {JUDG A}
-  `{semec : !∀ a, SemEcifcon JUDG (CONF a) (@sigTCC A CONF) Σ} {a} :
+  `{semec : !∀ a, SemEcifcon (CONF a) (@sigTCC A CONF) JUDG Σ} {a} :
   EsemEcifcon (Ecifcon0:=sigT_ecifcon) (SemCifcon0:=sigT_sem_cifcon)
-    JUDG (CONF a) (sigTCC CONF) Σ.
+    (CONF a) (sigTCC CONF) JUDG Σ.
 Proof. done. Qed.
 
 Section cif_ecustom.
-  Context `{!Ecifcon CON' CON, !SemCifcon JUDG CON Σ,
-    !SemEcifcon JUDG CON' CON Σ, !EsemEcifcon JUDG CON' CON Σ}.
+  Context `{!Ecifcon CON' CON, !SemCifcon CON JUDG Σ,
+    !SemEcifcon CON' CON JUDG Σ, !EsemEcifcon CON' CON JUDG Σ}.
 
   (** Semantics of [cif_ecustom] *)
   Lemma sem_ecustom {δ s Φx Ψx d} :
@@ -468,16 +468,16 @@ Section cif_ecustom.
 End cif_ecustom.
 
 (** ** [AsCif]: Reify [iProp] into [cif] *)
-Class AsCif `{!SemCifcon JUDG CON Σ} (Φ : (JUDG -n> iProp Σ) → iProp Σ) :=
+Class AsCif `{!SemCifcon CON JUDG Σ} (Φ : (JUDG -n> iProp Σ) → iProp Σ) :=
   AS_CIF {
   as_cif : cif CON Σ;
   sem_as_cif {δ} : cif_sem δ as_cif ⊣⊢ Φ δ;
 }.
-Arguments AsCif {_} CON {_ _}. Arguments AS_CIF {_ _ _ _ _} _ _.
+Arguments AsCif CON {_ _ _}. Arguments AS_CIF {_ _ _ _ _} _ _.
 Arguments as_cif {_ _ _ _} Φ {_}. Arguments sem_as_cif {_ _ _ _ _ _ _}.
 
 Section as_cif.
-  Context `{!SemCifcon JUDG CON Σ}.
+  Context `{!SemCifcon CON JUDG Σ}.
 
   (** Instances of [AsCif] *)
   #[export] Program Instance sem_cif_as_cif {Px} :

@@ -60,7 +60,7 @@ Notation plendd := (plend der).
 Section pborrow_deriv.
   Context `{!borrowGS (cifOF CON) Σ, !prophGS TY Σ, !proph_agG A TY Σ,
     !PborrowCon A TY CON, !BorrowJudg (cifOF CON $oi Σ) JUDG,
-    !Jsem JUDG (iProp Σ), !SemCifcon JUDG CON Σ, !PborrowSem A TY JUDG CON Σ,
+    !Jsem JUDG (iProp Σ), !SemCifcon CON JUDG Σ, !PborrowSem A TY CON JUDG Σ,
     !BorrowJsem (cifOF CON) Σ JUDG, !Deriv (JUDG:=JUDG) ih δ}.
   Implicit Type (X Y Z : TY) (Px Qx Rx : cif CON Σ) (δ : JUDG -n> iProp Σ).
 
@@ -168,7 +168,7 @@ End pborrow_deriv.
 Section pborrow_deriv.
   Context `{!borrowGS (cifOF CON) Σ, !prophGS TY Σ, !proph_agG A TY Σ,
     !PborrowCon A TY CON, !BorrowJudg (cifOF CON $oi Σ) JUDG,
-    !Jsem JUDG (iProp Σ), !SemCifcon JUDG CON Σ, !PborrowSem A TY JUDG CON Σ,
+    !Jsem JUDG (iProp Σ), !SemCifcon CON JUDG Σ, !PborrowSem A TY CON JUDG Σ,
     !BorrowJsem (cifOF CON) Σ JUDG,
     !@ModUpd (iProp Σ) M, !ModBUpd M, !ModExcept0 M}.
   Implicit Type (X Y : TY) (Px Qx : cif CON Σ).

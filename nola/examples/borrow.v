@@ -6,9 +6,9 @@ Import ProdNotation FunPRNotation ModwNotation WpwNotation DsemNotation
   LftNotation ProphNotation NsyntyNotation.
 
 Section borrow.
-  Context `{!lrustGS_gen hlc Σ, !SemCifcon JUDG CON Σ, !Jsem JUDG (iProp Σ),
-    !inv'GS (cifOF CON) Σ, !InvCon CON, !InvSem JUDG CON Σ,
-    !borrowGS (cifOF CON) Σ, !BorCon CON, !BorSem JUDG CON Σ}.
+  Context `{!lrustGS_gen hlc Σ, !SemCifcon CON JUDG Σ, !Jsem JUDG (iProp Σ),
+    !inv'GS (cifOF CON) Σ, !InvCon CON, !InvSem CON JUDG Σ,
+    !borrowGS (cifOF CON) Σ, !BorCon CON, !BorSem CON JUDG Σ}.
   Implicit Type l : loc.
 
   (** Dereference a nested mutable reference *)
@@ -47,8 +47,8 @@ Section borrow.
   Qed.
 
   Context `{!prophGS xty Σ, !proph_agG unit xty Σ, !PborrowCon unit xty CON,
-    !PborCon unit xty CON, !PborrowSem unit xty JUDG CON Σ,
-    !PborSem unit xty JUDG CON Σ}.
+    !PborCon unit xty CON, !PborrowSem unit xty CON JUDG Σ,
+    !PborSem unit xty CON JUDG Σ}.
   Implicit Type X : xty.
 
   (** Dereference a nested prophetic mutable reference *)

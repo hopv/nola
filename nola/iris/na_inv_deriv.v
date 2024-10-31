@@ -88,7 +88,7 @@ Notation NaInvJsem CON Σ JUDG :=
 
 Section na_inv_deriv.
   Context `{!inv'GS (cifOF CON) Σ, !invGS_gen hlc Σ, !na_invG Σ,
-    !NaInvJudg (cif CON Σ) JUDG, !Jsem JUDG (iProp Σ), !SemCifcon JUDG CON Σ,
+    !NaInvJudg (cif CON Σ) JUDG, !Jsem JUDG (iProp Σ), !SemCifcon CON JUDG Σ,
     !NaInvJsem CON Σ JUDG}.
   Implicit Type Px Qx : cif CON Σ.
 

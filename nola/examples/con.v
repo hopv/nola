@@ -13,7 +13,7 @@ Variant invCC_id := .
 Definition invCC :=
   Cifcon invCC_id namespace (λ _, Empty_set) (λ _, unit) (λ _, unitO) _.
 (** [InvCon]: [invCC] registered *)
-Notation InvCon CON := (Ecifcon invCC CON).
+Notation InvCon := (Ecifcon invCC).
 Section cif_inv.
   Context `{!InvCon CON} {Σ}.
   (** [cif_inv]: Formula *)
@@ -33,16 +33,16 @@ Section cif_inv.
   Context `{!inv'GS (cifOF CON) Σ}.
   (** Semantics of [invCC] *)
   #[export] Program Instance inv_sem_ecifcon {JUDG}
-    : SemEcifcon JUDG invCC CON Σ :=
+    : SemEcifcon invCC CON JUDG Σ :=
     SEM_ECIFCON (λ _ _ N _ Φx _, inv_tok N (Φx ())) _.
   Next Obligation. move=>/= ???*???*?? eqv ???. f_equiv. apply eqv. Qed.
 End cif_inv.
 (** [invCC] semantics registered *)
-Notation InvSem JUDG CON Σ := (EsemEcifcon JUDG invCC CON Σ).
+Notation InvSem := (EsemEcifcon invCC).
 
 (** Reify [inv_tok] *)
-#[export] Program Instance inv_tok_as_cif `{!SemCifcon JUDG CON Σ, !InvCon CON}
-  `{!inv'GS (cifOF CON) Σ, !InvSem JUDG CON Σ} {N Px} :
+#[export] Program Instance inv_tok_as_cif `{!SemCifcon CON JUDG Σ, !InvCon CON}
+  `{!inv'GS (cifOF CON) Σ, !InvSem CON JUDG Σ} {N Px} :
   AsCif CON (λ _, inv_tok N Px) := AS_CIF (cif_inv N Px) _.
 Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
 
@@ -52,7 +52,7 @@ Variant borCC_id := .
 Definition borCC :=
   Cifcon borCC_id lft (λ _, Empty_set) (λ _, unit) (λ _, unitO) _.
 (** [BorCon]: [borCC] registered *)
-Notation BorCon CON := (Ecifcon borCC CON).
+Notation BorCon := (Ecifcon borCC).
 Section cif_bor.
   Context `{!BorCon CON} {Σ}.
   (** [cif_bor]: Formula *)
@@ -72,16 +72,16 @@ Section cif_bor.
   Context `{!borrowGS (cifOF CON) Σ}.
   (** Semantics of [borCC] *)
   #[export] Program Instance bor_sem_ecifcon {JUDG}
-    : SemEcifcon JUDG borCC CON Σ :=
+    : SemEcifcon borCC CON JUDG Σ :=
     SEM_ECIFCON (λ _ _ α _ Φx _, bor_tok α (Φx ())) _.
   Next Obligation. move=>/= ???*???*?? eqv ???. f_equiv. apply eqv. Qed.
 End cif_bor.
 (** [borCC] semantics registered *)
-Notation BorSem JUDG CON Σ := (EsemEcifcon JUDG borCC CON Σ).
+Notation BorSem := (EsemEcifcon borCC).
 
 (** Reify [bor_tok] *)
-#[export] Program Instance bor_tok_as_cif `{!SemCifcon JUDG CON Σ, !BorCon CON}
-  `{!borrowGS (cifOF CON) Σ, !BorSem JUDG CON Σ} {α Px} :
+#[export] Program Instance bor_tok_as_cif `{!SemCifcon CON JUDG Σ, !BorCon CON}
+  `{!borrowGS (cifOF CON) Σ, !BorSem CON JUDG Σ} {α Px} :
   AsCif CON (λ _, bor_tok α Px) := AS_CIF (cif_bor α Px) _.
 Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
 
@@ -92,7 +92,7 @@ Definition pborCC A TY :=
   Cifcon (pborCC_id A TY) TY (λ _, Empty_set) (λ X, A *' clair TY X)%type
     (λ X, leibnizO (lft *' A *' clair TY X *' prvar X)) _.
 (** [PborCon]: [pborCC] registered *)
-Notation PborCon A TY CON := (Ecifcon (pborCC A TY) CON).
+Notation PborCon A TY := (Ecifcon (pborCC A TY)).
 Section cif_pbor.
   Context `{!PborCon A TY CON} {Σ}.
   Implicit Type X : TY.
@@ -117,7 +117,7 @@ Section cif_pbor.
     !PborrowCon A TY CON}.
   (** Semantics of [pborCC] *)
   #[export] Program Instance pbor_sem_ecifcon {JUDG}
-    : SemEcifcon JUDG (pborCC A TY) CON Σ :=
+    : SemEcifcon (pborCC A TY) CON JUDG Σ :=
     SEM_ECIFCON (λ _ _ X _ Φx '(α, a, xπ, ξ)',
       pbor_tok α a xπ ξ (λ a xπ, Φx (a, xπ)')) _.
   Next Obligation.
@@ -125,13 +125,13 @@ Section cif_pbor.
   Qed.
 End cif_pbor.
 (** [pborCC] semantics registered *)
-Notation PborSem A TY JUDG CON Σ := (EsemEcifcon JUDG (pborCC A TY) CON Σ).
+Notation PborSem A TY := (EsemEcifcon (pborCC A TY)).
 
 (** Reify [pbor_tok] *)
 #[export] Program Instance pbor_tok_as_cif
   `{!PborCon A TY CON, !borrowGS (cifOF CON) Σ, !prophGS TY Σ,
-    !proph_agG A TY Σ, !PborrowCon A TY CON, !SemCifcon JUDG CON Σ,
-    !PborSem A TY JUDG CON Σ}
+    !proph_agG A TY Σ, !PborrowCon A TY CON, !SemCifcon CON JUDG Σ,
+    !PborSem A TY CON JUDG Σ}
   {X α a xπ ξ Φx} :
   AsCif CON (λ _, pbor_tok (X:=X) α a xπ ξ Φx) :=
   AS_CIF (cif_pbor α a xπ ξ Φx) _.
@@ -140,7 +140,7 @@ Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
 (** ** Judgment *)
 Variant iff_judg_id FM := .
 Definition iff_judgty (FM : ofe) : ofe := tagged (iff_judg_id FM) (FM * FM).
-Notation IffJudg FM JUDG := (Ejudg (iff_judgty FM) JUDG).
+Notation IffJudg FM := (Ejudg (iff_judgty FM)).
 Section iff_judg.
   Context `{iff_judg : !IffJudg FM JUDG}.
   Definition jiff (Px Qx : FM) : JUDG := iff_judg (Tagged (Px, Qx)).
@@ -159,11 +159,11 @@ Section iff_judg.
     : Dsem JUDG (iff_judgty FM) (iProp Σ) := DSEM iff_judg_sem _.
 End iff_judg.
 (** ** [IffJsem]: Judgment semantics for [iff] *)
-Notation IffJsem FM Σ JUDG := (Ejsem (iff_judgty FM) JUDG (iProp Σ)).
+Notation IffJsem FM JUDG Σ := (Ejsem (iff_judgty FM) JUDG (iProp Σ)).
 
 Section iff_judg.
   Context `{!Jsem JUDG (iProp Σ), !Dsem JUDG FM (iProp Σ), !IffJudg FM JUDG,
-    !IffJsem FM Σ JUDG}.
+    !IffJsem FM JUDG Σ}.
 
   (** Derivability of [jiff] is persistent *)
   #[export] Instance Deriv_jiff_persistent `{!Deriv (JUDG:=JUDG) ih δ} {Px Qx} :
@@ -192,7 +192,7 @@ Variant inv'CC_id := .
 Definition inv'CC :=
   Cifcon inv'CC_id namespace (λ _, Empty_set) (λ _, unit) (λ _, unitO) _.
 (** [Inv'Con]: [inv'CC] registered *)
-Notation Inv'Con CON := (Ecifcon inv'CC CON).
+Notation Inv'Con := (Ecifcon inv'CC).
 Section cif_inv'.
   Context `{!Inv'Con CON} {Σ}.
   (** [cif_inv']: Formula *)
@@ -213,16 +213,16 @@ Section cif_inv'.
   Context `{!inv'GS (cifOF CON) Σ, !IffJudg (cifO CON Σ) JUDG}.
   (** Semantics of [invCC] *)
   #[export] Program Instance inv'_sem_ecifcon
-    : SemEcifcon JUDG inv'CC CON Σ :=
+    : SemEcifcon inv'CC CON JUDG Σ :=
     SEM_ECIFCON (λ _ δ N _ Φx _, inv' δ N (Φx ())) _.
   Next Obligation. move=> ??*???*?? eqv ?*. f_equiv. apply eqv. Qed.
 End cif_inv'.
 (** [inv'CC] semantics registered *)
-Notation Inv'Sem JUDG CON Σ := (EsemEcifcon JUDG inv'CC CON Σ).
+Notation Inv'Sem := (EsemEcifcon inv'CC).
 
 (** Reify [inv'] *)
-#[export] Program Instance inv'_as_cif `{!SemCifcon JUDG CON Σ, !Inv'Con CON}
-  `{!inv'GS (cifOF CON) Σ, !IffJudg (cifO CON Σ) JUDG, !Inv'Sem JUDG CON Σ}
+#[export] Program Instance inv'_as_cif `{!SemCifcon CON JUDG Σ, !Inv'Con CON}
+  `{!inv'GS (cifOF CON) Σ, !IffJudg (cifO CON Σ) JUDG, !Inv'Sem CON JUDG Σ}
   {N Px} :
   AsCif CON (λ δ, inv' δ N Px) := AS_CIF (cif_inv' N Px) _.
 Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.

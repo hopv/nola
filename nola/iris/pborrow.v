@@ -22,7 +22,7 @@ Definition pborrowCC A TY :=
   Cifcon (pborrowCC_id A TY) (pborrowCC_sel A TY)
     (λ _, Empty_set) (λ _, Empty_set) (λ _, unitO) _.
 (** [PborrowCon]: [pborrowCC] registered *)
-Notation PborrowCon A TY CON := (Ecifcon (pborrowCC A TY) CON).
+Notation PborrowCon A TY := (Ecifcon (pborrowCC A TY)).
 Section cif_pborrow.
   Context `{!PborrowCon A TY CON} {Σ}.
   (** [cif_proph_ctrl]: Prophecy controller *)
@@ -47,13 +47,12 @@ Section cif_pborrow.
     | cifs_val_obs γ a xπ => val_obs γ a xπ
     end.
   #[export] Program Instance pborrow_sem_ecifcon {JUDG}
-    : SemEcifcon JUDG (pborrowCC A TY) CON Σ :=
+    : SemEcifcon (pborrowCC A TY) CON JUDG Σ :=
     SEM_ECIFCON (λ _ _ s _ _ _, pborrow_sem s) _.
   Next Obligation. done. Qed.
 End cif_pborrow.
 (** [pborrowCC] semantics registered *)
-Notation PborrowSem A TY JUDG CON Σ :=
-  (EsemEcifcon JUDG (pborrowCC A TY) CON Σ).
+Notation PborrowSem A TY := (EsemEcifcon (pborrowCC A TY)).
 
 Section pborrow.
   Context `{!borrowGS (cifOF CON) Σ, !prophGS TY Σ, !proph_agG A TY Σ,
@@ -162,7 +161,7 @@ Section pborrow.
 
   (** ** Borrows *)
 
-  Context `{!SemCifcon JUDG CON Σ, !PborrowSem A TY JUDG CON Σ,
+  Context `{!SemCifcon CON JUDG Σ, !PborrowSem A TY CON JUDG Σ,
     !@ModUpd (iProp Σ) M, !ModBUpd M}.
   Implicit Type δ : JUDG -n> iProp Σ.
 

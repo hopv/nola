@@ -5,8 +5,8 @@ From nola.rust_lang Require Export notation proofmode.
 Import FunPRNotation WpwNotation DsemNotation.
 
 Section ilist.
-  Context `{!lrustGS_gen hlc Σ, !SemCifcon JUDG CON Σ, !Jsem JUDG (iProp Σ),
-    !inv'GS (cifOF CON) Σ, !InvCon CON, !InvSem JUDG CON Σ}.
+  Context `{!lrustGS_gen hlc Σ, !SemCifcon CON JUDG Σ, !Jsem JUDG (iProp Σ),
+    !inv'GS (cifOF CON) Σ, !InvCon CON, !InvSem CON JUDG Σ}.
   Implicit Type (Px Qx : cif CON Σ) (Φx Ψx : loc → cif CON Σ) (l : loc).
 
   (** ** Linked list *)

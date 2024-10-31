@@ -10,7 +10,7 @@ Implicit Type (FML : oFunctor) (p : na_inv_pool_name) (i : positive).
 
 Section na_inv.
   Context `{!inv'GS (cifOF CON) Σ, !invGS_gen hlc Σ, !na_invG Σ,
-    !SemCifcon JUDG CON Σ}.
+    !SemCifcon CON JUDG Σ}.
   Local Existing Instance na_inv_inG.
   Implicit Type (Px : cif CON Σ) (δ : JUDG -n> iProp Σ).
 
