@@ -232,8 +232,7 @@ Section invC.
 
   Context `{!inv'GS (cifOF CON) Σ, !iffJ (cifO CON Σ) JUDG}.
   (** Semantics of [invCT] *)
-  #[export] Program Instance invCT_ecsem
-    : Ecsem invCT CON JUDG Σ :=
+  #[export] Program Instance invCT_ecsem : Ecsem invCT CON JUDG Σ :=
     ECSEM (λ _ δ N _ Φx _, inv' δ N (Φx ())) _.
   Next Obligation. move=> ??*???*?? eqv ?*. f_equiv. apply eqv. Qed.
 End invC.
@@ -242,7 +241,6 @@ Notation invCS := (inCS invCT).
 
 (** Reify [inv'] *)
 #[export] Program Instance inv'_as_cif `{!Csem CON JUDG Σ, !invC CON}
-  `{!inv'GS (cifOF CON) Σ, !iffJ (cifO CON Σ) JUDG, !invCS CON JUDG Σ}
-  {N Px} :
+  `{!inv'GS (cifOF CON) Σ, !iffJ (cifO CON Σ) JUDG, !invCS CON JUDG Σ} {N Px} :
   AsCif CON (λ δ, inv' δ N Px) := AS_CIF (cif_inv N Px) _.
 Next Obligation. move=>/= *. by rewrite sem_ecustom. Qed.
