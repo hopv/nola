@@ -277,7 +277,7 @@ Section borrow.
   (** Create [bor_jtok]s and [lend_itok]s w.r.t. [depo_stl_tok] *)
   Local Lemma depo_stl_bor_lend_new {Dl α} Pxl Qxl :
     let i := length Dl in let Bl := (λ Px, (Px, Clsd)) <$> Pxl in
-    depo_stl_tok Dl -∗ |==>
+    depo_stl_tok Dl ==∗
       depo_stl_tok (Dl ++ [(α, Bl, map_by Qxl)']) ∗
       ([∗ list] B ∈ Bl, ∃ j, bor_jtok i j α B) ∗
       [∗ list] Qx ∈ Qxl, lend_itok i α Qx.
