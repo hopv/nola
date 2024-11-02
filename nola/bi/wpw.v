@@ -334,6 +334,10 @@ Section wpw.
     ElimModal (to_val e = None) p false (|->[W'] P) P
       (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E {{ Φ }}).
   Proof. move=> ?. by rewrite (idw_fupdw E) elim_modal_fupdw_wpw. Qed.
+  #[export] Instance elim_modal_idw_0_wpw `{!WsatIncl W W' Wr} {p e s E P Φ} :
+    ElimModal (to_val e = None) p false (|->[W']◇ P) P
+      (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E {{ Φ }}).
+  Proof. move=> ?. by rewrite (idw_0_fupdw E) elim_modal_fupdw_wpw. Qed.
   #[export] Instance elim_modal_bupdw_wpw `{!WsatIncl W W' Wr} {p e s E P Φ} :
     ElimModal (to_val e = None) p false (|=[W']=> P) P
       (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E {{ Φ }}).
@@ -373,6 +377,10 @@ Section wpw.
     ElimModal (to_val e = None) p false (|->[W'] P) P
       (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E [{ Φ }]).
   Proof. move=> ?. by rewrite (idw_fupdw E) elim_modal_fupdw_twpw. Qed.
+  #[export] Instance elim_modal_idw_0_twpw `{!WsatIncl W W' Wr} {p e s E P Φ} :
+    ElimModal (to_val e = None) p false (|->[W']◇ P) P
+      (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E [{ Φ }]).
+  Proof. move=> ?. by rewrite (idw_0_fupdw E) elim_modal_fupdw_twpw. Qed.
   #[export] Instance elim_modal_bupdw_twpw `{!WsatIncl W W' Wr} {p e s E P Φ} :
     ElimModal (to_val e = None) p false (|=[W']=> P) P
       (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E [{ Φ }]).

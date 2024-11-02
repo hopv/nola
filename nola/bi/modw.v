@@ -43,6 +43,7 @@ Arguments modw : simpl never.
 
 (** Just with a world satisfaction *)
 Notation idw := (modw id).
+Notation idw_0 := (modw bi_except_0).
 (** Basic update with a world satisfaction *)
 Notation bupdw := (modw bupd).
 Notation bupdw_0 := (modw bupd_0).
@@ -59,6 +60,14 @@ Module ModwNotation.
     (at level 99, Q at level 200, format "'[' P  -∗[ W ]  '/' '[' Q ']' ']'")
     : bi_scope.
   Notation "P -∗[ W ] Q" := (P -∗ |->[W] Q) : stdpp_scope.
+
+  Notation "|->[ W ]◇ P" := (idw_0 W P)
+    (at level 99, P at level 200, format "'[  ' |->[ W ]◇  '/' P ']'")
+    : bi_scope.
+  Notation "P -∗[ W ]◇ Q" := (P -∗ |->[W]◇ Q)%I
+    (at level 99, Q at level 200, format "'[' P  -∗[ W ]◇  '/' '[' Q ']' ']'")
+    : bi_scope.
+  Notation "P -∗[ W ]◇ Q" := (P -∗ |->[W]◇ Q) : stdpp_scope.
 
   Notation "|=[ W ] => P" := (bupdw W P)
     (at level 99, P at level 200, format "'[  ' |=[ W ] =>  '/' P ']'")
@@ -242,6 +251,15 @@ Section mod_intro.
     iIntros "[→P →Q][W' Wr]". iDestruct ("→P" with "W'") as "[W' P]".
     iApply ("→Q" with "P"). iFrame.
   Qed.
+  (** Eliminate [idw_0] *)
+  #[export] Instance elim_modal_idw_0_modw_modw_upd `{!ModExcept0 M}
+    `{!WsatIncl W W' Wr} {p P Q} :
+    ElimModal True p false (|->[W']◇ P) P (modw M W Q) (modw M W Q).
+  Proof.
+    rewrite /ElimModal bi.intuitionistically_if_elim /= (wsat_incl W W')=> ?.
+    iIntros "[→P →Q][W' Wr]". iDestruct ("→P" with "W'") as ">[W' P]".
+    iApply ("→Q" with "P"). iFrame.
+  Qed.
 End mod_intro.
 
 (** Under [ModFrame] *)
@@ -399,6 +417,8 @@ Section fupdw.
     ((|={E',E}=> emp) -∗ P) ⊢ |=[W]{E,E'}=> P.
   Proof. iIntros (?) "? $". by iApply fupd_mask_intro. Qed.
   Lemma idw_fupdw E {W P} : (|->[W] P) ⊢ |=[W]{E}=> P.
+  Proof. by iIntros ">? !>". Qed.
+  Lemma idw_0_fupdw E {W P} : (|->[W]◇ P) ⊢ |=[W]{E}=> P.
   Proof. by iIntros ">? !>". Qed.
   Lemma bupdw_fupdw `{!BiBUpd PROP, !BiBUpdFUpd PROP} E {W P} :
     (|=[W]=> P) ⊢ |=[W]{E}=> P.
