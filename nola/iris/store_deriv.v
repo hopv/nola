@@ -1,4 +1,4 @@
-(** * Stored propositions *)
+(** * Stored propositions relaxed with derivability *)
 
 From nola.util Require Import tagged.
 From nola.bi Require Export deriv.

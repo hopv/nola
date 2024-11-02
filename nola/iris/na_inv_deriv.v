@@ -1,4 +1,4 @@
-(** * Non-atomic invariant machinery relaxed with derivability *)
+(** * Non-atomic invariants relaxed with derivability *)
 
 From nola.util Require Import tagged.
 From nola.util Require Export prod.

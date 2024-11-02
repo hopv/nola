@@ -1,4 +1,4 @@
-(** * Borrowing machinery relaxed with derivability *)
+(** * Borrows relaxed with derivability *)
 
 From nola.util Require Import tagged.
 From nola.bi Require Export deriv.

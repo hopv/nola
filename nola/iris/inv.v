@@ -1,4 +1,4 @@
-(** * Nola later-free invariant *)
+(** * Nola's later-free invariants *)
 
 From nola.bi Require Export internal modw.
 From nola.bi Require Import wpw.

@@ -1,4 +1,4 @@
-(** * Simple invariant *)
+(** * Simple invariants *)
 
 From nola.bi Require Export internal modw.
 From nola.iris Require Export iprop.

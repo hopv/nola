@@ -1,4 +1,4 @@
-(** * Invariant machinery relaxed with derivability *)
+(** * Invariants relaxed with derivability *)
 
 From nola.util Require Import tagged.
 From nola.bi Require Export deriv.

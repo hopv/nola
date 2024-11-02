@@ -90,22 +90,24 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`option`](nola/iris/option.v) (On `option`),
     [`agree`](nola/iris/agree.v) (On `agree`),
     [`csum`](nola/iris/csum.v) (On `csum`)
-  + [`sinv`](nola/iris/sinv.v) (Simple invariant)
-  + [`inv`](nola/iris/inv.v) (Invariant),
-    [`inv_deriv`](nola/iris/inv_deriv.v) (Invariant relaxed with derivability),
-    [`na_inv`](nola/iris/na_inv.v) (Non-atomic invariant),
-    [`na_inv_deriv`](nola/iris/na_inv_deriv.v) (Non-atomic invariant relaxed
+  + [`sinv`](nola/iris/sinv.v) (Simple invariants)
+  + [`inv`](nola/iris/inv.v) (Invariants),
+    [`inv_deriv`](nola/iris/inv_deriv.v) (Invariants relaxed with derivability),
+    [`na_inv`](nola/iris/na_inv.v) (Non-atomic invariants),
+    [`na_inv_deriv`](nola/iris/na_inv_deriv.v) (Non-atomic invariants relaxed
       with derivability)
   + [`store`](nola/iris/store.v) (Stored propositions),
     [`store_deriv`](nola/iris/store_deriv.v) (Stored propositions relaxed
       with derivability)
   + [`lft`](nola/iris/lft.v) (Lifetime),
-    [`borrow`](nola/iris/borrow.v) (Borrowing),
-    [`borrow_deriv`](nola/iris/borrow_deriv.v) (Borrowing relaxed with
+    [`borrow`](nola/iris/borrow.v) (Borrows),
+    [`borrow_deriv`](nola/iris/borrow_deriv.v) (Borrows relaxed with
       derivability)
   + [`proph`](nola/iris/proph.v) (Prophecy),
     [`proph_ag`](nola/iris/proph_ag.v) (Prophetic agreement),
-    [`pborrow`](nola/iris/pborrow.v) (Prophetic borrowing)
+    [`pborrow`](nola/iris/pborrow.v) (Prophetic borrows),
+    [`pborrow_deriv`](nola/iris/pborrow_deriv.v) (Prophetic borrows relaxed with
+      derivability)
   + [`cif`](nola/iris/cif.v) (Coinductive-inductive formula)
   + [`paradox`](nola/iris/paradox.v) (Paradox)
 - [`heap_lang/`](nola/heap_lang/) : Variant of Iris HeapLang, supporting `Ndnat`

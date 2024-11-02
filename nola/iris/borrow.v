@@ -1,4 +1,4 @@
-(** * Borrowing machinery *)
+(** * Nola's later-free borrows *)
 
 From nola.util Require Export prod.
 From nola.bi Require Export internal modw.

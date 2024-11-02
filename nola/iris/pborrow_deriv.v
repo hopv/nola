@@ -1,4 +1,4 @@
-(** * Prophetic borrowing machinery relaxed with derivability *)
+(** * Prophetic borrows relaxed with derivability *)
 
 From nola.util Require Import tagged.
 From nola.bi Require Export deriv.

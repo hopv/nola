@@ -1,4 +1,4 @@
-(** * Prophetic borrowing *)
+(** * Prophetic borrows *)
 
 From nola.bi Require Export plist.
 From nola.bi Require Import order.
