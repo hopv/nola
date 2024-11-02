@@ -153,10 +153,10 @@ Section inv.
     iMod ("cl" with "i") as "_". iModIntro. iSplit; [|done]. iApply "→W".
     iLeft. iFrame.
   Qed.
-  (** Access using [inv_tok] via view shift *)
+  (** Access using [inv_tok] via view shift, for presentation *)
   Lemma inv_tok_acc_vs {sm N Px E Q R} : ↑N ⊆ E →
     □ (sm Px -∗ Q =[inv_wsat sm]{E∖↑N}=∗ sm Px ∗ R) -∗
-    □ (inv_tok N Px -∗ Q =[inv_wsat sm]{E}=∗ R).
+      □ (inv_tok N Px -∗ Q =[inv_wsat sm]{E}=∗ R).
   Proof.
     iIntros (?) "#vs !> i Q". iMod (inv_tok_acc with "i") as "[Px cl]"; [done|].
     iMod ("vs" with "Px Q") as "[Px $]". by iApply "cl".
@@ -166,7 +166,7 @@ End inv.
 Section inv_wp.
   Context `{!inv'GS FML Σ, !iris'GS_gen hlc Λ Σ}.
 
-  (** Access using [inv_tok] via [twp] *)
+  (** Access using [inv_tok] via [twp], for presentation *)
   Lemma inv_tok_acc_twp `{!Atomic (stuckness_to_atomicity s) e}
     {sm N Px E Q Ψ} :
     ↑N ⊆ E → to_val e = None →

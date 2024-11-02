@@ -91,10 +91,10 @@ Section inv_deriv.
     iDestruct (der_sound with "accPx") as "accPx". rewrite in_js.
     by iApply "accPx".
   Qed.
-  (** Access using [invd] via view shift *)
+  (** Access using [invd] via view shift, for presentation *)
   Lemma invd_acc_vs {N Px E Q R} : ↑N ⊆ E →
     □ (⟦ Px ⟧ -∗ Q =[inv_wsat ⟦⟧]{E∖↑N}=∗ ⟦ Px ⟧ ∗ R) -∗
-    □ (invd N Px -∗ Q =[inv_wsat ⟦⟧]{E}=∗ R).
+      □ (invd N Px -∗ Q =[inv_wsat ⟦⟧]{E}=∗ R).
   Proof.
     iIntros (?) "#vs !> i Q". iMod (invd_acc with "i") as "[Px cl]"; [done|].
     iMod ("vs" with "Px Q") as "[Px $]". by iApply "cl".
@@ -187,7 +187,7 @@ Section inv_deriv_wp.
   Context `{!inv'GS FML Σ, !iris'GS_gen hlc Λ Σ, !invJ (FML $oi Σ) JUDG,
     !Dsem JUDG (FML $oi Σ) (iProp Σ), !Jsem JUDG (iProp Σ), !invJS FML JUDG Σ}.
 
-  (** Access using [invd] via [twp] *)
+  (** Access using [invd] via [twp], for presentation *)
   Lemma invd_acc_twp `{!Atomic (stuckness_to_atomicity s) e} {N Px E Q Ψ} :
     ↑N ⊆ E → to_val e = None →
     [[{ ⟦ Px ⟧ ∗ Q }]][inv_wsat ⟦⟧]
