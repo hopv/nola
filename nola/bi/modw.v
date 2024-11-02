@@ -288,18 +288,6 @@ End mod_upd.
 Section mod_bupd.
   Context `{!BiBUpd PROP, !@Mod PROP M, !ModBUpd M}.
 
-  (** Turn from [bupdw] under [ModIntro] *)
-  Lemma from_bupdw `{!ModIntro M} {W P} : (|=[W]=> P) ⊢ modw M W P.
-  Proof. by rewrite /bupdw /modw -(is_bupd (P:=M _)) -(mod_intro (M:=M)). Qed.
-
-  (** Turn from [bupdw_0] under [ModIntro] *)
-  Lemma from_bupdw_0 `{!ModIntro M, !ModExcept0 M} {W P} :
-    (|=[W]=>◇ P) ⊢ modw M W P.
-  Proof.
-    by rewrite /bupdw_0 /modw -(is_bupd (P:=M _)) -[M _]is_except_0
-      -(mod_intro (M:=M)).
-  Qed.
-
   (** Eliminate [bupdw] *)
   #[export] Instance elim_modal_bupdw_modw_modw_upd `{!WsatIncl W W' Wr}
     {p P Q} :
@@ -411,13 +399,13 @@ Section fupdw.
     ((|={E',E}=> emp) -∗ P) ⊢ |=[W]{E,E'}=> P.
   Proof. iIntros (?) "? $". by iApply fupd_mask_intro. Qed.
   Lemma idw_fupdw E {W P} : (|->[W] P) ⊢ |=[W]{E}=> P.
-  Proof. iIntros "→P W !>". by iApply "→P". Qed.
+  Proof. by iIntros ">? !>". Qed.
   Lemma bupdw_fupdw `{!BiBUpd PROP, !BiBUpdFUpd PROP} E {W P} :
     (|=[W]=> P) ⊢ |=[W]{E}=> P.
-  Proof. exact from_bupdw. Qed.
+  Proof. by iIntros ">? !>". Qed.
   Lemma bupdw_0_fupdw `{!BiBUpd PROP, !BiBUpdFUpd PROP} E {W P} :
     (|=[W]=>◇ P) ⊢ |=[W]{E}=> P.
-  Proof. exact from_bupdw_0. Qed.
+  Proof. by iIntros ">? !>". Qed.
 
   (** Compose [fupdw]s *)
   Lemma fupdw_trans {E E' E'' W P} :
