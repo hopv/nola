@@ -38,6 +38,7 @@ nola/iris/inv.v
 nola/iris/inv_deriv.v
 nola/iris/na_inv.v
 nola/iris/na_inv_deriv.v
+nola/iris/dinv.v
 nola/iris/store.v
 nola/iris/store_deriv.v
 nola/iris/lft.v

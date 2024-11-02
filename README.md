@@ -96,7 +96,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     [`na_inv`](nola/iris/na_inv.v) (Non-atomic invariants),
     [`na_inv_deriv`](nola/iris/na_inv_deriv.v) (Non-atomic invariants relaxed
       with derivability)
-  + [`store`](nola/iris/store.v) (Stored propositions),
+  + [`dinv`](nola/iris/dinv.v) (Direct invariants),
+    [`store`](nola/iris/store.v) (Stored propositions),
     [`store_deriv`](nola/iris/store_deriv.v) (Stored propositions relaxed
       with derivability)
   + [`lft`](nola/iris/lft.v) (Lifetime),
