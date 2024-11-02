@@ -91,7 +91,8 @@ Section store_deriv.
     rewrite -store_acsr_store. iIntros "?" (????). by iApply store_tok_acc.
   Qed.
   (** Turn [dinv_tok] over a persistent proposition into [□ store] *)
-  Lemma dinv_tok_persistent_store {Px} : (∀ δ', Persistent ⟦ Px ⟧(δ')) →
+  Lemma dinv_tok_persistent_store {Px} :
+    (∀ δ', Deriv ih δ' → Persistent ⟦ Px ⟧(δ')) →
     dinv_tok Px ⊢ □ store δ Px.
   Proof.
     rewrite -store_acsr_store=> ?. iIntros "#i !>" (????).
@@ -102,7 +103,8 @@ Section store_deriv.
   Lemma store_alloc Px : ⟦ Px ⟧(δ) =[dinv_wsat ⟦⟧(δ)]=∗ store δ Px.
   Proof. rewrite -store_tok_store. exact: store_tok_alloc. Qed.
   (** Allocate [□ store] *)
-  Lemma pstore_alloc Px : (∀ δ', Persistent ⟦ Px ⟧(δ')) →
+  Lemma store_alloc_persistent Px :
+    (∀ δ', Deriv ih δ' → Persistent ⟦ Px ⟧(δ')) →
     ⟦ Px ⟧(δ) =[dinv_wsat ⟦⟧(δ)]=∗ □ store δ Px.
   Proof.
     move=> ?. rewrite -dinv_tok_persistent_store. exact: dinv_tok_alloc.
@@ -144,7 +146,7 @@ Notation storeC := (inC storeCT).
 Section storeC.
   Context `{!storeC CON} {Σ}.
   Implicit Type Px : cif CON Σ.
-  (** Formula for [store] *)
+  (** [cif_store]: Formula for [store] *)
   Definition cif_store Px : cif CON Σ :=
     cif_in storeCT () nullary (unary Px) ().
   (** [cif_store] is non-expansive *)
@@ -166,7 +168,7 @@ End storeC.
 (** [storeC] semantics registered *)
 Notation storeCS := (inCS storeCT).
 
-(** Reify into formulas *)
+(** Reify [store] *)
 Section storeC.
   Context `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), !dinvGS (cifOF CON) Σ,
     !storeC CON, !storeJ (cifO CON Σ) JUDG, !storeCS CON JUDG Σ,
