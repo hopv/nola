@@ -80,10 +80,10 @@ Section dinv.
     iDestruct (sinv_tok_acc with "i W") as "[$$]".
   Qed.
   (** Access the content of [dinv_tok] for persistent propositions *)
-  Lemma dinv_tok_acc_persistent {sm Px} `{!Persistent (sm Px)} :
+  Lemma dinv_tok_acc_persistent {sm Px} : Persistent (sm Px) →
     dinv_tok Px -∗[dinv_wsat sm] sm Px.
   Proof.
-    iIntros "i W". iDestruct (dinv_tok_acc with "i W") as "[#Px cl]".
+    iIntros (?) "i W". iDestruct (dinv_tok_acc with "i W") as "[#Px cl]".
     iFrame "Px". by iApply "cl".
   Qed.
 End dinv.

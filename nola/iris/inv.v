@@ -163,10 +163,10 @@ Section inv.
   Qed.
 
   (** Access using [inv_tok] for persistent propositions *)
-  Lemma inv_tok_acc_persistent {N E} `{!Persistent (sm Px)} : ↑N ⊆ E →
+  Lemma inv_tok_acc_persistent {sm N Px E} : Persistent (sm Px) → ↑N ⊆ E →
     inv_tok N Px =[inv_wsat sm]{E}=∗ sm Px.
   Proof.
-    iIntros (?) "i". iMod (inv_tok_acc with "i") as "[#Px cl]"; [done|].
+    iIntros (??) "i". iMod (inv_tok_acc with "i") as "[#Px cl]"; [done|].
     iFrame "Px". by iApply "cl".
   Qed.
 End inv.
