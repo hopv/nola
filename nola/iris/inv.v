@@ -161,6 +161,14 @@ Section inv.
     iIntros (?) "#vs !> i Q". iMod (inv_tok_acc with "i") as "[Px cl]"; [done|].
     iMod ("vs" with "Px Q") as "[Px $]". by iApply "cl".
   Qed.
+
+  (** Access using [inv_tok] for persistent propositions *)
+  Lemma inv_tok_acc_persistent {N E} `{!Persistent (sm Px)} : ↑N ⊆ E →
+    inv_tok N Px =[inv_wsat sm]{E}=∗ sm Px.
+  Proof.
+    iIntros (?) "i". iMod (inv_tok_acc with "i") as "[#Px cl]"; [done|].
+    iFrame "Px". by iApply "cl".
+  Qed.
 End inv.
 
 Section inv_wp.
