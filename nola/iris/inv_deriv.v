@@ -220,7 +220,7 @@ Section invC.
     cif_in invCT N nullary (unary Px) ().
   (** [cif_inv] is non-expansive *)
   #[export] Instance cif_inv_ne {N} : NonExpansive (cif_inv N).
-  Proof. move=> ????. apply cif_in_ne; solve_proper. Qed.
+  Proof. solve_proper. Qed.
   #[export] Instance cif_inv_proper {N} : Proper ((≡) ==> (≡)) (cif_inv N).
   Proof. apply ne_proper, _. Qed.
   (** [cif_inv] is productive *)

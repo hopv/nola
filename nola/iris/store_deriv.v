@@ -151,7 +151,7 @@ Section storeC.
     cif_in storeCT () nullary (unary Px) ().
   (** [cif_store] is non-expansive *)
   #[export] Instance cif_store_ne : NonExpansive cif_store.
-  Proof. move=> ????. apply cif_in_ne; solve_proper. Qed.
+  Proof. solve_proper. Qed.
   #[export] Instance cif_store_proper : Proper ((≡) ==> (≡)) cif_store.
   Proof. apply ne_proper, _. Qed.
   (** [cif_store] is productive *)

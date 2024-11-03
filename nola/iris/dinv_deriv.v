@@ -159,7 +159,7 @@ Section dinvC.
     cif_in dinvCT () nullary (unary Px) ().
   (** [cif_dinv] is non-expansive *)
   #[export] Instance cif_dinv_ne : NonExpansive (cif_dinv).
-  Proof. move=> ????. apply cif_in_ne; solve_proper. Qed.
+  Proof. solve_proper. Qed.
   #[export] Instance cif_dinv_proper : Proper ((≡) ==> (≡)) (cif_dinv).
   Proof. apply ne_proper, _. Qed.
   (** [cif_dinv] is productive *)

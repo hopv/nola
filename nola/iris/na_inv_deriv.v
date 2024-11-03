@@ -211,7 +211,7 @@ Section na_invC.
     cif_in na_invCT (p, N)' nullary (unary Px) ().
   (** [cif_na_inv] is non-expansive *)
   #[export] Instance cif_na_inv_ne {p N} : NonExpansive (cif_na_inv p N).
-  Proof. move=> ????. apply cif_in_ne; solve_proper. Qed.
+  Proof. solve_proper. Qed.
   #[export] Instance cif_na_inv_proper {p N} :
     Proper ((≡) ==> (≡)) (cif_na_inv p N).
   Proof. apply ne_proper, _. Qed.

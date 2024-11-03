@@ -345,7 +345,7 @@ Section pborrowC.
     Proper ((≡) ==> (≡)) (@cif_pobor X α q ξ).
   Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_plend_ne {X α xπ} : NonExpansive (@cif_plend X α xπ).
-  Proof. move=> ????. apply cif_in_ne; solve_proper. Qed.
+  Proof. solve_proper. Qed.
   #[export] Instance cif_plend_proper {X α xπ} :
     Proper ((≡) ==> (≡)) (@cif_plend X α xπ).
   Proof. apply ne_proper, _. Qed.

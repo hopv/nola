@@ -326,16 +326,16 @@ Section borrowC.
     cif_in borrowCT (cifs_lend α) nullary (unary Px) ().
   (** The formulas are non-expansive *)
   #[export] Instance cif_bor_ne {α} : NonExpansive (cif_bor α).
-  Proof. move=> ????. apply cif_in_ne; solve_proper. Qed.
+  Proof. solve_proper. Qed.
   #[export] Instance cif_bor_proper {α} : Proper ((≡) ==> (≡)) (cif_bor α).
   Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_obor_ne {α q} : NonExpansive (cif_obor α q).
-  Proof. move=> ????. apply cif_in_ne; solve_proper. Qed.
+  Proof. solve_proper. Qed.
   #[export] Instance cif_obor_proper {α q} :
     Proper ((≡) ==> (≡)) (cif_obor α q).
   Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_lend_ne {α} : NonExpansive (cif_lend α).
-  Proof. move=> ????. apply cif_in_ne; solve_proper. Qed.
+  Proof. solve_proper. Qed.
   #[export] Instance cif_lend_proper {α} : Proper ((≡) ==> (≡)) (cif_lend α).
   Proof. apply ne_proper, _. Qed.
   (** The formulas are productive *)

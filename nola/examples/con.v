@@ -23,7 +23,7 @@ Section inv_tokC.
     cif_in inv_tokCT N nullary (unary Px) ().
   (** [cif_inv] is non-expansive *)
   #[export] Instance cif_inv_tok_ne {N} : NonExpansive (cif_inv_tok N).
-  Proof. move=> ????. apply cif_in_ne; solve_proper. Qed.
+  Proof. solve_proper. Qed.
   #[export] Instance cif_inv_tok_proper {N} :
     Proper ((≡) ==> (≡)) (cif_inv_tok N).
   Proof. apply ne_proper, _. Qed.
@@ -65,7 +65,7 @@ Section bor_tokC.
     cif_in bor_tokCT α nullary (unary Px) ().
   (** [cif_bor_tok] is non-expansive *)
   #[export] Instance cif_bor_tok_ne {α} : NonExpansive (cif_bor_tok α).
-  Proof. move=> ????. apply cif_in_ne; solve_proper. Qed.
+  Proof. solve_proper. Qed.
   #[export] Instance cif_bor_tok_proper {α} :
     Proper ((≡) ==> (≡)) (cif_bor_tok α).
   Proof. apply ne_proper, _. Qed.
@@ -217,7 +217,7 @@ Section invC.
     cif_in invCT N nullary (unary Px) ().
   (** [cif_inv] is non-expansive *)
   #[export] Instance cif_inv_ne {N} : NonExpansive (cif_inv N).
-  Proof. move=> ????. apply cif_in_ne; solve_proper. Qed.
+  Proof. solve_proper. Qed.
   #[export] Instance cif_inv_proper {N} : Proper ((≡) ==> (≡)) (cif_inv N).
   Proof. apply ne_proper, _. Qed.
   (** [cif_inv] is productive *)
