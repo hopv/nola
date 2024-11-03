@@ -48,7 +48,7 @@ Section storeJ.
   Implicit Type (δ : JUDG -n> iProp Σ).
 
   (** [storeJT_sem]: Semantics of [storeJT] *)
-  Definition storeJT_sem δ (J : storeJT (FML $oi Σ))  : iProp Σ :=
+  Definition storeJT_sem δ (J : storeJT (FML $oi Σ)) : iProp Σ :=
     |->[dinv_wsat ⟦⟧(δ)]◇ (⟦ J.(untag) ⟧(δ)).
   (** [storeJT_sem] is non-expansive *)
   #[export] Instance storeJT_sem_ne {δ} : NonExpansive (storeJT_sem δ).
