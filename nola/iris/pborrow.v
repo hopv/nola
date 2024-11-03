@@ -281,7 +281,7 @@ Section pborrow.
     [†α] -∗ @plend_tok X α xπ Φx -∗ modw M (borrow_wsat M ⟦⟧ᶜ(δ))
       (xplend δ xπ Φx).
   Proof.
-    iIntros "† l". iMod (lend_tok_retrieve with "† l")=>/=.
+    iIntros "† l". iMod (lend_tok_retrieve (M:=M) with "† l")=>/=.
     by setoid_rewrite sem_cif_in.
   Qed.
 

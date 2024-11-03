@@ -172,6 +172,7 @@ Qed.
 (** ** [ModFrame]: Modality with the frame law *)
 Class ModFrame {PROP} (M : PROP → PROP) : Prop :=
   mod_frame_l : ∀ {P Q}, P ∗ M Q ⊢ M (P ∗ Q).
+Hint Mode ModFrame + ! : typeclass_instances.
 
 (** Under [ModFrame] *)
 Section mod_frame.
@@ -251,6 +252,7 @@ Class ModUpd {PROP} (M : PROP → PROP) : Prop := MOD_UPD {
   mod_upd_trans :: ModTrans M;
   mod_upd_frame :: ModFrame M;
 }.
+Hint Mode ModUpd + ! : typeclass_instances.
 
 (** Instances of [ModUpd] *)
 #[export] Instance bupd_mod_upd `{!BiBUpd PROP} : @ModUpd PROP bupd.

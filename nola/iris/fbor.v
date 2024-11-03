@@ -68,7 +68,7 @@ Section fbor.
     iIntros "[$ Wb]".
     iMod (bord_open (Dsem0:=cif_dsem) with "α b Wb") as "/=($ & o & $)".
     iModIntro. iIntros "Φx".
-    by iMod (obord_close (Dsem0:=cif_dsem) with "o Φx") as "[$ _]".
+    by iMod (obord_close (M:=M) (Dsem0:=cif_dsem) with "o Φx") as "[$ _]".
   Qed.
 
   (** Modify the lifetime of [fbor] *)

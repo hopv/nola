@@ -190,7 +190,7 @@ Section pborrow_deriv.
   Lemma plend_tok_retrieve {X α} {xπ : clair TY X} {Φx} :
     [†α] -∗ plendd α xπ Φx -∗ modw M (borrow_wsat M ⟦⟧ᶜ) (xplendd xπ Φx).
   Proof.
-    iIntros "† l". iMod (lendd_retrieve with "† l")=>/=.
+    iIntros "† l". iMod (lendd_retrieve (M:=M) with "† l")=>/=.
     by setoid_rewrite sem_cif_in.
   Qed.
 
@@ -247,7 +247,7 @@ Section pborrow_deriv.
           [∗ list] Rx ∈ Rxl, bord β Rx).
   Proof.
     rewrite pobor_unseal=> ??. iIntros "(%Φx' & #ΦΦ' & #? & o)".
-    iMod (pobor_tok_subdiv with "o") as (?) "[$ big]"; [done..|].
+    iMod (pobor_tok_subdiv (M:=M) with "o") as (?) "[$ big]"; [done..|].
     iIntros "!> ⊑ Ψxl Rxl →Φx". setoid_rewrite <-pbor_tok_pbor.
     setoid_rewrite <-bor_tok_bor. iApply ("big" with "⊑ Ψxl Rxl").
     iIntros "% † Ψxl Rxl". iMod ("→Φx" with "† Ψxl Rxl") as "/=[% Φx]".
@@ -285,8 +285,8 @@ Section pborrow_deriv.
   Proof.
     rewrite pobor_unseal pbor_unseal. iIntros (?) "⊑ α".
     iIntros "(%Φx' & #ΦΦ' & #? & o) (%Ψx' & #ΨΨ' & #Ψ'Ψ & b) →Φx".
-    iMod (pobor_pbor_tok_reborrow with "⊑ α o b [→Φx]") as "($ & Ψ'x & big)".
-    { done. }
+    iMod (pobor_pbor_tok_reborrow (M:=M) with "⊑ α o b [→Φx]")
+      as "($ & Ψ'x & big)". { done. }
     { iIntros "%% † b". iMod ("→Φx" with "† [$b]") as "Φx"; [by iSplit|].
       by iMod (der_borrow_jto' with "ΦΦ' Φx"). }
     iMod (der_borrow_jto' with "Ψ'Ψ Ψ'x") as "$". iModIntro.
