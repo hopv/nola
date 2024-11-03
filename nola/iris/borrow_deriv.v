@@ -361,9 +361,7 @@ Section borrowC.
     end.
   #[export] Program Instance borrowCT_ecsem : Ecsem borrowCT CON JUDG Σ :=
     ECSEM (λ _ δ s _ Φx _, borrowCT_sem δ s (Φx ())) _.
-  Next Obligation.
-    move=>/= ???*? s ?*?? eqv ?*. case s=>/= >; f_equiv; apply eqv.
-  Qed.
+  Next Obligation. move=> ??*?. case; solve_proper. Qed.
 End borrowC.
 (** [borrowCS]: Semantics of [borrowCT] registered *)
 Notation borrowCS := (inCS borrowCT).

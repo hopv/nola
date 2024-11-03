@@ -226,7 +226,7 @@ Section na_invC.
   (** Semantics of [na_invCT] *)
   #[export] Program Instance na_invCT_ecsem : Ecsem na_invCT CON JUDG Σ :=
     ECSEM (λ _ δ '(p, N)' _ Φx _, na_inv' δ p N (Φx ())) _.
-  Next Obligation. move=>/= ??*???*?? eqv ?*. f_equiv. apply eqv. Qed.
+  Next Obligation. solve_proper. Qed.
 End na_invC.
 (** [na_invC] semantics registered *)
 Notation na_invCS := (inCS na_invCT).
