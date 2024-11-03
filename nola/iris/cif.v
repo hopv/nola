@@ -326,7 +326,7 @@ Section iris.
   #[export] Instance cif_sem'_proper {δ} : Proper ((≡) ==> (≡)) (cif_sem' δ).
   Proof. apply ne_proper, _. Qed.
   (** [Dsem] over [cif] *)
-  #[export] Instance cif_dsem : Dsem JUDG (cifO CON Σ) (iProp Σ) :=
+  #[export] Instance cif_dsem : Dsem JUDG (cifOF CON $oi Σ) (iProp Σ) :=
     DSEM (λ δ, cif_sem δ) _.
 End iris.
 
