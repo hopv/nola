@@ -105,7 +105,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`lft`](nola/iris/lft.v) (Lifetime),
     [`borrow`](nola/iris/borrow.v) (Borrows),
     [`borrow_deriv`](nola/iris/borrow_deriv.v) (Borrows relaxed with
-      derivability)
+      derivability),
+    [`fbor`](nola/iris/fbor.v) (Fractured borrows)
   + [`proph`](nola/iris/proph.v) (Prophecy),
     [`proph_ag`](nola/iris/proph_ag.v) (Prophetic agreement),
     [`pborrow`](nola/iris/pborrow.v) (Prophetic borrows),

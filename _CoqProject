@@ -45,6 +45,7 @@ nola/iris/store_deriv.v
 nola/iris/lft.v
 nola/iris/borrow.v
 nola/iris/borrow_deriv.v
+nola/iris/fbor.v
 nola/iris/proph.v
 nola/iris/proph_ag.v
 nola/iris/pborrow.v
