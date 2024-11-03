@@ -165,8 +165,8 @@ Section iffJ.
 
   Context `{!Dsem JUDG FM (iProp Σ)}.
   (** [iffJT_sem]: Semantics of [iffJT] *)
-  Definition iffJT_sem δ (PQx : iffJT FM) : iProp Σ :=
-    □ (⟦ PQx.(untag).1 ⟧(δ) ∗-∗ ⟦ PQx.(untag).2 ⟧(δ)).
+  Definition iffJT_sem δ (J : iffJT FM) : iProp Σ :=
+    □ (⟦ J.(untag).1 ⟧(δ) ∗-∗ ⟦ J.(untag).2 ⟧(δ)).
   (** [iffJT_sem] is non-expansive *)
   #[export] Instance iffJT_sem_ne {δ} : NonExpansive (iffJT_sem δ).
   Proof. solve_proper. Qed.

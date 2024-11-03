@@ -64,8 +64,8 @@ Section invJ.
   Implicit Type δ : JUDG -n> iProp Σ.
 
   (** ** [invJT_sem]: Semantics of [invJT] *)
-  Definition invJT_sem δ (NPx : invJT (FML $oi Σ)) : iProp Σ :=
-    inv_acsr ⟦⟧(δ) NPx.(untag).1 ⟦ NPx.(untag).2 ⟧(δ).
+  Definition invJT_sem δ (J : invJT (FML $oi Σ)) : iProp Σ :=
+    inv_acsr ⟦⟧(δ) J.(untag).1 ⟦ J.(untag).2 ⟧(δ).
   (** [invJT_sem] is non-expansive *)
   #[export] Instance invJT_sem_ne {δ} : NonExpansive (invJT_sem δ).
   Proof. move=> ?[[??]][[??]][/=/leibniz_equiv_iff<-?]. solve_proper. Qed.

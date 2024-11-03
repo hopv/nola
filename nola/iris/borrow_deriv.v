@@ -71,8 +71,8 @@ Section borrowJ.
   Implicit Type (δ : JUDG -n> iProp Σ) (Px Qx : FML $oi Σ).
 
   (** [borrowJT_sem]: Semantics of [borrowJT] *)
-  Definition borrowJT_sem δ (PQx : borrowJT (FML $oi Σ)) : iProp Σ :=
-    ⟦ PQx.(untag).1 ⟧(δ) ==∗ ⟦ PQx.(untag).2 ⟧(δ).
+  Definition borrowJT_sem δ (J : borrowJT (FML $oi Σ)) : iProp Σ :=
+    ⟦ J.(untag).1 ⟧(δ) ==∗ ⟦ J.(untag).2 ⟧(δ).
   (** [borrowJT_sem] is non-expansive *)
   #[export] Instance borrowJT_sem_ne {δ} : NonExpansive (borrowJT_sem δ).
   Proof. solve_proper. Qed.

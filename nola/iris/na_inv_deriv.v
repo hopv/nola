@@ -72,8 +72,8 @@ Section na_invJ.
   Implicit Type δ : JUDG -n> iProp Σ.
 
   (** ** [na_invJT_sem]: Semantics of [na_invJT] *)
-  Definition na_invJT_sem δ (pNPx : na_invJT (cif CON Σ)) : iProp Σ :=
-    na_inv_acsr ⟦⟧(δ) pNPx.(untag).1.1' pNPx.(untag).1.2' ⟦ pNPx.(untag).2 ⟧(δ).
+  Definition na_invJT_sem δ (J : na_invJT (cif CON Σ)) : iProp Σ :=
+    na_inv_acsr ⟦⟧(δ) J.(untag).1.1' J.(untag).1.2' ⟦ J.(untag).2 ⟧(δ).
   (** [na_invJT_sem] is non-expansive *)
   #[export] Instance na_invJT_sem_ne {δ} : NonExpansive (na_invJT_sem δ).
   Proof. move=> ?[[??]][[??]][/=/leibniz_equiv_iff<-?]. solve_proper. Qed.
