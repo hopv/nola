@@ -72,8 +72,7 @@ Section bor_tokC.
   (** [cif_bor_tok] is productive *)
   #[export] Instance cif_bor_tok_productive {α} : Productive (cif_bor_tok α).
   Proof.
-    move=> ????. apply cif_in_preserv_productive=>//.
-    by apply fun_proeq_later.
+    move=> ????. apply cif_in_preserv_productive=>//. by apply fun_proeq_later.
   Qed.
 
   Context `{!borrowGS (cifOF CON) Σ}.

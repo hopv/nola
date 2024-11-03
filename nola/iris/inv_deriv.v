@@ -226,8 +226,7 @@ Section invC.
   (** [cif_inv] is productive *)
   #[export] Instance cif_inv_productive {N} : Productive (cif_inv N).
   Proof.
-    move=> ????. apply cif_in_preserv_productive=>//.
-    by apply fun_proeq_later.
+    move=> ????. apply cif_in_preserv_productive=>//. by apply fun_proeq_later.
   Qed.
 
   Context `{!inv'GS (cifOF CON) Σ, !invJ (cifO CON Σ) JUDG}.
