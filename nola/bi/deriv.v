@@ -19,9 +19,7 @@ Arguments dsem {_ _ _ _} _ _ /. Arguments dsem_ne {_ _ _ _}.
 
 Module DsemNotation'.
   Notation "⟦ ⟧( x )" := (dsem x) (format "⟦ ⟧( x )").
-  Notation "⟦ ⟧( x )@{ A }" := (dsem (A:=A) x) (only parsing).
   Notation "⟦ a ⟧( x )" := (dsem x a) (format "⟦  '[' a  ']' ⟧( x )").
-  Notation "⟦ a ⟧( x )@{ A }" := (dsem (A:=A) x a) (only parsing).
 End DsemNotation'.
 Import DsemNotation'.
 
@@ -151,9 +149,7 @@ End deriv.
 Module DsemNotation.
   Export DsemNotation'.
   Notation "⟦ ⟧" := (⟦⟧(der)) (format "⟦ ⟧").
-  Notation "⟦ ⟧@{ A }" := (⟦ ⟧(der)@{ A }) (only parsing).
   Notation "⟦ a ⟧" := (⟦ a ⟧(der)) (format "⟦  '[' a  ']' ⟧").
-  Notation "⟦ a ⟧@{ A }" := (⟦ a ⟧(der)@{ A }) (only parsing).
 End DsemNotation.
 
 (** ** [inJ]: Judgment inclusion *)
