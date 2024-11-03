@@ -2,7 +2,7 @@
 
 From nola.util Require Import tagged.
 From nola.iris Require Export cif inv pborrow.
-Import ProdNotation FunPRNotation DsemNotation iPropAppNotation.
+Import ProdNotation FunPRNotation DsemNotation CsemNotation iPropAppNotation.
 
 Implicit Type (Σ : gFunctors) (N : namespace) (TY : synty) (α : lft) (FM : ofe)
   (A : Type).

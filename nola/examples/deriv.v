@@ -2,7 +2,7 @@
 
 From nola.examples Require Export con.
 From nola.rust_lang Require Export notation proofmode.
-Import ModwNotation WpwNotation DsemNotation LftNotation.
+Import ModwNotation WpwNotation CsemNotation LftNotation.
 
 Section deriv.
   Context `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), !lrustGS_gen hlc Σ,
@@ -27,8 +27,8 @@ Section deriv.
 
   (** Access using [invd] *)
   Lemma invd_acc {N Px E} : ↑N ⊆ E →
-    invd N Px =[inv_wsat ⟦⟧]{E,E∖↑N}=∗
-      ⟦ Px ⟧ ∗ (⟦ Px ⟧ =[inv_wsat ⟦⟧]{E∖↑N,E}=∗ True).
+    invd N Px =[inv_wsat ⟦⟧ᶜ]{E,E∖↑N}=∗
+      ⟦ Px ⟧ᶜ ∗ (⟦ Px ⟧ᶜ =[inv_wsat ⟦⟧ᶜ]{E∖↑N,E}=∗ True).
   Proof.
     iIntros (?) "[%Qx[#PQ i]]". iDestruct (der_sound with "PQ") as "{PQ}PQ".
     iMod (inv_tok_acc with "i") as "[Qx cl]"; [done|]. rewrite in_js /=.
@@ -37,8 +37,8 @@ Section deriv.
   Qed.
   (** Access using [invd] via view shift *)
   Lemma invd_acc_vs {N Px E Q R} : ↑N ⊆ E →
-    □ (⟦ Px ⟧ -∗ Q =[inv_wsat ⟦⟧]{E∖↑N}=∗ ⟦ Px ⟧ ∗ R) -∗
-      □ (invd N Px -∗ Q =[inv_wsat ⟦⟧]{E}=∗ R).
+    □ (⟦ Px ⟧ᶜ -∗ Q =[inv_wsat ⟦⟧ᶜ]{E∖↑N}=∗ ⟦ Px ⟧ᶜ ∗ R) -∗
+      □ (invd N Px -∗ Q =[inv_wsat ⟦⟧ᶜ]{E}=∗ R).
   Proof.
     iIntros (?) "#vs !> i Q". iMod (invd_acc with "i") as "[Px cl]"; [done|].
     iMod ("vs" with "Px Q") as "[Px $]". by iApply "cl".
@@ -46,9 +46,9 @@ Section deriv.
   (** Access using [invd] via [twp] *)
   Lemma invd_acc_twp {N Px E Q Ψ} `{!Atomic (stuckness_to_atomicity s) e} :
     ↑N ⊆ E → to_val e = None →
-    [[{ ⟦ Px ⟧ ∗ Q }]][inv_wsat ⟦⟧] e @ s; E∖↑N [[{ v, RET v; ⟦ Px ⟧ ∗ Ψ v }]]
-      -∗
-      [[{ invd N Px ∗ Q }]][inv_wsat ⟦⟧] e @ s; E [[{ v, RET v; Ψ v }]].
+    [[{ ⟦ Px ⟧ᶜ ∗ Q }]][inv_wsat ⟦⟧ᶜ] e @ s; E∖↑N
+    [[{ v, RET v; ⟦ Px ⟧ᶜ ∗ Ψ v }]] -∗
+      [[{ invd N Px ∗ Q }]][inv_wsat ⟦⟧ᶜ] e @ s; E [[{ v, RET v; Ψ v }]].
   Proof.
     iIntros (??) "#twp %Φ !> [i Q] →Φ".
     iMod (invd_acc with "i") as "[Px cl]"; [done..|].
@@ -59,7 +59,7 @@ Section deriv.
   (** General rule for semantic alteration *)
   Lemma inv'_iff `{!Deriv ih δ} {N Px Qx} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      ⟦ Px ⟧(δ') ∗-∗ ⟦ Qx ⟧(δ')) -∗
+      ⟦ Px ⟧ᶜ(δ') ∗-∗ ⟦ Qx ⟧ᶜ(δ')) -∗
       inv' δ N Px -∗ inv' δ N Qx.
   Proof.
     iIntros "#iff [%Rx[PR i]]". iExists Rx. iFrame "i".
@@ -70,7 +70,7 @@ Section deriv.
   Qed.
   Lemma inv'_iff' `{!Deriv ih δ} {N Px Qx} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      ⟦ Px ⟧(δ') ∗-∗ ⟦ Qx ⟧(δ')) -∗
+      ⟦ Px ⟧ᶜ(δ') ∗-∗ ⟦ Qx ⟧ᶜ(δ')) -∗
       inv' δ N Px ∗-∗ inv' δ N Qx.
   Proof.
     iIntros "#iff". iSplit; iApply inv'_iff; [done|]. iIntros "!>" (????).

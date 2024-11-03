@@ -4,7 +4,7 @@ From nola.bi Require Export internal modw.
 From nola.iris Require Export cif dinv.
 From iris.base_logic Require Export lib.token.
 From iris.proofmode Require Import proofmode.
-Import iPropAppNotation ModwNotation DsemNotation.
+Import iPropAppNotation ModwNotation CsemNotation.
 
 Implicit Type FML : oFunctor.
 
@@ -27,7 +27,7 @@ Section store.
   Proof. apply ne_proper, _. Qed.
 
   (** Allocate [store_tok] *)
-  Lemma store_tok_alloc {δ} Px : ⟦ Px ⟧(δ) =[dinv_wsat ⟦⟧(δ)]=∗ store_tok Px.
+  Lemma store_tok_alloc {δ} Px : ⟦ Px ⟧ᶜ(δ) =[dinv_wsat ⟦⟧ᶜ(δ)]=∗ store_tok Px.
   Proof.
     rewrite store_tok_unseal. iIntros "Px W". iMod token_alloc as (γ) "$".
     iMod (dinv_tok_alloc_suspend (FML:=cifOF _) (Px ∨ ▷ token γ)%cif
@@ -36,7 +36,7 @@ Section store.
   Qed.
 
   (** Access the content of [store_tok] *)
-  Lemma store_tok_acc {δ} Px : store_tok Px -∗[dinv_wsat ⟦⟧(δ)]◇ ⟦ Px ⟧(δ).
+  Lemma store_tok_acc {δ} Px : store_tok Px -∗[dinv_wsat ⟦⟧ᶜ(δ)]◇ ⟦ Px ⟧ᶜ(δ).
   Proof.
     rewrite store_tok_unseal. iIntros "[%[t i]] W".
     iDestruct (dinv_tok_acc with "i W") as "/=[[$|>t'] →W]"; last first.

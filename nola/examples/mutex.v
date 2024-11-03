@@ -2,7 +2,7 @@
 
 From nola.examples Require Export con.
 From nola.rust_lang Require Export notation proofmode.
-Import FunPRNotation ModwNotation WpwNotation DsemNotation LftNotation.
+Import FunPRNotation ModwNotation WpwNotation CsemNotation LftNotation.
 
 Section mutex_bor.
   Context `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), !lrustGS_gen hlc Σ,
@@ -55,7 +55,7 @@ Section mutex_bor.
 
   (** Try to acquire a lock from a shared borrow over a mutex *)
   Lemma mutex_bor_try_acquire {α l Px q} :
-    [[{ mutex_bor α l Px ∗ q.[α] }]][inv_wsat ⟦⟧ ∗ borrow_wsat bupd ⟦⟧]
+    [[{ mutex_bor α l Px ∗ q.[α] }]][inv_wsat ⟦⟧ᶜ ∗ borrow_wsat bupd ⟦⟧ᶜ]
       try_acquire_mutex [ #l]
     [[{ b, RET #b; (if b then bor_tok α Px else True) ∗ q.[α] }]].
   Proof.
@@ -72,7 +72,7 @@ Section mutex_bor.
   Qed.
   (** [mutex_bor_try_acquire], repeatedly with a timeout *)
   Lemma mutex_bor_try_acquire_loop {α l Px q} {n : nat} :
-    [[{ mutex_bor α l Px ∗ q.[α] }]][inv_wsat ⟦⟧ ∗ borrow_wsat bupd ⟦⟧]
+    [[{ mutex_bor α l Px ∗ q.[α] }]][inv_wsat ⟦⟧ᶜ ∗ borrow_wsat bupd ⟦⟧ᶜ]
       try_acquire_loop_mutex [ #n; #l]
     [[{ b, RET #b; (if b then bor_tok α Px else True) ∗ q.[α] }]].
   Proof.
@@ -88,7 +88,7 @@ Section mutex_bor.
   (** Release a lock from a shared borrow over a mutex *)
   Lemma mutex_bor_release {α l Px q} :
     [[{ mutex_bor α l Px ∗ bor_tok α Px ∗ q.[α] }]]
-      [inv_wsat ⟦⟧ ∗ borrow_wsat bupd ⟦⟧]
+      [inv_wsat ⟦⟧ᶜ ∗ borrow_wsat bupd ⟦⟧ᶜ]
       release_mutex [ #l]
     [[{ RET #☠; q.[α] }]].
   Proof.
@@ -105,7 +105,7 @@ Section mutex_bor.
 
   (** Create a shared borrow and a lender of a mutex *)
   Lemma mutex_bor_lend_new {α l Px b q} :
-    l ↦ #b -∗ ⟦ Px ⟧ -∗ q.[α] =[inv_wsat ⟦⟧ ∗ borrow_wsat bupd ⟦⟧]=∗◇
+    l ↦ #b -∗ ⟦ Px ⟧ᶜ -∗ q.[α] =[inv_wsat ⟦⟧ᶜ ∗ borrow_wsat bupd ⟦⟧ᶜ]=∗◇
       mutex_bor α l Px ∗ lend_tok α (∃ b', ▷ l ↦ #b' ∗ Px)%cif ∗ q.[α].
   Proof.
     iIntros "↦ Px α".
@@ -161,9 +161,9 @@ Section mutex_bor.
         "c" <- !"c" - #1;; "self" ["f"; "k"; "c"; "l'"]
       else #false.
   Lemma twp_iter_mblist {α Φx c l q} {f : val} {k n : nat} :
-    (∀ l', [[{ ⟦ Φx (l' +ₗ 1) ⟧ }]][inv_wsat ⟦⟧ ∗ borrow_wsat bupd ⟦⟧]
-        f [ #(l' +ₗ 1)] [[{ RET #☠; ⟦ Φx (l' +ₗ 1) ⟧ }]]) -∗
-    [[{ c ↦ #n ∗ mblist α Φx l ∗ q.[α] }]][inv_wsat ⟦⟧ ∗ borrow_wsat bupd ⟦⟧]
+    (∀ l', [[{ ⟦ Φx (l' +ₗ 1) ⟧ᶜ }]][inv_wsat ⟦⟧ᶜ ∗ borrow_wsat bupd ⟦⟧ᶜ]
+        f [ #(l' +ₗ 1)] [[{ RET #☠; ⟦ Φx (l' +ₗ 1) ⟧ᶜ }]]) -∗
+    [[{ c ↦ #n ∗ mblist α Φx l ∗ q.[α] }]][inv_wsat ⟦⟧ᶜ ∗ borrow_wsat bupd ⟦⟧ᶜ]
       iter_mblist [f; #k; #c; #l]
     [[{ b, RET #b; (if b then c ↦ #0 else ∃ n', c ↦ #n') ∗ q.[α] }]].
   Proof.

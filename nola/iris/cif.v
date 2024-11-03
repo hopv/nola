@@ -330,6 +330,15 @@ Section iris.
     DSEM (λ δ, cif_sem δ) _.
 End iris.
 
+(** Notation for [cif_sem] *)
+Module CsemNotation.
+  Notation "⟦ ⟧ᶜ( x )" := (cif_sem x) (format "⟦ ⟧ᶜ( x )").
+  Notation "⟦ a ⟧ᶜ( x )" := (cif_sem x a) (format "⟦  '[' a  ']' ⟧ᶜ( x )").
+  Notation "⟦ ⟧ᶜ" := (⟦⟧ᶜ(der)) (format "⟦ ⟧ᶜ").
+  Notation "⟦ a ⟧ᶜ" := (⟦ a ⟧ᶜ(der)) (format "⟦  '[' a  ']' ⟧ᶜ").
+End CsemNotation.
+Import CsemNotation.
+
 (** ** Element [cifcon] *)
 
 (** [inC]: Element [cifcon] *)
@@ -448,22 +457,19 @@ Section cif_in.
 
   (** Semantics of [cif_in] *)
   Lemma sem_cif_in {δ s Φx Ψx d} :
-    cif_sem δ (cif_in CON' s Φx Ψx d) ⊣⊢
-      ecsem cif_sem δ s (λ i, ⟦ Φx i ⟧(δ)) Ψx d.
+    ⟦ cif_in CON' s Φx Ψx d ⟧ᶜ(δ) ⊣⊢
+      ecsem (λ δ, ⟦⟧ᶜ(δ)) δ s (λ i, ⟦ Φx i ⟧ᶜ(δ)) Ψx d.
   Proof.
     rewrite cif_in_unseal /= -in_cs. apply equiv_dist=> n.
     apply csem_ne=>// >; [|by rewrite to_of_cit].
     apply dist_dist_later, equiv_dist, cif_sem'_unfold.
   Qed.
-  Lemma sem'_cif_in {δ s Φx Ψx d} :
-    ⟦ cif_in CON' s Φx Ψx d ⟧(δ) ⊣⊢ ecsem cif_sem δ s (λ i, ⟦ Φx i ⟧(δ)) Ψx d.
-  Proof. exact sem_cif_in. Qed.
 End cif_in.
 
 (** ** [AsCif]: Reify [iProp] into [cif] *)
 Class AsCif `{!Csem CON JUDG Σ} (Φ : (JUDG -n> iProp Σ) → iProp Σ) := AS_CIF {
   as_cif : cif CON Σ;
-  sem_as_cif {δ} : cif_sem δ as_cif ⊣⊢ Φ δ;
+  sem_as_cif {δ} : ⟦ as_cif ⟧ᶜ(δ) ⊣⊢ Φ δ;
 }.
 Arguments AsCif CON {_ _ _}. Arguments AS_CIF {_ _ _ _ _} _ _.
 Arguments as_cif {_ _ _ _} Φ {_}. Arguments sem_as_cif {_ _ _ _ _ _ _}.

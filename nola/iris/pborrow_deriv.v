@@ -5,7 +5,7 @@ From nola.bi Require Export deriv.
 From nola.iris Require Export pborrow borrow_deriv.
 From iris.proofmode Require Import proofmode.
 Import ProdNotation PlistNotation iPropAppNotation ModwNotation LftNotation
-  ProphNotation DsemNotation.
+  ProphNotation CsemNotation.
 
 Implicit Type (A : Type) (TY : synty) (α : lft) (q : Qp) (Σ : gFunctors).
 
@@ -69,16 +69,15 @@ Section pborrow_deriv.
   (** ** Conversion *)
 
   (** Utility *)
-  Lemma der_borrow_jto' {Px Qx} :
-    der (borrow_jto Px Qx) ⊢ (cif_sem der Px ==∗ cif_sem der Qx).
+  Lemma der_borrow_jto' {Px Qx} : der (borrow_jto Px Qx) ⊢ ⟦ Px ⟧ᶜ ==∗ ⟦ Qx ⟧ᶜ.
   Proof. exact der_borrow_jto. Qed.
 
   (** Convert the body of borrower and lender propositions *)
   Lemma pbor_to {X α a xπ ξ Φx Ψx} :
     □ (∀ a xπ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      ⟦ Φx a xπ ⟧(δ') ==∗ ⟦ Ψx a xπ ⟧(δ')) -∗
+      ⟦ Φx a xπ ⟧ᶜ(δ') ==∗ ⟦ Ψx a xπ ⟧ᶜ(δ')) -∗
     □ (∀ a xπ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      ⟦ Ψx a xπ ⟧(δ') ==∗ ⟦ Φx a xπ ⟧(δ')) -∗
+      ⟦ Ψx a xπ ⟧ᶜ(δ') ==∗ ⟦ Φx a xπ ⟧ᶜ(δ')) -∗
     pbor (X:=X) δ α a xπ ξ Φx -∗ pbor δ α a xπ ξ Ψx.
   Proof.
     rewrite pbor_unseal. iIntros "#ΦΨ #ΨΦ (%Ω & #ΦΩ & #ΩΦ & $)".
@@ -87,9 +86,9 @@ Section pborrow_deriv.
   Qed.
   Lemma pobor_to {X α q ξ Φx Ψx} :
     □ (∀ a xπ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      ⟦ Φx a xπ ⟧(δ') ==∗ ⟦ Ψx a xπ ⟧(δ')) -∗
+      ⟦ Φx a xπ ⟧ᶜ(δ') ==∗ ⟦ Ψx a xπ ⟧ᶜ(δ')) -∗
     □ (∀ a xπ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      ⟦ Ψx a xπ ⟧(δ') ==∗ ⟦ Φx a xπ ⟧(δ')) -∗
+      ⟦ Ψx a xπ ⟧ᶜ(δ') ==∗ ⟦ Φx a xπ ⟧ᶜ(δ')) -∗
     pobor (X:=X) δ α q ξ Φx -∗ pobor δ α q ξ Ψx.
   Proof.
     rewrite pobor_unseal. iIntros "#ΦΨ #ΨΦ (%Ω & #ΦΩ & #ΩΦ & $)".
@@ -144,11 +143,11 @@ Section pborrow_deriv.
   Lemma pbor_plend_new_list Xl α (axπΦxl : plist _ Xl) :
     ⊢ |==> ∃ ξl, ∀ Yl (yπΨxl : plist (λ Y, _ *' (clair TY Y → _)) Yl),
       let ξaxπΦxl := plist_zip ξl axπΦxl in
-      ([∗ plist] '(a, xπ, Φx)' ∈ axπΦxl, ⟦ Φx a xπ ⟧(δ)) -∗
+      ([∗ plist] '(a, xπ, Φx)' ∈ axπΦxl, ⟦ Φx a xπ ⟧ᶜ(δ)) -∗
       ([†α] -∗ ([∗ plist] '(ξ, _, _, Φx)' ∈ ξaxπΦxl,
         xplend_var δ ξ (λ xπ, ∃ a, Φx a xπ)%cif) -∗
         M ([∗ plist] '(yπ, Ψx)' ∈ yπΨxl, xplend δ yπ Ψx))
-        =[borrow_wsat M ⟦⟧(δ)]=∗
+        =[borrow_wsat M ⟦⟧ᶜ(δ)]=∗
         ([∗ plist] '(ξ, a, xπ, Φx)' ∈ ξaxπΦxl, pbor δ α a xπ ξ Φx) ∗
         ([∗ plist] '(yπ, Ψx)' ∈ yπΨxl, plend δ α yπ Ψx).
   Proof.
@@ -157,7 +156,7 @@ Section pborrow_deriv.
   Qed.
   (** Simply create a prophetic borrower and a prophetic lender *)
   Lemma pbor_plend_new X α a xπ Φx :
-    ⟦ Φx a xπ ⟧(δ) =[borrow_wsat M ⟦⟧(δ)]=∗ ∃ ξ,
+    ⟦ Φx a xπ ⟧ᶜ(δ) =[borrow_wsat M ⟦⟧ᶜ(δ)]=∗ ∃ ξ,
       pbor (X:=X) δ α a xπ ξ Φx ∗ plend δ α (λ π, π ξ) (λ xπ, ∃ a, Φx a xπ)%cif.
   Proof.
     setoid_rewrite <-pbor_tok_pbor. setoid_rewrite <-plend_tok_plend.
@@ -178,7 +177,7 @@ Section pborrow_deriv.
     (yπΨxl : plist (λ Y, _ *' (clair TY Y → _)) Yl) :
     plendd α xπ Φx -∗
     (xplendd xπ Φx -∗ M ([∗ plist] '(yπ, Ψx)' ∈ yπΨxl, xplendd yπ Ψx))
-      =[borrow_wsat M ⟦⟧]=∗ [∗ plist] '(yπ, Ψx)' ∈ yπΨxl, plendd α yπ Ψx.
+      =[borrow_wsat M ⟦⟧ᶜ]=∗ [∗ plist] '(yπ, Ψx)' ∈ yπΨxl, plendd α yπ Ψx.
   Proof.
     iIntros "/=l →Ψxl".
     iMod (lendd_split (FML:=cifOF _) (M:=M)
@@ -189,7 +188,7 @@ Section pborrow_deriv.
 
   (** Retrieve from a prophetic lender *)
   Lemma plend_tok_retrieve {X α} {xπ : clair TY X} {Φx} :
-    [†α] -∗ plendd α xπ Φx -∗ modw M (borrow_wsat M ⟦⟧) (xplendd xπ Φx).
+    [†α] -∗ plendd α xπ Φx -∗ modw M (borrow_wsat M ⟦⟧ᶜ) (xplendd xπ Φx).
   Proof.
     iIntros "† l". iMod (lendd_retrieve with "† l")=>/=.
     by setoid_rewrite sem_cif_in.
@@ -197,29 +196,29 @@ Section pborrow_deriv.
 
   (** Open a prophetic borrower *)
   Lemma pbord_open {X α q a xπ} {ξ : prvar X} {Φx} :
-    q.[α] -∗ pbord α a xπ ξ Φx -∗ modw M (borrow_wsat M ⟦⟧)
-      (pobord α q ξ Φx ∗ ⟦ Φx a xπ ⟧).
+    q.[α] -∗ pbord α a xπ ξ Φx -∗ modw M (borrow_wsat M ⟦⟧ᶜ)
+      (pobord α q ξ Φx ∗ ⟦ Φx a xπ ⟧ᶜ).
   Proof.
     rewrite pbor_unseal pobor_unseal. iIntros "α (% & $ & #ΨΦ & b)".
     iMod (pbor_tok_open (M:=M) with "α b") as "[$ Ψx]".
-    iMod (der_borrow_jto with "ΨΦ Ψx") as "$". by iIntros "$".
+    iMod (der_borrow_jto' with "ΨΦ Ψx") as "$". by iIntros "$".
   Qed.
 
   (** Subdivide a prophetic borrower without changing the prophecy *)
   Lemma pobord_nsubdiv {X α q ξ Φx} Ψx a (xπ : clair TY X) β :
-    β ⊑□ α -∗ pobord α q ξ Φx -∗ ⟦ Ψx a xπ ⟧ -∗
-    (∀ a' xπ', [†β] -∗ ⟦ Ψx a' xπ' ⟧ -∗ M ⟦ Φx a' xπ' ⟧)
-      =[borrow_wsat M ⟦⟧]=∗ q.[α] ∗ pbord β a xπ ξ Ψx.
+    β ⊑□ α -∗ pobord α q ξ Φx -∗ ⟦ Ψx a xπ ⟧ᶜ -∗
+    (∀ a' xπ', [†β] -∗ ⟦ Ψx a' xπ' ⟧ᶜ -∗ M ⟦ Φx a' xπ' ⟧ᶜ)
+      =[borrow_wsat M ⟦⟧ᶜ]=∗ q.[α] ∗ pbord β a xπ ξ Ψx.
   Proof.
     rewrite pobor_unseal. iIntros "⊑ (%Ω & #ΦΩ & _ & o) Ψx →Φx".
     rewrite -pbor_tok_pbor.
     iApply (pobor_tok_nsubdiv (M:=M) with "⊑ o Ψx [ΦΩ →Φx]").
     iIntros "%% † Ψx". iMod ("→Φx" with "† Ψx") as "Φx".
-    by iMod (der_borrow_jto with "ΦΩ Φx").
+    by iMod (der_borrow_jto' with "ΦΩ Φx").
   Qed.
   (** Simply close a prophetic borrower *)
   Lemma pobord_close {X α q ξ Φx} a (xπ : clair TY X) :
-    pobord α q ξ Φx -∗ ⟦ Φx a xπ ⟧ =[borrow_wsat M ⟦⟧]=∗
+    pobord α q ξ Φx -∗ ⟦ Φx a xπ ⟧ᶜ =[borrow_wsat M ⟦⟧ᶜ]=∗
       q.[α] ∗ pbord α a xπ ξ Φx.
   Proof.
     iIntros "o Φx". iApply (pobord_nsubdiv Φx with "[] o Φx"); [|by iIntros].
@@ -234,14 +233,14 @@ Section pborrow_deriv.
     pobord α q ξ Φx =[r:∗[ζl]]=∗ ∃ ηl,
       ⟨π, π (Aprvar _ ξ) = fπ π (app_plist_prvar π ηl)⟩ ∗
       (β ⊑□ α -∗
-        ([∗ plist] '(a, yπ, Ψx)' ∈ ayπΨxl, ⟦ Ψx a yπ ⟧) -∗
-        ([∗ list] Rx ∈ Rxl, ⟦ Rx ⟧) -∗
+        ([∗ plist] '(a, yπ, Ψx)' ∈ ayπΨxl, ⟦ Ψx a yπ ⟧ᶜ) -∗
+        ([∗ list] Rx ∈ Rxl, ⟦ Rx ⟧ᶜ) -∗
         (∀ yπl', [†β] -∗
           ([∗ plist] '(yπ', _, _, Ψx)' ∈ plist_zip yπl' ayπΨxl,
-            ⟦ ∃ a, Ψx a yπ' ⟧%cif) -∗
-          ([∗ list] Rx ∈ Rxl, ⟦ Rx ⟧) -∗
-            M ⟦ ∃ a, Φx a (λ π, fπ π (app_plist_clair π yπl')) ⟧%cif)
-          =[borrow_wsat M ⟦⟧]=∗
+            ⟦ ∃ a, Ψx a yπ' ⟧ᶜ%cif) -∗
+          ([∗ list] Rx ∈ Rxl, ⟦ Rx ⟧ᶜ) -∗
+            M ⟦ ∃ a, Φx a (λ π, fπ π (app_plist_clair π yπl')) ⟧ᶜ%cif)
+          =[borrow_wsat M ⟦⟧ᶜ]=∗
           q.[α] ∗
           ([∗ plist] '(η, a, yπ, Ψx)' ∈ plist_zip ηl ayπΨxl,
             pbord β a yπ η Ψx) ∗
@@ -260,7 +259,7 @@ Section pborrow_deriv.
     proph_dep xπ ηl →
     pobord α q ξ Φx =[r:∗[ηl]]=∗
       ⟨π, π ξ = xπ π⟩ ∗
-      (⟦ Φx a xπ ⟧ =[borrow_wsat M ⟦⟧]=∗ q.[α] ∗ bord α (Φx a xπ)).
+      (⟦ Φx a xπ ⟧ᶜ =[borrow_wsat M ⟦⟧ᶜ]=∗ q.[α] ∗ bord α (Φx a xπ)).
   Proof.
     iIntros (?) "o".
     iMod (pobord_subdiv [] (λ π _, xπ π) ηl () [Φx a xπ] with "o")
@@ -277,11 +276,11 @@ Section pborrow_deriv.
     β ⊑□ α -∗ r.[α] -∗
     pobord β q ξ Φx -∗ pbord α a yπ η Ψx -∗
     (∀ a' yπ', [†β] -∗ pbord α a' yπ' η Ψx -∗ M
-      ⟦ Φx a' (λ π, fπ π (yπ' π)) ⟧) -∗
-      modw M (borrow_wsat M ⟦⟧) (1:[η] ∗ ⟦ Ψx a yπ ⟧ ∗
+      ⟦ Φx a' (λ π, fπ π (yπ' π)) ⟧ᶜ) -∗
+      modw M (borrow_wsat M ⟦⟧ᶜ) (1:[η] ∗ ⟦ Ψx a yπ ⟧ᶜ ∗
         ∀ ζl s, ⌜∀ y, proph_dep (λ π, fπ π y) ζl⌝ -∗ s:∗[ζl]
           ==∗ ∃ η' : prvar _, ⟨π, π ξ = fπ π (π η')⟩ ∗ s:∗[ζl] ∗
-            (1:[η] -∗ ⟦ Ψx a yπ ⟧ =[borrow_wsat M ⟦⟧]=∗
+            (1:[η] -∗ ⟦ Ψx a yπ ⟧ᶜ =[borrow_wsat M ⟦⟧ᶜ]=∗
               q.[β] ∗ r.[α] ∗ pbord β a yπ η' Ψx)).
   Proof.
     rewrite pobor_unseal pbor_unseal. iIntros (?) "⊑ α".
@@ -289,10 +288,10 @@ Section pborrow_deriv.
     iMod (pobor_pbor_tok_reborrow with "⊑ α o b [→Φx]") as "($ & Ψ'x & big)".
     { done. }
     { iIntros "%% † b". iMod ("→Φx" with "† [$b]") as "Φx"; [by iSplit|].
-      by iMod (der_borrow_jto with "ΦΦ' Φx"). }
-    iMod (der_borrow_jto with "Ψ'Ψ Ψ'x") as "$". iModIntro.
+      by iMod (der_borrow_jto' with "ΦΦ' Φx"). }
+    iMod (der_borrow_jto' with "Ψ'Ψ Ψ'x") as "$". iModIntro.
     iIntros (???) "ζl". iMod ("big" with "[//] ζl") as (?) "($ & $ & big)".
-    iIntros "!> η Ψx". iMod (der_borrow_jto with "ΨΨ' Ψx") as "Ψx'".
+    iIntros "!> η Ψx". iMod (der_borrow_jto' with "ΨΨ' Ψx") as "Ψx'".
     iMod ("big" with "η Ψx'") as "($ & $ & $)". iModIntro. by iSplit.
   Qed.
 End pborrow_deriv.

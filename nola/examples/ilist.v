@@ -2,7 +2,7 @@
 
 From nola.examples Require Export con.
 From nola.rust_lang Require Export notation proofmode.
-Import FunPRNotation WpwNotation DsemNotation.
+Import FunPRNotation WpwNotation CsemNotation.
 
 Section ilist.
   Context `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), !lrustGS_gen hlc Σ,
@@ -62,7 +62,7 @@ Section ilist.
   (** Access the tail of a list *)
   Definition tail_ilist : val := λ: ["l"], !ˢᶜ("l" +ₗ #1).
   Lemma twp_tail_list {N E Φx l} : ↑N ⊆ E →
-    [[{ ilist N Φx l }]][inv_wsat ⟦⟧]
+    [[{ ilist N Φx l }]][inv_wsat ⟦⟧ᶜ]
       tail_ilist [ #l] @ E
     [[{ l', RET #l'; ilist N Φx l' }]].
   Proof.
@@ -78,9 +78,9 @@ Section ilist.
     if: !"c" ≤ #0 then #☠ else
       "f" ["l"];; "c" <- !"c" - #1;; "self" ["f"; "c"; tail_ilist ["l"]].
   Lemma twp_iter_list {N E Φx c l} {f : val} {n : nat} : ↑N ⊆ E →
-    (∀ l', [[{ inv_tok N (Φx l') }]][inv_wsat ⟦⟧] f [ #l'] @ E
+    (∀ l', [[{ inv_tok N (Φx l') }]][inv_wsat ⟦⟧ᶜ] f [ #l'] @ E
       [[{ RET #☠; True }]]) -∗
-    [[{ c ↦ #n ∗ ilist N Φx l }]][inv_wsat ⟦⟧]
+    [[{ c ↦ #n ∗ ilist N Φx l }]][inv_wsat ⟦⟧ᶜ]
       iter_ilist [f; #c; #l] @ E
     [[{ RET #☠; c ↦ #0 }]].
   Proof.
@@ -97,9 +97,9 @@ Section ilist.
 
   (** Iterate over a list with two threads *)
   Lemma twp_fork_iter_list {N E Φx c' c l} {f : val} {m n : nat} : ↑N ⊆ E →
-    (∀ l', [[{ inv_tok N (Φx l') }]][inv_wsat ⟦⟧] f [ #l'] @ E
+    (∀ l', [[{ inv_tok N (Φx l') }]][inv_wsat ⟦⟧ᶜ] f [ #l'] @ E
       [[{ RET #☠; True }]]) -∗
-    [[{ c' ↦ #m ∗ c ↦ #n ∗ ilist N Φx l }]][inv_wsat ⟦⟧]
+    [[{ c' ↦ #m ∗ c ↦ #n ∗ ilist N Φx l }]][inv_wsat ⟦⟧ᶜ]
       Fork (iter_ilist [f; #c'; #l]);; iter_ilist [f; #c; #l] @ E
     [[{ RET #☠; c ↦ #0 }]].
   Proof.
@@ -116,9 +116,9 @@ Section ilist.
       Fork (let: "c" := Alloc #1 in "c" <- Ndnat;; iter_ilist ["f"; "c"; "l"]);;
       "k" <- !"k" - #1;; "self" ["f"; "k"; "l"].
   Lemma twp_forks_iter_list {N E Φx k l} {f : val} {n : nat} :
-    (∀ l', [[{ inv_tok N (Φx l') }]][inv_wsat ⟦⟧] f [ #l']
+    (∀ l', [[{ inv_tok N (Φx l') }]][inv_wsat ⟦⟧ᶜ] f [ #l']
       [[{ RET #☠; True }]]) -∗
-    [[{ k ↦ #n ∗ ilist N Φx l }]][inv_wsat ⟦⟧]
+    [[{ k ↦ #n ∗ ilist N Φx l }]][inv_wsat ⟦⟧ᶜ]
       forks_iter_list [f; #k; #l] @ E
     [[{ RET #☠; k ↦ #0 }]].
   Proof.
@@ -132,9 +132,9 @@ Section ilist.
     iApply ("IH" with "↦ →Ψ l").
   Qed.
   Lemma twp_nd_forks_iter_list {N E Φx l} {f : val} :
-    (∀ l', [[{ inv_tok N (Φx l') }]][inv_wsat ⟦⟧] f [ #l']
+    (∀ l', [[{ inv_tok N (Φx l') }]][inv_wsat ⟦⟧ᶜ] f [ #l']
       [[{ RET #☠; True }]]) -∗
-    [[{ ilist N Φx l }]][inv_wsat ⟦⟧]
+    [[{ ilist N Φx l }]][inv_wsat ⟦⟧ᶜ]
       let: "k" := Alloc #1 in "k" <- Ndnat;; forks_iter_list [f; "k"; #l] @ E
     [[{ RET #☠; True }]].
   Proof.

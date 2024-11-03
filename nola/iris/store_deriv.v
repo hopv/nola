@@ -4,7 +4,7 @@ From nola.util Require Import tagged.
 From nola.bi Require Export deriv.
 From nola.iris Require Export store.
 From iris.proofmode Require Import proofmode.
-Import iPropAppNotation ModwNotation DsemNotation.
+Import iPropAppNotation ModwNotation DsemNotation CsemNotation.
 
 Implicit Type (Σ : gFunctors) (FM : ofe).
 
@@ -67,7 +67,7 @@ Section store_deriv.
   Implicit Type Px Qx Rx : cif CON Σ.
 
   (** Access using [stored] *)
-  Lemma stored_acc {Px} : stored Px -∗[dinv_wsat ⟦⟧]◇ ⟦ Px ⟧.
+  Lemma stored_acc {Px} : stored Px -∗[dinv_wsat ⟦⟧ᶜ]◇ ⟦ Px ⟧ᶜ.
   Proof.
     rewrite store_unseal. iIntros "accPx".
     iDestruct (der_sound with "accPx") as "accPx". by rewrite in_js.
@@ -78,7 +78,7 @@ Section store_deriv.
   (** Turn an accessor into [store] *)
   Lemma store_acsr_store {Px} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      |->[dinv_wsat ⟦⟧(δ')]◇ ⟦ Px ⟧(δ')) ⊢
+      |->[dinv_wsat ⟦⟧ᶜ(δ')]◇ ⟦ Px ⟧ᶜ(δ')) ⊢
       store δ Px.
   Proof.
     rewrite store_unseal. iIntros "big". iApply Deriv_factor. iIntros (????).
@@ -92,7 +92,7 @@ Section store_deriv.
   Qed.
   (** Turn [dinv_tok] over a persistent proposition into [□ store] *)
   Lemma dinv_tok_persistent_store {Px} :
-    (∀ δ', Deriv ih δ' → Persistent ⟦ Px ⟧(δ')) →
+    (∀ δ', Deriv ih δ' → Persistent ⟦ Px ⟧ᶜ(δ')) →
     dinv_tok Px ⊢ □ store δ Px.
   Proof.
     rewrite -store_acsr_store=> ?. iIntros "#i !>" (????).
@@ -100,12 +100,12 @@ Section store_deriv.
   Qed.
 
   (** Allocate [store] *)
-  Lemma store_alloc Px : ⟦ Px ⟧(δ) =[dinv_wsat ⟦⟧(δ)]=∗ store δ Px.
+  Lemma store_alloc Px : ⟦ Px ⟧ᶜ(δ) =[dinv_wsat ⟦⟧ᶜ(δ)]=∗ store δ Px.
   Proof. rewrite -store_tok_store. exact: store_tok_alloc. Qed.
   (** Allocate [□ store] *)
   Lemma store_alloc_persistent Px :
-    (∀ δ', Deriv ih δ' → Persistent ⟦ Px ⟧(δ')) →
-    ⟦ Px ⟧(δ) =[dinv_wsat ⟦⟧(δ)]=∗ □ store δ Px.
+    (∀ δ', Deriv ih δ' → Persistent ⟦ Px ⟧ᶜ(δ')) →
+    ⟦ Px ⟧ᶜ(δ) =[dinv_wsat ⟦⟧ᶜ(δ)]=∗ □ store δ Px.
   Proof.
     move=> ?. rewrite -dinv_tok_persistent_store. exact: dinv_tok_alloc.
   Qed.
@@ -113,7 +113,7 @@ Section store_deriv.
   (** Convert [store] with [-∗] *)
   Lemma store_wand {Px Qx} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      ⟦ Px ⟧(δ') -∗[dinv_wsat ⟦⟧(δ')]◇ ⟦ Qx ⟧(δ')) -∗
+      ⟦ Px ⟧ᶜ(δ') -∗[dinv_wsat ⟦⟧ᶜ(δ')]◇ ⟦ Qx ⟧ᶜ(δ')) -∗
       store δ Px -∗ store δ Qx.
   Proof.
     rewrite store_unseal. iIntros "PQ accPx". iApply Deriv_factor.
@@ -124,7 +124,7 @@ Section store_deriv.
   (** Merge [store]s *)
   Lemma store_merge {Px Qx Rx} :
     (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      ⟦ Px ⟧(δ') -∗ ⟦ Qx ⟧(δ') -∗[dinv_wsat ⟦⟧(δ')]◇ ⟦ Rx ⟧(δ')) -∗
+      ⟦ Px ⟧ᶜ(δ') -∗ ⟦ Qx ⟧ᶜ(δ') -∗[dinv_wsat ⟦⟧ᶜ(δ')]◇ ⟦ Rx ⟧ᶜ(δ')) -∗
       store δ Px -∗ store δ Qx -∗ store δ Rx.
   Proof.
     rewrite store_unseal. iIntros "PQR accPx accQx". iApply Deriv_factor.

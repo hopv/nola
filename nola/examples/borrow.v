@@ -2,7 +2,7 @@
 
 From nola.examples Require Export xty con.
 From nola.rust_lang Require Export notation proofmode.
-Import ProdNotation FunPRNotation ModwNotation WpwNotation DsemNotation
+Import ProdNotation FunPRNotation ModwNotation WpwNotation CsemNotation
   LftNotation ProphNotation NsyntyNotation.
 
 Section borrow.
@@ -15,7 +15,7 @@ Section borrow.
   Lemma bor_bor_deref {α β l Φx q} :
     [[{ β ⊑□ α ∗ q.[β] ∗
       bor_tok β (∃ l', ▷ l ↦ #l' ∗ cif_bor_tok α (Φx l'))%cif }]]
-      [borrow_wsat bupd ⟦⟧]
+      [borrow_wsat bupd ⟦⟧ᶜ]
       !#l
     [[{ l', RET #l'; q.[β] ∗ bor_tok β (Φx l') }]].
   Proof.
@@ -36,7 +36,7 @@ Section borrow.
   (** Load from an immutable shared borrow *)
   Lemma imbor_load {l α q} {n : Z} :
     [[{ q.[α] ∗ inv_tok nroot (cif_bor_tok α (▷ l ↦ #n)) }]]
-      [inv_wsat ⟦⟧ ∗ borrow_wsat bupd ⟦⟧]
+      [inv_wsat ⟦⟧ᶜ ∗ borrow_wsat bupd ⟦⟧ᶜ]
       !ˢᶜ#l
     [[{ RET #n; q.[α] }]].
   Proof.
@@ -59,7 +59,7 @@ Section borrow.
           (λ _ pπ, ∃ l' (xπ : clair _ X) (ξ : prvar X),
             ⌜pπ = λ π, (xπ π, π ξ)'⌝ ∗
             ▷ l ↦ #l' ∗ cif_pbor_tok α () xπ ξ (Φx l'))%cif }]]
-      [borrow_wsat bupd ⟦⟧]
+      [borrow_wsat bupd ⟦⟧ᶜ]
       !#l
     [[{ l', RET #l'; ∃ (xπ : clair _ X) (ξ ξ' : prvar X),
         ⌜pπ = λ π, (xπ π, π ξ)'⌝ ∗ ⟨π, π η = (π ξ', π ξ)'⟩ ∗ q.[β] ∗
