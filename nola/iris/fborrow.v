@@ -1,21 +1,70 @@
 (** * Fractured borrows *)
 
-From nola.iris Require Export dinv_deriv borrow_deriv cif.
+From nola.iris Require Export dinv_deriv borrow_deriv.
+From nola.util Require Import tagged.
 From iris.bi Require Export lib.fractional.
 From iris.proofmode Require Import proofmode.
-Import ProdNotation iPropAppNotation ModwNotation LftNotation CsemNotation.
+Import ProdNotation iPropAppNotation ModwNotation LftNotation DsemNotation.
 
-Implicit Type (α : lft) (q : Qp) (Σ : gFunctors).
+Implicit Type (α : lft) (q : Qp) (Σ : gFunctors) (FML : oFunctor) (FM : ofe).
 
-(** ** Fractured borrows *)
+(** Formula for fractured borrows *)
+Definition fborrow_fmlOF FML : oFunctor := leibnizO lft * (Qp -d> FML).
+
+(** Ghost state for fractured borrows *)
+Class fborrowGpreS FML Σ :=
+  fborrowGpreS_dinv :: dinvGpreS (fborrow_fmlOF FML) Σ.
+Class fborrowGS FML Σ := fborrowGS_dinv :: dinvGS (fborrow_fmlOF FML) Σ.
+Definition fborrowΣ FML `{!oFunctorContractive FML} :=
+  dinvΣ (fborrow_fmlOF FML).
+#[export] Instance subG_fborrowΣ
+  `{!oFunctorContractive FML, !subG (fborrowΣ FML) Σ} : fborrowGpreS FML Σ.
+Proof. solve_inG. Qed.
+
+Section fborrow_wsat.
+  Context `{!fborrowGS FML Σ, !borrowGS FML Σ, !bupdJ (FML $oi Σ) JUDG}.
+  Implicit Type (Φx : Qp -d> FML $oi Σ) (δ : JUDG -n> iProp Σ).
+
+  (** [fborrow_sem]: Semantics for [fborrow_fmlOF] *)
+  Definition fborrow_sem δ : fborrow_fmlOF FML $oi Σ → iProp Σ :=
+    λ '(α, Φx), (∃ q, bor δ α (Φx q))%I.
+  (** [fborrow_sem] is non-expansive *)
+  #[export] Instance fborrow_sem_ne {δ} : NonExpansive (fborrow_sem δ).
+  Proof. move=> ?[??][??][/=/leibniz_equiv_iff<- ?]. solve_proper. Qed.
+  (** [Dsem] for [fborrow_fmlOF] *)
+  #[export] Instance fborrow_dsem :
+    Dsem JUDG (fborrow_fmlOF FML $oi Σ) (iProp Σ) := DSEM fborrow_sem _.
+
+  (** [fborrow_wsat]: World satisfaction for fractured borrows *)
+  Local Definition fborrow_wsat_def δ : iProp Σ := dinv_wsat (fborrow_dsem δ).
+  Local Lemma fborrow_wsat_aux : seal fborrow_wsat_def. Proof. by eexists. Qed.
+  Definition fborrow_wsat := fborrow_wsat_aux.(unseal).
+  Local Lemma fborrow_wsat_unseal : fborrow_wsat = fborrow_wsat_def.
+  Proof. exact: seal_eq. Qed.
+End fborrow_wsat.
+Notation fborrow_wsatd := (fborrow_wsat der).
+
+(** Allocate [fborrow_wsat] *)
+Lemma fborrow_wsat_alloc `{!borrowGS FML Σ, !fborrowGpreS FML Σ,
+  !bupdJ (FML $oi Σ) JUDG} :
+  ⊢ |==> ∃ _ : fborrowGS FML Σ, ∀ δ, fborrow_wsat δ.
+Proof.
+  iMod dinv_wsat_alloc as (?) "→W". iModIntro. iExists _. iIntros (?).
+  rewrite fborrow_wsat_unseal. iApply "→W". iApply ne_internal_ne.
+Qed.
+
+(** [fborrowJ]: Judgment for [fborrow] registered *)
+Notation fborrowJ FML JUDG Σ := (dinvJ (fborrow_fmlOF FML $oi Σ) JUDG).
+(** [fborrowJS]: Judgment semantics for [fborrow] registered *)
+Notation fborrowJS FML JUDG Σ := (dinvJS (fborrow_fmlOF FML) JUDG Σ).
 
 Section fbor.
-  Context `{!dinvJ (cifO CON Σ) JUDG, !borrowC CON, !lftG Σ}.
-  Implicit Type (δ : JUDG -n> iProp Σ) (Φx : Qp -d> cif CON Σ).
+  Context `{!borrowGS FML Σ, !fborrowJ FML JUDG Σ}.
+  Implicit Type (δ : JUDG -n> iProp Σ) (Φx : Qp -d> FML $oi Σ).
 
   (** [fbor]: Relaxed fractured borrower *)
   Local Definition fbor_def δ α Φx : iProp Σ :=
-    ∃ α', α ⊑□ α' ∗ dinv δ (∃ q, cif_bor α' (Φx q))%cif.
+    ∃ α', α ⊑□ α' ∗ dinv δ (α', Φx).
   Local Lemma fbor_aux : seal fbor_def. Proof. by eexists. Qed.
   Definition fbor := fbor_aux.(unseal).
   Local Lemma fbor_unseal : fbor = fbor_def. Proof. exact: seal_eq. Qed.
@@ -31,44 +80,39 @@ Section fbor.
 End fbor.
 Notation fbord := (fbor der).
 
-Arguments dsem {_ _ _ _} _ _ /.
 Section fbor.
-  Context `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), dinvGS (cifOF CON) Σ,
-    !dinvJ (cifO CON Σ) JUDG, !dinvJS (cifOF CON) JUDG Σ,
-    !borrowGS (cifOF CON) Σ, !borrowC CON, !bupdJ (cifO CON Σ) JUDG,
-    !borrowCS CON JUDG Σ, !bupdJS (cifO CON Σ) JUDG (iProp Σ),
-    !ModUpd (PROP:=iProp Σ) M, !ModBUpd M}.
+  Context `{!borrowGS FML Σ, !bupdJ (FML $oi Σ) JUDG, !fborrowGS FML Σ,
+    !fborrowJ FML JUDG Σ, !Dsem JUDG (FML $oi Σ) (iProp Σ),
+    !Jsem JUDG (iProp Σ), !bupdJS (FML $oi Σ) JUDG (iProp Σ),
+    !fborrowJS FML JUDG Σ, !ModUpd (PROP:=iProp Σ) M, !ModBUpd M}.
 
   (** Access the content of [fbord] under the fractionality of [Φx] *)
   Lemma fbord_acc_bord {α Φx r} :
-    Fractional (λ q, ⟦ Φx q ⟧ᶜ) →
-    fbord α Φx -∗ r.[α] -∗ modw M (dinv_wsat ⟦⟧ᶜ ∗ borrow_wsat M ⟦⟧ᶜ)
+    Fractional (λ q, ⟦ Φx q ⟧) →
+    fbord α Φx -∗ r.[α] -∗ modw M (fborrow_wsatd ∗ borrow_wsat M ⟦⟧)
       (∃ q, r.[α] ∗ bord α (Φx q)).
   Proof.
-    rewrite fbor_unseal. iIntros (frac) "(%α' & #⊑ & f) α [Wd Wb]".
-    iDestruct (dinvd_acc (Dsem0:=cif_dsem) with "f Wd") as "/=[[%q b] cl]".
-    rewrite sem_cif_in /=.
+    rewrite fbor_unseal. iIntros (frac) "(%α' & #⊑ & f) α [Wf Wb]".
+    rewrite fborrow_wsat_unseal.
+    iDestruct (dinvd_acc (FML:=fborrow_fmlOF _) with "f Wf") as "/=[[%q b] cl]".
     iMod (lft_sincl_live_acc with "⊑ α") as (?) "[α' →α]".
-    iMod (bord_open (Dsem0:=cif_dsem) with "α' b Wb") as "(Wb & o & Φx)".
-    iMod (obord_subdiv (Dsem0:=cif_dsem) [Φx (q/2)%Qp; Φx (q/2)%Qp] α'
-      with "[] o [Φx] [] Wb") as "($ & α' & _ & b & b' & _)"=>/=.
+    iMod (bord_open with "α' b Wb") as "(Wb & o & Φx)".
+    iMod (obord_subdiv [Φx (q/2)%Qp; Φx (q/2)%Qp] α' with "[] o [Φx] [] Wb")
+      as "($ & α' & _ & b & b' & _)"=>/=.
     { iApply lft_sincl_refl. }
     { rewrite -{1}(Qp.div_2 q) frac. iDestruct "Φx" as "[$$]". }
     { rewrite -{3}(Qp.div_2 q) frac. by iIntros "_ [$[$ _]]". }
     iModIntro. iDestruct ("→α" with "α'") as "$".
-    iDestruct (bor_lft with "⊑ b") as "$". iApply "cl". iExists _.
-    by rewrite sem_cif_in /=.
+    iDestruct (bor_lft with "⊑ b") as "$". iApply "cl". by iExists _.
   Qed.
   Lemma fbord_acc {α Φx r} :
-    Fractional (λ q, ⟦ Φx q ⟧ᶜ) →
-    fbord α Φx -∗ r.[α] -∗ modw M (dinv_wsat ⟦⟧ᶜ ∗ borrow_wsat M ⟦⟧ᶜ)
-      (∃ q, ⟦ Φx q ⟧ᶜ ∗ (⟦ Φx q ⟧ᶜ =[borrow_wsat M ⟦⟧ᶜ]=∗ r.[α])).
+    Fractional (λ q, ⟦ Φx q ⟧) →
+    fbord α Φx -∗ r.[α] -∗ modw M (fborrow_wsatd ∗ borrow_wsat M ⟦⟧)
+      (∃ q, ⟦ Φx q ⟧ ∗ (⟦ Φx q ⟧ =[borrow_wsat M ⟦⟧]=∗ r.[α])).
   Proof.
     iIntros (frac) "f α". iMod (fbord_acc_bord with "f α") as (?) "[α b]"=>//.
-    iIntros "[$ Wb]".
-    iMod (bord_open (Dsem0:=cif_dsem) with "α b Wb") as "/=($ & o & $)".
-    iModIntro. iIntros "Φx".
-    by iMod (obord_close (M:=M) (Dsem0:=cif_dsem) with "o Φx") as "[$ _]".
+    iIntros "[$ Wb]". iMod (bord_open with "α b Wb") as "/=($ & o & $)".
+    iIntros "!> Φx". by iMod (obord_close (M:=M) with "o Φx") as "[$ _]".
   Qed.
 
   (** Modify the lifetime of [fbor] *)
@@ -80,24 +124,23 @@ Section fbor.
   Context `{!Deriv (JUDG:=JUDG) ih δ}.
 
   (** Allocate [fbor] from [bor] *)
-  Lemma fbor_alloc {α} Φx q : bor δ α (Φx q) =[dinv_wsat ⟦⟧ᶜ(δ)]=∗ fbor δ α Φx.
+  Lemma fbor_alloc {α} Φx q : bor δ α (Φx q) =[dinv_wsat ⟦⟧(δ)]=∗ fbor δ α Φx.
   Proof.
     iIntros "b". rewrite fbor_unseal.
-    iMod (dinv_alloc (Dsem0:=cif_dsem) (∃ q, cif_bor α (Φx q))%cif with "[b]")
-      as "$"=>/=.
-    { iExists _. rewrite sem_cif_in //=. } { iModIntro. iApply lft_sincl_refl. }
+    iMod (dinv_alloc (FML:=fborrow_fmlOF _) (α, Φx) with "[b]") as "$"=>/=.
+    { by iExists _. } { iModIntro. iApply lft_sincl_refl. }
   Qed.
 
   (** Convert the body of [fbor] *)
   Lemma fbor_to {α Φx Ψx} :
-    □ (∀ q δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ Φx q ⟧ᶜ(δ') ==∗ ⟦ Ψx q ⟧ᶜ(δ')) -∗
-    □ (∀ q δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ Ψx q ⟧ᶜ(δ') ==∗ ⟦ Φx q ⟧ᶜ(δ')) -∗
+    □ (∀ q δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ Φx q ⟧(δ') ==∗ ⟦ Ψx q ⟧(δ')) -∗
+    □ (∀ q δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⟦ Ψx q ⟧(δ') ==∗ ⟦ Φx q ⟧(δ')) -∗
     fbor δ α Φx -∗ fbor δ α Ψx.
   Proof.
     iIntros "#ΦΨ #ΨΦ". rewrite fbor_unseal. iIntros "(% & $ & i)".
-    iApply (dinv_iff (FML:=cifOF _) with "[] i"). iIntros (????) "!> /=".
-    iSplit; iIntros "[%q b]"; iExists q; rewrite !sem_cif_in /=;
-      (iApply (bor_to (Dsem0:=cif_dsem) (ih:=ih) with "[] [] b");
+    iApply (dinv_iff (FML:=fborrow_fmlOF _) with "[] i"). iIntros (????) "!>/=".
+    iSplit; iIntros "[%q b]"; iExists q;
+      (iApply (bor_to (ih:=ih) with "[] [] b");
         iIntros "!>" (????); by [iApply "ΦΨ"|iApply "ΨΦ"]).
   Qed.
 End fbor.
@@ -128,7 +171,8 @@ Section fborC.
   #[export] Instance cif_bor_productive {α} : Productive (cif_fbor α).
   Proof. move=> ????. by apply cif_in_preserv_productive. Qed.
 
-  Context `{!dinvJ (cifO CON Σ) JUDG, !borrowC CON, !lftG Σ}.
+  Context `{!dinvJ (cifO CON Σ) JUDG, !borrowGS (cifOF CON) Σ,
+    !fborrowJ (cifOF CON) JUDG Σ}.
   #[export] Program Instance fborCT_ecsem : Ecsem fborCT CON JUDG Σ :=
     ECSEM (λ _ δ α _ Φx _, fbor δ α Φx) _.
   Next Obligation. solve_proper. Qed.
@@ -139,7 +183,8 @@ Notation fborCS := (inCS fborCT).
 (** Reify [fbor] *)
 Section fborC.
   Context `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), !dinvJ (cifO CON Σ) JUDG,
-    !borrowC CON, !lftG Σ, !fborC CON, !fborCS CON JUDG Σ}.
+    !borrowGS (cifOF CON) Σ, !fborrowJ (cifOF CON) JUDG Σ, !fborC CON,
+    !fborCS CON JUDG Σ}.
 
   #[export] Program Instance fbor_as_cif {α Φx} :
     AsCif CON (λ δ, fbor δ α Φx) := AS_CIF (cif_fbor α Φx) _.
