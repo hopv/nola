@@ -56,6 +56,13 @@ Section dinv.
   #[export] Instance dinv_wsat_proper : Proper ((≡) ==> (≡)) dinv_wsat.
   Proof. apply ne_proper, _. Qed.
 
+  (** [dinv_wsat] is timeless if [sm] is always timeless
+    and the underlying ofe is discrete *)
+  #[export] Instance dinv_wsat_timeless
+    `{!OfeDiscrete (FML $oi Σ), !∀ Px, Timeless (sm Px)} :
+    Timeless (dinv_wsat sm).
+  Proof. rewrite dinv_wsat_unseal. exact _. Qed.
+
   (** Allocate [dinv_tok] suspending the world satisfaction *)
   Lemma dinv_tok_alloc_suspend {sm} Px :
     dinv_wsat sm ==∗ dinv_tok Px ∗ (sm Px -∗ dinv_wsat sm).

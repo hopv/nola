@@ -55,6 +55,10 @@ Section inv.
   Proof.
     iIntros "#Ne" (???) "≡". unfold inv_sem. by iRewrite ("Ne" with "≡").
   Qed.
+  (** [inv_sem sm] is always timeless when [sm] is *)
+  Local Instance inv_sem_timeless `{!∀ Px, Timeless (sm Px)} {i Px} :
+    Timeless (inv_sem sm i Px).
+  Proof. unfold inv_sem, ownD, ownE. exact _. Qed.
 
   (** World satisfaction *)
   Local Definition inv_wsat_def sm : iProp Σ := sinv_wsat (inv_sem sm).
@@ -68,6 +72,13 @@ Section inv.
   Proof. rewrite inv_wsat_unseal /inv_wsat_def /inv_sem. solve_proper. Qed.
   #[export] Instance inv_wsat_proper : Proper ((≡) ==> (≡)) inv_wsat.
   Proof. apply ne_proper, _. Qed.
+
+  (** [inv_wsat] is timeless if [sm] is always timeless
+    and the underlying ofe is discrete *)
+  #[export] Instance inv_wsat_timeless
+    `{!OfeDiscrete (FML $oi Σ), !∀ Px, Timeless (sm Px)} :
+    Timeless (inv_wsat sm).
+  Proof. rewrite inv_wsat_unseal. exact _. Qed.
 
   (** Allocate [ownD] *)
   Lemma alloc_ownD (I : gset positive) N :
