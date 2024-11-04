@@ -68,7 +68,7 @@ Notation lendd := (lend der).
 Section borrowJ.
   Context `{!borrowJ (FML $oi Σ) JUDG, !Dsem JUDG (FML $oi Σ) (iProp Σ),
     !Jsem JUDG (iProp Σ)}.
-  Implicit Type (δ : JUDG -n> iProp Σ) (Px Qx : FML $oi Σ).
+  Implicit Type δ : JUDG -n> iProp Σ.
 
   (** [borrowJT_sem]: Semantics of [borrowJT] *)
   Definition borrowJT_sem δ (J : borrowJT (FML $oi Σ)) : iProp Σ :=

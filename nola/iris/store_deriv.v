@@ -45,7 +45,7 @@ Notation stored := (store der).
 Section storeJ.
   Context `{!dinvGS FML Σ, !storeJ (FML $oi Σ) JUDG,
     !Dsem JUDG (FML $oi Σ) (iProp Σ), !Jsem JUDG (iProp Σ)}.
-  Implicit Type (δ : JUDG -n> iProp Σ).
+  Implicit Type δ : JUDG -n> iProp Σ.
 
   (** [storeJT_sem]: Semantics of [storeJT] *)
   Definition storeJT_sem δ (J : storeJT (FML $oi Σ)) : iProp Σ :=

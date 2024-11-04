@@ -48,7 +48,7 @@ Notation invd := (inv' der).
 
 Section invJ.
   Context `{!inv'GS FML Σ, !invGS_gen hlc Σ}.
-  Implicit Type (P : iProp Σ) (Px : FML $oi Σ).
+  Implicit Type P : iProp Σ.
 
   (** Accessor to the invariant body *)
   Definition inv_acsr sm N P : iProp Σ :=
