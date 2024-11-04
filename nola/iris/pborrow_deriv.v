@@ -11,14 +11,14 @@ Implicit Type (A : Type) (TY : synty) (α : lft) (q : Qp) (Σ : gFunctors).
 
 Section pborrow_deriv.
   Context `{!borrowGS (cifOF CON) Σ, !prophGS TY Σ, !proph_agG A TY Σ,
-    !proph_agC A TY CON, !borrowJ (cifOF CON $oi Σ) JUDG}.
+    !proph_agC A TY CON, !bupdJ (cifOF CON $oi Σ) JUDG}.
   Implicit Type (δ : JUDG -n> iProp Σ) (Px Qx : cif CON Σ) (X Y : TY).
 
   (** [pbor]: Relaxed prophetic borrower *)
   Local Definition pbor_def {X} δ α a xπ ξ (Φx : _ -d> _ -d> cif CON Σ)
     : iProp Σ :=
-    ∃ Ψx, □ (∀ a xπ, δ (borrow_jto (Φx a xπ) (Ψx a xπ))) ∗
-      □ (∀ a xπ, δ (borrow_jto (Ψx a xπ) (Φx a xπ))) ∗
+    ∃ Ψx, □ (∀ a xπ, δ (jbupd (Φx a xπ) (Ψx a xπ))) ∗
+      □ (∀ a xπ, δ (jbupd (Ψx a xπ) (Φx a xπ))) ∗
       pbor_tok (X:=X) α a xπ ξ Ψx.
   Local Lemma pbor_aux : seal (@pbor_def). Proof. by eexists. Qed.
   Definition pbor {X} := pbor_aux.(unseal) X.
@@ -26,8 +26,8 @@ Section pborrow_deriv.
   (** [pobor]: Relaxed prophetic open borrower *)
   Local Definition pobor_def {X} δ α q ξ (Φx : _ -d> _ -d> cif CON Σ)
     : iProp Σ :=
-    ∃ Ψx, □ (∀ a xπ, δ (borrow_jto (Φx a xπ) (Ψx a xπ))) ∗
-      □ (∀ a xπ, δ (borrow_jto (Ψx a xπ) (Φx a xπ))) ∗
+    ∃ Ψx, □ (∀ a xπ, δ (jbupd (Φx a xπ) (Ψx a xπ))) ∗
+      □ (∀ a xπ, δ (jbupd (Ψx a xπ) (Φx a xπ))) ∗
       pobor_tok (X:=X) α q ξ Ψx.
   Local Lemma pobor_aux : seal (@pobor_def). Proof. by eexists. Qed.
   Definition pobor {X} := pobor_aux.(unseal) X.
@@ -61,16 +61,16 @@ Notation plendd := (plend der).
 
 Section pborrow_deriv.
   Context `{!borrowGS (cifOF CON) Σ, !prophGS TY Σ, !proph_agG A TY Σ,
-    !proph_agC A TY CON, !borrowJ (cifOF CON $oi Σ) JUDG, !Csem CON JUDG Σ,
+    !proph_agC A TY CON, !bupdJ (cifOF CON $oi Σ) JUDG, !Csem CON JUDG Σ,
     !Jsem JUDG (iProp Σ), !proph_agCS A TY CON JUDG Σ,
-    !borrowJS (cifOF CON) JUDG Σ, !Deriv (JUDG:=JUDG) ih δ}.
+    !bupdJS (cifO CON Σ) JUDG (iProp Σ), !Deriv (JUDG:=JUDG) ih δ}.
   Implicit Type (X Y Z : TY) (Px Qx Rx : cif CON Σ) (δ : JUDG -n> iProp Σ).
 
   (** ** Conversion *)
 
   (** Utility *)
-  Lemma der_borrow_jto' {Px Qx} : der (borrow_jto Px Qx) ⊢ ⟦ Px ⟧ᶜ ==∗ ⟦ Qx ⟧ᶜ.
-  Proof. exact der_borrow_jto. Qed.
+  Lemma der_jbupd' {Px Qx} : der (jbupd Px Qx) ⊢ ⟦ Px ⟧ᶜ ==∗ ⟦ Qx ⟧ᶜ.
+  Proof. exact der_jbupd. Qed.
 
   (** Convert the body of borrower and lender propositions *)
   Lemma pbor_to {X α a xπ ξ Φx Ψx} :
@@ -81,8 +81,8 @@ Section pborrow_deriv.
     pbor (X:=X) δ α a xπ ξ Φx -∗ pbor δ α a xπ ξ Ψx.
   Proof.
     rewrite pbor_unseal. iIntros "#ΦΨ #ΨΦ (%Ω & #ΦΩ & #ΩΦ & $)".
-    iSplit; iIntros "!>" (??); [by iApply borrow_jto_trans|].
-    iApply borrow_jto_trans'; by [iApply "ΦΨ"|].
+    iSplit; iIntros "!>" (??); [by iApply jbupd_trans|].
+    iApply jbupd_trans'; by [iApply "ΦΨ"|].
   Qed.
   Lemma pobor_to {X α q ξ Φx Ψx} :
     □ (∀ a xπ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
@@ -92,8 +92,8 @@ Section pborrow_deriv.
     pobor (X:=X) δ α q ξ Φx -∗ pobor δ α q ξ Ψx.
   Proof.
     rewrite pobor_unseal. iIntros "#ΦΨ #ΨΦ (%Ω & #ΦΩ & #ΩΦ & $)".
-    iSplit; iIntros "!>" (??); [by iApply borrow_jto_trans|].
-    iApply borrow_jto_trans'; by [iApply "ΦΨ"|].
+    iSplit; iIntros "!>" (??); [by iApply jbupd_trans|].
+    iApply jbupd_trans'; by [iApply "ΦΨ"|].
   Qed.
   Lemma plend_to {X Y α xπ yπ Φx Ψx} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
@@ -123,13 +123,13 @@ Section pborrow_deriv.
     pbor_tok (X:=X) α a xπ ξ Φx ⊢ pbor δ α a xπ ξ Φx.
   Proof.
     rewrite pbor_unseal. iIntros "$".
-    iSplit; iIntros "!> %%"; iApply borrow_jto_refl.
+    iSplit; iIntros "!> %%"; iApply jbupd_refl.
   Qed.
   Lemma pobor_tok_pobor {X α q ξ Φx} :
     pobor_tok (X:=X) α q ξ Φx ⊢ pobor δ α q ξ Φx.
   Proof.
     rewrite pobor_unseal. iIntros "$".
-    iSplit; iIntros "!> %%"; iApply borrow_jto_refl.
+    iSplit; iIntros "!> %%"; iApply jbupd_refl.
   Qed.
   Lemma plend_tok_plend {X α xπ Φx} :
     plend_tok (X:=X) α xπ Φx ⊢ plend δ α xπ Φx.
@@ -166,9 +166,9 @@ End pborrow_deriv.
 
 Section pborrow_deriv.
   Context `{!borrowGS (cifOF CON) Σ, !prophGS TY Σ, !proph_agG A TY Σ,
-    !proph_agC A TY CON, !borrowJ (cifOF CON $oi Σ) JUDG, !Csem CON JUDG Σ,
+    !proph_agC A TY CON, !bupdJ (cifOF CON $oi Σ) JUDG, !Csem CON JUDG Σ,
     !Jsem JUDG (iProp Σ), !proph_agCS A TY CON JUDG Σ,
-    !borrowJS (cifOF CON) JUDG Σ, !@ModUpd (iProp Σ) M, !ModBUpd M,
+    !bupdJS (cifO CON Σ) JUDG (iProp Σ), !@ModUpd (iProp Σ) M, !ModBUpd M,
     !ModExcept0 M}.
   Implicit Type (X Y : TY) (Px Qx : cif CON Σ).
 
@@ -201,7 +201,7 @@ Section pborrow_deriv.
   Proof.
     rewrite pbor_unseal pobor_unseal. iIntros "α (% & $ & #ΨΦ & b)".
     iMod (pbor_tok_open (M:=M) with "α b") as "[$ Ψx]".
-    iMod (der_borrow_jto' with "ΨΦ Ψx") as "$". by iIntros "$".
+    iMod (der_jbupd' with "ΨΦ Ψx") as "$". by iIntros "$".
   Qed.
 
   (** Subdivide a prophetic borrower without changing the prophecy *)
@@ -214,7 +214,7 @@ Section pborrow_deriv.
     rewrite -pbor_tok_pbor.
     iApply (pobor_tok_nsubdiv (M:=M) with "⊑ o Ψx [ΦΩ →Φx]").
     iIntros "%% † Ψx". iMod ("→Φx" with "† Ψx") as "Φx".
-    by iMod (der_borrow_jto' with "ΦΩ Φx").
+    by iMod (der_jbupd' with "ΦΩ Φx").
   Qed.
   (** Simply close a prophetic borrower *)
   Lemma pobord_close {X α q ξ Φx} a (xπ : clair TY X) :
@@ -251,7 +251,7 @@ Section pborrow_deriv.
     iIntros "!> ⊑ Ψxl Rxl →Φx". setoid_rewrite <-pbor_tok_pbor.
     setoid_rewrite <-bor_tok_bor. iApply ("big" with "⊑ Ψxl Rxl").
     iIntros "% † Ψxl Rxl". iMod ("→Φx" with "† Ψxl Rxl") as "/=[% Φx]".
-    by iMod (der_borrow_jto' with "ΦΦ' Φx") as "$".
+    by iMod (der_jbupd' with "ΦΦ' Φx") as "$".
   Qed.
 
   (** Resolve the prophecy of a prophetic borrower *)
@@ -288,10 +288,10 @@ Section pborrow_deriv.
     iMod (pobor_pbor_tok_reborrow (M:=M) with "⊑ α o b [→Φx]")
       as "($ & Ψ'x & big)". { done. }
     { iIntros "%% † b". iMod ("→Φx" with "† [$b]") as "Φx"; [by iSplit|].
-      by iMod (der_borrow_jto' with "ΦΦ' Φx"). }
-    iMod (der_borrow_jto' with "Ψ'Ψ Ψ'x") as "$". iModIntro.
+      by iMod (der_jbupd' with "ΦΦ' Φx"). }
+    iMod (der_jbupd' with "Ψ'Ψ Ψ'x") as "$". iModIntro.
     iIntros (???) "ζl". iMod ("big" with "[//] ζl") as (?) "($ & $ & big)".
-    iIntros "!> η Ψx". iMod (der_borrow_jto' with "ΨΨ' Ψx") as "Ψx'".
+    iIntros "!> η Ψx". iMod (der_jbupd' with "ΨΨ' Ψx") as "Ψx'".
     iMod ("big" with "η Ψx'") as "($ & $ & $)". iModIntro. by iSplit.
   Qed.
 End pborrow_deriv.
@@ -366,7 +366,7 @@ Section pborrowC.
     Productive (@cif_plend X α xπ).
   Proof. move=> ????. by apply cif_in_preserv_productive. Qed.
 
-  Context `{!borrowGS (cifOF CON) Σ, !borrowJ (cif CON Σ) JUDG, !prophGS TY Σ,
+  Context `{!borrowGS (cifOF CON) Σ, !bupdJ (cif CON Σ) JUDG, !prophGS TY Σ,
     !proph_agG A TY Σ, !proph_agC A TY CON}.
   (** Semantics of [pborrowCT] *)
   Definition pborrowCT_sem δ (s : pborrowCT_sel A TY) :
@@ -388,8 +388,8 @@ Notation pborrowCS A TY := (inCS (pborrowCT A TY)).
 Section pborrowC.
   Context `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), !borrowGS (cifOF CON) Σ,
     !prophGS TY Σ, !proph_agG A TY Σ, !proph_agC A TY CON,
-    !proph_agCS A TY CON JUDG Σ, !borrowJ (cifO CON Σ) JUDG,
-    !borrowJS (cifOF CON) JUDG Σ, !pborrowC A TY CON,
+    !proph_agCS A TY CON JUDG Σ, !bupdJ (cifO CON Σ) JUDG,
+    !bupdJS (cifO CON Σ) JUDG (iProp Σ), !pborrowC A TY CON,
     !pborrowCS A TY CON JUDG Σ}.
 
   #[export] Program Instance pbor_as_cif {X α a xπ ξ Φx} :

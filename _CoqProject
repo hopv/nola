@@ -25,6 +25,7 @@ nola/bi/deriv.v
 nola/bi/mod.v
 nola/bi/modw.v
 nola/bi/wpw.v
+nola/bi/judg.v
 nola/bi/paradox.v
 
 nola/iris/iprop.v

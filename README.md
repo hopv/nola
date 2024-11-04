@@ -82,6 +82,7 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     [`modw`](nola/bi/modw.v) (Modality with a custom world satisfaction),
     [`wpw`](nola/bi/wpw.v) (Weakest precondition with a custom world
       satisfaction)
+  + [`judg`](nola/bi/judg.v) (Judgments)
   + [`paradox`](nola/bi/paradox.v) (Paradoxes)
 - [`iris/`](nola/iris/) : Libraries for Iris base logic
   + [`iprop`](nola/iris/iprop.v) (`iprop`)

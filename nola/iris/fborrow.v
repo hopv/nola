@@ -35,8 +35,8 @@ Arguments dsem {_ _ _ _} _ _ /.
 Section fbor.
   Context `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), dinvGS (cifOF CON) Σ,
     !dinvJ (cifO CON Σ) JUDG, !dinvJS (cifOF CON) JUDG Σ,
-    !borrowGS (cifOF CON) Σ, !borrowC CON, !borrowJ (cifO CON Σ) JUDG,
-    !borrowCS CON JUDG Σ, !borrowJS (cifOF CON) JUDG Σ,
+    !borrowGS (cifOF CON) Σ, !borrowC CON, !bupdJ (cifO CON Σ) JUDG,
+    !borrowCS CON JUDG Σ, !bupdJS (cifO CON Σ) JUDG (iProp Σ),
     !ModUpd (PROP:=iProp Σ) M, !ModBUpd M}.
 
   (** Access the content of [fbord] under the fractionality of [Φx] *)
