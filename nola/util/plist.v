@@ -11,6 +11,22 @@ Section plist.
     match al with [] => unit | a :: al => F a *' plist al end.
 End plist.
 
+(** Cons and nil for [plist] *)
+Definition pcons {A F a al} : F a → @plist A F al → plist F (a :: al) :=
+  pair'.
+Definition pnil {A F} : @plist A F [] := ().
+Module PlistNotation.
+  Infix "ᵖ::" := pcons (at level 60, right associativity).
+  Infix "ᵖ::@{ F }" := (pcons (F:=F))
+    (at level 60, right associativity, only parsing).
+  Notation "ᵖ[ ]" := pnil (at level 1, format "ᵖ[ ]").
+  Notation "ᵖ[ ]@{ F }" := (pnil (F:=F)) (at level 1, only parsing).
+  Notation "ᵖ[ x ; .. ; z ]" := (x ᵖ:: .. (z ᵖ:: ᵖ[]) ..)
+    (at level 1, format "ᵖ[ x ;  .. ;  z ]").
+  Notation "ᵖ[ x ; .. ; z ]@{ F }" := (x ᵖ::@{F} .. (z ᵖ::@{F} ᵖ[]@{F}) ..)
+    (at level 1, only parsing).
+End PlistNotation.
+
 (** [plist] as [list] *)
 Section of_plist.
   Context {A} {F : A → Type} {B} (f : ∀ a, F a → B).
