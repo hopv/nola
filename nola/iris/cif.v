@@ -521,3 +521,36 @@ Section as_cif.
     AS_CIF (▷ P) _.
   Next Obligation. done. Qed.
 End as_cif.
+
+(** ** Iterative separating conjunction *)
+
+(** [cif_big_sepL]: Iterative separating conjunction *)
+Fixpoint cif_big_sepL {CON Σ A} (Φx : nat → A → cif CON Σ) (al : list A)
+  : cif CON Σ :=
+  match al with
+  | [] => True
+  | a :: al => Φx 0 a ∗ cif_big_sepL (λ k, Φx (S k)) al
+  end%cif.
+Notation "'[∗' 'list]' k ↦ x ∈ l , Px" := (cif_big_sepL (λ k x, Px%cif) l)
+  : cif_scope.
+Notation "'[∗' 'list]' x ∈ l , Px" := (cif_big_sepL (λ _ x, Px%cif) l)
+  : cif_scope.
+
+Section cif_big_sepL.
+  Context `{!Csem CON JUDG Σ}.
+  Implicit Type δ : JUDG -n> iProp Σ.
+
+  (** Semantics of [cif_big_sepL] *)
+  Lemma sem_cif_big_sepL {δ A al} {Φx : nat → A → cif CON Σ} :
+    ⟦ cif_big_sepL Φx al ⟧ᶜ(δ) ⊣⊢ [∗ list] k ↦ a ∈ al, ⟦ Φx k a ⟧ᶜ(δ).
+  Proof. move: Φx. elim: al=>//= ?? IH ?. by rewrite IH. Qed.
+
+  (** Reify [cif_big_sepL] *)
+  #[export] Program Instance big_sepL_as_cif {A al} {Φ : _ → A → _}
+    `{!∀ k a, AsCif CON (Φ k a)} :
+    AsCif CON (λ δ, [∗ list] k ↦ a ∈ al, Φ k a δ)%I | 5 :=
+    AS_CIF ([∗ list] k ↦ a ∈ al, as_cif (Φ k a)) _.
+  Next Obligation.
+    move=>/= >. rewrite sem_cif_big_sepL. do 3 f_equiv. exact sem_as_cif.
+  Qed.
+End cif_big_sepL.
