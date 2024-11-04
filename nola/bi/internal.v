@@ -39,7 +39,7 @@ Section internal_ne.
     Persistent (@internal_ne A B f).
   Proof. exact _. Qed.
   (** [NonExpansive] entails [internal_ne] *)
-  Lemma ne_internal_ne {A B} `{!NonExpansive f} : ⊢ @internal_ne A B f.
-  Proof. iIntros (??) "≡". by iRewrite "≡". Qed.
+  Lemma ne_internal_ne {A B f} : NonExpansive f → ⊢ @internal_ne A B f.
+  Proof. iIntros (???) "≡". by iRewrite "≡". Qed.
 End internal_ne.
 Arguments internal_ne : simpl never.
