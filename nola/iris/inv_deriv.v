@@ -59,8 +59,7 @@ Section invJ.
     Proper ((≡{n}≡) ==> (=) ==> (≡{n}≡) ==> (≡{n}≡)) inv_acsr.
   Proof. solve_proper. Qed.
 
-  Context `{!invJ (FML $oi Σ) JUDG, !Dsem JUDG (FML $oi Σ) (iProp Σ),
-    !Jsem JUDG (iProp Σ)}.
+  Context `{!invJ (FML $oi Σ) JUDG, !Dsem JUDG (FML $oi Σ) (iProp Σ)}.
   Implicit Type δ : JUDG -n> iProp Σ.
 
   (** ** [invJT_sem]: Semantics of [invJT] *)

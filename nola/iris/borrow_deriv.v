@@ -66,8 +66,7 @@ Notation bord := (bor der). Notation obord := (obor der).
 Notation lendd := (lend der).
 
 Section borrowJ.
-  Context `{!borrowJ (FML $oi Σ) JUDG, !Dsem JUDG (FML $oi Σ) (iProp Σ),
-    !Jsem JUDG (iProp Σ)}.
+  Context `{!borrowJ (FML $oi Σ) JUDG, !Dsem JUDG (FML $oi Σ) (iProp Σ)}.
   Implicit Type δ : JUDG -n> iProp Σ.
 
   (** [borrowJT_sem]: Semantics of [borrowJT] *)

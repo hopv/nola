@@ -47,7 +47,7 @@ Notation dinvd := (dinv der).
 
 Section dinvJ.
   Context `{!dinvGS FML Σ, !dinvJ (FML $oi Σ) JUDG,
-    !Dsem JUDG (FML $oi Σ) (iProp Σ), !Jsem JUDG (iProp Σ)}.
+    !Dsem JUDG (FML $oi Σ) (iProp Σ)}.
   Implicit Type δ : JUDG -n> iProp Σ.
 
   (** ** [dinvJT_sem]: Semantics of [dinvJT] *)

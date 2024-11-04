@@ -67,8 +67,7 @@ Section na_invJ.
     Proper ((≡{n}≡) ==> (=) ==> (=) ==> (≡{n}≡) ==> (≡{n}≡)) na_inv_acsr.
   Proof. solve_proper. Qed.
 
-  Context `{!na_invJ (cif CON Σ) JUDG, !Dsem JUDG (cif CON Σ) (iProp Σ),
-    !Jsem JUDG (iProp Σ)}.
+  Context `{!na_invJ (cif CON Σ) JUDG, !Dsem JUDG (cif CON Σ) (iProp Σ)}.
   Implicit Type δ : JUDG -n> iProp Σ.
 
   (** ** [na_invJT_sem]: Semantics of [na_invJT] *)
