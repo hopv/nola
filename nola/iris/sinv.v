@@ -9,6 +9,7 @@ Import iPropAppNotation.
 
 Implicit Type FML : oFunctor.
 
+(** Ghost state for simple invariants *)
 Class sinvGpreS FML Σ :=
   sinvGpreS_in : inG Σ (gmap_viewR positive (agreeR (FML $oi Σ))).
 Local Existing Instance sinvGpreS_in.
@@ -25,7 +26,8 @@ Proof. solve_inG. Qed.
 
 Section sinv.
   Context `{!sinvGS FML Σ}.
-  Implicit Type (Px : FML $oi Σ) (sm : positive → FML $oi Σ → iProp Σ).
+  Implicit Type (Px : FML $oi Σ) (sm : positive → FML $oi Σ → iProp Σ)
+    (i : positive).
 
   (** Simple invariant token *)
   Local Definition sinv_tok_def i Px : iProp Σ :=
@@ -46,12 +48,6 @@ Section sinv.
   Definition sinv_wsat := sinv_wsat_aux.(unseal).
   Local Lemma sinv_wsat_unseal : sinv_wsat = sinv_wsat_def.
   Proof. exact: seal_eq. Qed.
-End sinv.
-
-Section sinv.
-  Context `{!sinvGS FML Σ}.
-  Implicit Type Px : FML $oi Σ.
-  Implicit Type (i : positive) (I : gset positive).
 
   (** [sinv_tok] is non-expansive *)
   #[export] Instance sinv_tok_ne {i} : NonExpansive (sinv_tok i).
@@ -97,7 +93,7 @@ Section sinv.
   Qed.
   (** Allocate [sinv_tok] suspending the world satisfaction *)
   Lemma sinv_tok_alloc_suspend {sm} Px :
-    sinv_wsat sm -∗ ∃ I, ∀ i, ⌜i ∉ I⌝ ==∗
+    sinv_wsat sm -∗ ∃ I : gset positive, ∀ i, ⌜i ∉ I⌝ ==∗
       sinv_tok i Px ∗ (sm i Px -∗ sinv_wsat sm).
   Proof.
     rewrite sinv_wsat_unseal. iIntros "[Ne[%M[● M]]]". iExists (dom M).
