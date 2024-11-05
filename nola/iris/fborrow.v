@@ -9,7 +9,9 @@ Import ProdNotation iPropAppNotation ModwNotation LftNotation DsemNotation.
 Implicit Type (α : lft) (q : Qp) (Σ : gFunctors) (FML : oFunctor) (FM : ofe).
 
 (** Formula for fractured borrows *)
-Definition fborrow_fmlOF FML : oFunctor := leibnizO lft * (Qp -d> FML).
+Variant fborrow_fml_id := .
+Definition fborrow_fmlOF FML : oFunctor :=
+  leibnizO (tagged fborrow_fml_id lft) * (Qp -d> FML).
 
 (** Ghost state for fractured borrows *)
 Class fborrowGpreS FML Σ :=
@@ -27,7 +29,7 @@ Section fborrow_wsat.
 
   (** [fborrow_sem]: Semantics for [fborrow_fmlOF] *)
   Definition fborrow_sem δ : fborrow_fmlOF FML $oi Σ → iProp Σ :=
-    λ '(α, Φx), (∃ q, bor δ α (Φx q))%I.
+    λ '(Tagged α, Φx), (∃ q, bor δ α (Φx q))%I.
   (** [fborrow_sem] is non-expansive *)
   #[export] Instance fborrow_sem_ne {δ} : NonExpansive (fborrow_sem δ).
   Proof. move=> ?[??][??][/=/leibniz_equiv_iff<- ?]. solve_proper. Qed.
@@ -64,7 +66,7 @@ Section fbor.
 
   (** [fbor]: Relaxed fractured borrower *)
   Local Definition fbor_def δ α Φx : iProp Σ :=
-    ∃ α', α ⊑□ α' ∗ dinv δ (α', Φx).
+    ∃ α', α ⊑□ α' ∗ dinv δ (Tagged α' : leibnizO _, Φx).
   Local Lemma fbor_aux : seal fbor_def. Proof. by eexists. Qed.
   Definition fbor := fbor_aux.(unseal).
   Local Lemma fbor_unseal : fbor = fbor_def. Proof. exact: seal_eq. Qed.
@@ -127,8 +129,9 @@ Section fbor.
   Lemma fbor_alloc {α} Φx q : bor δ α (Φx q) =[dinv_wsat ⟦⟧(δ)]=∗ fbor δ α Φx.
   Proof.
     iIntros "b". rewrite fbor_unseal.
-    iMod (dinv_alloc (FML:=fborrow_fmlOF _) (α, Φx) with "[b]") as "$"=>/=.
-    { by iExists _. } { iModIntro. iApply lft_sincl_refl. }
+    iMod (dinv_alloc (FML:=fborrow_fmlOF _) (Tagged α, Φx) with "[b]")
+      as "$"=>/=; [by iExists _|].
+    iModIntro. iApply lft_sincl_refl.
   Qed.
 
   (** Convert the body of [fbor] *)
