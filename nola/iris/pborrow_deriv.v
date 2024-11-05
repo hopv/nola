@@ -231,7 +231,7 @@ Section pborrow_deriv.
     (∀ π π' p p', fπ π p = fπ π' p' → p = p') →
     (∀ p, proph_dep (λ π, fπ π p) ζl) →
     pobord α q ξ Φx =[r:∗[ζl]]=∗ ∃ ηl,
-      ⟨π, π (Aprvar _ ξ) = fπ π (app_plist_prvar π ηl)⟩ ∗
+      ⟨π, π (Aprvar _ ξ) = fπ π (app_prvars π ηl)⟩ ∗
       (β ⊑□ α -∗
         ([∗ plist] '(a, yπ, Ψx)' ∈ ayπΨxl, ⟦ Ψx a yπ ⟧ᶜ) -∗
         ([∗ list] Rx ∈ Rxl, ⟦ Rx ⟧ᶜ) -∗
@@ -239,7 +239,7 @@ Section pborrow_deriv.
           ([∗ plist] '(yπ', _, _, Ψx)' ∈ plist_zip yπl' ayπΨxl,
             ⟦ ∃ a, Ψx a yπ' ⟧ᶜ%cif) -∗
           ([∗ list] Rx ∈ Rxl, ⟦ Rx ⟧ᶜ) -∗
-            M ⟦ ∃ a, Φx a (λ π, fπ π (app_plist_clair π yπl')) ⟧ᶜ%cif)
+            M ⟦ ∃ a, Φx a (λ π, fπ π (app_clairs π yπl')) ⟧ᶜ%cif)
           =[borrow_wsat M ⟦⟧ᶜ]=∗
           q.[α] ∗
           ([∗ plist] '(η, a, yπ, Ψx)' ∈ plist_zip ηl ayπΨxl,

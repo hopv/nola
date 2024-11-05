@@ -72,7 +72,7 @@ Definition aprvar_by_inhab {PTY} (X : PTY) (h : synpty_inhab X) : aprvar PTY :=
   prvar_by_inhab X h.
 
 (** [plist prvar] as [list aprvar] *)
-Definition of_plist_prvar {PTY} {Xl : list PTY}
+Definition Aprvars {PTY} {Xl : list PTY}
   : plist prvar Xl → list (aprvar PTY) :=
   of_plist Aprvar.
 
@@ -112,11 +112,11 @@ Proof. move=> ?. by apply synty_inhabited, prvar_inhab. Qed.
 Proof. apply populate. move=> [??]. by apply prvar_to_inhabited. Qed.
 
 (** Instantiate [plist] over [clair] with [prasn] *)
-Definition app_plist_clair {TY} {Xl : list TY} (π : prasn TY)
+Definition app_clairs {TY} {Xl : list TY} (π : prasn TY)
   (xπl : plist (λ X : TY, clair TY X) Xl) : plist synty_ty Xl :=
   plist_map (λ _ xπ, xπ π) xπl.
 (** Evaluate [plist prvar] with [prasn] *)
-Definition app_plist_prvar {TY} {Xl : list TY}
+Definition app_prvars {TY} {Xl : list TY}
   (π : prasn TY) (ξl : plist prvar Xl) : plist synty_ty Xl :=
   plist_map (λ _ (ξ : prvar _), π ξ) ξl.
 
@@ -179,11 +179,10 @@ Section lemmas.
     move=> dep dep' π π' eqv.
     rewrite (dep π π') ?(dep' π π') //; move=> ??; apply eqv; set_solver.
   Qed.
-  Lemma proph_dep_plist_prvar {Xl} (ξl : plist prvar Xl) :
-    proph_dep (λ π, app_plist_prvar π ξl) (of_plist_prvar ξl).
+  Lemma proph_dep_prvars {Xl} (ξl : plist prvar Xl) :
+    proph_dep (λ π, app_prvars π ξl) (Aprvars ξl).
   Proof.
-    elim: Xl ξl; [done|]=>/= ?? IH [ξ ξl] ?? eqv.
-    unfold app_plist_prvar=>/=. f_equal.
+    elim: Xl ξl; [done|]=>/= ?? IH [ξ ξl] ?? eqv. unfold app_prvars. f_equal.
     { apply (eqv ξ). set_solver. } { apply IH=> ??. apply eqv. set_solver. }
   Qed.
 

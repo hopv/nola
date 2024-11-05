@@ -539,7 +539,7 @@ Section lemmas.
   Qed.
   (** Allocate new prophecy variables *)
   Lemma proph_alloc_list {Xl} : plist synty_ty Xl →
-    ⊢ |==> ∃ ξl : plist _ Xl, 1:∗[of_plist_prvar ξl].
+    ⊢ |==> ∃ ξl : plist _ Xl, 1:∗[Aprvars ξl].
   Proof.
     elim: Xl; [move=>/= ?; by iExists ()|]=>/= ?? IH [x xl].
     iMod (IH xl) as (ξl) "ξl". iMod (proph_alloc x) as (ξ) "ξ". iModIntro.

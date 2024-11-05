@@ -175,8 +175,7 @@ Section pborrow.
     (xπΦxl : plist (λ X, _ *' (clair TY X -d> _)) Xl) : list (cif CON Σ) :=
     of_plist (λ _ '(xπ, Φx)', cif_xplend xπ Φx) xπΦxl.
   Local Lemma alloc_vol_xpbl {δ Xl ξl} {axπΦxl : plist _ Xl} :
-    1:∗[of_plist_prvar ξl] -∗
-    ([∗ plist] '(a, xπ, Φx)' ∈ axπΦxl, ⟦ Φx a xπ ⟧ᶜ(δ)) ==∗
+    1:∗[Aprvars ξl] -∗ ([∗ plist] '(a, xπ, Φx)' ∈ axπΦxl, ⟦ Φx a xπ ⟧ᶜ(δ)) ==∗
       ∃ γl, let γξaxπΦxl := plist_zip γl (plist_zip ξl axπΦxl) in
       ([∗ plist] '(γ, _, a, xπ, _)' ∈ γξaxπΦxl, val_obs γ a xπ) ∗
       ([∗ list] Px ∈ cif_xpborl γξaxπΦxl, ⟦ Px ⟧ᶜ(δ)).
@@ -325,7 +324,7 @@ Section pborrow.
   Local Lemma of_xpbl {δ Yl γl' ηl} {ayπΨxl : plist _ Yl} :
     ([∗ list] Qx ∈ cif_xpborl (plist_zip γl' (plist_zip ηl ayπΨxl)), ⟦ Qx ⟧ᶜ(δ))
       ==∗ ∃ yπl',
-      proph_eqz (λ π, app_plist_prvar π ηl) (λ π, app_plist_clair π yπl') ∗
+      proph_eqz (λ π, app_prvars π ηl) (λ π, app_clairs π yπl') ∗
       [∗ plist] '(yπ', _, _, Ψx)' ∈ plist_zip yπl' ayπΨxl,
         ⟦ ∃ a', Ψx a' yπ' ⟧ᶜ(δ)%cif.
   Proof.
@@ -343,7 +342,7 @@ Section pborrow.
     (∀ π π' p p', fπ π p = fπ π' p' → p = p') →
     (∀ p, proph_dep (λ π, fπ π p) ζl) →
     pobor_tok α q ξ Φx =[r:∗[ζl]]=∗ ∃ ηl,
-      ⟨π, π (Aprvar _ ξ) = fπ π (app_plist_prvar π ηl)⟩ ∗
+      ⟨π, π (Aprvar _ ξ) = fπ π (app_prvars π ηl)⟩ ∗
       (β ⊑□ α -∗
         ([∗ plist] '(a, yπ, Ψx)' ∈ ayπΨxl, ⟦ Ψx a yπ ⟧ᶜ(δ)) -∗
         ([∗ list] Rx ∈ Rxl, ⟦ Rx ⟧ᶜ(δ)) -∗
@@ -351,7 +350,7 @@ Section pborrow.
           ([∗ plist] '(yπ', _, _, Ψx)' ∈ plist_zip yπl' ayπΨxl,
             ⟦ ∃ a, Ψx a yπ' ⟧ᶜ(δ)%cif) -∗
           ([∗ list] Rx ∈ Rxl, ⟦ Rx ⟧ᶜ(δ)) -∗
-            M ⟦ ∃ a, Φx a (λ π, fπ π (app_plist_clair π yπl')) ⟧ᶜ(δ)%cif)
+            M ⟦ ∃ a, Φx a (λ π, fπ π (app_clairs π yπl')) ⟧ᶜ(δ)%cif)
           =[borrow_wsat M ⟦⟧ᶜ(δ)]=∗
           q.[α] ∗
           ([∗ plist] '(η, a, yπ, Ψx)' ∈ plist_zip ηl ayπΨxl,
@@ -363,7 +362,7 @@ Section pborrow.
       as (ηl) "ηl".
     iDestruct (proph_toks_combine with "ζl ηl") as (?) "[ζηl →ζlηl]".
     iMod (vo_pc_preresolve with "vo pc ζηl") as "(ζηl & $ & →pc)".
-    { apply proph_dep_fpi; [done|]. apply proph_dep_plist_prvar. }
+    { apply proph_dep_fpi; [done|]. apply proph_dep_prvars. }
     iDestruct ("→ζlηl" with "ζηl") as "[$ ηl]". iIntros "!> ⊑ Ψxl Rxl →Φx".
     iMod (alloc_vol_xpbl with "ηl Ψxl") as (?) "[vol xpbl]".
     iMod (obor_tok_subdiv (FML:=cifOF _) (M:=M) (_ ++ Rxl)
