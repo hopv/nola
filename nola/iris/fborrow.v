@@ -126,9 +126,9 @@ Section fbor.
   Context `{!Deriv (JUDG:=JUDG) ih δ}.
 
   (** Allocate [fbor] from [bor] *)
-  Lemma fbor_alloc {α} Φx q : bor δ α (Φx q) =[dinv_wsat ⟦⟧(δ)]=∗ fbor δ α Φx.
+  Lemma fbor_alloc {α} Φx q : bor δ α (Φx q) =[fborrow_wsat δ]=∗ fbor δ α Φx.
   Proof.
-    iIntros "b". rewrite fbor_unseal.
+    iIntros "b". rewrite fbor_unseal fborrow_wsat_unseal.
     iMod (dinv_alloc (FML:=fborrow_fmlOF _) (Tagged α, Φx) with "[b]")
       as "$"=>/=; [by iExists _|].
     iModIntro. iApply lft_sincl_refl.
