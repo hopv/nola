@@ -91,10 +91,10 @@ Section fbor.
   (** Access the content of [fbord] under the fractionality of [Φx] *)
   Lemma fbord_acc_bord {α Φx r} :
     Fractional (λ q, ⟦ Φx q ⟧) →
-    fbord α Φx -∗ r.[α] -∗ modw M (fborrow_wsatd ∗ borrow_wsat M ⟦⟧)
+    r.[α] -∗ fbord α Φx -∗ modw M (fborrow_wsatd ∗ borrow_wsat M ⟦⟧)
       (∃ q, r.[α] ∗ bord α (Φx q)).
   Proof.
-    rewrite fbor_unseal. iIntros (frac) "(%α' & #⊑ & f) α [Wf Wb]".
+    rewrite fbor_unseal. iIntros (frac) "α (%α' & #⊑ & f) [Wf Wb]".
     rewrite fborrow_wsat_unseal.
     iDestruct (dinvd_acc (FML:=fborrow_fmlOF _) with "f Wf") as "/=[[%q b] cl]".
     iMod (lft_sincl_live_acc with "⊑ α") as (?) "[α' →α]".
@@ -109,10 +109,10 @@ Section fbor.
   Qed.
   Lemma fbord_acc {α Φx r} :
     Fractional (λ q, ⟦ Φx q ⟧) →
-    fbord α Φx -∗ r.[α] -∗ modw M (fborrow_wsatd ∗ borrow_wsat M ⟦⟧)
+    r.[α] -∗ fbord α Φx -∗ modw M (fborrow_wsatd ∗ borrow_wsat M ⟦⟧)
       (∃ q, ⟦ Φx q ⟧ ∗ (⟦ Φx q ⟧ =[borrow_wsat M ⟦⟧]=∗ r.[α])).
   Proof.
-    iIntros (frac) "f α". iMod (fbord_acc_bord with "f α") as (?) "[α b]"=>//.
+    iIntros (frac) "α f". iMod (fbord_acc_bord with "α f") as (?) "[α b]"=>//.
     iIntros "[$ Wb]". iMod (bord_open with "α b Wb") as "/=($ & o & $)".
     iIntros "!> Φx". by iMod (obord_close (M:=M) with "o Φx") as "[$ _]".
   Qed.
