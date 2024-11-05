@@ -273,7 +273,7 @@ Section mod_frame.
 End mod_frame.
 
 (** Eliminate [modw] from [modw] *)
-#[export] Instance elim_modal_modw_modw `{!@Mod PROP M', !@Mod PROP M''} {φ}
+#[export] Instance elim_modal_modw_modw `{!@Mod PROP M', !@Mod PROP M''}
   `{!∀ R R', ElimModal φ false false (M R) R (M' R') (M'' R')}
   `{!WsatIncl W W' Wr} {p P Q} :
   ElimModal φ p false (@modw PROP M W' P) P (modw M' W Q) (modw M'' W Q).
@@ -284,7 +284,7 @@ Proof.
 Qed.
 
 (** Eliminate a usual modality from [modw] *)
-#[export] Instance elim_modal_mod_modw `{!@Mod PROP M', !@Mod PROP M''} {φ}
+#[export] Instance elim_modal_mod_modw `{!@Mod PROP M', !@Mod PROP M''}
   `{!∀ R R', ElimModal φ false false (M R) R (M' R') (M'' R')} {p P Q W} :
   ElimModal φ p false (M P) P (modw M' W Q) (modw M'' W Q) | 50.
 Proof.
