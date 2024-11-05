@@ -187,7 +187,7 @@ Section pborrow_deriv.
   Qed.
 
   (** Retrieve from a prophetic lender *)
-  Lemma plend_tok_retrieve {X α} {xπ : clair TY X} {Φx} :
+  Lemma plendd_retrieve {X α} {xπ : clair TY X} {Φx} :
     [†α] -∗ plendd α xπ Φx -∗ modw M (borrow_wsat M ⟦⟧ᶜ) (xplendd xπ Φx).
   Proof.
     iIntros "† l". iMod (lendd_retrieve (M:=M) with "† l")=>/=.
