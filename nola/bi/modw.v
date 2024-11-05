@@ -205,6 +205,12 @@ Section modw.
       apply bi.equiv_entails. f_equiv. by rewrite assoc.
   Qed.
 
+  (** Eliminate [modw] over [modw] *)
+  #[export] Instance elim_modal_modw_modw_sep
+    `{!ElimModal φ p p' (modw M (W ∗ W') P) P' Q Q'} :
+    ElimModal φ p p' (modw (modw M W) W' P) P' Q Q'.
+  Proof. by rewrite /ElimModal modw_modw_sep. Qed.
+
   (** [modw] over [emp] world satisfaction *)
   Lemma modw_emp {P} : modw M emp P ⊣⊢ M P.
   Proof. by rewrite /modw !left_id. Qed.
