@@ -4,7 +4,7 @@ From nola.bi Require Export plist.
 From nola.bi Require Import order.
 From nola.iris Require Export borrow proph_ag cif.
 From iris.proofmode Require Import proofmode.
-Import ProdNotation PlistNotation FunPNotation BUpd0Notation iPropAppNotation
+Import ProdNotation BigSepPLNotation FunPNotation BUpd0Notation iPropAppNotation
   LftNotation ProphNotation ModwNotation CsemNotation.
 
 Implicit Type (A : Type) (TY : synty) (FML : oFunctor) (γ : positive) (α : lft)

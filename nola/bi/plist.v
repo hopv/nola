@@ -15,7 +15,7 @@ Definition big_sepPL {PROP A F} (f : ∀ a, F a → PROP) {al}
   : plist F al → PROP :=
   big_opPL bi_sep f (A:=A) (al:=al).
 
-Module PlistNotation.
+Module BigSepPLNotation.
   Notation "[∗ plist] a ∈ al ; x ∈ xl , P" := (big_sepPL (al:=al) (λ a x, P) xl)
     (at level 200, al at level 10, xl at level 10, a binder, x binder,
       only parsing) : bi_scope.
@@ -25,8 +25,8 @@ Module PlistNotation.
   Notation "[∗ plist] x ∈ xl , P" := (big_sepPL (λ _ x, P) xl)
     (at level 200, xl at level 10, x binder,
       format "[∗  plist]  x  ∈  xl ,  P") : bi_scope.
-End PlistNotation.
-Import PlistNotation.
+End BigSepPLNotation.
+Import BigSepPLNotation.
 
 Section big_sepPL.
   Context {PROP A} {F : A → Type}.
