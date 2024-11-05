@@ -323,29 +323,12 @@ Section wpw.
     (|=[W]{E}=> WP[W] e @ s; E {{ v, |=[W]{E}=> Φ v }}) ⊢
       WP[W] e @ s; E {{ v, |=[W]{E}=> Φ v }}.
   Proof. rewrite fupdw_wpw_fupdw. apply wp_mono. iIntros (?) ">$". Qed.
-  #[export] Instance elim_modal_fupdw_wpw `{!WsatIncl W W' Wr} {p e s E P Φ} :
-    ElimModal (to_val e = None) p false (|=[W']{E}=> P) P
-      (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E {{ Φ }}).
-  Proof.
-    move=> ?. by rewrite /ElimModal bi.intuitionistically_if_elim mod_frame_r
-      bi.wand_elim_r (fupdw_incl (W:=W)) fupdw_wpw_nonval.
-  Qed.
-  #[export] Instance elim_modal_idw_wpw `{!WsatIncl W W' Wr} {p e s E P Φ} :
-    ElimModal (to_val e = None) p false (|->[W'] P) P
-      (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E {{ Φ }}).
-  Proof. move=> ?. by rewrite (idw_fupdw E) elim_modal_fupdw_wpw. Qed.
-  #[export] Instance elim_modal_idw_0_wpw `{!WsatIncl W W' Wr} {p e s E P Φ} :
-    ElimModal (to_val e = None) p false (|->[W']◇ P) P
-      (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E {{ Φ }}).
-  Proof. move=> ?. by rewrite (idw_0_fupdw E) elim_modal_fupdw_wpw. Qed.
-  #[export] Instance elim_modal_bupdw_wpw `{!WsatIncl W W' Wr} {p e s E P Φ} :
-    ElimModal (to_val e = None) p false (|=[W']=> P) P
-      (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E {{ Φ }}).
-  Proof. move=> ?. by rewrite (bupdw_fupdw E) elim_modal_fupdw_wpw. Qed.
-  #[export] Instance elim_modal_bupdw_0_wpw `{!WsatIncl W W' Wr} {p e s E P Φ} :
-    ElimModal (to_val e = None) p false (|=[W']=>◇ P) P
-      (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E {{ Φ }}) | 2.
-  Proof. move=> ?. by rewrite (bupdw_0_fupdw E) elim_modal_fupdw_wpw. Qed.
+  #[export] Instance wpw_nonval_is_fupdw {e s E W Φ} :
+    IsFUpdW (to_val e = None) W E (WP[W] e @ s; E {{ Φ }}).
+  Proof. exact fupdw_wpw_nonval. Qed.
+  #[export] Instance wpw_fupdw_is_fupdw {e s E W Φ} :
+    IsFUpdW True W E (WP[W] e @ s; E {{ v, |=[W]{E}=> Φ v }})%I.
+  Proof. move=> _. exact fupdw_wpw_fupdw'. Qed.
 
   (** Eliminate [fupdw] over [twpw] *)
   Lemma fupdw_twpw_nonval {e s E W Φ} : to_val e = None →
@@ -366,30 +349,12 @@ Section wpw.
     (|=[W]{E}=> WP[W] e @ s; E [{ v, |=[W]{E}=> Φ v }]) ⊢
       WP[W] e @ s; E [{ v, |=[W]{E}=> Φ v }].
   Proof. rewrite fupdw_twpw_fupdw. apply twp_mono. iIntros (?) ">$". Qed.
-  #[export] Instance elim_modal_fupdw_twpw `{!WsatIncl W W' Wr} {p e s E P Φ} :
-    ElimModal (to_val e = None) p false (|=[W']{E}=> P) P
-      (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E [{ Φ }]).
-  Proof.
-    move=> ?. by rewrite /ElimModal bi.intuitionistically_if_elim mod_frame_r
-      bi.wand_elim_r (fupdw_incl (W:=W)) fupdw_twpw_nonval.
-  Qed.
-  #[export] Instance elim_modal_idw_twpw `{!WsatIncl W W' Wr} {p e s E P Φ} :
-    ElimModal (to_val e = None) p false (|->[W'] P) P
-      (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E [{ Φ }]).
-  Proof. move=> ?. by rewrite (idw_fupdw E) elim_modal_fupdw_twpw. Qed.
-  #[export] Instance elim_modal_idw_0_twpw `{!WsatIncl W W' Wr} {p e s E P Φ} :
-    ElimModal (to_val e = None) p false (|->[W']◇ P) P
-      (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E [{ Φ }]).
-  Proof. move=> ?. by rewrite (idw_0_fupdw E) elim_modal_fupdw_twpw. Qed.
-  #[export] Instance elim_modal_bupdw_twpw `{!WsatIncl W W' Wr} {p e s E P Φ} :
-    ElimModal (to_val e = None) p false (|=[W']=> P) P
-      (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E [{ Φ }]).
-  Proof. move=> ?. by rewrite (bupdw_fupdw E) elim_modal_fupdw_twpw. Qed.
-  #[export] Instance elim_modal_bupdw_0_twpw
-    `{!WsatIncl W W' Wr} {p e s E P Φ} :
-    ElimModal (to_val e = None) p false (|=[W']=>◇ P) P
-      (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E [{ Φ }]) | 2.
-  Proof. move=> ?. by rewrite (bupdw_0_fupdw E) elim_modal_fupdw_twpw. Qed.
+  #[export] Instance twpw_nonval_is_fupdw {e s E W Φ} :
+    IsFUpdW (to_val e = None) W E (WP[W] e @ s; E [{ Φ }]).
+  Proof. exact fupdw_twpw_nonval. Qed.
+  #[export] Instance twpw_fupdw_is_fupdw {e s E W Φ} :
+    IsFUpdW True W E (WP[W] e @ s; E [{ v, |=[W]{E}=> Φ v }])%I.
+  Proof. move=> _. exact fupdw_twpw_fupdw'. Qed.
 
   (** Mask-changing [fupdw] over atomic [wpw] *)
   Lemma wpw_atomic `{!Atomic (stuckness_to_atomicity s) e} {E E' W Φ} :

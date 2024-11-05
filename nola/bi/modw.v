@@ -3,6 +3,7 @@
 From nola.bi Require Export mod.
 From iris.bi Require Export bi.
 From iris.proofmode Require Import proofmode.
+From stdpp Require Import coPset.
 Import BUpd0Notation.
 
 Implicit Type PROP : bi.
@@ -517,3 +518,38 @@ Use [iMod (fupd_mask_subseteq E')] to adjust the mask of your goal to [E']")
     iMod ("big" with "W") as "[W big]". iModIntro. by iApply "big".
   Qed.
 End fupdw.
+
+(** ** [IsFUpdW]: Proposition absorbing [fupdw] *)
+
+Class IsFUpdW `{!BiFUpd PROP} (φ : Prop) (W : PROP) (E : coPset) (P : PROP) :=
+  is_fupdw : φ → (|=[W]{E}=> P) ⊢ P.
+Hint Mode IsFUpdW + - - - - ! : typeclass_instances.
+
+(** Eliminate modalities under [IsFUpdW] *)
+Section is_fupdw.
+  Context `{!BiFUpd PROP, !IsFUpdW (PROP:=PROP) φ W E P}.
+
+  #[export] Instance elim_modal_fupdw_is_fupdw `{!WsatIncl W W' Wr} {p Q} :
+    ElimModal φ p false (|=[W']{E}=> Q) Q P P.
+  Proof.
+    move=> ?.
+    rewrite /ElimModal bi.intuitionistically_if_elim mod_frame_r bi.wand_elim_r
+      (fupdw_incl (W:=W)).
+    by apply is_fupdw.
+  Qed.
+  #[export] Instance elim_modal_idw_is_fupdw `{!WsatIncl W W' Wr} {p Q} :
+    ElimModal φ p false (|->[W'] Q) Q P P.
+  Proof. move=> ?. by rewrite (idw_fupdw E) elim_modal_fupdw_is_fupdw. Qed.
+  #[export] Instance elim_modal_idw_0_is_fupdw `{!WsatIncl W W' Wr} {p Q} :
+    ElimModal φ p false (|->[W']◇ Q) Q P P.
+  Proof. move=> ?. by rewrite (idw_0_fupdw E) elim_modal_fupdw_is_fupdw. Qed.
+
+  Context `{!BiBUpd PROP, !BiBUpdFUpd PROP}.
+
+  #[export] Instance elim_modal_bupdw_is_fupdw `{!WsatIncl W W' Wr} {p Q} :
+    ElimModal φ p false (|=[W']=> Q) Q P P.
+  Proof. move=> ?. by rewrite (bupdw_fupdw E) elim_modal_fupdw_is_fupdw. Qed.
+  #[export] Instance elim_modal_bupdw_0_is_fupdw `{!WsatIncl W W' Wr} {p Q} :
+    ElimModal φ p false (|=[W']=>◇ Q) Q P P.
+  Proof. move=> ?. by rewrite (bupdw_0_fupdw E) elim_modal_fupdw_is_fupdw. Qed.
+End is_fupdw.

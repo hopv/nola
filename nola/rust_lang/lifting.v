@@ -26,31 +26,19 @@ Section instances.
   Context `{!lrustGS_gen hlc Σ}.
   Let iris := lrustGS_iris'GS.
 
-  #[export] Instance elim_modal_fupdw_wpw
-    `{!WsatIncl W W' Wr} {p e s E P Φ} :
-    ElimModal (to_val e = None) p false (|=[W']{E}=> P) P
-      (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E {{ Φ }}).
-  Proof. exact elim_modal_fupdw_wpw. Qed.
+  #[export] Instance wpw_nonval_is_fupdw {e s E W Φ} :
+    IsFUpdW (to_val e = None) W E (WP[W] e @ s; E {{ Φ }}).
+  Proof. exact _. Qed.
+  #[export] Instance wpw_fupdw_is_fupdw {e s E W Φ} :
+    IsFUpdW True W E (WP[W] e @ s; E {{ v, |=[W]{E}=> Φ v }})%I.
+  Proof. exact _. Qed.
 
-  #[export] Instance elim_modal_fupdw_twpw
-    `{!WsatIncl W W' Wr} {p e s E P Φ} :
-    ElimModal (to_val e = None) p false (|=[W']{E}=> P) P
-      (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E [{ Φ }]).
-  Proof. exact elim_modal_fupdw_twpw. Qed.
-
-  #[export] Instance elim_modal_fupdw_wpw_atomic {p e s E E' P Φ}
-    `{!Atomic (stuckness_to_atomicity s) e, !WsatIncl W W' Wr} :
-    ElimModal (to_val e = None) p false (|=[W']{E,E'}=> P) P
-      (WP[W] e @ s; E {{ Φ }}) (WP[W] e @ s; E' {{ v, |=[W]{E',E}=> Φ v }})%I
-    | 100.
-  Proof. exact (elim_modal_fupdw_wpw_atomic (iris'GS_gen0:=iris)). Qed.
-
-  #[export] Instance elim_modal_fupdw_twpw_atomic {p e s E E' P Φ}
-    `{!Atomic (stuckness_to_atomicity s) e, !WsatIncl W W' Wr} :
-    ElimModal (to_val e = None) p false (|=[W']{E,E'}=> P) P
-      (WP[W] e @ s; E [{ Φ }]) (WP[W] e @ s; E' [{ v, |=[W]{E',E}=> Φ v }])%I
-    | 100.
-  Proof. exact (elim_modal_fupdw_twpw_atomic (iris'GS_gen0:=iris)). Qed.
+  #[export] Instance twpw_nonval_is_fupdw {e s E W Φ} :
+    IsFUpdW (to_val e = None) W E (WP[W] e @ s; E [{ Φ }]).
+  Proof. exact _. Qed.
+  #[export] Instance twpw_fupdw_is_fupdw {e s E W Φ} :
+    IsFUpdW True W E (WP[W] e @ s; E [{ v, |=[W]{E}=> Φ v }])%I.
+  Proof. exact _. Qed.
 End instances.
 
 Ltac inv_lit :=
