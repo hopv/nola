@@ -18,8 +18,8 @@ Arguments DSEM {_ _ _} _ _.
 Arguments dsem {_ _ _ _} _ _ /. Arguments dsem_ne {_ _ _ _}.
 
 Module DsemNotation'.
-  Notation "⟦ ⟧( x )" := (dsem x) (format "⟦ ⟧( x )").
-  Notation "⟦ a ⟧( x )" := (dsem x a) (format "⟦  '[' a  ']' ⟧( x )").
+  Notation "⟦ ⟧( δ )" := (dsem δ) (format "⟦ ⟧( δ )").
+  Notation "⟦ a ⟧( δ )" := (dsem δ a) (format "⟦  '[' a  ']' ⟧( δ )").
 End DsemNotation'.
 Import DsemNotation'.
 

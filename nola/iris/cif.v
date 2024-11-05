@@ -332,10 +332,11 @@ End iris.
 
 (** Notation for [cif_sem] *)
 Module CsemNotation.
-  Notation "⟦ ⟧ᶜ( x )" := (cif_sem x) (format "⟦ ⟧ᶜ( x )").
-  Notation "⟦ a ⟧ᶜ( x )" := (cif_sem x a) (format "⟦  '[' a  ']' ⟧ᶜ( x )").
+  Notation "⟦ ⟧ᶜ( δ )" := (cif_sem δ) (format "⟦ ⟧ᶜ( δ )").
+  Notation "⟦ Px ⟧ᶜ( δ )" := (cif_sem δ Px%cif)
+    (format "⟦  '[' Px  ']' ⟧ᶜ( δ )").
   Notation "⟦ ⟧ᶜ" := (⟦⟧ᶜ(der)) (format "⟦ ⟧ᶜ").
-  Notation "⟦ a ⟧ᶜ" := (⟦ a ⟧ᶜ(der)) (format "⟦  '[' a  ']' ⟧ᶜ").
+  Notation "⟦ Px ⟧ᶜ" := (⟦ Px ⟧ᶜ(der)) (format "⟦  '[' Px  ']' ⟧ᶜ").
 End CsemNotation.
 Import CsemNotation.
 
