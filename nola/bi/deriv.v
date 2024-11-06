@@ -7,7 +7,7 @@ From iris.proofmode Require Import proofmode.
 
 (** ** [Dsem]: Semantics parameterized over derivability candidates *)
 #[projections(primitive)]
-Record Dsem (JUDG : ofe) (A : ofe) (PROP : bi) := DSEM {
+Record Dsem (JUDG : ofe) (A : ofe) (PROP : bi) : Type := DSEM {
   dsem :> (JUDG -n> PROP) → A → PROP;
   dsem_ne {δ} :: NonExpansive (dsem δ);
 }.
@@ -153,7 +153,7 @@ Module DsemNotation.
 End DsemNotation.
 
 (** ** [inJ]: Judgment inclusion *)
-Record inJ (JUDG' JUDG : ofe) := IN_J {
+Record inJ (JUDG' JUDG : ofe) : Type := IN_J {
   in_j :> JUDG' → JUDG;
   in_j_ne :: NonExpansive in_j;
 }.
@@ -169,7 +169,7 @@ Definition sigT_inJ {A} {JUDGf : A → ofe} {a} : inJ (JUDGf a) (sigTO JUDGf) :=
 
 (** ** [inJS]: Judgment semantics inclusion *)
 Class inJS (JUDG' JUDG : ofe) PROP
-  `{!inJ JUDG' JUDG, !Dsem JUDG JUDG' PROP, !Jsem JUDG PROP} :=
+  `{!inJ JUDG' JUDG, !Dsem JUDG JUDG' PROP, !Jsem JUDG PROP} : Prop :=
   in_js : ∀ {δ J}, ⟦ @in_j JUDG' JUDG _ J ⟧(δ) = ⟦ J ⟧(δ).
 Hint Mode inJS ! - - - - - : typeclass_instances.
 

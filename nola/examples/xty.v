@@ -4,7 +4,7 @@ From nola.util Require Export prod proph.
 Import ProdNotation.
 
 (** Syntactic type *)
-Inductive xpty :=
+Inductive xpty : Set :=
 | aprvarₓ | prvarₓ (X : xpty) | xptyₓ
 | Empty_setₓ | unitₓ | boolₓ | natₓ | Zₓ | Propₓ
 | optionₓ (X : xpty) | listₓ (X : xpty) | vecₓ (X : xpty) (n : nat)

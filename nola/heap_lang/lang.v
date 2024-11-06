@@ -88,7 +88,7 @@ Inductive bin_op : Set :=
   | LeOp | LtOp | EqOp (* Relations *)
   | OffsetOp. (* Pointer offset *)
 
-Inductive expr :=
+Inductive expr : Set :=
   (* Values *)
   | Val (v : val)
   (* Base lambda calculus *)
@@ -415,7 +415,7 @@ not reduce directly under Resolve's first argument. We only reduce things nested
 further down. Once no nested contexts exist any more, the expression must take
 exactly one more step to a value, and Resolve then (atomically) also uses that
 value for prophecy resolution.  *)
-Inductive ectx_item :=
+Inductive ectx_item : Set :=
   | AppLCtx (v2 : val)
   | AppRCtx (e1 : expr)
   | UnOpCtx (op : un_op)

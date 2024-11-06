@@ -23,7 +23,7 @@ Implicit Type PTY : synpty.
 (** ** Prophecy variable *)
 
 #[projections(primitive)]
-Record prvar {PTY} (A : PTY) := Prvar {
+Record prvar {PTY} (A : PTY) : Set := Prvar {
   (* Proof of inhabitance *) prvar_inhab : synpty_inhab A;
   (* Id *) prvar_id : positive;
 }.
@@ -49,7 +49,7 @@ Proof. move=> neg [??]. by apply neg. Qed.
 
 (** Prophecy variable of any type *)
 #[projections(primitive)]
-Record aprvar PTY := Aprvar {
+Record aprvar PTY : Type := Aprvar {
   (* Type *) aprvar_ty : PTY;
   (* Variable *) aprvar_var :> prvar aprvar_ty;
 }.

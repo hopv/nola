@@ -5,7 +5,7 @@ From iris.algebra Require Import ofe.
 
 (** ** [tagged]: Type tagged with a ghost id *)
 #[projections(primitive)]
-Record tagged (ID : Type) (A : Type) := Tagged { untag : A; }.
+Record tagged (ID : Type) (A : Type) : Type := Tagged { untag : A; }.
 Add Printing Constructor tagged.
 Arguments Tagged {_ _}. Arguments untag {_ _}.
 

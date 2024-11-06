@@ -29,7 +29,7 @@ Notation "[ x1 ; x2 ; .. ; xn ]" :=
         (..(@cons binder xn%binder (@nil binder))..))) : binder_scope.
 Notation "[ x ]" := (@cons binder x%binder (@nil binder)) : binder_scope.
 
-Inductive expr :=
+Inductive expr : Set :=
 | Var (x : string)
 | Lit (l : base_lit)
 | Rec (f : binder) (xl : list binder) (e : expr)
@@ -60,13 +60,13 @@ Fixpoint is_closed (X : list string) (e : expr) : bool :=
   | Ndnat => true
   end.
 
-Class Closed (X : list string) (e : expr) := closed : is_closed X e.
+Class Closed (X : list string) (e : expr) : Type := closed : is_closed X e.
 Global Instance closed_proof_irrel env e : ProofIrrel (Closed env e).
 Proof. rewrite /Closed. apply _. Qed.
 Global Instance closed_decision env e : Decision (Closed env e).
 Proof. rewrite /Closed. apply _. Qed.
 
-Inductive val :=
+Inductive val : Set :=
 | LitV (l : base_lit)
 | RecV (f : binder) (xl : list binder) (e : expr) `{!Closed (f :b: xl +b+ []) e}.
 
@@ -87,12 +87,12 @@ Definition to_val (e : expr) : option val :=
   end.
 
 (** The state: heaps of vals*lockstate. *)
-Inductive lock_state :=
+Inductive lock_state : Set :=
 | WSt | RSt (n : nat).
 Definition state := gmap loc (lock_state * val).
 
 (** Evaluation contexts *)
-Inductive ectx_item :=
+Inductive ectx_item : Set :=
 | BinOpLCtx (op : bin_op) (e2 : expr)
 | BinOpRCtx (op : bin_op) (v1 : val)
 | AppLCtx (e2 : list expr)

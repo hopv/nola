@@ -62,12 +62,12 @@ Local Instance borrowRF_contractive `{!oFunctorContractive FML} :
 Proof. rewrite borrowRF_unseal. exact _. Qed.
 
 (** Ghost state for the borrowing machinery *)
-Class borrowGpreS FML Σ := BorrowGpreS {
+Class borrowGpreS FML Σ : Type := BorrowGpreS {
   borrowGpreS_lft :: lftG Σ;
   borrowGpreS_borrow : inG Σ (borrowRF FML $ri Σ);
 }.
 Local Existing Instance borrowGpreS_borrow.
-Class borrowGS FML Σ := BorrowGS {
+Class borrowGS FML Σ : Type := BorrowGS {
   borrowGS_lft :: lftG Σ;
   borrowGS_borrow : inG Σ (borrowRF FML $ri Σ);
   borrow_name : gname;

@@ -16,7 +16,7 @@ Implicit Type (TY : synty) (q : Qp).
 
 (** Prophecy log item *)
 #[projections(primitive)]
-Record proph_log_item TY := ProphLogItem {
+Record proph_log_item TY : Type := ProphLogItem {
   (* Prophecy variable *) pli_var : aprvar TY;
   (* Clairvoyant value *) pli_val : clair TY pli_var.(aprvar_ty);
 }.
@@ -117,7 +117,7 @@ Local Definition proph_mapUR TY := gmapUR positive (proph_itemR TY).
 
 (** Carrier of the algebra for the prophecy machinery *)
 #[projections(primitive)]
-Record proph_car TY := ProphCar { un_proph_car : proph_mapUR TY }.
+Record proph_car TY : Type := ProphCar { un_proph_car : proph_mapUR TY }.
 Add Printing Constructor proph_car.
 Arguments ProphCar {_}. Arguments un_proph_car {_}.
 
@@ -271,12 +271,12 @@ Local Instance pli_item_core_id {TY pli} :
 Proof. rewrite core_id_total /=. by apply singleton_core'. Qed.
 
 (** Ghost state *)
-Class prophGS TY Σ := ProphGS {
+Class prophGS TY Σ : Type := ProphGS {
   prophG_in : inG Σ (prophR TY);
   proph_name : gname;
 }.
 Local Existing Instance prophG_in.
-Class prophGpreS TY Σ := prophGpreS_in : inG Σ (prophR TY).
+Class prophGpreS TY Σ : Type := prophGpreS_in : inG Σ (prophR TY).
 Local Existing Instance prophGpreS_in.
 Definition prophΣ TY := GFunctor (prophR TY).
 #[export] Instance subG_prophPreG `{!subG (prophΣ TY) Σ} : prophGpreS TY Σ.

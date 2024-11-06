@@ -119,7 +119,7 @@ Proof. exact _. Qed.
 (** ** Completeness *)
 
 (** [prochain]: Chain / Cauchy sequence over [prost] *)
-Record prochain PR := Prochain {
+Record prochain PR : Type := Prochain {
   prochain_seq :> nat → PR;
   prochain_eq {k k'} : k ≤ k' → proeq k (prochain_seq k) (prochain_seq k');
 }.
@@ -128,7 +128,7 @@ Arguments Prochain {_}. Arguments prochain_seq {_}.
 Arguments prochain_eq {_ c _ _} : rename.
 
 (** [Cprost]: Complete [prost] *)
-Class Cprost PR := CPROST {
+Class Cprost PR : Type := CPROST {
   (** Limit *)
   prolimit : prochain PR → PR;
   (** For any level [k], [prolimit c] equals [c k] up to [k] *)

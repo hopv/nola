@@ -6,7 +6,7 @@ From nola.heap_lang Require Import proofmode notation.
 From iris.prelude Require Import options.
 Import WpwNotation.
 
-Class heapGpreS Σ := HeapGpreS {
+Class heapGpreS Σ : Type := HeapGpreS {
   heapGpreS_iris :: invGpreS Σ;
   heapGpreS_heap :: gen_heapGpreS loc (option val) Σ;
   heapGpreS_inv_heap :: inv_heapGpreS loc (option val) Σ;

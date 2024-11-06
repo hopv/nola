@@ -11,7 +11,7 @@ Implicit Type SEL : Type.
 (** [citg]: Generator of [cit] *)
 Section citg.
   Context {SEL} (I C : SEL → Type) (D : SEL → ofe) (CIT : ofe).
-  Inductive citg := Citg {
+  Inductive citg : Type := Citg {
     (** Selector *) citg_sel : SEL;
     (** Inductive children *) citg_ikids : I citg_sel → citg;
     (** Coinductive children *) citg_ckids : C citg_sel → CIT;
@@ -471,7 +471,7 @@ End wfcit.
 Section cita.
   Context {SEL} (I C : SEL → Type) (D : SEL → ofe).
   #[projections(primitive)]
-  Record cita := Cita {
+  Record cita : Type := Cita {
     cita_head : citi I C D 1;
     cita_tail : ∀ k, citi I C D (S (S k));
     cita_wf : wfcit cita_head cita_tail;

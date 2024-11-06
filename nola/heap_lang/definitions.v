@@ -7,7 +7,7 @@ From nola.bi Require Export wpw.
 From nola.heap_lang Require Export class_instances.
 Import ModwNotation WpwNotation.
 
-Class heapGS_gen hlc Σ := HeapGS {
+Class heapGS_gen hlc Σ : Type := HeapGS {
   heapGS_invGS :: invGS_gen hlc Σ;
   heapGS_gen_heapGS :: gen_heapGS loc (option val) Σ;
   heapGS_inv_heapGS :: inv_heapGS loc (option val) Σ;

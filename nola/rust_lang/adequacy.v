@@ -5,7 +5,7 @@ From nola.rust_lang Require Import proofmode notation.
 From iris.prelude Require Import options.
 Import WpwNotation.
 
-Class lrustGpreS Σ := HeapGpreS {
+Class lrustGpreS Σ : Type := HeapGpreS {
   lrustGpreS_inv :: invGpreS Σ;
   lrustGpreS_heap :: inG Σ (authR heapUR);
   lrustGpreS_heap_freeable :: inG Σ (authR heap_freeableUR)

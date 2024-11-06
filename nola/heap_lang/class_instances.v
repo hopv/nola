@@ -99,7 +99,7 @@ not if [v] contains a lambda/rec that is hidden behind a definition.
 
 To make sure that [wp_rec] and [wp_lam] do reduce lambdas/recs that are hidden
 behind a definition, we activate [AsRecV_recv] by hand in these tactics. *)
-Class AsRecV (v : val) (f x : binder) (erec : expr) :=
+Class AsRecV (v : val) (f x : binder) (erec : expr) : Prop :=
   as_recv : v = RecV f x erec.
 Global Hint Mode AsRecV ! - - - : typeclass_instances.
 Definition AsRecV_recv f x e : AsRecV (RecV f x e) f x e := eq_refl.

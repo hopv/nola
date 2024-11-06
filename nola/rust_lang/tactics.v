@@ -7,7 +7,7 @@ embedding of values and closed expressions is explicit. By reification of
 expressions into this type we can implement substitution, closedness
 checking, atomic checking, and conversion into values, by computation. *)
 Module W.
-Inductive expr :=
+Inductive expr : Set :=
 | Val (v : val) (e : lang.expr) (H : to_val e = Some v)
 | ClosedExpr (e : lang.expr) `{!Closed [] e}
 | Var (x : string)

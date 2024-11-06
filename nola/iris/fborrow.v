@@ -14,9 +14,9 @@ Definition fborrow_fmlOF FML : oFunctor :=
   leibnizO (tagged fborrow_fml_id lft) * (Qp -d> FML).
 
 (** Ghost state for fractured borrows *)
-Class fborrowGpreS FML Σ :=
+Class fborrowGpreS FML Σ : Type :=
   fborrowGpreS_dinv :: dinvGpreS (fborrow_fmlOF FML) Σ.
-Class fborrowGS FML Σ := fborrowGS_dinv :: dinvGS (fborrow_fmlOF FML) Σ.
+Class fborrowGS FML Σ : Type := fborrowGS_dinv :: dinvGS (fborrow_fmlOF FML) Σ.
 Definition fborrowΣ FML `{!oFunctorContractive FML} :=
   dinvΣ (fborrow_fmlOF FML).
 #[export] Instance subG_fborrowΣ

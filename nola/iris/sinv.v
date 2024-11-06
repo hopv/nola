@@ -10,10 +10,10 @@ Import iPropAppNotation.
 Implicit Type FML : oFunctor.
 
 (** Ghost state for simple invariants *)
-Class sinvGpreS FML Σ :=
+Class sinvGpreS FML Σ : Type :=
   sinvGpreS_in : inG Σ (gmap_viewR positive (agreeR (FML $oi Σ))).
 Local Existing Instance sinvGpreS_in.
-Class sinvGS FML Σ := SinvGS {
+Class sinvGS FML Σ : Type := SinvGS {
   sinvGS_pre : sinvGpreS FML Σ;
   sinv_name : gname;
 }.

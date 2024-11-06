@@ -6,7 +6,7 @@ From nola.rust_lang Require Import tactics.
 From iris.prelude Require Import options.
 Import uPred ModwNotation WpwNotation.
 
-Class lrustGS_gen hlc Σ := LRustGS {
+Class lrustGS_gen hlc Σ : Type := LRustGS {
   lrustGS_invGS : invGS_gen hlc Σ;
   lrustGS_heapGS :: heapGS Σ;
 }.
@@ -62,19 +62,19 @@ Local Hint Constructors base_step bin_op_eval lit_neq lit_eq : core.
 Local Hint Resolve alloc_fresh : core.
 Local Hint Resolve to_of_val : core.
 
-Class AsRec (e : expr) (f : binder) (xl : list binder) (erec : expr) :=
+Class AsRec (e : expr) (f : binder) (xl : list binder) (erec : expr) : Prop :=
   as_rec : e = Rec f xl erec.
 Global Instance AsRec_rec f xl e : AsRec (Rec f xl e) f xl e := eq_refl.
 Global Instance AsRec_rec_locked_val v f xl e :
   AsRec (of_val v) f xl e → AsRec (of_val (locked v)) f xl e.
 Proof. by unlock. Qed.
 
-Class DoSubst (x : binder) (es : expr) (e er : expr) :=
+Class DoSubst (x : binder) (es : expr) (e er : expr) : Prop :=
   do_subst : subst' x es e = er.
 Global Hint Extern 0 (DoSubst _ _ _ _) =>
   rewrite /DoSubst; simpl_subst; reflexivity : typeclass_instances.
 
-Class DoSubstL (xl : list binder) (esl : list expr) (e er : expr) :=
+Class DoSubstL (xl : list binder) (esl : list expr) (e er : expr) : Prop :=
   do_subst_l : subst_l xl esl e = Some er.
 Global Instance do_subst_l_nil e : DoSubstL [] [] e e.
 Proof. done. Qed.

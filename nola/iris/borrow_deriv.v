@@ -254,7 +254,7 @@ From nola.iris Require Import cif.
 
 (** [borrowCT]: Constructor *)
 Variant borrowCT_id := .
-Variant borrowCT_sel := cifs_bor α | cifs_obor α q | cifs_lend α.
+Variant borrowCT_sel : Set := cifs_bor α | cifs_obor α q | cifs_lend α.
 Definition borrowCT :=
   Cifcon borrowCT_id borrowCT_sel (λ _, Empty_set) (λ _, unit) (λ _, unitO) _.
 (** [borrowC]: [borrowCT] registered *)

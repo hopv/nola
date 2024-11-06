@@ -11,7 +11,7 @@ Import ProdNotation ProphNotation ModwNotation.
 Implicit Type (A : Type) (TY : synty).
 
 (** Ghost state *)
-Class proph_agG A TY Σ :=
+Class proph_agG A TY Σ : Type :=
   proph_agG_in :: ghost_varG Σ (A *' sigT' (λ X : TY, clair TY X)).
 Definition proph_agΣ A TY := ghost_varΣ (A *' sigT' (λ X : TY, clair TY X)).
 #[export] Instance subG_proph_agΣ `{!subG (proph_agΣ A TY) Σ} :

@@ -10,7 +10,7 @@ Implicit Type Σ : gFunctors.
 
 (** ** [cifcon]: Custom constructor structure for [cif] *)
 #[projections(primitive)]
-Record cifcon := Cifcon {
+Record cifcon : Type := Cifcon {
   (** Identifier *) cifc_id : Type;
   (** Selector of custom constructors *) cifc_sel :> Type;
   (** Domain for inductive parts *) cifc_idom : cifc_sel → Type;
@@ -36,7 +36,7 @@ Canonical sigTCT {A} (CONF : A → cifcon) := Cifcon (sigTCT_id CONF) (sigT CONF
 (** ** Data types for [cif] *)
 
 (** [cif_binsel]: Binary operator selector *)
-Variant cif_binsel :=
+Variant cif_binsel : Set :=
 | (** Conjunction *) cifs_and
 | (** Disjunction *) cifs_or
 | (** Implication *) cifs_imp
@@ -44,14 +44,14 @@ Variant cif_binsel :=
 | (** Magic wand *) cifs_wand.
 
 (** [cif_unsel]: Unary operator selector *)
-Variant cif_unsel :=
+Variant cif_unsel : Set :=
 | (** Plainly *) cifs_plain
 | (** Persistently *) cifs_pers
 | (** Basic update *) cifs_bupd
 | (** Except-0 *) cifs_except0.
 
 (** [cif_sel]: Selector *)
-Variant cif_sel CON :=
+Variant cif_sel CON : Type :=
 | (** Universal quantifier *) cifs_all (A : Type)
 | (** Existential quantifier *) cifs_ex (A : Type)
 | (** Binary operator *) cifs_bin (s : cif_binsel)
@@ -243,7 +243,7 @@ Implicit Type JUDG : ofe.
 
 (** ** Semantics for [cifcon] *)
 #[projections(primitive)]
-Record Csem CON JUDG Σ := CSEM {
+Record Csem CON JUDG Σ : Type := CSEM {
   (** Semantics *)
   csem :> ((JUDG -n> iProp Σ) -d> cif CON Σ -d> iProp Σ) →
     (JUDG -n> iProp Σ) → ∀ s, (CON.(cifc_idom) s -d> iProp Σ) →
@@ -344,7 +344,7 @@ Import CsemNotation.
 
 (** [inC]: Element [cifcon] *)
 #[projections(primitive)]
-Class inC CON' CON := IN_C {
+Class inC CON' CON : Type := IN_C {
   in_c_sel : CON' → CON;
   in_c_idom {s} : CON.(cifc_idom) (in_c_sel s) → CON'.(cifc_idom) s;
   in_c_cdom {s} : CON.(cifc_cdom) (in_c_sel s) → CON'.(cifc_cdom) s;
@@ -411,7 +411,7 @@ End cif_in.
 
 (** Semantics of an element [cifcon] *)
 #[projections(primitive)]
-Record Ecsem CON' CON JUDG Σ := ECSEM {
+Record Ecsem CON' CON JUDG Σ : Type := ECSEM {
   (** Semantics *)
   ecsem :> ((JUDG -n> iProp Σ) -d> cif CON Σ -d> iProp Σ) →
     (JUDG -n> iProp Σ) → ∀ s,
@@ -439,7 +439,7 @@ Next Obligation. move=> *?*???*?*?*. by apply ecsem_ne. Qed.
 
 (** Inclusion with respect to [inCS] and [Csem] *)
 Class inCS CON' CON JUDG Σ `{!inC CON' CON}
-  `{!Ecsem CON' CON JUDG Σ, !Csem CON JUDG Σ} :=
+  `{!Ecsem CON' CON JUDG Σ, !Csem CON JUDG Σ} : Prop :=
   in_cs : ∀ {sm δ s Φ Ψx d},
     csem (CON:=CON) sm δ (in_c_sel s) (λ i, Φ (in_c_idom i))
       (λ c, Ψx (in_c_cdom c)) (in_c_data d) =
@@ -468,7 +468,8 @@ Section cif_in.
 End cif_in.
 
 (** ** [AsCif]: Reify [iProp] into [cif] *)
-Class AsCif `{!Csem CON JUDG Σ} (Φ : (JUDG -n> iProp Σ) → iProp Σ) := AS_CIF {
+Class AsCif `{!Csem CON JUDG Σ} (Φ : (JUDG -n> iProp Σ) → iProp Σ) : Type :=
+  AS_CIF {
   as_cif : cif CON Σ;
   sem_as_cif {δ} : ⟦ as_cif ⟧ᶜ(δ) ⊣⊢ Φ δ;
 }.

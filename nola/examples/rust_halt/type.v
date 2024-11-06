@@ -38,7 +38,7 @@ Section ty.
   Context `{!Csem CON JUDG Σ}.
 
   (** Basic properties of a type *)
-  Class Ty {X} (T : ty CON Σ X) (sz : nat) := TY {
+  Class Ty {X} (T : ty CON Σ X) (sz : nat) : Prop := TY {
     (** The sharing predicate is persistent *)
     ty_shr_persistent {t d l α xπ δ} :: Persistent ⟦ T.2 t d l α xπ ⟧ᶜ(δ);
     (** The ownership predicate entails the size constraint *)
@@ -51,7 +51,7 @@ Section ty.
   }.
 
   (** Basic properties of a simple type *)
-  Class Sty {X} (T : sty CON Σ X) (sz : nat) := STY {
+  Class Sty {X} (T : sty CON Σ X) (sz : nat) : Prop := STY {
     (** The ownership predicate is persistent *)
     sty_persistent {t d xπ vl δ} :: Persistent ⟦ T t d xπ vl ⟧ᶜ(δ);
     (** The ownership predicate entails the size constraint *)
@@ -62,7 +62,7 @@ Section ty.
   }.
 
   (** Basic properties of a plain type *)
-  Class Pty {X} (T : pty CON Σ X) (sz : nat) := PTY {
+  Class Pty {X} (T : pty CON Σ X) (sz : nat) : Prop := PTY {
     (** The ownership predicate is persistent *)
     pty_persistent {x vl δ} :: Persistent ⟦ T x vl ⟧ᶜ(δ);
     (** The ownership predicate entails the size constraint *)
@@ -118,7 +118,7 @@ Section ty_op.
     !Jsem JUDG (iProp Σ)}.
 
   (** [TyOpAt]: Basic operations on a type at a depth *)
-  Class TyOpAt {X} (T : ty CON Σ X) (β : lft) (d : nat) := TY_OP_AT {
+  Class TyOpAt {X} (T : ty CON Σ X) (β : lft) (d : nat) : Prop := TY_OP_AT {
     (** Take out prophecy tokens from ownership and sharing formulas *)
     ty_own_proph {t xπ vl q} :
       q.[β] -∗ ⟦ T.1 t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
@@ -168,7 +168,7 @@ Section ty_op.
   Proof. move=> ?????<-??<-. split; by apply TyOpAt_mono. Qed.
 
   (** [TyOpLt]: Basic operations on a type below a depth *)
-  Class TyOpLt {X} (T : ty CON Σ X) (α : lft) (d : nat) :=
+  Class TyOpLt {X} (T : ty CON Σ X) (α : lft) (d : nat) : Prop :=
     ty_op_lt : ∀ {d'}, d' < d → TyOpAt T α d'.
 
   (** [TyOpLt] is monotone *)
@@ -242,7 +242,7 @@ Section classes.
   Context {CON Σ}.
 
   (** [Send]: the ownership formula does not depend on the thread id *)
-  Class Send {X} (T : ty CON Σ X) :=
+  Class Send {X} (T : ty CON Σ X) : Prop :=
     send : ∀ {t t'}, T.1 t ≡ T.1 t'.
   (** [Send] is proper *)
   #[export] Instance Send_proper {X} : Proper ((≡) ==> (↔)) (@Send X).
@@ -252,7 +252,7 @@ Section classes.
   Qed.
 
   (** [Sync]: the sharing formula does not depend on the thread id *)
-  Class Sync {X} (T : ty CON Σ X) :=
+  Class Sync {X} (T : ty CON Σ X) : Prop :=
     sync : ∀ {t t'}, T.2 t ≡ T.2 t'.
   (** [Sync] is proper *)
   #[export] Instance Sync_proper {X} : Proper ((≡) ==> (↔)) (@Sync X).
@@ -265,7 +265,7 @@ Section classes.
     !Jsem JUDG (iProp Σ)}.
 
   (** [Copy] *)
-  Class Copy {X} (T : ty CON Σ X) := COPY {
+  Class Copy {X} (T : ty CON Σ X) : Prop := COPY {
     (** Persistence of the ownership formula *)
     copy_persistent {t d xπ vl δ} : Persistent ⟦ T.1 t d xπ vl ⟧ᶜ(δ);
     (** Access via the sharing formula *)

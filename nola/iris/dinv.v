@@ -9,9 +9,9 @@ Import iPropAppNotation ModwNotation.
 Implicit Type (FML : oFunctor) (i : positive).
 
 (** Ghost state for direct invariants *)
-Class dinvGpreS FML Σ := dinvGpreS_sinv : sinvGpreS FML Σ.
+Class dinvGpreS FML Σ : Type := dinvGpreS_sinv : sinvGpreS FML Σ.
 Local Existing Instance dinvGpreS_sinv.
-Class dinvGS FML Σ := dinvGS_sinv : sinvGS FML Σ.
+Class dinvGS FML Σ : Type := dinvGS_sinv : sinvGS FML Σ.
 Local Existing Instance dinvGS_sinv.
 Definition dinvΣ FML `{!oFunctorContractive FML} := sinvΣ FML.
 #[export] Instance subG_dinvΣ

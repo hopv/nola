@@ -18,7 +18,7 @@ Definition heapUR : ucmra :=
 Definition heap_freeableUR : ucmra :=
   gmapUR block (prodR fracR (gmapR Z (exclR unitO))).
 
-Class heapGS Σ := HeapGS {
+Class heapGS Σ : Type := HeapGS {
   heap_inG :: inG Σ (authR heapUR);
   heap_freeable_inG :: inG Σ (authR heap_freeableUR);
   heap_name : gname;

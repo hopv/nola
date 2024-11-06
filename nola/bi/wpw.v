@@ -9,7 +9,7 @@ From iris.proofmode Require Import proofmode.
 Import BUpd0Notation ModwNotation.
 
 (** ** [iris'GS_gen]: Language ghost state for a custom world satisfaction *)
-Class iris'GS_gen (hlc : has_lc) (Λ : language) Σ := Iris'G {
+Class iris'GS_gen (hlc : has_lc) (Λ : language) Σ : Type := Iris'G {
   iris'_invGS :: invGS_gen hlc Σ;
   state_interp' : state Λ → nat → list (observation Λ) → nat → iProp Σ;
   fork_post' : val Λ → iProp Σ;

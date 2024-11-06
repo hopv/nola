@@ -94,7 +94,7 @@ Import FunNPNotation.
 
 (** Dual *)
 #[projections(primitive)]
-Record dual A := Dual { undual : A }.
+Record dual A : Type := Dual { undual : A }.
 Add Printing Constructor dual.
 Arguments Dual {_} _. Arguments undual {_} _.
 (** [ofe] structure for [dual] *)
@@ -131,14 +131,14 @@ Proof. done. Qed.
 
 (** ** Monotonicity *)
 
-Class Mono {OT OT'} (f : OT -p> OT') := mono :: Proper ((⊑) ==> (⊑)) f.
+Class Mono {OT OT'} (f : OT -p> OT') : Prop := mono :: Proper ((⊑) ==> (⊑)) f.
 Hint Mode Mono - - ! : typeclass_instances.
-Class Anti {OT OT'} (f : OT -p> OT') := anti :: Proper ((⊑) --> (⊑)) f.
+Class Anti {OT OT'} (f : OT -p> OT') : Prop := anti :: Proper ((⊑) --> (⊑)) f.
 Hint Mode Anti - - ! : typeclass_instances.
-Class Mono2 {OT OT' OT''} (f : OT -p> OT' -p> OT'') :=
+Class Mono2 {OT OT' OT''} (f : OT -p> OT' -p> OT'') : Prop :=
   mono2 :: Proper ((⊑) ==> (⊑) ==> (⊑)) f.
 Hint Mode Mono2 - - - ! : typeclass_instances.
-Class AntiMono {OT OT' OT''} (f : OT -p> OT' -p> OT'') :=
+Class AntiMono {OT OT' OT''} (f : OT -p> OT' -p> OT'') : Prop :=
   antimono :: Proper ((⊑) --> (⊑) ==> (⊑)) f.
 Hint Mode AntiMono - - - ! : typeclass_instances.
 
@@ -188,14 +188,14 @@ Proof. move=> *?*?. etrans; by [|etrans]. Qed.
 
 (** ** Top and bottom *)
 
-Class Otop OT := OTOP {
+Class Otop OT : Type := OTOP {
   otop :: Top OT;
   otop_intro {o : OT} : o ⊑ ⊤;
 }.
 Hint Mode Otop ! : typeclass_instances.
 Arguments OTOP {_} _ _.
 
-Class Obot OT := OBOT {
+Class Obot OT : Type := OBOT {
   obot :: Bottom OT;
   obot_elim {o : OT} : ⊥ ⊑ o;
 }.
@@ -242,7 +242,7 @@ Next Obligation. move=> ???. exact otop_intro. Qed.
 
 (** ** Binary meet and join *)
 
-Class BinMeet OT := BIN_MEET {
+Class BinMeet OT : Type := BIN_MEET {
   bin_meet :: Meet OT;
   bin_meet_ne :: NonExpansive2 bin_meet;
   bin_meet_elim_1 {o o' : OT} : o ⊓ o' ⊑ o;
@@ -252,7 +252,7 @@ Class BinMeet OT := BIN_MEET {
 Hint Mode BinMeet ! : typeclass_instances.
 Arguments BIN_MEET {_} _ _ _ _.
 
-Class BinJoin OT := BIN_JOIN {
+Class BinJoin OT : Type := BIN_JOIN {
   bin_join :: Join OT;
   bin_join_ne :: NonExpansive2 bin_join;
   bin_join_intro_1 {o o' : OT} : o ⊑ o ⊔ o';
@@ -411,7 +411,7 @@ Next Obligation. move=> *. exact: bin_meet_intro. Qed.
 
 (** ** Big meet and join *)
 
-Class BigMeet OT := BIG_MEET {
+Class BigMeet OT : Type := BIG_MEET {
   big_meet {A : Type} : (A -p> Prop) → (A -p> OT) → OT;
   big_meet_ne {A S} : NonExpansive (@big_meet A S);
   big_meet_elim {A S} f {a} : S a → @big_meet A S f ⊑ f a;
@@ -420,7 +420,7 @@ Class BigMeet OT := BIG_MEET {
 Hint Mode BigMeet ! : typeclass_instances.
 Arguments BIG_MEET {_} _ _ _.
 
-Class BigJoin OT := BIG_JOIN {
+Class BigJoin OT : Type := BIG_JOIN {
   big_join {A : Type} : (A -p> Prop) → (A -p> OT) → OT;
   big_join_ne {A S} : NonExpansive (@big_join A S);
   big_join_intro {A S} f {a} : S a → f a ⊑ @big_join A S f;

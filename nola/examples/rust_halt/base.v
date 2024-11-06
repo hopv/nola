@@ -11,7 +11,7 @@ Notation thread_id := na_inv_pool_name.
 
 (** ** Ghost state *)
 
-Class rust_haltGS CON Σ := RustHaltGS {
+Class rust_haltGS CON Σ : Type := RustHaltGS {
   rust_haltGS_lrust :: lrustGS_gen HasNoLc Σ;
   rust_haltGS_inv :: inv'GS (cifOF CON) Σ;
   rust_haltGS_na_inv :: na_invG Σ;
@@ -22,7 +22,7 @@ Class rust_haltGS CON Σ := RustHaltGS {
   rust_haltGS_proph_ag :: proph_agG nat xty Σ;
   rust_haltGS_fborrow :: fborrowGS (cifOF CON) Σ;
 }.
-Class rust_haltGpreS CON Σ := RustHaltGpreS {
+Class rust_haltGpreS CON Σ : Type := RustHaltGpreS {
   rust_haltGpreS_lrust :: lrustGpreS Σ;
   rust_haltGoreS_inv :: inv'GpreS (cifOF CON) Σ;
   rust_haltGpreS_na_inv :: na_invG Σ;
@@ -43,7 +43,7 @@ Proof. solve_inG. Qed.
 (** ** Constructor and judgment constraint *)
 
 (** Constructor constraint *)
-Class rust_haltC CON := RUST_HALT_C {
+Class rust_haltC CON : Type := RUST_HALT_C {
   rust_haltC_inv :: invC CON;
   rust_haltC_na_inv :: na_invC CON;
   rust_haltC_store :: storeC CON;
@@ -54,7 +54,7 @@ Class rust_haltC CON := RUST_HALT_C {
 }.
 
 (** Judgment constraint *)
-Class rust_haltJ CON JUDG Σ := RUST_HALT_J {
+Class rust_haltJ CON JUDG Σ : Type := RUST_HALT_J {
   rust_haltJ_inv :: invJ (cifO CON Σ) JUDG;
   rust_haltJ_na_inv :: na_invJ (cifO CON Σ) JUDG;
   rust_haltJ_dinv :: dinvJ (cifO CON Σ) JUDG;
@@ -65,7 +65,7 @@ Class rust_haltJ CON JUDG Σ := RUST_HALT_J {
 
 (** Constructor semantics constraint *)
 Class rust_haltCS CON JUDG Σ `{!rust_haltGS CON Σ, !rust_haltC CON}
-  `{!rust_haltJ CON JUDG Σ, !Csem CON JUDG Σ} := RUST_HALT_CS {
+  `{!rust_haltJ CON JUDG Σ, !Csem CON JUDG Σ} : Prop := RUST_HALT_CS {
   rust_haltCS_inv :: invCS CON JUDG Σ;
   rust_haltCS_na_inv :: na_invCS CON JUDG Σ;
   rust_haltCS_store :: storeCS CON JUDG Σ;
@@ -77,7 +77,7 @@ Class rust_haltCS CON JUDG Σ `{!rust_haltGS CON Σ, !rust_haltC CON}
 
 (** Judgment semantics constraint *)
 Class rust_haltJS CON JUDG Σ `{!rust_haltGS CON Σ, !rust_haltC CON}
-  `{!rust_haltJ CON JUDG Σ, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ)} :=
+  `{!rust_haltJ CON JUDG Σ, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ)} : Prop :=
   RUST_HALT_JS {
   rust_haltJS_inv :: invJS (cifOF CON) JUDG Σ;
   rust_haltJS_na_inv :: na_invJS CON JUDG Σ;

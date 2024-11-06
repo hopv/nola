@@ -521,7 +521,8 @@ End fupdw.
 
 (** ** [IsFUpdW]: Proposition absorbing [fupdw] *)
 
-Class IsFUpdW `{!BiFUpd PROP} (φ : Prop) (W : PROP) (E : coPset) (P : PROP) :=
+Class IsFUpdW `{!BiFUpd PROP} (φ : Prop) (W : PROP) (E : coPset) (P : PROP)
+  : Prop :=
   is_fupdw : φ → (|=[W]{E}=> P) ⊢ P.
 Hint Mode IsFUpdW + - - - - ! : typeclass_instances.
 
