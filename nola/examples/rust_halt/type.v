@@ -458,6 +458,21 @@ Section tcx.
     iMod ("sub" with "α t pre Γi") as (yπl) "($ & $ & ? & ?)". iExists (_,_)'.
     by iFrame.
   Qed.
+  (** [sub] is monotone *)
+  #[export] Instance sub_mono {Xl Yl} :
+    Proper ((⊑) --> (=) ==> (=) ==>
+      pointwise_relation _ (pointwise_relation _ impl) --> (⊢)) (@sub Xl Yl).
+  Proof.
+    move=>/= ?????<-??<-?? impl. rewrite sub_pre; [|exact impl].
+    iApply sub_lft. by iApply lft_incl_sincl.
+  Qed.
+  #[export] Instance sub_proper {Xl Yl α Γi Γo} :
+    Proper (pointwise_relation _ (pointwise_relation _ (↔)) --> (⊣⊢))
+      (@sub Xl Yl α Γi Γo).
+  Proof.
+    move=> ?? impl. apply bi.equiv_entails.
+    split; apply sub_mono=>//= ???; by apply impl.
+  Qed.
 
   (** Modify the input type context of [type] *)
   Lemma type_in {Xl' Xl Yl α Γi' Γi e Γo prei pre} :
@@ -506,6 +521,21 @@ Section tcx.
     rewrite type_unseal. iIntros "#type !>" (????) "/= α t pre [vT Γi]".
     iDestruct ("type" with "α t pre Γi") as "twp". iApply (twp_wand with "twp").
     iIntros (?) ">(% & $ & $ & ? & ?) !>". iExists (_,_)'. by iFrame.
+  Qed.
+  (** [type] is monotone *)
+  #[export] Instance type_mono {Xl Yl} :
+    Proper ((⊑) --> (=) ==> (=) ==> (=) ==>
+      pointwise_relation _ (pointwise_relation _ impl) --> (⊢)) (@type Xl Yl).
+  Proof.
+    move=>/= ?????<-??<-??<-?? impl. rewrite type_pre; [|exact impl].
+    iApply type_lft. by iApply lft_incl_sincl.
+  Qed.
+  #[export] Instance type_proper {Xl Yl α Γi e Γo} :
+    Proper (pointwise_relation _ (pointwise_relation _ (↔)) --> (⊣⊢))
+      (@type Xl Yl α Γi e Γo).
+  Proof.
+    move=> ?? impl. apply bi.equiv_entails.
+    split; apply type_mono=>//= ???; by apply impl.
   Qed.
 End tcx.
 Arguments type {_ _ _ _ _ _ _ _ _} _ _ _%_E _ _.
