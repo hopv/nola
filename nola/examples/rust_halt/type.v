@@ -290,33 +290,36 @@ Section subty.
   Implicit Type δ : JUDG -n> iProp Σ.
 
   (** [subty]: Subtyping *)
-  Definition subty δ {X Y} (T : ty CON Σ X) (U : ty CON Σ Y) (f : X → Y)
+  Definition subty_def δ {X Y} (T : ty CON Σ X) (U : ty CON Σ Y) (f : X → Y)
     : iProp Σ :=
     (* Ownership formula conversion *) □ (∀ t d xπ vl,
       ⟦ T.1 t d xπ vl ⟧ᶜ(δ) -∗ ⟦ U.1 t d (λ π, f (xπ π)) vl ⟧ᶜ(δ)) ∧
     (* Sharing formula conversion *) □ (∀ t d l α xπ,
       ⟦ T.2 t d l α xπ ⟧ᶜ(δ) -∗ ⟦ U.2 t d l α (λ π, f (xπ π)) ⟧ᶜ(δ)).
+  Lemma subty_aux : @subty_def.(seal). Proof. by eexists _. Qed.
+  Definition subty δ {X Y} := subty_aux.(unseal) δ X Y.
+  Lemma subty_unseal : @subty = @subty_def. Proof. exact: seal_eq. Qed.
 
   (** [subty] is persistent *)
   #[export] Instance subty_persistent {δ X Y T U f} :
     Persistent (@subty δ X Y T U f).
-  Proof. exact _. Qed.
+  Proof. rewrite subty_unseal. exact _. Qed.
   (** [subty] is proper *)
   #[export] Instance subty_proper {δ X Y} :
     Proper ((≡) ==> (≡) ==> (=) ==> (⊣⊢)) (@subty δ X Y).
   Proof.
-    move=> ??[eqvO eqvS]??[eqvO' eqvS']??<-. unfold subty.
+    rewrite subty_unseal /subty_def=> ??[eqvO eqvS]??[eqvO' eqvS']??<-.
     repeat f_equiv; [exact (eqvO _ _ _ _)|exact (eqvO' _ _ _ _)|
       exact (eqvS _ _ _ _ _)|exact (eqvS' _ _ _ _ _)].
   Qed.
   (** [subty] is reflexive *)
   Lemma subty_refl {δ X T} : ⊢ @subty δ X _ T T id.
-  Proof. iSplit; iModIntro; iIntros; iFrame. Qed.
+  Proof. rewrite subty_unseal. iSplit; iModIntro; iIntros; iFrame. Qed.
   (** [subty] is transitive *)
   Lemma subty_trans {δ X Y Z T U V f g} :
     @subty δ X Y T U f -∗ @subty δ _ Z U V g -∗ @subty δ X Z T V (g ∘ f).
   Proof.
-    iIntros "[#TUo #TUs][#UVo #UVs]". iSplit; iModIntro.
+    rewrite subty_unseal. iIntros "[#TUo #TUs][#UVo #UVs]". iSplit; iModIntro.
     - iIntros (????) "T". iApply "UVo". by iApply "TUo".
     - iIntros (?????) "T". iApply "UVs". by iApply "TUs".
   Qed.
@@ -328,8 +331,8 @@ Section subty.
     □ (∀ t d xπ vl, ⟦ T t d xπ vl ⟧ᶜ(δ) -∗ ⟦ U t d (λ π, f (xπ π)) vl ⟧ᶜ(δ)) ⊢
       @subty δ X Y (ty_sty T) (ty_sty U) f.
   Proof.
-    iIntros "#sub". iSplit; [done|]=>/=. iIntros (?????) "!> (% & $ & ?)".
-    by iApply "sub".
+    rewrite subty_unseal. iIntros "#sub". iSplit; [done|]=>/=.
+    iIntros (?????) "!> (% & $ & ?)". by iApply "sub".
   Qed.
   (** [subty] over [pty] *)
   Lemma subty_pty {δ X Y T U f} :

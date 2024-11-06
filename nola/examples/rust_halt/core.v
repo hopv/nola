@@ -37,18 +37,20 @@ Section type.
       sub (Xl:=X::Zl) (Yl:=Y::_) α (vl *◁ T ᵖ:: Γ) (vl *◁ U ᵖ:: Γ)
         (λ post '(x, zl)', post (f x, zl)').
   Proof.
-    rewrite sub_unseal. iIntros "[#TU _] !>/=" (????) "$ $ pre [[% T] Γ] !>".
-    iExists (_,_)'. iDestruct ("TU" with "T") as "$". iFrame.
+    rewrite subty_unseal sub_unseal.
+    iIntros "[#TU _] !>/=" (????) "$ $ pre [[% T] Γ] !>". iExists (_,_)'.
+    iDestruct ("TU" with "T") as "$". iFrame.
   Qed.
   Lemma sub_subty_frozen_hd {X Y Zl α β vl T U Γ} `{!Inj (=) (=) f} :
     subtyd T U f ⊢
       sub (Xl:=X::Zl) (Yl:=Y::_) α (vl *◁[†β] T ᵖ:: Γ) (vl *◁[†β] U ᵖ:: Γ)
         (λ post '(x, zl)', post (f x, zl)').
   Proof.
-    rewrite sub_unseal. iIntros "[#TU _] !>/=" (????) "$ $ pre [→T Γ] !>".
-    iExists (_,_)'. iFrame "pre Γ". iIntros "†".
-    iMod ("→T" with "†") as (??) "[eqz T]". iExists _, _.
-    iDestruct ("TU" with "T") as "$". iApply (proph_eqz_f with "eqz").
+    rewrite subty_unseal sub_unseal.
+    iIntros "[#TU _] !>/=" (????) "$ $ pre [→T Γ] !>". iExists (_,_)'.
+    iFrame "pre Γ". iIntros "†". iMod ("→T" with "†") as (??) "[eqz T]".
+    iExists _, _. iDestruct ("TU" with "T") as "$".
+    iApply (proph_eqz_f with "eqz").
   Qed.
 
   (** ** Operations on lifetimes *)
