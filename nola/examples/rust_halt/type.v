@@ -69,6 +69,30 @@ Section ty.
     pty_size {x vl δ} : ⟦ T x vl ⟧ᶜ(δ) ⊢ ⌜length vl = sz⌝;
   }.
 
+  (** [Ty], [Sty], [Pty] are proper *)
+  #[export] Instance Ty_proper {X} : Proper ((≡) ==> (=) ==> (↔)) (@Ty X).
+  Proof.
+    have pro : Proper ((≡) ==> (=) ==> (→)) (@Ty X); last first.
+    { move=> ?????<-. split; by apply pro. }
+    move=> [??][??][/=eqvO eqvS]??<-[/=?? depO depS]. split=>/= >.
+    { by rewrite -(eqvS _ _ _ _ _). } { by rewrite -(eqvO _ _ _ _). }
+    { rewrite -!(eqvO _ _ _ _). apply depO. }
+    { rewrite -!(eqvS _ _ _ _ _). apply depS. }
+  Qed.
+  #[export] Instance Sty_proper {X} : Proper ((≡) ==> (=) ==> (↔)) (@Sty X).
+  Proof.
+    have pro : Proper ((≡) ==> (=) ==> (→)) (@Sty X); last first.
+    { move=> ?????<-. split; by apply pro. }
+    move=> ?? eqv ??<-[?? dep]. split=> >; [by rewrite -(eqv _ _ _ _)..|].
+    rewrite -!(eqv _ _ _ _). apply dep.
+  Qed.
+  #[export] Instance Pty_proper {X} : Proper ((≡) ==> (=) ==> (↔)) (@Pty X).
+  Proof.
+    have pro : Proper ((≡) ==> (=) ==> (→)) (@Pty X); last first.
+    { move=> ?????<-. split; by apply pro. }
+    move=> ?? eqv ??<-[??]. split=> >; by rewrite -(eqv _ _).
+  Qed.
+
   Context `{!rust_haltGS CON Σ, !rust_haltC CON, !rust_haltJ CON JUDG Σ,
     !rust_haltCS CON JUDG Σ}.
 
