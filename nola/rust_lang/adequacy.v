@@ -19,7 +19,7 @@ Global Instance subG_lrustGpreS {Σ} : subG lrustΣ Σ → lrustGpreS Σ.
 Proof. solve_inG. Qed.
 
 (** Partial correctness adequacy *)
-Definition lrust_adequacy Σ `{!lrustGpreS Σ} hlc e σ φ :
+Theorem lrust_adequacy Σ `{!lrustGpreS Σ} hlc e σ φ :
   (∀ `{!lrustGS_gen hlc Σ}, ⊢ |={⊤}=>
     ∃ W : iProp Σ, W ∗ WP[W] e {{ v, ⌜φ v⌝ }}) →
   adequate NotStuck e σ (λ v _, φ v).
