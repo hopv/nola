@@ -247,8 +247,8 @@ Section classes.
     (** Access via the sharing formula *)
     copy_shr_acc {t d l α xπ q} :
       q.[α] -∗ na_own t ⊤ -∗ ⟦ T.2 t d l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ r vl,
-          l ↦∗{r} vl ∗ ⟦ T.1 t d xπ vl ⟧ᶜ ∗
-          (l ↦∗{r} vl =[rust_halt_wsat]{⊤}=∗ q.[α] ∗ na_own t ⊤);
+        l ↦∗{r} vl ∗ ⟦ T.1 t d xπ vl ⟧ᶜ ∗
+        (l ↦∗{r} vl =[rust_halt_wsat]{⊤}=∗ q.[α] ∗ na_own t ⊤);
   }.
   (** [Copy] is proper *)
   #[export] Instance Copy_proper {X} : Proper ((≡) ==> (↔)) (@Copy X).
