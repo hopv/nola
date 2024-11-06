@@ -228,7 +228,7 @@ Section ty_rec.
     move: OpUl. elim: d; [move=> ??; lia|]=> d IH OpUl d' ?.
     apply TyOp0; last first.
     { move: OpUl. apply TCPlistForall_mono=> ??. apply: TyOpLt_mono=>//=. lia. }
-    have le : (d' ≤ d)%nat by lia. apply: TyOpLt_mono=>//.
+    have le : d' ≤ d by lia. apply: TyOpLt_mono=>//.
     rewrite ty_rec_unfold. apply IH. move: OpUl. apply TCPlistForall_mono=> ??.
     apply: TyOpLt_mono=>//=. lia.
   Qed.

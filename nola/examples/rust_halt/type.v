@@ -206,13 +206,13 @@ Section ty_op.
 
   (** [TyOpLt] is monotone *)
   #[export] Instance TyOpLt_mono {X} :
-    Proper ((≡) ==> (⊑) --> (≤)%nat --> (→)) (@TyOpLt X).
+    Proper ((≡) ==> (⊑) --> (≤) --> (→)) (@TyOpLt X).
   Proof.
     move=> ?????? d d' /= ? wl d'' ?. have lt : d'' < d by lia. move: (wl _ lt).
     by apply TyOpAt_mono.
   Qed.
   #[export] Instance TyOpLt_flip_mono {X} :
-    Proper ((≡) ==> (⊑) ==> (≤)%nat ==> flip (→)) (@TyOpLt X).
+    Proper ((≡) ==> (⊑) ==> (≤) ==> flip (→)) (@TyOpLt X).
   Proof. move=> ????????? /=. by apply TyOpLt_mono. Qed.
   #[export] Instance TyOpLt_proper {X} :
     Proper ((≡) ==> (=) --> (=) ==> (↔)) (@TyOpLt X).
