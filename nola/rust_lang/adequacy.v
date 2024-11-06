@@ -41,17 +41,17 @@ Proof.
 Qed.
 
 (** Termination adequacy *)
-Theorem lrust_total Σ `{!lrustGpreS Σ} s e σ φ :
+Theorem lrust_total Σ `{!lrustGpreS Σ} s e σ :
   (∀ `{!lrustGS_gen HasNoLc Σ}, ⊢ |={⊤}=>
-    ∃ W : iProp Σ, W ∗ WP[W] e @ s; ⊤ [{ v, ⌜φ v⌝ }]) →
+    ∃ W Φ, W ∗ WP[W] e @ s; ⊤ [{ Φ }]) →
   sn erased_step ([e], σ).
 Proof.
-  move=> big. eapply (twpw_total _ _ _ _ _ _ 0)=> Hinv.
+  move=> big. eapply (twpw_total _ _ _ _ _ 0)=> Hinv.
   iMod (own_alloc (● to_heap σ)) as (vγ) "?".
   { apply (auth_auth_valid (to_heap _)), to_heap_valid. }
   iMod (own_alloc (● (∅ : heap_freeableUR))) as (fγ) "?";
     first by apply auth_auth_valid.
   set Hheap := HeapGS _ _ _ vγ fγ.
-  iMod (big (LRustGS _ _ Hinv Hheap)) as (W) "[??]". iModIntro.
+  iMod (big (LRustGS _ _ Hinv Hheap)) as (??) "[??]". iModIntro.
   iExists _, _, _, _, _. by iFrame.
 Qed.

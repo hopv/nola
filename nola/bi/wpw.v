@@ -527,14 +527,16 @@ Proof.
 Qed.
 
 (** ** Total adequacy of [twpw] *)
-Theorem twpw_total Σ Λ `{!invGpreS Σ} s e σ Φ n :
+Theorem twpw_total Σ Λ `{!invGpreS Σ} s e σ n :
   (∀ `{!invGS_gen HasNoLc Σ}, ⊢ |={⊤}=>
     ∃ state_interp num_laters_per_step fork_post state_interp_mono,
     let _ : iris'GS_gen HasNoLc Λ Σ := Iris'G _
       state_interp fork_post num_laters_per_step state_interp_mono in
-    ∃ W : iProp Σ, W ∗ state_interp σ n [] 0 ∗ WP[W] e @ s; ⊤ [{ Φ }]) →
+    ∃ W Φ, W ∗ state_interp σ n [] 0 ∗ WP[W] e @ s; ⊤ [{ Φ }]) →
   sn erased_step ([e], σ).
 Proof.
-  move=> big. apply: twp_total. iIntros (?). iMod big as (????) "[%[?[??]]]".
-  iModIntro. iExists _, _, _, _. iFrame.
+  move=> big. apply: twp_total. iIntros (?).
+  iMod big as (????) "(% & % & ? & ? & twp)".
+  rewrite (twp_mono _ _ _ _ (λ _, True)%I); [|by iIntros]. iModIntro.
+  iExists _, _, _, _. iFrame.
 Qed.
