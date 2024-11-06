@@ -153,8 +153,8 @@ Section lemmas.
   Proof. move=> ????? eq. split; apply proph_dep_mono=>//; by rewrite eq. Qed.
 
   (** On a constant *)
-  Lemma proph_dep_const {A} a : @proph_dep A TY (λ _, a) [].
-  Proof. done. Qed.
+  Lemma proph_dep_const {A aπ} a : (∀ π, aπ π = a) → @proph_dep TY A aπ [].
+  Proof. move=> eq ???. by rewrite !eq. Qed.
 
   (** On the clairvoyant value for a prophecy variable *)
   Lemma proph_dep_one ξ : proph_dep (λ π, π ξ) [ξ].
