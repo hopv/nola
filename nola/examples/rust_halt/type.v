@@ -362,7 +362,7 @@ Notation "^[ α ]" := (Lft α) (format "^[ α ]").
 (** Type context *)
 Notation tcx CON Σ := (plist (etcx CON Σ)).
 (** Predicate over [plist] *)
-Notation pred Xl := (plist synty_ty Xl → Prop).
+Notation pred Xl := (plist xpty_ty Xl → Prop).
 
 Section tcx.
   Context `{!rust_haltGS CON Σ, rust_haltJ CON JUDG Σ, !Csem CON JUDG Σ,
