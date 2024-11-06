@@ -1,8 +1,6 @@
 (** * Type model *)
 
 From nola.examples.rust_halt Require Export base.
-Import ProdNotation PlistNotation BigSepPLNotation ModwNotation WpwNotation
-  iPropAppNotation ProphNotation LftNotation CsemNotation FunPRNotation.
 
 Implicit Type (sz d : nat) (X : xty) (t : thread_id) (v : val) (e : expr)
   (l : loc) (α : lft) (CON : cifcon) (Σ : gFunctors).
