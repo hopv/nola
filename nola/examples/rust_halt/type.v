@@ -118,43 +118,43 @@ Section ty_op.
     !Jsem JUDG (iProp Σ)}.
 
   (** [TyOpAt]: Basic operations on a type at a depth *)
-  Class TyOpAt {X} (T : ty CON Σ X) (β : lft) (d : nat) : Prop := TY_OP_AT {
+  Class TyOpAt {X} (T : ty CON Σ X) (α : lft) (d : nat) : Prop := TY_OP_AT {
     (** Take out prophecy tokens from ownership and sharing formulas *)
     ty_own_proph {t xπ vl q} :
-      q.[β] -∗ ⟦ T.1 t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
+      q.[α] -∗ ⟦ T.1 t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
         ⌜proph_dep xπ ξl⌝ ∗ r:∗[ξl] ∗
-        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[β] ∗ ⟦ T.1 t d xπ vl ⟧ᶜ);
-    ty_shr_proph {t l α xπ q} :
-      q.[α ⊓ β] -∗ ⟦ T.2 t d l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
+        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[α] ∗ ⟦ T.1 t d xπ vl ⟧ᶜ);
+    ty_shr_proph {t l β xπ q} :
+      q.[α ⊓ β] -∗ ⟦ T.2 t d l β xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
         ⌜proph_dep xπ ξl⌝ ∗ r:∗[ξl] ∗
-        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[α ⊓ β] ∗ ⟦ T.2 t d l α xπ ⟧ᶜ);
+        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[α ⊓ β] ∗ ⟦ T.2 t d l β xπ ⟧ᶜ);
     (** A borrow over the ownership formula can turn into the sharing formula *)
-    ty_share {t l α xπ q} :
-      q.[α ⊓ β] -∗ bord α (∃ vl, ▷ l ↦∗ vl ∗ T.1 t d xπ vl)%cif
-        =[rust_halt_wsat]{⊤}=∗ q.[α ⊓ β] ∗ ⟦ T.2 t d l α xπ ⟧ᶜ;
+    ty_share {t l β xπ q} :
+      q.[α ⊓ β] -∗ bord β (∃ vl, ▷ l ↦∗ vl ∗ T.1 t d xπ vl)%cif
+        =[rust_halt_wsat]{⊤}=∗ q.[α ⊓ β] ∗ ⟦ T.2 t d l β xπ ⟧ᶜ;
   }.
 
   (** [TyOpAt] is monotone *)
   #[export] Instance TyOpAt_mono {X} :
     Proper ((≡) ==> (⊑) --> (=) ==> (→)) (@TyOpAt X).
   Proof.
-    move=> T T' [eqvO eqvS] β β' /= inc ?? <- ?. split.
-    - move=> >. setoid_rewrite <-(eqvO _ _ _ _). iIntros "β' T".
-      iDestruct (lft_incl_live_acc with "β'") as (?) "[β →β']"; [done|].
-      iMod (ty_own_proph with "β T") as (??) "($ & $ & →T)". iModIntro.
-      iIntros "ξl". iMod ("→T" with "ξl") as "[β $]". iModIntro.
-      by iApply "→β'".
-    - move=> ?? α ??. setoid_rewrite <-(eqvS _ _ _ _ _). iIntros "αβ' T".
-      iDestruct (lft_incl_live_acc (β:=_ ⊓ β) with "αβ'") as (?) "[αβ →αβ']".
-      { apply lft_incl_meet_intro; [exact lft_incl_meet_l|].
-        by etrans; [exact lft_incl_meet_r|]. }
+    move=> T T' [eqvO eqvS] α α' /= inc ?? <- ?. split.
+    - move=> >. setoid_rewrite <-(eqvO _ _ _ _). iIntros "α' T".
+      iDestruct (lft_incl_live_acc with "α'") as (?) "[α →α']"; [done|].
+      iMod (ty_own_proph with "α T") as (??) "($ & $ & →T)". iModIntro.
+      iIntros "ξl". iMod ("→T" with "ξl") as "[α $]". iModIntro.
+      by iApply "→α'".
+    - move=> ?? β ??. setoid_rewrite <-(eqvS _ _ _ _ _). iIntros "αβ' T".
+      iDestruct (lft_incl_live_acc (β:=α ⊓ β) with "αβ'") as (?) "[αβ →αβ']".
+      { apply lft_incl_meet_intro; [|exact lft_incl_meet_r].
+        by etrans; [exact lft_incl_meet_l|]. }
       iMod (ty_shr_proph with "αβ T") as (??) "($ & $ & →T)". iModIntro.
       iIntros "ξl". iMod ("→T" with "ξl") as "[β $]". iModIntro.
       by iApply "→αβ'".
-    - move=> ?? α ??. rewrite -(eqvS _ _ _ _ _). iIntros "αβ' b".
+    - move=> ?? β ??. rewrite -(eqvS _ _ _ _ _). iIntros "αβ' b".
       iDestruct (lft_incl_live_acc (β:=α ⊓ β) with "αβ'") as (?) "[αβ →αβ']".
-      { apply lft_incl_meet_intro; [exact lft_incl_meet_l|].
-        by etrans; [exact lft_incl_meet_r|]. }
+      { apply lft_incl_meet_intro; [|exact lft_incl_meet_r].
+        by etrans; [exact lft_incl_meet_l|]. }
       iMod (ty_share with "αβ [b]") as "[αβ $]"; last first.
       { iModIntro. by iApply "→αβ'". }
       iStopProof. apply bi.equiv_entails. (do 2 f_equiv)=> ?.
@@ -187,45 +187,45 @@ Section ty_op.
 
   (** Lemmas under [TyOpLt] *)
   Section ty_op_lt.
-    Context `{!@TyOpLt X T β d0}.
+    Context `{!@TyOpLt X T α d0}.
     Lemma ty_own_proph_lt {t d xπ vl q} : d < d0 →
-      q.[β] -∗ ⟦ T.1 t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
+      q.[α] -∗ ⟦ T.1 t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
         ⌜proph_dep xπ ξl⌝ ∗ r:∗[ξl] ∗
-        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[β] ∗ ⟦ T.1 t d xπ vl ⟧ᶜ).
+        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[α] ∗ ⟦ T.1 t d xπ vl ⟧ᶜ).
     Proof. move=> ?. by apply ty_op_lt. Qed.
-    Lemma ty_shr_proph_lt {t d l α xπ q} : d < d0 →
-      q.[α ⊓ β] -∗ ⟦ T.2 t d l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
+    Lemma ty_shr_proph_lt {t d l β xπ q} : d < d0 →
+      q.[α ⊓ β] -∗ ⟦ T.2 t d l β xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
         ⌜proph_dep xπ ξl⌝ ∗ r:∗[ξl] ∗
-        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[α ⊓ β] ∗ ⟦ T.2 t d l α xπ ⟧ᶜ).
+        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[α ⊓ β] ∗ ⟦ T.2 t d l β xπ ⟧ᶜ).
     Proof. move=> ?. by apply ty_op_lt. Qed.
-    Lemma ty_share_lt {t d l α xπ q} : d < d0 →
-      q.[α ⊓ β] -∗ bord α (∃ vl, ▷ l ↦∗ vl ∗ T.1 t d xπ vl)%cif
-        =[rust_halt_wsat]{⊤}=∗ q.[α ⊓ β] ∗ ⟦ T.2 t d l α xπ ⟧ᶜ.
+    Lemma ty_share_lt {t d l β xπ q} : d < d0 →
+      q.[α ⊓ β] -∗ bord β (∃ vl, ▷ l ↦∗ vl ∗ T.1 t d xπ vl)%cif
+        =[rust_halt_wsat]{⊤}=∗ q.[α ⊓ β] ∗ ⟦ T.2 t d l β xπ ⟧ᶜ.
     Proof. move=> ?. by apply ty_op_lt. Qed.
   End ty_op_lt.
 
   Context `{!rust_haltC CON, !rust_haltCS CON JUDG Σ, !rust_haltJS CON JUDG Σ}.
 
   (** Basic operations on a simple type at a depth *)
-  Lemma sty_op_at `{!Sty (X:=X) T sz} {d} β :
+  Lemma sty_op_at `{!Sty (X:=X) T sz} {d} α :
     (∀ t xπ vl q,
-      q.[β] -∗ ⟦ T t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
+      q.[α] -∗ ⟦ T t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
         ⌜proph_dep xπ ξl⌝ ∗ r:∗[ξl] ∗
-        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[β] ∗ ⟦ T t d xπ vl ⟧ᶜ)) →
-    TyOpAt (ty_sty T) β d.
+        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[α] ∗ ⟦ T t d xπ vl ⟧ᶜ)) →
+    TyOpAt (ty_sty T) α d.
   Proof.
     move=> sty_proph. split=>/= >; [done| |].
-    - iIntros "[$ β] (%vl & ↦ & T)".
-      iMod (sty_proph with "β T") as (??) "($ & $ & cl)". iIntros "!> ξl".
+    - iIntros "[α $] (%vl & ↦ & T)".
+      iMod (sty_proph with "α T") as (??) "($ & $ & cl)". iIntros "!> ξl".
       iFrame "↦". by iApply "cl".
-    - iIntros "[α $] b".
-      iMod (bord_open (M:=borrowM) with "α b") as "/=[o (% & >↦ & #T)]".
+    - iIntros "[$ β] b".
+      iMod (bord_open (M:=borrowM) with "β b") as "/=[o (% & >↦ & #T)]".
       iFrame "T".
       iMod (obord_subdiv (FML:=cifOF _) (M:=borrowM) [▷ _]%cif
-        with "[] o [$↦ //] []") as "(α & _ & [b _])"=>/=.
+        with "[] o [$↦ //] []") as "(β & _ & [b _])"=>/=.
       { iApply lft_sincl_refl. } { by iIntros "_ [$ _]". }
       rewrite sem_cif_spointsto_vec.
-      by iMod (spointsto_vecd_alloc with "α b") as "$".
+      by iMod (spointsto_vecd_alloc with "β b") as "$".
   Qed.
 
   (** Basic operations on a plain type at a depth *)
