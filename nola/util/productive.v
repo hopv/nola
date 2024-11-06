@@ -234,11 +234,11 @@ Section profix.
     elim=>/=; [by apply eq|]=>/= ? IH. etrans; [by apply eq|]. f_equiv.
     move: IH. apply proeq_to_later.
   Qed.
-  Lemma map_profix_preserv {PR'} {f : PR' → PR → PR}
+  Lemma profix_map_preserv {PR'} {f : PR' → PR → PR}
     `{!∀ b, Productive (f b), Pres : !∀ a, Preserv (λ b, f b a)} :
     Preserv (λ b, profix (f b)).
   Proof. move=> ????. apply profix_preserv=> ?. by apply Pres. Qed.
-  Lemma map_profix_productive {PR'} {f : PR' → PR → PR}
+  Lemma profix_map_productive {PR'} {f : PR' → PR → PR}
     `{!∀ b, Productive (f b), Prod : !∀ a, Productive (λ b, f b a)} :
     Productive (λ b, profix (f b)).
   Proof. move=> ????. apply profix_preserv=> ?. by apply Prod. Qed.
