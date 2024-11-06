@@ -205,12 +205,16 @@ Section profix.
     profix_aux.(unseal) f _.
   Lemma profix_unseal : @profix = @profix_def. Proof. exact: seal_eq. Qed.
 
+  (** Approximate [profix] by an iteration *)
+  Lemma profix_iter `{!Productive f} {k} :
+    proeq k (profix f) (f (Nat.iter k f inhabitant)).
+  Proof. rewrite profix_unseal. exact prolimit_eq. Qed.
+
   (** Unfold [profix] *)
   Lemma profix_unfold `{!Productive f} : profix f ≡ f (profix f).
   Proof.
-    rewrite profix_unseal. apply equiv_proeq=> k.
-    etrans; [exact prolimit_eq|]=>/=. f_equiv. case: k; [done|]=>/= k. symmetry.
-    by etrans; [apply prolimit_eq|].
+    apply equiv_proeq=> k. etrans; [exact profix_iter|]=>/=. f_equiv.
+    case: k; [done|]=>/= k. symmetry. by etrans; [apply profix_iter|].
   Qed.
 
   (** Any fixed point of [f] equals [profix f] *)
@@ -225,8 +229,8 @@ Section profix.
   Lemma profix_preserv `{!Productive f, !Productive g} {k} :
     proeq (PR:=funPR _) k f g → proeq k (profix f) (profix g).
   Proof.
-    move=> eq. rewrite profix_unseal. etrans; [exact prolimit_eq|].
-    etrans; [|symmetry; exact prolimit_eq]=>/=. move: {2 3}k.
+    move=> eq. etrans; [exact profix_iter|].
+    etrans; [|symmetry; exact profix_iter]=>/=. move: {2 3}k.
     elim=>/=; [by apply eq|]=>/= ? IH. etrans; [by apply eq|]. f_equiv.
     move: IH. apply proeq_to_later.
   Qed.
