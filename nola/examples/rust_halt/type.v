@@ -386,7 +386,7 @@ Section subty.
   Context `{!rust_haltC CON, !rust_haltCS CON JUDG Σ}.
 
   (** [subty] over [sty] *)
-  Lemma subty_sty {δ X Y T U f} :
+  Lemma subty_sty {δ X Y f} T U :
     □ (∀ t d xπ vl, ⟦ T t d xπ vl ⟧ᶜ(δ) -∗ ⟦ U t d (λ π, f (xπ π)) vl ⟧ᶜ(δ)) ⊢
       @subty δ X Y (ty_sty T) (ty_sty U) f.
   Proof.
@@ -394,7 +394,7 @@ Section subty.
     iIntros (?????) "!> (% & $ & ?)". by iApply "sub".
   Qed.
   (** [subty] over [pty] *)
-  Lemma subty_pty {δ X Y T U f} :
+  Lemma subty_pty {δ X Y f} T U :
     □ (∀ x vl, ⟦ T x vl ⟧ᶜ(δ) -∗ ⟦ U (f x) vl ⟧ᶜ(δ)) ⊢
       @subty δ X Y (ty_pty T) (ty_pty U) f.
   Proof.
