@@ -28,7 +28,7 @@ Definition ty_sty `{!rust_haltGS CON Σ, !rust_haltC CON}
   and the prophecy assignment *)
 Definition pty CON Σ X := X -d> list val -d> cif CON Σ.
 Definition sty_pty {CON Σ X} (T : pty CON Σ X) : sty CON Σ X :=
-  λ _ _ xπ vl, (∃ x, ⌜xπ = λ _, x⌝ ∗ T x vl)%cif.
+  λ _ _ xπ vl, (∃ x, ⌜∀ π, xπ π = x⌝ ∗ T x vl)%cif.
 Definition ty_pty `{!rust_haltGS CON Σ, !rust_haltC CON}
   `{!rust_haltJ CON JUDG Σ} {X} (T : pty CON Σ X) : ty CON Σ X :=
   ty_sty (sty_pty T).
@@ -68,6 +68,12 @@ Section ty.
       d ≤ d' → ⟦ T.1 t d xπ vl ⟧ᶜ(δ) ⊢ ⟦ T.1 t d' xπ vl ⟧ᶜ(δ);
     ty_shr_depth {t d d' l α xπ δ} :
       d ≤ d' → ⟦ T.2 t d l α xπ ⟧ᶜ(δ) ⊢ ⟦ T.2 t d' l α xπ ⟧ᶜ(δ);
+    (** The ownership and sharing predicates are proper over the clairvoyant
+      value *)
+    ty_own_clair {t d xπ xπ' vl δ} :
+      (∀ π, xπ π = xπ' π) → ⟦ T.1 t d xπ vl ⟧ᶜ(δ) ⊢ ⟦ T.1 t d xπ' vl ⟧ᶜ(δ);
+    ty_shr_clair {t d l α xπ xπ' δ} :
+      (∀ π, xπ π = xπ' π) → ⟦ T.2 t d l α xπ ⟧ᶜ(δ) ⊢ ⟦ T.2 t d l α xπ' ⟧ᶜ(δ);
   }.
 
   (** Basic properties of a simple type *)
@@ -79,6 +85,9 @@ Section ty.
     (** The depth of the ownership predicate can be bumped up *)
     sty_depth {t d d' xπ vl δ} :
       d ≤ d' → ⟦ T t d xπ vl ⟧ᶜ(δ) ⊢ ⟦ T t d' xπ vl ⟧ᶜ(δ);
+    (** The ownership predicates is proper over the clairvoyant value *)
+    sty_clair {t d xπ xπ' vl δ} :
+      (∀ π, xπ π = xπ' π) → ⟦ T t d xπ vl ⟧ᶜ(δ) ⊢ ⟦ T t d xπ' vl ⟧ᶜ(δ);
   }.
 
   (** Basic properties of a plain type *)
@@ -94,17 +103,19 @@ Section ty.
   Proof.
     have pro : Proper ((≡) ==> (=) ==> (→)) (@Ty X); last first.
     { move=> ?????<-. split; by apply pro. }
-    move=> [??][??][/=eqvO eqvS]??<-[/=?? depO depS]. split=>/= >.
+    move=> [??][??][/=eqvO eqvS]??<-[/=?? depO depS claO claS]. split=>/= >.
     { by rewrite -(eqvS _ _ _ _ _). } { by rewrite -(eqvO _ _ _ _). }
     { rewrite -!(eqvO _ _ _ _). apply depO. }
     { rewrite -!(eqvS _ _ _ _ _). apply depS. }
+    { rewrite -!(eqvO _ _ _ _). apply claO. }
+    { rewrite -!(eqvS _ _ _ _ _). apply claS. }
   Qed.
   #[export] Instance Sty_proper {X} : Proper ((≡) ==> (=) ==> (↔)) (@Sty X).
   Proof.
     have pro : Proper ((≡) ==> (=) ==> (→)) (@Sty X); last first.
     { move=> ?????<-. split; by apply pro. }
-    move=> ?? eqv ??<-[?? dep]. split=> >; [by rewrite -(eqv _ _ _ _)..|].
-    rewrite -!(eqv _ _ _ _). apply dep.
+    move=> ?? eqv ??<-[?? dep cla].
+    split=> >; rewrite -!(eqv _ _ _ _) //; [apply dep|apply cla].
   Qed.
   #[export] Instance Pty_proper {X} : Proper ((≡) ==> (=) ==> (↔)) (@Pty X).
   Proof.
@@ -120,14 +131,16 @@ Section ty.
   #[export] Instance Ty_Sty `{!@Sty X T sz} : Ty (ty_sty T) sz.
   Proof.
     split=>/= >. { exact _. } { exact sty_size. } { exact sty_depth. }
-    { move=> ?. do 3 f_equiv. by apply sty_depth. }
+    { move=> ?. do 3 f_equiv. by apply sty_depth. } { exact sty_clair. }
+    { move=> ?. do 3 f_equiv. by apply sty_clair. }
   Qed.
 
   (** [Pty] entails [Sty] *)
   #[export] Instance Sty_Pty `{!@Pty X T sz} : Sty (sty_pty T) sz.
   Proof.
-    split=> > /=; [exact _| |done]. iIntros "[%[% ?]]". iStopProof.
-    exact pty_size.
+    split=> > /=; [exact _| |done|].
+    - iIntros "[%[% ?]]". iStopProof. exact pty_size.
+    - move=> eq. f_equiv=> ?. do 2 f_equiv. move=> ??. by rewrite -eq.
   Qed.
 End ty.
 
@@ -252,8 +265,9 @@ Section ty_op.
   #[export] Instance pty_op_at `{!Pty (X:=X) T sz} {α d} :
     TyOpAt (ty_pty T) α d.
   Proof.
-    apply sty_op_at=>/= ????. iIntros "$ (% & -> & ?) !>". iExists [], 1%Qp.
-    do 2 iSplit=>//. iIntros "_ !>". iExists _. by iSplit.
+    apply sty_op_at=>/= ????. iIntros "$ (% & % & ?) !>". iExists [], 1%Qp.
+    iSplit. { iPureIntro. by apply: proph_dep_const. }
+    iSplit=>//. iIntros "_ !>". iExists _. by iSplit.
   Qed.
 End ty_op.
 (** [TyOpAt]: Basic operations on a type *)
@@ -386,8 +400,8 @@ Section subty.
     □ (∀ x vl, ⟦ T x vl ⟧ᶜ(δ) -∗ ⟦ U (f x) vl ⟧ᶜ(δ)) ⊢
       @subty δ X Y (ty_pty T) (ty_pty U) f.
   Proof.
-    iIntros "#sub". iApply subty_sty=>/=. iIntros (????) "!> (% & -> & ?)".
-    iExists _. iSplit; [done|]. by iApply "sub".
+    iIntros "#sub". iApply subty_sty=>/=. iIntros (????) "!> (% & %eq & ?)".
+    iExists _. iSplit; [|by iApply "sub"]. iPureIntro=> ?. by rewrite eq.
   Qed.
 End subty.
 
