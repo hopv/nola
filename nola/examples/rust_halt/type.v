@@ -33,6 +33,25 @@ Definition ty_pty `{!rust_haltGS CON Σ, !rust_haltC CON}
   `{!rust_haltJ CON JUDG Σ} {X} (T : pty CON Σ X) : ty CON Σ X :=
   ty_sty (sty_pty T).
 
+Section ty.
+  Context `{!rust_haltGS CON Σ, !rust_haltC CON, !rust_haltJ CON JUDG Σ}.
+
+  (** [ty_sty] is size-preserving *)
+  #[export] Instance ty_sty_perserv {X} : Preserv (ty_sty (X:=X)).
+  Proof.
+    move=> ??? eq. unfold ty_sty. f_equiv=>// ?????. f_equiv=> ?. f_equiv.
+    apply eq.
+  Qed.
+  (** [sty_pty] is size-preserving *)
+  #[export] Instance sty_pty_perserv {X} : Preserv (@sty_pty CON Σ X).
+  Proof.
+    move=> ??? eq. unfold sty_pty=> ????. f_equiv=> ?. f_equiv. apply eq.
+  Qed.
+  (** [ty_pty] is size-preserving *)
+  #[export] Instance ty_pty_perserv {X} : Preserv (ty_pty (X:=X)).
+  Proof. solve_proper. Qed.
+End ty.
+
 (** ** Basic properties of a type *)
 
 Section ty.

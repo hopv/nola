@@ -160,6 +160,22 @@ Section ty_rec.
     (∀ T U, T ≡ U → F T ≡ G U) → ty_rec F ≡ ty_rec G.
   Proof. exact profix_proper. Qed.
 
+  (** [ty_rec] is size-preserving *)
+  Lemma ty_rec_preserv {G : ty CON Σ X → ty CON Σ X} `{!Productive G} {k} :
+    proeq (PR:=funPR _) k F G → proeq k (ty_rec F) (ty_rec G).
+  Proof. exact profix_preserv. Qed.
+  (** [ty_rec] preserves size preservation and productivity *)
+  #[export] Instance ty_rec_map_preserv {Y}
+    {H : ty CON Σ Y → ty CON Σ X → ty CON Σ X} `{!∀ T, Productive (H T)}
+    `{!∀ U, Preserv (λ T, H T U)} :
+    Preserv (λ T, ty_rec (H T)).
+  Proof. exact profix_map_preserv. Qed.
+  #[export] Instance ty_rec_map_productive {Y}
+    {H : ty CON Σ Y → ty CON Σ X → ty CON Σ X} `{!∀ T, Productive (H T)}
+    `{!∀ U, Productive (λ T, H T U)} :
+    Productive (λ T, ty_rec (H T)).
+  Proof. exact profix_map_productive. Qed.
+
   (** [Send] on [ty_rec], coinductively *)
   #[export] Instance ty_rec_send `{Send0 : !∀ T, Send T → Send (F T)} :
     Send (ty_rec F).
