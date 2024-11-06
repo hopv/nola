@@ -121,3 +121,23 @@ End plist_foldmap.
 (** Universal quantification over [plist] *)
 Definition plist_forall {A F} (Φ : ∀ a, F a → Prop) {al} : plist F al → Prop :=
   plist_foldmap True (∧) (A:=A) Φ (al:=al).
+
+(** [plist_forall] is monotone *)
+#[export] Instance plist_forall_mono {A F} :
+  Proper (forall_relation (λ _, pointwise_relation _ impl) ==>
+    forall_relation (λ _, pointwise_relation _ impl)) (@plist_forall A F).
+Proof.
+  move=> ?? impl. elim=>//= ?? IH ?[??]. split; by [apply impl|apply IH].
+Qed.
+
+(** Type class universal quantification over [plist] *)
+Definition TCPlistForall {A F} (Φ : ∀ a, F a → Prop) {al} : plist F al → Prop :=
+  plist_foldmap TCTrue TCAnd (A:=A) Φ (al:=al).
+
+(** [TCPlistForall] is monotone *)
+#[export] Instance TCPlistForall_mono {A F} :
+  Proper (forall_relation (λ _, pointwise_relation _ impl) ==>
+    forall_relation (λ _, pointwise_relation _ impl)) (@TCPlistForall A F).
+Proof.
+  move=> ?? impl. elim=>//= ?? IH ?[??]. split; by [apply impl|apply IH].
+Qed.
