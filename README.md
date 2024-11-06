@@ -122,8 +122,14 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     satisfactions
 - [`examples/`](nola/examples/) : Examples
   + [`xty`](nola/examples/xty.v) (Syntactic type),
-    [`con`](nola/examples/con.v) (Constructors),
+  + [`con`](nola/examples/con.v) (Constructors),
     [`ilist`](nola/examples/ilist.v) (Infinite list),
     [`borrow`](nola/examples/borrow.v) (Borrow),
     [`mutex`](nola/examples/mutex.v) (Mutex),
     [`deriv`](nola/examples/deriv.v) (Derivability)
+  + [`rust_halt/`](nola/examples/rust_halt/) : RustHalt, a formal foundation of
+      functional and termination-sensitive Rust program verification
+    * [`base`](nola/examples/rust_halt/base.v) (Basics),
+      [`type`](nola/examples/rust_halt/type.v) (Type model),
+      [`core`](nola/examples/rust_halt/core.v) (Core features)
+    * [`adequacy`](nola/examples/rust_halt/adequacy.v) (Adequacy)

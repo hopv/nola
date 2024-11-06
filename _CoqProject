@@ -84,3 +84,8 @@ nola/examples/ilist.v
 nola/examples/borrow.v
 nola/examples/mutex.v
 nola/examples/deriv.v
+
+nola/examples/rust_halt/base.v
+nola/examples/rust_halt/type.v
+nola/examples/rust_halt/core.v
+nola/examples/rust_halt/adequacy.v
