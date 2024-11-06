@@ -2,7 +2,7 @@
 
 From nola.examples.rust_halt Require Export base.
 Import ProdNotation PlistNotation BigSepPLNotation ModwNotation WpwNotation
-  iPropAppNotation ProphNotation LftNotation CsemNotation.
+  iPropAppNotation ProphNotation LftNotation CsemNotation FunPRNotation.
 
 Implicit Type (sz d : nat) (X : xty) (t : thread_id) (v : val) (e : expr)
   (l : loc) (α : lft) (CON : cifcon) (Σ : gFunctors).
@@ -10,19 +10,20 @@ Implicit Type (sz d : nat) (X : xty) (t : thread_id) (v : val) (e : expr)
 (** ** Type model *)
 
 (** Ownership formula *)
-Definition ownty CON Σ X :=
-  thread_id -d> nat -d> clair xty X -d> list val -d> cif CON Σ.
+Definition ownty CON Σ X : prost :=
+  thread_id -pr> nat -pr> clair xty X -pr> list val -pr> cif CON Σ.
 (** Sharing formula *)
-Definition shrty CON Σ X :=
-  thread_id -d> nat -d> loc -d> lft -d> clair xty X -d> cif CON Σ.
+Definition shrty CON Σ X : prost :=
+  thread_id -pr> nat -pr> loc -pr> lft -pr> clair xty X -pr> cif CON Σ.
 (** Type model *)
-Definition ty CON Σ X : Type := ownty CON Σ X * shrty CON Σ X.
+Definition ty CON Σ X : prost := (ownty CON Σ X * shrty CON Σ X)%type.
 
 (** Simple type, with the sharing formula defined from the ownership formula *)
 Definition sty := ownty.
 Definition ty_sty `{!rust_haltGS CON Σ, !rust_haltC CON}
   `{!rust_haltJ CON JUDG Σ} {X} (T : ownty CON Σ X) : ty CON Σ X :=
   (T, λ t d l α xπ, ∃ vl, l ↦∗ˢ[α] vl ∗ T t d xπ vl)%cif.
+
 (** Plain type, with the ownership formula ignoring the thread id, the depth,
   and the prophecy assignment *)
 Definition pty CON Σ X := X -d> list val -d> cif CON Σ.
@@ -291,7 +292,7 @@ Section classes.
   (** [Send] over [sty] entails [Sync] *)
   #[export] Instance sty_send_sync `{!Send (ty_sty (X:=X) T)} :
     Sync (ty_sty (X:=X) T).
-  Proof. move=>//= * ????. f_equiv=> ?. f_equiv. apply Send0. Qed.
+  Proof. move=>//= * ????. f_equiv=> ?. f_equiv. apply: Send0. Qed.
 
   (** [pty] is [Send] and [Sync] *)
   #[export] Instance pty_send {X T} : Send (ty_pty (X:=X) T).
