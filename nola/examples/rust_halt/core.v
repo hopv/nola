@@ -132,6 +132,17 @@ Section type.
   Qed.
 End type.
 
+(** Tactics for binding *)
+Ltac type_reshape e tac :=
+  lazymatch goal with
+  | |- envs_entails _ (type _ _ ?eglob _ _) =>
+        reshape_expr eglob ltac:(fun K e' => unify e' e; tac K)
+  end.
+Tactic Notation "type_bind" open_constr(e) :=
+  type_reshape e ltac:(fun K => iApply (type_bind K e)).
+Tactic Notation "type_bind" open_constr(e) "with" open_constr(H) :=
+  type_reshape e ltac:(fun K => iApply (type_bind K e with H)).
+
 (** ** Recursive type *)
 
 (** [ty_rec]: Recursive type *)

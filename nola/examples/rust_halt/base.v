@@ -1,5 +1,6 @@
 (** * Basics *)
 
+From iris.proofmode Require Export environments.
 From nola.iris Require Export cif inv_deriv na_inv_deriv store_deriv
   pborrow_deriv fborrow.
 From nola.examples Require Export xty.
