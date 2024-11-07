@@ -52,6 +52,39 @@ Section type.
     iDestruct ("TU" with "T") as "$". iApply (proph_eqz_f with "eqz").
   Qed.
 
+  (** ** Basic typing rules *)
+
+  (** Pure execution *)
+  Lemma type_pure {Xl Yl α Γi e e' Γo pre n φ} :
+    PureExec φ n e e' → φ →
+    type (Xl:=Xl) (Yl:=Yl) α Γi e' Γo pre ⊢ type α Γi e Γo pre.
+  Proof.
+    rewrite type_unseal=> ??. iIntros "#type !>" (????) "α t pre Γ".
+    wp_pure _. iApply ("type" with "α t pre Γ").
+  Qed.
+
+  (** Binding *)
+  Lemma type_bind {Xl Yl Zl α Γ Γ' Γ'' pre pre'} K e :
+    type (Yl:=Yl) α Γ e Γ' pre -∗
+    (∀ v, type α (Γ' v) (fill K (of_val v)) Γ'' pre') -∗
+      type (Xl:=Xl) (Yl:=Zl) α Γ (fill K e) Γ'' (pre ∘ pre').
+  Proof.
+    rewrite type_unseal. iIntros "#type #type' !>" (????) "α t pre Γ".
+    iApply twp_bind. iDestruct ("type" with "α t pre Γ") as "big".
+    iApply (twp_wand with "big"). iIntros (?) ">(% & α & t & pre & Γ')".
+    iApply ("type'" with "α t pre Γ'").
+  Qed.
+  (** Let expression *)
+  Lemma type_let {Xl Yl Zl α Γ Γ' Γ'' x e e' pre pre'}
+    `{!Closed (x :b: []) e'} :
+    type (Yl:=Yl) α Γ e Γ' pre -∗
+    (∀ v, type α (Γ' v) (subst' x v e') Γ'' pre') -∗
+      type (Xl:=Xl) (Yl:=Zl) α Γ (let: x := e in e') Γ'' (pre ∘ pre').
+  Proof.
+    iIntros "#type #type'". iApply (type_bind [LetCtx x e'] with "type")=>/=.
+    iIntros (?). by iApply (type_pure with "type'").
+  Qed.
+
   (** ** Operations on lifetimes *)
 
   (** Allocate a new local lifetime *)
@@ -107,41 +140,9 @@ Section type.
     iModIntro. iExists (λ π, (xπ' π, _)')=>/=. iFrame "T Γ".
     by iApply (proph_obs_impl2 with "pre eq")=> ??<-.
   Qed.
-
-  (** ** Basic typing rules *)
-
-  (** Pure execution *)
-  Lemma type_pure {Xl Yl α Γi e e' Γo pre n φ} :
-    PureExec φ n e e' → φ →
-    type (Xl:=Xl) (Yl:=Yl) α Γi e' Γo pre ⊢ type α Γi e Γo pre.
-  Proof.
-    rewrite type_unseal=> ??. iIntros "#type !>" (????) "α t pre Γ".
-    wp_pure _. iApply ("type" with "α t pre Γ").
-  Qed.
-  (** Binding *)
-  Lemma type_bind {Xl Yl Zl α Γ Γ' Γ'' pre pre'} K e :
-    type (Yl:=Yl) α Γ e Γ' pre -∗
-    (∀ v, type α (Γ' v) (fill K (of_val v)) Γ'' pre') -∗
-      type (Xl:=Xl) (Yl:=Zl) α Γ (fill K e) Γ'' (pre ∘ pre').
-  Proof.
-    rewrite type_unseal. iIntros "#type #type' !>" (????) "α t pre Γ".
-    iApply twp_bind. iDestruct ("type" with "α t pre Γ") as "big".
-    iApply (twp_wand with "big"). iIntros (?) ">(% & α & t & pre & Γ')".
-    iApply ("type'" with "α t pre Γ'").
-  Qed.
-  (** Let expression *)
-  Lemma type_let {Xl Yl Zl α Γ Γ' Γ'' x e e' pre pre'}
-    `{!Closed (x :b: []) e'} :
-    type (Yl:=Yl) α Γ e Γ' pre -∗
-    (∀ v, type α (Γ' v) (subst' x v e') Γ'' pre') -∗
-      type (Xl:=Xl) (Yl:=Zl) α Γ (let: x := e in e') Γ'' (pre ∘ pre').
-  Proof.
-    iIntros "#type #type'". iApply (type_bind [LetCtx x e'] with "type")=>/=.
-    iIntros (?). by iApply (type_pure with "type'").
-  Qed.
 End type.
 
-(** Tactics for binding *)
+(** ** Tactics for binding *)
 Ltac type_reshape e tac :=
   lazymatch goal with
   | |- envs_entails _ (type _ _ ?eglob _ _) =>
