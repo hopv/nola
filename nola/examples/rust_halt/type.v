@@ -9,10 +9,10 @@ Implicit Type (sz d : nat) (X : xty) (t : thread_id) (v : val) (e : expr)
 
 (** Ownership formula *)
 Definition ownty CON Σ X : prost :=
-  thread_id -pr> nat -pr> clair xty X -pr> list val -pr> cif CON Σ.
+  thread_id -pr> nat -pr> clair X -pr> list val -pr> cif CON Σ.
 (** Sharing formula *)
 Definition shrty CON Σ X : prost :=
-  thread_id -pr> nat -pr> loc -pr> lft -pr> clair xty X -pr> cif CON Σ.
+  thread_id -pr> nat -pr> loc -pr> lft -pr> clair X -pr> cif CON Σ.
 (** Type model *)
 Definition ty CON Σ X : prost := (ownty CON Σ X * shrty CON Σ X)%type.
 
@@ -432,15 +432,13 @@ Notation "^[ α ]" := (Lft α) (format "^[ α ]").
 
 (** Type context *)
 Notation tcx CON Σ := (plist (etcx CON Σ)).
-(** Predicate over [plist] *)
-Notation pred Xl := (plist xpty_ty Xl → Prop).
 
 Section tcx.
   Context `{!rust_haltGS CON Σ, rust_haltJ CON JUDG Σ, !Csem CON JUDG Σ,
     !Jsem JUDG (iProp Σ)}.
 
   (** Semantics of a type context element *)
-  Definition sem_etcx {X} t (E : etcx CON Σ X) : clair xty X → iProp Σ :=
+  Definition sem_etcx {X} t (E : etcx CON Σ X) : clair X → iProp Σ :=
     match E with
     | vl *◁ T => λ xπ, ∃ d, ⟦ T.1 t d xπ vl ⟧ᶜ
     | vl *◁[†α] T => λ xπ, [†α] =[rust_halt_wsat]{⊤}=∗
@@ -449,7 +447,7 @@ Section tcx.
     end%I.
 
   (** Semantics of a type context *)
-  Fixpoint sem_tcx t {Xl} : tcx CON Σ Xl → plist _ Xl → iProp Σ :=
+  Fixpoint sem_tcx t {Xl} : tcx CON Σ Xl → clairs Xl → iProp Σ :=
     match Xl with [] => λ _ _, True | _ :: _ =>
       λ '(eΓ, Γ)' '(xπ, xπl)', sem_etcx t eΓ xπ ∗ sem_tcx t Γ xπl end%I.
 End tcx.
@@ -460,7 +458,7 @@ Section tcx.
 
   (** [sub]: Inclusion between type contexts *)
   Definition sub_def {Xl Yl} (α : lft) (Γi : tcx CON Σ Xl) (Γo : tcx CON Σ Yl)
-    (pre : pred Yl → pred Xl) : iProp Σ :=
+    (pre : xpred Yl → xpred Xl) : iProp Σ :=
     □ ∀ q t postπ xπl,
       q.[α] -∗ na_own t ⊤ -∗ ⟨π, pre (postπ π) (app_clairs π xπl)⟩ -∗
         sem_tcx t Γi xπl =[rust_halt_wsat]{⊤}=∗ ∃ yπl,
@@ -475,7 +473,7 @@ Section tcx.
 
   (** [type]: Typing judgment over an expression, ensuring termination *)
   Definition type_def {Xl Yl} (α : lft) (Γi : tcx CON Σ Xl) (e : expr)
-    (Γo : val → tcx CON Σ Yl) (pre : pred Yl → pred Xl)
+    (Γo : val → tcx CON Σ Yl) (pre : xpred Yl → xpred Xl)
     : iProp Σ :=
     □ ∀ q t postπ xπl,
       q.[α] -∗ na_own t ⊤ -∗ ⟨π, pre (postπ π) (app_clairs π xπl)⟩ -∗

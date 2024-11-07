@@ -9,6 +9,18 @@ Export ProdNotation PlistNotation BigSepPLNotation ModwNotation WpwNotation
   iPropAppNotation ProphNotation LftNotation CsemNotation FunPRNotation.
 Open Scope nat_scope.
 
+(** ** Notation *)
+
+(** Clairvoyant value *)
+Notation clair A := (clair xty A).
+(** List of clairvoyant values *)
+Notation clairs := (plist (A:=xty) (λ X, clair X)).
+
+(** Value for [list xty] *)
+Notation xlist := (plist xpty_ty).
+(** Predicate over [xlist] *)
+Notation xpred Xl := (xlist Xl → Prop).
+
 (** Thread id *)
 Notation thread_id := na_inv_pool_name.
 
