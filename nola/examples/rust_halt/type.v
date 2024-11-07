@@ -509,6 +509,13 @@ Section tcx.
     iApply ("sub" with "α t [] Γ"). iApply (proph_obs_impl with "pre")=> ?.
     apply to.
   Qed.
+  (** [sub] with an unsatisfiable predicate transformer *)
+  Lemma sub_false {Xl Yl α Γi Γo pre} :
+    (∀ post xl, ¬ pre post xl) → ⊢ @sub Xl Yl α Γi Γo pre.
+  Proof.
+    rewrite sub_unseal=> ?. iIntros (????) "!> _ _ ?".
+    by rewrite proph_obs_false.
+  Qed.
   (** Modify the lifetime of [sub] *)
   Lemma sub_lft {Xl Yl α β Γi Γo pre} :
     β ⊑□ α -∗ @sub Xl Yl α Γi Γo pre -∗ sub β Γi Γo pre.
@@ -569,6 +576,13 @@ Section tcx.
     rewrite type_unseal=> to. iIntros "#type !>" (????) "α t #pre Γi".
     iApply ("type" with "α t [] Γi"). iApply (proph_obs_impl with "pre")=> ?.
     apply to.
+  Qed.
+  (** [type] with an unsatisfiable predicate transformer *)
+  Lemma type_false {Xl Yl α Γi e Γo pre} :
+    (∀ post xl, ¬ pre post xl) → ⊢ @type Xl Yl α Γi e Γo pre.
+  Proof.
+    rewrite type_unseal=> ?. iIntros (????) "!> _ _ ?".
+    by rewrite proph_obs_false.
   Qed.
   (** Modify the lifetime of [type] *)
   Lemma type_lft {Xl Yl α β Γi e Γo pre} :
