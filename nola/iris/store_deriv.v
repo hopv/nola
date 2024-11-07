@@ -103,7 +103,7 @@ Section store_deriv.
   Lemma store_alloc Px : ⟦ Px ⟧ᶜ(δ) =[dinv_wsat ⟦⟧ᶜ(δ)]=∗ store δ Px.
   Proof. rewrite -store_tok_store. exact: store_tok_alloc. Qed.
   (** Allocate [□ store] *)
-  Lemma store_alloc_persistent Px :
+  Lemma store_alloc_pers Px :
     (∀ δ', Deriv ih δ' → Persistent ⟦ Px ⟧ᶜ(δ')) →
     ⟦ Px ⟧ᶜ(δ) =[dinv_wsat ⟦⟧ᶜ(δ)]=∗ □ store δ Px.
   Proof.
