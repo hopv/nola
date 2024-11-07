@@ -48,8 +48,8 @@ Section num.
     rewrite /= type_unseal. iIntros (????) "!>/= $ $ pre". rewrite tcx_extract.
     iIntros "/=[%Γf Γr]".
     destruct Γf as ((? & ? & eq & [= ->]) & (? & ? & eq' & [= ->]) & _). wp_op.
-    iModIntro. iFrame "pre". iSplit=>//. iExists 0, _. iSplit=>//=.
-    iPureIntro=> ?. by rewrite eq eq'.
+    iModIntro. iFrame "pre Γr". iPureIntro. eexists 0, _. split=>//= ?.
+    by rewrite eq eq'.
   Qed.
   Lemma type_sub_int v v' {α}
     `{!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_int; v' ◁ ty_int] Γi Γr get getr} :
@@ -59,8 +59,8 @@ Section num.
     rewrite /= type_unseal. iIntros (????) "!>/= $ $ pre". rewrite tcx_extract.
     iIntros "/=[%Γf Γr]".
     destruct Γf as ((? & ? & eq & [= ->]) & (? & ? & eq' & [= ->]) & _). wp_op.
-    iModIntro. iFrame "pre". iSplit=>//. iExists 0, _. iSplit=>//=.
-    iPureIntro=> ?. by rewrite eq eq'.
+    iModIntro. iFrame "pre Γr". iPureIntro. eexists 0, _. split=>//= ?.
+    by rewrite eq eq'.
   Qed.
   Lemma type_eq_int v v' {α}
     `{!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_int; v' ◁ ty_int] Γi Γr get getr} :
@@ -71,8 +71,8 @@ Section num.
     rewrite /= type_unseal. iIntros (????) "!>/= $ $ pre". rewrite tcx_extract.
     iIntros "/=[%Γf Γr]".
     destruct Γf as ((? & ? & eq & [= ->]) & (? & ? & eq' & [= ->]) & _). wp_op.
-    iModIntro. iFrame "pre". iSplit=>//. iExists 0, _. iSplit=>//=.
-    iPureIntro=> ?. by rewrite eq eq'.
+    iModIntro. iFrame "pre Γr". iPureIntro. eexists 0, _. split=>//= ?.
+    by rewrite eq eq'.
   Qed.
   Lemma type_le_int v v' {α}
     `{!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_int; v' ◁ ty_int] Γi Γr get getr} :
@@ -83,8 +83,8 @@ Section num.
     rewrite /= type_unseal. iIntros (????) "!>/= $ $ pre". rewrite tcx_extract.
     iIntros "/=[%Γf Γr]".
     destruct Γf as ((? & ? & eq & [= ->]) & (? & ? & eq' & [= ->]) & _). wp_op.
-    iModIntro. iFrame "pre". iSplit=>//. iExists 0, _. iSplit=>//=.
-    iPureIntro=> ?. by rewrite eq eq'.
+    iModIntro. iFrame "pre Γr". iPureIntro. eexists 0, _. split=>//= ?.
+    by rewrite eq eq'.
   Qed.
 
   (** Natural number operations *)
@@ -96,8 +96,8 @@ Section num.
     rewrite /= type_unseal. iIntros (????) "!>/= $ $ pre". rewrite tcx_extract.
     iIntros "/=[%Γf Γr]".
     destruct Γf as ((? & ? & eq & [= ->]) & (? & ? & eq' & [= ->]) & _). wp_op.
-    iModIntro. iFrame "pre". iSplit=>//. iExists 0, _.
-    iSplit=>//=; iPureIntro=> >. { by rewrite eq eq'. } { do 3 f_equal. lia. }
+    iModIntro. iFrame "pre Γr". iPureIntro. eexists 0, _. split=>/=.
+    { move=> ?. by rewrite eq eq'. } { do 3 f_equal. lia. }
   Qed.
   Lemma type_sub_nat v v' {α}
     `{!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_nat; v' ◁ ty_nat] Γi Γr get getr} :
@@ -124,8 +124,8 @@ Section num.
     rewrite /= type_unseal. iIntros (????) "!>/= $ $ pre". rewrite tcx_extract.
     iIntros "/=[%Γf Γr]".
     destruct Γf as ((? & ? & eq & [= ->]) & (? & ? & eq' & [= ->]) & _). wp_op.
-    iModIntro. iFrame "pre". iSplit=>//. iExists 0, _. iSplit=>//=.
-    iPureIntro=> ?. rewrite eq eq'. apply bool_decide_ext. lia.
+    iModIntro. iFrame "pre Γr". iPureIntro. eexists 0, _. split=>//= ?.
+    rewrite eq eq'. apply bool_decide_ext. lia.
   Qed.
   Lemma type_le_nat v v' {α}
     `{!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_nat; v' ◁ ty_nat] Γi Γr get getr} :
@@ -136,8 +136,8 @@ Section num.
     rewrite /= type_unseal. iIntros (????) "!>/= $ $ pre". rewrite tcx_extract.
     iIntros "/=[%Γf Γr]".
     destruct Γf as ((? & ? & eq & [= ->]) & (? & ? & eq' & [= ->]) & _). wp_op.
-    iModIntro. iFrame "pre". iSplit=>//. iExists 0, _. iSplit=>//=.
-    iPureIntro=> ?. rewrite eq eq'. apply bool_decide_ext. lia.
+    iModIntro. iFrame "pre Γr". iPureIntro. eexists 0, _. split=>//= ?.
+    rewrite eq eq'. apply bool_decide_ext. lia.
   Qed.
   Lemma type_ndnat {α Xl Γ} :
     ⊢ type (Xl:=Xl) α Γ Ndnat (λ r, r ◁ ty_nat ᵖ:: Γ)
@@ -160,8 +160,8 @@ Section num.
     rewrite /= type_unseal. iIntros (????) "!>/= $ $ pre". rewrite tcx_extract.
     iIntros "/=[%Γf Γr]".
     destruct Γf as ((? & b & eq & [= ->]) & (? & b' & eq' & [= ->]) & _). wp_op.
-    iModIntro. iFrame "pre". iSplit=>//. iExists 0, _. iSplit=>//=.
-    iPureIntro=> ?. rewrite eq eq'. apply bool_decide_ext. by case b; case b'.
+    iModIntro. iFrame "pre Γr". iPureIntro. eexists 0, _. split=>//= ?.
+    rewrite eq eq'. apply bool_decide_ext. by case b; case b'.
   Qed.
   Lemma type_le_bool v v' {α}
     `{!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_bool; v' ◁ ty_bool]
@@ -173,8 +173,8 @@ Section num.
     rewrite /= type_unseal. iIntros (????) "!>/= $ $ pre". rewrite tcx_extract.
     iIntros "/=[%Γf Γr]".
     destruct Γf as ((? & b & eq & [= ->]) & (? & b' & eq' & [= ->]) & _). wp_op.
-    iModIntro. iFrame "pre". iSplit=>//. iExists 0, _. iSplit=>//=.
-    iPureIntro=> ?. rewrite eq eq'. by case b; case b'.
+    iModIntro. iFrame "pre Γr". iPureIntro. eexists 0, _. split=>//= ?.
+    rewrite eq eq'. by case b; case b'.
   Qed.
 
   (** If expression *)
