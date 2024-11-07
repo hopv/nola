@@ -1,7 +1,6 @@
 (** * Adequacy *)
 
 From nola.examples.rust_halt Require Export type.
-Import PlistNotation WpwNotation.
 
 Implicit Type JUDG : ofe.
 

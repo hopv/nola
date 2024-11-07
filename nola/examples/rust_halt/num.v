@@ -1,8 +1,6 @@
 (** * Numeric types *)
 
 From nola.examples.rust_halt Require Export type.
-Import ProdNotation PlistNotation BigSepPLNotation ModwNotation WpwNotation
-  iPropAppNotation ProphNotation LftNotation CsemNotation.
 
 Implicit Type (sz d : nat) (X Y : xty) (t : thread_id) (v : val) (e : expr)
   (l : loc) (α : lft) (CON : cifcon) (Σ : gFunctors).
