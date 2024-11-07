@@ -656,8 +656,10 @@ Section lemmas.
     move: val=> /aitems_sat[π sat]. exists π. by apply to.
   Qed.
   (** Get a pure proposition from a prophecy observation *)
-  Lemma proph_obs_elim {φπ ψ} : (∀ π, φπ π → ψ) → .⟨φπ⟩ ⊢ ⌜ψ⌝.
+  Lemma proph_obs_elim ψ {φπ} : (∀ π, φπ π → ψ) → .⟨φπ⟩ ⊢ ⌜ψ⌝.
   Proof. rewrite proph_obs_sat=> ?. iPureIntro. by case. Qed.
+  Lemma proph_obs_false {φπ} : (∀ π, ¬ φπ π) → .⟨φπ⟩ ⊢ False.
+  Proof. move=> ?. by rewrite (proph_obs_elim False). Qed.
   Lemma proph_obs_const {φ} : .⟨λ _, φ⟩ ⊢ ⌜φ⌝.
   Proof. by apply proph_obs_elim. Qed.
 End lemmas.
