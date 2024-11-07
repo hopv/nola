@@ -24,26 +24,26 @@ Section type.
     iFrame "pre". iFrame.
   Qed.
   (** Copy the head element under [Copy] *)
-  Lemma sub_copy_hd {X Yl α vl T Γ} `{!Copy T} :
-    ⊢ sub (Xl:=X::Yl) α (vl *◁ T ᵖ:: Γ) (vl *◁ T ᵖ:: vl *◁ T ᵖ:: Γ)
+  Lemma sub_copy_hd {X Yl α v T Γ} `{!Copy T} :
+    ⊢ sub (Xl:=X::Yl) α (v ◁ T ᵖ:: Γ) (v ◁ T ᵖ:: v ◁ T ᵖ:: Γ)
         (λ post '(x, zl)', post (x, x, zl)').
   Proof.
     rewrite sub_unseal. iIntros (? t ??) "!>/= $ $ pre [[%d #T] Γ] !>".
     iFrame "pre Γ T".
   Qed.
   (** Modify the head element by subtyping *)
-  Lemma sub_subty_hd {X Y Zl α vl T U f Γ} :
+  Lemma sub_subty_hd {X Y Zl α v T U f Γ} :
     subtyd T U f ⊢
-      sub (Xl:=X::Zl) (Yl:=Y::_) α (vl *◁ T ᵖ:: Γ) (vl *◁ U ᵖ:: Γ)
+      sub (Xl:=X::Zl) (Yl:=Y::_) α (v ◁ T ᵖ:: Γ) (v ◁ U ᵖ:: Γ)
         (λ post '(x, zl)', post (f x, zl)').
   Proof.
     rewrite subty_unseal sub_unseal.
     iIntros "[#TU _] !>/=" (????) "$ $ pre [[% T] Γ] !>". iFrame "pre".
     by iDestruct ("TU" with "T") as "$".
   Qed.
-  Lemma sub_subty_frozen_hd {X Y Zl α β vl T U Γ} `{!Inj (=) (=) f} :
+  Lemma sub_subty_frozen_hd {X Y Zl α β v T U Γ} `{!Inj (=) (=) f} :
     subtyd T U f ⊢
-      sub (Xl:=X::Zl) (Yl:=Y::_) α (vl *◁[†β] T ᵖ:: Γ) (vl *◁[†β] U ᵖ:: Γ)
+      sub (Xl:=X::Zl) (Yl:=Y::_) α (v ◁[†β] T ᵖ:: Γ) (v ◁[†β] U ᵖ:: Γ)
         (λ post '(x, zl)', post (f x, zl)').
   Proof.
     rewrite subty_unseal sub_unseal.
@@ -151,10 +151,10 @@ Section type.
     { iApply type_in; [|done]. by iApply sub_lft_end. } { done. }
   Qed.
   (** Retrieve a frozen object *)
-  Lemma sub_retrieve vl α
-    `{!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Zl) (vl *◁[†α] T) Γ Γr get getr,
+  Lemma sub_retrieve v α
+    `{!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Zl) (v ◁[†α] T) Γ Γr get getr,
       !TyOp T β} :
-    [†α] -∗ sub β Γ (vl *◁ T ᵖ:: Γr) (λ post yl, post (get yl, getr yl)').
+    [†α] -∗ sub β Γ (v ◁ T ᵖ:: Γr) (λ post yl, post (get yl, getr yl)').
   Proof.
     rewrite sub_unseal. iIntros "#† !>/=" (????) "β $ pre".
     rewrite etcx_extract /=. iIntros "[→T Γr]".
