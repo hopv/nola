@@ -124,8 +124,8 @@ Section plist_funsplit.
   Context {B A : Type} {F : A → Type}.
   Fixpoint plist_funsplit {al}
     : (B → plist F al) → plist (λ a, B → F a) al :=
-    match al with [] => λ _, ᵖ[] |
-      a :: al => λ f, (fst' ∘ f) ᵖ:: plist_funsplit (snd' ∘ f) end.
+    match al with [] => λ _, ᵖ[] | a :: al => λ f,
+      (λ b, (f b).1') ᵖ::@{λ _, B → _} plist_funsplit (λ b, (f b).2') end.
 End plist_funsplit.
 
 (** [plist_funsplit] and [plist_map] over application are mutually inverse *)
