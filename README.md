@@ -133,5 +133,6 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     * [`base`](nola/examples/rust_halt/base.v) (Basics),
       [`type`](nola/examples/rust_halt/type.v) (Type model),
       [`core`](nola/examples/rust_halt/core.v) (Core features),
-      [`num`](nola/examples/rust_halt/num.v) (Numeric types)
+      [`num`](nola/examples/rust_halt/num.v) (Numeric types),
+      [`ptr`](nola/examples/rust_halt/ptr.v) (Pointer types)
     * [`adequacy`](nola/examples/rust_halt/adequacy.v) (Adequacy)
