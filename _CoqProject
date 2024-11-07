@@ -4,6 +4,7 @@ nola/prelude.v
 
 nola/util/eq.v
 nola/util/uip.v
+nola/util/fn.v
 nola/util/gmap.v
 nola/util/gmultiset.v
 nola/util/prod.v
