@@ -647,7 +647,7 @@ Section lemmas.
     apply (Cinr_proper (B:=proph_aitemR TY)). symmetry.
     by apply agree_valid_included.
   Qed.
-  (** Get a satisfiability from a prophecy observation *)
+  (** Get the satisfiability from a prophecy observation *)
   Lemma proph_obs_sat {φπ} : .⟨φπ⟩ ⊢ ⌜∃ π, φπ π⌝.
   Proof.
     rewrite proph_obs_unseal. iDestruct 1 as (L to) "aobss".
@@ -655,6 +655,7 @@ Section lemmas.
     iDestruct (own_valid with "aitems") as %val. iPureIntro.
     move: val=> /aitems_sat[π sat]. exists π. by apply to.
   Qed.
+  (** Get a pure proposition from a prophecy observation *)
   Lemma proph_obs_elim {φπ ψ} : (∀ π, φπ π → ψ) → .⟨φπ⟩ ⊢ ⌜ψ⌝.
   Proof. rewrite proph_obs_sat=> ?. iPureIntro. by case. Qed.
   Lemma proph_obs_const {φ} : .⟨λ _, φ⟩ ⊢ ⌜φ⌝.
