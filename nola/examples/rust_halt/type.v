@@ -141,6 +141,9 @@ Section ty.
     - move=> eq. f_equiv=> ?. do 2 f_equiv. move=> ??. by rewrite -eq.
   Qed.
 End ty.
+Hint Mode Ty - - - - - ! - : typeclass_instances.
+Hint Mode Sty - - - - - ! - : typeclass_instances.
+Hint Mode Pty - - - - - ! - : typeclass_instances.
 
 (** ** Basic operations on a type *)
 
@@ -268,6 +271,9 @@ Section ty_op.
     iSplit=>//. iIntros "_ !>". iExists _. by iSplit.
   Qed.
 End ty_op.
+Hint Mode TyOpAt - - - - - - - - ! - - : typeclass_instances.
+Hint Mode TyOpLt - - - - - - - - ! - - : typeclass_instances.
+
 (** [TyOpAt]: Basic operations on a type *)
 Notation TyOp T α := (∀ d, TyOpAt T α d).
 
@@ -340,6 +346,9 @@ Section classes.
     by iMod ("cl" with "↦s").
   Qed.
 End classes.
+Hint Mode Send - - - ! : typeclass_instances.
+Hint Mode Sync - - - ! : typeclass_instances.
+Hint Mode Copy - - - - - - - - ! : typeclass_instances.
 
 (** ** Subtyping *)
 
