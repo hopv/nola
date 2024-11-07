@@ -308,7 +308,7 @@ Section classes.
   (** [Copy] *)
   Class Copy {X} (T : ty CON Σ X) : Prop := COPY {
     (** Persistence of the ownership formula *)
-    copy_persistent {t d xπ vl δ} : Persistent ⟦ T.1 t d xπ vl ⟧ᶜ(δ);
+    copy_persistent {t d xπ vl δ} :: Persistent ⟦ T.1 t d xπ vl ⟧ᶜ(δ);
     (** Access via the sharing formula *)
     copy_shr_acc {t d l α xπ q} :
       q.[α] -∗ na_own t ⊤ -∗ ⟦ T.2 t d l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ r vl,

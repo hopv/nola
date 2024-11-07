@@ -28,10 +28,8 @@ Section type.
     ⊢ sub (Xl:=X::Yl) α (vl *◁ T ᵖ:: Γ) (vl *◁ T ᵖ:: vl *◁ T ᵖ:: Γ)
         (λ post '(x, zl)', post (x, x, zl)').
   Proof.
-    rewrite sub_unseal. iIntros (? t ??) "!>/= $ $ pre [[%d T] Γ] !>".
-    have ? : ∀ xπ, Persistent ⟦ T.1 t d xπ vl ⟧ᶜ
-      by move=> ?; exact copy_persistent.
-    iDestruct "T" as "#T". iFrame "pre Γ T".
+    rewrite sub_unseal. iIntros (? t ??) "!>/= $ $ pre [[%d #T] Γ] !>".
+    iFrame "pre Γ T".
   Qed.
   (** Modify the head element by subtyping *)
   Lemma sub_subty_hd {X Y Zl α vl T U f Γ} :
