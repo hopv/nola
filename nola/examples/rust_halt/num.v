@@ -210,4 +210,48 @@ Section num.
       [iApply ("type" with "α t [] Γr")|iApply ("type'" with "α t [] Γr")];
       iApply (proph_obs_impl with "pre")=> ?; by rewrite eq.
   Qed.
+
+  (** ** [nat_iter]: Iterating a function with a natural number counter *)
+  Definition nat_iter : val :=
+    rec: "nat_iter" ["f"; "n"; "x"] := if: "n" ≤ #0 then "x" else
+      let: "n'" := "n" - #1 in "nat_iter" ["f"; "n'"; "f" ["n'"; "x"]].
+
+  (** Predicate transformer for [nat_iter] *)
+  Section pre_nat_iter.
+    Context {X Zl} (pre : xpred (X :: Zl) → xpred (natₓ :: X :: Zl))
+      (post : xpred (X :: Zl)).
+    Fixpoint pre_nat_iter (n : nat) (x : X) (zl : xlist Zl) : Prop :=
+      match n with 0 => post (x, zl)' |
+        S n' => pre (λ '(x', zl')', pre_nat_iter n' x' zl') (n', x, zl)' end.
+  End pre_nat_iter.
+  (** Typing [nat_iter] *)
+  Lemma type'_nat_iter {f : val} {α X T Zl v w Γ pre} :
+    (∀ v w, type (Xl:=_::X::Zl) α (v ◁ ty_nat ᵖ:: w ◁ T ᵖ:: Γ) (f [v; w]%E)
+      (λ r, r ◁ T ᵖ:: Γ) pre) ⊢
+    type α (v ◁ ty_nat ᵖ:: w ◁ T ᵖ:: Γ) (nat_iter [f; v; w]%E)
+      (λ r, r ◁ T ᵖ:: Γ) (λ post '(n, x, zl)', pre_nat_iter pre post n x zl).
+  Proof.
+    rewrite /= type_unseal.
+    iIntros "#type !>/=" (?? postπ xlπ) "α t pre (%vi & [%d T] & Γ)".
+    destruct vi as (? & n & eq & [= ->]). setoid_rewrite eq. clear.
+    iInduction n as [|n'] "IH" forall (postπ xlπ d w); wp_rec; wp_op; wp_case.
+    { iModIntro. do 2 iFrame. }
+    wp_op. have -> : (S n' - 1)%Z = n' by lia. wp_let. wp_bind (f _).
+    iDestruct ("type" with "α t pre [T Γ]") as "twp"=>/=.
+    { iFrame. by iExists 0, _. }
+    iApply (twp_wand with "twp"). iIntros (?) ">(% & α & t & pre & [% T] & Γ)".
+    iApply ("IH" $! _ (λ _,(0,_)') with "α t pre T Γ").
+  Qed.
+  Lemma type_nat_iter {α X T} {f : val}
+    `{!TcxExtract (Xl:=[_;X]) (Yl:=Yl) (Zl:=Zl) ᵖ[v ◁ ty_nat; w ◁ T] Γi Γr
+      get getr} {pre} :
+    (∀ v w, type α (v ◁ ty_nat ᵖ:: w ◁ T ᵖ:: Γr) (f [v; w]%E)
+      (λ r, r ◁ T ᵖ:: Γr) pre) ⊢
+    type α Γi (nat_iter [f; v; w]%E) (λ r, r ◁ T ᵖ:: Γr)
+      (λ post yl, let '(n, x, _)' := get yl in
+        pre_nat_iter pre post n x (getr yl))%type.
+  Proof.
+    rewrite type'_nat_iter /=. iIntros "type".
+    iDestruct (type_in with "[] type") as "type"; by [iApply sub_tcx_extract|].
+  Qed.
 End num.
