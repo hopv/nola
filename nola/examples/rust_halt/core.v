@@ -11,44 +11,39 @@ Section type.
 
   (** ** Operations on type contexts *)
 
-  (** Leak the head in [sub] *)
-  Lemma sub_leak_hd {X Yl α E Γ} :
-    ⊢ sub (Xl:=X::Yl) α (E ᵖ:: Γ) Γ (λ post '(_, yl)', post yl).
-  Proof. rewrite sub_unseal. iIntros (????) "!>/= $ $ ? [_ $] //". Qed.
-  (** Swap the head elements *)
-  Lemma sub_swap_hd {X Y Zl α E E' Γ} :
-    ⊢ sub (Xl:=X::Y::Zl) α (E ᵖ:: E' ᵖ:: Γ) (E' ᵖ:: E ᵖ:: Γ)
-      (λ post '(x, y, zl)', post (y, x, zl)').
+  (** Leak *)
+  Lemma sub_leak {Xl} Γ
+    `{!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Zl) Γ Γg Γr get getr} {α} :
+    ⊢ sub α Γg Γr (λ post yl, post (getr yl)).
   Proof.
-    rewrite sub_unseal. iIntros (????) "!>/= $ $ pre (? & ? & ?) !>".
-    iFrame "pre". iFrame.
+    rewrite sub_unseal. iIntros (????) "!>/= $ $ ?". rewrite tcx_extract.
+    by iIntros "[_ $]".
   Qed.
-  (** Copy the head element under [Copy] *)
-  Lemma sub_copy_hd {X Yl α v T Γ} `{!Copy T} :
-    ⊢ sub (Xl:=X::Yl) α (v ◁ T ᵖ:: Γ) (v ◁ T ᵖ:: v ◁ T ᵖ:: Γ)
-        (λ post '(x, zl)', post (x, x, zl)').
+  Lemma sub_leak_rest {Xl} Γ
+    `{!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Zl) Γ Γg Γr get getr} {α} :
+    ⊢ sub α Γg Γ (λ post yl, post (get yl)).
   Proof.
-    rewrite sub_unseal. iIntros (? t ??) "!>/= $ $ pre [[%d #T] Γ] !>".
-    iFrame "pre Γ T".
+    rewrite sub_unseal. iIntros (????) "!>/= $ $ ?". rewrite tcx_extract.
+    by iIntros "[$ _]".
   Qed.
-  (** Modify the head element by subtyping *)
-  Lemma sub_subty_hd {X Y Zl α v T U f Γ} :
+  (** Modify by subtyping *)
+  Lemma sub_subty v {X Y T} U (f : X → Y) {α}
+    `{!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (v ◁ T) Γ Γr get getr} :
     subtyd T U f ⊢
-      sub (Xl:=X::Zl) (Yl:=Y::_) α (v ◁ T ᵖ:: Γ) (v ◁ U ᵖ:: Γ)
-        (λ post '(x, zl)', post (f x, zl)').
+      sub α Γ (v ◁ U ᵖ:: Γr) (λ post zl, post (f (get zl), getr zl)').
   Proof.
-    rewrite subty_unseal sub_unseal.
-    iIntros "[#TU _] !>/=" (????) "$ $ pre [[% T] Γ] !>". iFrame "pre".
+    rewrite subty_unseal sub_unseal. iIntros "[#TU _] !>/=" (????) "$ $ pre".
+    rewrite etcx_extract. iIntros "[[% T] Γr] !>". iFrame "pre Γr".
     by iDestruct ("TU" with "T") as "$".
   Qed.
-  Lemma sub_subty_frozen_hd {X Y Zl α β v T U Γ} `{!Inj (=) (=) f} :
+  Lemma sub_subty_frozen v {X Y T} U f `{!@Inj X Y (=) (=) f} {α β}
+    `{!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (v ◁[†α] T) Γ Γr get getr} :
     subtyd T U f ⊢
-      sub (Xl:=X::Zl) (Yl:=Y::_) α (v ◁[†β] T ᵖ:: Γ) (v ◁[†β] U ᵖ:: Γ)
-        (λ post '(x, zl)', post (f x, zl)').
+      sub β Γ (v ◁[†α] U ᵖ:: Γr) (λ post zl, post (f (get zl), getr zl)').
   Proof.
-    rewrite subty_unseal sub_unseal.
-    iIntros "[#TU _] !>/=" (????) "$ $ pre [→T Γ] !>". iFrame "pre Γ".
-    iIntros "†". iMod ("→T" with "†") as (??) "[eqz T]". iExists _, _.
+    rewrite subty_unseal sub_unseal. iIntros "[#TU _] !>/=" (????) "$ $ pre".
+    rewrite etcx_extract. iIntros "[→T Γr] !>". iFrame "pre Γr". iIntros "†".
+    iMod ("→T" with "†") as (??) "[eqz T]". iExists _, _.
     iDestruct ("TU" with "T") as "$". iApply (proph_eqz_f with "eqz").
   Qed.
 
