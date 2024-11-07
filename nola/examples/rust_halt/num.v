@@ -40,6 +40,12 @@ Section num.
   Proof. iApply (subty_pty pty_bool pty_nat). by iIntros ([|]?). Qed.
 
   (** Integer operations *)
+  Lemma type_int (n : Z) {α Xl Γ} :
+    ⊢ type (Xl:=Xl) α Γ #n (λ r, r ◁ ty_int ᵖ:: Γ) (λ post xl, post (n, xl)').
+  Proof.
+    rewrite /= type_unseal. iIntros (????) "!>/= $ $ pre Γ". wp_value_head.
+    iModIntro. iFrame "pre Γ". iPureIntro. eexists 0, _. split=>//=.
+  Qed.
   Lemma type_add_int v v' {α}
     `{!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_int; v' ◁ ty_int] Γi Γr get getr} :
     ⊢ type α Γi (v + v') (λ r, r ◁ ty_int ᵖ:: Γr)
@@ -88,6 +94,12 @@ Section num.
   Qed.
 
   (** Natural number operations *)
+  Lemma type_nat (n : nat) {α Xl Γ} :
+    ⊢ type (Xl:=Xl) α Γ #n (λ r, r ◁ ty_nat ᵖ:: Γ) (λ post xl, post (n, xl)').
+  Proof.
+    rewrite /= type_unseal. iIntros (????) "!>/= $ $ pre Γ". wp_value_head.
+    iModIntro. iFrame "pre Γ". iPureIntro. eexists 0, _. split=>//=.
+  Qed.
   Lemma type_add_nat v v' {α}
     `{!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_nat; v' ◁ ty_nat] Γi Γr get getr} :
     ⊢ type α Γi (v + v') (λ r, r ◁ ty_nat ᵖ:: Γr)
@@ -150,6 +162,12 @@ Section num.
   Qed.
 
   (** Boolean operations *)
+  Lemma type_bool (b : bool) {α Xl Γ} :
+    ⊢ type (Xl:=Xl) α Γ #b (λ r, r ◁ ty_bool ᵖ:: Γ) (λ post xl, post (b, xl)').
+  Proof.
+    rewrite /= type_unseal. iIntros (????) "!>/= $ $ pre Γ". wp_value_head.
+    iModIntro. iFrame "pre Γ". iPureIntro. eexists 0, _. split=>//=.
+  Qed.
   Lemma type_eq_bool v v' {α}
     `{!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_bool; v' ◁ ty_bool]
         Γi Γr get getr} :
