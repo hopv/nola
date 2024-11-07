@@ -64,25 +64,37 @@ Section type.
     iApply ("type" with "β t pre"). by iFrame.
   Qed.
   (** Use a local lifetime *)
-  Lemma type_lft_use {Xl Yl α β Γi e Γo pre} :
-    type (Xl:=Xl) (Yl:=Yl) (α ⊓ β) Γi e Γo pre ⊢
-      type β (^[α] ᵖ:: Γi) e (λ v, ^[α] ᵖ:: Γo v)
-        (λ post '(_, xl)', pre (λ yl, post ((), yl)') xl).
+  Lemma type_lft_use α
+    `{!EtcxExtract (Yl:=Xl) (Zl:=Xl') ^[α] Γi Γr get getr} {Yl β e Γo pre} :
+    type (Yl:=Yl) (α ⊓ β) Γr e Γo pre ⊢
+      type β Γi e (λ v, ^[α] ᵖ:: Γo v)
+        (λ post xl, pre (λ yl, post ((), yl)') (getr xl)).
   Proof.
-    rewrite type_unseal. iIntros "#type !>/=" (q ???) "β t pre [[$ α] Γi]".
-    case (Qp.lower_bound 1 q) as [?[?[?[->->]]]]. iDestruct "α" as "[α α']".
-    iDestruct "β" as "[β β']".
-    iDestruct ("type" with "[$α $β //] t pre Γi") as "twp".
-    iApply (twp_wand with "twp"). iIntros (?) ">(% & [$$] & $ & pre & Γo) !>".
-    by iFrame.
+    rewrite type_unseal. iIntros "#type !>/=" (q ???) "β t pre Γi".
+    rewrite etcx_extract. iDestruct "Γi" as "[[% α] Γr]".
+    case (Qp.lower_bound 1 q) as [?[?[?[->->]]]]. iDestruct "α" as "[α $]".
+    iDestruct "β" as "[β $]".
+    iDestruct ("type" with "[$α $β //] t pre Γr") as "twp".
+    iApply (twp_wand with "twp"). by iIntros (?) ">(% & [$$] & $ & $ & $) !>".
   Qed.
   (** End a lifetime *)
-  Lemma sub_lft_end {Xl Yl α β Γi Γo pre} :
-    □ ([†α] -∗ sub (Xl:=Xl) (Yl:=Yl) β Γi Γo pre) ⊢
-      sub β (^[α] ᵖ:: Γi) Γo (λ post '(_, xl)', pre post xl).
+  Lemma sub_lft_end
+    `{!EtcxExtract (Yl:=Xl) (Zl:=Xl') ^[α] Γi Γr get getr} {Yl β Γo pre} :
+    □ ([†α] -∗ sub (Yl:=Yl) β Γr Γo pre) ⊢
+      sub β Γi Γo (λ post xl, pre post (getr xl)).
   Proof.
-    rewrite sub_unseal. iIntros "#sub !>/=" (????) "β t pre [[% α] Γi]".
-    iMod (lft_kill with "α") as "†"=>//. iApply ("sub" with "† β t pre Γi").
+    rewrite sub_unseal. iIntros "#sub !>/=" (????) "β t pre Γi".
+    rewrite etcx_extract. iDestruct "Γi" as "[[% α] Γr]".
+    iMod (lft_kill with "α") as "†"=>//. iApply ("sub" with "† β t pre Γr").
+  Qed.
+  Lemma type_lft_end
+    `{!EtcxExtract (Yl:=Xl) (Zl:=Xl') ^[α] Γi Γr get getr}
+    {Yl Zl β Γi' e Γo pre pre'} :
+    □ ([†α] -∗ sub (Yl:=Yl) β Γr Γi' pre) -∗ type (Yl:=Zl) β Γi' e Γo pre' -∗
+      type β Γi e Γo (λ post xl, pre (pre' post) (getr xl)).
+  Proof.
+    iIntros "#sub #type". iApply type_pre; last first.
+    { iApply type_in; [|done]. by iApply sub_lft_end. } { done. }
   Qed.
   (** Retrieve a frozen object *)
   Lemma sub_retrieve {X Yl α β vl T Γ} `{!TyOp T β} :

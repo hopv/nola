@@ -606,3 +606,56 @@ Section tcx.
   Qed.
 End tcx.
 Arguments type {_ _ _ _ _ _ _ _ _} _ _ _%_E _ _.
+
+(** ** Extraction from a type context *)
+
+Section tcx_extract.
+  Context `{!rust_haltGS CON Σ, rust_haltJ CON JUDG Σ, !Csem CON JUDG Σ,
+    !Jsem JUDG (iProp Σ)}.
+
+  (** Extract a type context element *)
+  Class EtcxExtract {X Yl Zl} (E : etcx CON Σ X) (Γ : tcx CON Σ Yl)
+    (Γr : tcx CON Σ Zl) (get : xlist Yl → X) (getr : xlist Yl → xlist Zl)
+    := ETCX_EXTRACT {
+    etcx_extract : ∀ t ylπ, sem_tcx t Γ ylπ ⊢
+      sem_etcx t E (λ π, get (ylπ π)) ∗ sem_tcx t Γr (λ π, getr (ylπ π))
+  }.
+
+  (** Extract from the head *)
+  #[export] Instance etcx_extract_hd {X Yl E Γ} :
+    @EtcxExtract X _ Yl E (E ᵖ:: Γ) Γ fst' snd' | 5.
+  Proof. by split. Qed.
+  (** Extract from the copyable head *)
+  #[export] Instance etcx_extract_hd_copy {X Yl Γ vl} `{!Copy T} :
+    @EtcxExtract X (_ :: Yl) _ (vl *◁ T) (vl *◁ T ᵖ:: Γ) (vl *◁ T ᵖ:: Γ)
+      fst' (λ yyl, yyl) | 2.
+  Proof. split=> ??. iIntros "[#T $]". iFrame "T". Qed.
+  (** Extract from the tail *)
+  #[export] Instance etcx_extract_tl {X Y Yl Zl E'}
+    `{!EtcxExtract E Γ Γ' get getr} :
+    @EtcxExtract X (Y :: Yl) (_ :: Zl) E (E' ᵖ:: Γ) (E' ᵖ:: Γ')
+      (λ yyl, get yyl.2') (λ yyl, yyl.1' ᵖ:: getr yyl.2') | 10.
+  Proof. split=>/= ??. rewrite etcx_extract. iIntros "[$ $]". Qed.
+
+  (** Extract a type context *)
+  Class TcxExtract {Xl Yl Zl} (Γ : tcx CON Σ Xl) (Γg : tcx CON Σ Yl)
+    (Γr : tcx CON Σ Zl) (get : xlist Yl → xlist Xl) (getr : xlist Yl → xlist Zl)
+    := TCX_EXTRACT {
+    tcx_extract : ∀ t xlπ, sem_tcx t Γg xlπ ⊢
+      sem_tcx t Γ (λ π, get (xlπ π)) ∗ sem_tcx t Γr (λ π, getr (xlπ π))
+  }.
+
+  (** Extract a nil *)
+  #[export] Instance tcx_extract_nil {Xl Γ} :
+    @TcxExtract _ Xl _ ᵖ[] Γ Γ (λ _, ()) (λ xl, xl) | 10.
+  Proof. split=> ??. by iIntros "$". Qed.
+  (** Extract a cons *)
+  #[export] Instance tcx_extract_cons
+    `{!@EtcxExtract X Yl Yl' E Γg Γm get getr,
+      !@TcxExtract Xl _ Zl Γ Γm Γr get' getr'} :
+    TcxExtract (E ᵖ:: Γ) Γg Γr
+      (λ yl, get yl ᵖ:: get' (getr yl)) (λ yl, getr' (getr yl)) | 20.
+  Proof. split=> ??. rewrite etcx_extract tcx_extract. iIntros "[$ $]". Qed.
+End tcx_extract.
+Hint Mode EtcxExtract - - - - - - - - - - - - - - - : typeclass_instances.
+Hint Mode TcxExtract - - - - - - - - - - - - - - - : typeclass_instances.
