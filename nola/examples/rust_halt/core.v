@@ -20,17 +20,18 @@ Section type.
     ⊢ sub (Xl:=X::Y::Zl) α (E ᵖ:: E' ᵖ:: Γ) (E' ᵖ:: E ᵖ:: Γ)
       (λ post '(x, y, zl)', post (y, x, zl)').
   Proof.
-    rewrite sub_unseal. iIntros (???[?[??]]) "!>/= $ $ ? (? & ? & ?) !>".
-    iExists (_,_,_)'. iFrame.
+    rewrite sub_unseal. iIntros (????) "!>/= $ $ pre (? & ? & ?) !>".
+    iFrame "pre". iFrame.
   Qed.
   (** Copy the head element under [Copy] *)
   Lemma sub_copy_hd {X Yl α vl T Γ} `{!Copy T} :
     ⊢ sub (Xl:=X::Yl) α (vl *◁ T ᵖ:: Γ) (vl *◁ T ᵖ:: vl *◁ T ᵖ:: Γ)
         (λ post '(x, zl)', post (x, x, zl)').
   Proof.
-    rewrite sub_unseal. iIntros (? t ? [xπ ?]) "!>/= $ $ ? [[%d T] ?] !>".
-    have ? : Persistent ⟦ T.1 t d xπ vl ⟧ᶜ by exact copy_persistent.
-    iDestruct "T" as "#T". iExists (_,_,_)'. iFrame "T". iFrame.
+    rewrite sub_unseal. iIntros (? t ??) "!>/= $ $ pre [[%d T] Γ] !>".
+    have ? : ∀ xπ, Persistent ⟦ T.1 t d xπ vl ⟧ᶜ
+      by move=> ?; exact copy_persistent.
+    iDestruct "T" as "#T". iFrame "pre Γ T".
   Qed.
   (** Modify the head element by subtyping *)
   Lemma sub_subty_hd {X Y Zl α vl T U f Γ} :
@@ -39,8 +40,8 @@ Section type.
         (λ post '(x, zl)', post (f x, zl)').
   Proof.
     rewrite subty_unseal sub_unseal.
-    iIntros "[#TU _] !>/=" (????) "$ $ pre [[% T] Γ] !>". iExists (_,_)'.
-    iDestruct ("TU" with "T") as "$". iFrame.
+    iIntros "[#TU _] !>/=" (????) "$ $ pre [[% T] Γ] !>". iFrame "pre".
+    by iDestruct ("TU" with "T") as "$".
   Qed.
   Lemma sub_subty_frozen_hd {X Y Zl α β vl T U Γ} `{!Inj (=) (=) f} :
     subtyd T U f ⊢
@@ -48,10 +49,9 @@ Section type.
         (λ post '(x, zl)', post (f x, zl)').
   Proof.
     rewrite subty_unseal sub_unseal.
-    iIntros "[#TU _] !>/=" (????) "$ $ pre [→T Γ] !>". iExists (_,_)'.
-    iFrame "pre Γ". iIntros "†". iMod ("→T" with "†") as (??) "[eqz T]".
-    iExists _, _. iDestruct ("TU" with "T") as "$".
-    iApply (proph_eqz_f with "eqz").
+    iIntros "[#TU _] !>/=" (????) "$ $ pre [→T Γ] !>". iFrame "pre Γ".
+    iIntros "†". iMod ("→T" with "†") as (??) "[eqz T]". iExists _, _.
+    iDestruct ("TU" with "T") as "$". iApply (proph_eqz_f with "eqz").
   Qed.
 
   (** ** Operations on lifetimes *)
@@ -63,7 +63,7 @@ Section type.
   Proof.
     rewrite type_unseal.
     iIntros "#type !>" (????) "β t pre Γi". iMod lft_alloc as (α ?) "α".
-    iApply ("type" $! _ _ _ _ (_,_)' with "β t pre")=>/=. by iFrame.
+    iApply ("type" with "β t pre"). by iFrame.
   Qed.
   (** Use a local lifetime *)
   Lemma type_lft_use {Xl Yl α β Γi e Γo pre} :
@@ -76,7 +76,7 @@ Section type.
     iDestruct "β" as "[β β']".
     iDestruct ("type" with "[$α $β //] t pre Γi") as "twp".
     iApply (twp_wand with "twp"). iIntros (?) ">(% & [$$] & $ & pre & Γo) !>".
-    iExists (λ _,(), _)'. iFrame.
+    by iFrame.
   Qed.
   (** End a lifetime *)
   Lemma sub_lft_end {Xl Yl α β Γi Γo pre} :
@@ -90,12 +90,11 @@ Section type.
   Lemma sub_retrieve {X Yl α β vl T Γ} `{!TyOp T β} :
     [†α] -∗ sub (Xl:=X::Yl) β (vl *◁[†α] T ᵖ:: Γ) (vl *◁ T ᵖ:: Γ) id.
   Proof.
-    rewrite sub_unseal.
-    iIntros "#† !>/=" (???[??]) "β $ pre [T Γ]".
-    iMod ("T" with "†") as (??) "[eqz T]".
+    rewrite sub_unseal. iIntros "#† !>/=" (????) "β $ pre [T Γ]".
+    iMod ("T" with "†") as (? xπ') "[eqz T]".
     iMod (ty_own_proph with "β T") as (???) "[ξl cl]".
     iMod ("eqz" with "[//] ξl") as "[ξl eq]". iMod ("cl" with "ξl") as "[$ T]".
-    iModIntro. iExists (_,_)'. iFrame "T Γ".
+    iModIntro. iExists (λ π, (xπ' π, _)')=>/=. iFrame "T Γ".
     by iApply (proph_obs_impl2 with "pre eq")=> ??<-.
   Qed.
 

@@ -56,8 +56,8 @@ Proof.
   move=> topre totyp. eapply wp_adequacy=> ?. case (totyp _)=> ?[? typ].
   exists _, _. rewrite type_unseal in typ.
   iMod (na_alloc (na_invG0:=rust_haltGS_na_inv)) as (t) "t". iModIntro.
-  iDestruct (typ $! 1%Qp t (λ _ _, True) () with "[//] t [] [//]") as "twp".
-  { by iApply proph_obs_true. }
+  iDestruct (typ $! 1%Qp t (λ _ _, True) (λ _,()) with "[//] t [] [//]")
+    as "twp"; [by iApply proph_obs_true|].
   iApply twp_wp. iApply (twp_mono with "twp"). by iIntros.
 Qed.
 
@@ -72,7 +72,7 @@ Proof.
   move=> topre totyp. eapply twp_total=> ?. case (totyp _)=> ?[? typ].
   exists _, _, (λ _, True)%I. rewrite type_unseal in typ.
   iMod (na_alloc (na_invG0:=rust_haltGS_na_inv)) as (t) "t". iModIntro.
-  iDestruct (typ $! 1%Qp t (λ _ _, True) () with "[//] t [] [//]") as "twp".
-  { by iApply proph_obs_true. }
+  iDestruct (typ $! 1%Qp t (λ _ _, True) (λ _,()) with "[//] t [] [//]")
+    as "twp"; [by iApply proph_obs_true|].
   iApply (twp_mono with "twp"). by iIntros.
 Qed.

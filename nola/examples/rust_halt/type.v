@@ -447,9 +447,9 @@ Section tcx.
     end%I.
 
   (** Semantics of a type context *)
-  Fixpoint sem_tcx t {Xl} : tcx CON Σ Xl → clairs Xl → iProp Σ :=
-    match Xl with [] => λ _ _, True | _ :: _ =>
-      λ '(eΓ, Γ)' '(xπ, xπl)', sem_etcx t eΓ xπ ∗ sem_tcx t Γ xπl end%I.
+  Fixpoint sem_tcx t {Xl} : tcx CON Σ Xl → clair (xlist Xl) → iProp Σ :=
+    match Xl with [] => λ _ _, True | _ :: _ => λ '(eΓ, Γ)' xlπ,
+      sem_etcx t eΓ (λ π, (xlπ π).1') ∗ sem_tcx t Γ (λ π, (xlπ π).2') end%I.
 End tcx.
 
 Section tcx.
@@ -459,10 +459,10 @@ Section tcx.
   (** [sub]: Inclusion between type contexts *)
   Definition sub_def {Xl Yl} (α : lft) (Γi : tcx CON Σ Xl) (Γo : tcx CON Σ Yl)
     (pre : xpred Yl → xpred Xl) : iProp Σ :=
-    □ ∀ q t postπ xπl,
-      q.[α] -∗ na_own t ⊤ -∗ ⟨π, pre (postπ π) (app_clairs π xπl)⟩ -∗
-        sem_tcx t Γi xπl =[rust_halt_wsat]{⊤}=∗ ∃ yπl,
-        q.[α] ∗ na_own t ⊤ ∗ ⟨π, postπ π (app_clairs π yπl)⟩ ∗ sem_tcx t Γo yπl.
+    □ ∀ q t postπ xlπ,
+      q.[α] -∗ na_own t ⊤ -∗ ⟨π, pre (postπ π) (xlπ π)⟩ -∗ sem_tcx t Γi xlπ
+        =[rust_halt_wsat]{⊤}=∗ ∃ ylπ,
+        q.[α] ∗ na_own t ⊤ ∗ ⟨π, postπ π (ylπ π)⟩ ∗ sem_tcx t Γo ylπ.
   Lemma sub_aux : seal (@sub_def). Proof. by eexists. Qed.
   Definition sub {Xl Yl} := sub_aux.(unseal) Xl Yl.
   Lemma sub_unseal : @sub = @sub_def. Proof. exact: seal_eq. Qed.
@@ -475,11 +475,10 @@ Section tcx.
   Definition type_def {Xl Yl} (α : lft) (Γi : tcx CON Σ Xl) (e : expr)
     (Γo : val → tcx CON Σ Yl) (pre : xpred Yl → xpred Xl)
     : iProp Σ :=
-    □ ∀ q t postπ xπl,
-      q.[α] -∗ na_own t ⊤ -∗ ⟨π, pre (postπ π) (app_clairs π xπl)⟩ -∗
-      sem_tcx t Γi xπl -∗ WP[rust_halt_wsat] e [{ v, |=[rust_halt_wsat]{⊤}=>
-        ∃ yπl, q.[α] ∗ na_own t ⊤ ∗ ⟨π, postπ π (app_clairs π yπl)⟩ ∗
-          sem_tcx t (Γo v) yπl }].
+    □ ∀ q t postπ xlπ,
+      q.[α] -∗ na_own t ⊤ -∗ ⟨π, pre (postπ π) (xlπ π)⟩ -∗ sem_tcx t Γi xlπ -∗
+        WP[rust_halt_wsat] e [{ v, |=[rust_halt_wsat]{⊤}=> ∃ ylπ,
+          q.[α] ∗ na_own t ⊤ ∗ ⟨π, postπ π (ylπ π)⟩ ∗ sem_tcx t (Γo v) ylπ }].
   Lemma type_aux : seal (@type_def). Proof. by eexists. Qed.
   Definition type {Xl Yl} := type_aux.(unseal) Xl Yl.
   Lemma type_unseal : @type = @type_def. Proof. exact: seal_eq. Qed.
@@ -524,8 +523,7 @@ Section tcx.
       (λ post '(x, yl)', pre (λ zl, post (x, zl)') yl).
   Proof.
     rewrite sub_unseal. iIntros "#sub !>" (????) "/= α t pre [E Γi]".
-    iMod ("sub" with "α t pre Γi") as (yπl) "($ & $ & ? & ?)". iExists (_,_)'.
-    by iFrame.
+    by iMod ("sub" with "α t pre Γi") as (?) "($ & $ & $ & $)".
   Qed.
   (** [sub] is monotone *)
   #[export] Instance sub_mono {Xl Yl} :
@@ -589,7 +587,7 @@ Section tcx.
   Proof.
     rewrite type_unseal. iIntros "#type !>" (????) "/= α t pre [E Γi]".
     iDestruct ("type" with "α t pre Γi") as "twp". iApply (twp_wand with "twp").
-    iIntros (?) ">(% & $ & $ & ? & ?) !>". iExists (_,_)'. by iFrame.
+    by iIntros (?) ">(% & $ & $ & $ & $) !>".
   Qed.
   (** [type] is monotone *)
   #[export] Instance type_mono {Xl Yl} :

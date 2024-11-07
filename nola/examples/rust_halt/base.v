@@ -13,8 +13,6 @@ Open Scope nat_scope.
 
 (** Clairvoyant value *)
 Notation clair A := (clair xty A).
-(** List of clairvoyant values *)
-Notation clairs := (plist (A:=xty) (λ X, clair X)).
 
 (** Value for [list xty] *)
 Notation xlist := (plist xpty_ty).

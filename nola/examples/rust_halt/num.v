@@ -46,8 +46,8 @@ Section num.
   Proof.
     rewrite /= type_unseal. iIntros (????) "!>/= $$ pre".
     iIntros (((? & ? & eq & [= ->]) & (? & ? & eq' & [= ->]) & _)). wp_op.
-    iModIntro. iExists (λ _, _, ())'. iFrame "pre". iSplit=>//. iExists 0, _.
-    iSplit=>//=. iPureIntro=> ?. by rewrite eq eq'.
+    iModIntro. iFrame "pre". iSplit=>//. iExists 0, _. iSplit=>//=.
+    iPureIntro=> ?. by rewrite eq eq'.
   Qed.
   Lemma type_sub_int {α v v'} :
     ⊢ type α ᵖ[v ◁ ty_int; v' ◁ ty_int] (v - v') (λ r, ᵖ[r ◁ ty_int])
@@ -55,8 +55,8 @@ Section num.
   Proof.
     rewrite /= type_unseal. iIntros (????) "!>/= $$ pre".
     iIntros (((? & ? & eq & [= ->]) & (? & ? & eq' & [= ->]) & _)). wp_op.
-    iModIntro. iExists (λ _, _, ())'. iFrame "pre". iSplit=>//. iExists 0, _.
-    iSplit=>//=. iPureIntro=> ?. by rewrite eq eq'.
+    iModIntro. iFrame "pre". iSplit=>//. iExists 0, _. iSplit=>//=.
+    iPureIntro=> ?. by rewrite eq eq'.
   Qed.
   Lemma type_eq_int {α v v'} :
     ⊢ type α ᵖ[v ◁ ty_int; v' ◁ ty_int] (v = v') (λ r, ᵖ[r ◁ ty_bool])
@@ -64,8 +64,8 @@ Section num.
   Proof.
     rewrite /= type_unseal. iIntros (????) "!>/= $$ pre".
     iIntros (((? & ? & eq & [= ->]) & (? & ? & eq' & [= ->]) & _)). wp_op.
-    iModIntro. iExists (λ _, _, ())'. iFrame "pre". iSplit=>//. iExists 0, _.
-    iSplit=>//=. iPureIntro=> ?. by rewrite eq eq'.
+    iModIntro. iFrame "pre". iSplit=>//. iExists 0, _. iSplit=>//=.
+    iPureIntro=> ?. by rewrite eq eq'.
   Qed.
   Lemma type_le_int {α v v'} :
     ⊢ type α ᵖ[v ◁ ty_int; v' ◁ ty_int] (v ≤ v') (λ r, ᵖ[r ◁ ty_bool])
@@ -73,7 +73,7 @@ Section num.
   Proof.
     rewrite /= type_unseal. iIntros (????) "!>/= $$ pre".
     iIntros (((? & ? & eq & [= ->]) & (? & ? & eq' & [= ->]) & _)). wp_op.
-    iModIntro. iExists (λ _, _, ())'. iFrame "pre". iSplit=>//. iExists 0, _.
+    iModIntro. iFrame "pre". iSplit=>//. iExists 0, _.
     iSplit=>//=. iPureIntro=> ?. by rewrite eq eq'.
   Qed.
 
@@ -84,7 +84,7 @@ Section num.
   Proof.
     rewrite /= type_unseal. iIntros (????) "!>/= $$ pre".
     iIntros (((? & ? & eq & [= ->]) & (? & ? & eq' & [= ->]) & _)). wp_op.
-    iModIntro. iExists (λ _, _, ())'. iFrame "pre". iSplit=>//. iExists 0, _.
+    iModIntro. iFrame "pre". iSplit=>//. iExists 0, _.
     iSplit=>//=; iPureIntro=> >. { by rewrite eq eq'. } { do 3 f_equal. lia. }
   Qed.
   Lemma type_sub_nat {α v v'} :
@@ -93,7 +93,7 @@ Section num.
   Proof.
     rewrite /= type_unseal. iIntros (????) "!>/= $ $ pre".
     iIntros (((? & ? & eq & [= ->]) & (? & ? & eq' & [= ->]) & _)). wp_op.
-    iModIntro. iExists (λ _, _, ())'. iSplit.
+    iModIntro. iExists (λ _, _). iSplit.
     { by iApply (proph_obs_impl with "pre")=>/= [?[??]]. }
     iSplit=>//. iExists 0, _. iSplit. { iPureIntro=> ?. by rewrite eq eq'. }
     rewrite proph_obs_sat. iRevert "pre". iPureIntro. case=>/= [?+].
@@ -105,8 +105,8 @@ Section num.
   Proof.
     rewrite /= type_unseal. iIntros (????) "!>/= $$ pre".
     iIntros (((? & ? & eq & [= ->]) & (? & ? & eq' & [= ->]) & _)). wp_op.
-    iModIntro. iExists (λ _, _, ())'. iFrame "pre". iSplit=>//. iExists 0, _.
-    iSplit=>//=. iPureIntro=> ?. rewrite eq eq'. apply bool_decide_ext. lia.
+    iModIntro. iFrame "pre". iSplit=>//. iExists 0, _. iSplit=>//=.
+    iPureIntro=> ?. rewrite eq eq'. apply bool_decide_ext. lia.
   Qed.
   Lemma type_le_nat {α v v'} :
     ⊢ type α ᵖ[v ◁ ty_nat; v' ◁ ty_nat] (v ≤ v') (λ r, ᵖ[r ◁ ty_bool])
@@ -114,14 +114,14 @@ Section num.
   Proof.
     rewrite /= type_unseal. iIntros (????) "!>/= $$ pre".
     iIntros (((? & ? & eq & [= ->]) & (? & ? & eq' & [= ->]) & _)). wp_op.
-    iModIntro. iExists (λ _, _, ())'. iFrame "pre". iSplit=>//. iExists 0, _.
-    iSplit=>//=. iPureIntro=> ?. rewrite eq eq'. apply bool_decide_ext. lia.
+    iModIntro. iFrame "pre". iSplit=>//. iExists 0, _. iSplit=>//=.
+    iPureIntro=> ?. rewrite eq eq'. apply bool_decide_ext. lia.
   Qed.
   Lemma type_ndnat {α v v'} :
     ⊢ type α ᵖ[] Ndnat (λ r, ᵖ[r ◁ ty_nat]) (λ post _, ∀ n, post ᵖ[n])%type.
   Proof.
     rewrite /= type_unseal. iIntros (????) "!>/= $ $ pre _".
-    wp_apply twp_ndnat=>//. iIntros (?) "_ !>". iExists (λ _, n, ())'.
+    wp_apply twp_ndnat=>//. iIntros (?) "_ !>". iExists _.
     iSplit. { iApply (proph_obs_impl with "pre")=> ? post. apply post. }
     iSplit=>//. by iExists 0, _.
   Qed.
@@ -133,9 +133,8 @@ Section num.
   Proof.
     rewrite /= type_unseal. iIntros (????) "!>/= $$ pre".
     iIntros (((? & b & eq & [= ->]) & (? & b' & eq' & [= ->]) & _)). wp_op.
-    iModIntro. iExists (λ _, _, ())'. iFrame "pre". iSplit=>//. iExists 0, _.
-    iSplit=>//=. iPureIntro=> ?. rewrite eq eq'. apply bool_decide_ext.
-    by case b; case b'.
+    iModIntro. iFrame "pre". iSplit=>//. iExists 0, _. iSplit=>//=.
+    iPureIntro=> ?. rewrite eq eq'. apply bool_decide_ext. by case b; case b'.
   Qed.
   Lemma type_le_bool {α v v'} :
     ⊢ type α ᵖ[v ◁ ty_bool; v' ◁ ty_bool] (v ≤ v') (λ r, ᵖ[r ◁ ty_bool])
@@ -143,8 +142,8 @@ Section num.
   Proof.
     rewrite /= type_unseal. iIntros (????) "!>/= $$ pre".
     iIntros (((? & b & eq & [= ->]) & (? & b' & eq' & [= ->]) & _)). wp_op.
-    iModIntro. iExists (λ _, _, ())'. iFrame "pre". iSplit=>//. iExists 0, _.
-    iSplit=>//=. iPureIntro=> ?. rewrite eq eq'. by case b; case b'.
+    iModIntro. iFrame "pre". iSplit=>//. iExists 0, _. iSplit=>//=.
+    iPureIntro=> ?. rewrite eq eq'. by case b; case b'.
   Qed.
 
   (** If expression *)
