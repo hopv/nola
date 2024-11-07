@@ -450,6 +450,15 @@ Section tcx.
   Fixpoint sem_tcx t {Xl} : tcx CON Σ Xl → clair (xlist Xl) → iProp Σ :=
     match Xl with [] => λ _ _, True | _ :: _ => λ '(eΓ, Γ)' xlπ,
       sem_etcx t eΓ (λ π, (xlπ π).1') ∗ sem_tcx t Γ (λ π, (xlπ π).2') end%I.
+
+  (** [sem_tcx] over [plist_app] *)
+  Lemma sem_tcx_app {t Xl Yl Γ Γ' xlπ ylπ} :
+    @sem_tcx t Xl Γ xlπ ∗ @sem_tcx t Yl Γ' ylπ ⊣⊢
+      sem_tcx t (plist_app Γ Γ') (λ π, plist_app (xlπ π) (ylπ π)).
+  Proof.
+    move: Γ xlπ. elim: Xl=>/=. { move=> ??. by rewrite left_id. }
+    move=> ?? IH ??. by rewrite -IH assoc.
+  Qed.
 End tcx.
 
 Section tcx.
@@ -670,6 +679,22 @@ Section tcx_extract.
     TcxExtract (E ᵖ:: Γ) Γg Γr
       (λ yl, get yl ᵖ:: get' (getr yl)) (λ yl, getr' (getr yl)) | 20.
   Proof. split=> ??. rewrite etcx_extract tcx_extract. iIntros "[$ $]". Qed.
+
+  (** Type context inclusion by [EtcxExtract] *)
+  Lemma sub_etcx_extract `{!@EtcxExtract X Yl Zl E Γ Γr get getr} {α} :
+    ⊢ sub α Γ (E ᵖ:: Γr) (λ post yl, post (get yl, getr yl)').
+  Proof.
+    rewrite sub_unseal. iIntros (????) "!>/= $ $ ?? !>". rewrite etcx_extract.
+    iExists (λ _, (_,_)'). iFrame.
+  Qed.
+  (** Type context inclusion by [TcxExtract] *)
+  Lemma sub_tcx_extract `{!@TcxExtract Xl Yl Zl Γ Γg Γr get getr} {α} :
+    ⊢ sub α Γg (plist_app Γ Γr)
+      (λ post yl, post (plist_app (get yl) (getr yl))).
+  Proof.
+    rewrite sub_unseal. iIntros (????) "!>/= $ $ pre Γ !>". iExists (λ _, _).
+    iFrame "pre". by rewrite tcx_extract sem_tcx_app.
+  Qed.
 End tcx_extract.
 Hint Mode EtcxExtract - - - - - - - - - - - - - - - : typeclass_instances.
 Hint Mode TcxExtract - - - - - - - - - - - - - - - : typeclass_instances.
