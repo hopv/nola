@@ -242,7 +242,7 @@ Section fbor_tok.
   Context `{!rust_haltJ CON JUDG Σ, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ),
     !rust_haltCS CON JUDG Σ}.
 
-  (** Access [spointstod] *)
+  (** Access [spointsto] *)
   Lemma spointsto_acc {α l v r} :
     r.[α] -∗ l ↦ˢ[α] v =[rust_halt_wsat]{⊤}=∗ ∃ q,
       l ↦{q} v ∗ (l ↦{q} v =[rust_halt_wsat]=∗ r.[α]).
