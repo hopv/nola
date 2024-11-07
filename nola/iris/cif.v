@@ -485,37 +485,37 @@ Section as_cif.
   Next Obligation. done. Qed.
   #[export] Program Instance all_as_cif `{!∀ a : A, AsCif CON (Φ a)} :
     AsCif CON (λ δ, ∀ a, Φ a δ)%I | 5 := AS_CIF (∀ a, as_cif (Φ a)) _.
-  Next Obligation. move=>/= *. f_equiv=> ?. exact sem_as_cif. Qed.
+  Next Obligation. move=>/= >. f_equiv=> ?. exact sem_as_cif. Qed.
   #[export] Program Instance ex_as_cif `{!∀ a : A, AsCif CON (Φ a)} :
     AsCif CON (λ δ, ∃ a : A, Φ a δ)%I | 5 := AS_CIF (∃ a, as_cif (Φ a)) _.
-  Next Obligation. move=>/= *. f_equiv=> ?. exact sem_as_cif. Qed.
+  Next Obligation. move=>/= >. f_equiv=> ?. exact sem_as_cif. Qed.
   #[export] Program Instance and_as_cif `{!AsCif CON Φ, !AsCif CON Ψ} :
     AsCif CON (λ δ, Φ δ ∧ Ψ δ)%I | 5 := AS_CIF (as_cif Φ ∧ as_cif Ψ) _.
-  Next Obligation. move=>/= *. f_equiv; exact sem_as_cif. Qed.
+  Next Obligation. move=>/= >. f_equiv; exact sem_as_cif. Qed.
   #[export] Program Instance or_as_cif `{!AsCif CON Φ, !AsCif CON Ψ} :
     AsCif CON (λ δ, Φ δ ∨ Ψ δ)%I | 5 := AS_CIF (as_cif Φ ∨ as_cif Ψ) _.
-  Next Obligation. move=>/= *. f_equiv; exact sem_as_cif. Qed.
+  Next Obligation. move=>/= >. f_equiv; exact sem_as_cif. Qed.
   #[export] Program Instance imp_as_cif `{!AsCif CON Φ, !AsCif CON Ψ} :
     AsCif CON (λ δ, Φ δ → Ψ δ)%I | 5 := AS_CIF (as_cif Φ → as_cif Ψ) _.
-  Next Obligation. move=>/= *. f_equiv; exact sem_as_cif. Qed.
+  Next Obligation. move=>/= >. f_equiv; exact sem_as_cif. Qed.
   #[export] Program Instance sep_as_cif `{!AsCif CON Φ, !AsCif CON Ψ} :
     AsCif CON (λ δ, Φ δ ∗ Ψ δ)%I | 5 := AS_CIF (as_cif Φ ∗ as_cif Ψ) _.
-  Next Obligation. move=>/= *. f_equiv; exact sem_as_cif. Qed.
+  Next Obligation. move=>/= >. f_equiv; exact sem_as_cif. Qed.
   #[export] Program Instance wand_as_cif `{!AsCif CON Φ, !AsCif CON Ψ} :
     AsCif CON (λ δ, Φ δ -∗ Ψ δ)%I | 5 := AS_CIF (as_cif Φ -∗ as_cif Ψ) _.
-  Next Obligation. move=>/= *. f_equiv; exact sem_as_cif. Qed.
+  Next Obligation. move=>/= >. f_equiv; exact sem_as_cif. Qed.
   #[export] Program Instance plain_as_cif `{!AsCif CON Φ} :
     AsCif CON (λ δ, ■ Φ δ)%I | 5 := AS_CIF (■ as_cif Φ) _.
-  Next Obligation. move=>/= *. f_equiv. exact sem_as_cif. Qed.
+  Next Obligation. move=>/= >. f_equiv. exact sem_as_cif. Qed.
   #[export] Program Instance pers_as_cif `{!AsCif CON Φ} :
     AsCif CON (λ δ, □ Φ δ)%I | 5 := AS_CIF (□ as_cif Φ) _.
-  Next Obligation. move=>/= *. f_equiv. exact sem_as_cif. Qed.
+  Next Obligation. move=>/= >. f_equiv. exact sem_as_cif. Qed.
   #[export] Program Instance bupd_as_cif `{!AsCif CON Φ} :
     AsCif CON (λ δ, |==> Φ δ)%I | 5 := AS_CIF (|==> as_cif Φ) _.
-  Next Obligation. move=>/= *. f_equiv. exact sem_as_cif. Qed.
+  Next Obligation. move=>/= >. f_equiv. exact sem_as_cif. Qed.
   #[export] Program Instance except_0_as_cif `{!AsCif CON Φ} :
     AsCif CON (λ δ, ◇ Φ δ)%I | 5 := AS_CIF (◇ as_cif Φ) _.
-  Next Obligation. move=>/= *. f_equiv. exact sem_as_cif. Qed.
+  Next Obligation. move=>/= >. f_equiv. exact sem_as_cif. Qed.
   #[export] Program Instance pure_as_cif {φ} : AsCif CON (λ _, ⌜φ⌝)%I | 5 :=
     AS_CIF ⌜φ⌝ _.
   Next Obligation. done. Qed.

@@ -319,11 +319,11 @@ Section borrowC.
 
   #[export] Program Instance bor_as_cif {α Px} :
     AsCif CON (λ δ, bor δ α Px) := AS_CIF (cif_bor α Px) _.
-  Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
+  Next Obligation. move=>/= >. by rewrite sem_cif_in. Qed.
   #[export] Program Instance obor_as_cif {α q Px} :
     AsCif CON (λ δ, obor δ α q Px) := AS_CIF (cif_obor α q Px) _.
-  Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
+  Next Obligation. move=>/= >. by rewrite sem_cif_in. Qed.
   #[export] Program Instance lend_as_cif {α Px} :
     AsCif CON (λ δ, lend δ α Px) := AS_CIF (cif_lend α Px) _.
-  Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
+  Next Obligation. move=>/= >. by rewrite sem_cif_in. Qed.
 End borrowC.

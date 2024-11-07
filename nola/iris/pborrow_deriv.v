@@ -393,11 +393,11 @@ Section pborrowC.
   #[export] Program Instance pbor_as_cif {X α a xπ ξ Φx} :
     AsCif CON (λ δ, pbor (X:=X) δ α a xπ ξ Φx) :=
     AS_CIF (cif_pbor α a xπ ξ Φx) _.
-  Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
+  Next Obligation. move=>/= >. by rewrite sem_cif_in. Qed.
   #[export] Program Instance pobor_as_cif {X α q ξ Φx} :
     AsCif CON (λ δ, pobor (X:=X) δ α q ξ Φx) := AS_CIF (cif_pobor α q ξ Φx) _.
-  Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
+  Next Obligation. move=>/= >. by rewrite sem_cif_in. Qed.
   #[export] Program Instance plend_as_cif {X α xπ Φx} :
     AsCif CON (λ δ, plend (X:=X) δ α xπ Φx) := AS_CIF (cif_plend α xπ Φx) _.
-  Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
+  Next Obligation. move=>/= >. by rewrite sem_cif_in. Qed.
 End pborrowC.

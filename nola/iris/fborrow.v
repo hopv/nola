@@ -192,5 +192,5 @@ Section fborC.
 
   #[export] Program Instance fbor_as_cif {α Φx} :
     AsCif CON (λ δ, fbor δ α Φx) := AS_CIF (cif_fbor α Φx) _.
-  Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
+  Next Obligation. move=>/= >. by rewrite sem_cif_in. Qed.
 End fborC.

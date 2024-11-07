@@ -47,7 +47,7 @@ Notation inv_tokCS := (inCS inv_tokCT).
 #[export] Program Instance inv_tok_as_cif `{!Csem CON JUDG Σ}
   `{!inv_tokC CON, !inv'GS (cifOF CON) Σ, !inv_tokCS CON JUDG Σ} {N Px} :
   AsCif CON (λ _, inv_tok N Px) := AS_CIF (cif_inv_tok N Px) _.
-Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
+Next Obligation. move=>/= >. by rewrite sem_cif_in. Qed.
 
 (** ** Borrow *)
 
@@ -89,7 +89,7 @@ Notation bor_tokCS := (inCS bor_tokCT).
 #[export] Program Instance bor_tok_as_cif `{!Csem CON JUDG Σ}
   `{!bor_tokC CON, !borrowGS (cifOF CON) Σ, !bor_tokCS CON JUDG Σ} {α Px} :
   AsCif CON (λ _, bor_tok α Px) := AS_CIF (cif_bor_tok α Px) _.
-Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
+Next Obligation. move=>/= >. by rewrite sem_cif_in. Qed.
 
 (** ** Prophetic borrow *)
 
@@ -144,7 +144,7 @@ Notation pbor_tokCS A TY := (inCS (pbor_tokCT A TY)).
   {X α a xπ ξ Φx} :
   AsCif CON (λ _, pbor_tok (X:=X) α a xπ ξ Φx) :=
   AS_CIF (cif_pbor_tok α a xπ ξ Φx) _.
-Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
+Next Obligation. move=>/= >. by rewrite sem_cif_in. Qed.
 
 (** ** Judgment for [iff] *)
 
@@ -239,4 +239,4 @@ Notation invCS := (inCS invCT).
 #[export] Program Instance inv'_as_cif `{!Csem CON JUDG Σ, !invC CON}
   `{!inv'GS (cifOF CON) Σ, !iffJ (cifO CON Σ) JUDG, !invCS CON JUDG Σ} {N Px} :
   AsCif CON (λ δ, inv' δ N Px) := AS_CIF (cif_inv N Px) _.
-Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
+Next Obligation. move=>/= >. by rewrite sem_cif_in. Qed.

@@ -181,4 +181,4 @@ Notation dinvCS := (inCS dinvCT).
 #[export] Program Instance dinv_as_cif `{!Csem CON JUDG Σ, !dinvC CON}
   `{!dinvGS (cifOF CON) Σ, !dinvJ (cifO CON Σ) JUDG, !dinvCS CON JUDG Σ} {Px} :
   AsCif CON (λ δ, dinv δ Px) := AS_CIF (cif_dinv Px) _.
-Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
+Next Obligation. move=>/= >. by rewrite sem_cif_in. Qed.

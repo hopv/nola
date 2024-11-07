@@ -230,9 +230,12 @@ End na_invC.
 (** [na_invC] semantics registered *)
 Notation na_invCS := (inCS na_invCT).
 
-(** Reify [na_inv'] *)
-#[export] Program Instance na_inv'_as_cif `{!Csem CON JUDG Σ, !na_invC CON}
-  `{!inv'GS (cifOF CON) Σ, !na_invGS (cifOF CON) Σ, !na_invJ (cifO CON Σ) JUDG,
-    !na_invCS CON JUDG Σ} {p N Px} :
-  AsCif CON (λ δ, na_inv' δ p N Px) := AS_CIF (cif_na_inv p N Px) _.
-Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
+Section na_invC.
+  Context `{!Csem CON JUDG Σ, !na_invC CON, !inv'GS (cifOF CON) Σ,
+    !na_invGS (cifOF CON) Σ, !na_invJ (cifO CON Σ) JUDG, !na_invCS CON JUDG Σ}.
+
+  (** Reify [na_inv'] *)
+  #[export] Program Instance na_inv'_as_cif {p N Px} :
+    AsCif CON (λ δ, na_inv' δ p N Px) := AS_CIF (cif_na_inv p N Px) _.
+  Next Obligation. move=>/= >. by rewrite sem_cif_in. Qed.
+End na_invC.

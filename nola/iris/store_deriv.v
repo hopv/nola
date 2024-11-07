@@ -176,5 +176,5 @@ Section storeC.
 
   #[export] Program Instance store_as_cif {Px} :
     AsCif CON (λ δ, store δ Px) := AS_CIF (cif_store Px) _.
-  Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
+  Next Obligation. move=>/= >. by rewrite sem_cif_in. Qed.
 End storeC.

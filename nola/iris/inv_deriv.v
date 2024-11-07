@@ -241,4 +241,4 @@ Notation invCS := (inCS invCT).
 #[export] Program Instance inv'_as_cif `{!Csem CON JUDG Σ, !invC CON}
   `{!inv'GS (cifOF CON) Σ, !invJ (cifO CON Σ) JUDG, !invCS CON JUDG Σ} {N Px} :
   AsCif CON (λ δ, inv' δ N Px) := AS_CIF (cif_inv N Px) _.
-Next Obligation. move=>/= *. by rewrite sem_cif_in. Qed.
+Next Obligation. move=>/= >. by rewrite sem_cif_in. Qed.
