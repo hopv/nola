@@ -1,6 +1,7 @@
 (** * Basics *)
 
 From iris.proofmode Require Export environments.
+From nola.util Require Export fn.
 From nola.iris Require Export cif inv_deriv na_inv_deriv store_deriv
   pborrow_deriv fborrow.
 From nola.examples Require Export xty.
@@ -8,6 +9,8 @@ From nola.rust_lang Require Export proofmode adequacy notation.
 Export ProdNotation PlistNotation BigSepPLNotation ModwNotation WpwNotation
   iPropAppNotation ProphNotation LftNotation CsemNotation FunPRNotation.
 Open Scope nat_scope.
+
+Implicit Type Σ : gFunctors.
 
 (** ** Notation *)
 
@@ -53,6 +56,58 @@ Global Instance subG_rust_haltGpreS `{!subG (rust_haltΣ CON) Σ} :
   rust_haltGpreS CON Σ.
 Proof. solve_inG. Qed.
 
+(** ** Custom constructors *)
+
+(** [customCT]: Constructor *)
+Variant customCT_id := .
+Variant customCT_sel :=
+| (** Points-to token *) cifs_pointsto (l : loc) (q : Qp) (v : val)
+| (** Prophecy token *) cifs_proph_tok (ξ : aprvar xty) (q : Qp).
+Definition customCT := Cifcon customCT_id customCT_sel
+  (λ _, Empty_set) (λ _, Empty_set) (λ _, unitO) _.
+(** [customC]: [customCT] registered *)
+Notation customC := (inC customCT).
+Section customC.
+  Context `{!customC CON} {Σ}.
+  (** [cif_pointsto]: Points-to token *)
+  Definition cif_pointsto l q v : cif CON Σ :=
+    cif_in customCT (cifs_pointsto l q v) nullary nullary ().
+  (** [cif_proph_tok]: Prophecy token *)
+  Definition cif_proph_tok ξ q : cif CON Σ :=
+    cif_in customCT (cifs_proph_tok ξ q) nullary nullary ().
+
+  Context `{!rust_haltGS TY Σ}.
+  (** Semantics of [customCT] *)
+  Definition customCT_sem (s : customCT_sel) : iProp Σ :=
+    match s with
+    | cifs_pointsto l q v => l ↦{q} v
+    | cifs_proph_tok ξ q => q:[ξ]
+    end.
+  #[export] Program Instance customCT_ecsem {JUDG}
+    : Ecsem customCT CON JUDG Σ :=
+    ECSEM (λ _ _ s _ _ _, customCT_sem s) _.
+  Next Obligation. done. Qed.
+End customC.
+(** [customC] semantics registered *)
+Notation customCS := (inCS customCT).
+(** Notation *)
+Notation "l ↦{ q } v" := (cif_pointsto l q v) : cif_scope.
+Notation "l ↦ v" := (cif_pointsto l 1 v) : cif_scope.
+Notation "q :[ ξ ]" := (cif_proph_tok ξ q) : cif_scope.
+
+Section customC.
+  Context `{!customC CON, !Csem CON JUDG Σ, !rust_haltGS CON Σ,
+    !customCS CON JUDG Σ}.
+
+  (** Reify tokens *)
+  #[export] Program Instance pointsto_as_cif {l q v} :
+    AsCif CON (λ _, l ↦{q} v)%I := AS_CIF (l ↦{q} v) _.
+  Next Obligation. move=>/= >. by rewrite sem_cif_in. Qed.
+  #[export] Program Instance proph_tok_as_cif {q ξ} :
+    AsCif CON (λ _, q:[ξ])%I := AS_CIF q:[ξ] _.
+  Next Obligation. move=>/= >. by rewrite sem_cif_in. Qed.
+End customC.
+
 (** ** Constructor and judgment constraint *)
 
 (** Constructor constraint *)
@@ -64,6 +119,7 @@ Class rust_haltC CON : Type := RUST_HALT_C {
   rust_haltC_proph_ag :: proph_agC nat xty CON;
   rust_haltC_pborrow :: pborrowC nat xty CON;
   rust_haltC_fbor_tok :: fbor_tokC CON;
+  rust_haltC_custom :: customC CON;
 }.
 
 (** Judgment constraint *)
@@ -84,6 +140,7 @@ Class rust_haltCS CON JUDG Σ `{!rust_haltGS CON Σ, !rust_haltC CON}
   rust_haltCS_proph_ag :: proph_agCS nat xty CON JUDG Σ;
   rust_haltCS_pborrow :: pborrowCS nat xty CON JUDG Σ;
   rust_haltCS_fbor_tok :: fbor_tokCS CON JUDG Σ;
+  rust_haltCS_custom :: customCS CON JUDG Σ;
 }.
 
 (** Judgment semantics constraint *)
@@ -110,20 +167,20 @@ Definition rust_halt_wsat
 (** ** Shared borrows *)
 
 (** [spointsto]: Shared borrow over a points-to token *)
-Definition spointsto `{!rust_haltGS CON Σ} α l v
-  : iProp Σ := fbor_tok α (λ q, ▷ l ↦{q} v)%cif.
+Definition spointsto `{!rust_haltGS CON Σ, !rust_haltC CON} α l v
+  : iProp Σ := fbor_tok α (λ q, l ↦{q} v)%cif.
 Notation "l ↦ˢ[ α ] v" := (spointsto α l v)
  (at level 20, format "l  ↦ˢ[ α ]  v") : bi_scope.
 
 (** [spointsto_vec]: Iterative [spointsto] *)
-Definition spointsto_vec `{!rust_haltGS CON Σ} α l vl :=
+Definition spointsto_vec `{!rust_haltGS CON Σ, !rust_haltC CON} α l vl :=
   ([∗ list] k ↦ v ∈ vl, (l +ₗ k) ↦ˢ[α] v)%I.
 Notation "l ↦∗ˢ[ α ] vl" := (spointsto_vec α l vl)
   (at level 20, format "l  ↦∗ˢ[ α ]  vl") : bi_scope.
 
 (** [sproph_tok]: Shared borrow over a prophecy token *)
-Definition sproph_tok `{!rust_haltGS CON Σ} α ξ
-  : iProp Σ := fbor_tok α (λ q, ▷ q:[ξ])%cif.
+Definition sproph_tok `{!rust_haltGS CON Σ, !rust_haltC CON} α ξ
+  : iProp Σ := fbor_tok α (λ q, q:[ξ])%cif.
 Notation "[ ξ ]:ˢ[ α ]" := (sproph_tok α ξ) (format "[ ξ ]:ˢ[ α ]") : bi_scope.
 
 (** [sproph_toks]: Iterative [sproph_tok] *)
@@ -134,7 +191,7 @@ Notation "[ ξl ]:∗ˢ[ α ]" := (sproph_toks α ξl) (format "[ ξl ]:∗ˢ[ �
 (** Formula for [spointsto] *)
 Definition cif_spointsto `{!rust_haltGS CON Σ, !rust_haltC CON} α l v
   : cif CON Σ :=
-  cif_fbor_tok α (λ q, ▷ l ↦{q} v)%cif.
+  cif_fbor_tok α (λ q, l ↦{q} v)%cif.
 Notation "l ↦ˢ[ α ] v" := (cif_spointsto α l v) : cif_scope.
 (** Formula for [spointsto_vec] *)
 Notation cif_spointsto_vec α l vl :=
@@ -144,14 +201,25 @@ Notation "l ↦∗ˢ[ α ] vl" := (cif_spointsto_vec α l vl) : cif_scope.
 (** Formula for [sproph_tok] *)
 Definition cif_sproph_tok `{!rust_haltGS CON Σ, !rust_haltC CON} α ξ
   : cif CON Σ :=
-  cif_fbor_tok α (λ q, ▷ q:[ξ])%cif.
+  cif_fbor_tok α (λ q, q:[ξ])%cif.
 Notation "[ ξ ]:ˢ[ α ]" := (cif_sproph_tok α ξ) : cif_scope.
 (** Formula for [sproph_toks] *)
 Notation cif_sproph_toks α ξl := ([∗ list] ξ ∈ ξl, [ξ]:ˢ[α])%cif.
 Notation "[ ξl ]:∗ˢ[ α ]" := (cif_sproph_toks α ξl) : cif_scope.
 
 Section fbor_tok.
-  Context `{!rust_haltGS CON Σ}.
+  Context `{!rust_haltGS CON Σ, !rust_haltC CON}.
+
+  (** [spointsto] is timeless *)
+  #[export] Instance spointsto_timeless {α l v} : Timeless (l ↦ˢ[α] v).
+  Proof. exact _. Qed.
+  #[export] Instance spointsto_vec_timeless {α l vl} : Timeless (l ↦∗ˢ[α] vl).
+  Proof. exact _. Qed.
+  (** [sproph_tok] is timeless *)
+  #[export] Instance sproph_tok_timeless {α ξ} : Timeless [ξ]:ˢ[α].
+  Proof. exact _. Qed.
+  #[export] Instance sproph_toks_timeless {α ξl} : Timeless [ξl]:∗ˢ[α].
+  Proof. exact _. Qed.
 
   (** [spointsto_vec] over nil *)
   Lemma spointsto_vec_nil {α l} : l ↦∗ˢ[α] [] ⊣⊢ True.
@@ -171,7 +239,8 @@ Section fbor_tok.
     unfold shift_loc=>/=. do 2 f_equal. lia.
   Qed.
 
-  Context `{!rust_haltC CON, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ)}.
+  Context `{!rust_haltJ CON JUDG Σ, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ),
+    !rust_haltCS CON JUDG Σ}.
 
   (** Access [spointstod] *)
   Lemma spointsto_acc {α l v r} :
@@ -179,9 +248,9 @@ Section fbor_tok.
       l ↦{q} v ∗ (l ↦{q} v =[rust_halt_wsat]=∗ r.[α]).
   Proof.
     iIntros "α ↦".
-    iMod (fbor_tok_acc (M:=borrowM) with "α ↦") as (?) "/=[>$ →α]".
-    { move=>/= ??. by rewrite heap_pointsto_fractional bi.later_sep. }
-    iIntros "!> ↦". by iMod ("→α" with "↦").
+    iMod (fbor_tok_acc (M:=borrowM) with "α ↦") as (?) "/=[↦ →α]".
+    { move=>/= ??. by rewrite !sem_cif_in /= heap_pointsto_fractional. }
+    rewrite sem_cif_in /=. iFrame "↦". iIntros "!> ↦". by iMod ("→α" with "↦").
   Qed.
 
   (** Access [spointsto_vec] *)
@@ -210,13 +279,14 @@ Section fbor_tok.
     { iIntros (??) "$ _". by rewrite spointsto_vec_nil. }
     iIntros (v vl IH l ?) "α b".
     iMod (bor_tok_open (M:=borrowM) with "α b") as "/=[o ↦s]".
-    rewrite {2}heap_pointsto_vec_cons. iDestruct "↦s" as "[↦ ↦s]".
-    iMod (obor_tok_subdiv (FML:=cifOF _) (M:=borrowM) (sm:=⟦⟧ᶜ) [▷ _; ▷ _]%cif
-      with "[] o [$↦ $↦s //] []") as "(α & _ & b & b' & _)"=>/=.
-    { iApply lft_sincl_refl. }
-    { rewrite heap_pointsto_vec_cons. by iIntros "_ ($ & $ & _)". }
+    rewrite {2}heap_pointsto_vec_cons. iDestruct "↦s" as "[>↦ ↦s]".
+    iMod (obor_tok_subdiv (FML:=cifOF _) (M:=borrowM) (sm:=⟦⟧ᶜ) [_ ↦ _; ▷ _]%cif
+      with "[] o [↦ $↦s] []") as "(α & _ & b & b' & _)"=>/=.
+    { iApply lft_sincl_refl. } { rewrite sem_cif_in /=. iFrame. }
+    { rewrite heap_pointsto_vec_cons sem_cif_in /=.
+      by iIntros "_ ($ & $ & _)". }
     rewrite spointsto_vec_cons. iMod (IH with "α b'") as "[$$]".
-    by iMod (fbor_tok_alloc (FML:=cifOF _) (λ q, ▷ l ↦{q} v)%cif with "b")
+    by iMod (fbor_tok_alloc (FML:=cifOF _) (λ q, l ↦{q} v)%cif with "b")
       as "$".
   Qed.
 
@@ -225,10 +295,10 @@ Section fbor_tok.
     r.[α] -∗ [ξ]:ˢ[α] =[rust_halt_wsat]{⊤}=∗ ∃ q,
       q:[ξ] ∗ (q:[ξ] =[rust_halt_wsat]=∗ r.[α]).
   Proof.
-    iIntros "α ↦".
-    iMod (fbor_tok_acc (M:=borrowM) with "α ↦") as (?) "/=[>$ →α]".
-    { move=>/= ??. by rewrite proph_tok_fractional bi.later_sep. }
-    iIntros "!> ↦". by iMod ("→α" with "↦").
+    iIntros "α ξ".
+    iMod (fbor_tok_acc (M:=borrowM) with "α ξ") as (?) "/=[ξ →α]".
+    { move=>/= ??. by rewrite !sem_cif_in /= proph_tok_fractional. }
+    rewrite sem_cif_in /=. iFrame "ξ". iIntros "!> ξ". by iMod ("→α" with "ξ").
   Qed.
 
   (** Access [sproph_toks] *)
