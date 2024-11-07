@@ -58,7 +58,7 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
 - [`prelude`](nola/prelude.v) : Prelude
 - [`util/`](nola/util/) : General-purpose utilities, extending
   [`stdpp`](https://gitlab.mpi-sws.org/iris/stdpp)
-  + [`eq`](nola/util/eq.v) (Equality),
+  + [`eq`](nola/util/eq.v) (Equality)
   + [`uip`](nola/util/uip.v) (UIP)
   + [`gmap`](nola/util/gmap.v) (On `gmap`),
     [`gmultiset`](nola/util/gmultiset.v) (On `gmultiset`)
