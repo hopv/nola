@@ -258,7 +258,7 @@ Section ty_op.
       iMod (obord_subdiv (FML:=cifOF _) (M:=borrowM) [▷ _]%cif
         with "[] o [$↦ //] []") as "(β & _ & [b _])"=>/=.
       { iApply lft_sincl_refl. } { by iIntros "_ [$ _]". }
-      rewrite sem_cif_spointsto_vec.
+      rewrite sem_cif_spointsto_vec bor_tok_bor.
       by iMod (spointsto_vecd_alloc with "β b") as "$".
   Qed.
 

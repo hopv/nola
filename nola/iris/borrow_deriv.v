@@ -201,11 +201,10 @@ Section borrow_deriv.
     ([†β] -∗ ([∗ list] Qx ∈ Qxl, ⟦ Qx ⟧) -∗ M
       ([∗ list] '(_, _, Px)' ∈ αqPxl, ⟦ Px ⟧)) =[borrow_wsat M ⟦⟧]=∗
       ([∗ list] '(α, q, Px)' ∈ αqPxl, q.[α] ∗ ([†β] -∗ bord α Px)) ∗
-      ([∗ list] Qx ∈ Qxl, bord β Qx).
+      ([∗ list] Qx ∈ Qxl, bor_tok β Qx).
   Proof.
     iIntros "big Qxl →Pxl". rewrite from_sincl_obords /=.
     iDestruct "big" as (αqRxl) "(#→Rxl & #→αbdl & ol)".
-    setoid_rewrite <-(bor_tok_bor (α:=β)).
     iMod (obor_tok_merge_subdiv (M:=M) with "ol Qxl [→Pxl]") as "[αbl $]".
     - iIntros "† Qxl". iMod ("→Pxl" with "† Qxl") as "Pxl".
       by iMod ("→Rxl" with "Pxl").
@@ -215,7 +214,7 @@ Section borrow_deriv.
   Lemma obord_subdiv {α q Px} Qxl β :
     β ⊑□ α -∗ obord α q Px -∗ ([∗ list] Qx ∈ Qxl, ⟦ Qx ⟧) -∗
     ([†β] -∗ ([∗ list] Qx ∈ Qxl, ⟦ Qx ⟧) -∗ M ⟦ Px ⟧) =[borrow_wsat M ⟦⟧]=∗
-      q.[α] ∗ ([†β] -∗ bord α Px) ∗ ([∗ list] Qx ∈ Qxl, bord β Qx).
+      q.[α] ∗ ([†β] -∗ bord α Px) ∗ ([∗ list] Qx ∈ Qxl, bor_tok β Qx).
   Proof.
     iIntros "⊑ o Qxl →Px".
     iMod (obord_merge_subdiv [(_,_,_)'] with "[⊑ o] Qxl [→Px]")
@@ -225,7 +224,7 @@ Section borrow_deriv.
   (** Reborrow a borrower *)
   Lemma obord_reborrow {α q Px} β :
     β ⊑□ α -∗ obord α q Px -∗ ⟦ Px ⟧ =[borrow_wsat M ⟦⟧]=∗
-      q.[α] ∗ ([†β] -∗ bord α Px) ∗ bord β Px.
+      q.[α] ∗ ([†β] -∗ bord α Px) ∗ bor_tok β Px.
   Proof.
     iIntros "⊑ o Px".
     iMod (obord_subdiv [Px] with "⊑ o [Px] []") as "($ & $ & $ & _)"=>/=;
@@ -233,14 +232,14 @@ Section borrow_deriv.
   Qed.
   Lemma bord_reborrow {α q Px} β :
     β ⊑□ α -∗ q.[α] -∗ bord α Px -∗ modw M (borrow_wsat M ⟦⟧)
-      (q.[α] ∗ ([†β] -∗ bord α Px) ∗ bord β Px).
+      (q.[α] ∗ ([†β] -∗ bord α Px) ∗ bor_tok β Px).
   Proof.
     iIntros "⊑ α b". iMod (bord_open with "α b") as "[o Px]".
     by iMod (obord_reborrow with "⊑ o Px").
   Qed.
   (** Simply close a borrower *)
   Lemma obord_close {α q Px} :
-    obord α q Px -∗ ⟦ Px ⟧ =[borrow_wsat M ⟦⟧]=∗ q.[α] ∗ bord α Px.
+    obord α q Px -∗ ⟦ Px ⟧ =[borrow_wsat M ⟦⟧]=∗ q.[α] ∗ bor_tok α Px.
   Proof.
     iIntros "o Px".
     iMod (obord_reborrow with "[] o Px") as "($ & _ & $)";

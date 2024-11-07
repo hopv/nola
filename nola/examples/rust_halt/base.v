@@ -233,7 +233,8 @@ Section fbor.
       with "[] o [$↦ $↦s //] []") as "(α & _ & b & b' & _)"=>/=.
     { iApply lft_sincl_refl. }
     { rewrite heap_pointsto_vec_cons. by iIntros "_ ($ & $ & _)". }
-    rewrite spointsto_vec_cons. iMod (IH with "α b'") as "[$$]".
+    rewrite spointsto_vec_cons. rewrite !bor_tok_bor.
+    iMod (IH with "α b'") as "[$$]".
     by iMod (fbor_alloc (FML:=cifOF _) (λ q, ▷ l ↦{q} v)%cif with "b") as "$".
   Qed.
 

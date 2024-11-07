@@ -208,10 +208,9 @@ Section pborrow_deriv.
   Lemma pobord_nsubdiv {X α q ξ Φx} Ψx a (xπ : clair TY X) β :
     β ⊑□ α -∗ pobord α q ξ Φx -∗ ⟦ Ψx a xπ ⟧ᶜ -∗
     (∀ a' xπ', [†β] -∗ ⟦ Ψx a' xπ' ⟧ᶜ -∗ M ⟦ Φx a' xπ' ⟧ᶜ)
-      =[borrow_wsat M ⟦⟧ᶜ]=∗ q.[α] ∗ pbord β a xπ ξ Ψx.
+      =[borrow_wsat M ⟦⟧ᶜ]=∗ q.[α] ∗ pbor_tok β a xπ ξ Ψx.
   Proof.
     rewrite pobor_unseal. iIntros "⊑ (%Ω & #ΦΩ & _ & o) Ψx →Φx".
-    rewrite -pbor_tok_pbor.
     iApply (pobor_tok_nsubdiv (M:=M) with "⊑ o Ψx [ΦΩ →Φx]").
     iIntros "%% † Ψx". iMod ("→Φx" with "† Ψx") as "Φx".
     by iMod (der_jbupd' with "ΦΩ Φx").
@@ -219,7 +218,7 @@ Section pborrow_deriv.
   (** Simply close a prophetic borrower *)
   Lemma pobord_close {X α q ξ Φx} a (xπ : clair TY X) :
     pobord α q ξ Φx -∗ ⟦ Φx a xπ ⟧ᶜ =[borrow_wsat M ⟦⟧ᶜ]=∗
-      q.[α] ∗ pbord α a xπ ξ Φx.
+      q.[α] ∗ pbor_tok α a xπ ξ Φx.
   Proof.
     iIntros "o Φx". iApply (pobord_nsubdiv Φx with "[] o Φx"); [|by iIntros].
     iApply lft_sincl_refl.
@@ -243,13 +242,12 @@ Section pborrow_deriv.
           =[borrow_wsat M ⟦⟧ᶜ]=∗
           q.[α] ∗
           ([∗ plist] '(η, a, yπ, Ψx)' ∈ plist_zip ηl ayπΨxl,
-            pbord β a yπ η Ψx) ∗
-          [∗ list] Rx ∈ Rxl, bord β Rx).
+            pbor_tok β a yπ η Ψx) ∗
+          [∗ list] Rx ∈ Rxl, bor_tok β Rx).
   Proof.
     rewrite pobor_unseal=> ??. iIntros "(%Φx' & #ΦΦ' & #? & o)".
     iMod (pobor_tok_subdiv (M:=M) with "o") as (?) "[$ big]"; [done..|].
-    iIntros "!> ⊑ Ψxl Rxl →Φx". setoid_rewrite <-pbor_tok_pbor.
-    setoid_rewrite <-bor_tok_bor. iApply ("big" with "⊑ Ψxl Rxl").
+    iIntros "!> ⊑ Ψxl Rxl →Φx". iApply ("big" with "⊑ Ψxl Rxl").
     iIntros "% † Ψxl Rxl". iMod ("→Φx" with "† Ψxl Rxl") as "/=[% Φx]".
     by iMod (der_jbupd' with "ΦΦ' Φx") as "$".
   Qed.
@@ -259,7 +257,7 @@ Section pborrow_deriv.
     proph_dep xπ ηl →
     pobord α q ξ Φx =[r:∗[ηl]]=∗
       ⟨π, π ξ = xπ π⟩ ∗
-      (⟦ Φx a xπ ⟧ᶜ =[borrow_wsat M ⟦⟧ᶜ]=∗ q.[α] ∗ bord α (Φx a xπ)).
+      (⟦ Φx a xπ ⟧ᶜ =[borrow_wsat M ⟦⟧ᶜ]=∗ q.[α] ∗ bor_tok α (Φx a xπ)).
   Proof.
     iIntros (?) "o".
     iMod (pobord_subdiv [] (λ π _, xπ π) ηl () [Φx a xπ] with "o")
