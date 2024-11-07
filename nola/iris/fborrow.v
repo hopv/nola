@@ -167,11 +167,10 @@ End fbor_tokC.
 (** [fbor_tokCS]: Semantics of [fbor_tokCT] registered *)
 Notation fbor_tokCS := (inCS fbor_tokCT).
 
-(** Reify [fbor_tok] *)
 Section fbor_tokC.
   Context `{!fbor_tokC CON, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ),
     !borrowGS (cifOF CON) Σ, !fborrowGS (cifOF CON) Σ, !fbor_tokCS CON JUDG Σ}.
-
+  (** Reify [fbor_tok] *)
   #[export] Program Instance fbor_tok_as_cif {α Φx} :
     AsCif CON (λ _, fbor_tok α Φx) := AS_CIF (cif_fbor_tok α Φx) _.
   Next Obligation. move=>/= >. by rewrite sem_cif_in. Qed.
