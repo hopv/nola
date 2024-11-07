@@ -244,7 +244,7 @@ Section num.
   Qed.
   Lemma type_nat_iter {α X T} {f : val}
     `{!TcxExtract (Xl:=[_;X]) (Yl:=Yl) (Zl:=Zl) ᵖ[v ◁ ty_nat; w ◁ T] Γi Γr
-      get getr} {pre} :
+        get getr} {pre} :
     (∀ v w, type α (v ◁ ty_nat ᵖ:: w ◁ T ᵖ:: Γr) (f [v; w]%E)
       (λ r, r ◁ T ᵖ:: Γr) pre) ⊢
     type α Γi (nat_iter [f; v; w]%E) (λ r, r ◁ T ᵖ:: Γr)
