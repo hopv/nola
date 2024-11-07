@@ -270,6 +270,19 @@ Section fbor_tok.
     rewrite heap_pointsto_vec_fractional. iFrame.
   Qed.
 
+  (** Allocate [spointsto] *)
+  Lemma spointsto_alloc {α l v r} :
+    r.[α] -∗ bor_tok α (▷ l ↦ v)%cif =[rust_halt_wsat]{⊤}=∗ r.[α] ∗ l ↦ˢ[α] v.
+  Proof.
+    iIntros "α b".
+    iMod (bor_tok_open (M:=borrowM) with "α b") as "/=[o >↦]".
+    iMod (obor_tok_subdiv (FML:=cifOF _) (M:=borrowM) (sm:=⟦⟧ᶜ) [_ ↦ _]%cif
+      with "[] o [↦] []") as "($ & _ & b & _)"=>/=.
+    { iApply lft_sincl_refl. } { rewrite sem_cif_in /=. iFrame. }
+    { rewrite sem_cif_in /=. by iIntros "_ ($ & _)". }
+    by iMod (fbor_tok_alloc (FML:=cifOF _) (λ q, l ↦{q} v)%cif with "b") as "$".
+  Qed.
+
   (** Allocate [spointsto_vec] *)
   Lemma spointsto_vec_alloc {α l vl r} :
     r.[α] -∗ bor_tok α (▷ l ↦∗ vl)%cif =[rust_halt_wsat]{⊤}=∗
@@ -313,6 +326,34 @@ Section fbor_tok.
     case (Qp.lower_bound q q')=> [q''[?[?[->->]]]]. iExists q''.
     iDestruct "ξ" as "[$ ξ']". iDestruct "ξl" as "[$ ξl']". iIntros "[ξ ξl]".
     iMod ("→α" with "[$ξ $ξ']") as "$". iApply "→α'". iFrame.
+  Qed.
+
+  (** Allocate [sproph_tok] *)
+  Lemma sproph_tok_alloc {α ξ r} :
+    r.[α] -∗ bor_tok α (▷ 1:[ξ])%cif =[rust_halt_wsat]{⊤}=∗ r.[α] ∗ [ξ]:ˢ[α].
+  Proof.
+    iIntros "α b".
+    iMod (bor_tok_open (M:=borrowM) with "α b") as "/=[o >ξ]".
+    iMod (obor_tok_subdiv (FML:=cifOF _) (M:=borrowM) (sm:=⟦⟧ᶜ) [1:[ξ]]%cif
+      with "[] o [ξ] []") as "($ & _ & b & _)"=>/=.
+    { iApply lft_sincl_refl. } { rewrite sem_cif_in /=. iFrame. }
+    { rewrite sem_cif_in /=. by iIntros "_ ($ & _)". }
+    by iMod (fbor_tok_alloc (FML:=cifOF _) (λ q, q:[ξ])%cif with "b") as "$".
+  Qed.
+
+  (** Allocate [sproph_toks] *)
+  Lemma sproph_toks_alloc {α ξl r} :
+    r.[α] -∗ bor_tok α (▷ 1:∗[ξl])%cif =[rust_halt_wsat]{⊤}=∗
+      r.[α] ∗ [ξl]:∗ˢ[α].
+  Proof.
+    move: r. elim: ξl=>/=; [by iIntros (?) "$ _"|]. iIntros (ξ ξl IH ?) "α b".
+    iMod (bor_tok_open (M:=borrowM) with "α b") as "/=[o [>ξ ξl]]".
+    iMod (obor_tok_subdiv (FML:=cifOF _) (M:=borrowM) (sm:=⟦⟧ᶜ) [_:[_]; ▷ _]%cif
+      with "[] o [ξ $ξl] []") as "(α & _ & b & b' & _)"=>/=.
+    { iApply lft_sincl_refl. } { rewrite sem_cif_in /=. iFrame. }
+    { rewrite sem_cif_in /=. by iIntros "_ ($ & $ & _)". }
+    iMod (IH with "α b'") as "[$$]".
+    by iMod (fbor_tok_alloc (FML:=cifOF _) (λ q, q:[ξ])%cif with "b") as "$".
   Qed.
 
   Context `{!rust_haltJ CON JUDG Σ, !rust_haltCS CON JUDG Σ}.
