@@ -63,17 +63,15 @@ Class rust_haltC CON : Type := RUST_HALT_C {
   rust_haltC_borrow :: borrowC CON;
   rust_haltC_proph_ag :: proph_agC nat xty CON;
   rust_haltC_pborrow :: pborrowC nat xty CON;
-  rust_haltC_fbor :: fborC CON;
+  rust_haltC_fbor_tok :: fbor_tokC CON;
 }.
 
 (** Judgment constraint *)
 Class rust_haltJ CON JUDG Σ : Type := RUST_HALT_J {
   rust_haltJ_inv :: invJ (cifO CON Σ) JUDG;
   rust_haltJ_na_inv :: na_invJ (cifO CON Σ) JUDG;
-  rust_haltJ_dinv :: dinvJ (cifO CON Σ) JUDG;
   rust_haltJ_store :: storeJ (cifO CON Σ) JUDG;
   rust_haltJ_bupd :: bupdJ (cifOF CON $oi Σ) JUDG;
-  rust_haltJ_fborrow :: fborrowJ (cifOF CON) JUDG Σ;
 }.
 
 (** Constructor semantics constraint *)
@@ -85,7 +83,7 @@ Class rust_haltCS CON JUDG Σ `{!rust_haltGS CON Σ, !rust_haltC CON}
   rust_haltCS_borrow :: borrowCS CON JUDG Σ;
   rust_haltCS_proph_ag :: proph_agCS nat xty CON JUDG Σ;
   rust_haltCS_pborrow :: pborrowCS nat xty CON JUDG Σ;
-  rust_haltCS_fbor :: fborCS CON JUDG Σ;
+  rust_haltCS_fbor_tok :: fbor_tokCS CON JUDG Σ;
 }.
 
 (** Judgment semantics constraint *)
@@ -94,66 +92,49 @@ Class rust_haltJS CON JUDG Σ `{!rust_haltGS CON Σ, !rust_haltC CON}
   RUST_HALT_JS {
   rust_haltJS_inv :: invJS (cifOF CON) JUDG Σ;
   rust_haltJS_na_inv :: na_invJS CON JUDG Σ;
-  rust_haltJS_dinv :: dinvJS (cifOF CON) JUDG Σ;
   rust_haltJS_store :: storeJS (cifOF CON) JUDG Σ;
   rust_haltJS_bupd :: bupdJS (cifO CON Σ) JUDG (iProp Σ);
-  rust_haltJS_fborrow :: fborrowJS (cifOF CON) JUDG Σ;
 }.
 
 (** ** World satisfaction *)
 
 (** Modality for [borrow_wsat] *)
-Definition borrowM `{!rust_haltGS CON Σ, !rust_haltJ CON JUDG Σ}
-  `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ)} : iProp Σ → iProp Σ :=
+Definition borrowM `{!rust_haltGS CON Σ, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ)}
+  : iProp Σ → iProp Σ :=
   fupdw ⊤ ⊤ (inv_wsat ⟦⟧ᶜ ∗ dinv_wsat ⟦⟧ᶜ).
 (** World satisfaction *)
-Definition rust_halt_wsat `{!rust_haltGS CON Σ, !rust_haltJ CON JUDG Σ}
-  `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ)} : iProp Σ :=
-  inv_wsat ⟦⟧ᶜ ∗ dinv_wsat ⟦⟧ᶜ ∗ borrow_wsat borrowM ⟦⟧ᶜ ∗
-    fborrow_wsat (JUDG:=JUDG) der.
+Definition rust_halt_wsat
+  `{!rust_haltGS CON Σ, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ)} : iProp Σ :=
+  inv_wsat ⟦⟧ᶜ ∗ dinv_wsat ⟦⟧ᶜ ∗ borrow_wsat borrowM ⟦⟧ᶜ ∗ fborrow_wsat.
 
 (** ** Shared borrows *)
 
 (** [spointsto]: Shared borrow over a points-to token *)
-Definition spointsto `{!rust_haltGS CON Σ, !rust_haltJ CON JUDG Σ} δ α l v
-  : iProp Σ := fbor δ α (λ q, ▷ l ↦{q} v)%cif.
-Notation "l ↦ˢ[ α ; δ ] v" := (spointsto δ α l v)
- (at level 20, format "l  ↦ˢ[ α ; δ ]  v") : bi_scope.
-Notation spointstod := (spointsto der).
-Notation "l ↦ˢ[ α ] v" := (spointstod α l v)
+Definition spointsto `{!rust_haltGS CON Σ} α l v
+  : iProp Σ := fbor_tok α (λ q, ▷ l ↦{q} v)%cif.
+Notation "l ↦ˢ[ α ] v" := (spointsto α l v)
  (at level 20, format "l  ↦ˢ[ α ]  v") : bi_scope.
 
 (** [spointsto_vec]: Iterative [spointsto] *)
-Definition spointsto_vec `{!rust_haltGS CON Σ, !rust_haltJ CON JUDG Σ}
-  δ α l vl :=
-  ([∗ list] k ↦ v ∈ vl, (l +ₗ k) ↦ˢ[α; δ] v)%I.
-Notation "l ↦∗ˢ[ α ; δ ] vl" := (spointsto_vec δ α l vl)
-  (at level 20, format "l  ↦∗ˢ[ α ; δ ]  vl") : bi_scope.
-Notation spointsto_vecd α l vl := (spointsto_vec der α l vl).
-Notation "l ↦∗ˢ[ α ] vl" := (spointsto_vecd α l vl)
+Definition spointsto_vec `{!rust_haltGS CON Σ} α l vl :=
+  ([∗ list] k ↦ v ∈ vl, (l +ₗ k) ↦ˢ[α] v)%I.
+Notation "l ↦∗ˢ[ α ] vl" := (spointsto_vec α l vl)
   (at level 20, format "l  ↦∗ˢ[ α ]  vl") : bi_scope.
 
 (** [sproph_tok]: Shared borrow over a prophecy token *)
-Definition sproph_tok `{!rust_haltGS CON Σ, !rust_haltJ CON JUDG Σ} δ α ξ
-  : iProp Σ := fbor δ α (λ q, ▷ q:[ξ])%cif.
-Notation "[ ξ ]:ˢ[ α ; δ ]" := (sproph_tok δ α ξ) (format "[ ξ ]:ˢ[ α ; δ ]")
-  : bi_scope.
-Notation sproph_tokd := (sproph_tok der).
-Notation "[ ξ ]:ˢ[ α ]" := (sproph_tokd α ξ) (format "[ ξ ]:ˢ[ α ]")
-  : bi_scope.
+Definition sproph_tok `{!rust_haltGS CON Σ} α ξ
+  : iProp Σ := fbor_tok α (λ q, ▷ q:[ξ])%cif.
+Notation "[ ξ ]:ˢ[ α ]" := (sproph_tok α ξ) (format "[ ξ ]:ˢ[ α ]") : bi_scope.
 
 (** [sproph_toks]: Iterative [sproph_tok] *)
-Notation sproph_toks δ α ξl := ([∗ list] ξ ∈ ξl, [ξ]:ˢ[α;δ])%I.
-Notation "[ ξl ]:∗ˢ[ α ; δ ]" := (sproph_toks δ α ξl)
-  (format "[ ξl ]:∗ˢ[ α ; δ ]") : bi_scope.
-Notation sproph_toksd α ξl := (sproph_toks der α ξl).
-Notation "[ ξl ]:∗ˢ[ α ]" := (sproph_toksd α ξl) (format "[ ξl ]:∗ˢ[ α ]")
+Notation sproph_toks α ξl := ([∗ list] ξ ∈ ξl, [ξ]:ˢ[α])%I.
+Notation "[ ξl ]:∗ˢ[ α ]" := (sproph_toks α ξl) (format "[ ξl ]:∗ˢ[ α ]")
   : bi_scope.
 
 (** Formula for [spointsto] *)
-Definition cif_spointsto `{!rust_haltGS CON Σ, !rust_haltC CON}
-  `{!rust_haltJ CON JUDG Σ} α l v : cif CON Σ :=
-  cif_fbor α (λ q, ▷ l ↦{q} v)%cif.
+Definition cif_spointsto `{!rust_haltGS CON Σ, !rust_haltC CON} α l v
+  : cif CON Σ :=
+  cif_fbor_tok α (λ q, ▷ l ↦{q} v)%cif.
 Notation "l ↦ˢ[ α ] v" := (cif_spointsto α l v) : cif_scope.
 (** Formula for [spointsto_vec] *)
 Notation cif_spointsto_vec α l vl :=
@@ -161,57 +142,57 @@ Notation cif_spointsto_vec α l vl :=
 Notation "l ↦∗ˢ[ α ] vl" := (cif_spointsto_vec α l vl) : cif_scope.
 
 (** Formula for [sproph_tok] *)
-Definition cif_sproph_tok `{!rust_haltGS CON Σ, !rust_haltC CON}
-  `{!rust_haltJ CON JUDG Σ} α ξ : cif CON Σ :=
-  cif_fbor α (λ q, ▷ q:[ξ])%cif.
+Definition cif_sproph_tok `{!rust_haltGS CON Σ, !rust_haltC CON} α ξ
+  : cif CON Σ :=
+  cif_fbor_tok α (λ q, ▷ q:[ξ])%cif.
 Notation "[ ξ ]:ˢ[ α ]" := (cif_sproph_tok α ξ) : cif_scope.
 (** Formula for [sproph_toks] *)
 Notation cif_sproph_toks α ξl := ([∗ list] ξ ∈ ξl, [ξ]:ˢ[α])%cif.
 Notation "[ ξl ]:∗ˢ[ α ]" := (cif_sproph_toks α ξl) : cif_scope.
 
-Section fbor.
-  Context `{!rust_haltGS CON Σ, !rust_haltJ CON JUDG Σ}.
+Section fbor_tok.
+  Context `{!rust_haltGS CON Σ}.
 
   (** [spointsto_vec] over nil *)
-  Lemma spointsto_vec_nil {α l δ} : l ↦∗ˢ[α;δ] [] ⊣⊢ True.
+  Lemma spointsto_vec_nil {α l} : l ↦∗ˢ[α] [] ⊣⊢ True.
   Proof. done. Qed.
   (** [spointsto_vec] over cons *)
-  Lemma spointsto_vec_cons {α l v vl δ} :
-    l ↦∗ˢ[α;δ] (v :: vl) ⊣⊢ l ↦ˢ[α;δ] v ∗ (l +ₗ 1) ↦∗ˢ[α;δ] vl.
+  Lemma spointsto_vec_cons {α l v vl} :
+    l ↦∗ˢ[α] (v :: vl) ⊣⊢ l ↦ˢ[α] v ∗ (l +ₗ 1) ↦∗ˢ[α] vl.
   Proof.
     rewrite /spointsto_vec /= shift_loc_0. do 4 f_equiv. apply reflexive_eq.
     unfold shift_loc=>/=. do 2 f_equal. lia.
   Qed.
   (** [spointsto_vec] over [++] *)
-  Lemma spointsto_vec_app {α l vl vl' δ} :
-    l ↦∗ˢ[α;δ] (vl ++ vl') ⊣⊢ l ↦∗ˢ[α;δ] vl ∗ (l +ₗ length vl) ↦∗ˢ[α;δ] vl'.
+  Lemma spointsto_vec_app {α l vl vl'} :
+    l ↦∗ˢ[α] (vl ++ vl') ⊣⊢ l ↦∗ˢ[α] vl ∗ (l +ₗ length vl) ↦∗ˢ[α] vl'.
   Proof.
     rewrite /spointsto_vec big_sepL_app. do 4 f_equiv. apply reflexive_eq.
     unfold shift_loc=>/=. do 2 f_equal. lia.
   Qed.
 
-  Context `{!rust_haltC CON, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ),
-    !rust_haltJS CON JUDG Σ}.
+  Context `{!rust_haltC CON, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ)}.
 
   (** Access [spointstod] *)
-  Lemma spointstod_acc {α l v r} :
+  Lemma spointsto_acc {α l v r} :
     r.[α] -∗ l ↦ˢ[α] v =[rust_halt_wsat]{⊤}=∗ ∃ q,
       l ↦{q} v ∗ (l ↦{q} v =[rust_halt_wsat]=∗ r.[α]).
   Proof.
-    iIntros "α ↦". iMod (fbord_acc (M:=borrowM) with "α ↦") as (?) "/=[>$ →α]".
+    iIntros "α ↦".
+    iMod (fbor_tok_acc (M:=borrowM) with "α ↦") as (?) "/=[>$ →α]".
     { move=>/= ??. by rewrite heap_pointsto_fractional bi.later_sep. }
     iIntros "!> ↦". by iMod ("→α" with "↦").
   Qed.
 
-  (** Access [spointsto_vecd] *)
-  Lemma spointsto_vecd_acc {α l vl r} :
+  (** Access [spointsto_vec] *)
+  Lemma spointsto_vec_acc {α l vl r} :
     r.[α] -∗ l ↦∗ˢ[α] vl =[rust_halt_wsat]{⊤}=∗ ∃ q,
       l ↦∗{q} vl ∗ (l ↦∗{q} vl =[rust_halt_wsat]=∗ r.[α]).
   Proof.
     move: l r. elim: vl=>//=.
     { unfold heap_pointsto_vec=>/=. iIntros (??) "$ _ !>". by iExists 1%Qp. }
     move=> v vl IH l ?. rewrite spointsto_vec_cons. iIntros "[α α'] [↦ ↦s]".
-    iMod (spointstod_acc with "α ↦") as (q) "[↦ →α]".
+    iMod (spointsto_acc with "α ↦") as (q) "[↦ →α]".
     iMod (IH with "α' ↦s") as (q') "[↦s →α']". iModIntro.
     case (Qp.lower_bound q q')=> [q''[?[?[->->]]]]. iExists q''.
     rewrite heap_pointsto_vec_cons. iDestruct "↦" as "[$ ↦']".
@@ -220,36 +201,38 @@ Section fbor.
     rewrite heap_pointsto_vec_fractional. iFrame.
   Qed.
 
-  (** Allocate [spointsto_vecd] *)
-  Lemma spointsto_vecd_alloc {α l vl r} :
-    r.[α] -∗ bord α (▷ l ↦∗ vl)%cif =[rust_halt_wsat]{⊤}=∗ r.[α] ∗ l ↦∗ˢ[α] vl.
+  (** Allocate [spointsto_vec] *)
+  Lemma spointsto_vec_alloc {α l vl r} :
+    r.[α] -∗ bor_tok α (▷ l ↦∗ vl)%cif =[rust_halt_wsat]{⊤}=∗
+      r.[α] ∗ l ↦∗ˢ[α] vl.
   Proof.
     move: l r. elim: vl=>/=.
     { iIntros (??) "$ _". by rewrite spointsto_vec_nil. }
     iIntros (v vl IH l ?) "α b".
-    iMod (bord_open (M:=borrowM) with "α b") as "/=[o ↦s]".
+    iMod (bor_tok_open (M:=borrowM) with "α b") as "/=[o ↦s]".
     rewrite {2}heap_pointsto_vec_cons. iDestruct "↦s" as "[↦ ↦s]".
-    iMod (obord_subdiv (FML:=cifOF _) (M:=borrowM) [▷ _; ▷ _]%cif
+    iMod (obor_tok_subdiv (FML:=cifOF _) (M:=borrowM) (sm:=⟦⟧ᶜ) [▷ _; ▷ _]%cif
       with "[] o [$↦ $↦s //] []") as "(α & _ & b & b' & _)"=>/=.
     { iApply lft_sincl_refl. }
     { rewrite heap_pointsto_vec_cons. by iIntros "_ ($ & $ & _)". }
-    rewrite spointsto_vec_cons. rewrite !bor_tok_bor.
-    iMod (IH with "α b'") as "[$$]".
-    by iMod (fbor_alloc (FML:=cifOF _) (λ q, ▷ l ↦{q} v)%cif with "b") as "$".
+    rewrite spointsto_vec_cons. iMod (IH with "α b'") as "[$$]".
+    by iMod (fbor_tok_alloc (FML:=cifOF _) (λ q, ▷ l ↦{q} v)%cif with "b")
+      as "$".
   Qed.
 
-  (** Access [sproph_tokd] *)
+  (** Access [sproph_tok] *)
   Lemma sproph_tok_acc {α ξ r} :
     r.[α] -∗ [ξ]:ˢ[α] =[rust_halt_wsat]{⊤}=∗ ∃ q,
       q:[ξ] ∗ (q:[ξ] =[rust_halt_wsat]=∗ r.[α]).
   Proof.
-    iIntros "α ↦". iMod (fbord_acc (M:=borrowM) with "α ↦") as (?) "/=[>$ →α]".
+    iIntros "α ↦".
+    iMod (fbor_tok_acc (M:=borrowM) with "α ↦") as (?) "/=[>$ →α]".
     { move=>/= ??. by rewrite proph_tok_fractional bi.later_sep. }
     iIntros "!> ↦". by iMod ("→α" with "↦").
   Qed.
 
-  (** Access [sproph_toksd] *)
-  Lemma sproph_toksd_acc {α ξl r} :
+  (** Access [sproph_toks] *)
+  Lemma sproph_toks_acc {α ξl r} :
     r.[α] -∗ [ξl]:∗ˢ[α] =[rust_halt_wsat]{⊤}=∗ ∃ q,
       q:∗[ξl] ∗ (q:∗[ξl] =[rust_halt_wsat]=∗ r.[α]).
   Proof.
@@ -262,10 +245,10 @@ Section fbor.
     iMod ("→α" with "[$ξ $ξ']") as "$". iApply "→α'". iFrame.
   Qed.
 
-  Context `{!rust_haltCS CON JUDG Σ}.
+  Context `{!rust_haltJ CON JUDG Σ, !rust_haltCS CON JUDG Σ}.
 
   (** Semantics of [cif_spointsto_vec] *)
-  Lemma sem_cif_spointsto_vec {α l vl δ} : ⟦ l ↦∗ˢ[α] vl ⟧ᶜ(δ) ⊣⊢ l ↦∗ˢ[α;δ] vl.
+  Lemma sem_cif_spointsto_vec {α l vl δ} : ⟦ l ↦∗ˢ[α] vl ⟧ᶜ(δ) ⊣⊢ l ↦∗ˢ[α] vl.
   Proof.
     rewrite sem_cif_big_sepL /spointsto_vec. do 3 f_equiv.
     by rewrite sem_cif_in.
@@ -273,4 +256,4 @@ Section fbor.
   #[export] Instance sem_cif_spointsto_vec_persistent {α l vl δ} :
     Persistent ⟦ l ↦∗ˢ[α] vl ⟧ᶜ(δ).
   Proof. rewrite sem_cif_spointsto_vec. exact _. Qed.
-End fbor.
+End fbor_tok.

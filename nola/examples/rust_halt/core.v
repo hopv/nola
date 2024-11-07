@@ -231,7 +231,8 @@ Section ty_rec.
     elim: k; [by move|exact _].
   Qed.
 
-  Context `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ)}.
+  Context `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), !rust_haltGS CON Σ,
+    rust_haltJ CON JUDG Σ}.
   Implicit Type δ : JUDG -n> iProp Σ.
 
   (** Unfold and fold [ty_rec] in subtyping *)
@@ -249,8 +250,6 @@ Section ty_rec.
   (** [Ty] on [ty_rec] *)
   #[export] Instance ty_rec_ty `{!∀ T, Ty (F T) sz} : Ty (ty_rec F) sz.
   Proof. by rewrite ty_rec_unfold. Qed.
-
-  Context `{!rust_haltGS CON Σ, rust_haltJ CON JUDG Σ}.
 
   (** [Copy] on [ty_rec] *)
   #[export] Instance ty_rec_copy `{!∀ T, Copy (F T)} : Copy (ty_rec F).

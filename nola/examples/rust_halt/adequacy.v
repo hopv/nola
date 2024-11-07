@@ -6,7 +6,7 @@ Implicit Type JUDG : ofe.
 
 (** Allocate the world satisfaction *)
 Lemma rust_wsat_alloc `{!rust_haltGpreS CON Σ,
-  lrustGS_gen0 : !lrustGS_gen HasNoLc Σ, !rust_haltJ CON JUDG Σ} :
+  lrustGS_gen0 : !lrustGS_gen HasNoLc Σ} {JUDG} :
   ⊢ |==> ∃ _ : rust_haltGS CON Σ, ⌜rust_haltGS_lrust = lrustGS_gen0⌝ ∧
     ∀ (_ : Csem CON JUDG Σ) (_ : Jsem JUDG (iProp Σ)), rust_halt_wsat.
 Proof.
@@ -21,8 +21,7 @@ Proof.
 Qed.
 
 (** Usual adequacy for a partial weakest precondition *)
-Theorem wp_adequacy `{!rust_haltGpreS CON Σ, !rust_haltJ CON JUDG Σ}
-  {e σ φ} :
+Theorem wp_adequacy `{!rust_haltGpreS CON Σ} {JUDG e σ φ} :
   (∀ `{!rust_haltGS CON Σ}, ∃ (_ : Csem CON JUDG Σ) (_ : Jsem JUDG (iProp Σ)),
     ⊢ |={⊤}=> WP[rust_halt_wsat] e {{ v, ⌜φ v⌝ }}) →
   adequate NotStuck e σ (λ v _, φ v).
@@ -33,8 +32,7 @@ Proof.
 Qed.
 
 (** Termination adequacy over a total weakest precondition *)
-Theorem twp_total `{!rust_haltGpreS CON Σ, !rust_haltJ CON JUDG Σ}
-  {e σ} :
+Theorem twp_total `{!rust_haltGpreS CON Σ} {JUDG e σ} :
   (∀ `{!rust_haltGS CON Σ}, ∃ (_ : Csem CON JUDG Σ) (_ : Jsem JUDG (iProp Σ)) Φ,
     ⊢ |={⊤}=> WP[rust_halt_wsat] e [{ Φ }]) →
   sn erased_step ([e], σ).
@@ -45,8 +43,7 @@ Proof.
 Qed.
 
 (** Usual adequacy over a typing judgment *)
-Theorem type_adeqaucy `{!rust_haltGpreS CON Σ, !rust_haltJ CON JUDG Σ}
-  {Xl e Γo pre σ} :
+Theorem type_adeqaucy `{!rust_haltGpreS CON Σ} {JUDG Xl e Γo pre σ} :
   (∀ post, pre post ()) →
   (∀ `{!rust_haltGS CON Σ}, ∃ (_ : Csem CON JUDG Σ) (_ : Jsem JUDG (iProp Σ)),
     ⊢ type (Yl:=Xl) ⊤ ᵖ[] e (λ _, Γo) pre) →
@@ -61,8 +58,7 @@ Proof.
 Qed.
 
 (** Termination adequacy over a typing judgment *)
-Theorem type_total `{!rust_haltGpreS CON Σ, !rust_haltJ CON JUDG Σ}
-  {Xl e Γo pre σ} :
+Theorem type_total `{!rust_haltGpreS CON Σ} {JUDG Xl e Γo pre σ} :
   (∀ post, pre post ()) →
   (∀ `{!rust_haltGS CON Σ}, ∃ (_ : Csem CON JUDG Σ) (_ : Jsem JUDG (iProp Σ)),
     ⊢ type (Yl:=Xl) ⊤ ᵖ[] e (λ _, Γo) pre) →

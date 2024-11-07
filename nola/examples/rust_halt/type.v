@@ -258,8 +258,8 @@ Section ty_op.
       iMod (obord_subdiv (FML:=cifOF _) (M:=borrowM) [▷ _]%cif
         with "[] o [$↦ //] []") as "(β & _ & [b _])"=>/=.
       { iApply lft_sincl_refl. } { by iIntros "_ [$ _]". }
-      rewrite sem_cif_spointsto_vec bor_tok_bor.
-      by iMod (spointsto_vecd_alloc with "β b") as "$".
+      rewrite sem_cif_spointsto_vec.
+      by iMod (spointsto_vec_alloc with "β b") as "$".
   Qed.
 
   (** Basic operations on a plain type at a depth *)
@@ -324,7 +324,7 @@ Section classes.
     rewrite -(eqvS _ _ _ _ _). by setoid_rewrite <-(eqvO _ _ _ _).
   Qed.
 
-  Context `{!rust_haltC CON, !rust_haltCS CON JUDG Σ, !rust_haltJS CON JUDG Σ}.
+  Context `{!rust_haltC CON, !rust_haltCS CON JUDG Σ}.
 
   (** [Send] over [sty] entails [Sync] *)
   #[export] Instance sty_send_sync `{!Send (ty_sty (X:=X) T)} :
@@ -342,13 +342,13 @@ Section classes.
   Proof.
     split; [exact _|]=>/= ??????. iIntros "α $ (% & ↦ & $)".
     rewrite sem_cif_spointsto_vec.
-    iMod (spointsto_vecd_acc with "α ↦") as (?) "[$ cl]". iIntros "!> ↦s".
+    iMod (spointsto_vec_acc with "α ↦") as (?) "[$ cl]". iIntros "!> ↦s".
     by iMod ("cl" with "↦s").
   Qed.
 End classes.
 Hint Mode Send - - - ! : typeclass_instances.
 Hint Mode Sync - - - ! : typeclass_instances.
-Hint Mode Copy - - - - - - - - ! : typeclass_instances.
+Hint Mode Copy - - - - - - - ! : typeclass_instances.
 
 (** ** Subtyping *)
 
@@ -431,7 +431,7 @@ Notation "^[ α ]" := (Lft α) (format "^[ α ]").
 Notation tcx CON Σ := (plist (etcx CON Σ)).
 
 Section tcx.
-  Context `{!rust_haltGS CON Σ, rust_haltJ CON JUDG Σ, !Csem CON JUDG Σ,
+  Context `{!rust_haltGS CON Σ, !Csem CON JUDG Σ,
     !Jsem JUDG (iProp Σ)}.
 
   (** Semantics of a type context element *)
@@ -625,12 +625,12 @@ Section tcx.
     split; apply type_mono=>//= ???; by apply impl.
   Qed.
 End tcx.
-Arguments type {_ _ _ _ _ _ _ _ _} _ _ _%_E _ _.
+Arguments type {_ _ _ _ _ _ _ _} _ _ _%_E _ _.
 
 (** ** Extraction from a type context *)
 
 Section tcx_extract.
-  Context `{!rust_haltGS CON Σ, rust_haltJ CON JUDG Σ, !Csem CON JUDG Σ,
+  Context `{!rust_haltGS CON Σ, !Csem CON JUDG Σ,
     !Jsem JUDG (iProp Σ)}.
 
   (** Extract a type context element *)
@@ -693,5 +693,5 @@ Section tcx_extract.
     iFrame "pre". by rewrite tcx_extract sem_tcx_app.
   Qed.
 End tcx_extract.
-Hint Mode EtcxExtract - - - - - - - - - - - - - - - : typeclass_instances.
-Hint Mode TcxExtract - - - - - - - - - - - - - - - : typeclass_instances.
+Hint Mode EtcxExtract - - - - - - - - - - - - - - : typeclass_instances.
+Hint Mode TcxExtract - - - - - - - - - - - - - - : typeclass_instances.
