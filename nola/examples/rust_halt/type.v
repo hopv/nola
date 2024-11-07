@@ -440,8 +440,8 @@ Section tcx.
     !Jsem JUDG (iProp Σ)}.
 
   (** Semantics of a type context element *)
-  Definition sem_etcx {X} t (vT : etcx CON Σ X) : clair xty X → iProp Σ :=
-    match vT with
+  Definition sem_etcx {X} t (E : etcx CON Σ X) : clair xty X → iProp Σ :=
+    match E with
     | vl *◁ T => λ xπ, ∃ d, ⟦ T.1 t d xπ vl ⟧ᶜ
     | vl *◁[†α] T => λ xπ, [†α] =[rust_halt_wsat]{⊤}=∗
         ∃ d xπ', proph_eqz xπ xπ' ∗ ⟦ T.1 t d xπ' vl ⟧ᶜ
@@ -521,11 +521,11 @@ Section tcx.
     iMod ("ty" with "α t pre Γi") as (?) "[α $]". iModIntro. by iApply "→β".
   Qed.
   (** Frame the head in [sub] *)
-  Lemma sub_frame_hd {X Yl Zl α vT Γi Γo pre} :
-    @sub Yl Zl α Γi Γo pre ⊢ @sub (X :: _) _ α (vT ᵖ:: Γi) (vT ᵖ:: Γo)
+  Lemma sub_frame_hd {X Yl Zl α E Γi Γo pre} :
+    @sub Yl Zl α Γi Γo pre ⊢ @sub (X :: _) _ α (E ᵖ:: Γi) (E ᵖ:: Γo)
       (λ post '(x, yl)', pre (λ zl, post (x, zl)') yl).
   Proof.
-    rewrite sub_unseal. iIntros "#sub !>" (????) "/= α t pre [vT Γi]".
+    rewrite sub_unseal. iIntros "#sub !>" (????) "/= α t pre [E Γi]".
     iMod ("sub" with "α t pre Γi") as (yπl) "($ & $ & ? & ?)". iExists (_,_)'.
     by iFrame.
   Qed.
@@ -584,12 +584,12 @@ Section tcx.
     iIntros (?) ">(% & α & $) !>". by iApply "→β".
   Qed.
   (** Frame the head in [type] *)
-  Lemma type_frame_hd {X Yl Zl α vT Γi e Γo pre} :
+  Lemma type_frame_hd {X Yl Zl α E Γi e Γo pre} :
     @type Yl Zl α Γi e Γo pre ⊢
-      @type (X :: _) _ α (vT ᵖ:: Γi) e (λ v, vT ᵖ:: Γo v)
+      @type (X :: _) _ α (E ᵖ:: Γi) e (λ v, E ᵖ:: Γo v)
         (λ post '(x, yl)', pre (λ zl, post (x, zl)') yl).
   Proof.
-    rewrite type_unseal. iIntros "#type !>" (????) "/= α t pre [vT Γi]".
+    rewrite type_unseal. iIntros "#type !>" (????) "/= α t pre [E Γi]".
     iDestruct ("type" with "α t pre Γi") as "twp". iApply (twp_wand with "twp").
     iIntros (?) ">(% & $ & $ & ? & ?) !>". iExists (_,_)'. by iFrame.
   Qed.

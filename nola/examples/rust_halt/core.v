@@ -12,12 +12,12 @@ Section type.
   (** ** Operations on type contexts *)
 
   (** Leak the head in [sub] *)
-  Lemma sub_leak_hd {X Yl α vT Γ} :
-    ⊢ sub (Xl:=X::Yl) α (vT ᵖ:: Γ) Γ (λ post '(_, yl)', post yl).
+  Lemma sub_leak_hd {X Yl α E Γ} :
+    ⊢ sub (Xl:=X::Yl) α (E ᵖ:: Γ) Γ (λ post '(_, yl)', post yl).
   Proof. rewrite sub_unseal. iIntros (????) "!>/= $ $ ? [_ $] //". Qed.
   (** Swap the head elements *)
-  Lemma sub_swap_hd {X Y Zl α vT vT' Γ} :
-    ⊢ sub (Xl:=X::Y::Zl) α (vT ᵖ:: vT' ᵖ:: Γ) (vT' ᵖ:: vT ᵖ:: Γ)
+  Lemma sub_swap_hd {X Y Zl α E E' Γ} :
+    ⊢ sub (Xl:=X::Y::Zl) α (E ᵖ:: E' ᵖ:: Γ) (E' ᵖ:: E ᵖ:: Γ)
       (λ post '(x, y, zl)', post (y, x, zl)').
   Proof.
     rewrite sub_unseal. iIntros (???[?[??]]) "!>/= $ $ ? (? & ? & ?) !>".
