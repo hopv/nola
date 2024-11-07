@@ -119,6 +119,26 @@ Section plist_foldmap.
       λ '(x, xl)', op (f _ x) (plist_foldmap xl) end.
 End plist_foldmap.
 
+(** Split a function to [plist] into a [plist] of functions *)
+Section plist_funsplit.
+  Context {B A : Type} {F : A → Type}.
+  Fixpoint plist_funsplit {al}
+    : (B → plist F al) → plist (λ a, B → F a) al :=
+    match al with [] => λ _, ᵖ[] |
+      a :: al => λ f, (fst' ∘ f) ᵖ:: plist_funsplit (snd' ∘ f) end.
+End plist_funsplit.
+
+(** [plist_funsplit] and [plist_map] over application are mutually inverse *)
+Lemma plist_map_app_funsplit {B A F al f b} :
+  plist_map (λ _, (.$ b)) (@plist_funsplit B A F al f) = f b.
+Proof.
+  move: f. elim: al=>/=. { move=> f. by case (f b). }
+  move=> ?? IH ?. by rewrite IH.
+Qed.
+Lemma plist_funsplit_map_app {B A F al gl} :
+  @plist_funsplit B A F al (λ b, plist_map (λ _, (.$ b)) gl) = gl.
+Proof. move: gl. elim: al=>/=; [by case|]=> ?? IH [??]. by rewrite IH. Qed.
+
 (** Universal quantification over [plist] *)
 Definition plist_forall {A F} (Φ : ∀ a, F a → Prop) {al} : plist F al → Prop :=
   plist_foldmap True (∧) (A:=A) Φ (al:=al).
