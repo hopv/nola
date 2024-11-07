@@ -111,7 +111,7 @@ Section type.
     iApply (twp_wand with "twp"). by iIntros (?) ">(% & [$$] & $ & $ & $) !>".
   Qed.
   (** End a lifetime *)
-  Lemma sub_lft_end
+  Lemma sub_lft_end α
     `{!EtcxExtract (Yl:=Xl) (Zl:=Xl') ^[α] Γi Γr get getr} {Yl β Γo pre} :
     □ ([†α] -∗ sub (Yl:=Yl) β Γr Γo pre) ⊢
       sub β Γi Γo (λ post xl, pre post (getr xl)).
@@ -120,7 +120,7 @@ Section type.
     rewrite etcx_extract. iDestruct "Γi" as "[[% α] Γr]".
     iMod (lft_kill with "α") as "†"=>//. iApply ("sub" with "† β t pre Γr").
   Qed.
-  Lemma type_lft_end
+  Lemma type_lft_end α
     `{!EtcxExtract (Yl:=Xl) (Zl:=Xl') ^[α] Γi Γr get getr}
     {Yl Zl β Γi' e Γo pre pre'} :
     □ ([†α] -∗ sub (Yl:=Yl) β Γr Γi' pre) -∗ type (Yl:=Zl) β Γi' e Γo pre' -∗
@@ -130,14 +130,17 @@ Section type.
     { iApply type_in; [|done]. by iApply sub_lft_end. } { done. }
   Qed.
   (** Retrieve a frozen object *)
-  Lemma sub_retrieve {X Yl α β vl T Γ} `{!TyOp T β} :
-    [†α] -∗ sub (Xl:=X::Yl) β (vl *◁[†α] T ᵖ:: Γ) (vl *◁ T ᵖ:: Γ) id.
+  Lemma sub_retrieve vl α
+    `{!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Zl) (vl *◁[†α] T) Γ Γr get getr,
+      !TyOp T β} :
+    [†α] -∗ sub β Γ (vl *◁ T ᵖ:: Γr) (λ post yl, post (get yl, getr yl)').
   Proof.
-    rewrite sub_unseal. iIntros "#† !>/=" (????) "β $ pre [T Γ]".
-    iMod ("T" with "†") as (? xπ') "[eqz T]".
+    rewrite sub_unseal. iIntros "#† !>/=" (????) "β $ pre".
+    rewrite etcx_extract /=. iIntros "[→T Γr]".
+    iMod ("→T" with "†") as (? xπ') "[eqz T]".
     iMod (ty_own_proph with "β T") as (???) "[ξl cl]".
     iMod ("eqz" with "[//] ξl") as "[ξl eq]". iMod ("cl" with "ξl") as "[$ T]".
-    iModIntro. iExists (λ π, (xπ' π, _)')=>/=. iFrame "T Γ".
+    iModIntro. iExists (λ π, (xπ' π, _)')=>/=. iFrame "T Γr".
     by iApply (proph_obs_impl2 with "pre eq")=> ??<-.
   Qed.
 End type.
