@@ -36,7 +36,7 @@ Section ty_mod.
   Qed.
 
   (** [ty_mod] preserves [TyOpAt] *)
-  #[export] Instance ty_mod_ty_op `{!TyOpAt T β d, !Inj (=) (=) f} :
+  #[export] Instance ty_mod_ty_op `(!TyOpAt T β d, !Inj (=) (=) f) :
     TyOpAt (ty_mod f T) β d.
   Proof.
     split=>/= >.

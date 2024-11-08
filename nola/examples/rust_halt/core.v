@@ -92,7 +92,7 @@ Section type.
   Qed.
   (** Use a local lifetime *)
   Lemma type_lft_use α
-    `{!EtcxExtract (Yl:=Xl) (Zl:=Xl') ^[α] Γi Γr get getr} {Yl β e Γo pre} :
+    `(!EtcxExtract (Yl:=Xl) (Zl:=Xl') ^[α] Γi Γr get getr) {Yl β e Γo pre} :
     type (Yl:=Yl) (α ⊓ β) Γr e Γo pre ⊢
       type β Γi e (λ v, ^[α] ᵖ:: Γo v)
         (λ post xl, pre (λ yl, post ((), yl)') (getr xl)).
@@ -106,7 +106,7 @@ Section type.
   Qed.
   (** Eternalize a lifetime *)
   Lemma sub_lft_eternal α
-    `{!EtcxExtract (Yl:=Xl) (Zl:=Xl') ^[α] Γi Γr get getr} {Yl β Γo pre} :
+    `(!EtcxExtract (Yl:=Xl) (Zl:=Xl') ^[α] Γi Γr get getr) {Yl β Γo pre} :
     □ ((∀ α', α' ⊑□ α) -∗ sub (Yl:=Yl) β Γr Γo pre) ⊢
       sub β Γi Γo (λ post xl, pre post (getr xl)).
   Proof.
@@ -116,7 +116,7 @@ Section type.
     iApply ("sub" with "∞ β t pre Γr").
   Qed.
   Lemma type_lft_eternal α
-    `{!EtcxExtract (Yl:=Xl) (Zl:=Xl') ^[α] Γi Γr get getr}
+    `(!EtcxExtract (Yl:=Xl) (Zl:=Xl') ^[α] Γi Γr get getr)
     {Yl Zl β Γi' e Γo pre pre'} :
     □ ((∀ α', α' ⊑□ α) -∗ sub (Yl:=Yl) β Γr Γi' pre) -∗
     type (Yl:=Zl) β Γi' e Γo pre' -∗
@@ -127,7 +127,7 @@ Section type.
   Qed.
   (** End a lifetime *)
   Lemma sub_lft_end α
-    `{!EtcxExtract (Yl:=Xl) (Zl:=Xl') ^[α] Γi Γr get getr} {Yl β Γo pre} :
+    `(!EtcxExtract (Yl:=Xl) (Zl:=Xl') ^[α] Γi Γr get getr) {Yl β Γo pre} :
     □ ([†α] -∗ sub (Yl:=Yl) β Γr Γo pre) ⊢
       sub β Γi Γo (λ post xl, pre post (getr xl)).
   Proof.
@@ -136,7 +136,7 @@ Section type.
     iMod (lft_kill with "α") as "†"=>//. iApply ("sub" with "† β t pre Γr").
   Qed.
   Lemma type_lft_end α
-    `{!EtcxExtract (Yl:=Xl) (Zl:=Xl') ^[α] Γi Γr get getr}
+    `(!EtcxExtract (Yl:=Xl) (Zl:=Xl') ^[α] Γi Γr get getr)
     {Yl Zl β Γi' e Γo pre pre'} :
     □ ([†α] -∗ sub (Yl:=Yl) β Γr Γi' pre) -∗ type (Yl:=Zl) β Γi' e Γo pre' -∗
       type β Γi e Γo (λ post xl, pre (pre' post) (getr xl)).
@@ -146,8 +146,8 @@ Section type.
   Qed.
   (** Retrieve a frozen object *)
   Lemma sub_retrieve v α
-    `{!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Zl) (v ◁[†α] T) Γ Γr get getr,
-      !TyOp T β} :
+    `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Zl) (v ◁[†α] T) Γ Γr get getr,
+      !TyOp T β) :
     [†α] -∗ sub β Γ (v ◁ T ᵖ:: Γr) (λ post yl, post (get yl, getr yl)').
   Proof.
     rewrite sub_unseal. iIntros "#† !>/=" (????) "β $ pre".

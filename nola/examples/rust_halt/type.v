@@ -230,7 +230,7 @@ Section ty_op.
 
   (** Lemmas under [TyOpLt] *)
   Section ty_op_lt.
-    Context `{!@TyOpLt X T α d0}.
+    Context `(!@TyOpLt X T α d0).
     Lemma ty_own_proph_lt {t d xπ vl q} : d < d0 →
       q.[α] -∗ ⟦ T.1 t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
         ⌜proph_dep xπ ξl⌝ ∗ r:∗[ξl] ∗

@@ -67,8 +67,8 @@ Section read_write.
 
   (** Reading a value from a pointer *)
   Lemma type_read v
-    `{!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (v ◁ T) Γ Γr get' getr,
-      !Read (Y:=Y) (X':=X') α T U T' get set, !Ty U 1} :
+    `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (v ◁ T) Γ Γr get' getr,
+      !Read (Y:=Y) (X':=X') α T U T' get set, !Ty U 1) :
     ⊢ type α Γ (!v) (λ r, r ◁ U ᵖ:: v ◁ T' ᵖ:: Γr)
       (λ post zl, let x := get' zl in post (get x, set x, getr zl)').
   Proof.
@@ -83,8 +83,8 @@ Section read_write.
 
   (** Writing a value to a pointer *)
   Lemma type_write v w
-    `{!TcxExtract (Xl:=[X;Y]) (Yl:=Zl) (Zl:=Zl') ᵖ[v ◁ T; w ◁ U] Γ Γr get' getr,
-      !Write (Y:=Y') (X':=X') α T U' U T' get set, !Ty U' 1} :
+    `(!TcxExtract (Xl:=[X;Y]) (Yl:=Zl) (Zl:=Zl') ᵖ[v ◁ T; w ◁ U] Γ Γr get' getr,
+      !Write (Y:=Y') (X':=X') α T U' U T' get set, !Ty U' 1) :
     ⊢ type α Γ (v <- w) (λ _, v ◁ T' ᵖ:: Γr)
         (λ post zl, let '(x, y, _)' := get' zl in post (set x y, getr zl)').
   Proof.
@@ -99,10 +99,10 @@ Section read_write.
 
   (** Memory copy *)
   Lemma type_memcopy vs vt
-    `{!TcxExtract (Xl:=[Xs; Xt]) (Yl:=Zl) (Zl:=Zl') ᵖ[vs ◁ Ts; vt ◁ Tt] Γ Γr
+    `(!TcxExtract (Xl:=[Xs; Xt]) (Yl:=Zl) (Zl:=Zl') ᵖ[vs ◁ Ts; vt ◁ Tt] Γ Γr
         get getr,
       !Read (Y:=Y) (X':=Xs') α Ts U Ts' gets sets,
-      !Write (Y:=Y') (X':=Xt') α Tt U' U Tt' gett sett, !Ty U sz, !Ty U' sz} :
+      !Write (Y:=Y') (X':=Xt') α Tt U' U Tt' gett sett, !Ty U sz, !Ty U' sz) :
     ⊢ type α Γ (vt <-{sz} !vs)%E (λ _, vs ◁ Ts' ᵖ:: vt ◁ Tt' ᵖ:: Γr)
         (λ post zl, let '(xs, xt, _)' := get zl in
           post (sets xs, sett xt (gets xs), getr zl)').

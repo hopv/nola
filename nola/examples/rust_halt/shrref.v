@@ -38,8 +38,8 @@ Section ty_shrref.
   Qed.
 
   (** [ty_shrref] satisfies [TyOp] *)
-  #[export] Instance ty_shrref_ty_op
-    `{!Ty (X:=X) T sz, !TyOpLt T α d, !LftIncl α β} :
+  #[export] Instance ty_shrref_ty_op `{!Ty (X:=X) T sz}
+    `(!TyOpLt T α d, !LftIncl α β) :
     TyOpAt (ty_shrref β T) α d.
   Proof.
     apply: sty_op_at=> >. rewrite sty_shrref_unseal /=.

@@ -42,7 +42,7 @@ Section num.
     iModIntro. iFrame "pre Γ". iPureIntro. eexists 0, _. split=>//=.
   Qed.
   Lemma type_add_int v v' {α}
-    `{!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_int; v' ◁ ty_int] Γi Γr get getr} :
+    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_int; v' ◁ ty_int] Γi Γr get getr) :
     ⊢ type α Γi (v + v') (λ r, r ◁ ty_int ᵖ:: Γr)
       (λ post xl, let '(n, n', _)' := get xl in post (n + n', getr xl)'%Z).
   Proof.
@@ -53,7 +53,7 @@ Section num.
     by rewrite eq eq'.
   Qed.
   Lemma type_sub_int v v' {α}
-    `{!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_int; v' ◁ ty_int] Γi Γr get getr} :
+    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_int; v' ◁ ty_int] Γi Γr get getr) :
     ⊢ type α Γi (v - v') (λ r, r ◁ ty_int ᵖ:: Γr)
       (λ post xl, let '(n, n', _)' := get xl in post (n - n', getr xl)'%Z).
   Proof.
@@ -64,7 +64,7 @@ Section num.
     by rewrite eq eq'.
   Qed.
   Lemma type_eq_int v v' {α}
-    `{!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_int; v' ◁ ty_int] Γi Γr get getr} :
+    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_int; v' ◁ ty_int] Γi Γr get getr) :
     ⊢ type α Γi (v = v') (λ r, r ◁ ty_bool ᵖ:: Γr)
       (λ post xl, let '(n, n', _)' := get xl in
         post (bool_decide (n = n'), getr xl)').
@@ -76,7 +76,7 @@ Section num.
     by rewrite eq eq'.
   Qed.
   Lemma type_le_int v v' {α}
-    `{!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_int; v' ◁ ty_int] Γi Γr get getr} :
+    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_int; v' ◁ ty_int] Γi Γr get getr) :
     ⊢ type α Γi (v ≤ v') (λ r, r ◁ ty_bool ᵖ:: Γr)
       (λ post xl, let '(n, n', _)' := get xl in
         post (bool_decide (n ≤ n')%Z, getr xl)').
@@ -96,7 +96,7 @@ Section num.
     iModIntro. iFrame "pre Γ". iPureIntro. eexists 0, _. split=>//=.
   Qed.
   Lemma type_add_nat v v' {α}
-    `{!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_nat; v' ◁ ty_nat] Γi Γr get getr} :
+    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_nat; v' ◁ ty_nat] Γi Γr get getr) :
     ⊢ type α Γi (v + v') (λ r, r ◁ ty_nat ᵖ:: Γr)
       (λ post xl, let '(n, n', _)' := get xl in post (n + n', getr xl)').
   Proof.
@@ -107,7 +107,7 @@ Section num.
     { move=> ?. by rewrite eq eq'. } { do 3 f_equal. lia. }
   Qed.
   Lemma type_sub_nat v v' {α}
-    `{!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_nat; v' ◁ ty_nat] Γi Γr get getr} :
+    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_nat; v' ◁ ty_nat] Γi Γr get getr) :
     ⊢ type α Γi (v - v') (λ r, r ◁ ty_nat ᵖ:: Γr)
       (λ post xl, let '(n, n', _)' := get xl in
         n ≥ n' ∧ post (n - n', getr xl)')%type.
@@ -123,7 +123,7 @@ Section num.
     rewrite eq eq'. case=> ??. do 3 f_equal. lia.
   Qed.
   Lemma type_eq_nat v v' {α}
-    `{!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_nat; v' ◁ ty_nat] Γi Γr get getr} :
+    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_nat; v' ◁ ty_nat] Γi Γr get getr) :
     ⊢ type α Γi (v = v') (λ r, r ◁ ty_bool ᵖ:: Γr)
       (λ post xl, let '(n, n', _)' := get xl in
         post (bool_decide (n = n'), getr xl)').
@@ -135,7 +135,7 @@ Section num.
     rewrite eq eq'. apply bool_decide_ext. lia.
   Qed.
   Lemma type_le_nat v v' {α}
-    `{!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_nat; v' ◁ ty_nat] Γi Γr get getr} :
+    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_nat; v' ◁ ty_nat] Γi Γr get getr) :
     ⊢ type α Γi (v ≤ v') (λ r, r ◁ ty_bool ᵖ:: Γr)
       (λ post xl, let '(n, n', _)' := get xl in
         post (bool_decide (n ≤ n'), getr xl)').
@@ -164,8 +164,8 @@ Section num.
     iModIntro. iFrame "pre Γ". iPureIntro. eexists 0, _. split=>//=.
   Qed.
   Lemma type_eq_bool v v' {α}
-    `{!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_bool; v' ◁ ty_bool]
-        Γi Γr get getr} :
+    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_bool; v' ◁ ty_bool]
+        Γi Γr get getr) :
     ⊢ type α Γi (v = v') (λ r, r ◁ ty_bool ᵖ:: Γr)
       (λ post xl, let '(b, b', _)' := get xl in
         post (bool_decide (b = b'), getr xl)').
@@ -177,8 +177,8 @@ Section num.
     rewrite eq eq'. apply bool_decide_ext. by case b; case b'.
   Qed.
   Lemma type_le_bool v v' {α}
-    `{!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_bool; v' ◁ ty_bool]
-        Γi Γr get getr} :
+    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁ ty_bool; v' ◁ ty_bool]
+        Γi Γr get getr) :
     ⊢ type α Γi (v ≤ v') (λ r, r ◁ ty_bool ᵖ:: Γr)
       (λ post xl, let '(b, b', _)' := get xl in
         post (negb b || b', getr xl)').
@@ -192,7 +192,7 @@ Section num.
 
   (** If expression *)
   Lemma type_if v
-    `{!EtcxExtract (Yl:=Xl) (Zl:=Yl) (v ◁ ty_bool) Γi Γr get getr}
+    `(!EtcxExtract (Yl:=Xl) (Zl:=Yl) (v ◁ ty_bool) Γi Γr get getr)
     {Zl α e e' Γo pre pre'} :
     type (Yl:=Zl) α Γr e Γo pre -∗ type α Γr e' Γo pre' -∗
       type α Γi (if: v then e else e') Γo
@@ -238,8 +238,8 @@ Section num.
     iApply ("IH" $! _ (λ _,(0,_)') with "α t pre T Γ").
   Qed.
   Lemma type_nat_iter {α X T} {f : val}
-    `{!TcxExtract (Xl:=[_;X]) (Yl:=Yl) (Zl:=Zl) ᵖ[v ◁ ty_nat; w ◁ T] Γi Γr
-        get getr} {pre} :
+    `(!TcxExtract (Xl:=[_;X]) (Yl:=Yl) (Zl:=Zl) ᵖ[v ◁ ty_nat; w ◁ T] Γi Γr
+        get getr) {pre} :
     (∀ v w, type α (v ◁ ty_nat ᵖ:: w ◁ T ᵖ:: Γr) (f [v; w]%E)
       (λ r, r ◁ T ᵖ:: Γr) pre) ⊢
     type α Γi (nat_iter [f; v; w]%E) (λ r, r ◁ T ᵖ:: Γr)

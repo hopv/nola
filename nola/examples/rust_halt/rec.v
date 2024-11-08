@@ -85,8 +85,8 @@ Section ty_rec.
 
   (** [TyOp] on [ty_rec] *)
   Lemma ty_rec_ty_op_lt {Yl} (Ul : plist (ty CON Σ) Yl)
-    `{TyOp0: !∀ d T, TyOpLt T α d → TCPlistForall (λ _ U, TyOpLt U α d) Ul →
-        TyOpAt (F T) α d} {d} :
+    `(TyOp0: !∀ d T, TyOpLt T α d → TCPlistForall (λ _ U, TyOpLt U α d) Ul →
+        TyOpAt (F T) α d) {d} :
     TCPlistForall (λ _ U, TyOpLt U α d) Ul → TyOpAt (ty_rec F) α d.
   Proof.
     rewrite ty_rec_unfold=> OpUl. apply TyOp0; [|done]. rewrite ty_rec_unfold.
@@ -97,7 +97,7 @@ Section ty_rec.
     rewrite ty_rec_unfold. apply IH. move: OpUl. apply TCPlistForall_mono=> ??.
     apply: TyOpLt_mono=>//=. lia.
   Qed.
-  Lemma ty_rec_ty_op `{!∀ d T, TyOpLt T α d → TyOpAt (F T) α d} :
+  Lemma ty_rec_ty_op `(!∀ d T, TyOpLt T α d → TyOpAt (F T) α d) :
     TyOp (ty_rec F) α.
-  Proof. move=> ?. by apply (ty_rec_ty_op_lt ᵖ[]). Qed.
+  Proof. move=> ?. by apply (ty_rec_ty_op_lt ᵖ[] _). Qed.
 End ty_rec.

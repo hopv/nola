@@ -37,7 +37,7 @@ Section ty_box.
   Qed.
 
   (** [ty_box] satisfies [TyOp] *)
-  #[export] Instance ty_box_ty_op `{!Ty (X:=X) T sz, !TyOpLt T α d} :
+  #[export] Instance ty_box_ty_op `(!Ty (X:=X) T sz, !TyOpLt T α d) :
     TyOpAt (ty_box T) α d.
   Proof.
     rewrite ty_box_unseal. split=>/= *.
