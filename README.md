@@ -131,8 +131,10 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`rust_halt/`](nola/examples/rust_halt/) : RustHalt, a formal foundation of
       functional and termination-sensitive Rust program verification
     * [`base`](nola/examples/rust_halt/base.v) (Basics),
-      [`type`](nola/examples/rust_halt/type.v) (Type model),
-      [`core`](nola/examples/rust_halt/core.v) (Core features),
-      [`num`](nola/examples/rust_halt/num.v) (Numeric types),
-      [`ptr`](nola/examples/rust_halt/ptr.v) (Pointer types)
+      [`type`](nola/examples/rust_halt/type.v) (Type model)
+    * [`core`](nola/examples/rust_halt/core.v) (Core features)
+    * [`num`](nola/examples/rust_halt/num.v) (Numeric types),
+      [`box`](nola/examples/rust_halt/box.v) (Box pointer type),
+      [`rec`](nola/examples/rust_halt/rec.v) (Recursive type),
+      [`mod`](nola/examples/rust_halt/mod.v) (Modification type)
     * [`adequacy`](nola/examples/rust_halt/adequacy.v) (Adequacy)
