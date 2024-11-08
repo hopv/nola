@@ -743,5 +743,3 @@ Section tcx_extract.
     iFrame "pre". by rewrite tcx_extract sem_tcx_app.
   Qed.
 End tcx_extract.
-Hint Mode EtcxExtract - - - - - - - - - - - - - - : typeclass_instances.
-Hint Mode TcxExtract - - - - - - - - - - - - - - : typeclass_instances.
