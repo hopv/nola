@@ -380,11 +380,11 @@ Section classes.
   (** [Send] over [sty] entails [Sync] *)
   #[export] Instance sty_send_sync `{!Send (ty_sty (X:=X) T)} :
     Sync (ty_sty (X:=X) T).
-  Proof. move=>//= * ????. f_equiv=> ?. f_equiv. apply: Send0. Qed.
+  Proof. move=> > /=. f_equiv=> ?. f_equiv. apply: Send0. Qed.
 
   (** [pty] is [Send] and [Sync] *)
   #[export] Instance pty_send {X T} : Send (ty_pty (X:=X) T).
-  Proof. move=>//=. Qed.
+  Proof. by move. Qed.
   #[export] Instance pty_sync {X T} : Sync (ty_pty (X:=X) T).
   Proof. exact _. Qed.
 

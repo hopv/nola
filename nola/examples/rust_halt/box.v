@@ -78,14 +78,12 @@ Section ty_box.
   (** [ty_box] preserves [Send] *)
   #[export] Instance ty_box_send `{!Send (X:=X) T} : Send (ty_box T).
   Proof.
-    rewrite ty_box_unseal. move=>/= ?????. do 4 f_equiv=> ?. do 6 f_equiv.
-    apply: send.
+    rewrite ty_box_unseal=> > /=. do 4 f_equiv=> ?. do 6 f_equiv. apply: send.
   Qed.
   (** [ty_box] preserves [Sync] *)
   #[export] Instance ty_box_sync `{!Sync (X:=X) T} : Sync (ty_box T).
   Proof.
-    rewrite ty_box_unseal. move=>/= ??????. do 3 f_equiv=> ?. do 5 f_equiv.
-    apply: sync.
+    rewrite ty_box_unseal=> > /=. do 3 f_equiv=> ?. do 5 f_equiv. apply: sync.
   Qed.
 
   (** Subtyping over [ty_box] *)

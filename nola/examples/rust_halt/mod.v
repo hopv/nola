@@ -49,10 +49,10 @@ Section ty_mod.
 
   (** [ty_mod] preserves [Send] *)
   #[export] Instance ty_mod_send `{!Send T} : Send (ty_mod f T).
-  Proof. move=>/= ????. apply: send. Qed.
+  Proof. move=>/= >. apply: send. Qed.
   (** [ty_mod] preserves [Sync] *)
   #[export] Instance ty_mod_sync `{!Sync T} : Sync (ty_mod f T).
-  Proof. move=>/= ??????. apply: sync. Qed.
+  Proof. move=>/= >. apply: sync. Qed.
   (** [ty_mod] preserves [Copy] *)
   #[export] Instance ty_mod_copy `{!Copy T sz} : Copy (ty_mod f T) sz.
   Proof. split=>/= >; [exact: copy_persistent|exact: copy_shr_acc]. Qed.
