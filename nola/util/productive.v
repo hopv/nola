@@ -24,21 +24,26 @@ Arguments equiv_proeq {PR _ _} : rename.
 Implicit Type PR : prost.
 
 (** [proeq] is proper *)
-Local Lemma proeq_proper' {PR k} : Proper ((≡) ==> (≡) ==> impl) (@proeq PR k).
+#[export] Instance proeq_proper {PR k} :
+  Proper ((≡) ==> (≡) ==> (↔)) (@proeq PR k).
 Proof.
+  have pro : Proper ((≡) ==> (≡) ==> impl) (@proeq PR k); last first.
+  { move=> ??????. by split; apply pro. }
   move=> ?? /equiv_proeq eq ?? /equiv_proeq eq' ?.
   etrans; [symmetry; by apply eq|]. by etrans.
 Qed.
-#[export] Instance proeq_proper {PR k} :
-  Proper ((≡) ==> (≡) ==> (↔)) (@proeq PR k).
-Proof. move=> ??????. by split; apply proeq_proper'. Qed.
 
 (** [proeq_later]: [proeq] with the level deferred by 1 *)
 Definition proeq_later {PR} k : relation PR :=
   match k with 0 => λ _ _, True | S k' => proeq k' end.
+(** [proeq_later] is an equivalence relation *)
 #[export] Instance proeq_later_equivalence {PR k} :
   Equivalence (@proeq_later PR k).
 Proof. case: k=>//=. exact _. Qed.
+(** [proeq_later] is proper *)
+#[export] Instance proeq_later_proper {PR k} :
+  Proper ((≡) ==> (≡) ==> (↔)) (@proeq_later PR k).
+Proof. case: k; solve_proper. Qed.
 (** [proeq] to [proeq_later] *)
 Lemma proeq_to_later {PR k a a'} : proeq k a a' → @proeq_later PR k a a'.
 Proof. case: k=>//= ?. apply proeq_anti. lia. Qed.
