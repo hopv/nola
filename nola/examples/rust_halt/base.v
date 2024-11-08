@@ -165,6 +165,30 @@ Definition rust_halt_wsat
   `{!rust_haltGS CON Σ, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ)} : iProp Σ :=
   inv_wsat ⟦⟧ᶜ ∗ dinv_wsat ⟦⟧ᶜ ∗ borrow_wsat borrowM ⟦⟧ᶜ ∗ fborrow_wsat.
 
+(** ** Lifetime inclusion *)
+
+(** [LftIncl]: Type class for lifetime inclusion *)
+Class LftIncl (α β : lft) : Prop :=
+  lft_incl' : α ⊑ β.
+Hint Mode LftIncl ! ! : typeclass_instances.
+
+(** Trivial matches *)
+#[export] Instance lft_incl'_top {α} : LftIncl α ⊤ | 2.
+Proof. exact lft_incl_top. Qed.
+#[export] Instance lft_incl'_refl {α} : LftIncl α α | 2.
+Proof. exact: lft_incl_refl. Qed.
+(** Decompose the right-hand side *)
+#[export] Instance lft_incl'_meet_intro `{!LftIncl α β, !LftIncl α β'} :
+  LftIncl α (β ⊓ β') | 5.
+Proof. exact: lft_incl_meet_intro. Qed.
+(** Decompose the left-hand side *)
+#[export] Instance lft_incl'_meet_by_l `{!LftIncl α β} {α'} :
+  LftIncl (α ⊓ α') β | 30.
+Proof. unfold LftIncl. etrans; [exact lft_incl_meet_l|done]. Qed.
+#[export] Instance lft_incl'_meet_by_r `{!LftIncl α' β} {α} :
+  LftIncl (α ⊓ α') β | 30.
+Proof. unfold LftIncl. etrans; [exact lft_incl_meet_r|done]. Qed.
+
 (** ** Shared borrows *)
 
 (** [spointsto]: Shared borrow over a points-to token *)
