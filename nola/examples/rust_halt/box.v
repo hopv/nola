@@ -104,7 +104,7 @@ Section ty_box.
       iIntros (????) "? !>". by iApply ("tosub" with "[//] [//]").
   Qed.
 
-  (** Reading from [ty_box] *)
+  (** Read from [ty_box] *)
   Lemma read_ty_box `{!Ty (X:=X) T sz} {α} :
     ⊢ read α (ty_box T) T (ty_box (ty_uninit sz)) id (λ _, ()).
   Proof.
@@ -130,7 +130,7 @@ Section ty_box.
     by iFrame.
   Qed.
 
-  (** Writing to [ty_box] *)
+  (** Write to [ty_box] *)
   Lemma write_ty_box `{!Ty (X:=X) T sz, !Ty (X:=Y) U sz} {α} :
     ⊢ write α (ty_box T) T U (ty_box U) id (λ _, id).
   Proof.
