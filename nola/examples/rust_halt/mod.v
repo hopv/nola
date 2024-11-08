@@ -55,9 +55,7 @@ Section ty_mod.
   Proof. move=>/= ??????. apply: sync. Qed.
   (** [ty_mod] preserves [Copy] *)
   #[export] Instance ty_mod_copy `{!Copy T} : Copy (ty_mod f T).
-  Proof.
-    split=>/= >. { exact: copy_persistent. } { exact: copy_shr_acc. }
-  Qed.
+  Proof. split=>/= >; [exact: copy_persistent|exact: copy_shr_acc]. Qed.
 
   (** Subtyping on [ty_mod] *)
   Lemma subty_of_ty_mod {δ} : ⊢ subty δ (ty_mod f T) T f.
