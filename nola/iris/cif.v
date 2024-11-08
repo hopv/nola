@@ -4,7 +4,7 @@ From nola.util Require Export uip (** Assume UIP over any type *).
 From nola.util Require Export nary cit.
 From nola.bi Require Export deriv.
 From nola.iris Require Export iprop.
-Import EqNotations iPropAppNotation FunPRNotation.
+Import EqNotations ProeqNotation iPropAppNotation FunPRNotation.
 
 Implicit Type Σ : gFunctors.
 
@@ -154,7 +154,7 @@ Section cif.
   #[export] Instance cif_ex_preserv {A} : Preserv (@cif_ex A).
   Proof. move=> ????. by apply Citg_preserv_productive. Qed.
   #[export] Instance cif_bin_preserv {s k} :
-    Proper (proeq k ==> proeq k ==> proeq k) (cif_bin s).
+    Proper ((≡[k]≡) ==> (≡[k]≡) ==> (≡[k]≡)) (cif_bin s).
   Proof. move=> ??????. apply Citg_preserv_productive=>//. by f_equiv. Qed.
   #[export] Instance cif_un_preserv {s} : Preserv (cif_un s).
   Proof. move=> ????. apply Citg_preserv_productive=>//. by f_equiv. Qed.
@@ -162,7 +162,7 @@ Section cif.
   (** Custom connectives are size-preserving over the inductive arguments
     and productive over the coinductive arguments *)
   #[export] Instance cif_con_preserv_productive {s k} :
-    Proper (proeq k ==> proeq_later k ==> (≡) ==> proeq k) (cif_con s).
+    Proper ((≡[k]≡) ==> (≡[<k]≡) ==> (≡) ==> (≡[k]≡)) (cif_con s).
   Proof.
     move=> ?????????. apply Citg_preserv_productive=>//. by destruct k as [|k].
   Qed.
@@ -384,8 +384,7 @@ Section cif_in.
   (** Custom connectives are size-preserving over the inductive arguments
     and productive over the coinductive arguments *)
   #[export] Instance cif_in_preserv_productive {s k} :
-    Proper (proeq k ==> proeq_later k ==> (≡) ==> proeq k)
-      (cif_in CON' (Σ:=Σ) s).
+    Proper ((≡[k]≡) ==> (≡[<k]≡) ==> (≡) ==> (≡[k]≡)) (cif_in CON' (Σ:=Σ) s).
   Proof.
     rewrite cif_in_unseal=> ????? /fun_proeq_later eqc ???.
     apply cif_con_preserv_productive.

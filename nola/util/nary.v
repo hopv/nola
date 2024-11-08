@@ -2,6 +2,7 @@
 
 From nola Require Export prelude.
 From nola Require Import productive.
+Import ProeqNotation.
 
 Implicit Type A : ofe.
 
@@ -38,5 +39,5 @@ Proof. by case: b. Qed.
 #[export] Instance unary_preserv {A : prost} : Preserv' _ _ (@unary A).
 Proof. solve_proper. Qed.
 #[export] Instance binary_preserv {A : prost} {k} :
-  Proper (proeq k ==> proeq k ==> proeq k) (@binary A).
+  Proper ((≡[k]≡) ==> (≡[k]≡) ==> (≡[k]≡)) (@binary A).
 Proof. solve_proper. Qed.

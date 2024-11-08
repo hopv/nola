@@ -2,7 +2,7 @@
 
 From nola.util Require Export eq order productive.
 From iris.algebra Require Export ofe.
-Import EqNotations FunPNotation FunPRNotation.
+Import EqNotations ProeqNotation FunPNotation FunPRNotation.
 
 Implicit Type SEL : Type.
 
@@ -852,7 +852,7 @@ Next Obligation. move=> ??????. split; [done|]=> eq ?. apply eq. Qed.
 
 (** [citPR]: Productivity structure for [cit], under UIP over [SEL] *)
 Program Canonical citPR {SEL} `{!Uip SEL} I C D :=
-  Prost (@citO SEL I C D) (λ k t t', proeq k (of_cit t) (of_cit t')) _ _ _.
+  Prost (@citO SEL I C D) (λ k t t', of_cit t ≡[k]≡ of_cit t') _ _ _.
 Next Obligation.
   split. { by move=> ?. } { move=> ???. by symmetry. }
   { move=> ?????. by etrans. }
@@ -870,14 +870,14 @@ Section citPR.
   Lemma cita_proeq : @proeq (citaPR I C D) = λ k ta ta', ta k ≡ ta' k.
   Proof. done. Qed.
   Lemma cit_proeq `{!Uip SEL} :
-    @proeq (citPR I C D) = λ k t t', proeq k (of_cit t) (of_cit t').
+    @proeq (citPR I C D) = λ k t t', of_cit t ≡[k]≡ of_cit t'.
   Proof. done. Qed.
 
   (** [Citg] is size-preserving over the inductive arguments
     and [Productive] over the coinductive arguments *)
   #[export] Instance Citg_preserv_productive `{!Uip SEL} {s k} :
-    Proper (@proeq (_ -pr> citPR I C D) k ==>
-      @proeq_later (_ -pr> _) k ==> (≡) ==> @proeq (citPR I C D) k) (Citg s).
+    Proper ((≡[k]@{_ -pr> citPR I C D}≡) ==>
+      (≡[<k]@{_ -pr> _}≡) ==> (≡) ==> (≡[k]@{citPR I C D}≡)) (Citg s).
   Proof.
     move=> ?? eq ?? eq' ??<-. rewrite /proeq /= cit_proeq of_cit_unseal in eq.
     apply equiv_dist=> n. apply citi_dist_Forall2.

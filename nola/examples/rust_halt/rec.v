@@ -18,7 +18,7 @@ Section ty_rec.
   Proof. exact profix_unique. Qed.
 
   (** Approximate [ty_rec] by an iteration *)
-  Lemma ty_rec_iter {k} : proeq k (ty_rec F) (F (Nat.iter k F inhabitant)).
+  Lemma ty_rec_iter {k} : ty_rec F ≡[k]≡ F (Nat.iter k F inhabitant).
   Proof. exact profix_iter. Qed.
 
   (** Equivalence between [ty_rec]s *)
@@ -28,7 +28,7 @@ Section ty_rec.
 
   (** [ty_rec] is size-preserving *)
   Lemma ty_rec_preserv {G : ty CON Σ X → ty CON Σ X} `{!Productive G} {k} :
-    proeq (PR:=funPR _) k F G → proeq k (ty_rec F) (ty_rec G).
+    F ≡[k]@{funPR _}≡ G → ty_rec F ≡[k]≡ ty_rec G.
   Proof. exact profix_preserv. Qed.
   (** [ty_rec] preserves size preservation and productivity *)
   #[export] Instance ty_rec_map_preserv {Y}

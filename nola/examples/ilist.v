@@ -2,7 +2,7 @@
 
 From nola.examples Require Export con.
 From nola.rust_lang Require Export notation proofmode.
-Import FunPRNotation WpwNotation CsemNotation.
+Import ProeqNotation FunPRNotation WpwNotation CsemNotation.
 
 Section ilist.
   Context `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), !lrustGS_gen hlc Σ,
@@ -19,7 +19,7 @@ Section ilist.
     : loc -pr> cif CON Σ :=
     λ l, as_cif (λ _, ilist_gen N Φx Ilist l).
   #[export] Instance cif_ilist_gen_productive {k N} :
-    Proper (proeq_later k ==> proeq_later k ==> proeq k) (cif_ilist_gen N).
+    Proper ((≡[<k]≡) ==> (≡[<k]≡) ==> (≡[k]≡)) (cif_ilist_gen N).
   Proof.
     unfold cif_ilist_gen=>/= ?? eq ?? eq' ?.
     f_equiv; apply cif_inv_tok_productive; (destruct k as [|k]; [done|]);
