@@ -20,6 +20,14 @@ Section ty_box.
   Definition ty_box {X} := ty_box_aux.(unseal) X.
   Lemma ty_box_unseal : @ty_box = @ty_box_def. Proof. exact: seal_eq. Qed.
 
+  (** [ty_box] is productive *)
+  #[export] Instance ty_box_productive {X} : Productive (ty_box (X:=X)).
+  Proof.
+    move=> ?[??][??] /ty_proeq_later [/=eqO eqS].
+    rewrite ty_box_unseal /ty_box_def. apply ty_proeq=>/=. split=> >.
+    { do 4 f_equiv=> ?. by rewrite eqO. } { do 3 f_equiv=> ?. by rewrite eqS. }
+  Qed.
+
   (** [ty_box] satisfies [Ty] *)
   #[export] Instance ty_box_ty {X T} : Ty (ty_box (X:=X) T) 1.
   Proof.
