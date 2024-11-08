@@ -106,7 +106,7 @@ Section ty_box.
 
   (** Read from [ty_box] *)
   #[export] Instance read_ty_box `{!Ty (X:=X) T sz} {α} :
-    Read α (ty_box T) T (ty_box (ty_uninit sz)) id (λ _, ()).
+    Read α (ty_box T) T (ty_box (ty_uninit sz)) id (λ _, ()) | 20.
   Proof.
     split=> >. iIntros "$ $". rewrite ty_box_unseal /=.
     iDestruct 1 as (????[= ->]??) "(>$ & >† & T)". rewrite sem_cif_in /=.
