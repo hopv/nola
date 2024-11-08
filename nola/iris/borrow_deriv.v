@@ -286,15 +286,15 @@ Section borrowC.
   (** The formulas are productive *)
   #[export] Instance cif_bor_productive {α} : Productive (cif_bor α).
   Proof.
-    move=> ????. apply cif_in_preserv_productive=>//. by apply fun_proeq_later.
+    move=> ??*. apply cif_in_preserv_productive=>//. by apply fun_proeq_later.
   Qed.
   #[export] Instance cif_obor_productive {α q} : Productive (cif_obor α q).
   Proof.
-    move=> ????. apply cif_in_preserv_productive=>//. by apply fun_proeq_later.
+    move=> ??*. apply cif_in_preserv_productive=>//. by apply fun_proeq_later.
   Qed.
   #[export] Instance cif_lend_productive {α} : Productive (cif_lend α).
   Proof.
-    move=> ????. apply cif_in_preserv_productive=>//. by apply fun_proeq_later.
+    move=> ??*. apply cif_in_preserv_productive=>//. by apply fun_proeq_later.
   Qed.
 
   Context `{!borrowGS (cifOF CON) Σ, !bupdJ (cif CON Σ) JUDG}.

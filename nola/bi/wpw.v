@@ -268,9 +268,8 @@ Section wpw.
     move=> W W' ???<-??<-??<-?? ΦΨ.
     enough (go : (wpw W : _ -d> _ -d> _ -d> _ -d> _) ≡{n}≡ wpw W').
     { etrans; [apply go|]. by f_equiv. }
-    rewrite /wp/wp' wp_unseal=> ?. apply fixpoint_ne=> ????.
-    rewrite /wp_pre/=. do 13 f_equiv; [done|]. do 12 f_equiv.
-    apply step_fupdN_ne. by do 3 f_equiv.
+    rewrite /wp/wp' wp_unseal=> ?. apply fixpoint_ne=> >. rewrite /wp_pre/=.
+    do 13 f_equiv; [done|]. do 12 f_equiv. apply step_fupdN_ne. by do 3 f_equiv.
   Qed.
   #[export] Instance wpw_proper :
     Proper ((≡) ==> (=) ==> (=) ==> (=) ==>
@@ -288,7 +287,7 @@ Section wpw.
     move=> W W' ???<-??<-??<-?? ΦΨ.
     enough (go : (twpw W : _ -d> _ -d> _ -d> _ -d> _) ≡{n}≡ twpw W').
     { etrans; [apply go|]. by f_equiv. }
-    rewrite /twp/twp' twp_unseal=> ????.
+    rewrite /twp/twp' twp_unseal=> >.
     apply least_fixpoint_ne; [|done]=> ?[[??]?]. rewrite /twp_pre'/twp_pre/=.
     do 11 f_equiv; [done|]. by do 14 f_equiv.
   Qed.

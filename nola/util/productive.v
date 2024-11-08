@@ -48,7 +48,7 @@ Import ProeqNotation.
   Proper ((≡) ==> (≡) ==> (↔)) (≡[k]@{PR}≡).
 Proof.
   have pro : Proper ((≡) ==> (≡) ==> impl) (≡[k]@{PR}≡); last first.
-  { move=> ??????. by split; apply pro. }
+  { move=> ?*?*. by split; apply pro. }
   move=> ?? /equiv_proeq eq ?? /equiv_proeq eq' ?.
   etrans; [symmetry; by apply eq|]. by etrans.
 Qed.
@@ -86,9 +86,9 @@ Proof. case: k=>/= >; [split; by [left|]|split; by [right|case]]. Qed.
 (** Product *)
 Program Canonical prodPR (A B : prost) : prost :=
   Prost (prodO A B) (λ k, prod_relation (≡[k]≡) (≡[k]≡)) _ _ _.
-Next Obligation. move=> ???????[??]. split; by eapply proeq_anti. Qed.
+Next Obligation. move=> > ?[??]. split; by eapply proeq_anti. Qed.
 Next Obligation.
-  move=> ????. split. { move=> [??]?. split; by apply equiv_proeq. }
+  move=> >. split. { move=> [??]?. split; by apply equiv_proeq. }
   { move=> eq. split; apply equiv_proeq; apply eq. }
 Qed.
 
@@ -99,9 +99,9 @@ Next Obligation.
   move=> ???. split. { by move=> ??. } { move=> ????. by symmetry. }
   { move=> ??? e ??. etrans; by [apply e|]. }
 Qed.
-Next Obligation. move=> ?????????. by eapply proeq_anti. Qed.
+Next Obligation. move=> *?. by eapply proeq_anti. Qed.
 Next Obligation.
-  move=> ????. split. { move=> ???. by apply equiv_proeq. }
+  move=> >. split. { move=> *. by apply equiv_proeq. }
   { move=> eq ?. apply equiv_proeq=> ?. apply eq. }
 Qed.
 (** Unfold [proeq] over [funPR] *)
@@ -188,8 +188,8 @@ Next Obligation. move=> ?? c ???/=. by apply c.(prochain_eq). Qed.
 #[export] Program Instance prod_cprost {A B} `{!Cprost A, !Cprost B} :
   Cprost (prodPR A B) :=
   CPROST (λ c, (prolimit (prochain_proj1 c), prolimit (prochain_proj2 c))) _ _.
-Next Obligation. move=> ??????. split; exact prolimit_eq. Qed.
-Next Obligation. move=> ??????? eq. split; apply prolimit_ne=> ?; apply eq. Qed.
+Next Obligation. move=> *. split; exact prolimit_eq. Qed.
+Next Obligation. move=> ?*?? eq. split; apply prolimit_ne=> ?; apply eq. Qed.
 
 (** Turn [prochain] over [funPR] *)
 Program Definition prochain_app {A PRF}
@@ -199,9 +199,9 @@ Next Obligation. move=> ?? c ????/=. by apply c.(prochain_eq). Qed.
 (** [Cprost] over [funPR] *)
 #[export] Program Instance fun_cprost {A PRF} `{!∀ a, Cprost (PRF a)} :
   Cprost (@funPR A PRF) := CPROST (λ c a, prolimit (prochain_app c a)) _ _.
-Next Obligation. move=> ??????. by etrans; [exact prolimit_eq|]. Qed.
+Next Obligation. move=> *>. by etrans; [exact prolimit_eq|]. Qed.
 Next Obligation.
-  move=> ?????? eq a. apply prolimit_ne=> k. by apply (eq k a).
+  move=> > ?? eq a. apply prolimit_ne=> k. by apply (eq k a).
 Qed.
 
 (** ** Fixed point *)

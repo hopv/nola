@@ -155,16 +155,16 @@ Section cif.
   Proof. move=> ????. by apply Citg_preserv_productive. Qed.
   #[export] Instance cif_bin_preserv {s k} :
     Proper ((≡[k]≡) ==> (≡[k]≡) ==> (≡[k]≡)) (cif_bin s).
-  Proof. move=> ??????. apply Citg_preserv_productive=>//. by f_equiv. Qed.
+  Proof. move=> ?*?*. apply Citg_preserv_productive=>//. by f_equiv. Qed.
   #[export] Instance cif_un_preserv {s} : Preserv (cif_un s).
-  Proof. move=> ????. apply Citg_preserv_productive=>//. by f_equiv. Qed.
+  Proof. move=> ??*. apply Citg_preserv_productive=>//. by f_equiv. Qed.
 
   (** Custom connectives are size-preserving over the inductive arguments
     and productive over the coinductive arguments *)
   #[export] Instance cif_con_preserv_productive {s k} :
     Proper ((≡[k]≡) ==> (≡[<k]≡) ==> (≡) ==> (≡[k]≡)) (cif_con s).
   Proof.
-    move=> ?????????. apply Citg_preserv_productive=>//. by destruct k as [|k].
+    move=> ?*?*?*. apply Citg_preserv_productive=>//. by destruct k as [|k].
   Qed.
 
   (** Non-expansiveness *)
@@ -177,7 +177,7 @@ Section cif.
   #[export] Instance cif_ex_proper {A} : Proper ((≡) ==> (≡)) (@cif_ex A).
   Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_bin_ne {s} : NonExpansive2 (cif_bin s).
-  Proof. move=> ???????. apply Citg_ne; solve_proper. Qed.
+  Proof. move=> ??*?*. apply Citg_ne; solve_proper. Qed.
   #[export] Instance cif_bin_proper {s} :
     Proper ((≡) ==> (≡) ==> (≡)) (cif_bin s).
   Proof. apply ne_proper_2, _. Qed.
@@ -186,15 +186,15 @@ Section cif.
   #[export] Instance cif_un_proper {s} : Proper ((≡) ==> (≡)) (cif_un s).
   Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_pure_ne : NonExpansive cif_pure.
-  Proof. move=> ????. by apply Citg_ne. Qed.
+  Proof. move=> ??*. by apply Citg_ne. Qed.
   #[export] Instance cif_pure_proper : Proper ((≡) ==> (≡)) cif_pure.
   Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_later_contractive : Contractive cif_later.
-  Proof. move=> ????. by apply Citg_ne. Qed.
+  Proof. move=> ??*. by apply Citg_ne. Qed.
   #[export] Instance cif_later_proper : Proper ((≡) ==> (≡)) cif_later.
   Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_con_ne {s} : NonExpansive3 (cif_con s).
-  Proof. move=> ??????????. apply Citg_ne=>// ?. by f_equiv. Qed.
+  Proof. move=> ??*?*?*. apply Citg_ne=>// ?. by f_equiv. Qed.
   #[export] Instance cif_con_proper {s} :
     Proper ((≡) ==> (≡) ==> (≡) ==> (≡)) (cif_con s).
   Proof.
@@ -294,16 +294,14 @@ Section iris.
       (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡)))) cif_bsem.
   Proof.
     move=> ????. case=>/=; try solve_proper.
-    { move=> ????????. by apply later_contractive. } { by apply csem_ne. }
+    { move=> ?*?*?*. by apply later_contractive. } { by apply csem_ne. }
   Qed.
 
   (** [cif_sem_gen]: Generator of [cif_sem] *)
   Definition cif_sem_gen sm : (JUDG -n> iProp Σ) -d> cif CON Σ -d> iProp Σ :=
     λ δ, cit_fold (cif_bsem sm δ).
   #[export] Instance cif_sem_gen_contractive : Contractive cif_sem_gen.
-  Proof.
-    move=> ??????. apply cit_fold_ne_gen=>// ??????????. by apply cif_bsem_ne.
-  Qed.
+  Proof. move=> ??*?*?. apply cit_fold_ne_gen=>// *. by apply cif_bsem_ne. Qed.
 
   (** [cif_sem]: Semantics of [cif] *)
   Definition cif_sem' : (JUDG -n> iProp Σ) -d> cif CON Σ -d> iProp Σ :=
@@ -388,7 +386,7 @@ Section cif_in.
   #[export] Instance cif_in_preserv_productive {s k} :
     Proper ((≡[k]≡) ==> (≡[<k]≡) ==> (≡) ==> (≡[k]≡)) (cif_in CON' (Σ:=Σ) s).
   Proof.
-    rewrite cif_in_unseal=> ????? /fun_proeq_later eqc ???.
+    rewrite cif_in_unseal=> ?*?? /fun_proeq_later eqc ?*.
     apply cif_con_preserv_productive.
     { by move. } { by apply fun_proeq_later. } { by f_equiv. }
   Qed.
@@ -396,14 +394,13 @@ Section cif_in.
   (** Custom connectives are non-expansive *)
   #[export] Instance cif_in_ne {s} : NonExpansive3 (cif_in CON' (Σ:=Σ) s).
   Proof.
-    rewrite cif_in_unseal=> ??????????. apply cif_con_ne.
-    { by move. } { by move. } { by f_equiv. }
+    rewrite cif_in_unseal=> ??*?*?*. apply cif_con_ne. { by move. } { by move. }
+    { by f_equiv. }
   Qed.
   #[export] Instance cif_in_proper {s} :
     Proper ((≡) ==> (≡) ==> (≡) ==> (≡)) (cif_in CON' (Σ:=Σ) s).
   Proof.
-    move=> ?????????. apply equiv_dist=> ?.
-    apply cif_in_ne; by apply equiv_dist.
+    move=> ?*?*?*. apply equiv_dist=> ?. apply cif_in_ne; by apply equiv_dist.
   Qed.
 
   (** Discreteness of custom connectives *)

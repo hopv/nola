@@ -30,7 +30,7 @@ Section inv_tokC.
   (** [cif_inv] is productive *)
   #[export] Instance cif_inv_tok_productive {N} : Productive (cif_inv_tok N).
   Proof.
-    move=> ????. apply cif_in_preserv_productive=>//. by apply fun_proeq_later.
+    move=> ??*. apply cif_in_preserv_productive=>//. by apply fun_proeq_later.
   Qed.
 
   Context `{!inv'GS (cifOF CON) Σ}.

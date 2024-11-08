@@ -83,14 +83,14 @@ Section psg.
   #[export] Instance Psgoidp_proper' {f} :
     Proper ((⊑) ==> (≡) ==> (⊑)) (Psgoidp f).
   Proof.
-    move=> ????? /equiv_ole[??] /Psgoidp_factor'?. apply: Psgoidp_mono; [done|].
+    move=> ?*?? /equiv_ole[??] /Psgoidp_factor' ?. apply: Psgoidp_mono; [done|].
     apply factor'_Psgoidp. do 2 (etrans; [|done]).
     apply big_meet_mono; [|done]=>/= ?[?[??]]. split; [done|].
     split; by [etrans|].
   Qed.
   #[export] Instance Psgoidp_proper {f} :
     Proper ((≡) ==> (≡) ==> (≡)) (Psgoidp f).
-  Proof. move=> ?? /equiv_ole[??] ???. split; by apply Psgoidp_proper'. Qed.
+  Proof. move=> ?? /equiv_ole[??] ?*. split; by apply Psgoidp_proper'. Qed.
 
   (** ** [Psgoid' f]: Another definition of [Psgoid f], the closure under [f]
     and the meet *)

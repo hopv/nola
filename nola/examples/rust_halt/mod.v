@@ -17,8 +17,7 @@ Section ty_mod.
   (** [ty_mod] is size-preserving *)
   #[export] Instance ty_mod_preserv : Preserv (@ty_mod CON Σ _ _ f).
   Proof.
-    move=> ?[??][??][/=eqvO eqvS]. split=>/=.
-    { move=> ????. apply eqvO. } { move=> ?????. apply eqvS. }
+    move=> ?[??][??][/=eqvO eqvS]. split=>/= >; [apply eqvO|apply eqvS].
   Qed.
   #[export] Instance ty_mod_map_preserv `{!Preserv' (ty CON Σ X') _ F} :
     Preserv (λ T, @ty_mod CON Σ _ _ f (F T)).

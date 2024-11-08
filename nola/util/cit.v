@@ -110,7 +110,7 @@ Section citg_Forall2.
   #[export] Instance citg_Forall2_trans {CIT}
     `{!∀ s, @Transitive (D s) (R s), !Transitive CITF} :
     Transitive (@citg_Forall2 _ I C _ _ CIT _ R CITF).
-  Proof. move=> ?????. by eapply citg_Forall2_compose. Qed.
+  Proof. move=> ?*. by eapply citg_Forall2_compose. Qed.
 
   (** [citg_Forall2] preserves equivalence-ness *)
   #[export] Instance citg_Forall2_equivalence {CIT}
@@ -574,7 +574,7 @@ Section citO.
   #[export] Instance Citg_ne {CIT s n} :
     Proper (pointwise_relation _ (≡{n}≡) ==> pointwise_relation _ (≡{n}≡) ==>
       (≡{n}≡) ==> (≡{n}≡)) (@Citg _ I C D CIT s).
-  Proof. move=> ?????????. by apply citg_Forall2_eq. Qed.
+  Proof. move=> ?*?*?*. by apply citg_Forall2_eq. Qed.
   #[export] Instance Citg_proper {CIT s} :
     Proper (pointwise_relation _ (≡) ==> pointwise_relation _ (≡) ==>
       (≡) ==> (≡)) (@Citg _ I C D CIT s).
@@ -826,8 +826,8 @@ Section cit_fold.
       (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡)) ==>
       (≡{n}≡) ==> (≡{n}≡)) (@cit_fold _ I C D A).
   Proof.
-    move=> ?? to ???. apply citg_fold_ne_gen; [|done]=> ??????????.
-    apply to=>// ?. by do 2 f_equiv.
+    move=> ?? to ???. apply citg_fold_ne_gen; [|done]=> ??*?*?*. apply to=>// ?.
+    by do 2 f_equiv.
   Qed.
   #[export] Instance cit_fold_ne `{!Uip SEL} {D A n}
     `{∀ s, Proper (pointwise_relation _ (≡{n}≡) ==>
@@ -846,10 +846,7 @@ End cit_fold.
 (** [citaPR]: Productivity structure for [cita] *)
 Program Canonical citaPR {SEL} I C D :=
   Prost (@citaO SEL I C D) (λ k ta ta', ta k ≡ ta' k) _ _ _.
-Next Obligation.
-  split. { by move=> ?. } { move=> ???. by symmetry. }
-  { move=> ?????. by etrans. }
-Qed.
+Next Obligation. split=> ?* //. by etrans. Qed.
 Next Obligation.
   move=> ???? k k' ta ta' ? /equiv_dist F. apply equiv_dist=> ?.
   apply citi_dist_Forall2.
@@ -857,15 +854,12 @@ Next Obligation.
   eapply citi_Forall2_trans; [| |exact (cita_seq_dist (k:=k))]; [lia|].
   by apply citi_dist_Forall2.
 Qed.
-Next Obligation. move=> ??????. split; [done|]=> eq ?. apply eq. Qed.
+Next Obligation. move=> >. split; [done|]=> eq ?. apply eq. Qed.
 
 (** [citPR]: Productivity structure for [cit], under UIP over [SEL] *)
 Program Canonical citPR {SEL} `{!Uip SEL} I C D :=
   Prost (@citO SEL I C D) (λ k t t', of_cit t ≡[k]≡ of_cit t') _ _ _.
-Next Obligation.
-  split. { by move=> ?. } { move=> ???. by symmetry. }
-  { move=> ?????. by etrans. }
-Qed.
+Next Obligation. split=> ?* //. by etrans. Qed.
 Next Obligation. move=> *. by eapply proeq_anti. Qed.
 Next Obligation.
   move=> ????? t t'. split. { move=> eq ?. by rewrite eq. }

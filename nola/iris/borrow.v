@@ -461,7 +461,7 @@ Section borrow.
   #[export] Instance borrow_wsat_ne {n} :
     Proper (((≡{n}≡) ==> (≡{n}≡)) ==> (≡{n}≡) ==> (≡{n}≡)) borrow_wsat.
   Proof.
-    rewrite borrow_wsat_unseal /borrow_wsat_def /borrow_lwsat. move=> ??????.
+    rewrite borrow_wsat_unseal /borrow_wsat_def /borrow_lwsat. move=> ?*?*.
     repeat f_equiv=>//. by apply depo_wsat_ne.
   Qed.
   #[export] Instance borrow_wsat_proper `{!NonExpansive M} :

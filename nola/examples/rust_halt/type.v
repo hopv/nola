@@ -37,14 +37,12 @@ Section ty.
   (** [ty_sty] is size-preserving *)
   #[export] Instance ty_sty_perserv {X} : Preserv (ty_sty (X:=X)).
   Proof.
-    move=> ??? eq. unfold ty_sty. f_equiv=>// ?????. f_equiv=> ?. f_equiv.
+    move=> ??? eq. unfold ty_sty. f_equiv=>// >. f_equiv=> ?. f_equiv.
     apply eq.
   Qed.
   (** [sty_pty] is size-preserving *)
   #[export] Instance sty_pty_perserv {X} : Preserv (@sty_pty CON Σ X).
-  Proof.
-    move=> ??? eq. unfold sty_pty=> ????. f_equiv=> ?. f_equiv. apply eq.
-  Qed.
+  Proof. move=> ??? eq. unfold sty_pty=> >. f_equiv=> ?. f_equiv. apply eq. Qed.
   (** [ty_pty] is size-preserving *)
   #[export] Instance ty_pty_perserv {X} : Preserv (ty_pty (X:=X)).
   Proof. solve_proper. Qed.
@@ -113,7 +111,7 @@ Section ty.
   #[export] Instance Ty_proper {X} : Proper ((≡) ==> (=) ==> (↔)) (@Ty X).
   Proof.
     have pro : Proper ((≡) ==> (=) ==> (→)) (@Ty X); last first.
-    { move=> ?????<-. split; by apply pro. }
+    { move=> ?*?? <-. split; by apply pro. }
     move=> [??][??][/=eqvO eqvS]??<-[/=?? depO depS claO claS]. split=>/= >.
     { by rewrite -(eqvS _ _ _ _ _). } { by rewrite -(eqvO _ _ _ _). }
     { rewrite -!(eqvO _ _ _ _). apply depO. }
@@ -124,14 +122,14 @@ Section ty.
   #[export] Instance Sty_proper {X} : Proper ((≡) ==> (=) ==> (↔)) (@Sty X).
   Proof.
     have pro : Proper ((≡) ==> (=) ==> (→)) (@Sty X); last first.
-    { move=> ?????<-. split; by apply pro. }
+    { move=> ?*??<-. split; by apply pro. }
     move=> ?? eqv ??<-[?? dep cla].
     split=> >; rewrite -!(eqv _ _ _ _) //; [apply dep|apply cla].
   Qed.
   #[export] Instance Pty_proper {X} : Proper ((≡) ==> (=) ==> (↔)) (@Pty X).
   Proof.
     have pro : Proper ((≡) ==> (=) ==> (→)) (@Pty X); last first.
-    { move=> ?????<-. split; by apply pro. }
+    { move=> ?*??<-. split; by apply pro. }
     move=> ?? eqv ??<-[??]. split=> >; by rewrite -(eqv _ _).
   Qed.
 
@@ -209,10 +207,10 @@ Section ty_op.
   Qed.
   #[export] Instance TyOpAt_flip_mono {X} :
     Proper ((≡) ==> (⊑) ==> (=) ==> flip (→)) (@TyOpAt X).
-  Proof. move=> ????????<- /=. by apply TyOpAt_mono. Qed.
+  Proof. move=> ?*?*??<- /=. by apply TyOpAt_mono. Qed.
   #[export] Instance TyOpAt_proper {X} :
     Proper ((≡) ==> (=) --> (=) ==> (↔)) (@TyOpAt X).
-  Proof. move=> ?????<-??<-. split; by apply TyOpAt_mono. Qed.
+  Proof. move=> ?*??<-??<-. split; by apply TyOpAt_mono. Qed.
 
   (** [TyOpLt]: Basic operations on a type below a depth *)
   Class TyOpLt {X} (T : ty CON Σ X) (α : lft) (d : nat) : Prop :=
@@ -222,15 +220,15 @@ Section ty_op.
   #[export] Instance TyOpLt_mono {X} :
     Proper ((≡) ==> (⊑) --> (≤) --> (→)) (@TyOpLt X).
   Proof.
-    move=> ?????? d d' /= ? wl d'' ?. have lt : d'' < d by lia. move: (wl _ lt).
+    move=> ?*?* d d' /= ? wl d'' ?. have lt : d'' < d by lia. move: (wl _ lt).
     by apply TyOpAt_mono.
   Qed.
   #[export] Instance TyOpLt_flip_mono {X} :
     Proper ((≡) ==> (⊑) ==> (≤) ==> flip (→)) (@TyOpLt X).
-  Proof. move=> ????????? /=. by apply TyOpLt_mono. Qed.
+  Proof. move=> ?*?*?* /=. by apply TyOpLt_mono. Qed.
   #[export] Instance TyOpLt_proper {X} :
     Proper ((≡) ==> (=) --> (=) ==> (↔)) (@TyOpLt X).
-  Proof. move=> ?????<-??<-. split; by apply TyOpLt_mono. Qed.
+  Proof. move=> ?*?? <- ?? <-. split; by apply TyOpLt_mono. Qed.
 
   (** Lemmas under [TyOpLt] *)
   Section ty_op_lt.

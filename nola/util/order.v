@@ -30,7 +30,7 @@ Proof. move=> >. apply equiv_ole. Qed.
 Proof. move=>/= ???????. etrans; by [|etrans]. Qed.
 #[export] Instance ole_proper_ole_flip {OT} :
   Proper ((⊑) ==> (⊑) --> flip impl) (⊑@{OT}).
-Proof. move=> ???????. by apply: ole_proper_ole. Qed.
+Proof. move=> ?*?*. by apply: ole_proper_ole. Qed.
 #[export] Instance ole_proper {OT} : Proper ((≡) ==> (≡) ==> (↔)) (⊑@{OT}).
 Proof.
   move=> ?? eqv ?? eqv'. by split=> ?; [rewrite -eqv -eqv'|rewrite eqv eqv'].
@@ -62,9 +62,9 @@ Proof. done. Qed.
 (** Function *)
 Program Canonical funP {A} (OTF : A → poty) : poty :=
   Poty (discrete_funO OTF) (λ f g, ∀ a, f a ⊑ g a) _ _.
-Next Obligation. constructor; [auto|]=> ??????. etrans; auto. Qed.
+Next Obligation. constructor; [auto|]=> ?*. etrans; auto. Qed.
 Next Obligation.
-  move=> ????. split.
+  move=> >. split.
   - move=> ?. split=> ?; by apply equiv_ole.
   - move=> [??]?. by apply equiv_ole.
 Qed.
@@ -122,7 +122,7 @@ Proof. solve_proper. Qed.
 (** [poty] structure for [dual] *)
 Program Canonical dualP OT : poty :=
   Poty (dualO OT) (λ o o', o'.(undual) ⊑ o.(undual)) _ _.
-Next Obligation. move=> ?. constructor; [auto|]=> ?????. by etrans. Qed.
+Next Obligation. move=> ?. constructor; [auto|]=> ?*. by etrans. Qed.
 Next Obligation.
   move=> ???. split; by [move/equiv_ole|move=> ?; apply equiv_ole].
 Qed.
@@ -345,7 +345,7 @@ Next Obligation. move=> >. rewrite !nat_ole /join. lia. Qed.
 #[export] Program Instance bin_meet_Prop : BinMeet Prop := BIN_MEET and _ _ _ _.
 Next Obligation. by move=> ??[??]. Qed.
 Next Obligation. by move=> ??[??]. Qed.
-Next Obligation. move=> ??????. split; auto. Qed.
+Next Obligation. move=> *. split; auto. Qed.
 
 #[export] Program Instance bin_join_Prop : BinJoin Prop := BIN_JOIN or _ _ _ _.
 Next Obligation. move=> >. by left. Qed.
@@ -462,29 +462,25 @@ Next Obligation. move=>/= ???? all ???. exact: all. Qed.
 
 #[export] Program Instance big_join_Prop : BigJoin Prop :=
   BIG_JOIN (λ _ S φ, ∃ o, S o ∧ φ o) _ _ _.
-Next Obligation. move=> ????? eqv. do 3 f_equiv. apply (eqv _). Qed.
-Next Obligation. move=>/= ??????. eauto. Qed.
-Next Obligation. move=>/= ???? all [?[??]]. exact: all. Qed.
+Next Obligation. move=> > ?? eqv. do 3 f_equiv. apply (eqv _). Qed.
+Next Obligation. move=>/= * ?. eauto. Qed.
+Next Obligation. move=>/= > all [?[??]]. exact: all. Qed.
 
 (** The big meet and join over functions *)
 
 #[export] Program Instance big_meet_fun `{!∀ a : A, BigMeet (OTF a)} :
   BigMeet (funP OTF) := BIG_MEET (λ _ S F a, [⊓] b :: S b, F b a) _ _ _.
-Next Obligation.
-  move=> ???????? eqv ?. apply big_meet_ne=> ?. apply (eqv _ _).
-Qed.
+Next Obligation. move=> > ?? eqv ?. apply big_meet_ne=> ?. apply (eqv _ _). Qed.
 Next Obligation. move=> *?. exact: big_meet_elim. Qed.
 Next Obligation.
-  move=> ??????? all o. apply big_meet_intro=> *. move: o. by apply all.
+  move=> > all o. apply big_meet_intro=> *. move: o. by apply all.
 Qed.
 #[export] Program Instance big_join_fun `{!∀ a : A, BigJoin (OTF a)} :
   BigJoin (funP OTF) := BIG_JOIN (λ _ S F a, [⊔] b :: S b, F b a) _ _ _.
-Next Obligation.
-  move=> ???????? eqv ?. apply big_join_ne=> ?. apply (eqv _ _).
-Qed.
+Next Obligation. move=> > ?? eqv ?. apply big_join_ne=> ?. apply (eqv _ _). Qed.
 Next Obligation. move=> *?. by exact: big_join_intro. Qed.
 Next Obligation.
-  move=> ??????? all o. apply big_join_elim=> *. move: o. by apply all.
+ move=> > all o. apply big_join_elim=> *. move: o. by apply all.
 Qed.
 
 #[export] Program Instance big_meet_funN `{!BigMeet OT} {A : ofe} :
@@ -496,7 +492,7 @@ Next Obligation.
 Qed.
 Next Obligation. move=> *?. exact: big_meet_elim. Qed.
 Next Obligation.
-  move=> ??????? all o. apply big_meet_intro=> *. move: o. by apply all.
+  move=> > all o. apply big_meet_intro=> *. move: o. by apply all.
 Qed.
 #[export] Program Instance big_join_funN `{!∀ a : A, BigJoin (OTF a)} :
   BigJoin (funP OTF) := BIG_JOIN (λ _ S F a, [⊔] b :: S b, F b a) _ _ _.
@@ -505,7 +501,7 @@ Next Obligation.
 Qed.
 Next Obligation. move=> *?. by exact: big_join_intro. Qed.
 Next Obligation.
-  move=> ??????? all o. apply big_join_elim=> *. move: o. by apply all.
+  move=> > all o. apply big_join_elim=> *. move: o. by apply all.
 Qed.
 
 (** The big meet and join flipped with [dual] *)
