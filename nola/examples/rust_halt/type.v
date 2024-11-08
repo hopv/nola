@@ -481,8 +481,7 @@ Notation "^[ α ]" := (Lft α) (format "^[ α ]").
 Notation tcx CON Σ := (plist (etcx CON Σ)).
 
 Section tcx.
-  Context `{!rust_haltGS CON Σ, !Csem CON JUDG Σ,
-    !Jsem JUDG (iProp Σ)}.
+  Context `{!rust_haltGS CON Σ, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ)}.
 
   (** Semantics of a type context element *)
   Definition sem_etcx {X} t (E : etcx CON Σ X) : clair X → iProp Σ :=
