@@ -60,7 +60,7 @@ Section ty_rec.
   Qed.
 
   Context `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), !rust_haltGS CON Σ,
-    rust_haltJ CON JUDG Σ}.
+    !rust_haltJ CON JUDG Σ}.
   Implicit Type δ : JUDG -n> iProp Σ.
 
   (** Unfold and fold [ty_rec] in subtyping *)

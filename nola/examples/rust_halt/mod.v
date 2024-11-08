@@ -11,7 +11,7 @@ Definition ty_mod {CON Σ X Y} (f : Y → X) (T : ty CON Σ X) : ty CON Σ Y :=
 
 Section ty_mod.
   Context `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), !rust_haltGS CON Σ,
-    !rust_haltC CON, !rust_haltJ CON JUDG Σ, !rust_haltJS CON JUDG Σ}.
+    !rust_haltC CON, !rust_haltJ CON JUDG Σ}.
   Context {X Y} {f : X → Y} {T : ty CON Σ Y}.
 
   (** [ty_mod] is size-preserving *)

@@ -2,8 +2,7 @@
 
 From nola.examples.rust_halt Require Export type.
 
-Implicit Type (sz d : nat) (X Y : xty) (t : thread_id) (v : val) (e : expr)
-  (l : loc) (α : lft) (CON : cifcon) (Σ : gFunctors).
+Implicit Type l : loc.
 
 Section ty_box.
   Context `{!rust_haltGS CON Σ, !rust_haltC CON, !rust_haltJ CON JUDG Σ,

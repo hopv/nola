@@ -2,12 +2,9 @@
 
 From nola.examples.rust_halt Require Export type.
 
-Implicit Type (sz d : nat) (X Y : xty) (t : thread_id) (v : val) (e : expr)
-  (l : loc) (α : lft) (CON : cifcon) (Σ : gFunctors).
-
 Section num.
-  Context `{!rust_haltGS CON Σ, !rust_haltC CON, !rust_haltJ CON JUDG Σ,
-    !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ)}.
+  Context `{!rust_haltGS CON Σ, !rust_haltC CON, !Csem CON JUDG Σ,
+    !Jsem JUDG (iProp Σ)}.
 
   (** ** [ty_int]: Integer type *)
   Definition pty_int : pty CON Σ Zₓ := λ n vl, ⌜vl = [ #n]⌝%cif.
@@ -31,9 +28,9 @@ Section num.
   Proof. split=>/= *; [exact _|]. by iIntros "->". Qed.
 
   (** Subtyping *)
-  Lemma subty_nat_int {α δ} : ⊢ subty δ ty_nat ty_int id.
+  Lemma subty_nat_int {δ} : ⊢ subty δ ty_nat ty_int id.
   Proof. iApply (subty_pty pty_nat pty_int). by iIntros (??). Qed.
-  Lemma subty_bool_nat {α δ} :
+  Lemma subty_bool_nat {δ} :
     ⊢ subty δ ty_bool ty_nat (λ b, if b then 1 else 0).
   Proof. iApply (subty_pty pty_bool pty_nat). by iIntros ([|]?). Qed.
 

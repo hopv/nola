@@ -2,8 +2,7 @@
 
 From nola.examples.rust_halt Require Export base.
 
-Implicit Type (sz d : nat) (X : xty) (t : thread_id) (v : val) (e : expr)
-  (l : loc) (α : lft) (CON : cifcon) (Σ : gFunctors).
+Implicit Type (CON : cifcon) (Σ : gFunctors) (X : xty).
 
 (** ** Type model *)
 
@@ -19,20 +18,19 @@ Definition ty CON Σ X : prost := (ownty CON Σ X * shrty CON Σ X)%type.
 (** Simple type, with the sharing formula defined from the ownership formula *)
 Definition sty := ownty.
 Definition ty_sty `{!rust_haltGS CON Σ, !rust_haltC CON}
-  `{!rust_haltJ CON JUDG Σ} {X} (T : ownty CON Σ X) : ty CON Σ X :=
+  {X} (T : ownty CON Σ X) : ty CON Σ X :=
   (T, λ t d l α xπ, ∃ vl, l ↦∗ˢ[α] vl ∗ T t d xπ vl)%cif.
-
 (** Plain type, with the ownership formula ignoring the thread id, the depth,
   and the prophecy assignment *)
 Definition pty CON Σ X := X -d> list val -d> cif CON Σ.
 Definition sty_pty {CON Σ X} (T : pty CON Σ X) : sty CON Σ X :=
   λ _ _ xπ vl, (∃ x, ⌜∀ π, xπ π = x⌝ ∗ T x vl)%cif.
-Definition ty_pty `{!rust_haltGS CON Σ, !rust_haltC CON}
-  `{!rust_haltJ CON JUDG Σ} {X} (T : pty CON Σ X) : ty CON Σ X :=
+Definition ty_pty `{!rust_haltGS CON Σ, !rust_haltC CON} {X} (T : pty CON Σ X)
+  : ty CON Σ X :=
   ty_sty (sty_pty T).
 
 Section ty.
-  Context `{!rust_haltGS CON Σ, !rust_haltC CON, !rust_haltJ CON JUDG Σ}.
+  Context `{!rust_haltGS CON Σ, !rust_haltC CON}.
 
   (** [ty_sty] is size-preserving *)
   #[export] Instance ty_sty_perserv {X} : Preserv (ty_sty (X:=X)).
@@ -159,7 +157,7 @@ Hint Mode Pty - - - - - ! - : typeclass_instances.
 (** ** Basic operations on a type *)
 
 Section ty_op.
-  Context `{!rust_haltGS CON Σ, rust_haltJ CON JUDG Σ, !Csem CON JUDG Σ,
+  Context `{!rust_haltGS CON Σ, !rust_haltJ CON JUDG Σ, !Csem CON JUDG Σ,
     !Jsem JUDG (iProp Σ)}.
 
   (** [TyOpAt]: Basic operations on a type at a depth *)
@@ -313,8 +311,7 @@ Section classes.
     by rewrite (eqv t) (eqv t').
   Qed.
 
-  Context `{!rust_haltGS CON Σ, rust_haltJ CON JUDG Σ, !Csem CON JUDG Σ,
-    !Jsem JUDG (iProp Σ)}.
+  Context `{!rust_haltGS CON Σ, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ)}.
 
   (** [Copy] *)
   Class Copy {X} (T : ty CON Σ X) : Prop := COPY {
@@ -335,7 +332,7 @@ Section classes.
     rewrite -(eqvS _ _ _ _ _). by setoid_rewrite <-(eqvO _ _ _ _).
   Qed.
 
-  Context `{!rust_haltC CON, !rust_haltCS CON JUDG Σ}.
+  Context `{!rust_haltC CON, !rust_haltJ CON JUDG Σ, !rust_haltCS CON JUDG Σ}.
 
   (** [Send] over [sty] entails [Sync] *)
   #[export] Instance sty_send_sync `{!Send (ty_sty (X:=X) T)} :
@@ -364,8 +361,7 @@ Hint Mode Copy - - - - - - - ! : typeclass_instances.
 (** ** Subtyping *)
 
 Section subty.
-  Context `{!rust_haltGS CON Σ, rust_haltJ CON JUDG Σ, !Csem CON JUDG Σ,
-    !Jsem JUDG (iProp Σ)}.
+  Context `{!rust_haltGS CON Σ, !Csem CON JUDG Σ}.
   Implicit Type δ : JUDG -n> iProp Σ.
 
   (** [subty]: Subtyping *)
@@ -403,7 +399,7 @@ Section subty.
     - iIntros (?????) "T". iApply "UVs". by iApply "TUs".
   Qed.
 
-  Context `{!rust_haltC CON, !rust_haltCS CON JUDG Σ}.
+  Context `{!rust_haltC CON, !rust_haltJ CON JUDG Σ, !rust_haltCS CON JUDG Σ}.
 
   (** [subty] over [sty] *)
   Lemma subty_sty {δ X Y f} T U :
@@ -434,8 +430,7 @@ Variant etcx CON Σ : xty → Type :=
 | Lft (α : lft) : etcx CON Σ unitₓ.
 Arguments Owned {_ _ _}. Arguments Frozen {_ _ _}. Arguments Lft {_ _}.
 Infix "◁" := Owned (at level 55).
-Notation "v ◁[† α ] T" := (Frozen α v T)
-  (at level 55, format "v  ◁[† α ]  T").
+Notation "v ◁[† α ] T" := (Frozen α v T) (at level 55, format "v  ◁[† α ]  T").
 Notation "^[ α ]" := (Lft α) (format "^[ α ]").
 
 (** Type context *)
@@ -471,8 +466,7 @@ End tcx.
 
 (** ** Type context inclusion and expression typing *)
 Section type.
-  Context `{!rust_haltGS CON Σ, rust_haltJ CON JUDG Σ, !Csem CON JUDG Σ,
-    !Jsem JUDG (iProp Σ)}.
+  Context `{!rust_haltGS CON Σ, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ)}.
 
   (** [sub]: Inclusion between type contexts *)
   Definition sub_def {Xl Yl} (α : lft) (Γi : tcx CON Σ Xl) (Γo : tcx CON Σ Yl)
@@ -505,7 +499,7 @@ Section type.
     Persistent (@type Xl Yl α Γi e Γo pre).
   Proof. rewrite type_unseal. exact _. Qed.
 
-  Context `{!rust_haltC CON, !rust_haltCS CON JUDG Σ}.
+  Context `{!rust_haltC CON, !rust_haltJ CON JUDG Σ, !rust_haltCS CON JUDG Σ}.
 
   (** [sub] is reflexive and transitive *)
   Lemma sub_refl {Xl α Γ} : ⊢ @sub Xl _ α Γ Γ id.
