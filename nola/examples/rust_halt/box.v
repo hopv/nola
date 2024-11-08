@@ -1,6 +1,6 @@
 (** * Box pointer type *)
 
-From nola.examples.rust_halt Require Export type.
+From nola.examples.rust_halt Require Export uninit ptr.
 
 Implicit Type l : loc.
 
@@ -105,5 +105,45 @@ Section ty_box.
       iDestruct (store_wand with "[] T") as "$"; last first.
       { iPureIntro. (split=>//)=> ?. by rewrite eq. }
       iIntros (????) "? !>". by iApply ("tosub" with "[//] [//]").
+  Qed.
+
+  (** Reading from [ty_box] *)
+  Lemma read_ty_box `{!Ty (X:=X) T sz} {α} :
+    ⊢ read α (ty_box T) T (ty_box (ty_uninit sz)) id (λ _, ()).
+  Proof.
+    rewrite read_unseal ty_box_unseal. iIntros (?????) "!>/= $ $".
+    iDestruct 1 as (????[= ->]??) "(>$ & >† & T)". rewrite sem_cif_in /=.
+    iMod (stored_acc with "T") as "T". iDestruct (ty_own_size with "T") as %?.
+    iDestruct (ty_own_clair with "T") as "$"=>//.
+    iMod (store_alloc (sty_pty (pty_uninit sz) _ _ _ _) with "[]")
+      as "u"=>/=; [by iExists ()|].
+    iModIntro. iSplit=>//. iIntros "$ !>". iFrame "†". iExists _, _, _.
+    rewrite sem_cif_in /=. by iFrame.
+  Qed.
+  (** Reading a copyable object from [ty_box] *)
+  Lemma read_ty_box_copy `{!Ty (X:=X) T sz, !Copy T} {α} :
+    ⊢ read α (ty_box T) T (ty_box T) id id.
+  Proof.
+    rewrite read_unseal ty_box_unseal. iIntros (?????) "!>/= $ $".
+    iDestruct 1 as (????[= ->]??) "(>$ & >† & T)". rewrite sem_cif_in /=.
+    iMod (stored_acc with "T") as "#T". iDestruct (ty_own_size with "T") as %?.
+    iDestruct (ty_own_clair with "T") as "$"=>//.
+    iMod (store_alloc with "T") as "{T}T". iModIntro. iSplit=>//.
+    iIntros "↦ !>". iFrame "↦ †". iExists _, _, _. rewrite sem_cif_in /=.
+    by iFrame.
+  Qed.
+
+  (** Writing to [ty_box] *)
+  Lemma write_ty_box `{!Ty (X:=X) T sz, !Ty (X:=Y) U sz} {α} :
+    ⊢ write α (ty_box T) T U (ty_box U) id (λ _, id).
+  Proof.
+    rewrite write_unseal ty_box_unseal. iIntros (?????) "!>/= $".
+    iDestruct 1 as (????[= ->]??) "(>$ & >† & T)". rewrite sem_cif_in /=.
+    iMod (stored_acc with "T") as "T". iDestruct (ty_own_size with "T") as %->.
+    iDestruct (ty_own_clair with "T") as "$"=>//. iModIntro. iSplit=>//.
+    iIntros (d' ??) "↦ U". iFrame "↦". iDestruct (ty_own_size with "U") as %->.
+    iMod (store_alloc with "U") as "U". iModIntro. iFrame "†".
+    iExists (S d'), _, _. rewrite sem_cif_in /=. iFrame "U". iPureIntro.
+    do 2 split=>//. lia.
   Qed.
 End ty_box.
