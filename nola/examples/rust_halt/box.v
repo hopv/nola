@@ -11,16 +11,20 @@ Section ty_box.
     !rust_haltJS CON JUDG Σ}.
 
   (** [ty_box]: Box pointer type *)
-  Definition ty_box {X} (T : ty CON Σ X) : ty CON Σ X :=
+  Definition ty_box_def {X} (T : ty CON Σ X) : ty CON Σ X :=
     (λ t d xπ vl, ∃ l d' xπ' wl, ⌜vl = [ #l]⌝ ∗ ⌜d' < d⌝ ∗ ⌜∀ π, xπ' π = xπ π⌝ ∗
         ▷ l ↦∗ wl ∗ ▷ †l…(length wl) ∗ cif_store (T.1 t d' xπ' wl),
       λ t d l α xπ, ∃ l' d' xπ', ⌜d' < d⌝ ∗ ⌜∀ π, xπ' π = xπ π⌝ ∗
         ▷ l ↦ˢ[α] #l' ∗ □ cif_store (T.2 t d' l' α xπ'))%cif.
+  Lemma ty_box_aux : seal (@ty_box_def). Proof. by eexists _. Qed.
+  Definition ty_box {X} := ty_box_aux.(unseal) X.
+  Lemma ty_box_unseal : @ty_box = @ty_box_def. Proof. exact: seal_eq. Qed.
 
   (** [ty_box] satisfies [Ty] *)
   #[export] Instance ty_box_ty {X T} : Ty (ty_box (X:=X) T) 1.
   Proof.
-    split=>/= *. { exact _. } { by iIntros "(% & % & % & % & -> & _)". }
+    rewrite ty_box_unseal. split=>/= *. { exact _. }
+    { by iIntros "(% & % & % & % & -> & _)". }
     { do 10 f_equiv. iPureIntro. lia. } { do 7 f_equiv. iPureIntro. lia. }
     { do 11 f_equiv. iPureIntro=> eq ?. by rewrite eq. }
     { (do 9 f_equiv)=> eq ?. by rewrite eq. }
@@ -30,7 +34,7 @@ Section ty_box.
   #[export] Instance ty_box_ty_op `{!Ty (X:=X) T sz, !TyOpLt T α d} :
     TyOpAt (ty_box T) α d.
   Proof.
-    split=>/= *.
+    rewrite ty_box_unseal. split=>/= *.
     - iIntros "α". iDestruct 1 as (???? -> ? eq) "(↦ & † & T)".
       rewrite sem_cif_in /=. iMod (stored_acc with "T") as "T".
       iMod (ty_own_proph_lt with "α T") as (???) "[$ →T]"=>//. iModIntro.
@@ -67,17 +71,23 @@ Section ty_box.
 
   (** [ty_box] preserves [Send] *)
   #[export] Instance ty_box_send `{!Send (X:=X) T} : Send (ty_box T).
-  Proof. move=>/= ?????. do 4 f_equiv=> ?. do 6 f_equiv. apply: send. Qed.
+  Proof.
+    rewrite ty_box_unseal. move=>/= ?????. do 4 f_equiv=> ?. do 6 f_equiv.
+    apply: send.
+  Qed.
   (** [ty_box] preserves [Sync] *)
   #[export] Instance ty_box_sync `{!Sync (X:=X) T} : Sync (ty_box T).
-  Proof. move=>/= ??????. do 3 f_equiv=> ?. do 5 f_equiv. apply: sync. Qed.
+  Proof.
+    rewrite ty_box_unseal. move=>/= ??????. do 3 f_equiv=> ?. do 5 f_equiv.
+    apply: sync.
+  Qed.
 
   (** Subtyping over [ty_box] *)
   Lemma subty_ty_box `{!Deriv ih δ} {X Y T U f} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ -∗ ⌜ih δ'⌝ -∗ subty (X:=X) (Y:=Y) δ' T U f) ⊢
       subty δ (ty_box T) (ty_box U) f.
   Proof.
-    rewrite subty_unseal. iIntros "#tosub". iSplit; iModIntro=>/=.
+    rewrite subty_unseal ty_box_unseal. iIntros "#tosub". iSplit; iModIntro=>/=.
     - iIntros (????) "(% & % & %xπ' & % & % & % & %eq & $ & $ & T)".
       iExists _, (f ∘ xπ'). rewrite !sem_cif_in /=.
       iDestruct (store_wand with "[] T") as "$"; last first.
