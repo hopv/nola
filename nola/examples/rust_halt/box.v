@@ -105,10 +105,10 @@ Section ty_box.
   Qed.
 
   (** Read from [ty_box] *)
-  Lemma read_ty_box `{!Ty (X:=X) T sz} {α} :
-    ⊢ read α (ty_box T) T (ty_box (ty_uninit sz)) id (λ _, ()).
+  #[export] Instance read_ty_box `{!Ty (X:=X) T sz} {α} :
+    Read α (ty_box T) T (ty_box (ty_uninit sz)) id (λ _, ()).
   Proof.
-    rewrite read_unseal ty_box_unseal. iIntros (?????) "!>/= $ $".
+    split=> >. iIntros "$ $". rewrite ty_box_unseal /=.
     iDestruct 1 as (????[= ->]??) "(>$ & >† & T)". rewrite sem_cif_in /=.
     iMod (stored_acc with "T") as "T". iDestruct (ty_own_size with "T") as %?.
     iDestruct (ty_own_clair with "T") as "$"=>//.
@@ -119,9 +119,9 @@ Section ty_box.
   Qed.
   (** Reading a copyable object from [ty_box] *)
   Lemma read_ty_box_copy `{!Ty (X:=X) T sz, !Copy T sz} {α} :
-    ⊢ read α (ty_box T) T (ty_box T) id id.
+    Read α (ty_box T) T (ty_box T) id id.
   Proof.
-    rewrite read_unseal ty_box_unseal. iIntros (?????) "!>/= $ $".
+    split=> >. iIntros "$ $". rewrite ty_box_unseal /=.
     iDestruct 1 as (????[= ->]??) "(>$ & >† & T)". rewrite sem_cif_in /=.
     iMod (stored_acc with "T") as "#T". iDestruct (ty_own_size with "T") as %?.
     iDestruct (ty_own_clair with "T") as "$"=>//.
@@ -132,9 +132,9 @@ Section ty_box.
 
   (** Write to [ty_box] *)
   Lemma write_ty_box `{!Ty (X:=X) T sz, !Ty (X:=Y) U sz} {α} :
-    ⊢ write α (ty_box T) T U (ty_box U) id (λ _, id).
+    Write α (ty_box T) T U (ty_box U) id (λ _, id).
   Proof.
-    rewrite write_unseal ty_box_unseal. iIntros (?????) "!>/= $".
+    split=> >. iIntros "$". rewrite ty_box_unseal /=.
     iDestruct 1 as (????[= ->]??) "(>$ & >† & T)". rewrite sem_cif_in /=.
     iMod (stored_acc with "T") as "T". iDestruct (ty_own_size with "T") as %->.
     iDestruct (ty_own_clair with "T") as "$"=>//. iModIntro. iSplit=>//.

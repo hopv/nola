@@ -84,10 +84,10 @@ Section ty_shrref.
 
   (** Read a copyable object from [ty_shrref] *)
   Lemma read_ty_shrref `{!Ty (X:=X) T sz, !Copy T sz, !LftIncl α β} :
-    ⊢ read α (ty_shrref β T) T (ty_shrref β T) id id.
+    Read α (ty_shrref β T) T (ty_shrref β T) id id.
   Proof.
-    rewrite read_unseal. iIntros (?????) "!>/= α t".
-    rewrite sty_shrref_unseal /=. iDestruct 1 as (???[= ->]??) "#sT".
+    split=>/= >. iIntros "α t". rewrite sty_shrref_unseal /=.
+    iDestruct 1 as (???[= ->]??) "#sT".
     rewrite sem_cif_in /=. iMod (stored_acc with "sT") as "sT'".
     iDestruct (lft_incl_live_acc with "α") as (?) "[β →α]"=>//.
     iMod (copy_shr_acc with "β t sT'") as (??) "(↦ & t & #T & cl)"=>//.
