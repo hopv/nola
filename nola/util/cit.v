@@ -144,13 +144,19 @@ Section citg.
     λ n, citg_Forall2 (λ _, (≡{n}≡)) (≡{n}≡).
 
   (** Equivalence for [citg] *)
-  Local Instance citg_equiv : Equiv (citg I C D CIT) :=
+  Definition citg_equiv_def :=
     λ t t', ∀ n, citg_dist n t t' (** Trick to avoid UIP *).
+  Lemma citg_equiv_aux : seal citg_equiv_def. Proof. by eexists _. Qed.
+  Local Instance citg_equiv : Equiv (citg I C D CIT) :=
+    citg_equiv_aux.(unseal).
+  Lemma citg_equiv_unseal : (≡@{citg I C D CIT}) = citg_equiv_def.
+  Proof. exact: seal_eq. Qed.
 
   (** OFE mixin of [citg] *)
   Lemma citg_ofe_mixin : OfeMixin (citg I C D CIT).
   Proof.
-    split; [done|exact _|]=> ???? F ?. move: F. apply citg_Forall2_mono.
+    split; [by rewrite citg_equiv_unseal|exact _|]=> ???? F ?. move: F.
+    apply citg_Forall2_mono.
     { move=> ????. by eapply dist_lt. } { move=> ???. by eapply dist_lt. }
   Qed.
   (** OFE of [citg] *)
@@ -191,7 +197,7 @@ Section citg_map.
     (∀ s d, f s d ≡ d) → (∀ ct, g ct ≡ ct) →
       @citg_map _ I C D _ CIT _ f g t ≡ t.
   Proof.
-    move=> eq eq' ?. elim: t=>/= ?? IH ??.
+    move=> eq eq'. apply equiv_dist=> ?. elim: t=>/= ?? IH ??.
     apply citg_Forall2_eq=>// >; by apply equiv_dist.
   Qed.
 
@@ -551,7 +557,7 @@ Section citO.
     `{!∀ s, OfeDiscrete (D s), !OfeDiscrete CIT} :
     OfeDiscrete (citgO I C D CIT).
   Proof.
-    move=> ?? + ?.
+    move=> ??. rewrite equiv_dist=> + ?.
     by apply citg_Forall2_mono; [move=> ?|]=> ?? /discrete_0/equiv_dist.
   Qed.
   (** [citiO I C D k] is discrete if [D] is discrete *)
@@ -573,8 +579,9 @@ Section citO.
     Proper (pointwise_relation _ (≡) ==> pointwise_relation _ (≡) ==>
       (≡) ==> (≡)) (@Citg _ I C D CIT s).
   Proof.
-    move=> ?? eqi ???????. apply citg_Forall2_eq=>/= >.
-    { apply eqi. } { by apply equiv_dist. } { by apply equiv_dist. }
+    move=> ??. rewrite citg_equiv_unseal=> eqi ???????.
+    apply citg_Forall2_eq=>/= >. { apply eqi. } { by apply equiv_dist. }
+    { by apply equiv_dist. }
   Qed.
 
   (** [Citg] preserves discreteness *)
@@ -582,8 +589,10 @@ Section citO.
     `{!∀ i, Discrete (ti i), !∀ c, Discrete (tc c), !Discrete d} :
     Discrete (@Citg _ I C D CIT s ti tc d).
   Proof.
-    move=> [????][/=?]. subst=>/= Ei Ec deq n. apply citg_Forall2_eq.
-    - move=> i. move: (Ei i)=>/(discrete_0 (ti i)) Ei'. apply Ei'.
+    move=> [????][/=?]. subst=>/= Ei Ec deq. apply equiv_dist=> ?.
+    apply citg_Forall2_eq.
+    - move=> i. move: (Ei i)=>/(discrete_0 (ti i)). rewrite equiv_dist=> Ei'.
+      apply Ei'.
     - move=> c. by move: (Ec c)=>/discrete_0/equiv_dist.
     - by move: deq=> /discrete_0/equiv_dist.
   Qed.
@@ -642,19 +651,19 @@ Section of_cit.
   (** Simplify [to_cit] over [of_cit] *)
   Lemma to_of_cit {t} : to_cit (of_cit t) ≡ t.
   Proof.
-    rewrite to_cit_unseal of_cit_unseal. move=> ?. elim: t=>/= ?????.
-    by apply citg_Forall2_eq.
+    rewrite to_cit_unseal of_cit_unseal. apply equiv_dist=> ?.
+    elim: t=>/= ?????. by apply citg_Forall2_eq.
   Qed.
 
   (** Simplify [of_cit] over [to_cit] *)
   Lemma of_to_cit {ta} : of_cit (to_cit ta) ≡ ta.
   Proof.
-    rewrite of_cit_unseal to_cit_unseal. move=> n k. move: ta=> [t tl wf]/=.
-    case: n=>/=.
+    rewrite of_cit_unseal to_cit_unseal=> k. apply equiv_dist=> n.
+    move: ta=> [t tl wf]/=. case: k=>/=.
     { elim: t tl wf=> ?? IH tc ???/=. apply citg_Forall2_eq=>// i. apply IH. }
-    move=> n. elim: t tl wf=> ?? IH ???[/=sel ?? deq] /=.
-    apply (Citgf2 (t:=Citg _ _ _ _) (sel n))=>/=. { move=> ?. apply IH. }
-    { by destruct n. } { by rewrite (deq n). }
+    move=> k. elim: t tl wf=> ?? IH ???[/=sel ?? deq] /=.
+    apply (Citgf2 (t:=Citg _ _ _ _) (sel k))=>/=. { move=> ?. apply IH. }
+    { by destruct k. } { by rewrite (deq k). }
   Qed.
 
   (** [of_cit] is non-expansive *)
@@ -785,8 +794,8 @@ Section cit_map.
   Lemma cit_map_compose {D D' D'' f g t} :
     cit_map g (@cit_map _ I C D D' f t) ≡ cit_map (D':=D'') (λ s, g s ◎ f s) t.
   Proof.
-    move=> ?. elim: t=> ?? IH ??. apply citg_Forall2_eq=>// ?.
-    apply equiv_dist, cita_map_compose.
+    apply equiv_dist=> ?. elim: t=> ?? IH ??.
+    apply citg_Forall2_eq=>// ?. apply equiv_dist, cita_map_compose.
   Qed.
 
   (** [of_cit] over [cit_map] *)
@@ -912,7 +921,7 @@ Section cit_cprost.
   (** [cita] is complete *)
   #[export] Program Instance cita_cprost : Cprost (citaPR I C D) :=
     CPROST cita_prolimit _ _.
-  Next Obligation. move=> ?. by case=>/= >. Qed.
+  Next Obligation. move=> ?. case=> >; by apply equiv_dist=> ?. Qed.
   Next Obligation.
     move=> ??? eq k. rewrite !cita_seq_limit. apply (eq k k).
   Qed.

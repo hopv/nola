@@ -197,7 +197,9 @@ Section cif.
   Proof. move=> ??????????. apply Citg_ne=>// ?. by f_equiv. Qed.
   #[export] Instance cif_con_proper {s} :
     Proper ((≡) ==> (≡) ==> (≡) ==> (≡)) (cif_con s).
-  Proof. move=> ??????????. apply cif_con_ne; by apply equiv_dist. Qed.
+  Proof.
+    move=> ?*?*?*. apply equiv_dist=> ?. apply cif_con_ne; by apply equiv_dist.
+  Qed.
 
   (** Discreteness *)
   #[export] Instance cif_all_discrete {A} `{!∀ a : A, Discrete (Φx a)} :
@@ -399,7 +401,10 @@ Section cif_in.
   Qed.
   #[export] Instance cif_in_proper {s} :
     Proper ((≡) ==> (≡) ==> (≡) ==> (≡)) (cif_in CON' (Σ:=Σ) s).
-  Proof. move=> ??????????. apply cif_in_ne; by apply equiv_dist. Qed.
+  Proof.
+    move=> ?????????. apply equiv_dist=> ?.
+    apply cif_in_ne; by apply equiv_dist.
+  Qed.
 
   (** Discreteness of custom connectives *)
   #[export] Instance cif_in_discrete {s}
