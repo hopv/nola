@@ -469,7 +469,8 @@ Section tcx.
   Qed.
 End tcx.
 
-Section tcx.
+(** ** Type context inclusion and expression typing *)
+Section type.
   Context `{!rust_haltGS CON Σ, rust_haltJ CON JUDG Σ, !Csem CON JUDG Σ,
     !Jsem JUDG (iProp Σ)}.
 
@@ -488,7 +489,7 @@ Section tcx.
     Persistent (@sub Xl Yl α Γi Γo pre).
   Proof. rewrite sub_unseal. exact _. Qed.
 
-  (** [type]: Typing judgment over an expression, ensuring termination *)
+  (** [type]: Expression typing, ensuring termination *)
   Definition type_def {Xl Yl} (α : lft) (Γi : tcx CON Σ Xl) (e : expr)
     (Γo : val → tcx CON Σ Yl) (pre : xpred Yl → xpred Xl)
     : iProp Σ :=
@@ -635,7 +636,7 @@ Section tcx.
     move=> ?? impl. apply bi.equiv_entails.
     split; apply type_mono=>//= ???; by apply impl.
   Qed.
-End tcx.
+End type.
 Arguments type {_ _ _ _ _ _ _ _} _ _ _%_E _ _.
 
 (** ** Extraction from a type context *)
