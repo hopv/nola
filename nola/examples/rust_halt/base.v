@@ -229,15 +229,14 @@ Section fbor_tok.
   Lemma spointsto_vec_cons {α l v vl} :
     l ↦∗ˢ[α] (v :: vl) ⊣⊢ l ↦ˢ[α] v ∗ (l +ₗ 1) ↦∗ˢ[α] vl.
   Proof.
-    rewrite /spointsto_vec /= shift_loc_0. do 4 f_equiv. apply reflexive_eq.
-    unfold shift_loc=>/=. do 2 f_equal. lia.
+    rewrite /spointsto_vec /= shift_loc_0. do 4 f_equiv. by rewrite shift_loc_S.
   Qed.
   (** [spointsto_vec] over [++] *)
   Lemma spointsto_vec_app {α l vl vl'} :
     l ↦∗ˢ[α] (vl ++ vl') ⊣⊢ l ↦∗ˢ[α] vl ∗ (l +ₗ length vl) ↦∗ˢ[α] vl'.
   Proof.
-    rewrite /spointsto_vec big_sepL_app. do 4 f_equiv. apply reflexive_eq.
-    unfold shift_loc=>/=. do 2 f_equal. lia.
+    rewrite /spointsto_vec big_sepL_app. do 4 f_equiv.
+    by rewrite shift_loc_assoc_nat.
   Qed.
 
   Context `{!rust_haltJ CON JUDG Σ, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ),

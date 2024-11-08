@@ -406,6 +406,10 @@ Proof. rewrite /shift_loc /=. f_equal. lia. Qed.
 Lemma shift_loc_0_nat l : l +ₗ 0%nat = l.
 Proof. destruct l as [b o]. rewrite /shift_loc /=. f_equal. lia. Qed.
 
+(** For [shift_loc] by [S _] *)
+Lemma shift_loc_S l n : l +ₗ S n = (l +ₗ 1) +ₗ n.
+Proof. rewrite /shift_loc /=. f_equal. lia. Qed.
+
 Global Instance shift_loc_inj l : Inj (=) (=) (shift_loc l).
 Proof. destruct l as [b o]; intros n n' [= ?]; lia. Qed.
 
