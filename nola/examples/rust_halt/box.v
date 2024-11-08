@@ -31,9 +31,8 @@ Section ty_box.
   #[export] Instance ty_box_ty {X T} : Ty (ty_box (X:=X) T) 1.
   Proof.
     rewrite ty_box_unseal. split=>/= *. { exact _. }
-    { by iIntros "(% & % & % & % & -> & _)". }
-    { do 10 f_equiv. iPureIntro. lia. } { do 7 f_equiv. iPureIntro. lia. }
-    { do 11 f_equiv. iPureIntro=> eq ?. by rewrite eq. }
+    { by iDestruct 1 as (???? ->) "_". } { (do 11 f_equiv)=> ?. lia. }
+    { (do 8 f_equiv)=> ?. lia. } { (do 12 f_equiv)=> eq ?. by rewrite eq. }
     { (do 9 f_equiv)=> eq ?. by rewrite eq. }
   Qed.
 
