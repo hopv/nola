@@ -80,7 +80,7 @@ Section ty_rec.
   Proof. by rewrite ty_rec_unfold. Qed.
 
   (** [Copy] on [ty_rec] *)
-  #[export] Instance ty_rec_copy `{!∀ T, Copy (F T)} : Copy (ty_rec F).
+  #[export] Instance ty_rec_copy `{!∀ T, Copy (F T) sz} : Copy (ty_rec F) sz.
   Proof. by rewrite ty_rec_unfold. Qed.
 
   (** [TyOp] on [ty_rec] *)

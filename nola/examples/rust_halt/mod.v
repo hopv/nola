@@ -54,7 +54,7 @@ Section ty_mod.
   #[export] Instance ty_mod_sync `{!Sync T} : Sync (ty_mod f T).
   Proof. move=>/= ??????. apply: sync. Qed.
   (** [ty_mod] preserves [Copy] *)
-  #[export] Instance ty_mod_copy `{!Copy T} : Copy (ty_mod f T).
+  #[export] Instance ty_mod_copy `{!Copy T sz} : Copy (ty_mod f T) sz.
   Proof. split=>/= >; [exact: copy_persistent|exact: copy_shr_acc]. Qed.
 
   (** Subtyping on [ty_mod] *)

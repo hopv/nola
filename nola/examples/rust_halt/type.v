@@ -286,6 +286,47 @@ Hint Mode TyOpLt - - - - - - - - ! - - : typeclass_instances.
 (** [TyOpAt]: Basic operations on a type *)
 Notation TyOp T α := (∀ d, TyOpAt T α d).
 
+(** ** Namespaces and masks *)
+
+(** For RustHalt *)
+Definition rust_haltN : namespace := nroot.@"rust_halt".
+(** For sharing *)
+Definition shrN : namespace := rust_haltN.@"shr".
+
+(** The mask for the region from the location *)
+Fixpoint shr_locsE (l : loc) (sz : nat) : coPset :=
+  match sz with 0 => ∅ | S sz' => ↑shrN.@l ∪ shr_locsE (l +ₗ 1%nat) sz' end.
+
+(** [shr_locsE] over a sum size *)
+Lemma shr_locsE_add {l sz sz'} :
+  shr_locsE l (sz + sz') = shr_locsE l sz ∪ shr_locsE (l +ₗ sz) sz'.
+Proof.
+  apply leibniz_equiv. move: l. elim: sz=>/=.
+  { move=> ?. by rewrite shift_loc_0 left_id. }
+  move=> ? IH l. rewrite -union_assoc IH. do 3 f_equiv. by rewrite -shift_loc_S.
+Qed.
+(** Disjointness of adjacent [shr_locsE]s *)
+Lemma shr_locsE_disj {l sz sz'} : shr_locsE l sz ## shr_locsE (l +ₗ sz) sz'.
+Proof.
+  move: l. elim: sz=>/=; [set_solver|]=> n IH l. apply disjoint_union_l.
+  split; [|by rewrite (shift_loc_S _ n)]. clear IH. move: n.
+  elim: sz'=>/=; [set_solver|]=> ? IH ?. apply disjoint_union_r.
+  split; [|by rewrite shift_loc_assoc_nat Nat.add_comm]. apply ndot_ne_disjoint.
+  case l=> ??. case. lia.
+Qed.
+(** Inclusion into [shrN] *)
+Lemma shr_locsE_shrN {l sz} : shr_locsE l sz ⊆ ↑shrN.
+Proof.
+  move: l. elim: sz=>/=; [set_solver|]=> *. apply union_least; [|done].
+  solve_ndisj.
+Qed.
+(** [shr_locsE] is monotone over the size *)
+Lemma shr_locsE_mono {l sz sz'} : sz ≤ sz' → shr_locsE l sz ⊆ shr_locsE l sz'.
+Proof.
+  move: l. move: sz'. elim: sz=>/=; [set_solver|]=> ? IH. case; [lia|]=>/= ???.
+  apply union_mono_l. apply IH. lia.
+Qed.
+
 (** ** Type classes *)
 
 Section classes.
@@ -314,22 +355,24 @@ Section classes.
   Context `{!rust_haltGS CON Σ, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ)}.
 
   (** [Copy] *)
-  Class Copy {X} (T : ty CON Σ X) : Prop := COPY {
+  Class Copy {X} (T : ty CON Σ X) sz : Prop := COPY {
     (** Persistence of the ownership formula *)
     copy_persistent {t d xπ vl δ} :: Persistent ⟦ T.1 t d xπ vl ⟧ᶜ(δ);
     (** Access via the sharing formula *)
-    copy_shr_acc {t d l α xπ q} :
-      q.[α] -∗ na_own t ⊤ -∗ ⟦ T.2 t d l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ r vl,
-        l ↦∗{r} vl ∗ ⟦ T.1 t d xπ vl ⟧ᶜ ∗
-        (l ↦∗{r} vl =[rust_halt_wsat]{⊤}=∗ q.[α] ∗ na_own t ⊤);
+    copy_shr_acc {t d l α xπ q F} : shr_locsE l (S sz) ⊆ F →
+      q.[α] -∗ na_own t F -∗ ⟦ T.2 t d l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ r vl,
+        l ↦∗{r} vl ∗ na_own t (F ∖ shr_locsE l sz) ∗ ⟦ T.1 t d xπ vl ⟧ᶜ ∗
+        (l ↦∗{r} vl -∗ na_own t (F ∖ shr_locsE l sz) =[rust_halt_wsat]{⊤}=∗
+          q.[α] ∗ na_own t F);
   }.
   (** [Copy] is proper *)
-  #[export] Instance Copy_proper {X} : Proper ((≡) ==> (↔)) (@Copy X).
+  #[export] Instance Copy_proper {X} : Proper ((≡) ==> (=) ==> (↔)) (@Copy X).
   Proof.
-    have pro: Proper ((≡) ==> (→)) (@Copy X); last first.
+    have pro: Proper ((≡) ==> (=) ==> (→)) (@Copy X); last first.
     { move=> ???. split; by apply pro. }
-    move=> ??[eqvO eqvS][??]. split=> >. { by rewrite -(eqvO _ _ _ _). }
-    rewrite -(eqvS _ _ _ _ _). by setoid_rewrite <-(eqvO _ _ _ _).
+    move=> ??[eqvO eqvS]??<-. split=> *; [rewrite -(eqvO _ _ _ _); exact _|].
+    rewrite -(eqvS _ _ _ _ _). setoid_rewrite <-(eqvO _ _ _ _).
+    by apply copy_shr_acc.
   Qed.
 
   Context `{!rust_haltC CON, !rust_haltJ CON JUDG Σ, !rust_haltCS CON JUDG Σ}.
@@ -346,17 +389,18 @@ Section classes.
   Proof. exact _. Qed.
 
   (** [sty] is [Copy] *)
-  #[export] Instance sty_copy `{!Sty (X:=X) T sz} : Copy (ty_sty (X:=X) T).
+  #[export] Instance sty_copy `{!Sty (X:=X) T sz} : Copy (ty_sty (X:=X) T) sz.
   Proof.
-    split; [exact _|]=>/= ??????. iIntros "α $ (% & ↦ & $)".
+    split; [exact _|]=>/= ????????. iIntros "α F (% & ↦ & $)".
     rewrite sem_cif_spointsto_vec.
-    iMod (spointsto_vec_acc with "α ↦") as (?) "[$ cl]". iIntros "!> ↦s".
-    by iMod ("cl" with "↦s").
+    iMod (spointsto_vec_acc with "α ↦") as (?) "[$ cl]".
+    iDestruct (na_own_acc with "F") as "[$ →F]"; [set_solver|].
+    iIntros "!> ↦s F∖". iMod ("cl" with "↦s") as "$". iModIntro. by iApply "→F".
   Qed.
 End classes.
 Hint Mode Send - - - ! : typeclass_instances.
 Hint Mode Sync - - - ! : typeclass_instances.
-Hint Mode Copy - - - - - - - ! : typeclass_instances.
+Hint Mode Copy - - - - - - - ! - : typeclass_instances.
 
 (** ** Subtyping *)
 
@@ -652,7 +696,7 @@ Section tcx_extract.
     @EtcxExtract X _ Yl E (E ᵖ:: Γ) Γ fst' snd' | 5.
   Proof. by split. Qed.
   (** Extract from the copyable head *)
-  #[export] Instance etcx_extract_hd_copy {X Yl Γ v} `{!Copy T} :
+  #[export] Instance etcx_extract_hd_copy {X Yl Γ v} `{!Copy T sz} :
     @EtcxExtract X (_ :: Yl) _ (v ◁ T) (v ◁ T ᵖ:: Γ) (v ◁ T ᵖ:: Γ)
       fst' (λ yyl, yyl) | 2.
   Proof. split=> ??. iIntros "[#T $]". iFrame "T". Qed.

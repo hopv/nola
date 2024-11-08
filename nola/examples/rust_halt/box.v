@@ -121,7 +121,7 @@ Section ty_box.
     rewrite sem_cif_in /=. by iFrame.
   Qed.
   (** Reading a copyable object from [ty_box] *)
-  Lemma read_ty_box_copy `{!Ty (X:=X) T sz, !Copy T} {α} :
+  Lemma read_ty_box_copy `{!Ty (X:=X) T sz, !Copy T sz} {α} :
     ⊢ read α (ty_box T) T (ty_box T) id id.
   Proof.
     rewrite read_unseal ty_box_unseal. iIntros (?????) "!>/= $ $".
