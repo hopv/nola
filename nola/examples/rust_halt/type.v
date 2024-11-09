@@ -498,6 +498,16 @@ Section subty.
     do 12 f_equiv; [exact (eqvO _ _ _ _)|exact (eqvO' _ _ _ _)|].
     do 2 f_equiv; [exact (eqvS _ _ _ _ _)|exact (eqvS' _ _ _ _ _)].
   Qed.
+  (** [subty] is proper over the clairvoyant value under [Ty] *)
+  #[export] Instance subty_proper_clair {δ X T Y} `{!Ty U} :
+    Proper (pointwise_relation _ (=) ==> (⊣⊢)) (@subty δ X Y T U).
+  Proof.
+    have pro : Proper (pointwise_relation _ (=) ==> (⊢)) (@subty δ X Y T U);
+      last first.
+    { move=> ?*. apply bi.equiv_entails. split; by apply pro. }
+    rewrite subty_unseal /subty_def=> ?*. do 11 f_equiv; [exact: ty_own_clair|].
+    do 2 f_equiv. exact: ty_shr_clair.
+  Qed.
   (** [subty] is reflexive *)
   Lemma subty_refl {δ X T} : ⊢ @subty δ X _ T T id.
   Proof. rewrite subty_unseal. iSplit; iModIntro; iIntros; iFrame. Qed.
