@@ -161,41 +161,41 @@ Section ty_op.
     !Jsem JUDG (iProp Σ)}.
 
   (** [TyOpAt]: Basic operations on a type at a depth *)
-  Class TyOpAt {X} (T : ty CON Σ X) (α : lft) (d : nat) : Prop := TY_OP_AT {
+  Class TyOpAt {X} (T : ty CON Σ X) (κ : lft) (d : nat) : Prop := TY_OP_AT {
     (** Take out prophecy tokens from ownership and sharing formulas *)
     ty_own_proph {t xπ vl q} :
-      q.[α] -∗ ⟦ T.1 t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
+      q.[κ] -∗ ⟦ T.1 t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
         ⌜proph_dep xπ ξl⌝ ∗ r:∗[ξl] ∗
-        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[α] ∗ ⟦ T.1 t d xπ vl ⟧ᶜ);
-    ty_shr_proph {t l β xπ q} :
-      q.[α ⊓ β] -∗ ⟦ T.2 t d l β xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
+        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ] ∗ ⟦ T.1 t d xπ vl ⟧ᶜ);
+    ty_shr_proph {t l α xπ q} :
+      q.[κ ⊓ α] -∗ ⟦ T.2 t d l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
         ⌜proph_dep xπ ξl⌝ ∗ r:∗[ξl] ∗
-        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[α ⊓ β] ∗ ⟦ T.2 t d l β xπ ⟧ᶜ);
+        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ ⊓ α] ∗ ⟦ T.2 t d l α xπ ⟧ᶜ);
     (** A borrow over the ownership formula can turn into the sharing formula *)
-    ty_share {t l β xπ q} :
-      q.[α ⊓ β] -∗ bord β (∃ vl, ▷ l ↦∗ vl ∗ T.1 t d xπ vl)%cif
-        =[rust_halt_wsat]{⊤}=∗ q.[α ⊓ β] ∗ ⟦ T.2 t d l β xπ ⟧ᶜ;
+    ty_share {t l α xπ q} :
+      q.[κ ⊓ α] -∗ bord α (∃ vl, ▷ l ↦∗ vl ∗ T.1 t d xπ vl)%cif
+        =[rust_halt_wsat]{⊤}=∗ q.[κ ⊓ α] ∗ ⟦ T.2 t d l α xπ ⟧ᶜ;
   }.
 
   (** [TyOpAt] is monotone *)
   #[export] Instance TyOpAt_mono {X} :
     Proper ((≡) ==> LftIncl --> (=) ==> (→)) (@TyOpAt X).
   Proof.
-    move=> T T' [eqvO eqvS] α α' /= inc ?? <- ?. split.
-    - move=> >. setoid_rewrite <-(eqvO _ _ _ _). iIntros "α' T".
-      iDestruct (lft_incl'_live_acc (β:=α) with "α'") as (?) "[α →α']".
-      iMod (ty_own_proph with "α T") as (??) "($ & $ & →T)". iModIntro.
+    move=> T T' [eqvO eqvS] κ κ' /= ??? <- ?. split.
+    - move=> >. setoid_rewrite <-(eqvO _ _ _ _). iIntros "κ' T".
+      iDestruct (lft_incl'_live_acc (α:=κ) with "κ'") as (?) "[κ →κ']".
+      iMod (ty_own_proph with "κ T") as (??) "($ & $ & →T)". iModIntro.
+      iIntros "ξl". iMod ("→T" with "ξl") as "[κ $]". iModIntro.
+      by iApply "→κ'".
+    - move=> ?? α ??. setoid_rewrite <-(eqvS _ _ _ _ _). iIntros "κ'α T".
+      iDestruct (lft_incl'_live_acc (α:=κ ⊓ α) with "κ'α") as (?) "[κα →κ'α]".
+      iMod (ty_shr_proph with "κα T") as (??) "($ & $ & →T)". iModIntro.
       iIntros "ξl". iMod ("→T" with "ξl") as "[α $]". iModIntro.
-      by iApply "→α'".
-    - move=> ?? β ??. setoid_rewrite <-(eqvS _ _ _ _ _). iIntros "αβ' T".
-      iDestruct (lft_incl'_live_acc (β:=α ⊓ β) with "αβ'") as (?) "[αβ →αβ']".
-      iMod (ty_shr_proph with "αβ T") as (??) "($ & $ & →T)". iModIntro.
-      iIntros "ξl". iMod ("→T" with "ξl") as "[β $]". iModIntro.
-      by iApply "→αβ'".
-    - move=> ?? β ??. rewrite -(eqvS _ _ _ _ _). iIntros "αβ' b".
-      iDestruct (lft_incl'_live_acc (β:=α ⊓ β) with "αβ'") as (?) "[αβ →αβ']".
-      iMod (ty_share with "αβ [b]") as "[αβ $]"; last first.
-      { iModIntro. by iApply "→αβ'". }
+      by iApply "→κ'α".
+    - move=> ?? α ??. rewrite -(eqvS _ _ _ _ _). iIntros "κ'α b".
+      iDestruct (lft_incl'_live_acc (α:=κ ⊓ α) with "κ'α") as (?) "[κα →κ'α]".
+      iMod (ty_share with "κα [b]") as "[κα $]"; last first.
+      { iModIntro. by iApply "→κ'α". }
       iStopProof. apply bi.equiv_entails. (do 2 f_equiv)=> ?.
       by rewrite (eqvO _ _ _ _).
   Qed.
@@ -207,8 +207,8 @@ Section ty_op.
   Proof. move=> ?*??<-??<-. split; apply TyOpAt_mono=>//=; exact _. Qed.
 
   (** [TyOpLt]: Basic operations on a type below a depth *)
-  Class TyOpLt {X} (T : ty CON Σ X) (α : lft) (d : nat) : Prop :=
-    ty_op_lt : ∀ {d'}, d' < d → TyOpAt T α d'.
+  Class TyOpLt {X} (T : ty CON Σ X) (κ : lft) (d : nat) : Prop :=
+    ty_op_lt : ∀ {d'}, d' < d → TyOpAt T κ d'.
 
   (** [TyOpLt] is monotone *)
   #[export] Instance TyOpLt_mono {X} :
@@ -226,50 +226,50 @@ Section ty_op.
 
   (** Lemmas under [TyOpLt] *)
   Section ty_op_lt.
-    Context `(!@TyOpLt X T α d0).
+    Context `(!@TyOpLt X T κ d0).
     Lemma ty_own_proph_lt {t d xπ vl q} : d < d0 →
-      q.[α] -∗ ⟦ T.1 t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
+      q.[κ] -∗ ⟦ T.1 t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
         ⌜proph_dep xπ ξl⌝ ∗ r:∗[ξl] ∗
-        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[α] ∗ ⟦ T.1 t d xπ vl ⟧ᶜ).
+        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ] ∗ ⟦ T.1 t d xπ vl ⟧ᶜ).
     Proof. move=> ?. by apply ty_op_lt. Qed.
-    Lemma ty_shr_proph_lt {t d l β xπ q} : d < d0 →
-      q.[α ⊓ β] -∗ ⟦ T.2 t d l β xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
+    Lemma ty_shr_proph_lt {t d l α xπ q} : d < d0 →
+      q.[κ ⊓ α] -∗ ⟦ T.2 t d l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
         ⌜proph_dep xπ ξl⌝ ∗ r:∗[ξl] ∗
-        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[α ⊓ β] ∗ ⟦ T.2 t d l β xπ ⟧ᶜ).
+        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ ⊓ α] ∗ ⟦ T.2 t d l α xπ ⟧ᶜ).
     Proof. move=> ?. by apply ty_op_lt. Qed.
-    Lemma ty_share_lt {t d l β xπ q} : d < d0 →
-      q.[α ⊓ β] -∗ bord β (∃ vl, ▷ l ↦∗ vl ∗ T.1 t d xπ vl)%cif
-        =[rust_halt_wsat]{⊤}=∗ q.[α ⊓ β] ∗ ⟦ T.2 t d l β xπ ⟧ᶜ.
+    Lemma ty_share_lt {t d l α xπ q} : d < d0 →
+      q.[κ ⊓ α] -∗ bord α (∃ vl, ▷ l ↦∗ vl ∗ T.1 t d xπ vl)%cif
+        =[rust_halt_wsat]{⊤}=∗ q.[κ ⊓ α] ∗ ⟦ T.2 t d l α xπ ⟧ᶜ.
     Proof. move=> ?. by apply ty_op_lt. Qed.
   End ty_op_lt.
 
   Context `{!rust_haltC CON, !rust_haltCS CON JUDG Σ, !rust_haltJS CON JUDG Σ}.
 
   (** Basic operations on a simple type at a depth *)
-  Lemma sty_op_at `{!Sty (X:=X) T sz} {d} α :
+  Lemma sty_op_at `{!Sty (X:=X) T sz} {d} κ :
     (∀ t xπ vl q,
-      q.[α] -∗ ⟦ T t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
+      q.[κ] -∗ ⟦ T t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
         ⌜proph_dep xπ ξl⌝ ∗ r:∗[ξl] ∗
-        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[α] ∗ ⟦ T t d xπ vl ⟧ᶜ)) →
-    TyOpAt (ty_sty T) α d.
+        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ] ∗ ⟦ T t d xπ vl ⟧ᶜ)) →
+    TyOpAt (ty_sty T) κ d.
   Proof.
     move=> sty_proph. split=>/= >; [done| |].
-    - iIntros "[α $] (%vl & ↦ & T)".
-      iMod (sty_proph with "α T") as (??) "($ & $ & cl)". iIntros "!> ξl".
+    - iIntros "[κ $] (%vl & ↦ & T)".
+      iMod (sty_proph with "κ T") as (??) "($ & $ & cl)". iIntros "!> ξl".
       iFrame "↦". by iApply "cl".
-    - iIntros "[$ β] b".
-      iMod (bord_open (M:=borrowM) with "β b") as "/=[o (% & >↦ & #T)]".
+    - iIntros "[$ α] b".
+      iMod (bord_open (M:=borrowM) with "α b") as "/=[o (% & >↦ & #T)]".
       iFrame "T".
       iMod (obord_subdiv (FML:=cifOF _) (M:=borrowM) [▷ _]%cif
-        with "[] o [$↦ //] []") as "(β & _ & [b _])"=>/=.
+        with "[] o [$↦ //] []") as "(α & _ & [b _])"=>/=.
       { iApply lft_sincl_refl. } { by iIntros "_ [$ _]". }
       rewrite sem_cif_spointsto_vec.
-      by iMod (spointsto_vec_alloc with "β b") as "$".
+      by iMod (spointsto_vec_alloc with "α b") as "$".
   Qed.
 
   (** Basic operations on a plain type at a depth *)
-  #[export] Instance pty_op_at `{!Pty (X:=X) T sz} {α d} :
-    TyOpAt (ty_pty T) α d.
+  #[export] Instance pty_op_at `{!Pty (X:=X) T sz} {κ d} :
+    TyOpAt (ty_pty T) κ d.
   Proof.
     apply sty_op_at=>/= ????. iIntros "$ (% & % & ?) !>". iExists [], 1%Qp.
     iSplit. { iPureIntro. by apply: proph_dep_const. }
@@ -280,7 +280,7 @@ Hint Mode TyOpAt - - - - - - - - ! - - : typeclass_instances.
 Hint Mode TyOpLt - - - - - - - - ! - - : typeclass_instances.
 
 (** [TyOpAt]: Basic operations on a type *)
-Notation TyOp T α := (∀ d, TyOpAt T α d).
+Notation TyOp T κ := (∀ d, TyOpAt T κ d).
 
 (** ** Namespaces and masks *)
 
@@ -508,80 +508,80 @@ Section type.
   Context `{!rust_haltGS CON Σ, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ)}.
 
   (** [sub]: Inclusion between type contexts *)
-  Definition sub_def {Xl Yl} (α : lft) (Γi : tcx CON Σ Xl) (Γo : tcx CON Σ Yl)
+  Definition sub_def {Xl Yl} (κ : lft) (Γi : tcx CON Σ Xl) (Γo : tcx CON Σ Yl)
     (pre : xpred Yl → xpred Xl) : iProp Σ :=
     □ ∀ q t postπ xlπ,
-      q.[α] -∗ na_own t ⊤ -∗ ⟨π, pre (postπ π) (xlπ π)⟩ -∗ sem_tcx t Γi xlπ
+      q.[κ] -∗ na_own t ⊤ -∗ ⟨π, pre (postπ π) (xlπ π)⟩ -∗ sem_tcx t Γi xlπ
         =[rust_halt_wsat]{⊤}=∗ ∃ ylπ,
-        q.[α] ∗ na_own t ⊤ ∗ ⟨π, postπ π (ylπ π)⟩ ∗ sem_tcx t Γo ylπ.
+        q.[κ] ∗ na_own t ⊤ ∗ ⟨π, postπ π (ylπ π)⟩ ∗ sem_tcx t Γo ylπ.
   Lemma sub_aux : seal (@sub_def). Proof. by eexists. Qed.
   Definition sub {Xl Yl} := sub_aux.(unseal) Xl Yl.
   Lemma sub_unseal : @sub = @sub_def. Proof. exact: seal_eq. Qed.
   (** [sub] is persistent *)
-  #[export] Instance sub_persistent {Xl Yl α Γi Γo pre} :
-    Persistent (@sub Xl Yl α Γi Γo pre).
+  #[export] Instance sub_persistent {Xl Yl κ Γi Γo pre} :
+    Persistent (@sub Xl Yl κ Γi Γo pre).
   Proof. rewrite sub_unseal. exact _. Qed.
 
   (** [type]: Expression typing, ensuring termination *)
-  Definition type_def {Xl Yl} (α : lft) (Γi : tcx CON Σ Xl) (e : expr)
+  Definition type_def {Xl Yl} (κ : lft) (Γi : tcx CON Σ Xl) (e : expr)
     (Γo : val → tcx CON Σ Yl) (pre : xpred Yl → xpred Xl)
     : iProp Σ :=
     □ ∀ q t postπ xlπ,
-      q.[α] -∗ na_own t ⊤ -∗ ⟨π, pre (postπ π) (xlπ π)⟩ -∗ sem_tcx t Γi xlπ -∗
+      q.[κ] -∗ na_own t ⊤ -∗ ⟨π, pre (postπ π) (xlπ π)⟩ -∗ sem_tcx t Γi xlπ -∗
         WP[rust_halt_wsat] e [{ v, |=[rust_halt_wsat]{⊤}=> ∃ ylπ,
-          q.[α] ∗ na_own t ⊤ ∗ ⟨π, postπ π (ylπ π)⟩ ∗ sem_tcx t (Γo v) ylπ }].
+          q.[κ] ∗ na_own t ⊤ ∗ ⟨π, postπ π (ylπ π)⟩ ∗ sem_tcx t (Γo v) ylπ }].
   Lemma type_aux : seal (@type_def). Proof. by eexists. Qed.
   Definition type {Xl Yl} := type_aux.(unseal) Xl Yl.
   Lemma type_unseal : @type = @type_def. Proof. exact: seal_eq. Qed.
   (** [type] is persistent *)
-  #[export] Instance type_persistent {Xl Yl α Γi e Γo pre} :
-    Persistent (@type Xl Yl α Γi e Γo pre).
+  #[export] Instance type_persistent {Xl Yl κ Γi e Γo pre} :
+    Persistent (@type Xl Yl κ Γi e Γo pre).
   Proof. rewrite type_unseal. exact _. Qed.
 
   Context `{!rust_haltC CON, !rust_haltJ CON JUDG Σ, !rust_haltCS CON JUDG Σ}.
 
   (** [sub] is reflexive and transitive *)
-  Lemma sub_refl {Xl α Γ} : ⊢ @sub Xl _ α Γ Γ id.
+  Lemma sub_refl {Xl κ Γ} : ⊢ @sub Xl _ κ Γ Γ id.
   Proof. rewrite sub_unseal. iIntros (????) "!>/= $ $ ? $ //". Qed.
-  Lemma sub_trans {Xl Yl Zl α Γ Γ' Γ'' pre pre'} :
-    @sub Xl Yl α Γ Γ' pre -∗ @sub _ Zl α Γ' Γ'' pre' -∗
-      sub α Γ Γ'' (pre ∘ pre').
+  Lemma sub_trans {Xl Yl Zl κ Γ Γ' Γ'' pre pre'} :
+    @sub Xl Yl κ Γ Γ' pre -∗ @sub _ Zl κ Γ' Γ'' pre' -∗
+      sub κ Γ Γ'' (pre ∘ pre').
   Proof.
-    rewrite sub_unseal. iIntros "#sub #sub' !>" (????) "α t pre Γ".
-    iMod ("sub" with "α t pre Γ") as (?) "(α & t & pre & Γ')".
-    iApply ("sub'" with "α t pre Γ'").
+    rewrite sub_unseal. iIntros "#sub #sub' !>" (????) "κ t pre Γ".
+    iMod ("sub" with "κ t pre Γ") as (?) "(κ & t & pre & Γ')".
+    iApply ("sub'" with "κ t pre Γ'").
   Qed.
   (** Modify the predicate transformer of [sub] *)
-  Lemma sub_pre {Xl Yl α Γi Γo pre pre'} :
+  Lemma sub_pre {Xl Yl κ Γi Γo pre pre'} :
     (∀ post xl, pre' post xl → pre post xl) →
-    @sub Xl Yl α Γi Γo pre ⊢ @sub Xl Yl α Γi Γo pre'.
+    @sub Xl Yl κ Γi Γo pre ⊢ @sub Xl Yl κ Γi Γo pre'.
   Proof.
-    rewrite sub_unseal=> to. iIntros "#sub !>" (????) "α t #pre Γ".
-    iApply ("sub" with "α t [] Γ"). iApply (proph_obs_impl with "pre")=> ?.
+    rewrite sub_unseal=> to. iIntros "#sub !>" (????) "κ t #pre Γ".
+    iApply ("sub" with "κ t [] Γ"). iApply (proph_obs_impl with "pre")=> ?.
     apply to.
   Qed.
   (** [sub] with an unsatisfiable predicate transformer *)
-  Lemma sub_false {Xl Yl α Γi Γo pre} :
-    (∀ post xl, ¬ pre post xl) → ⊢ @sub Xl Yl α Γi Γo pre.
+  Lemma sub_false {Xl Yl κ Γi Γo pre} :
+    (∀ post xl, ¬ pre post xl) → ⊢ @sub Xl Yl κ Γi Γo pre.
   Proof.
     rewrite sub_unseal=> ?. iIntros (????) "!> _ _ ?".
     by rewrite proph_obs_false.
   Qed.
   (** Modify the lifetime of [sub] *)
-  Lemma sub_lft {Xl Yl α β Γi Γo pre} :
-    β ⊑□ α -∗ @sub Xl Yl α Γi Γo pre -∗ sub β Γi Γo pre.
+  Lemma sub_lft {Xl Yl κ κ' Γi Γo pre} :
+    κ' ⊑□ κ -∗ @sub Xl Yl κ Γi Γo pre -∗ sub κ' Γi Γo pre.
   Proof.
-    rewrite sub_unseal. iIntros "#⊑ #ty !>" (????) "β t pre Γi".
-    iMod (lft_sincl_live_acc with "⊑ β") as (?) "[α →β]".
-    iMod ("ty" with "α t pre Γi") as (?) "[α $]". iModIntro. by iApply "→β".
+    rewrite sub_unseal. iIntros "#⊑ #ty !>" (????) "κ' t pre Γi".
+    iMod (lft_sincl_live_acc with "⊑ κ'") as (?) "[κ →κ']".
+    iMod ("ty" with "κ t pre Γi") as (?) "[κ $]". iModIntro. by iApply "→κ'".
   Qed.
   (** Frame the head in [sub] *)
-  Lemma sub_frame_hd {X Yl Zl α E Γi Γo pre} :
-    @sub Yl Zl α Γi Γo pre ⊢ @sub (X :: _) _ α (E ᵖ:: Γi) (E ᵖ:: Γo)
+  Lemma sub_frame_hd {X Yl Zl κ E Γi Γo pre} :
+    @sub Yl Zl κ Γi Γo pre ⊢ @sub (X :: _) _ κ (E ᵖ:: Γi) (E ᵖ:: Γo)
       (λ post '(x, yl)', pre (λ zl, post (x, zl)') yl).
   Proof.
-    rewrite sub_unseal. iIntros "#sub !>" (????) "/= α t pre [E Γi]".
-    by iMod ("sub" with "α t pre Γi") as (?) "($ & $ & $ & $)".
+    rewrite sub_unseal. iIntros "#sub !>" (????) "/= κ t pre [E Γi]".
+    by iMod ("sub" with "κ t pre Γi") as (?) "($ & $ & $ & $)".
   Qed.
   (** [sub] is monotone *)
   #[export] Instance sub_mono {Xl Yl} :
@@ -591,67 +591,67 @@ Section type.
     move=>/= ?????<-??<-?? impl. rewrite sub_pre; [|exact impl].
     iApply sub_lft. by iApply lft_incl_sincl.
   Qed.
-  #[export] Instance sub_proper {Xl Yl α Γi Γo} :
+  #[export] Instance sub_proper {Xl Yl κ Γi Γo} :
     Proper (pointwise_relation _ (pointwise_relation _ (↔)) --> (⊣⊢))
-      (@sub Xl Yl α Γi Γo).
+      (@sub Xl Yl κ Γi Γo).
   Proof.
     move=> ?? impl. apply bi.equiv_entails.
     split; apply sub_mono=>//= ???; by apply impl.
   Qed.
 
   (** Modify the input type context of [type] *)
-  Lemma type_in {Xl' Xl Yl α Γi' Γi e Γo prei pre} :
-    @sub Xl' _ α Γi' Γi prei -∗ @type Xl Yl α Γi e Γo pre -∗
-      type α Γi' e Γo (prei ∘ pre).
+  Lemma type_in {Xl' Xl Yl κ Γi' Γi e Γo prei pre} :
+    @sub Xl' _ κ Γi' Γi prei -∗ @type Xl Yl κ Γi e Γo pre -∗
+      type κ Γi' e Γo (prei ∘ pre).
   Proof.
     rewrite sub_unseal type_unseal.
-    iIntros "#sub #type !>" (????) "/= α t pre Γi'".
-    iMod ("sub" with "α t pre Γi'") as (?) "(α & t & pre & Γi)".
-    iApply ("type" with "α t pre Γi").
+    iIntros "#sub #type !>" (????) "/= κ t pre Γi'".
+    iMod ("sub" with "κ t pre Γi'") as (?) "(κ & t & pre & Γi)".
+    iApply ("type" with "κ t pre Γi").
   Qed.
   (** Modify the output type context of [type] *)
-  Lemma type_out {Xl Yl Yl' α Γi e Γo Γo' pre preo} :
-    @type Xl Yl α Γi e Γo pre -∗ (∀ v, @sub Yl Yl' α (Γo v) (Γo' v) preo) -∗
-      type α Γi e Γo' (pre ∘ preo).
+  Lemma type_out {Xl Yl Yl' κ Γi e Γo Γo' pre preo} :
+    @type Xl Yl κ Γi e Γo pre -∗ (∀ v, @sub Yl Yl' κ (Γo v) (Γo' v) preo) -∗
+      type κ Γi e Γo' (pre ∘ preo).
   Proof.
     rewrite sub_unseal type_unseal.
-    iIntros "#type #sub !>" (????) "/= α t pre Γi".
-    iDestruct ("type" with "α t pre Γi") as "twp". iApply (twp_wand with "twp").
-    iIntros (?) ">(% & α & t & pre & Γo)". iApply ("sub" with "α t pre Γo").
+    iIntros "#type #sub !>" (????) "/= κ t pre Γi".
+    iDestruct ("type" with "κ t pre Γi") as "twp". iApply (twp_wand with "twp").
+    iIntros (?) ">(% & κ & t & pre & Γo)". iApply ("sub" with "κ t pre Γo").
   Qed.
   (** Modify the predicate transformer of [type] *)
-  Lemma type_pre {Xl Yl α Γi e Γo pre pre'} :
+  Lemma type_pre {Xl Yl κ Γi e Γo pre pre'} :
     (∀ post xl, pre' post xl → pre post xl) →
-    @type Xl Yl α Γi e Γo pre ⊢ @type Xl Yl α Γi e Γo pre'.
+    @type Xl Yl κ Γi e Γo pre ⊢ @type Xl Yl κ Γi e Γo pre'.
   Proof.
-    rewrite type_unseal=> to. iIntros "#type !>" (????) "α t #pre Γi".
-    iApply ("type" with "α t [] Γi"). iApply (proph_obs_impl with "pre")=> ?.
+    rewrite type_unseal=> to. iIntros "#type !>" (????) "κ t #pre Γi".
+    iApply ("type" with "κ t [] Γi"). iApply (proph_obs_impl with "pre")=> ?.
     apply to.
   Qed.
   (** [type] with an unsatisfiable predicate transformer *)
-  Lemma type_false {Xl Yl α Γi e Γo pre} :
-    (∀ post xl, ¬ pre post xl) → ⊢ @type Xl Yl α Γi e Γo pre.
+  Lemma type_false {Xl Yl κ Γi e Γo pre} :
+    (∀ post xl, ¬ pre post xl) → ⊢ @type Xl Yl κ Γi e Γo pre.
   Proof.
     rewrite type_unseal=> ?. iIntros (????) "!> _ _ ?".
     by rewrite proph_obs_false.
   Qed.
   (** Modify the lifetime of [type] *)
-  Lemma type_lft {Xl Yl α β Γi e Γo pre} :
-    β ⊑□ α -∗ @type Xl Yl α Γi e Γo pre -∗ @type Xl Yl β Γi e Γo pre.
+  Lemma type_lft {Xl Yl κ κ' Γi e Γo pre} :
+    κ' ⊑□ κ -∗ @type Xl Yl κ Γi e Γo pre -∗ @type Xl Yl κ' Γi e Γo pre.
   Proof.
-    rewrite type_unseal. iIntros "#⊑ #type !>" (????) "β t pre Γi".
-    iMod (lft_sincl_live_acc with "⊑ β") as (?) "[α →β]".
-    iDestruct ("type" with "α t pre Γi") as "twp". iApply (twp_wand with "twp").
-    iIntros (?) ">(% & α & $) !>". by iApply "→β".
+    rewrite type_unseal. iIntros "#⊑ #type !>" (????) "κ' t pre Γi".
+    iMod (lft_sincl_live_acc with "⊑ κ'") as (?) "[κ →κ']".
+    iDestruct ("type" with "κ t pre Γi") as "twp". iApply (twp_wand with "twp").
+    iIntros (?) ">(% & κ & $) !>". by iApply "→κ'".
   Qed.
   (** Frame the head in [type] *)
-  Lemma type_frame_hd {X Yl Zl α E Γi e Γo pre} :
-    @type Yl Zl α Γi e Γo pre ⊢
-      @type (X :: _) _ α (E ᵖ:: Γi) e (λ v, E ᵖ:: Γo v)
+  Lemma type_frame_hd {X Yl Zl κ E Γi e Γo pre} :
+    @type Yl Zl κ Γi e Γo pre ⊢
+      @type (X :: _) _ κ (E ᵖ:: Γi) e (λ v, E ᵖ:: Γo v)
         (λ post '(x, yl)', pre (λ zl, post (x, zl)') yl).
   Proof.
-    rewrite type_unseal. iIntros "#type !>" (????) "/= α t pre [E Γi]".
-    iDestruct ("type" with "α t pre Γi") as "twp". iApply (twp_wand with "twp").
+    rewrite type_unseal. iIntros "#type !>" (????) "/= κ t pre [E Γi]".
+    iDestruct ("type" with "κ t pre Γi") as "twp". iApply (twp_wand with "twp").
     by iIntros (?) ">(% & $ & $ & $ & $) !>".
   Qed.
   (** [type] is monotone *)
@@ -662,9 +662,9 @@ Section type.
     move=>/= ?????<-??<-??<-?? impl. rewrite type_pre; [|exact impl].
     iApply type_lft. by iApply lft_incl_sincl.
   Qed.
-  #[export] Instance type_proper {Xl Yl α Γi e Γo} :
+  #[export] Instance type_proper {Xl Yl κ Γi e Γo} :
     Proper (pointwise_relation _ (pointwise_relation _ (↔)) --> (⊣⊢))
-      (@type Xl Yl α Γi e Γo).
+      (@type Xl Yl κ Γi e Γo).
   Proof.
     move=> ?? impl. apply bi.equiv_entails.
     split; apply type_mono=>//= ???; by apply impl.
@@ -723,15 +723,15 @@ Section tcx_extract.
   Proof. split=> ??. rewrite etcx_extract tcx_extract. iIntros "[$ $]". Qed.
 
   (** Type context inclusion by [EtcxExtract] *)
-  Lemma sub_etcx_extract `{!@EtcxExtract X Yl Zl E Γ Γr get getr} {α} :
-    ⊢ sub α Γ (E ᵖ:: Γr) (λ post yl, post (get yl, getr yl)').
+  Lemma sub_etcx_extract `{!@EtcxExtract X Yl Zl E Γ Γr get getr} {κ} :
+    ⊢ sub κ Γ (E ᵖ:: Γr) (λ post yl, post (get yl, getr yl)').
   Proof.
     rewrite sub_unseal. iIntros (????) "!>/= $ $ ?? !>". rewrite etcx_extract.
     iExists (λ _, (_,_)'). iFrame.
   Qed.
   (** Type context inclusion by [TcxExtract] *)
-  Lemma sub_tcx_extract `{!@TcxExtract Xl Yl Zl Γ Γg Γr get getr} {α} :
-    ⊢ sub α Γg (plist_app Γ Γr)
+  Lemma sub_tcx_extract `{!@TcxExtract Xl Yl Zl Γ Γg Γr get getr} {κ} :
+    ⊢ sub κ Γg (plist_app Γ Γr)
       (λ post yl, post (plist_app (get yl) (getr yl))).
   Proof.
     rewrite sub_unseal. iIntros (????) "!>/= $ $ pre Γ !>". iExists (λ _, _).

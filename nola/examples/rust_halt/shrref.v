@@ -39,17 +39,17 @@ Section ty_shrref.
 
   (** [ty_shrref] satisfies [TyOp] *)
   #[export] Instance ty_shrref_ty_op `{!Ty (X:=X) T sz}
-    `(!TyOpLt T α d, !LftIncl α β) :
-    TyOpAt (ty_shrref β T) α d.
+    `(!TyOpLt T κ d, !LftIncl κ α) :
+    TyOpAt (ty_shrref α T) κ d.
   Proof.
     apply: sty_op_at=> >. rewrite sty_shrref_unseal /=.
-    iIntros "α". iDestruct 1 as (??? -> ??) "#T". rewrite sem_cif_in /=.
+    iIntros "κ". iDestruct 1 as (??? -> ??) "#T". rewrite sem_cif_in /=.
     iMod (stored_acc with "T") as "{T}T".
-    iDestruct (lft_incl'_live_acc (β:=α ⊓ β) with "α") as (?) "[αβ →α]".
-    iMod (ty_shr_proph_lt with "αβ T") as (???) "[$ →T]"=>//. iModIntro.
+    iDestruct (lft_incl'_live_acc (α:=κ ⊓ α) with "κ") as (?) "[κα →κ]".
+    iMod (ty_shr_proph_lt with "κα T") as (???) "[$ →T]"=>//. iModIntro.
     iSplit. { iPureIntro. by eapply proph_dep_proper. }
-    iIntros "ξl". iMod ("→T" with "ξl") as "[αβ T]".
-    iDestruct ("→α" with "αβ") as "$". iMod (store_alloc_pers with "T") as "T".
+    iIntros "ξl". iMod ("→T" with "ξl") as "[κα T]".
+    iDestruct ("→κ" with "κα") as "$". iMod (store_alloc_pers with "T") as "T".
     iModIntro. iExists _, _, _. rewrite sem_cif_in /=. by iFrame.
   Qed.
 
@@ -82,17 +82,17 @@ Section ty_shrref.
   Qed.
 
   (** Read a copyable object from [ty_shrref] *)
-  Lemma read_ty_shrref `{!Ty (X:=X) T sz, !Copy T sz, !LftIncl α β} :
-    Read α (ty_shrref β T) T (ty_shrref β T) id id.
+  Lemma read_ty_shrref `{!Ty (X:=X) T sz, !Copy T sz, !LftIncl κ α} :
+    Read κ (ty_shrref α T) T (ty_shrref α T) id id.
   Proof.
-    split=>/= >. iIntros "α t". rewrite sty_shrref_unseal /=.
+    split=>/= >. iIntros "κ t". rewrite sty_shrref_unseal /=.
     iDestruct 1 as (???[= ->]??) "#sT".
     rewrite sem_cif_in /=. iMod (stored_acc with "sT") as "sT'".
-    iDestruct (lft_incl'_live_acc (β:=β) with "α") as (?) "[β →α]".
-    iMod (copy_shr_acc with "β t sT'") as (??) "(↦ & t & #T & cl)"=>//.
+    iDestruct (lft_incl'_live_acc (α:=α) with "κ") as (?) "[α →κ]".
+    iMod (copy_shr_acc with "α t sT'") as (??) "(↦ & t & #T & cl)"=>//.
     iModIntro. iDestruct (ty_own_clair with "T") as "$"=>//. iFrame "↦".
-    iSplit=>//. iIntros "↦". iMod ("cl" with "↦ t") as "[β $]". iModIntro.
-    iDestruct ("→α" with "β") as "$". iExists _, _, _, _. rewrite sem_cif_in /=.
+    iSplit=>//. iIntros "↦". iMod ("cl" with "↦ t") as "[α $]". iModIntro.
+    iDestruct ("→κ" with "α") as "$". iExists _, _, _, _. rewrite sem_cif_in /=.
     by iFrame "sT".
   Qed.
 End ty_shrref.

@@ -36,13 +36,13 @@ Section ty_mod.
   Qed.
 
   (** [ty_mod] preserves [TyOpAt] *)
-  #[export] Instance ty_mod_ty_op `(!TyOpAt T β d, !Inj (=) (=) f) :
-    TyOpAt (ty_mod f T) β d.
+  #[export] Instance ty_mod_ty_op `(!TyOpAt T κ d, !Inj (=) (=) f) :
+    TyOpAt (ty_mod f T) κ d.
   Proof.
     split=>/= >.
-    - iIntros "β T". iMod (ty_own_proph with "β T") as (???) "[$$]".
+    - iIntros "κ T". iMod (ty_own_proph with "κ T") as (???) "[$$]".
       iPureIntro. by eapply proph_dep_unf.
-    - iIntros "αβ T". iMod (ty_shr_proph with "αβ T") as (???) "[$$]".
+    - iIntros "κα T". iMod (ty_shr_proph with "κα T") as (???) "[$$]".
       iPureIntro. by eapply proph_dep_unf.
     - exact ty_share.
   Qed.

@@ -37,40 +37,40 @@ Section ty_box.
   Qed.
 
   (** [ty_box] satisfies [TyOp] *)
-  #[export] Instance ty_box_ty_op `(!Ty (X:=X) T sz, !TyOpLt T α d) :
-    TyOpAt (ty_box T) α d.
+  #[export] Instance ty_box_ty_op `(!Ty (X:=X) T sz, !TyOpLt T κ d) :
+    TyOpAt (ty_box T) κ d.
   Proof.
     rewrite ty_box_unseal. split=>/= *.
-    - iIntros "α". iDestruct 1 as (???? -> ? eq) "(↦ & † & T)".
+    - iIntros "κ". iDestruct 1 as (???? -> ? eq) "(↦ & † & T)".
       rewrite sem_cif_in /=. iMod (stored_acc with "T") as "T".
-      iMod (ty_own_proph_lt with "α T") as (???) "[$ →T]"=>//. iModIntro.
+      iMod (ty_own_proph_lt with "κ T") as (???) "[$ →T]"=>//. iModIntro.
       iSplit. { iPureIntro. by eapply proph_dep_proper. }
       iIntros "ξl". iMod ("→T" with "ξl") as "[$ T]".
       iMod (store_alloc with "T") as "T". iModIntro. iFrame "↦ †".
       iExists _, _. do 3 iSplit=>//. by rewrite sem_cif_in.
-    - iIntros "αβ". iDestruct 1 as (???? eq) "[↦ #T]". rewrite sem_cif_in /=.
+    - iIntros "κα". iDestruct 1 as (???? eq) "[↦ #T]". rewrite sem_cif_in /=.
       iMod (stored_acc with "T") as "{T}T".
-      iMod (ty_shr_proph_lt with "αβ T") as (???) "[$ →T]"=>//. iModIntro.
+      iMod (ty_shr_proph_lt with "κα T") as (???) "[$ →T]"=>//. iModIntro.
       iSplit. { iPureIntro. by eapply proph_dep_proper. }
       iIntros "ξl". iMod ("→T" with "ξl") as "[$ T]".
       iMod (store_alloc_pers with "T") as "T". iModIntro. iFrame "↦".
       iExists _, _. do 2 iSplit=>//. by rewrite sem_cif_in.
-    - iIntros "[α β] b".
-      iMod (bord_open (M:=borrowM) with "β b") as "/=[o (% & ↦ & big)]".
+    - iIntros "[κ α] b".
+      iMod (bord_open (M:=borrowM) with "α b") as "/=[o (% & ↦ & big)]".
       iDestruct "big" as (???? -> ? eq) "(↦' & † & T)". rewrite sem_cif_in /=.
       iMod (stored_acc with "T") as "T".
       iDestruct (ty_own_size with "T") as %->.
       rewrite heap_pointsto_vec_singleton.
       iMod (obord_subdiv (FML:=cifOF _) (M:=borrowM)
         [▷ _ ↦ _; ∃ wl, ▷ _ ↦∗ wl ∗ T.1 _ _ _ wl]%cif
-        with "[] o [$↦ $↦' $T //] [†]") as "(β & _ & b & b' & _)"=>/=.
+        with "[] o [$↦ $↦' $T //] [†]") as "(α & _ & b & b' & _)"=>/=.
       { iApply lft_sincl_refl. }
       { iIntros "_ (↦ & (% & $ & T) & _)". rewrite -heap_pointsto_vec_singleton.
         iDestruct (ty_own_size with "T") as %->.
         iMod (store_alloc with "T") as "T". iModIntro. iFrame "↦ †".
         iExists _, _. do 3 iSplit=>//. by rewrite sem_cif_in. }
-      iMod (spointsto_alloc with "β b") as "[β $]". rewrite bor_tok_bor.
-      iMod (ty_share_lt (T:=T) with "[$α $β //] b'") as "[$ T]"=>//.
+      iMod (spointsto_alloc with "α b") as "[α $]". rewrite bor_tok_bor.
+      iMod (ty_share_lt (T:=T) with "[$κ $α //] b'") as "[$ T]"=>//.
       iMod (store_alloc_pers with "T") as "T". iModIntro. iExists _, _.
       do 2 iSplit=>//. by rewrite sem_cif_in /=.
   Qed.
@@ -105,8 +105,8 @@ Section ty_box.
   Qed.
 
   (** Read from [ty_box] *)
-  #[export] Instance read_ty_box `{!Ty (X:=X) T sz} {α} :
-    Read α (ty_box T) T (ty_box (ty_uninit sz)) id (λ _, ()) | 20.
+  #[export] Instance read_ty_box `{!Ty (X:=X) T sz} {κ} :
+    Read κ (ty_box T) T (ty_box (ty_uninit sz)) id (λ _, ()) | 20.
   Proof.
     split=> >. iIntros "$ $". rewrite ty_box_unseal /=.
     iDestruct 1 as (????[= ->]??) "(>$ & >† & T)". rewrite sem_cif_in /=.
@@ -118,8 +118,8 @@ Section ty_box.
     rewrite sem_cif_in /=. by iFrame.
   Qed.
   (** Reading a copyable object from [ty_box] *)
-  Lemma read_ty_box_copy `{!Ty (X:=X) T sz, !Copy T sz} {α} :
-    Read α (ty_box T) T (ty_box T) id id.
+  Lemma read_ty_box_copy `{!Ty (X:=X) T sz, !Copy T sz} {κ} :
+    Read κ (ty_box T) T (ty_box T) id id.
   Proof.
     split=> >. iIntros "$ $". rewrite ty_box_unseal /=.
     iDestruct 1 as (????[= ->]??) "(>$ & >† & T)". rewrite sem_cif_in /=.
@@ -131,8 +131,8 @@ Section ty_box.
   Qed.
 
   (** Write to [ty_box] *)
-  Lemma write_ty_box `{!Ty (X:=X) T sz, !Ty (X:=Y) U sz} {α} :
-    Write α (ty_box T) T U (ty_box U) id (λ _, id).
+  Lemma write_ty_box `{!Ty (X:=X) T sz, !Ty (X:=Y) U sz} {κ} :
+    Write κ (ty_box T) T U (ty_box U) id (λ _, id).
   Proof.
     split=> >. iIntros "$". rewrite ty_box_unseal /=.
     iDestruct 1 as (????[= ->]??) "(>$ & >† & T)". rewrite sem_cif_in /=.
