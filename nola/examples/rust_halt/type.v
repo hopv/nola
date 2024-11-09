@@ -108,7 +108,7 @@ Section ty.
   (** [Ty], [Sty], [Pty] are proper *)
   #[export] Instance Ty_proper {X} : Proper ((≡) ==> (=) ==> (↔)) (@Ty X).
   Proof.
-    have pro : Proper ((≡) ==> (=) ==> (→)) (@Ty X); last first.
+    have pro : Proper ((≡) ==> (=) ==> impl) (@Ty X); last first.
     { move=> ?*?? <-. split; by apply pro. }
     move=> [??][??][/=eqvO eqvS]??<-[/=?? depO depS claO claS]. split=>/= >.
     { by rewrite -(eqvS _ _ _ _ _). } { by rewrite -(eqvO _ _ _ _). }
@@ -119,14 +119,14 @@ Section ty.
   Qed.
   #[export] Instance Sty_proper {X} : Proper ((≡) ==> (=) ==> (↔)) (@Sty X).
   Proof.
-    have pro : Proper ((≡) ==> (=) ==> (→)) (@Sty X); last first.
+    have pro : Proper ((≡) ==> (=) ==> impl) (@Sty X); last first.
     { move=> ?*??<-. split; by apply pro. }
     move=> ?? eqv ??<-[?? dep cla].
     split=> >; rewrite -!(eqv _ _ _ _) //; [apply dep|apply cla].
   Qed.
   #[export] Instance Pty_proper {X} : Proper ((≡) ==> (=) ==> (↔)) (@Pty X).
   Proof.
-    have pro : Proper ((≡) ==> (=) ==> (→)) (@Pty X); last first.
+    have pro : Proper ((≡) ==> (=) ==> impl) (@Pty X); last first.
     { move=> ?*??<-. split; by apply pro. }
     move=> ?? eqv ??<-[??]. split=> >; by rewrite -(eqv _ _).
   Qed.
@@ -179,7 +179,7 @@ Section ty_op.
 
   (** [TyOpAt] is monotone *)
   #[export] Instance TyOpAt_mono {X} :
-    Proper ((≡) ==> LftIncl --> (=) ==> (→)) (@TyOpAt X).
+    Proper ((≡) ==> LftIncl --> (=) ==> impl) (@TyOpAt X).
   Proof.
     move=> T T' [eqvO eqvS] κ κ' /= ??? <- ?. split.
     - move=> >. setoid_rewrite <-(eqvO _ _ _ _). iIntros "κ' T".
@@ -200,7 +200,7 @@ Section ty_op.
       by rewrite (eqvO _ _ _ _).
   Qed.
   #[export] Instance TyOpAt_flip_mono {X} :
-    Proper ((≡) ==> LftIncl ==> (=) ==> flip (→)) (@TyOpAt X).
+    Proper ((≡) ==> LftIncl ==> (=) ==> flip impl) (@TyOpAt X).
   Proof. move=> ?*?*??<- /=. by apply TyOpAt_mono. Qed.
   #[export] Instance TyOpAt_proper {X} :
     Proper ((≡) ==> (=) --> (=) ==> (↔)) (@TyOpAt X).
@@ -212,13 +212,13 @@ Section ty_op.
 
   (** [TyOpLt] is monotone *)
   #[export] Instance TyOpLt_mono {X} :
-    Proper ((≡) ==> (⊑) --> (≤) --> (→)) (@TyOpLt X).
+    Proper ((≡) ==> (⊑) --> (≤) --> impl) (@TyOpLt X).
   Proof.
     move=> ?*?* d d' /= ? wl d'' ?. have lt : d'' < d by lia. move: (wl _ lt).
     by apply TyOpAt_mono.
   Qed.
   #[export] Instance TyOpLt_flip_mono {X} :
-    Proper ((≡) ==> (⊑) ==> (≤) ==> flip (→)) (@TyOpLt X).
+    Proper ((≡) ==> (⊑) ==> (≤) ==> flip impl) (@TyOpLt X).
   Proof. move=> ?*?*?* /=. by apply TyOpLt_mono. Qed.
   #[export] Instance TyOpLt_proper {X} :
     Proper ((≡) ==> (=) --> (=) ==> (↔)) (@TyOpLt X).
@@ -364,7 +364,7 @@ Section classes.
   (** [Copy] is proper *)
   #[export] Instance Copy_proper {X} : Proper ((≡) ==> (=) ==> (↔)) (@Copy X).
   Proof.
-    have pro: Proper ((≡) ==> (=) ==> (→)) (@Copy X); last first.
+    have pro: Proper ((≡) ==> (=) ==> impl) (@Copy X); last first.
     { move=> ???. split; by apply pro. }
     move=> ??[eqvO eqvS]??<-. split=> *; [rewrite -(eqvO _ _ _ _); exact _|].
     rewrite -(eqvS _ _ _ _ _). setoid_rewrite <-(eqvO _ _ _ _).
