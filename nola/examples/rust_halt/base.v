@@ -8,7 +8,7 @@ From nola.examples Require Export xty.
 From nola.rust_lang Require Export proofmode adequacy notation.
 Export ProdNotation PlistNotation ProeqvNotation FunPRNotation BigSepPLNotation
   ModwNotation WpwNotation iPropAppNotation ProphNotation LftNotation
-  CsemNotation.
+  CsemNotation XtyNotation.
 Open Scope nat_scope.
 
 Implicit Type Σ : gFunctors.
