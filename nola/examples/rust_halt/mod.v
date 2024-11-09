@@ -58,9 +58,9 @@ Section ty_mod.
   Proof. split=>/= >; [exact _|exact: copy_shr_acc]. Qed.
 
   (** Subtyping on [ty_mod] *)
-  Lemma subty_of_ty_mod {δ T} : ⊢ subty δ (ty_mod f T) T f.
+  Lemma subty_of_mod {δ T} : ⊢ subty δ (ty_mod f T) T f.
   Proof. rewrite subty_unseal. iSplit; iModIntro; by iIntros. Qed.
-  Lemma subty_to_ty_mod {δ g} `{!Ty T sz} :
+  Lemma subty_to_mod {δ g} `{!Ty T sz} :
     (∀ x, f (g x) = x) → ⊢ subty δ T (ty_mod f T) g.
   Proof.
     rewrite subty_unseal=> eq. iSplit; iModIntro=>/=.

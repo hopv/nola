@@ -93,7 +93,7 @@ Section ty_box.
   Qed.
 
   (** Subtyping over [ty_box] *)
-  Lemma subty_ty_box `{!Deriv ih δ} {X Y T U f} :
+  Lemma subty_box `{!Deriv ih δ} {X Y T U f} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ -∗ ⌜ih δ'⌝ -∗ subty (X:=X) (Y:=Y) δ' T U f) ⊢
       subty δ (ty_box T) (ty_box U) f.
   Proof.
@@ -111,7 +111,7 @@ Section ty_box.
   Qed.
 
   (** Read from [ty_box] *)
-  #[export] Instance read_ty_box `{!Ty (X:=X) T sz} {κ d} :
+  #[export] Instance read_box `{!Ty (X:=X) T sz} {κ d} :
     Read κ (S d) (ty_box T) d T (ty_box (ty_uninit sz)) id (λ _, ()) | 20.
   Proof.
     split=> >. iIntros "$ $". rewrite ty_box_unseal /=.
@@ -125,7 +125,7 @@ Section ty_box.
     rewrite sem_cif_in /=. by iFrame.
   Qed.
   (** Reading a copyable object from [ty_box] *)
-  Lemma read_ty_box_copy `{!Ty (X:=X) T sz, !Copy T sz} {κ d} :
+  Lemma read_box_copy `{!Ty (X:=X) T sz, !Copy T sz} {κ d} :
     Read κ (S d) (ty_box T) d T (ty_box T) id id.
   Proof.
     split=> >. iIntros "$ $". rewrite ty_box_unseal /=.
@@ -139,7 +139,7 @@ Section ty_box.
   Qed.
 
   (** Write to [ty_box] *)
-  Lemma write_ty_box `{!Ty (X:=X) T sz, !Ty (X:=Y) U sz} {κ d d'} :
+  Lemma write_box `{!Ty (X:=X) T sz, !Ty (X:=Y) U sz} {κ d d'} :
     Write κ (S d) (ty_box T) d T d' U (S d') (ty_box U) id (λ _, id).
   Proof.
     split=> >. iIntros "$". rewrite ty_box_unseal /=.

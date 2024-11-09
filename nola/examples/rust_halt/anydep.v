@@ -70,12 +70,12 @@ Section ty_anydep.
   Qed.
 
   (** Subtyping on [ty_anydep] *)
-  Lemma subty_to_ty_anydep {δ X T} : ⊢ subty (X:=X) δ T (ty_anydep T) id.
+  Lemma subty_to_anydep {δ X T} : ⊢ subty (X:=X) δ T (ty_anydep T) id.
   Proof.
     rewrite subty_unseal. iSplit; iModIntro=>/=.
     { iIntros (????) "$". } { iIntros (?????) "$". }
   Qed.
-  Lemma subty_ty_anydep {δ X Y T U f} :
+  Lemma subty_anydep {δ X Y T U f} :
     subty (X:=X) (Y:=Y) δ T U f ⊢ subty δ (ty_anydep T) (ty_anydep U) f.
   Proof.
     rewrite subty_unseal. iIntros "#[subO subS]". iSplit; iModIntro=>/=.
@@ -84,7 +84,7 @@ Section ty_anydep.
   Qed.
 
   (** Eliminate [ty_anydep] *)
-  Lemma type_elim_anydep v
+  Lemma type_anydep_elim v
     `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (v ◁{d'} ty_anydep (X:=X) T)
         Γi Γr get getr) {Zl' κ e Γo pre} :
     (∀ d, type (Yl:=Zl') κ (v ◁{d} T ᵖ:: Γr) e Γo pre) ⊢

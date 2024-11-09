@@ -76,7 +76,7 @@ Section ty_shrref.
   Proof. exact _. Qed.
 
   (** Subtyping over [ty_shrref] *)
-  Lemma subty_ty_shrref `{!Deriv ih δ} {X Y T U f α} :
+  Lemma subty_shrref `{!Deriv ih δ} {X Y T U f α} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ -∗ ⌜ih δ'⌝ -∗ subty (X:=X) (Y:=Y) δ' T U f) ⊢
       subty δ (ty_shrref α T) (ty_shrref α U) f.
   Proof.
@@ -88,7 +88,7 @@ Section ty_shrref.
   Qed.
 
   (** Read a copyable object from [ty_shrref] *)
-  Lemma read_ty_shrref `{!Ty (X:=X) T sz, !Copy T sz, !LftIncl κ α} {d} :
+  Lemma read_shrref `{!Ty (X:=X) T sz, !Copy T sz, !LftIncl κ α} {d} :
     Read κ (S d) (ty_shrref α T) d T (ty_shrref α T) id id.
   Proof.
     split=>/= >. iIntros "κ t". rewrite sty_shrref_unseal /=.
