@@ -165,7 +165,7 @@ Section dinvC.
   (** [cif_dinv] is productive *)
   #[export] Instance cif_dinv_productive : Productive (cif_dinv).
   Proof.
-    move=> ????. apply cif_in_preserv_productive=>//. by apply fun_proeq_later.
+    move=> ????. apply cif_in_preserv_productive=>//. by apply fun_proeqv_later.
   Qed.
 
   Context `{!dinvGS (cifOF CON) Σ, !dinvJ (cifO CON Σ) JUDG}.

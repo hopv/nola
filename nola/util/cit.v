@@ -2,7 +2,7 @@
 
 From nola.util Require Export eq order productive.
 From iris.algebra Require Export ofe.
-Import EqNotations ProeqNotation FunPNotation FunPRNotation.
+Import EqNotations ProeqvNotation FunPNotation FunPRNotation.
 
 Implicit Type SEL : Type.
 
@@ -860,7 +860,7 @@ Next Obligation. move=> >. split; [done|]=> eq ?. apply eq. Qed.
 Program Canonical citPR {SEL} `{!Uip SEL} I C D :=
   Prost (@citO SEL I C D) (λ k t t', of_cit t ≡[k]≡ of_cit t') _ _ _.
 Next Obligation. split=> ?* //. by etrans. Qed.
-Next Obligation. move=> *. by eapply proeq_anti. Qed.
+Next Obligation. move=> *. by eapply proeqv_anti. Qed.
 Next Obligation.
   move=> ????? t t'. split. { move=> eq ?. by rewrite eq. }
   move=> ?. rewrite -(to_of_cit (t:=t)) -(to_of_cit (t:=t')). by f_equiv.
@@ -869,11 +869,11 @@ Qed.
 Section citPR.
   Context {SEL} {I C : SEL → Type} {D : SEL → ofe}.
 
-  (** Unfold [proeq] over [cita] and [cit] *)
-  Lemma cita_proeq : @proeq (citaPR I C D) = λ k ta ta', ta k ≡ ta' k.
+  (** Unfold [proeqv] over [cita] and [cit] *)
+  Lemma cita_proeqv : @proeqv (citaPR I C D) = λ k ta ta', ta k ≡ ta' k.
   Proof. done. Qed.
-  Lemma cit_proeq `{!Uip SEL} :
-    @proeq (citPR I C D) = λ k t t', of_cit t ≡[k]≡ of_cit t'.
+  Lemma cit_proeqv `{!Uip SEL} :
+    @proeqv (citPR I C D) = λ k t t', of_cit t ≡[k]≡ of_cit t'.
   Proof. done. Qed.
 
   (** [Citg] is size-preserving over the inductive arguments
@@ -882,7 +882,7 @@ Section citPR.
     Proper ((≡[k]@{_ -pr> citPR I C D}≡) ==>
       (≡[<k]@{_ -pr> _}≡) ==> (≡) ==> (≡[k]@{citPR I C D}≡)) (Citg s).
   Proof.
-    move=> ?? eq ?? eq' ??<-. rewrite /proeq /= cit_proeq of_cit_unseal in eq.
+    move=> ?? eq ?? eq' ??<-. rewrite /proeqv /= cit_proeqv of_cit_unseal in eq.
     apply equiv_dist=> n. apply citi_dist_Forall2.
     rewrite !of_cit_unseal. destruct k as [|k]=>/=; apply citg_Forall2_eq=>//.
     - move=> i. apply (citi_equiv_Forall2 (k:=1)), eq.
@@ -907,7 +907,7 @@ Section cit_cprost.
   Next Obligation.
     move=> c. apply (equiv_wfcit' (ts:=λ k, (c k) k))=> k k' ?.
     eapply citi_Forall2_trans; [| |apply (cita_seq_equiv (k:=k))]; [lia|].
-    apply citi_equiv_Forall2', (prochain_eq (c:=c)). lia.
+    apply citi_equiv_Forall2', (prochain_eqv (c:=c)). lia.
   Qed.
   (** Simplify [cita_seq] over [cita_prolimit] *)
   Lemma cita_seq_limit {c k} : cita_prolimit c k = c k k.
@@ -923,12 +923,12 @@ Section cit_cprost.
   (** Limit over [cit] *)
   Definition cit_prolimit (c : prochain (citPR I C D)) : citPR I C D :=
     to_cit (prolimit
-      (Prochain (λ k, of_cit (c k)) (λ _ _, c.(prochain_eq)))).
+      (Prochain (λ k, of_cit (c k)) (λ _ _, c.(prochain_eqv)))).
   (** [cit] is complete *)
   #[export] Program Instance cit_cprost : Cprost (citPR I C D) :=
     CPROST cit_prolimit _ _.
   Next Obligation.
-    move=> c k. by rewrite cit_proeq of_to_cit cita_proeq cita_seq_limit.
+    move=> c k. by rewrite cit_proeqv of_to_cit cita_proeqv cita_seq_limit.
   Qed.
   Next Obligation.
     move=> ????. unfold cit_prolimit. (do 2 f_equiv)=>/= ?. by f_equiv.

@@ -6,7 +6,7 @@ From nola.iris Require Export cif inv_deriv na_inv_deriv store_deriv
   pborrow_deriv fborrow.
 From nola.examples Require Export xty.
 From nola.rust_lang Require Export proofmode adequacy notation.
-Export ProdNotation PlistNotation ProeqNotation FunPRNotation BigSepPLNotation
+Export ProdNotation PlistNotation ProeqvNotation FunPRNotation BigSepPLNotation
   ModwNotation WpwNotation iPropAppNotation ProphNotation LftNotation
   CsemNotation.
 Open Scope nat_scope.

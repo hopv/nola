@@ -24,7 +24,7 @@ Section ty_shrref.
   #[export] Instance ty_shrref_productive {X α} :
     Productive (@ty_shrref X α).
   Proof.
-    move=> ??? /ty_proeq_later [_ eq]. unfold ty_shrref. f_equiv.
+    move=> ??? /ty_proeqv_later [_ eq]. unfold ty_shrref. f_equiv.
     rewrite sty_shrref_unseal /sty_shrref_def=>/= >. do 3 f_equiv=> ?.
     by rewrite eq.
   Qed.

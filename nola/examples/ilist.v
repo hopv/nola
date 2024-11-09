@@ -2,7 +2,7 @@
 
 From nola.examples Require Export con.
 From nola.rust_lang Require Export notation proofmode.
-Import ProeqNotation FunPRNotation WpwNotation CsemNotation.
+Import ProeqvNotation FunPRNotation WpwNotation CsemNotation.
 
 Section ilist.
   Context `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), !lrustGS_gen hlc Σ,

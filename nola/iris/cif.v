@@ -4,7 +4,7 @@ From nola.util Require Export uip (** Assume UIP over any type *).
 From nola.util Require Export nary cit.
 From nola.bi Require Export deriv.
 From nola.iris Require Export iprop.
-Import EqNotations ProeqNotation iPropAppNotation FunPRNotation.
+Import EqNotations ProeqvNotation iPropAppNotation FunPRNotation.
 
 Implicit Type Σ : gFunctors.
 
@@ -386,9 +386,9 @@ Section cif_in.
   #[export] Instance cif_in_preserv_productive {s k} :
     Proper ((≡[k]≡) ==> (≡[<k]≡) ==> (≡) ==> (≡[k]≡)) (cif_in CON' (Σ:=Σ) s).
   Proof.
-    rewrite cif_in_unseal=> ?*?? /fun_proeq_later eqc ?*.
+    rewrite cif_in_unseal=> ?*?? /fun_proeqv_later eqc ?*.
     apply cif_con_preserv_productive.
-    { by move. } { by apply fun_proeq_later. } { by f_equiv. }
+    { by move. } { by apply fun_proeqv_later. } { by f_equiv. }
   Qed.
 
   (** Custom connectives are non-expansive *)

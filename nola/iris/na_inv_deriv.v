@@ -217,7 +217,7 @@ Section na_invC.
   (** [cif_na_inv] is productive *)
   #[export] Instance cif_na_inv_productive {p N} : Productive (cif_na_inv p N).
   Proof.
-    move=> ????. apply cif_in_preserv_productive=>//. by apply fun_proeq_later.
+    move=> ????. apply cif_in_preserv_productive=>//. by apply fun_proeqv_later.
   Qed.
 
   Context `{!inv'GS (cifOF CON) Σ, !na_invGS (cifOF CON) Σ,

@@ -2,7 +2,7 @@
 
 From nola Require Export prelude.
 From nola Require Import productive.
-Import ProeqNotation.
+Import ProeqvNotation.
 
 Implicit Type A : ofe.
 

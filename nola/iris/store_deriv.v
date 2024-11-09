@@ -157,7 +157,7 @@ Section storeC.
   (** [cif_store] is productive *)
   #[export] Instance cif_store_productive : Productive cif_store.
   Proof.
-    move=> ????. apply cif_in_preserv_productive=>//. by apply fun_proeq_later.
+    move=> ????. apply cif_in_preserv_productive=>//. by apply fun_proeqv_later.
   Qed.
 
   Context `{!storeGS (cifOF CON) Σ, !storeJ (cifO CON Σ) JUDG}.

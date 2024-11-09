@@ -44,16 +44,16 @@ Section ty_rec.
   #[export] Instance ty_rec_send `{Send0 : !∀ T, Send T → Send (F T)} :
     Send (ty_rec F).
   Proof.
-    move=> ??. apply equiv_proeq=> k. etrans; [by apply ty_rec_iter|].
-    etrans; [|symmetry; by apply ty_rec_iter]. apply equiv_proeq, Send0.
+    move=> ??. apply equiv_proeqv=> k. etrans; [by apply ty_rec_iter|].
+    etrans; [|symmetry; by apply ty_rec_iter]. apply equiv_proeqv, Send0.
     elim: k; [by move|exact _].
   Qed.
   (** [Sync] on [ty_rec], coinductively *)
   #[export] Instance ty_rec_sync `{Sync0 : !∀ T, Sync T → Sync (F T)} :
     Sync (ty_rec F).
   Proof.
-    move=> ??. apply equiv_proeq=> k. etrans; [by apply ty_rec_iter|].
-    etrans; [|symmetry; by apply ty_rec_iter]. apply equiv_proeq, Sync0.
+    move=> ??. apply equiv_proeqv=> k. etrans; [by apply ty_rec_iter|].
+    etrans; [|symmetry; by apply ty_rec_iter]. apply equiv_proeqv, Sync0.
     elim: k; [by move|exact _].
   Qed.
 

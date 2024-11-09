@@ -45,14 +45,14 @@ Section ty.
   #[export] Instance ty_pty_perserv {X} : Preserv (ty_pty (X:=X)).
   Proof. solve_proper. Qed.
 
-  (** Simplify [proeq] over [ty] *)
-  Lemma ty_proeq {X T U k} :
+  (** Simplify [proeqv] over [ty] *)
+  Lemma ty_proeqv {X T U k} :
     T ≡[k]@{ty CON Σ X}≡ U ↔
       (∀ t d xπ vl, T.1 t d xπ vl ≡[k]≡ U.1 t d xπ vl) ∧
       (∀ t d l α xπ, T.2 t d l α xπ ≡[k]≡ U.2 t d l α xπ).
   Proof. done. Qed.
-  (** Simplify [proeq_later] over [ty] *)
-  Lemma ty_proeq_later {X T U k} :
+  (** Simplify [proeqv_later] over [ty] *)
+  Lemma ty_proeqv_later {X T U k} :
     T ≡[<k]@{ty CON Σ X}≡ U ↔
       (∀ t d xπ vl, T.1 t d xπ vl ≡[<k]≡ U.1 t d xπ vl) ∧
       (∀ t d l α xπ, T.2 t d l α xπ ≡[<k]≡ U.2 t d l α xπ).

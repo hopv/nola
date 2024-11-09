@@ -30,7 +30,7 @@ Section inv_tokC.
   (** [cif_inv] is productive *)
   #[export] Instance cif_inv_tok_productive {N} : Productive (cif_inv_tok N).
   Proof.
-    move=> ??*. apply cif_in_preserv_productive=>//. by apply fun_proeq_later.
+    move=> ??*. apply cif_in_preserv_productive=>//. by apply fun_proeqv_later.
   Qed.
 
   Context `{!inv'GS (cifOF CON) Σ}.
@@ -72,7 +72,7 @@ Section bor_tokC.
   (** [cif_bor_tok] is productive *)
   #[export] Instance cif_bor_tok_productive {α} : Productive (cif_bor_tok α).
   Proof.
-    move=> ????. apply cif_in_preserv_productive=>//. by apply fun_proeq_later.
+    move=> ????. apply cif_in_preserv_productive=>//. by apply fun_proeqv_later.
   Qed.
 
   Context `{!borrowGS (cifOF CON) Σ}.
@@ -223,7 +223,7 @@ Section invC.
   (** [cif_inv] is productive *)
   #[export] Instance cif_inv_productive {N} : Productive (cif_inv N).
   Proof.
-    move=> ????. apply cif_in_preserv_productive=>//. by apply fun_proeq_later.
+    move=> ????. apply cif_in_preserv_productive=>//. by apply fun_proeqv_later.
   Qed.
 
   Context `{!inv'GS (cifOF CON) Σ, !iffJ (cifO CON Σ) JUDG}.

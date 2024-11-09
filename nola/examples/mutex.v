@@ -32,13 +32,13 @@ Section mutex_bor.
     Productive (cif_mutex_bor' α l).
   Proof.
     unfold cif_mutex_bor'=> n ?? eq. f_equiv. destruct n as [|n]=>//=.
-    do 3 f_equiv. move: eq. apply proeq_later_anti. lia.
+    do 3 f_equiv. move: eq. apply proeqv_later_anti. lia.
   Qed.
   #[export] Instance cif_mutex_bor_productive {α l} :
     Productive (cif_mutex_bor α l).
   Proof.
     unfold cif_mutex_bor=>/= n ?? eq. f_equiv. destruct n as [|n]=>//=. f_equiv.
-    move: eq. apply proeq_later_anti. lia.
+    move: eq. apply proeqv_later_anti. lia.
   Qed.
   (** [cif_mutex_bor'] is non-expansive *)
   #[export] Instance cif_mutex_bor'_ne {α l} :
