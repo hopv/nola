@@ -94,4 +94,15 @@ Section ty_anydep.
     rewrite etcx_extract /=. iIntros "[[% T] Γr]".
     iApply ("type" with "κ t pre [$T $Γr]").
   Qed.
+
+  (** Update the depth under [ty_anydep] *)
+  Lemma sub_anydep_depth v
+    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (v ◁{d} ty_anydep (X:=X) T)
+        Γi Γr get getr) {κ d'} :
+    ⊢ sub κ Γi (v ◁{d'} ty_anydep T ᵖ:: Γr)
+        (λ post xl, post (get xl, getr xl)').
+  Proof.
+    rewrite sub_unseal. iIntros (????) "!> $ $ pre". rewrite etcx_extract /=.
+    iIntros "[[% T] Γr] !>". iFrame "pre". iFrame.
+  Qed.
 End ty_anydep.
