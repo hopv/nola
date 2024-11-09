@@ -4,7 +4,7 @@ From nola.examples.rust_halt Require Export type.
 
 Section uninit.
   Context `{!rust_haltGS CON Σ, !rust_haltC CON, !Csem CON JUDG Σ,
-    !Jsem JUDG (iProp Σ)}.
+    !Jsem JUDG (iProp Σ), !rust_haltJ CON JUDG Σ, !rust_haltCS CON JUDG Σ}.
 
   (** ** [ty_uninit]: Universal type *)
   Definition pty_uninit sz : pty CON Σ unitₓ :=

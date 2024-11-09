@@ -9,14 +9,23 @@ Section ty_anydep.
     !rust_haltC CON, !rust_haltJ CON JUDG Σ, !rust_haltJS CON JUDG Σ}.
 
   (** [ty_anydep]: Any-depth type *)
-  Definition ty_anydep {X} (T : ty CON Σ X) : ty CON Σ X := pair (ty_size T)
+  Definition ty'_anydep_def {X} (T : ty CON Σ X) : ty' CON Σ X :=
     (λ t d xπ vl, ∃ d', ty_own T t d' xπ vl,
       λ t d l α xπ, ∃ d', ty_shr T t d' l α xπ)%cif.
+  Lemma ty'_anydep_aux : seal (@ty'_anydep_def). Proof. by eexists _. Qed.
+  Definition ty'_anydep {X} := ty'_anydep_aux.(unseal) X.
+  Lemma ty'_anydep_unseal : @ty'_anydep = @ty'_anydep_def.
+  Proof. by exact: seal_eq. Qed.
+  Definition ty_anydep {X} (T : ty CON Σ X) : ty CON Σ X :=
+    (ty_size T, ty'_anydep T).
+  Lemma ty_anydep_unseal : @ty_anydep = λ _ T, (ty_size T, ty'_anydep_def T).
+  Proof. by rewrite /ty_anydep ty'_anydep_unseal. Qed.
 
   (** [ty_anydep] is size-preserving *)
   #[export] Instance ty_anydep_preserv {X} : Preserv (@ty_anydep X).
   Proof.
-    move=> ??? /ty_proeqv[?[eqvO eqvS]]. apply ty_proeqv=>/=. split=>//.
+    move=> ??? /ty_proeqv[?[eqvO eqvS]]. rewrite ty_anydep_unseal.
+    apply ty_proeqv=>/=. split=>//.
     split=> *; f_equiv=> ?; [exact: eqvO|exact: eqvS].
   Qed.
   #[export] Instance ty_anydep_proper{X} : Proper ((≡) ==> (≡)) (@ty_anydep X).
@@ -31,7 +40,7 @@ Section ty_anydep.
   (** [ty_anydep] preserves [Ty] *)
   #[export] Instance ty_anydep_ty `{!Ty (X:=X) T} : Ty (ty_anydep T).
   Proof.
-    split=>//= *. { exact _. }
+    rewrite ty_anydep_unseal. split=>//= *. { exact _. }
     { iIntros "[% T]". by rewrite ty_own_size. }
     { iIntros "[% T]". iExists _. by iApply (ty_own_clair with "T"). }
     { iIntros "[% T]". iExists _. by iApply (ty_shr_clair with "T"). }
@@ -40,7 +49,7 @@ Section ty_anydep.
   (** [ty_anydep] preserves [TyOp] *)
   #[export] Instance ty_anydep_ty_op {X} `(!TyOp T κ) : TyOp (@ty_anydep X T) κ.
   Proof.
-    move=> ?. split=>/= >.
+    rewrite ty_anydep_unseal=> ?. split=>/= >.
     - iIntros "κ [% T]". iMod (ty_own_proph with "κ T") as (??) "($ & $ & →T)".
       iIntros "!> ξl". by iMod ("→T" with "ξl") as "[$$]".
     - iIntros "κα [% T]".
@@ -58,27 +67,33 @@ Section ty_anydep.
 
   (** [ty_anydep] preserves [Send] *)
   #[export] Instance ty_anydep_send `{!Send (X:=X) T} : Send (ty_anydep T).
-  Proof. move=>/= *. f_equiv=> ?. exact: send. Qed.
+  Proof.
+    rewrite ty_anydep_unseal. move=>/= *. f_equiv=> ?. exact: send.
+  Qed.
   (** [ty_anydep] preserves [Sync] *)
   #[export] Instance ty_anydep_sync `{!Sync (X:=X) T} : Sync (ty_anydep T).
-  Proof. move=>/= *?. f_equiv=> ?. exact: sync. Qed.
+  Proof.
+    rewrite ty_anydep_unseal. move=>/= *?. f_equiv=> ?. exact: sync.
+  Qed.
   (** [ty_anydep] preserves [Copy] *)
   #[export] Instance ty_anydep_copy `{!Copy (X:=X) T} : Copy (ty_anydep T).
   Proof.
-    split; [exact _|]=>/= *. iIntros "α t [% T]".
+    rewrite ty_anydep_unseal. split; [exact _|]=>/= *.
+    iIntros "α t [% T]".
     iMod (copy_shr_acc with "α t T") as (??) "($ & $ & $ & $)"=>//.
   Qed.
 
   (** Subtyping on [ty_anydep] *)
   Lemma subty_to_anydep {δ X T} : ⊢ subty (X:=X) δ T (ty_anydep T) id.
   Proof.
-    rewrite subty_unseal. iSplit; iModIntro=>/=.
+    rewrite subty_unseal ty_anydep_unseal. iSplit; iModIntro=>/=.
     { iIntros (????) "$". } { iIntros (?????) "$". }
   Qed.
   Lemma subty_anydep {δ X Y T U f} :
     subty (X:=X) (Y:=Y) δ T U f ⊢ subty δ (ty_anydep T) (ty_anydep U) f.
   Proof.
-    rewrite subty_unseal. iIntros "#[subO subS]". iSplit; iModIntro=>/=.
+    rewrite subty_unseal ty_anydep_unseal. iIntros "#[subO subS]".
+    iSplit; iModIntro=>/=.
     - iIntros (????) "[% T]". iExists _. by iApply "subO".
     - iIntros (?????) "[% T]". iExists _. by iApply "subS".
   Qed.
@@ -86,7 +101,10 @@ Section ty_anydep.
   (** Resolution over [ty_mod] *)
   #[export] Instance resol_anydep {X} `(!Resol T κ post) :
     Resol (ty_anydep (X:=X) T) κ post.
-  Proof. split=> > /=. iIntros "κ [% T]". iApply (resol with "κ T"). Qed.
+  Proof.
+    rewrite ty_anydep_unseal. split=> > /=. iIntros "κ [% T]".
+    iApply (resol with "κ T").
+  Qed.
 
   (** Eliminate [ty_anydep] *)
   Lemma type_anydep_elim v
@@ -96,7 +114,7 @@ Section ty_anydep.
       type κ Γi e Γo (λ post xl, pre post (get xl, getr xl)').
   Proof.
     rewrite type_unseal. iIntros "#type !>/=" (????) "κ t pre".
-    rewrite etcx_extract /=. iIntros "[[% T] Γr]".
+    rewrite etcx_extract ty_anydep_unseal /=. iIntros "[[% T] Γr]".
     iApply ("type" with "κ t pre [$T $Γr]").
   Qed.
 
@@ -107,7 +125,8 @@ Section ty_anydep.
     ⊢ sub κ Γi (v ◁{d'} ty_anydep T ᵖ:: Γr)
         (λ post xl, post (get xl, getr xl)').
   Proof.
-    rewrite sub_unseal. iIntros (????) "!> $ $ pre". rewrite etcx_extract /=.
-    iIntros "[[% T] Γr] !>". iFrame "pre". iFrame.
+    rewrite sub_unseal. iIntros (????) "!> $ $ pre". rewrite etcx_extract.
+    rewrite ty_anydep_unseal /=. iIntros "[[% T] Γr] !>".
+    iFrame "pre". iFrame.
   Qed.
 End ty_anydep.

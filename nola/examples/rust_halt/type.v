@@ -15,8 +15,8 @@ Definition ownty CON Σ X : prost :=
 Definition shrty CON Σ X : prost :=
   thread_id -pr> nat -pr> loc -pr> lft -pr> clair X -pr> cif CON Σ.
 (** Type model *)
-Definition ty CON Σ X : prost :=
-  (natPR * (ownty CON Σ X * shrty CON Σ X))%type.
+Definition ty' CON Σ X : prost := (ownty CON Σ X * shrty CON Σ X)%type.
+Definition ty CON Σ X : prost := (natPR * ty' CON Σ X)%type.
 
 (** Accessing members *)
 Notation ty_size T := T.1 (only parsing).
@@ -27,10 +27,19 @@ Notation ty_shr T := T.2.2 (only parsing).
 Definition sty CON Σ X : prost := (natPR * ownty CON Σ X)%type.
 Notation sty_size T := T.1 (only parsing).
 Notation sty_own T := T.2 (only parsing).
-Definition ty_sty `{!rust_haltGS CON Σ, !rust_haltC CON}
-  {X} (T : sty CON Σ X) : ty CON Σ X :=
-  pair (sty_size T)
+Section ty_sty.
+  Context `{!rust_haltGS CON Σ, !rust_haltC CON}.
+  Definition ty'_sty_def {X} (T : sty CON Σ X) : ty' CON Σ X :=
     (sty_own T, λ t d l α xπ, ∃ vl, l ↦∗ˢ[α] vl ∗ sty_own T t d xπ vl)%cif.
+  Lemma ty'_sty_aux : seal (@ty'_sty_def). Proof. by eexists _. Qed.
+  Definition ty'_sty {X} := ty'_sty_aux.(unseal) X.
+  Lemma ty'_sty_unseal : @ty'_sty = @ty'_sty_def. Proof. exact: seal_eq. Qed.
+  Definition ty_sty {X} (T : sty CON Σ X) : ty CON Σ X :=
+    (sty_size T, ty'_sty T).
+  Lemma ty_sty_unseal : @ty_sty = λ _ T, (sty_size T, ty'_sty_def T).
+  Proof. by rewrite /ty_sty ty'_sty_unseal. Qed.
+End ty_sty.
+
 (** Plain type, with the ownership formula ignoring the thread id, the depth,
   and the prophecy assignment *)
 Definition ownpty CON Σ X : prost := X -d> list val -d> cif CON Σ.
@@ -40,9 +49,12 @@ Notation pty_own T := T.2 (only parsing).
 Definition sty_pty {CON Σ X} (T : pty CON Σ X) : sty CON Σ X :=
   pair (pty_size T)
     (λ _ _ xπ vl, ∃ x, ⌜∀ π, xπ π = x⌝ ∗ pty_own T x vl)%cif.
-Definition ty_pty `{!rust_haltGS CON Σ, !rust_haltC CON} {X} (T : pty CON Σ X)
-  : ty CON Σ X :=
-  ty_sty (sty_pty T).
+Section ty_pty.
+  Context `{!rust_haltGS CON Σ, !rust_haltC CON}.
+  Definition ty_pty {X} (T : pty CON Σ X) : ty CON Σ X := ty_sty (sty_pty T).
+  Lemma ty_pty_unseal : @ty_pty = λ _ T, (pty_size T, ty'_sty_def (sty_pty T)).
+  Proof. by rewrite /ty_pty ty_sty_unseal. Qed.
+End ty_pty.
 
 Section ty.
   Context `{!rust_haltGS CON Σ, !rust_haltC CON}.
@@ -50,8 +62,8 @@ Section ty.
   (** [ty_sty] is size-preserving *)
   #[export] Instance ty_sty_preserv {X} : Preserv (ty_sty (X:=X)).
   Proof.
-    move=> ?[??][??][/=/leibniz_equiv_iff<- eq]. unfold ty_sty=>/=.
-    f_equiv. f_equiv=>// >. f_equiv=> ?. f_equiv. apply eq.
+    move=> ?[??][??][/=/leibniz_equiv_iff<- eq]. rewrite ty_sty_unseal.
+    split=>//=. split=>//= >. f_equiv=> ?. f_equiv. apply eq.
   Qed.
   (** [sty_pty] is size-preserving *)
   #[export] Instance sty_pty_preserv {X} : Preserv (@sty_pty CON Σ X).
@@ -202,7 +214,8 @@ Section ty.
   (** [Sty] entails [Ty] *)
   #[export] Instance Ty_Sty `{!@Sty X T} : Ty (ty_sty T).
   Proof.
-    split=>/= >. { exact _. } { exact sty_own_size. } { exact sty_own_depth. }
+    rewrite ty_sty_unseal. split=>/= >. { exact _. }
+    { exact sty_own_size. } { exact sty_own_depth. }
     { move=> ?. do 3 f_equiv. by apply sty_own_depth. } { exact sty_own_clair. }
     { move=> ?. do 3 f_equiv. by apply sty_own_clair. }
   Qed.
@@ -319,7 +332,8 @@ Section ty_op.
         (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ] ∗ ⟦ sty_own T t d xπ vl ⟧ᶜ)) →
     TyOpAt (ty_sty T) κ d.
   Proof.
-    move=> sty_proph. split=>/= >; [exact: sty_proph|..].
+    move=> sty_proph. rewrite ty_sty_unseal.
+    split=>/= >; [exact: sty_proph|..].
     - iIntros "[κ $] (%vl & ↦ & T)".
       iMod (sty_proph with "κ T") as (??) "($ & $ & cl)". iIntros "!> ξl".
       iFrame "↦". by iApply "cl".
@@ -445,20 +459,21 @@ Section classes.
   #[export] Instance sty_send_sync `{!Send (ty_sty (X:=X) T)} :
     Sync (ty_sty (X:=X) T).
   Proof.
-    move=> >. unfold ty_sty, ty_shr=>/=. f_equiv=> ?. f_equiv. apply: send.
+    move=> >. move: Send0. rewrite ty_sty_unseal=>/= Send0.
+    f_equiv=> ?. f_equiv. exact: Send0.
   Qed.
 
   (** [pty] is [Send] and [Sync] *)
   #[export] Instance pty_send {X T} : Send (ty_pty (X:=X) T).
-  Proof. by move. Qed.
+  Proof. by rewrite /ty_pty ty_sty_unseal=>/= ?. Qed.
   #[export] Instance pty_sync {X T} : Sync (ty_pty (X:=X) T).
   Proof. exact _. Qed.
 
   (** [sty] is [Copy] *)
   #[export] Instance sty_copy `{!Sty (X:=X) T} : Copy (ty_sty (X:=X) T).
   Proof.
-    split; [exact _|]=>/= *. iIntros "α F (% & ↦ & $)".
-    rewrite sem_cif_spointsto_vec.
+    rewrite ty_sty_unseal. split; [exact _|]=>/= *.
+    iIntros "α F (% & ↦ & $)". rewrite sem_cif_spointsto_vec.
     iMod (spointsto_vec_acc with "α ↦") as (?) "[$ cl]".
     iDestruct (na_own_acc with "F") as "[$ →F]"; [set_solver|].
     iIntros "!> ↦s F∖". iMod ("cl" with "↦s") as "$". iModIntro. by iApply "→F".
@@ -528,8 +543,8 @@ Section subty.
         ⟦ sty_own U t d (λ π, f (xπ π)) vl ⟧ᶜ(δ)) ⊢
       @subty δ X Y (ty_sty T) (ty_sty U) f.
   Proof.
-    rewrite subty_unseal. iIntros "#sub". iSplit; [done|]=>/=.
-    iIntros (?????) "!> (% & $ & ?)". by iApply "sub".
+    rewrite subty_unseal ty_sty_unseal. iIntros "#sub".
+    iSplit; [done|]=>/=. iIntros (?????) "!> (% & $ & ?)". by iApply "sub".
   Qed.
   (** [subty] over [pty] *)
   Lemma subty_pty {δ X Y f} T U :

@@ -10,19 +10,22 @@ Section ty_box.
     !rust_haltJS CON JUDG Σ}.
 
   (** [ty_box]: Box pointer type *)
-  Definition ty_box_def {X} (T : ty CON Σ X) : ty CON Σ X := pair 1
+  Definition ty'_box_def {X} (T : ty CON Σ X) : ty' CON Σ X :=
     (λ t d xπ vl, ∃ l d' xπ' wl, ⌜vl = [ #l]⌝ ∗ ⌜d' < d⌝ ∗ ⌜∀ π, xπ' π = xπ π⌝ ∗
         ▷ l ↦∗ wl ∗ ▷ †l…(length wl) ∗ cif_store (ty_own T t d' xπ' wl),
       λ t d l α xπ, ∃ l' d' xπ', ⌜d' < d⌝ ∗ ⌜∀ π, xπ' π = xπ π⌝ ∗
         ▷ l ↦ˢ[α] #l' ∗ □ cif_store (ty_shr T t d' l' α xπ'))%cif.
-  Lemma ty_box_aux : seal (@ty_box_def). Proof. by eexists _. Qed.
-  Definition ty_box {X} := ty_box_aux.(unseal) X.
-  Lemma ty_box_unseal : @ty_box = @ty_box_def. Proof. exact: seal_eq. Qed.
+  Lemma ty'_box_aux : seal (@ty'_box_def). Proof. by eexists _. Qed.
+  Definition ty'_box {X} := ty'_box_aux.(unseal) X.
+  Lemma ty'_box_unseal : @ty'_box = @ty'_box_def. Proof. exact: seal_eq. Qed.
+  Definition ty_box {X} (T : ty CON Σ X) : ty CON Σ X := (1, ty'_box T).
+  Lemma ty_box_unseal : @ty_box = λ _ T, (1, ty'_box_def T).
+  Proof. by rewrite /ty_box ty'_box_unseal. Qed.
 
   (** [ty_box] is productive *)
   #[export] Instance ty_box_productive {X} : Productive (@ty_box X).
   Proof.
-    move=> ??? /ty_proeqv_later[eqvO eqvS]. rewrite ty_box_unseal /ty_box_def.
+    rewrite ty_box_unseal=> ??? /ty_proeqv_later[eqvO eqvS].
     apply ty_proeqv=>/=. split=>//. split=> >.
     - do 4 f_equiv=> ?. by rewrite eqvO.
     - do 3 f_equiv=> ?. by rewrite eqvS.
@@ -92,7 +95,8 @@ Section ty_box.
   (** [ty_box] preserves [Sync] *)
   #[export] Instance ty_box_sync `{!Sync (X:=X) T} : Sync (ty_box T).
   Proof.
-    rewrite ty_box_unseal=> > /=. do 3 f_equiv=> ?. do 5 f_equiv. apply: sync.
+    rewrite ty_box_unseal=> > /=. do 3 f_equiv=> ?. do 5 f_equiv.
+    apply: sync.
   Qed.
 
   (** Subtyping over [ty_box] *)
@@ -100,7 +104,8 @@ Section ty_box.
     □ (∀ δ', ⌜Deriv ih δ'⌝ -∗ ⌜ih δ'⌝ -∗ subty (X:=X) (Y:=Y) δ' T U f) ⊢
       subty δ (ty_box T) (ty_box U) f.
   Proof.
-    rewrite subty_unseal ty_box_unseal. iIntros "#tosub". iSplit; iModIntro=>/=.
+    rewrite subty_unseal ty_box_unseal /=. iIntros "#tosub".
+    iSplit; iModIntro=>/=.
     - iIntros (????) "(% & % & %xπ' & % & % & % & %eq & $ & $ & T)".
       iExists _, (f ∘ xπ'). rewrite !sem_cif_in /=.
       iDestruct (store_wand with "[] T") as "$"; last first.
@@ -128,9 +133,10 @@ Section ty_box.
     Read κ (S d) (ty_box T) d T (ty_box (ty_uninit (ty_size T))) id (λ _, ())
     | 20.
   Proof.
-    split=> ? t ??. iIntros "$ $". rewrite ty_box_unseal /=.
-    iDestruct 1 as (????[= ->]??) "(>$ & >† & T)". rewrite sem_cif_in /=.
-    iMod (stored_acc with "T") as "T". iDestruct (ty_own_size with "T") as %?.
+    rewrite ty_box_unseal /ty_uninit ty_pty_unseal /=. split=>/= ? t ??.
+    iIntros "$ $". iDestruct 1 as (????[= ->]??) "(>$ & >† & T)".
+    rewrite sem_cif_in /=. iMod (stored_acc with "T") as "T".
+    iDestruct (ty_own_size with "T") as %?.
     iDestruct (ty_own_depth (d':=d) with "T") as "T"; [lia|].
     iDestruct (ty_own_clair with "T") as "$"=>//.
     iMod (store_alloc (sty_own (sty_pty (pty_uninit _)) t 0 _ _) with "[]")

@@ -10,24 +10,31 @@ Section ty_shrref.
     !rust_haltJS CON JUDG Σ}.
 
   (** [ty_shrref]: Shared reference type *)
-  Definition sty_shrref_def {X} (α : lft) (T : ty CON Σ X) : sty CON Σ X :=
-    pair 1 (λ t d xπ vl,
-      ∃ l d' xπ', ⌜vl = [ #l]⌝ ∗ ⌜d' < d⌝ ∗ ⌜∀ π, xπ' π = xπ π⌝ ∗
+  Definition sty'_shrref_def {X} (α : lft) (T : ty CON Σ X) : ownty CON Σ X :=
+    λ t d xπ vl,
+      (∃ l d' xπ', ⌜vl = [ #l]⌝ ∗ ⌜d' < d⌝ ∗ ⌜∀ π, xπ' π = xπ π⌝ ∗
         □ cif_store (ty_shr T t d' l α xπ'))%cif.
-  Lemma sty_shrref_aux : seal (@sty_shrref_def). Proof. by eexists _. Qed.
-  Definition sty_shrref {X} := sty_shrref_aux.(unseal) X.
-  Lemma sty_shrref_unseal : @sty_shrref = @sty_shrref_def.
+  Lemma sty'_shrref_aux : seal (@sty'_shrref_def). Proof. by eexists _. Qed.
+  Definition sty'_shrref {X} := sty'_shrref_aux.(unseal) X.
+  Lemma sty'_shrref_unseal : @sty'_shrref = @sty'_shrref_def.
   Proof. exact: seal_eq. Qed.
+  Definition sty_shrref {X} (α : lft) (T : ty CON Σ X) : sty CON Σ X :=
+    (1, sty'_shrref α T).
+  Lemma sty_shrref_unseal : @sty_shrref = λ _ α T, (1, sty'_shrref_def α T).
+  Proof. by rewrite /sty_shrref sty'_shrref_unseal. Qed.
   Definition ty_shrref {X} (α : lft) (T : ty CON Σ X) : ty CON Σ X :=
     ty_sty (sty_shrref α T).
+  Lemma ty_shrref_unseal :
+    @ty_shrref = λ _ α T, (1, ty'_sty_def (1, sty'_shrref_def α T)).
+  Proof. by rewrite /ty_shrref ty_sty_unseal sty_shrref_unseal. Qed.
 
   (** [ty_shrref] is productive *)
   #[export] Instance ty_shrref_productive {X α} :
     Productive (@ty_shrref X α).
   Proof.
     move=> ??? /ty_proeqv_later [_ eqv]. apply: ty_sty_preserv.
-    apply sty_proeqv. rewrite sty_shrref_unseal /=. split=>// >.
-    do 3 f_equiv=> ?. by rewrite eqv.
+    rewrite sty_shrref_unseal. apply sty_proeqv=>/=. split=>// >.
+    unfold sty'_shrref_def=>/=. do 3 f_equiv=> ?. by rewrite eqv.
   Qed.
   #[export] Instance ty_shrref_proper {X α} :
     Proper ((≡) ==> (≡)) (@ty_shrref X α).
@@ -52,8 +59,8 @@ Section ty_shrref.
     `(!TyOpLt T κ d, !LftIncl κ α) :
     TyOpAt (ty_shrref α T) κ d.
   Proof.
-    apply: sty_op_at=> >. rewrite sty_shrref_unseal /=.
-    iIntros "κ". iDestruct 1 as (??? -> ??) "#T". rewrite sem_cif_in /=.
+    apply: sty_op_at=> >. rewrite sty_shrref_unseal /=. iIntros "κ".
+    iDestruct 1 as (??? -> ??) "#T". rewrite sem_cif_in /=.
     iMod (stored_acc with "T") as "{T}T".
     iDestruct (lft_incl'_live_acc (α:=κ ⊓ α) with "κ") as (?) "[κα →κ]".
     iMod (ty_shr_proph_lt with "κα T") as (???) "[$ →T]"=>//. iModIntro.
@@ -67,8 +74,8 @@ Section ty_shrref.
   #[export] Instance ty_shrref_send `{!Sync (X:=X) T} {α} :
     Send (ty_shrref α T).
   Proof.
-    move=>/= >. rewrite sty_shrref_unseal /sty_shrref_def /=. do 3 f_equiv=> ?.
-    do 5 f_equiv. apply: sync.
+    rewrite ty_shrref_unseal /sty'_shrref_def=> > /=. do 3 f_equiv=> ?.
+    do 5 f_equiv. exact: sync.
   Qed.
   (** [ty_shrref] preserves [Sync] *)
   #[export] Instance ty_shrref_sync `{!Sync (X:=X) T} {α} :
@@ -95,7 +102,7 @@ Section ty_shrref.
   Lemma read_shrref `{!Ty (X:=X) T, !Copy T, !LftIncl κ α} {d} :
     Read κ (S d) (ty_shrref α T) d T (ty_shrref α T) id id.
   Proof.
-    split=>/= >. iIntros "κ t". rewrite sty_shrref_unseal /=.
+    rewrite ty_shrref_unseal. split=>/= >. iIntros "κ t".
     iDestruct 1 as (???[= ->]??) "#sT".
     rewrite sem_cif_in /=. iMod (stored_acc with "sT") as "sT'".
     iDestruct (lft_incl'_live_acc (α:=α) with "κ") as (?) "[α →κ]".
@@ -120,7 +127,7 @@ Section ty_shrref.
       type κ Γi e Γo (λ post xl, pre post (get xl, getr xl)').
   Proof.
     rewrite type_unseal. iIntros "#type !>/=" (????) "κ t pre".
-    rewrite etcx_extract /ty_shrref sty_shrref_unseal /=.
+    rewrite etcx_extract ty_shrref_unseal /=.
     iIntros "[shrrefT Γr]". iDestruct "shrrefT" as (?????) "big".
     iApply ("type" with "[%] κ t pre [big $Γr]"); [lia|]=>/=. by iFrame.
   Qed.
