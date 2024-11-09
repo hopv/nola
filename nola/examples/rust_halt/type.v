@@ -130,6 +130,15 @@ Section ty.
       ⟦ ty_shr T t d l α xπ ⟧ᶜ(δ) ⊢ ⟦ ty_shr T t d l α xπ' ⟧ᶜ(δ);
   }.
 
+  (** [ty_own_clair] applied to [⊣⊢] *)
+  Lemma ty_own_clair' `{!@Ty X T} {t d xπ xπ' vl δ} : (∀ π, xπ π = xπ' π) →
+    ⟦ ty_own T t d xπ vl ⟧ᶜ(δ) ⊣⊢ ⟦ ty_own T t d xπ' vl ⟧ᶜ(δ).
+  Proof. move=> ?. apply bi.equiv_entails. split; by apply: ty_own_clair. Qed.
+  (** [ty_shr_clair] applied to [⊣⊢] *)
+  Lemma ty_shr_clair' `{!@Ty X T} {t d l α xπ xπ' δ} : (∀ π, xπ π = xπ' π) →
+    ⟦ ty_shr T t d l α xπ ⟧ᶜ(δ) ⊣⊢ ⟦ ty_shr T t d l α xπ' ⟧ᶜ(δ).
+  Proof. move=> ?. apply bi.equiv_entails. split; by apply: ty_shr_clair. Qed.
+
   (** Basic properties of a simple type *)
   Class Sty {X} (T : sty CON Σ X) : Prop := STY {
     (** The ownership predicate is persistent *)
@@ -144,6 +153,11 @@ Section ty.
     sty_own_clair {t d xπ xπ' vl δ} : (∀ π, xπ π = xπ' π) →
       ⟦ sty_own T t d xπ vl ⟧ᶜ(δ) ⊢ ⟦ sty_own T t d xπ' vl ⟧ᶜ(δ);
   }.
+
+  (** [sty_own_clair] applied to [⊣⊢] *)
+  Lemma sty_own_clair' `{!@Sty X T} {t d xπ xπ' vl δ} : (∀ π, xπ π = xπ' π) →
+    ⟦ sty_own T t d xπ vl ⟧ᶜ(δ) ⊣⊢ ⟦ sty_own T t d xπ' vl ⟧ᶜ(δ).
+  Proof. move=> ?. apply bi.equiv_entails. split; by apply: sty_own_clair. Qed.
 
   (** Basic properties of a plain type *)
   Class Pty {X} (T : pty CON Σ X) : Prop := PTY {
