@@ -48,10 +48,10 @@ Section read_write.
     (U : ty CON Σ Y) (T' : ty CON Σ X') (get : X → Y) (set : X → X')
     : Prop := READ {
     read {q t xπ v} :
-      q.[κ] -∗ na_own t ⊤ -∗ ⟦ T.1 t d xπ [v] ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
-        ∃ l wl r, ⌜v = # l⌝ ∗ l ↦∗{r} wl ∗ ⟦ U.1 t du (get ∘ xπ) wl ⟧ᶜ ∗
+      q.[κ] -∗ na_own t ⊤ -∗ ⟦ ty_own T t d xπ [v] ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
+        ∃ l wl r, ⌜v = # l⌝ ∗ l ↦∗{r} wl ∗ ⟦ ty_own U t du (get ∘ xπ) wl ⟧ᶜ ∗
           (l ↦∗{r} wl =[rust_halt_wsat]{⊤}=∗
-            q.[κ] ∗ na_own t ⊤ ∗ ⟦ T'.1 t d (set ∘ xπ) [v] ⟧ᶜ);
+            q.[κ] ∗ na_own t ⊤ ∗ ⟦ ty_own T' t d (set ∘ xπ) [v] ⟧ᶜ);
   }.
 
   (** [Write]: Write to a pointer type *)
@@ -59,24 +59,26 @@ Section read_write.
     (U : ty CON Σ Y) (du' : nat) (U' : ty CON Σ Y') (d' : nat)
     (T' : ty CON Σ X') (get : X → Y) (set : X → Y' → X') : Prop := WRITE {
     write {q t xπ v} :
-      q.[κ] -∗ ⟦ T.1 t d xπ [v] ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ l wl,
-        ⌜v = # l⌝ ∗ l ↦∗ wl ∗ ⟦ U.1 t du (get ∘ xπ) wl ⟧ᶜ ∗
-        (∀ yπ' wl', l ↦∗ wl' -∗ ⟦ U'.1 t du' yπ' wl' ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
-          q.[κ] ∗ ⟦ T'.1 t d' (λ π, set (xπ π) (yπ' π)) [v] ⟧ᶜ);
+      q.[κ] -∗ ⟦ ty_own T t d xπ [v] ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ l wl,
+        ⌜v = # l⌝ ∗ l ↦∗ wl ∗ ⟦ ty_own U t du (get ∘ xπ) wl ⟧ᶜ ∗
+        (∀ yπ' wl', l ↦∗ wl' -∗ ⟦ ty_own U' t du' yπ' wl' ⟧ᶜ
+          =[rust_halt_wsat]{⊤}=∗
+          q.[κ] ∗ ⟦ ty_own T' t d' (λ π, set (xπ π) (yπ' π)) [v] ⟧ᶜ);
   }.
 
   (** Reading a value from a pointer *)
   Lemma type_read v
     `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (v ◁{d} T) Γ Γr get' getr,
-      !Read (Y:=Y) (X':=X') κ d T du U T' get set, !Ty U 1) :
+      !Read (Y:=Y) (X':=X') κ d T du U T' get set, !Ty U) :
+    ty_size U = 1 →
     ⊢ type κ Γ (!v) (λ r, r ◁{du} U ᵖ:: v ◁{d} T' ᵖ:: Γr)
         (λ post zl, let x := get' zl in post (get x, set x, getr zl)').
   Proof.
-    rewrite type_unseal. iIntros (????) "!> κ t pre".
+    rewrite type_unseal. iIntros (U1 ????) "!> κ t pre".
     rewrite etcx_extract /=. iIntros "[T Γr]".
     iMod (read with "κ t T") as (? wl ? ->) "(↦ & U & →T')".
-    iDestruct (ty_own_size with "U") as %?. destruct wl as [|w[|??]]=>//.
-    rewrite heap_pointsto_vec_singleton. wp_read.
+    iDestruct (ty_own_size with "U") as %lwl. rewrite U1 in lwl.
+    destruct wl as [|w[|??]]=>//. rewrite heap_pointsto_vec_singleton. wp_read.
     iMod ("→T'" with "↦") as "($ & $ & T')". iModIntro. iFrame "pre". iFrame.
   Qed.
 
@@ -84,17 +86,18 @@ Section read_write.
   Lemma type_write v w
     `(!TcxExtract (Xl:=[X;Y]) (Yl:=Zl) (Zl:=Zl') ᵖ[v ◁{d} T; w ◁{du} U] Γ Γr
         get' getr,
-      !Write (Y:=Y') (X':=X') κ d T du' U' du U d' T' get set, !Ty U' 1,
+      !Write (Y:=Y') (X':=X') κ d T du' U' du U d' T' get set, !Ty U',
       !Resol U' κ postr) :
+    ty_size U' = 1 →
     ⊢ type κ Γ (v <- w) (λ _, v ◁{d'} T' ᵖ:: Γr)
         (λ post zl, let '(x, y, _)' := get' zl in
           postr (get x) → post (set x y, getr zl)')%type.
   Proof.
-    rewrite type_unseal. iIntros (????) "!> κ $ pre". rewrite tcx_extract /=.
+    rewrite type_unseal. iIntros (U'1 ????) "!> κ $ pre". rewrite tcx_extract /=.
     iIntros "[(T & U & _) Γr]".
     iMod (write with "κ T") as (? wl ->) "(↦ & U' & →T')".
-    iDestruct (ty_own_size with "U'") as %?. destruct wl as [|?[|??]]=>//.
-    rewrite heap_pointsto_vec_singleton. wp_write.
+    iDestruct (ty_own_size with "U'") as %lwl. rewrite U'1 in lwl.
+    destruct wl as [|?[|??]]=>//. rewrite heap_pointsto_vec_singleton. wp_write.
     rewrite -heap_pointsto_vec_singleton. iMod ("→T'" with "↦ U") as "[κ Tt']".
     iMod (resol with "κ U'") as "[$ postr]". iModIntro. iExists (λ _, (_, _)').
     iFrame "Tt' Γr". iApply (proph_obs_impl2 with "postr pre")=>/= ?? to.
@@ -106,18 +109,19 @@ Section read_write.
     `(!TcxExtract (Xl:=[Xs; Xt]) (Yl:=Zl) (Zl:=Zl') ᵖ[vs ◁{ds} Ts; vt ◁{dt} Tt]
         Γ Γr get getr,
       !Read (Y:=Y) (X':=Xs') κ ds Ts du U Ts' gets sets,
-      !Write (Y:=Y') (X':=Xt') κ dt Tt du' U' du U dt' Tt' gett sett, !Ty U sz,
-      !Ty U' sz, !Resol U' κ postr) :
+      !Write (Y:=Y') (X':=Xt') κ dt Tt du' U' du U dt' Tt' gett sett, !Ty U,
+      !Ty U', !Resol U' κ postr) {sz} :
+    ty_size U = sz → ty_size U' = sz →
     ⊢ type κ Γ (vt <-{sz} !vs)%E (λ _, vs ◁{ds} Ts' ᵖ:: vt ◁{dt'} Tt' ᵖ:: Γr)
         (λ post zl, let '(xs, xt, _)' := get zl in
           postr (gett xt) → post (sets xs, sett xt (gets xs), getr zl)')%type.
   Proof.
-    rewrite type_unseal. iIntros (????) "!> [κ κ'] t pre".
+    rewrite type_unseal. iIntros (Usz U'sz ????) "!> [κ κ'] t pre".
     rewrite tcx_extract /=. iIntros "[(Ts & Tt & _) Γr]".
     iMod (read with "κ t Ts") as (? wls ? ->) "(↦s & U & →Ts')".
     iMod (write with "κ' Tt") as (? wlt ->) "(↦t & U' & →Tt')".
-    iDestruct (ty_own_size with "U") as %?.
-    iDestruct (ty_own_size with "U'") as %?.
+    iDestruct (ty_own_size with "U") as %lU. rewrite Usz in lU.
+    iDestruct (ty_own_size with "U'") as %lU'. rewrite U'sz in lU'.
     wp_apply (twp_memcpy wls wlt with "[$↦s $↦t]")=>//. iIntros "[↦s ↦t]".
     iMod ("→Ts'" with "↦s") as "($ & $ & Ts')".
     iMod ("→Tt'" with "↦t U") as "[κ Tt']".

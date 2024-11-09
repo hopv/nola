@@ -54,7 +54,7 @@ Section type.
   (** Bump up the depth of an object *)
   Lemma sub_depth v d'
     `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (v ◁{d} T) Γ Γr get getr,
-      !Ty T sz) {κ} :
+      !Ty T) {κ} :
     d ≤ d' →
     ⊢ sub κ Γ (v ◁{d'} T ᵖ:: Γr) (λ post zl, post (get zl, getr zl)').
   Proof.

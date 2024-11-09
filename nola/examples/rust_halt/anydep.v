@@ -9,27 +9,27 @@ Section ty_anydep.
     !rust_haltC CON, !rust_haltJ CON JUDG Σ, !rust_haltJS CON JUDG Σ}.
 
   (** [ty_anydep]: Any-depth type *)
-  Definition ty_anydep {X} (T : ty CON Σ X) : ty CON Σ X :=
-    (λ t d xπ vl, ∃ d', T.1 t d' xπ vl,
-      λ t d l α xπ, ∃ d', T.2 t d' l α xπ)%cif.
+  Definition ty_anydep {X} (T : ty CON Σ X) : ty CON Σ X := pair (ty_size T)
+    (λ t d xπ vl, ∃ d', ty_own T t d' xπ vl,
+      λ t d l α xπ, ∃ d', ty_shr T t d' l α xπ)%cif.
 
   (** [ty_anydep] is size-preserving *)
   #[export] Instance ty_anydep_preserv {X} : Preserv (@ty_anydep X).
   Proof.
-    move=> ?[??][??][/=eqvO eqvS].
-    split=>/= >; f_equiv=> ?; [apply eqvO|apply eqvS].
+    move=> ??? /ty_proeqv[?[eqvO eqvS]]. apply ty_proeqv=>/=. split=>//.
+    split=> *; f_equiv=> ?; [exact: eqvO|exact: eqvS].
   Qed.
   #[export] Instance ty_anydep_proper{X} : Proper ((≡) ==> (≡)) (@ty_anydep X).
   Proof. apply preserv_proper, _. Qed.
   #[export] Instance ty_anydep_map_preserv {X} `(!Preserv' PR _ F) :
     Preserv (λ T, @ty_anydep X (F T)).
-  Proof. solve_proper. Qed.
+  Proof. move=> ?*?*. by do 2 f_equiv. Qed.
   #[export] Instance ty_anydep_map_productive {X} `(!Productive' PR _ F) :
     Productive (λ T, @ty_anydep X (F T)).
-  Proof. solve_proper. Qed.
+  Proof. move=> ?*?*. by do 2 f_equiv. Qed.
 
   (** [ty_anydep] preserves [Ty] *)
-  #[export] Instance ty_anydep_ty `{!Ty (X:=X) T sz} : Ty (ty_anydep T) sz.
+  #[export] Instance ty_anydep_ty `{!Ty (X:=X) T} : Ty (ty_anydep T).
   Proof.
     split=>//= *. { exact _. }
     { iIntros "[% T]". by rewrite ty_own_size. }
@@ -49,7 +49,7 @@ Section ty_anydep.
     - iIntros "[κ α] b".
       iMod (bord_open (M:=borrowM) with "α b") as "/=[o (% & ↦ & % & T)]".
       iMod (obord_subdiv (FML:=cifOF _) (M:=borrowM)
-        [∃ vl, ▷ _ ↦∗ vl ∗ T.1 _ _ _ vl]%cif with "[] o [$↦ $T //] []")
+        [∃ vl, ▷ _ ↦∗ vl ∗ ty_own T _ _ _ vl]%cif with "[] o [$↦ $T //] []")
         as "(α & _ & b & _)"=>/=.
       { iApply lft_sincl_refl. } { by iIntros "_ [(% & $ & $) _]". }
       rewrite bor_tok_bor.
@@ -58,13 +58,12 @@ Section ty_anydep.
 
   (** [ty_anydep] preserves [Send] *)
   #[export] Instance ty_anydep_send `{!Send (X:=X) T} : Send (ty_anydep T).
-  Proof. move=>/= >. f_equiv=> ?. apply: send. Qed.
+  Proof. move=>/= *. f_equiv=> ?. exact: send. Qed.
   (** [ty_anydep] preserves [Sync] *)
   #[export] Instance ty_anydep_sync `{!Sync (X:=X) T} : Sync (ty_anydep T).
-  Proof. move=>/= >. f_equiv=> ?. apply: sync. Qed.
+  Proof. move=>/= *?. f_equiv=> ?. exact: sync. Qed.
   (** [ty_anydep] preserves [Copy] *)
-  #[export] Instance ty_anydep_copy `{!Copy (X:=X) T sz} :
-    Copy (ty_anydep T) sz.
+  #[export] Instance ty_anydep_copy `{!Copy (X:=X) T} : Copy (ty_anydep T).
   Proof.
     split; [exact _|]=>/= *. iIntros "α t [% T]".
     iMod (copy_shr_acc with "α t T") as (??) "($ & $ & $ & $)"=>//.

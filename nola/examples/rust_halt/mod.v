@@ -10,26 +10,29 @@ Section ty_mod.
 
   (** [ty_mod]: Modification type *)
   Definition ty_mod {X Y} (f : Y → X) (T : ty CON Σ X) : ty CON Σ Y :=
-    (λ t d yπ vl, T.1 t d (f ∘ yπ) vl, λ t d l α yπ, T.2 t d l α (f ∘ yπ)).
+    pair (ty_size T)
+      (λ t d yπ vl, ty_own T t d (f ∘ yπ) vl,
+        λ t d l α yπ, ty_shr T t d l α (f ∘ yπ)).
 
   Context {X Y} {f : X → Y}.
 
   (** [ty_mod] is size-preserving *)
   #[export] Instance ty_mod_preserv : Preserv (@ty_mod _ _ f).
   Proof.
-    move=> ?[??][??][/=eqvO eqvS]. split=>/= >; [apply eqvO|apply eqvS].
+    move=> ??? /ty_proeqv[?[eqvO eqvS]]. apply ty_proeqv=>/=. split; [done|].
+    split=> >; [exact: eqvO|exact: eqvS].
   Qed.
   #[export] Instance ty_mod_proper : Proper ((≡) ==> (≡)) (@ty_mod _ _ f).
   Proof. apply preserv_proper, _. Qed.
   #[export] Instance ty_mod_map_preserv `(!Preserv' PR _ F) :
     Preserv (λ T, @ty_mod _ _ f (F T)).
-  Proof. solve_proper. Qed.
+  Proof. move=> ?*?*. by do 2 f_equiv. Qed.
   #[export] Instance ty_mod_map_productive `(!Productive' PR _ F) :
     Productive (λ T, @ty_mod _ _ f (F T)).
-  Proof. solve_proper. Qed.
+  Proof. move=> ?*?*. by do 2 f_equiv. Qed.
 
   (** [ty_mod] preserves [Ty] *)
-  #[export] Instance ty_mod_ty `{!Ty T sz} : Ty (ty_mod f T) sz.
+  #[export] Instance ty_mod_ty `{!Ty T} : Ty (ty_mod f T).
   Proof.
     split=>/= >. { exact _. } { exact: ty_own_size. }
     { exact: ty_own_depth. } { exact: ty_shr_depth. }
@@ -51,18 +54,18 @@ Section ty_mod.
 
   (** [ty_mod] preserves [Send] *)
   #[export] Instance ty_mod_send `{!Send T} : Send (ty_mod f T).
-  Proof. move=>/= >. apply: send. Qed.
+  Proof. move=>/= >. exact: send. Qed.
   (** [ty_mod] preserves [Sync] *)
   #[export] Instance ty_mod_sync `{!Sync T} : Sync (ty_mod f T).
-  Proof. move=>/= >. apply: sync. Qed.
+  Proof. move=>/= >. exact: sync. Qed.
   (** [ty_mod] preserves [Copy] *)
-  #[export] Instance ty_mod_copy `{!Copy T sz} : Copy (ty_mod f T) sz.
+  #[export] Instance ty_mod_copy `{!Copy T} : Copy (ty_mod f T).
   Proof. split=>/= >; [exact _|exact: copy_shr_acc]. Qed.
 
   (** Subtyping on [ty_mod] *)
   Lemma subty_of_mod {δ T} : ⊢ subty δ (ty_mod f T) T f.
   Proof. rewrite subty_unseal. iSplit; iModIntro; by iIntros. Qed.
-  Lemma subty_to_mod {δ g} `{!Ty T sz} :
+  Lemma subty_to_mod {δ g} `{!Ty T} :
     (∀ x, f (g x) = x) → ⊢ subty δ T (ty_mod f T) g.
   Proof.
     rewrite subty_unseal=> eq. iSplit; iModIntro=>/=.

@@ -6,6 +6,8 @@ Implicit Type (CON : cifcon) (Σ : gFunctors) (X : xty).
 
 (** ** Type model *)
 
+Canonical natPR : prost := discretePR nat.
+
 (** Ownership formula *)
 Definition ownty CON Σ X : prost :=
   thread_id -pr> nat -pr> clair X -pr> list val -pr> cif CON Σ.
@@ -13,18 +15,31 @@ Definition ownty CON Σ X : prost :=
 Definition shrty CON Σ X : prost :=
   thread_id -pr> nat -pr> loc -pr> lft -pr> clair X -pr> cif CON Σ.
 (** Type model *)
-Definition ty CON Σ X : prost := (ownty CON Σ X * shrty CON Σ X)%type.
+Definition ty CON Σ X : prost :=
+  (natPR * (ownty CON Σ X * shrty CON Σ X))%type.
+
+(** Accessing members *)
+Notation ty_size T := T.1 (only parsing).
+Notation ty_own T := T.2.1 (only parsing).
+Notation ty_shr T := T.2.2 (only parsing).
 
 (** Simple type, with the sharing formula defined from the ownership formula *)
-Definition sty := ownty.
+Definition sty CON Σ X : prost := (natPR * ownty CON Σ X)%type.
+Notation sty_size T := T.1 (only parsing).
+Notation sty_own T := T.2 (only parsing).
 Definition ty_sty `{!rust_haltGS CON Σ, !rust_haltC CON}
-  {X} (T : ownty CON Σ X) : ty CON Σ X :=
-  (T, λ t d l α xπ, ∃ vl, l ↦∗ˢ[α] vl ∗ T t d xπ vl)%cif.
+  {X} (T : sty CON Σ X) : ty CON Σ X :=
+  pair (sty_size T)
+    (sty_own T, λ t d l α xπ, ∃ vl, l ↦∗ˢ[α] vl ∗ sty_own T t d xπ vl)%cif.
 (** Plain type, with the ownership formula ignoring the thread id, the depth,
   and the prophecy assignment *)
-Definition pty CON Σ X := X -d> list val -d> cif CON Σ.
+Definition ownpty CON Σ X : prost := X -d> list val -d> cif CON Σ.
+Definition pty CON Σ X := (natPR * ownpty CON Σ X)%type.
+Notation pty_size T := T.1 (only parsing).
+Notation pty_own T := T.2 (only parsing).
 Definition sty_pty {CON Σ X} (T : pty CON Σ X) : sty CON Σ X :=
-  λ _ _ xπ vl, (∃ x, ⌜∀ π, xπ π = x⌝ ∗ T x vl)%cif.
+  pair (pty_size T)
+    (λ _ _ xπ vl, ∃ x, ⌜∀ π, xπ π = x⌝ ∗ pty_own T x vl)%cif.
 Definition ty_pty `{!rust_haltGS CON Σ, !rust_haltC CON} {X} (T : pty CON Σ X)
   : ty CON Σ X :=
   ty_sty (sty_pty T).
@@ -35,28 +50,59 @@ Section ty.
   (** [ty_sty] is size-preserving *)
   #[export] Instance ty_sty_preserv {X} : Preserv (ty_sty (X:=X)).
   Proof.
-    move=> ??? eq. unfold ty_sty. f_equiv=>// >. f_equiv=> ?. f_equiv.
-    apply eq.
+    move=> ?[??][??][/=/leibniz_equiv_iff<- eq]. unfold ty_sty=>/=.
+    f_equiv. f_equiv=>// >. f_equiv=> ?. f_equiv. apply eq.
   Qed.
   (** [sty_pty] is size-preserving *)
   #[export] Instance sty_pty_preserv {X} : Preserv (@sty_pty CON Σ X).
-  Proof. move=> ??? eq. unfold sty_pty=> >. f_equiv=> ?. f_equiv. apply eq. Qed.
+  Proof.
+    move=> ?[??][??][/=/leibniz_equiv_iff<- eq]. unfold sty_pty=>/=.
+    f_equiv=> >. f_equiv=> ?. f_equiv. apply eq.
+  Qed.
   (** [ty_pty] is size-preserving *)
   #[export] Instance ty_pty_preserv {X} : Preserv (ty_pty (X:=X)).
   Proof. solve_proper. Qed.
 
+  (** Simplify [≡] over [ty] *)
+  Lemma ty_equiv {X T U} :
+    T ≡@{ty CON Σ X} U ↔ ty_size T = ty_size U ∧
+      (∀ t d xπ vl, ty_own T t d xπ vl ≡ ty_own U t d xπ vl) ∧
+      (∀ t d l α xπ, ty_shr T t d l α xπ ≡ ty_shr U t d l α xπ).
+  Proof. done. Qed.
   (** Simplify [proeqv] over [ty] *)
   Lemma ty_proeqv {X T U k} :
-    T ≡[k]@{ty CON Σ X}≡ U ↔
-      (∀ t d xπ vl, T.1 t d xπ vl ≡[k]≡ U.1 t d xπ vl) ∧
-      (∀ t d l α xπ, T.2 t d l α xπ ≡[k]≡ U.2 t d l α xπ).
+    T ≡[k]@{ty CON Σ X}≡ U ↔ ty_size T = ty_size U ∧
+      (∀ t d xπ vl, ty_own T t d xπ vl ≡[k]≡ ty_own U t d xπ vl) ∧
+      (∀ t d l α xπ, ty_shr T t d l α xπ ≡[k]≡ ty_shr U t d l α xπ).
   Proof. done. Qed.
   (** Simplify [proeqv_later] over [ty] *)
   Lemma ty_proeqv_later {X T U k} :
-    T ≡[<k]@{ty CON Σ X}≡ U ↔
-      (∀ t d xπ vl, T.1 t d xπ vl ≡[<k]≡ U.1 t d xπ vl) ∧
-      (∀ t d l α xπ, T.2 t d l α xπ ≡[<k]≡ U.2 t d l α xπ).
-  Proof. by case k. Qed.
+    T ≡[<k]@{ty CON Σ X}≡ U →
+      (∀ t d xπ vl, ty_own T t d xπ vl ≡[<k]≡ ty_own U t d xπ vl) ∧
+      (∀ t d l α xπ, ty_shr T t d l α xπ ≡[<k]≡ ty_shr U t d l α xπ).
+  Proof. by case k=>//= ?[??]. Qed.
+
+  (** Simplify [≡] over [sty] *)
+  Lemma sty_equiv {X T U} :
+    T ≡@{sty CON Σ X} U ↔ sty_size T = sty_size U ∧
+      (∀ t d xπ vl, sty_own T t d xπ vl ≡ sty_own U t d xπ vl).
+  Proof. done. Qed.
+  (** Simplify [proeqv] over [sty] *)
+  Lemma sty_proeqv {X T U k} :
+    T ≡[k]@{sty CON Σ X}≡ U ↔ sty_size T = sty_size U ∧
+      (∀ t d xπ vl, sty_own T t d xπ vl ≡[k]≡ sty_own U t d xπ vl).
+  Proof. done. Qed.
+
+  (** Simplify [≡] over [pty] *)
+  Lemma pty_equiv {X T U} :
+    T ≡@{pty CON Σ X} U ↔ pty_size T = pty_size U ∧
+      (∀ x vl, pty_own T x vl ≡ pty_own U x vl).
+  Proof. done. Qed.
+  (** Simplify [proeqv] over [pty] *)
+  Lemma pty_proeqv {X T U k} :
+    T ≡[k]@{pty CON Σ X}≡ U ↔ pty_size T = pty_size U ∧
+      (∀ x vl, pty_own T x vl ≡[k]≡ pty_own U x vl).
+  Proof. done. Qed.
 End ty.
 
 (** ** Basic properties of a type *)
@@ -65,94 +111,99 @@ Section ty.
   Context `{!Csem CON JUDG Σ}.
 
   (** Basic properties of a type *)
-  Class Ty {X} (T : ty CON Σ X) (sz : nat) : Prop := TY {
+  Class Ty {X} (T : ty CON Σ X) : Prop := TY {
     (** The sharing predicate is persistent *)
-    ty_shr_persistent {t d l α xπ δ} :: Persistent ⟦ T.2 t d l α xπ ⟧ᶜ(δ);
+    ty_shr_persistent {t d l α xπ δ} :: Persistent ⟦ ty_shr T t d l α xπ ⟧ᶜ(δ);
     (** The ownership predicate entails the size constraint *)
-    ty_own_size {t d xπ vl δ} : ⟦ T.1 t d xπ vl ⟧ᶜ(δ) ⊢ ⌜length vl = sz⌝;
+    ty_own_size {t d xπ vl δ} :
+      ⟦ ty_own T t d xπ vl ⟧ᶜ(δ) ⊢ ⌜length vl = ty_size T⌝;
     (** The depth of the ownership and sharing predicates can be bumped up *)
     ty_own_depth {t d d' xπ vl δ} :
-      d ≤ d' → ⟦ T.1 t d xπ vl ⟧ᶜ(δ) ⊢ ⟦ T.1 t d' xπ vl ⟧ᶜ(δ);
+      d ≤ d' → ⟦ ty_own T t d xπ vl ⟧ᶜ(δ) ⊢ ⟦ ty_own T t d' xπ vl ⟧ᶜ(δ);
     ty_shr_depth {t d d' l α xπ δ} :
-      d ≤ d' → ⟦ T.2 t d l α xπ ⟧ᶜ(δ) ⊢ ⟦ T.2 t d' l α xπ ⟧ᶜ(δ);
+      d ≤ d' → ⟦ ty_shr T t d l α xπ ⟧ᶜ(δ) ⊢ ⟦ ty_shr T t d' l α xπ ⟧ᶜ(δ);
     (** The ownership and sharing predicates are proper over the clairvoyant
       value *)
-    ty_own_clair {t d xπ xπ' vl δ} :
-      (∀ π, xπ π = xπ' π) → ⟦ T.1 t d xπ vl ⟧ᶜ(δ) ⊢ ⟦ T.1 t d xπ' vl ⟧ᶜ(δ);
-    ty_shr_clair {t d l α xπ xπ' δ} :
-      (∀ π, xπ π = xπ' π) → ⟦ T.2 t d l α xπ ⟧ᶜ(δ) ⊢ ⟦ T.2 t d l α xπ' ⟧ᶜ(δ);
+    ty_own_clair {t d xπ xπ' vl δ} : (∀ π, xπ π = xπ' π) →
+      ⟦ ty_own T t d xπ vl ⟧ᶜ(δ) ⊢ ⟦ ty_own T t d xπ' vl ⟧ᶜ(δ);
+    ty_shr_clair {t d l α xπ xπ' δ} : (∀ π, xπ π = xπ' π) →
+      ⟦ ty_shr T t d l α xπ ⟧ᶜ(δ) ⊢ ⟦ ty_shr T t d l α xπ' ⟧ᶜ(δ);
   }.
 
   (** Basic properties of a simple type *)
-  Class Sty {X} (T : sty CON Σ X) (sz : nat) : Prop := STY {
+  Class Sty {X} (T : sty CON Σ X) : Prop := STY {
     (** The ownership predicate is persistent *)
-    sty_persistent {t d xπ vl δ} :: Persistent ⟦ T t d xπ vl ⟧ᶜ(δ);
+    sty_own_persistent {t d xπ vl δ} :: Persistent ⟦ sty_own T t d xπ vl ⟧ᶜ(δ);
     (** The ownership predicate entails the size constraint *)
-    sty_size {t d xπ vl δ} : ⟦ T t d xπ vl ⟧ᶜ(δ) ⊢ ⌜length vl = sz⌝;
+    sty_own_size {t d xπ vl δ} :
+      ⟦ sty_own T t d xπ vl ⟧ᶜ(δ) ⊢ ⌜length vl = sty_size T⌝;
     (** The depth of the ownership predicate can be bumped up *)
-    sty_depth {t d d' xπ vl δ} :
-      d ≤ d' → ⟦ T t d xπ vl ⟧ᶜ(δ) ⊢ ⟦ T t d' xπ vl ⟧ᶜ(δ);
+    sty_own_depth {t d d' xπ vl δ} :
+      d ≤ d' → ⟦ sty_own T t d xπ vl ⟧ᶜ(δ) ⊢ ⟦ sty_own T t d' xπ vl ⟧ᶜ(δ);
     (** The ownership predicates is proper over the clairvoyant value *)
-    sty_clair {t d xπ xπ' vl δ} :
-      (∀ π, xπ π = xπ' π) → ⟦ T t d xπ vl ⟧ᶜ(δ) ⊢ ⟦ T t d xπ' vl ⟧ᶜ(δ);
+    sty_own_clair {t d xπ xπ' vl δ} : (∀ π, xπ π = xπ' π) →
+      ⟦ sty_own T t d xπ vl ⟧ᶜ(δ) ⊢ ⟦ sty_own T t d xπ' vl ⟧ᶜ(δ);
   }.
 
   (** Basic properties of a plain type *)
-  Class Pty {X} (T : pty CON Σ X) (sz : nat) : Prop := PTY {
+  Class Pty {X} (T : pty CON Σ X) : Prop := PTY {
     (** The ownership predicate is persistent *)
-    pty_persistent {x vl δ} :: Persistent ⟦ T x vl ⟧ᶜ(δ);
+    pty_own_persistent {x vl δ} :: Persistent ⟦ pty_own T x vl ⟧ᶜ(δ);
     (** The ownership predicate entails the size constraint *)
-    pty_size {x vl δ} : ⟦ T x vl ⟧ᶜ(δ) ⊢ ⌜length vl = sz⌝;
+    pty_own_size {x vl δ} : ⟦ pty_own T x vl ⟧ᶜ(δ) ⊢ ⌜length vl = pty_size T⌝;
   }.
 
   (** [Ty], [Sty], [Pty] are proper *)
-  #[export] Instance Ty_proper {X} : Proper ((≡) ==> (=) ==> (↔)) (@Ty X).
+  #[export] Instance Ty_proper {X} : Proper ((≡) ==> (↔)) (@Ty X).
   Proof.
-    have pro : Proper ((≡) ==> (=) ==> impl) (@Ty X); last first.
-    { move=> ?*?? <-. split; by apply pro. }
-    move=> [??][??][/=eqvO eqvS]??<-[/=?? depO depS claO claS]. split=>/= >.
-    { by rewrite -(eqvS _ _ _ _ _). } { by rewrite -(eqvO _ _ _ _). }
-    { rewrite -!(eqvO _ _ _ _). apply depO. }
-    { rewrite -!(eqvS _ _ _ _ _). apply depS. }
-    { rewrite -!(eqvO _ _ _ _). apply claO. }
-    { rewrite -!(eqvS _ _ _ _ _). apply claS. }
+    have pro : Proper ((≡) ==> impl) (@Ty X); last first.
+    { move=> ?*. split; by apply pro. }
+    move=> ?? /ty_equiv[eqZ[eqvO eqvS]]. split=>/= >.
+    - rewrite -(eqvS _ _ _ _ _). exact _.
+    - rewrite -(eqvO _ _ _ _) -eqZ. exact ty_own_size.
+    - rewrite -!(eqvO _ _ _ _). exact ty_own_depth.
+    - rewrite -!(eqvS _ _ _ _ _). exact ty_shr_depth.
+    - rewrite -!(eqvO _ _ _ _). exact ty_own_clair.
+    - rewrite -!(eqvS _ _ _ _ _). exact ty_shr_clair.
   Qed.
-  #[export] Instance Sty_proper {X} : Proper ((≡) ==> (=) ==> (↔)) (@Sty X).
+  #[export] Instance Sty_proper {X} : Proper ((≡) ==> (↔)) (@Sty X).
   Proof.
-    have pro : Proper ((≡) ==> (=) ==> impl) (@Sty X); last first.
-    { move=> ?*??<-. split; by apply pro. }
-    move=> ?? eqv ??<-[?? dep cla].
-    split=> >; rewrite -!(eqv _ _ _ _) //; [apply dep|apply cla].
+    have pro : Proper ((≡) ==> impl) (@Sty X); last first.
+    { move=> ?*. split; by apply pro. }
+    move=> ?? /sty_equiv[eqZ eqvO]. split=> >; rewrite -!(eqvO _ _ _ _).
+    { exact _. } { rewrite -eqZ. exact sty_own_size. }
+    { exact sty_own_depth. } { exact sty_own_clair. }
   Qed.
-  #[export] Instance Pty_proper {X} : Proper ((≡) ==> (=) ==> (↔)) (@Pty X).
+  #[export] Instance Pty_proper {X} : Proper ((≡) ==> (↔)) (@Pty X).
   Proof.
-    have pro : Proper ((≡) ==> (=) ==> impl) (@Pty X); last first.
-    { move=> ?*??<-. split; by apply pro. }
-    move=> ?? eqv ??<-[??]. split=> >; by rewrite -(eqv _ _).
+    have pro : Proper ((≡) ==> impl) (@Pty X); last first.
+    { move=> ?*. split; by apply pro. }
+    move=> ?? /pty_equiv[eqZ eqvO]. split=> >; rewrite -(eqvO _ _).
+    { exact _. } { rewrite -eqZ. exact pty_own_size. }
   Qed.
 
   Context `{!rust_haltGS CON Σ, !rust_haltC CON, !rust_haltJ CON JUDG Σ,
     !rust_haltCS CON JUDG Σ}.
 
   (** [Sty] entails [Ty] *)
-  #[export] Instance Ty_Sty `{!@Sty X T sz} : Ty (ty_sty T) sz.
+  #[export] Instance Ty_Sty `{!@Sty X T} : Ty (ty_sty T).
   Proof.
-    split=>/= >. { exact _. } { exact sty_size. } { exact sty_depth. }
-    { move=> ?. do 3 f_equiv. by apply sty_depth. } { exact sty_clair. }
-    { move=> ?. do 3 f_equiv. by apply sty_clair. }
+    split=>/= >. { exact _. } { exact sty_own_size. } { exact sty_own_depth. }
+    { move=> ?. do 3 f_equiv. by apply sty_own_depth. } { exact sty_own_clair. }
+    { move=> ?. do 3 f_equiv. by apply sty_own_clair. }
   Qed.
 
   (** [Pty] entails [Sty] *)
-  #[export] Instance Sty_Pty `{!@Pty X T sz} : Sty (sty_pty T) sz.
+  #[export] Instance Sty_Pty `{!@Pty X T} : Sty (sty_pty T).
   Proof.
     split=> > /=; [exact _| |done|].
-    - iIntros "[%[% ?]]". iStopProof. exact pty_size.
+    - iIntros "[%[% ?]]". iStopProof. exact pty_own_size.
     - move=> eq. f_equiv=> ?. do 2 f_equiv. move=> ??. by rewrite -eq.
   Qed.
 End ty.
-Hint Mode Ty - - - - - ! - : typeclass_instances.
-Hint Mode Sty - - - - - ! - : typeclass_instances.
-Hint Mode Pty - - - - - ! - : typeclass_instances.
+Hint Mode Ty - - - - - ! : typeclass_instances.
+Hint Mode Sty - - - - - ! : typeclass_instances.
+Hint Mode Pty - - - - - ! : typeclass_instances.
 
 (** ** Basic operations on a type *)
 
@@ -164,25 +215,25 @@ Section ty_op.
   Class TyOpAt {X} (T : ty CON Σ X) (κ : lft) (d : nat) : Prop := TY_OP_AT {
     (** Take out prophecy tokens from ownership and sharing formulas *)
     ty_own_proph {t xπ vl q} :
-      q.[κ] -∗ ⟦ T.1 t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
+      q.[κ] -∗ ⟦ ty_own T t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
         ⌜proph_dep xπ ξl⌝ ∗ r:∗[ξl] ∗
-        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ] ∗ ⟦ T.1 t d xπ vl ⟧ᶜ);
+        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ] ∗ ⟦ ty_own T t d xπ vl ⟧ᶜ);
     ty_shr_proph {t l α xπ q} :
-      q.[κ ⊓ α] -∗ ⟦ T.2 t d l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
+      q.[κ ⊓ α] -∗ ⟦ ty_shr T t d l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
         ⌜proph_dep xπ ξl⌝ ∗ r:∗[ξl] ∗
-        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ ⊓ α] ∗ ⟦ T.2 t d l α xπ ⟧ᶜ);
+        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ ⊓ α] ∗ ⟦ ty_shr T t d l α xπ ⟧ᶜ);
     (** A borrow over the ownership formula can turn into the sharing formula *)
     ty_share {t l α xπ q} :
-      q.[κ ⊓ α] -∗ bord α (∃ vl, ▷ l ↦∗ vl ∗ T.1 t d xπ vl)%cif
-        =[rust_halt_wsat]{⊤}=∗ q.[κ ⊓ α] ∗ ⟦ T.2 t d l α xπ ⟧ᶜ;
+      q.[κ ⊓ α] -∗ bord α (∃ vl, ▷ l ↦∗ vl ∗ ty_own T t d xπ vl)%cif
+        =[rust_halt_wsat]{⊤}=∗ q.[κ ⊓ α] ∗ ⟦ ty_shr T t d l α xπ ⟧ᶜ;
   }.
 
   (** [TyOpAt] is monotone *)
   #[export] Instance TyOpAt_mono {X} :
     Proper ((≡) ==> (⊑) --> (=) ==> impl) (@TyOpAt X).
   Proof.
-    move=> T T' [eqvO eqvS] κ κ' /= ??? <- ?. have ? : LftIncl κ' κ by done.
-    split.
+    move=> T T' /ty_equiv[?[eqvO eqvS]] κ κ' /= ??? <- ?.
+    have ? : LftIncl κ' κ by done. split.
     - move=> >. setoid_rewrite <-(eqvO _ _ _ _). iIntros "κ' T".
       iDestruct (lft_incl'_live_acc (α:=κ) with "κ'") as (?) "[κ →κ']"=>//.
       iMod (ty_own_proph with "κ T") as (??) "($ & $ & →T)". iModIntro.
@@ -229,32 +280,32 @@ Section ty_op.
   Section ty_op_lt.
     Context `(!@TyOpLt X T κ d0).
     Lemma ty_own_proph_lt {t d xπ vl q} : d < d0 →
-      q.[κ] -∗ ⟦ T.1 t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
+      q.[κ] -∗ ⟦ ty_own T t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
         ⌜proph_dep xπ ξl⌝ ∗ r:∗[ξl] ∗
-        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ] ∗ ⟦ T.1 t d xπ vl ⟧ᶜ).
+        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ] ∗ ⟦ ty_own T t d xπ vl ⟧ᶜ).
     Proof. move=> ?. by apply ty_op_lt. Qed.
     Lemma ty_shr_proph_lt {t d l α xπ q} : d < d0 →
-      q.[κ ⊓ α] -∗ ⟦ T.2 t d l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
+      q.[κ ⊓ α] -∗ ⟦ ty_shr T t d l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
         ⌜proph_dep xπ ξl⌝ ∗ r:∗[ξl] ∗
-        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ ⊓ α] ∗ ⟦ T.2 t d l α xπ ⟧ᶜ).
+        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ ⊓ α] ∗ ⟦ ty_shr T t d l α xπ ⟧ᶜ).
     Proof. move=> ?. by apply ty_op_lt. Qed.
     Lemma ty_share_lt {t d l α xπ q} : d < d0 →
-      q.[κ ⊓ α] -∗ bord α (∃ vl, ▷ l ↦∗ vl ∗ T.1 t d xπ vl)%cif
-        =[rust_halt_wsat]{⊤}=∗ q.[κ ⊓ α] ∗ ⟦ T.2 t d l α xπ ⟧ᶜ.
+      q.[κ ⊓ α] -∗ bord α (∃ vl, ▷ l ↦∗ vl ∗ ty_own T t d xπ vl)%cif
+        =[rust_halt_wsat]{⊤}=∗ q.[κ ⊓ α] ∗ ⟦ ty_shr T t d l α xπ ⟧ᶜ.
     Proof. move=> ?. by apply ty_op_lt. Qed.
   End ty_op_lt.
 
   Context `{!rust_haltC CON, !rust_haltCS CON JUDG Σ, !rust_haltJS CON JUDG Σ}.
 
   (** Basic operations on a simple type at a depth *)
-  Lemma sty_op_at `{!Sty (X:=X) T sz} {d} κ :
+  Lemma sty_op_at `{!Sty (X:=X) T} {d} κ :
     (∀ t xπ vl q,
-      q.[κ] -∗ ⟦ T t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
+      q.[κ] -∗ ⟦ sty_own T t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
         ⌜proph_dep xπ ξl⌝ ∗ r:∗[ξl] ∗
-        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ] ∗ ⟦ T t d xπ vl ⟧ᶜ)) →
+        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ] ∗ ⟦ sty_own T t d xπ vl ⟧ᶜ)) →
     TyOpAt (ty_sty T) κ d.
   Proof.
-    move=> sty_proph. split=>/= >; [done| |].
+    move=> sty_proph. split=>/= >; [exact: sty_proph|..].
     - iIntros "[κ $] (%vl & ↦ & T)".
       iMod (sty_proph with "κ T") as (??) "($ & $ & cl)". iIntros "!> ξl".
       iFrame "↦". by iApply "cl".
@@ -269,7 +320,7 @@ Section ty_op.
   Qed.
 
   (** Basic operations on a plain type at a depth *)
-  #[export] Instance pty_op_at `{!Pty (X:=X) T sz} {κ d} :
+  #[export] Instance pty_op_at `{!Pty (X:=X) T} {κ d} :
     TyOpAt (ty_pty T) κ d.
   Proof.
     apply sty_op_at=>/= ????. iIntros "$ (% & % & ?) !>". iExists [], 1%Qp.
@@ -331,45 +382,47 @@ Section classes.
 
   (** [Send]: the ownership formula does not depend on the thread id *)
   Class Send {X} (T : ty CON Σ X) : Prop :=
-    send : ∀ {t t'}, T.1 t ≡ T.1 t'.
+    send : ∀ {t t' d xπ vl}, ty_own T t d xπ vl ≡ ty_own T t' d xπ vl.
   (** [Send] is proper *)
   #[export] Instance Send_proper {X} : Proper ((≡) ==> (↔)) (@Send X).
   Proof.
-    move=> ??[eqv _]. apply forall_proper=> t. apply forall_proper=> t'.
-    by rewrite (eqv t) (eqv t').
+    move=> ?? /ty_equiv[_[eqv _]]. do 5 apply forall_proper=> ?.
+    by rewrite !eqv.
   Qed.
 
   (** [Sync]: the sharing formula does not depend on the thread id *)
   Class Sync {X} (T : ty CON Σ X) : Prop :=
-    sync : ∀ {t t'}, T.2 t ≡ T.2 t'.
+    sync : ∀ {t t' l α xπ}, ty_shr T t l α xπ ≡ ty_shr T t' l α xπ.
   (** [Sync] is proper *)
   #[export] Instance Sync_proper {X} : Proper ((≡) ==> (↔)) (@Sync X).
   Proof.
-    move=> ??[_ eqv]. apply forall_proper=> t. apply forall_proper=> t'.
-    by rewrite (eqv t) (eqv t').
+    move=> ?? /ty_equiv[_[_ eqv]]. do 6 apply forall_proper=> ?.
+    by rewrite !eqv.
   Qed.
 
   Context `{!rust_haltGS CON Σ, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ)}.
 
   (** [Copy] *)
-  Class Copy {X} (T : ty CON Σ X) sz : Prop := COPY {
+  Class Copy {X} (T : ty CON Σ X) : Prop := COPY {
     (** Persistence of the ownership formula *)
-    copy_persistent {t d xπ vl δ} :: Persistent ⟦ T.1 t d xπ vl ⟧ᶜ(δ);
+    copy_persistent {t d xπ vl δ} :: Persistent ⟦ ty_own T t d xπ vl ⟧ᶜ(δ);
     (** Access via the sharing formula *)
-    copy_shr_acc {t d l α xπ q F} : shr_locsE l (S sz) ⊆ F →
-      q.[α] -∗ na_own t F -∗ ⟦ T.2 t d l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ r vl,
-        l ↦∗{r} vl ∗ na_own t (F ∖ shr_locsE l sz) ∗ ⟦ T.1 t d xπ vl ⟧ᶜ ∗
-        (l ↦∗{r} vl -∗ na_own t (F ∖ shr_locsE l sz) =[rust_halt_wsat]{⊤}=∗
-          q.[α] ∗ na_own t F);
+    copy_shr_acc {t d l α xπ q F} : shr_locsE l (ty_size T + 1) ⊆ F →
+      q.[α] -∗ na_own t F -∗ ⟦ ty_shr T t d l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
+        ∃ r vl, l ↦∗{r} vl ∗ na_own t (F ∖ shr_locsE l (ty_size T)) ∗
+          ⟦ ty_own T t d xπ vl ⟧ᶜ ∗
+          (l ↦∗{r} vl -∗ na_own t (F ∖ shr_locsE l (ty_size T))
+            =[rust_halt_wsat]{⊤}=∗ q.[α] ∗ na_own t F);
   }.
   (** [Copy] is proper *)
-  #[export] Instance Copy_proper {X} : Proper ((≡) ==> (=) ==> (↔)) (@Copy X).
+  #[export] Instance Copy_proper {X} : Proper ((≡) ==> (↔)) (@Copy X).
   Proof.
-    have pro: Proper ((≡) ==> (=) ==> impl) (@Copy X); last first.
+    have pro: Proper ((≡) ==> impl) (@Copy X); last first.
     { move=> ???. split; by apply pro. }
-    move=> ??[eqvO eqvS]??<-. split=> *; [rewrite -(eqvO _ _ _ _); exact _|].
-    rewrite -(eqvS _ _ _ _ _). setoid_rewrite <-(eqvO _ _ _ _).
-    by apply copy_shr_acc.
+    move=> ?? /ty_equiv[eqZ[eqvO eqvS]]. split=> *.
+    - rewrite -(eqvO _ _ _ _). exact _.
+    - rewrite -(eqvS _ _ _ _ _) -eqZ. setoid_rewrite <-(eqvO _ _ _ _).
+      apply copy_shr_acc. by rewrite eqZ.
   Qed.
 
   Context `{!rust_haltC CON, !rust_haltJ CON JUDG Σ, !rust_haltCS CON JUDG Σ}.
@@ -377,7 +430,9 @@ Section classes.
   (** [Send] over [sty] entails [Sync] *)
   #[export] Instance sty_send_sync `{!Send (ty_sty (X:=X) T)} :
     Sync (ty_sty (X:=X) T).
-  Proof. move=> > /=. f_equiv=> ?. f_equiv. apply: Send0. Qed.
+  Proof.
+    move=> >. unfold ty_sty, ty_shr=>/=. f_equiv=> ?. f_equiv. apply: send.
+  Qed.
 
   (** [pty] is [Send] and [Sync] *)
   #[export] Instance pty_send {X T} : Send (ty_pty (X:=X) T).
@@ -386,9 +441,9 @@ Section classes.
   Proof. exact _. Qed.
 
   (** [sty] is [Copy] *)
-  #[export] Instance sty_copy `{!Sty (X:=X) T sz} : Copy (ty_sty (X:=X) T) sz.
+  #[export] Instance sty_copy `{!Sty (X:=X) T} : Copy (ty_sty (X:=X) T).
   Proof.
-    split; [exact _|]=>/= ????????. iIntros "α F (% & ↦ & $)".
+    split; [exact _|]=>/= *. iIntros "α F (% & ↦ & $)".
     rewrite sem_cif_spointsto_vec.
     iMod (spointsto_vec_acc with "α ↦") as (?) "[$ cl]".
     iDestruct (na_own_acc with "F") as "[$ →F]"; [set_solver|].
@@ -397,7 +452,7 @@ Section classes.
 End classes.
 Hint Mode Send - - - ! : typeclass_instances.
 Hint Mode Sync - - - ! : typeclass_instances.
-Hint Mode Copy - - - - - - - ! - : typeclass_instances.
+Hint Mode Copy - - - - - - - ! : typeclass_instances.
 
 (** ** Subtyping *)
 
@@ -409,9 +464,9 @@ Section subty.
   Definition subty_def δ {X Y} (T : ty CON Σ X) (U : ty CON Σ Y) (f : X → Y)
     : iProp Σ :=
     (* Ownership formula conversion *) □ (∀ t d xπ vl,
-      ⟦ T.1 t d xπ vl ⟧ᶜ(δ) -∗ ⟦ U.1 t d (λ π, f (xπ π)) vl ⟧ᶜ(δ)) ∧
+      ⟦ ty_own T t d xπ vl ⟧ᶜ(δ) -∗ ⟦ ty_own U t d (λ π, f (xπ π)) vl ⟧ᶜ(δ)) ∧
     (* Sharing formula conversion *) □ (∀ t d l α xπ,
-      ⟦ T.2 t d l α xπ ⟧ᶜ(δ) -∗ ⟦ U.2 t d l α (λ π, f (xπ π)) ⟧ᶜ(δ)).
+      ⟦ ty_shr T t d l α xπ ⟧ᶜ(δ) -∗ ⟦ ty_shr U t d l α (λ π, f (xπ π)) ⟧ᶜ(δ)).
   Lemma subty_aux : @subty_def.(seal). Proof. by eexists _. Qed.
   Definition subty δ {X Y} := subty_aux.(unseal) δ X Y.
   Lemma subty_unseal : @subty = @subty_def. Proof. exact: seal_eq. Qed.
@@ -424,9 +479,10 @@ Section subty.
   #[export] Instance subty_proper {δ X Y} :
     Proper ((≡) ==> (≡) ==> (=) ==> (⊣⊢)) (@subty δ X Y).
   Proof.
-    rewrite subty_unseal /subty_def=> ??[eqvO eqvS]??[eqvO' eqvS']??<-.
-    repeat f_equiv; [exact (eqvO _ _ _ _)|exact (eqvO' _ _ _ _)|
-      exact (eqvS _ _ _ _ _)|exact (eqvS' _ _ _ _ _)].
+    rewrite subty_unseal /subty_def=> ?? /ty_equiv[?[eqvO eqvS]].
+    move=> ?? /ty_equiv[?[eqvO' eqvS']]??<-.
+    do 12 f_equiv; [exact (eqvO _ _ _ _)|exact (eqvO' _ _ _ _)|].
+    do 2 f_equiv; [exact (eqvS _ _ _ _ _)|exact (eqvS' _ _ _ _ _)].
   Qed.
   (** [subty] is reflexive *)
   Lemma subty_refl {δ X T} : ⊢ @subty δ X _ T T id.
@@ -444,7 +500,8 @@ Section subty.
 
   (** [subty] over [sty] *)
   Lemma subty_sty {δ X Y f} T U :
-    □ (∀ t d xπ vl, ⟦ T t d xπ vl ⟧ᶜ(δ) -∗ ⟦ U t d (λ π, f (xπ π)) vl ⟧ᶜ(δ)) ⊢
+    □ (∀ t d xπ vl, ⟦ sty_own T t d xπ vl ⟧ᶜ(δ) -∗
+        ⟦ sty_own U t d (λ π, f (xπ π)) vl ⟧ᶜ(δ)) ⊢
       @subty δ X Y (ty_sty T) (ty_sty U) f.
   Proof.
     rewrite subty_unseal. iIntros "#sub". iSplit; [done|]=>/=.
@@ -452,7 +509,7 @@ Section subty.
   Qed.
   (** [subty] over [pty] *)
   Lemma subty_pty {δ X Y f} T U :
-    □ (∀ x vl, ⟦ T x vl ⟧ᶜ(δ) -∗ ⟦ U (f x) vl ⟧ᶜ(δ)) ⊢
+    □ (∀ x vl, ⟦ pty_own T x vl ⟧ᶜ(δ) -∗ ⟦ pty_own U (f x) vl ⟧ᶜ(δ)) ⊢
       @subty δ X Y (ty_pty T) (ty_pty U) f.
   Proof.
     iIntros "#sub". iApply subty_sty=>/=. iIntros (????) "!> (% & %eq & ?)".
@@ -471,7 +528,7 @@ Section resol.
   Class ResolAt {X} (T : ty CON Σ X) (κ : lft) (post : X → Prop) (d : nat)
     : Prop := RESOL_AT {
     resol {t xπ vl q} :
-      q.[κ] -∗ ⟦ T.1 t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
+      q.[κ] -∗ ⟦ ty_own T t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
         q.[κ] ∗ ⟨π, post (xπ π)⟩;
   }.
 
@@ -480,8 +537,8 @@ Section resol.
     Proper ((≡) ==> (⊑) --> pointwise_relation _ impl ==> (=) ==> impl)
       (@ResolAt X).
   Proof.
-    move=> ?? [eqv _] κ κ' /= ??? to ??<-?. have ? : LftIncl κ' κ by done.
-    split=>/= >. iIntros "κ' T".
+    move=> ?? /ty_equiv[_[eqv _]] κ κ' /= ??? to ??<-?.
+    have ? : LftIncl κ' κ by done. split=>/= >. iIntros "κ' T".
     iDestruct (lft_incl'_live_acc (α:=κ) with "κ'") as (?) "[κ →κ']".
     rewrite -(eqv _ _ _ _). iMod (resol with "κ T") as "[κ post]".
     iDestruct ("→κ'" with "κ") as "$". iModIntro.
@@ -531,7 +588,7 @@ Section resol.
 
   (** [resol] under [ResolLt] *)
   Lemma resol_lt `{!@ResolLt X T κ post d} {d' t xπ vl q} : d' < d →
-    q.[κ] -∗ ⟦ T.1 t d' xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
+    q.[κ] -∗ ⟦ ty_own T t d' xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
       q.[κ] ∗ ⟨π, post (xπ π)⟩.
   Proof. move=> ?. by apply @resol, resol_lt'. Qed.
 End resol.
@@ -559,9 +616,9 @@ Section tcx.
   (** Semantics of a type context element *)
   Definition sem_etcx {X} t (E : etcx CON Σ X) : clair X → iProp Σ :=
     match E with
-    | v ◁{d} T => λ xπ, ⟦ T.1 t d xπ [v] ⟧ᶜ
+    | v ◁{d} T => λ xπ, ⟦ ty_own T t d xπ [v] ⟧ᶜ
     | v ◁[†α] T => λ xπ, [†α] =[rust_halt_wsat]{⊤}=∗
-        ∃ d xπ', proph_eqz xπ xπ' ∗ ⟦ T.1 t d xπ' [v] ⟧ᶜ
+        ∃ d xπ', proph_eqz xπ xπ' ∗ ⟦ ty_own T t d xπ' [v] ⟧ᶜ
     | ^[α] => λ _, ⌜α ≠ ⊤⌝ ∧ 1.[α]
     end%I.
 
@@ -768,7 +825,7 @@ Section tcx_extract.
     @EtcxExtract X _ Yl E (E ᵖ:: Γ) Γ fst' snd' | 5.
   Proof. by split. Qed.
   (** Extract from the copyable head *)
-  #[export] Instance etcx_extract_hd_copy {X Yl Γ v d} `{!Copy T sz} :
+  #[export] Instance etcx_extract_hd_copy {X Yl Γ v d} `{!Copy T} :
     @EtcxExtract X (_ :: Yl) _ (v ◁{d} T) (v ◁{d} T ᵖ:: Γ) (v ◁{d} T ᵖ:: Γ)
       fst' (λ yyl, yyl) | 2.
   Proof. split=> ??. iIntros "[#T $]". iFrame "T". Qed.

@@ -7,9 +7,10 @@ Section uninit.
     !Jsem JUDG (iProp Σ)}.
 
   (** ** [ty_uninit]: Universal type *)
-  Definition pty_uninit sz : pty CON Σ unitₓ := λ n vl, ⌜length vl = sz⌝%cif.
+  Definition pty_uninit sz : pty CON Σ unitₓ :=
+    pair sz (λ _ vl, ⌜length vl = sz⌝%cif).
   Definition ty_uninit sz : ty CON Σ unitₓ := ty_pty (pty_uninit sz).
   (** [pty_uninit] satisfies [Pty] *)
-  #[export] Instance pty_uninit_pty {sz} : Pty (pty_uninit sz) sz.
+  #[export] Instance pty_uninit_pty {sz} : Pty (pty_uninit sz).
   Proof. split=>//= *. exact _. Qed.
 End uninit.

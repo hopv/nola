@@ -44,7 +44,7 @@ Section ty_rec.
   #[export] Instance ty_rec_send `{Send0 : !∀ T, Send T → Send (F T)} :
     Send (ty_rec F).
   Proof.
-    move=> ??. apply equiv_proeqv=> k. etrans; [by apply ty_rec_iter|].
+    move=> >. apply equiv_proeqv=> k. etrans; [by apply ty_rec_iter|].
     etrans; [|symmetry; by apply ty_rec_iter]. apply equiv_proeqv, Send0.
     elim: k; [by move|exact _].
   Qed.
@@ -52,9 +52,9 @@ Section ty_rec.
   #[export] Instance ty_rec_sync `{Sync0 : !∀ T, Sync T → Sync (F T)} :
     Sync (ty_rec F).
   Proof.
-    move=> ??. apply equiv_proeqv=> k. etrans; [by apply ty_rec_iter|].
-    etrans; [|symmetry; by apply ty_rec_iter]. apply equiv_proeqv, Sync0.
-    elim: k; [by move|exact _].
+    move=> >. apply equiv_proeqv=> k. etrans; [by apply ty_rec_iter|].
+    etrans; [|symmetry; by apply ty_rec_iter]. apply equiv_proeqv.
+    apply: (Sync0). elim: k; [by move|exact _].
   Qed.
 
   Context `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), !rust_haltGS CON Σ,
@@ -72,11 +72,11 @@ Section ty_rec.
   Qed.
 
   (** [Ty] on [ty_rec] *)
-  #[export] Instance ty_rec_ty `{!∀ T, Ty (F T) sz} : Ty (ty_rec F) sz.
+  #[export] Instance ty_rec_ty `{!∀ T, Ty (F T)} : Ty (ty_rec F).
   Proof. by rewrite ty_rec_unfold. Qed.
 
   (** [Copy] on [ty_rec] *)
-  #[export] Instance ty_rec_copy `{!∀ T, Copy (F T) sz} : Copy (ty_rec F) sz.
+  #[export] Instance ty_rec_copy `{!∀ T, Copy (F T)} : Copy (ty_rec F).
   Proof. by rewrite ty_rec_unfold. Qed.
 
   (** [TyOp] on [ty_rec] *)
