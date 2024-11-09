@@ -118,25 +118,15 @@ Section type.
     iApply (twp_wand with "twp"). by iIntros (?) ">(% & [$$] & $ & $ & $) !>".
   Qed.
   (** Eternalize a lifetime *)
-  Lemma sub_lft_eternal α
-    `(!EtcxExtract (Yl:=Xl) (Zl:=Xl') ^[α] Γi Γr get getr) {Yl κ Γo pre} :
-    □ ((∀ β, β ⊑□ α) -∗ sub (Yl:=Yl) κ Γr Γo pre) ⊢
-      sub κ Γi Γo (λ post xl, pre post (getr xl)).
-  Proof.
-    rewrite sub_unseal. iIntros "#sub !>/=" (????) "κ t pre Γi".
-    rewrite etcx_extract. iDestruct "Γi" as "[[% α] Γr]".
-    iMod (lft_eternalize_sincl with "α") as "∞"=>//.
-    iApply ("sub" with "∞ κ t pre Γr").
-  Qed.
   Lemma type_lft_eternal α
-    `(!EtcxExtract (Yl:=Xl) (Zl:=Xl') ^[α] Γi Γr get getr)
-    {Yl Zl κ Γi' e Γo pre pre'} :
-    □ ((∀ β, β ⊑□ α) -∗ sub (Yl:=Yl) κ Γr Γi' pre) -∗
-    type (Yl:=Zl) κ Γi' e Γo pre' -∗
-      type κ Γi e Γo (λ post xl, pre (pre' post) (getr xl)).
+    `(!EtcxExtract (Yl:=Xl) (Zl:=Yl) ^[α] Γi Γr get getr) {Zl κ e Γo pre} :
+    □ ((∀ β, β ⊑□ α) -∗ type (Yl:=Zl) κ Γr e Γo pre) ⊢
+      type κ Γi e Γo (λ post xl, pre post (getr xl)).
   Proof.
-    iIntros "#sub #type". iApply type_pre; last first.
-    { iApply type_in; [|done]. by iApply sub_lft_eternal. } { done. }
+    rewrite type_unseal. iIntros "#type !>/=" (????) "κ t pre".
+    rewrite etcx_extract. iDestruct 1 as "[[% α] Γr]".
+    iMod (lft_eternalize_sincl with "α") as "∞"=>//.
+    iApply ("type" with "∞ κ t pre Γr").
   Qed.
   (** End a lifetime *)
   Lemma type_lft_end α
