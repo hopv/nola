@@ -20,7 +20,7 @@ Section ty_box.
   Lemma ty_box_unseal : @ty_box = @ty_box_def. Proof. exact: seal_eq. Qed.
 
   (** [ty_box] is productive *)
-  #[export] Instance ty_box_productive {X} : Productive (ty_box (X:=X)).
+  #[export] Instance ty_box_productive {X} : Productive (@ty_box X).
   Proof.
     move=> ?[??][??] /ty_proeq_later [/=eqO eqS].
     rewrite ty_box_unseal /ty_box_def. apply ty_proeq=>/=. split=> >.
@@ -34,7 +34,7 @@ Section ty_box.
   Proof. apply productive_preserv, _. Qed.
 
   (** [ty_box] satisfies [Ty] *)
-  #[export] Instance ty_box_ty {X T} : Ty (ty_box (X:=X) T) 1.
+  #[export] Instance ty_box_ty {X T} : Ty (@ty_box X T) 1.
   Proof.
     rewrite ty_box_unseal. split=>/= *. { exact _. }
     { by iDestruct 1 as (???? ->) "_". } { (do 11 f_equiv)=> ?. lia. }
@@ -154,7 +154,7 @@ Section ty_box.
 
   (** The depth of [ty_box] is positive *)
   Lemma type_box_depth v
-    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (v ◁{d} ty_box (X:=X) T) Γi Γr get getr)
+    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (v ◁{d} @ty_box X T) Γi Γr get getr)
     {Zl' κ e Γo pre} :
     (⌜d > 0⌝ → type (Yl:=Zl') κ (v ◁{d} ty_box T ᵖ:: Γr) e Γo pre) ⊢
       type κ Γi e Γo (λ post xl, pre post (get xl, getr xl)').

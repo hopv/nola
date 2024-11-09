@@ -36,8 +36,7 @@ Section ty_anydep.
   Qed.
 
   (** [ty_anydep] preserves [TyOp] *)
-  #[export] Instance ty_anydep_ty_op {X} `(!TyOp T κ) :
-    TyOp (ty_anydep (X:=X) T) κ.
+  #[export] Instance ty_anydep_ty_op {X} `(!TyOp T κ) : TyOp (@ty_anydep X T) κ.
   Proof.
     move=> ?. split=>/= >.
     - iIntros "κ [% T]". iMod (ty_own_proph with "κ T") as (??) "($ & $ & →T)".
@@ -85,8 +84,8 @@ Section ty_anydep.
 
   (** Eliminate [ty_anydep] *)
   Lemma type_anydep_elim v
-    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (v ◁{d'} ty_anydep (X:=X) T)
-        Γi Γr get getr) {Zl' κ e Γo pre} :
+    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (v ◁{d'} @ty_anydep X T) Γi Γr get getr)
+    {Zl' κ e Γo pre} :
     (∀ d, type (Yl:=Zl') κ (v ◁{d} T ᵖ:: Γr) e Γo pre) ⊢
       type κ Γi e Γo (λ post xl, pre post (get xl, getr xl)').
   Proof.
@@ -97,8 +96,8 @@ Section ty_anydep.
 
   (** Update the depth under [ty_anydep] *)
   Lemma sub_anydep_depth v
-    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (v ◁{d} ty_anydep (X:=X) T)
-        Γi Γr get getr) {κ d'} :
+    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (v ◁{d} @ty_anydep X T) Γi Γr get getr)
+    {κ d'} :
     ⊢ sub κ Γi (v ◁{d'} ty_anydep T ᵖ:: Γr)
         (λ post xl, post (get xl, getr xl)').
   Proof.

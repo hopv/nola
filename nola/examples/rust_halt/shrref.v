@@ -22,7 +22,7 @@ Section ty_shrref.
 
   (** [ty_shrref] is productive *)
   #[export] Instance ty_shrref_productive {X α} :
-    Productive (ty_shrref (X:=X) α).
+    Productive (@ty_shrref X α).
   Proof.
     move=> ??? /ty_proeq_later [_ eq]. unfold ty_shrref. f_equiv.
     rewrite sty_shrref_unseal /sty_shrref_def=>/= >. do 3 f_equiv=> ?.
@@ -36,7 +36,7 @@ Section ty_shrref.
   Proof. apply productive_preserv, _. Qed.
 
   (** [sty_shrref] satisfies [Sty] *)
-  #[export] Instance sty_shrref_sty {X α T} : Sty (sty_shrref (X:=X) α T) 1.
+  #[export] Instance sty_shrref_sty {X α T} : Sty (@sty_shrref X α T) 1.
   Proof.
     rewrite sty_shrref_unseal. split=>/= *. { exact _. }
     { by iIntros "(% & % & % & -> & _)". }
@@ -72,7 +72,7 @@ Section ty_shrref.
   Proof. exact _. Qed.
 
   (** [ty_shrref] satisfies [Copy] *)
-  #[export] Instance ty_shrref_copy {X α T} : Copy (ty_shrref (X:=X) α T) 1.
+  #[export] Instance ty_shrref_copy {X α T} : Copy (@ty_shrref X α T) 1.
   Proof. exact _. Qed.
 
   (** Subtyping over [ty_shrref] *)
@@ -105,8 +105,8 @@ Section ty_shrref.
 
   (** The depth of [ty_shrref] is positive *)
   Lemma type_shrref_depth v
-    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (v ◁{d} ty_shrref (X:=X) α T)
-        Γi Γr get getr) {Zl' κ e Γo pre} :
+    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (v ◁{d} @ty_shrref X α T) Γi Γr get getr)
+    {Zl' κ e Γo pre} :
     (⌜d > 0⌝ → type (Yl:=Zl') κ (v ◁{d} ty_shrref α T ᵖ:: Γr) e Γo pre) ⊢
       type κ Γi e Γo (λ post xl, pre post (get xl, getr xl)').
   Proof.
