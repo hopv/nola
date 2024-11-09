@@ -4,8 +4,7 @@ From nola.examples.rust_halt Require Export type.
 
 Implicit Type X Y : xty.
 
-(** ** Modification type *)
-
+(** [ty_mod]: Modification type *)
 Definition ty_mod {CON Σ X Y} (f : Y → X) (T : ty CON Σ X) : ty CON Σ Y :=
   (λ t d yπ vl, T.1 t d (f ∘ yπ) vl, λ t d l α yπ, T.2 t d l α (f ∘ yπ)).
 

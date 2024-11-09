@@ -6,21 +6,21 @@ Section num.
   Context `{!rust_haltGS CON Σ, !rust_haltC CON, !Csem CON JUDG Σ,
     !Jsem JUDG (iProp Σ)}.
 
-  (** ** [ty_int]: Integer type *)
+  (** [ty_int]: Integer type *)
   Definition pty_int : pty CON Σ Zₓ := λ n vl, ⌜vl = [ #n]⌝%cif.
   Definition ty_int : ty CON Σ Zₓ := ty_pty pty_int.
   (** [pty_int] satisfies [Pty] *)
   #[export] Instance pty_int_pty : Pty pty_int 1.
   Proof. split=>/= *; [exact _|]. by iIntros "->". Qed.
 
-  (** ** [ty_nat]: Natural number type *)
+  (** [ty_nat]: Natural number type *)
   Definition pty_nat : pty CON Σ natₓ := λ n vl, ⌜vl = [ #n]⌝%cif.
   Definition ty_nat : ty CON Σ natₓ := ty_pty pty_nat.
   (** [pty_nat] satisfies [Pty] *)
   #[export] Instance ty_nat_pty : Pty pty_nat 1.
   Proof. split=>/= *; [exact _|]. by iIntros "->". Qed.
 
-  (** ** [ty_bool]: Boolean type *)
+  (** [ty_bool]: Boolean type *)
   Definition pty_bool : pty CON Σ boolₓ := λ b vl, ⌜vl = [ #b]⌝%cif.
   Definition ty_bool : ty CON Σ boolₓ := ty_pty pty_bool.
   (** [pty_bool] satisfies [Pty] *)
