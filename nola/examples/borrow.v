@@ -3,7 +3,7 @@
 From nola.examples Require Export xty con.
 From nola.rust_lang Require Export notation proofmode.
 Import ProdNotation FunPRNotation ModwNotation WpwNotation CsemNotation
-  LftNotation ProphNotation NsyntyNotation.
+  LftNotation ProphNotation XtyNotation.
 
 Section borrow.
   Context `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), !lrustGS_gen hlc Σ,

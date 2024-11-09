@@ -11,13 +11,13 @@ Inductive xpty : Set :=
 | prod'ₓ (X Y : xpty) | sumₓ (X Y : xpty) | funₓ (X Y : xpty).
 Implicit Type (X Y : xpty).
 
-Module NsyntyNotation.
+Module XtyNotation.
   Notation "()ₓ" := unitₓ.
   Infix "*'ₓ" := prod'ₓ (at level 80, right associativity).
   Infix "+ₓ" := sumₓ (at level 85, right associativity).
   Infix "→ₓ" := funₓ (at level 99, right associativity).
-End NsyntyNotation.
-Import NsyntyNotation.
+End XtyNotation.
+Import XtyNotation.
 
 (** Decidable equality *)
 #[export] Instance xpty_eq_dec : EqDecision xpty.
