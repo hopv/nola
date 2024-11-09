@@ -2,6 +2,8 @@
 
 From nola.examples.rust_halt Require Export type.
 
+Implicit Type PR : prost.
+
 Section ty_rec.
   Context {CON Σ X} {F : ty CON Σ X → ty CON Σ X} `{!Productive F}.
 
@@ -31,14 +33,12 @@ Section ty_rec.
     F ≡[k]@{funPR _}≡ G → ty_rec F ≡[k]≡ ty_rec G.
   Proof. exact profix_preserv. Qed.
   (** [ty_rec] preserves size preservation and productivity *)
-  #[export] Instance ty_rec_map_preserv {Y}
-    {H : ty CON Σ Y → ty CON Σ X → ty CON Σ X} `{!∀ T, Productive (H T)}
-    `{!∀ U, Preserv (λ T, H T U)} :
+  #[export] Instance ty_rec_map_preserv
+    `(!∀ T : PR, Productive (H T), !∀ U : ty CON Σ X, Preserv (λ T, H T U)) :
     Preserv (λ T, ty_rec (H T)).
   Proof. exact profix_map_preserv. Qed.
-  #[export] Instance ty_rec_map_productive {Y}
-    {H : ty CON Σ Y → ty CON Σ X → ty CON Σ X} `{!∀ T, Productive (H T)}
-    `{!∀ U, Productive (λ T, H T U)} :
+  #[export] Instance ty_rec_map_productive
+    `(!∀ T : PR, Productive (H T), !∀ U : ty CON Σ X, Productive (λ T, H T U)) :
     Productive (λ T, ty_rec (H T)).
   Proof. exact profix_map_productive. Qed.
 

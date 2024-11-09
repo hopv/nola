@@ -19,10 +19,10 @@ Section ty_mod.
   Proof.
     move=> ?[??][??][/=eqvO eqvS]. split=>/= >; [apply eqvO|apply eqvS].
   Qed.
-  #[export] Instance ty_mod_map_preserv `{!Preserv' (ty CON Σ X') _ F} :
+  #[export] Instance ty_mod_map_preserv `(!Preserv' PR _ F) :
     Preserv (λ T, @ty_mod _ _ f (F T)).
   Proof. solve_proper. Qed.
-  #[export] Instance ty_mod_map_productive `{!Productive' (ty CON Σ X') _ F} :
+  #[export] Instance ty_mod_map_productive `(!Productive' PR _ F) :
     Productive (λ T, @ty_mod _ _ f (F T)).
   Proof. solve_proper. Qed.
 
