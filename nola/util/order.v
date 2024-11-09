@@ -41,7 +41,7 @@ Qed.
 (** Natural number *)
 Program Canonical natP : poty := Poty natO (≤) _ _.
 Next Obligation.
-  move=> >. split; [by move=> ->|]. case=> *. by apply Nat.le_antisymm.
+  move=> >. split; [by move=> ->|]. case=> *. exact: Nat.le_antisymm.
 Qed.
 Lemma nat_ole {n m} : n ⊑ m ↔ n ≤ m.
 Proof. done. Qed.
@@ -105,7 +105,7 @@ Definition dual_dist_def {A : ofe} n : relation (dual A) :=
 Program Canonical dualO (A : ofe) :=
   @Ofe (dual A) dual_equiv_def dual_dist_def _.
 Next Obligation.
-  split=> >; [by apply equiv_dist| |by apply dist_lt].
+  split=> >; [exact: equiv_dist| |exact: dist_lt].
   unfold dist, dual_dist_def. split; [by move..|]=> ???. apply transitivity.
 Qed.
 Lemma dual_equiv {A : ofe} {a a' : dualO A} :
@@ -166,20 +166,20 @@ Proof. solve_proper. Qed.
 
 (** Monotonicity implies properness *)
 #[export] Instance mono_proper `{!@Mono OT OT' f} : Proper ((≡) ==> (≡)) f.
-Proof. move=> > /equiv_ole[??]. apply equiv_ole. split; by apply mono. Qed.
+Proof. move=> > /equiv_ole[??]. apply equiv_ole. split; exact: mono. Qed.
 #[export] Instance anti_proper `{!@Anti OT OT' f} : Proper ((≡) ==> (≡)) f.
-Proof. move=> > /equiv_ole[??]. apply equiv_ole. split; by apply anti. Qed.
+Proof. move=> > /equiv_ole[??]. apply equiv_ole. split; exact: anti. Qed.
 #[export] Instance mono2_proper `{!@Mono2 OT OT' OT'' f} :
   Proper ((≡) ==> (≡) ==> (≡)) f.
 Proof.
   move=> > /equiv_ole[??] ?? /equiv_ole[??]. apply equiv_ole.
-  split; by apply mono2.
+  split; exact: mono2.
 Qed.
 #[export] Instance antimono_proper `{!@AntiMono OT OT' OT'' f} :
   Proper ((≡) ==> (≡) ==> (≡)) f.
 Proof.
   move=> > /equiv_ole[??] ?? /equiv_ole[??]. apply equiv_ole.
-  split; by apply antimono.
+  split; exact: antimono.
 Qed.
 
 (** [⊑] is monotone *)
@@ -367,32 +367,32 @@ Solve All Obligations with done.
 #[export] Program Instance bin_meet_fun `{!∀ a : A, BinMeet (OTF a)} :
   BinMeet (funP OTF) := BIN_MEET (λ f g a, f a ⊓ g a) _ _ _ _.
 Next Obligation. move=> *?*?*?. by f_equiv. Qed.
-Next Obligation. move=> *?. by apply bin_meet_elim_1. Qed.
-Next Obligation. move=> *?. by apply bin_meet_elim_2. Qed.
-Next Obligation. move=> *?. by apply bin_meet_intro. Qed.
+Next Obligation. move=> *?. exact: bin_meet_elim_1. Qed.
+Next Obligation. move=> *?. exact: bin_meet_elim_2. Qed.
+Next Obligation. move=> *?. exact: bin_meet_intro. Qed.
 #[export] Program Instance bin_join_fun `{!∀ a : A, BinJoin (OTF a)} :
   BinJoin (funP OTF) := BIN_JOIN (λ f g a, f a ⊔ g a) _ _ _ _.
 Next Obligation. move=> *?*?*?. by f_equiv. Qed.
-Next Obligation. move=> *?. by apply bin_join_intro_1. Qed.
-Next Obligation. move=> *?. by apply bin_join_intro_2. Qed.
-Next Obligation. move=> *?. by apply bin_join_elim. Qed.
+Next Obligation. move=> *?. exact: bin_join_intro_1. Qed.
+Next Obligation. move=> *?. exact: bin_join_intro_2. Qed.
+Next Obligation. move=> *?. exact: bin_join_elim. Qed.
 
 #[export] Program Instance bin_meet_funN `{!BinMeet OT} {A : ofe} :
   BinMeet (A -np> OT) :=
   BIN_MEET (λ f g, OfeMor (λ a, f a ⊓ g a) (ofe_mor_ne:=_)) _ _ _ _.
 Next Obligation. solve_proper. Qed.
 Next Obligation. solve_proper. Qed.
-Next Obligation. move=> *?. by apply bin_meet_elim_1. Qed.
-Next Obligation. move=> *?. by apply bin_meet_elim_2. Qed.
-Next Obligation. move=> *?. by apply bin_meet_intro. Qed.
+Next Obligation. move=> *?. exact: bin_meet_elim_1. Qed.
+Next Obligation. move=> *?. exact: bin_meet_elim_2. Qed.
+Next Obligation. move=> *?. exact: bin_meet_intro. Qed.
 #[export] Program Instance bin_join_funN `{!BinJoin OT} {A : ofe} :
   BinJoin (A -np> OT) :=
   BIN_JOIN (λ f g, OfeMor (λ a, f a ⊔ g a) (ofe_mor_ne:=_)) _ _ _ _.
 Next Obligation. solve_proper. Qed.
 Next Obligation. solve_proper. Qed.
-Next Obligation. move=> *?. by apply bin_join_intro_1. Qed.
-Next Obligation. move=> *?. by apply bin_join_intro_2. Qed.
-Next Obligation. move=> *?. by apply bin_join_elim. Qed.
+Next Obligation. move=> *?. exact: bin_join_intro_1. Qed.
+Next Obligation. move=> *?. exact: bin_join_intro_2. Qed.
+Next Obligation. move=> *?. exact: bin_join_elim. Qed.
 
 (** The binary meet and join flipped with [dual] *)
 
@@ -450,7 +450,7 @@ Qed.
   Mono2 (big_join (OT:=OT) (A:=A)) | 20.
 Proof.
   move=>/= ?? ST ???. apply big_join_elim=> ? /ST ?.
-  by etrans; [|by apply big_join_intro].
+  by etrans; [|exact: big_join_intro].
 Qed.
 
 (** [Prop] has the big meet and join *)
@@ -473,14 +473,14 @@ Next Obligation. move=>/= > all [?[??]]. exact: all. Qed.
 Next Obligation. move=> > ?? eqv ?. apply big_meet_ne=> ?. apply (eqv _ _). Qed.
 Next Obligation. move=> *?. exact: big_meet_elim. Qed.
 Next Obligation.
-  move=> > all o. apply big_meet_intro=> *. move: o. by apply all.
+  move=> > all o. apply big_meet_intro=> *. move: o. exact: all.
 Qed.
 #[export] Program Instance big_join_fun `{!∀ a : A, BigJoin (OTF a)} :
   BigJoin (funP OTF) := BIG_JOIN (λ _ S F a, [⊔] b :: S b, F b a) _ _ _.
 Next Obligation. move=> > ?? eqv ?. apply big_join_ne=> ?. apply (eqv _ _). Qed.
-Next Obligation. move=> *?. by exact: big_join_intro. Qed.
+Next Obligation. move=> *?. exact: big_join_intro. Qed.
 Next Obligation.
- move=> > all o. apply big_join_elim=> *. move: o. by apply all.
+ move=> > all o. apply big_join_elim=> *. move: o. exact: all.
 Qed.
 
 #[export] Program Instance big_meet_funN `{!BigMeet OT} {A : ofe} :
@@ -492,31 +492,31 @@ Next Obligation.
 Qed.
 Next Obligation. move=> *?. exact: big_meet_elim. Qed.
 Next Obligation.
-  move=> > all o. apply big_meet_intro=> *. move: o. by apply all.
+  move=> > all o. apply big_meet_intro=> *. move: o. exact: all.
 Qed.
 #[export] Program Instance big_join_funN `{!∀ a : A, BigJoin (OTF a)} :
   BigJoin (funP OTF) := BIG_JOIN (λ _ S F a, [⊔] b :: S b, F b a) _ _ _.
 Next Obligation.
   move=> *?? eqv ?. apply big_join_ne=>// ?. apply (eqv _ _).
 Qed.
-Next Obligation. move=> *?. by exact: big_join_intro. Qed.
+Next Obligation. move=> *?. exact: big_join_intro. Qed.
 Next Obligation.
-  move=> > all o. apply big_join_elim=> *. move: o. by apply all.
+  move=> > all o. apply big_join_elim=> *. move: o. exact: all.
 Qed.
 
 (** The big meet and join flipped with [dual] *)
 
 #[export] Program Instance big_meet_dual `{!BigJoin OT} : BigMeet (dual OT) :=
   BIG_MEET (λ _ S f, Dual ([⊔] o :: S o, undual (f o))) _ _ _.
-Next Obligation. move=> *?*. by apply big_join_ne. Qed.
-Next Obligation. move=> */=. by exact: (big_join_intro (undual ∘ _)). Qed.
-Next Obligation. move=> */=. by exact: (big_join_elim (undual ∘ _)). Qed.
+Next Obligation. move=> *?*. exact: big_join_ne. Qed.
+Next Obligation. move=> */=. exact: (big_join_intro (undual ∘ _)). Qed.
+Next Obligation. move=> */=. exact: (big_join_elim (undual ∘ _)). Qed.
 
 #[export] Program Instance big_join_dual `{!BigMeet OT} : BigJoin (dual OT) :=
   BIG_JOIN (λ _ S f, Dual ([⊓] o :: S o, undual (f o))) _ _ _.
-Next Obligation. move=> *?*. by apply big_meet_ne. Qed.
-Next Obligation. move=> */=. by exact: (big_meet_elim (undual ∘ _)). Qed.
-Next Obligation. move=> */=. by exact: (big_meet_intro (undual ∘ _)). Qed.
+Next Obligation. move=> *?*. exact: big_meet_ne. Qed.
+Next Obligation. move=> */=. exact: (big_meet_elim (undual ∘ _)). Qed.
+Next Obligation. move=> */=. exact: (big_meet_intro (undual ∘ _)). Qed.
 
 (** ** [lfp]: Knaster-Tarski least fixed point *)
 
@@ -552,7 +552,7 @@ Section lfp.
 
   (** Basic induction principle *)
   Lemma lfp_ind `{!Mono f} {o} : f o ⊑ o → lfp f ⊑ o.
-  Proof. rewrite lfp_unseal=> ?. by apply (big_meet_elim id). Qed.
+  Proof. rewrite lfp_unseal=> ?. exact: (big_meet_elim id). Qed.
 
   (** Augmenting a function with a meet *)
   Definition aug_meet `{!BinMeet OT} (f : OT -p> OT) o : _ -p> _ :=
@@ -571,7 +571,7 @@ Section lfp.
     lfp (aug_meet f o) ⊑ o → lfp f ⊑ o.
   Proof.
     move=> to. rewrite -to. apply lfp_ind. etrans; [|exact lfp_unfold_2].
-    apply (mono (f:=f)). by apply bin_meet_intro.
+    apply (mono (f:=f)). exact: bin_meet_intro.
   Qed.
   Lemma lfp_para_ind' `{!BinMeet OT, !BigMeet OT, !Mono f} {o o'} :
     lfp (aug_meet f (o ⊓ o')) ⊑ o → lfp (aug_meet f o') ⊑ o.
@@ -610,7 +610,7 @@ Section gfp.
 
   (** Basic coinduction principle *)
   Lemma gfp_coind `{!Mono f} {o} : o ⊑ f o → o ⊑ gfp f.
-  Proof. rewrite gfp_unseal=> ?. by apply (big_join_intro id). Qed.
+  Proof. rewrite gfp_unseal=> ?. exact: (big_join_intro id). Qed.
 
   (** Augmenting a function with a join *)
   Definition aug_join `{!BinJoin OT} f o : _ -p> _ := λ o', f (o' ⊔ o).
@@ -628,7 +628,7 @@ Section gfp.
     o ⊑ gfp (aug_join f o) → o ⊑ gfp f.
   Proof.
     move=> to. rewrite to. apply gfp_coind. etrans; [exact gfp_unfold_1|].
-    apply (mono (f:=f)). by apply bin_join_elim.
+    apply (mono (f:=f)). exact: bin_join_elim.
   Qed.
   Lemma gfp_para_coind' `{!BinJoin OT, !BigJoin OT, !Mono f} {o o'} :
     o ⊑ gfp (aug_join f (o ⊔ o')) → o ⊑ gfp (aug_join f o').

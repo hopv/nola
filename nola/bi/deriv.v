@@ -66,7 +66,7 @@ Section deriv.
   Lemma Deriv_factor `{!Deriv ih δ} {J} :
     δ J ⊣⊢ ∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ → ⟦ J ⟧(δ').
   Proof.
-    iSplit; iIntros "?"; [|iStopProof; by exact Deriv_factor'].
+    iSplit; iIntros "?"; [|iStopProof; exact:  Deriv_factor'].
     by iIntros (??? ->).
   Qed.
   Lemma Deriv_factor_all `{!Deriv ih δ} {J} :

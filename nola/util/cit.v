@@ -630,7 +630,7 @@ Section of_cit.
       (λ k, citg_map (λ _, id) (λ ta, cita_seq ta k) t) (wf_of_cit t).
   Lemma of_cit_aux : seal of_cit_def. Proof. by eexists _. Qed.
   Definition of_cit := of_cit_aux.(unseal).
-  Lemma of_cit_unseal : of_cit = of_cit_def. Proof. by exact: seal_eq. Qed.
+  Lemma of_cit_unseal : of_cit = of_cit_def. Proof. exact: seal_eq. Qed.
 
   (** [to_cit]: Convert [cita] into [cit] *)
   Fixpoint to_cit' (t : citi I C D 1) (tl : ∀ k, citi I C D (S (S k)))
@@ -646,7 +646,7 @@ Section of_cit.
     to_cit' ta.(cita_head) ta.(cita_tail) ta.(cita_wf).
   Lemma to_cit_aux : seal to_cit_def. Proof. by eexists _. Qed.
   Definition to_cit := to_cit_aux.(unseal).
-  Lemma to_cit_unseal : to_cit = to_cit_def. Proof. by exact: seal_eq. Qed.
+  Lemma to_cit_unseal : to_cit = to_cit_def. Proof. exact: seal_eq. Qed.
 
   (** Simplify [to_cit] over [of_cit] *)
   Lemma to_of_cit {t} : to_cit (of_cit t) ≡ t.
