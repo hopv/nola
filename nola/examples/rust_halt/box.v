@@ -31,7 +31,7 @@ Section ty_box.
   Proof. move=> k ???. f_equiv. destruct k=>//=. by f_equiv. Qed.
   #[export] Instance ty_box_map_preserv `(!Preserv' PR (ty _ _ X) F) :
     Preserv (λ T, ty_box (F T)).
-  Proof. apply productive_preserv. Qed.
+  Proof. apply productive_preserv, _. Qed.
 
   (** [ty_box] satisfies [Ty] *)
   #[export] Instance ty_box_ty {X T} : Ty (ty_box (X:=X) T) 1.

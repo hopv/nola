@@ -33,7 +33,7 @@ Section ty_shrref.
   Proof. move=> k ???. f_equiv. destruct k=>//=. by f_equiv. Qed.
   #[export] Instance ty_shrref_map_preserv `(!Preserv' PR (ty _ _ X) F) {α} :
     Preserv (λ T, ty_shrref α (F T)).
-  Proof. apply productive_preserv. Qed.
+  Proof. apply productive_preserv, _. Qed.
 
   (** [sty_shrref] satisfies [Sty] *)
   #[export] Instance sty_shrref_sty {X α T} : Sty (sty_shrref (X:=X) α T) 1.
