@@ -228,7 +228,7 @@ Section lft.
     iMod (IH with "al") as (r) "al". iModIntro.
     case: (Qp.lower_bound q r)=> [s[t[t'[->->]]]].
     iExists s. iDestruct "a" as "[$ _]". iStopProof. do 3 f_equiv.
-    iDestruct 1 as "[$ ?]".
+    iIntros "[$ ?]".
   Qed.
   Lemma lft_etern_live {α} : [∞α] ==∗ ∃ q, q.[α].
   Proof. setoid_rewrite big_opMS_elements. apply alftl_etern_live. Qed.
@@ -247,8 +247,8 @@ Section lft.
     rewrite lft_dead_unseal. iSplit.
     - iDestruct 1 as (a) "[%e †]". rewrite gmultiset_elem_of_disj_union in e.
       case e as [?|?]; [iLeft|iRight]; iExists _; by iFrame "†".
-    - iDestruct 1 as "[(%a & % & †)|(%a & % & †)]"; iExists _; iFrame "†";
-        iPureIntro; set_solver.
+    - iIntros "[(%a & % & †)|(%a & % & †)]"; iExists _; iFrame "†"; iPureIntro;
+        set_solver.
   Qed.
   Lemma lft_dead_meet_l {α β} : [†α] ⊢ [†α ⊓ β].
   Proof. iIntros. rewrite lft_dead_meet. by iLeft. Qed.

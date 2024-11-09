@@ -124,7 +124,7 @@ Section type.
       type κ Γi e Γo (λ post xl, pre post (getr xl)).
   Proof.
     rewrite type_unseal. iIntros "#type !>/=" (????) "κ t pre".
-    rewrite etcx_extract. iDestruct 1 as "[[% α] Γr]".
+    rewrite etcx_extract. iIntros "[[% α] Γr]".
     iMod (lft_eternalize_sincl with "α") as "∞"=>//.
     iApply ("type" with "∞ κ t pre Γr").
   Qed.
@@ -135,7 +135,7 @@ Section type.
       type κ Γi e Γo (λ post xl, pre post (getr xl)).
   Proof.
     rewrite type_unseal. iIntros "#type !>/=" (????) "κ t pre".
-    rewrite etcx_extract. iDestruct 1 as "[[% α] Γr]".
+    rewrite etcx_extract. iIntros "[[% α] Γr]".
     iMod (lft_kill with "α") as "†"=>//. iApply ("type" with "† κ t pre Γr").
   Qed.
   (** Retrieve a frozen object *)
