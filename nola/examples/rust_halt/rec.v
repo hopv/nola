@@ -2,15 +2,15 @@
 
 From nola.examples.rust_halt Require Export type.
 
-(** [ty_rec]: Recursive type *)
-Definition ty_rec {CON Σ X} (F : ty CON Σ X → ty CON Σ X) `{!Productive F}
-  : ty CON Σ X := profix F.
-
 Section ty_rec.
   Context {CON Σ X} {F : ty CON Σ X → ty CON Σ X} `{!Productive F}.
 
+  (** [ty_rec]: Recursive type *)
+  Definition ty_rec {X} (F : ty CON Σ X → ty CON Σ X) `{!Productive F}
+    : ty CON Σ X := profix F.
+
   (** Unfold [ty_rec] *)
-  Lemma ty_rec_unfold : @ty_rec CON Σ X F _ ≡ F (ty_rec F).
+  Lemma ty_rec_unfold : @ty_rec X F _ ≡ F (ty_rec F).
   Proof. exact profix_unfold. Qed.
 
   (** Uniqueness of [ty_rec] *)
@@ -64,13 +64,11 @@ Section ty_rec.
   Implicit Type δ : JUDG -n> iProp Σ.
 
   (** Unfold and fold [ty_rec] in subtyping *)
-  Lemma ty_rec_unfold_sub {δ} :
-    ⊢ subty (X:=X) δ (ty_rec (CON:=CON) F) (F (ty_rec F)) id.
+  Lemma ty_rec_unfold_sub {δ} : ⊢ subty (X:=X) δ (ty_rec F) (F (ty_rec F)) id.
   Proof.
     erewrite subty_proper; [exact subty_refl|exact ty_rec_unfold|done..].
   Qed.
-  Lemma ty_rec_fold_sub {δ} :
-    ⊢ subty (X:=X) δ (F (ty_rec F)) (ty_rec (CON:=CON) F) id.
+  Lemma ty_rec_fold_sub {δ} : ⊢ subty (X:=X) δ (F (ty_rec F)) (ty_rec F) id.
   Proof.
     erewrite subty_proper; [exact subty_refl|done|exact ty_rec_unfold|done].
   Qed.

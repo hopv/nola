@@ -4,25 +4,26 @@ From nola.examples.rust_halt Require Export type.
 
 Implicit Type X Y : xty.
 
-(** [ty_mod]: Modification type *)
-Definition ty_mod {CON Σ X Y} (f : Y → X) (T : ty CON Σ X) : ty CON Σ Y :=
-  (λ t d yπ vl, T.1 t d (f ∘ yπ) vl, λ t d l α yπ, T.2 t d l α (f ∘ yπ)).
-
 Section ty_mod.
   Context `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), !rust_haltGS CON Σ,
     !rust_haltC CON, !rust_haltJ CON JUDG Σ}.
-  Context {X Y} {f : X → Y} {T : ty CON Σ Y}.
+
+  (** [ty_mod]: Modification type *)
+  Definition ty_mod {X Y} (f : Y → X) (T : ty CON Σ X) : ty CON Σ Y :=
+    (λ t d yπ vl, T.1 t d (f ∘ yπ) vl, λ t d l α yπ, T.2 t d l α (f ∘ yπ)).
+
+  Context {X Y} {f : X → Y}.
 
   (** [ty_mod] is size-preserving *)
-  #[export] Instance ty_mod_preserv : Preserv (@ty_mod CON Σ _ _ f).
+  #[export] Instance ty_mod_preserv : Preserv (@ty_mod _ _ f).
   Proof.
     move=> ?[??][??][/=eqvO eqvS]. split=>/= >; [apply eqvO|apply eqvS].
   Qed.
   #[export] Instance ty_mod_map_preserv `{!Preserv' (ty CON Σ X') _ F} :
-    Preserv (λ T, @ty_mod CON Σ _ _ f (F T)).
+    Preserv (λ T, @ty_mod _ _ f (F T)).
   Proof. solve_proper. Qed.
   #[export] Instance ty_mod_map_productive `{!Productive' (ty CON Σ X') _ F} :
-    Productive (λ T, @ty_mod CON Σ _ _ f (F T)).
+    Productive (λ T, @ty_mod _ _ f (F T)).
   Proof. solve_proper. Qed.
 
   (** [ty_mod] preserves [Ty] *)
@@ -57,7 +58,7 @@ Section ty_mod.
   Proof. split=>/= >; [exact: copy_persistent|exact: copy_shr_acc]. Qed.
 
   (** Subtyping on [ty_mod] *)
-  Lemma subty_of_ty_mod {δ} : ⊢ subty δ (ty_mod f T) T f.
+  Lemma subty_of_ty_mod {δ T} : ⊢ subty δ (ty_mod f T) T f.
   Proof. rewrite subty_unseal. iSplit; iModIntro; by iIntros. Qed.
   Lemma subty_to_ty_mod {δ g} `{!Ty T sz} :
     (∀ x, f (g x) = x) → ⊢ subty δ T (ty_mod f T) g.
