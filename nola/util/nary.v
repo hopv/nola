@@ -1,7 +1,7 @@
 (** * N-ary maps *)
 
 From nola Require Export prelude.
-From nola Require Import productive.
+From nola.util Require Import productive.
 Import ProeqvNotation.
 
 Implicit Type A : ofe.

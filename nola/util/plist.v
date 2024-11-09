@@ -1,6 +1,6 @@
 (** * Product list *)
 
-From nola Require Export prod.
+From nola.util Require Export prod.
 From stdpp Require Import vector.
 Import ProdNotation.
 
