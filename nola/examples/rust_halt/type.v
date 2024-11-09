@@ -279,7 +279,7 @@ End ty_op.
 Hint Mode TyOpAt - - - - - - - - ! - - : typeclass_instances.
 Hint Mode TyOpLt - - - - - - - - ! - - : typeclass_instances.
 
-(** [TyOpAt]: Basic operations on a type *)
+(** [TyOp]: Basic operations on a type *)
 Notation TyOp T κ := (∀ d, TyOpAt T κ d).
 
 (** ** Namespaces and masks *)
