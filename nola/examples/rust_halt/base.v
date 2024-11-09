@@ -189,6 +189,10 @@ Proof. unfold LftIncl. etrans; [exact lft_incl_meet_l|done]. Qed.
   LftIncl (α ⊓ α') β | 30.
 Proof. unfold LftIncl. etrans; [exact lft_incl_meet_r|done]. Qed.
 
+Lemma lft_incl'_live_acc `{!lftG Σ} `(!LftIncl α β) {q} :
+  q.[α] ⊢ ∃ r, r.[β] ∗ (r.[β] -∗ q.[α]).
+Proof. by apply lft_incl_live_acc. Qed.
+
 (** ** Shared borrows *)
 
 (** [spointsto]: Shared borrow over a points-to token *)

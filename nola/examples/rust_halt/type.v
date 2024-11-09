@@ -179,36 +179,32 @@ Section ty_op.
 
   (** [TyOpAt] is monotone *)
   #[export] Instance TyOpAt_mono {X} :
-    Proper ((≡) ==> (⊑) --> (=) ==> (→)) (@TyOpAt X).
+    Proper ((≡) ==> LftIncl --> (=) ==> (→)) (@TyOpAt X).
   Proof.
     move=> T T' [eqvO eqvS] α α' /= inc ?? <- ?. split.
     - move=> >. setoid_rewrite <-(eqvO _ _ _ _). iIntros "α' T".
-      iDestruct (lft_incl_live_acc with "α'") as (?) "[α →α']"; [done|].
+      iDestruct (lft_incl'_live_acc (β:=α) with "α'") as (?) "[α →α']".
       iMod (ty_own_proph with "α T") as (??) "($ & $ & →T)". iModIntro.
       iIntros "ξl". iMod ("→T" with "ξl") as "[α $]". iModIntro.
       by iApply "→α'".
     - move=> ?? β ??. setoid_rewrite <-(eqvS _ _ _ _ _). iIntros "αβ' T".
-      iDestruct (lft_incl_live_acc (β:=α ⊓ β) with "αβ'") as (?) "[αβ →αβ']".
-      { apply lft_incl_meet_intro; [|exact lft_incl_meet_r].
-        by etrans; [exact lft_incl_meet_l|]. }
+      iDestruct (lft_incl'_live_acc (β:=α ⊓ β) with "αβ'") as (?) "[αβ →αβ']".
       iMod (ty_shr_proph with "αβ T") as (??) "($ & $ & →T)". iModIntro.
       iIntros "ξl". iMod ("→T" with "ξl") as "[β $]". iModIntro.
       by iApply "→αβ'".
     - move=> ?? β ??. rewrite -(eqvS _ _ _ _ _). iIntros "αβ' b".
-      iDestruct (lft_incl_live_acc (β:=α ⊓ β) with "αβ'") as (?) "[αβ →αβ']".
-      { apply lft_incl_meet_intro; [|exact lft_incl_meet_r].
-        by etrans; [exact lft_incl_meet_l|]. }
+      iDestruct (lft_incl'_live_acc (β:=α ⊓ β) with "αβ'") as (?) "[αβ →αβ']".
       iMod (ty_share with "αβ [b]") as "[αβ $]"; last first.
       { iModIntro. by iApply "→αβ'". }
       iStopProof. apply bi.equiv_entails. (do 2 f_equiv)=> ?.
       by rewrite (eqvO _ _ _ _).
   Qed.
   #[export] Instance TyOpAt_flip_mono {X} :
-    Proper ((≡) ==> (⊑) ==> (=) ==> flip (→)) (@TyOpAt X).
+    Proper ((≡) ==> LftIncl ==> (=) ==> flip (→)) (@TyOpAt X).
   Proof. move=> ?*?*??<- /=. by apply TyOpAt_mono. Qed.
   #[export] Instance TyOpAt_proper {X} :
     Proper ((≡) ==> (=) --> (=) ==> (↔)) (@TyOpAt X).
-  Proof. move=> ?*??<-??<-. split; by apply TyOpAt_mono. Qed.
+  Proof. move=> ?*??<-??<-. split; apply TyOpAt_mono=>//=; exact _. Qed.
 
   (** [TyOpLt]: Basic operations on a type below a depth *)
   Class TyOpLt {X} (T : ty CON Σ X) (α : lft) (d : nat) : Prop :=
