@@ -19,6 +19,8 @@ Section ty_mod.
   Proof.
     move=> ?[??][??][/=eqvO eqvS]. split=>/= >; [apply eqvO|apply eqvS].
   Qed.
+  #[export] Instance ty_mod_proper : Proper ((≡) ==> (≡)) (@ty_mod _ _ f).
+  Proof. apply preserv_proper, _. Qed.
   #[export] Instance ty_mod_map_preserv `(!Preserv' PR _ F) :
     Preserv (λ T, @ty_mod _ _ f (F T)).
   Proof. solve_proper. Qed.

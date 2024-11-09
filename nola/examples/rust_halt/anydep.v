@@ -19,6 +19,8 @@ Section ty_anydep.
     move=> ?[??][??][/=eqvO eqvS].
     split=>/= >; f_equiv=> ?; [apply eqvO|apply eqvS].
   Qed.
+  #[export] Instance ty_anydep_proper{X} : Proper ((≡) ==> (≡)) (@ty_anydep X).
+  Proof. apply preserv_proper, _. Qed.
   #[export] Instance ty_anydep_map_preserv {X} `(!Preserv' PR _ F) :
     Preserv (λ T, @ty_anydep X (F T)).
   Proof. solve_proper. Qed.

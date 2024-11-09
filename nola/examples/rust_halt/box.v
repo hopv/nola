@@ -26,6 +26,8 @@ Section ty_box.
     rewrite ty_box_unseal /ty_box_def. apply ty_proeq=>/=. split=> >.
     { do 4 f_equiv=> ?. by rewrite eqO. } { do 3 f_equiv=> ?. by rewrite eqS. }
   Qed.
+  #[export] Instance ty_box_proper {X} : Proper ((≡) ==> (≡)) (@ty_box X).
+  Proof. apply productive_proper, _. Qed.
   #[export] Instance ty_box_map_productive `(!Preserv' PR (ty _ _ X) F) :
     Productive (λ T, ty_box (F T)).
   Proof. move=> k ???. f_equiv. destruct k=>//=. by f_equiv. Qed.
