@@ -132,6 +132,12 @@ Notation Preserv' PR PR' f := (∀ k, Proper ((≡[k]@{PR}≡) ==> (≡[k]@{PR'}
 Lemma productive_preserv `(!Productive' PR PR' f) : Preserv f.
 Proof. move=> ????. f_equiv. by apply proeq_to_later. Qed.
 
+(** [Preserv] entails [Proper] *)
+Lemma preserv_proper `(!Preserv' PR PR' f) : Proper ((≡) ==> (≡)) f.
+Proof. move=> ???. apply equiv_proeq=> ?. f_equiv. by apply equiv_proeq. Qed.
+Lemma productive_proper `(!Productive' PR PR' f) : Proper ((≡) ==> (≡)) f.
+Proof. apply preserv_proper, productive_preserv, _. Qed.
+
 (** [pair] is size-preserving *)
 #[export] Instance pair_preserv {A B : prost} {k} :
   Proper ((≡[k]≡) ==> (≡[k]≡) ==> (≡[k]≡)) (@pair A B).
