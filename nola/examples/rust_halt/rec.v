@@ -23,15 +23,13 @@ Section ty_rec.
   Lemma ty_rec_iter {k} : ty_rec F ≡[k]≡ F (Nat.iter k F inhabitant).
   Proof. exact profix_iter. Qed.
 
-  (** Equivalence between [ty_rec]s *)
-  Lemma ty_rec_equiv {G : ty CON Σ X → ty CON Σ X} `{!Productive G} :
-    (∀ T U, T ≡ U → F T ≡ G U) → ty_rec F ≡ ty_rec G.
-  Proof. exact profix_proper. Qed.
-
   (** [ty_rec] is size-preserving *)
   Lemma ty_rec_preserv {G : ty CON Σ X → ty CON Σ X} `{!Productive G} {k} :
-    F ≡[k]@{funPR _}≡ G → ty_rec F ≡[k]≡ ty_rec G.
+    (∀ T, F T ≡[k]≡ G T) → ty_rec F ≡[k]≡ ty_rec G.
   Proof. exact profix_preserv. Qed.
+  Lemma ty_rec_proper {G : ty CON Σ X → ty CON Σ X} `{!Productive G} :
+    (∀ T, F T ≡ G T) → ty_rec F ≡ ty_rec G.
+  Proof. exact profix_proper. Qed.
   (** [ty_rec] preserves size preservation and productivity *)
   #[export] Instance ty_rec_map_preserv
     `(!∀ T : PR, Productive (H T), !∀ U : ty CON Σ X, Preserv (λ T, H T U)) :

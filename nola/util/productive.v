@@ -254,12 +254,18 @@ Section profix.
 
   (** [profix] is size-preserving *)
   Lemma profix_preserv `{!Productive f, !Productive g} {k} :
-    f ≡[k]@{funPR _}≡ g → profix f ≡[k]≡ profix g.
+    (∀ a, f a ≡[k]≡ g a) → profix f ≡[k]≡ profix g.
   Proof.
     move=> eq. etrans; [exact profix_iter|].
     etrans; [|symmetry; exact profix_iter]=>/=. move: {2 3}k.
     elim=>/=; [by apply eq|]=>/= ? IH. etrans; [by apply eq|]. f_equiv.
     move: IH. apply proeq_to_later.
+  Qed.
+  Lemma profix_proper `{!Productive f, !Productive g} :
+    (∀ a, f a ≡ g a) → profix f ≡ profix g.
+  Proof.
+    move=> ?. apply equiv_proeq=> ?. apply profix_preserv=> ?.
+    by apply equiv_proeq.
   Qed.
   Lemma profix_map_preserv {PR'} {f : PR' → PR → PR}
     `{!∀ b, Productive (f b), Pres : !∀ a, Preserv (λ b, f b a)} :
@@ -270,19 +276,16 @@ Section profix.
     Productive (λ b, profix (f b)).
   Proof. move=> ????. apply profix_preserv=> ?. by apply Prod. Qed.
 
-  (** [profix] is proper *)
-  Lemma profix_proper `{!Equivalence R}
-    `{!Proper ((pointwise_relation _ R : relation (prochain _)) ==> R) prolimit}
+  (** Relation between [profix]s *)
+  Lemma profix_rel `{!Equivalence R}
+    `(!Proper ((pointwise_relation _ R : relation (prochain _)) ==> R) prolimit)
     `{!Productive f, !Productive g} :
     (∀ a a', R a a' → R (f a) (g a')) → R (profix f) (profix g).
   Proof.
     move=> eq. rewrite profix_unseal /profix_def. f_equiv=>/= +.
     elim=>/= *; by apply eq.
   Qed.
-  Lemma profix_equiv `{!Productive f, !Productive g} :
-    (∀ a a', a ≡ a' → f a ≡ g a') → profix f ≡ profix g.
-  Proof. apply profix_proper. Qed.
   Lemma profix_ne `{!Productive f, !Productive g} {n} :
     (∀ a a', a ≡{n}≡ a' → f a ≡{n}≡ g a') → profix f ≡{n}≡ profix g.
-  Proof. apply profix_proper. Qed.
+  Proof. apply profix_rel, _. Qed.
 End profix.
