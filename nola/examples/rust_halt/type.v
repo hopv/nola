@@ -496,6 +496,7 @@ Section subty.
   (** [subty]: Subtyping *)
   Definition subty_def δ {X Y} (T : ty CON Σ X) (U : ty CON Σ Y) (f : X → Y)
     : iProp Σ :=
+    (* Size equality *) ⌜ty_size T = ty_size U⌝ ∗
     (* Ownership formula conversion *) □ (∀ t d xπ vl,
       ⟦ ty_own T t d xπ vl ⟧ᶜ(δ) -∗ ⟦ ty_own U t d (λ π, f (xπ π)) vl ⟧ᶜ(δ)) ∧
     (* Sharing formula conversion *) □ (∀ t d l α xπ,
@@ -512,8 +513,8 @@ Section subty.
   #[export] Instance subty_proper {δ X Y} :
     Proper ((≡) ==> (≡) ==> (=) ==> (⊣⊢)) (@subty δ X Y).
   Proof.
-    rewrite subty_unseal /subty_def=> ?? /ty_equiv[?[eqvO eqvS]].
-    move=> ?? /ty_equiv[?[eqvO' eqvS']]??<-.
+    rewrite subty_unseal /subty_def=> ?? /ty_equiv[->[eqvO eqvS]].
+    move=> ?? /ty_equiv[->[eqvO' eqvS']]??<-. f_equiv.
     do 12 f_equiv; [exact (eqvO _ _ _ _)|exact (eqvO' _ _ _ _)|].
     do 2 f_equiv; [exact (eqvS _ _ _ _ _)|exact (eqvS' _ _ _ _ _)].
   Qed.
@@ -524,17 +525,20 @@ Section subty.
     have pro : Proper (pointwise_relation _ (=) ==> (⊢)) (@subty δ X Y T U);
       last first.
     { move=> ?*. apply bi.equiv_entails. split; by apply pro. }
-    rewrite subty_unseal /subty_def=> ?*. do 11 f_equiv; [exact: ty_own_clair|].
+    rewrite subty_unseal /subty_def=> ?*. do 12 f_equiv; [exact: ty_own_clair|].
     do 2 f_equiv. exact: ty_shr_clair.
   Qed.
   (** [subty] is reflexive *)
   Lemma subty_refl {δ X T} : ⊢ @subty δ X _ T T id.
-  Proof. rewrite subty_unseal. iSplit; iModIntro; iIntros; iFrame. Qed.
+  Proof.
+    rewrite subty_unseal. iSplit=>//. iSplit; iModIntro; iIntros; iFrame.
+  Qed.
   (** [subty] is transitive *)
   Lemma subty_trans {δ X Y Z T U V f g} :
     @subty δ X Y T U f -∗ @subty δ _ Z U V g -∗ @subty δ X Z T V (g ∘ f).
   Proof.
-    rewrite subty_unseal. iIntros "[#TUo #TUs][#UVo #UVs]". iSplit; iModIntro.
+    rewrite subty_unseal. iIntros "[%TUz[#TUo #TUs]][%[#UVo #UVs]]".
+    iSplit; [by rewrite TUz|]. iSplit; iModIntro.
     - iIntros (????) "T". iApply "UVo". by iApply "TUo".
     - iIntros (?????) "T". iApply "UVs". by iApply "TUs".
   Qed.
@@ -543,20 +547,23 @@ Section subty.
 
   (** [subty] over [sty] *)
   Lemma subty_sty {δ X Y f} T U :
+    ⌜sty_size T = sty_size U⌝ -∗
     □ (∀ t d xπ vl, ⟦ sty_own T t d xπ vl ⟧ᶜ(δ) -∗
-        ⟦ sty_own U t d (λ π, f (xπ π)) vl ⟧ᶜ(δ)) ⊢
+        ⟦ sty_own U t d (λ π, f (xπ π)) vl ⟧ᶜ(δ)) -∗
       @subty δ X Y (ty_sty T) (ty_sty U) f.
   Proof.
-    rewrite subty_unseal ty_sty_unseal. iIntros "#sub".
-    iSplit; [done|]=>/=. iIntros (?????) "!> (% & $ & ?)". by iApply "sub".
+    rewrite subty_unseal ty_sty_unseal. iIntros (eq) "#sub". iSplit=>//.
+    iSplit=>//=. iIntros (?????) "!> (% & $ & ?)". by iApply "sub".
   Qed.
   (** [subty] over [pty] *)
   Lemma subty_pty {δ X Y f} T U :
-    □ (∀ x vl, ⟦ pty_own T x vl ⟧ᶜ(δ) -∗ ⟦ pty_own U (f x) vl ⟧ᶜ(δ)) ⊢
+    ⌜pty_size T = pty_size U⌝ -∗
+    □ (∀ x vl, ⟦ pty_own T x vl ⟧ᶜ(δ) -∗ ⟦ pty_own U (f x) vl ⟧ᶜ(δ)) -∗
       @subty δ X Y (ty_pty T) (ty_pty U) f.
   Proof.
-    iIntros "#sub". iApply subty_sty=>/=. iIntros (????) "!> (% & %eq & ?)".
-    iExists _. iSplit; [|by iApply "sub"]. iPureIntro=> ?. by rewrite eq.
+    iIntros (?) "#sub". iApply subty_sty=>//=.
+    iIntros (????) "!> (% & %eq & ?)". iExists _. iSplit; [|by iApply "sub"].
+    iPureIntro=> ?. by rewrite eq.
   Qed.
 End subty.
 

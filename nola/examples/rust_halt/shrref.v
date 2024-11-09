@@ -91,11 +91,12 @@ Section ty_shrref.
     □ (∀ δ', ⌜Deriv ih δ'⌝ -∗ ⌜ih δ'⌝ -∗ subty (X:=X) (Y:=Y) δ' T U f) ⊢
       subty δ (ty_shrref α T) (ty_shrref α U) f.
   Proof.
-    rewrite -subty_sty sty_shrref_unseal. iIntros "#tosub !>/=" (????).
-    iDestruct 1 as (???) "($ & $ & %eq & #T)". iExists _.
+    iIntros "#tosub". iApply subty_sty=>//. rewrite sty_shrref_unseal.
+    iIntros (????) "!>/=". iDestruct 1 as (???) "($ & $ & %eq & #T)". iExists _.
     rewrite !sem_cif_in /=. iSplit. { iPureIntro=> ?. by rewrite -eq. }
     iModIntro. iApply (store_wand with "[] T"). iIntros (????) "{T}T !>".
-    rewrite subty_unseal. by iApply ("tosub" with "[//] [//]").
+    rewrite subty_unseal. iDestruct ("tosub" with "[//] [//]") as (_) "sub".
+    by iApply "sub".
   Qed.
 
   (** Read a copyable object from [ty_shrref] *)

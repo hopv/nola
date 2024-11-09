@@ -85,14 +85,14 @@ Section ty_anydep.
   (** Subtyping on [ty_anydep] *)
   Lemma subty_to_anydep {δ X T} : ⊢ subty (X:=X) δ T (ty_anydep T) id.
   Proof.
-    rewrite subty_unseal ty_anydep_unseal. iSplit; iModIntro=>/=.
+    rewrite subty_unseal ty_anydep_unseal. iSplit=>//. iSplit; iModIntro=>/=.
     { iIntros (????) "$". } { iIntros (?????) "$". }
   Qed.
   Lemma subty_anydep {δ X Y T U f} :
     subty (X:=X) (Y:=Y) δ T U f ⊢ subty δ (ty_anydep T) (ty_anydep U) f.
   Proof.
-    rewrite subty_unseal ty_anydep_unseal. iIntros "#[subO subS]".
-    iSplit; iModIntro=>/=.
+    rewrite subty_unseal ty_anydep_unseal. iIntros "[%[#subO #subS]]".
+    iSplit=>//. iSplit; iModIntro=>/=.
     - iIntros (????) "[% T]". iExists _. by iApply "subO".
     - iIntros (?????) "[% T]". iExists _. by iApply "subS".
   Qed.

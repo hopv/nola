@@ -104,18 +104,20 @@ Section ty_box.
     □ (∀ δ', ⌜Deriv ih δ'⌝ -∗ ⌜ih δ'⌝ -∗ subty (X:=X) (Y:=Y) δ' T U f) ⊢
       subty δ (ty_box T) (ty_box U) f.
   Proof.
-    rewrite subty_unseal ty_box_unseal /=. iIntros "#tosub".
+    rewrite subty_unseal ty_box_unseal /=. iIntros "#tosub". iSplit=>//.
     iSplit; iModIntro=>/=.
     - iIntros (????) "(% & % & %xπ' & % & % & % & %eq & $ & $ & T)".
       iExists _, (f ∘ xπ'). rewrite !sem_cif_in /=.
       iDestruct (store_wand with "[] T") as "$"; last first.
       { iPureIntro. (do 2 split=>//)=> ?. by rewrite eq. }
-      iIntros (????) "? !>". by iApply ("tosub" with "[//] [//]").
+      iIntros (????) "? !>".
+      iDestruct ("tosub" with "[//] [//]") as (_) "[sub _]". by iApply "sub".
     - iIntros (?????) "(% & % & %xπ' & % & %eq & $ & #T)". iExists _, (f ∘ xπ').
       rewrite !sem_cif_in /=.
       iDestruct (store_wand with "[] T") as "$"; last first.
       { iPureIntro. (split=>//)=> ?. by rewrite eq. }
-      iIntros (????) "? !>". by iApply ("tosub" with "[//] [//]").
+      iIntros (????) "? !>".
+      iDestruct ("tosub" with "[//] [//]") as (_) "[_ sub]". by iApply "sub".
   Qed.
 
   (** Resolution over [ty_box] *)

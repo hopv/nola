@@ -39,10 +39,10 @@ Section num.
 
   (** Subtyping *)
   Lemma subty_nat_int {δ} : ⊢ subty δ ty_nat ty_int id.
-  Proof. iApply (subty_pty pty_nat pty_int). by iIntros (??). Qed.
+  Proof. iApply (subty_pty pty_nat pty_int)=>//. by iIntros (??). Qed.
   Lemma subty_bool_nat {δ} :
     ⊢ subty δ ty_bool ty_nat (λ b, if b then 1 else 0).
-  Proof. iApply (subty_pty pty_bool pty_nat). by iIntros ([|]?). Qed.
+  Proof. iApply (subty_pty pty_bool pty_nat)=>//. by iIntros ([|]?). Qed.
 
   (** Integer operations *)
   Lemma type_int (n : Z) {κ Xl Γ} :

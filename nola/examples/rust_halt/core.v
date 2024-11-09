@@ -36,7 +36,7 @@ Section type.
     subtyd T U f ⊢
       sub κ Γ (v ◁{d} U ᵖ:: Γr) (λ post zl, post (f (get zl), getr zl)').
   Proof.
-    rewrite subty_unseal sub_unseal. iIntros "[#TU _] !>/=" (????) "$ $ pre".
+    rewrite subty_unseal sub_unseal. iIntros "[_[#TU _]] !>/=" (????) "$ $ pre".
     rewrite etcx_extract /=. iIntros "[T Γr] !>". iFrame "pre Γr".
     by iDestruct ("TU" with "T") as "$".
   Qed.
@@ -46,7 +46,7 @@ Section type.
     subtyd T U f ⊢
       sub κ Γ (v ◁[†α] U ᵖ:: Γr) (λ post zl, post (f (get zl), getr zl)').
   Proof.
-    rewrite subty_unseal sub_unseal. iIntros "[#TU _] !>/=" (????) "$ $ pre".
+    rewrite subty_unseal sub_unseal. iIntros "[_[#TU _]] !>/=" (????) "$ $ pre".
     rewrite etcx_extract /=. iIntros "[→T Γr] !>". iFrame "pre Γr". iIntros "†".
     iMod ("→T" with "†") as (??) "[eqz T]". iExists _, _.
     iDestruct ("TU" with "T") as "$". iApply (proph_eqz_f with "eqz").
