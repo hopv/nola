@@ -151,4 +151,17 @@ Section ty_box.
     iMod (store_alloc with "U") as "U". iModIntro. iFrame "†". iExists _, _.
     rewrite sem_cif_in /=. iFrame "U". iPureIntro. do 2 split=>//. lia.
   Qed.
+
+  (** The depth of [ty_box] is positive *)
+  Lemma type_box_depth v
+    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (v ◁{d} ty_box (X:=X) T) Γi Γr get getr)
+    {Zl' κ e Γo pre} :
+    (⌜d > 0⌝ → type (Yl:=Zl') κ (v ◁{d} ty_box T ᵖ:: Γr) e Γo pre) ⊢
+      type κ Γi e Γo (λ post xl, pre post (get xl, getr xl)').
+  Proof.
+    rewrite type_unseal. iIntros "#type !>/=" (????) "κ t pre".
+    rewrite etcx_extract ty_box_unseal /=. iIntros "[boxT Γr]".
+    iDestruct "boxT" as (??????) "big".
+    iApply ("type" with "[%] κ t pre [big $Γr]"); [lia|]=>/=. by iFrame.
+  Qed.
 End ty_box.

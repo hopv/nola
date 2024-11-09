@@ -102,4 +102,17 @@ Section ty_shrref.
     iDestruct ("→κ" with "α") as "$". iExists _, _, _. rewrite sem_cif_in /=.
     by iFrame "sT".
   Qed.
+
+  (** The depth of [ty_shrref] is positive *)
+  Lemma type_shrref_depth v
+    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (v ◁{d} ty_shrref (X:=X) α T)
+        Γi Γr get getr) {Zl' κ e Γo pre} :
+    (⌜d > 0⌝ → type (Yl:=Zl') κ (v ◁{d} ty_shrref α T ᵖ:: Γr) e Γo pre) ⊢
+      type κ Γi e Γo (λ post xl, pre post (get xl, getr xl)').
+  Proof.
+    rewrite type_unseal. iIntros "#type !>/=" (????) "κ t pre".
+    rewrite etcx_extract /ty_shrref sty_shrref_unseal /=.
+    iIntros "[shrrefT Γr]". iDestruct "shrrefT" as (?????) "big".
+    iApply ("type" with "[%] κ t pre [big $Γr]"); [lia|]=>/=. by iFrame.
+  Qed.
 End ty_shrref.
