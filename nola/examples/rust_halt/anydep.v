@@ -57,9 +57,8 @@ Section ty_anydep.
       by iMod ("→T" with "ξl") as "[$$]".
     - iIntros "[κ α] b".
       iMod (bord_open (M:=borrowM) with "α b") as "/=[o (% & ↦ & % & T)]".
-      iMod (obord_subdiv (FML:=cifOF _) (M:=borrowM)
-        [∃ vl, ▷ _ ↦∗ vl ∗ ty_own T _ _ _ vl]%cif with "[] o [$↦ $T //] []")
-        as "(α & _ & b & _)"=>/=.
+      iMod (obord_subdiv (M:=borrowM) [cif_pointsto_ty _ _ _ _ _]
+        with "[] o [$↦ $T //] []") as "(α & _ & b & _)"=>/=.
       { iApply lft_sincl_refl. } { by iIntros "_ [(% & $ & $) _]". }
       rewrite bor_tok_bor.
       by iMod (ty_share (T:=T) with "[$κ $α //] b") as "[$$]".

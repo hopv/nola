@@ -74,7 +74,7 @@ Section ty_box.
       iDestruct (ty_own_size with "T") as %->.
       rewrite heap_pointsto_vec_singleton.
       iMod (obord_subdiv (FML:=cifOF _) (M:=borrowM)
-        [▷ _ ↦ _; ∃ wl, ▷ _ ↦∗ wl ∗ ty_own T _ _ _ wl]%cif
+        [▷ _ ↦ _; cif_pointsto_ty _ _ _ _ _]%cif
         with "[] o [$↦ $↦' $T //] [†]") as "(α & _ & b & b' & _)"=>/=.
       { iApply lft_sincl_refl. }
       { iIntros "_ (↦ & (% & $ & T) & _)". rewrite -heap_pointsto_vec_singleton.

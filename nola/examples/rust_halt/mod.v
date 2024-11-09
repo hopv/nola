@@ -56,7 +56,7 @@ Section ty_mod.
       iPureIntro. by eapply proph_dep_unf.
     - iIntros "κα T". iMod (ty_shr_proph with "κα T") as (???) "[$$]".
       iPureIntro. by eapply proph_dep_unf.
-    - exact ty_share.
+    - unfold cif_pointsto_ty=>/=. exact ty_share.
   Qed.
 
   (** [ty_mod] preserves [Send] *)

@@ -238,6 +238,10 @@ Section ty_op.
   Context `{!rust_haltGS CON Σ, !rust_haltJ CON JUDG Σ, !Csem CON JUDG Σ,
     !Jsem JUDG (iProp Σ)}.
 
+  (** The body formula of the borrow for [ty_share] *)
+  Definition cif_pointsto_ty {X} (T : ty CON Σ X) l t d xπ : cifOF CON $oi Σ :=
+    (∃ vl, ▷ l ↦∗ vl ∗ ty_own T t d xπ vl)%cif.
+
   (** [TyOpAt]: Basic operations on a type at a depth *)
   Class TyOpAt {X} (T : ty CON Σ X) (κ : lft) (d : nat) : Prop := TY_OP_AT {
     (** Take out prophecy tokens from ownership and sharing formulas *)
@@ -251,7 +255,7 @@ Section ty_op.
         (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ ⊓ α] ∗ ⟦ ty_shr T t d l α xπ ⟧ᶜ);
     (** A borrow over the ownership formula can turn into the sharing formula *)
     ty_share {t l α xπ q} :
-      q.[κ ⊓ α] -∗ bord α (∃ vl, ▷ l ↦∗ vl ∗ ty_own T t d xπ vl)%cif
+      q.[κ ⊓ α] -∗ bord α (cif_pointsto_ty T l t d xπ)
         =[rust_halt_wsat]{⊤}=∗ q.[κ ⊓ α] ∗ ⟦ ty_shr T t d l α xπ ⟧ᶜ;
   }.
 
@@ -275,8 +279,8 @@ Section ty_op.
       iDestruct (lft_incl'_live_acc (α:=κ ⊓ α) with "κ'α") as (?) "[κα →κ'α]".
       iMod (ty_share with "κα [b]") as "[κα $]"; last first.
       { iModIntro. by iApply "→κ'α". }
-      iStopProof. apply bi.equiv_entails. (do 2 f_equiv)=> ?.
-      by rewrite (eqvO _ _ _ _).
+      iStopProof. apply bi.equiv_entails. unfold cif_pointsto_ty.
+      (do 2 f_equiv)=> ?. by rewrite (eqvO _ _ _ _).
   Qed.
   #[export] Instance TyOpAt_flip_mono {X} :
     Proper ((≡) ==> (⊑) ==> (=) ==> flip impl) (@TyOpAt X).
