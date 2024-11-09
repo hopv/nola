@@ -33,7 +33,7 @@ Section type.
       sub κ Γ (v ◁{d} U ᵖ:: Γr) (λ post zl, post (f (get zl), getr zl)').
   Proof.
     rewrite subty_unseal sub_unseal. iIntros "[#TU _] !>/=" (????) "$ $ pre".
-    rewrite etcx_extract. iIntros "[T Γr] !>". iFrame "pre Γr".
+    rewrite etcx_extract /=. iIntros "[T Γr] !>". iFrame "pre Γr".
     by iDestruct ("TU" with "T") as "$".
   Qed.
   Lemma sub_subty_frozen v {X} T
@@ -43,7 +43,7 @@ Section type.
       sub κ Γ (v ◁[†α] U ᵖ:: Γr) (λ post zl, post (f (get zl), getr zl)').
   Proof.
     rewrite subty_unseal sub_unseal. iIntros "[#TU _] !>/=" (????) "$ $ pre".
-    rewrite etcx_extract. iIntros "[→T Γr] !>". iFrame "pre Γr". iIntros "†".
+    rewrite etcx_extract /=. iIntros "[→T Γr] !>". iFrame "pre Γr". iIntros "†".
     iMod ("→T" with "†") as (??) "[eqz T]". iExists _, _.
     iDestruct ("TU" with "T") as "$". iApply (proph_eqz_f with "eqz").
   Qed.
@@ -111,7 +111,7 @@ Section type.
         (λ post xl, pre (λ yl, post ((), yl)') (getr xl)).
   Proof.
     rewrite type_unseal. iIntros "#type !>/=" (q ???) "κ t pre Γi".
-    rewrite etcx_extract. iDestruct "Γi" as "[[% α] Γr]".
+    rewrite etcx_extract /=. iDestruct "Γi" as "[[% α] Γr]".
     case (Qp.lower_bound 1 q) as [?[?[?[->->]]]]. iDestruct "α" as "[α $]".
     iDestruct "κ" as "[κ $]".
     iDestruct ("type" with "[$α $κ //] t pre Γr") as "twp".
@@ -124,7 +124,7 @@ Section type.
       type κ Γi e Γo (λ post xl, pre post (getr xl)).
   Proof.
     rewrite type_unseal. iIntros "#type !>/=" (????) "κ t pre".
-    rewrite etcx_extract. iIntros "[[% α] Γr]".
+    rewrite etcx_extract /=. iIntros "[[% α] Γr]".
     iMod (lft_eternalize_sincl with "α") as "∞"=>//.
     iApply ("type" with "∞ κ t pre Γr").
   Qed.
@@ -135,7 +135,7 @@ Section type.
       type κ Γi e Γo (λ post xl, pre post (getr xl)).
   Proof.
     rewrite type_unseal. iIntros "#type !>/=" (????) "κ t pre".
-    rewrite etcx_extract. iIntros "[[% α] Γr]".
+    rewrite etcx_extract /=. iIntros "[[% α] Γr]".
     iMod (lft_kill with "α") as "†"=>//. iApply ("type" with "† κ t pre Γr").
   Qed.
   (** Retrieve a frozen object *)
