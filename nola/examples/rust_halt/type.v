@@ -465,11 +465,11 @@ Notation subtyd := (subty der).
 
 (** Type context element *)
 Variant etcx CON Σ : xty → Type :=
-| Owned {X} (v : val) (T : ty CON Σ X) : etcx CON Σ X
+| Owned {X} (d : nat) (v : val) (T : ty CON Σ X) : etcx CON Σ X
 | Frozen {X} (α : lft) (v : val) (T : ty CON Σ X) : etcx CON Σ X
 | Lft (α : lft) : etcx CON Σ unitₓ.
 Arguments Owned {_ _ _}. Arguments Frozen {_ _ _}. Arguments Lft {_ _}.
-Infix "◁" := Owned (at level 55).
+Notation "v ◁{ d } T" := (Owned d v T) (at level 55, format "v  ◁{ d }  T").
 Notation "v ◁[† α ] T" := (Frozen α v T) (at level 55, format "v  ◁[† α ]  T").
 Notation "^[ α ]" := (Lft α) (format "^[ α ]").
 
@@ -482,7 +482,7 @@ Section tcx.
   (** Semantics of a type context element *)
   Definition sem_etcx {X} t (E : etcx CON Σ X) : clair X → iProp Σ :=
     match E with
-    | v ◁ T => λ xπ, ∃ d, ⟦ T.1 t d xπ [v] ⟧ᶜ
+    | v ◁{d} T => λ xπ, ⟦ T.1 t d xπ [v] ⟧ᶜ
     | v ◁[†α] T => λ xπ, [†α] =[rust_halt_wsat]{⊤}=∗
         ∃ d xπ', proph_eqz xπ xπ' ∗ ⟦ T.1 t d xπ' [v] ⟧ᶜ
     | ^[α] => λ _, ⌜α ≠ ⊤⌝ ∧ 1.[α]
@@ -691,8 +691,8 @@ Section tcx_extract.
     @EtcxExtract X _ Yl E (E ᵖ:: Γ) Γ fst' snd' | 5.
   Proof. by split. Qed.
   (** Extract from the copyable head *)
-  #[export] Instance etcx_extract_hd_copy {X Yl Γ v} `{!Copy T sz} :
-    @EtcxExtract X (_ :: Yl) _ (v ◁ T) (v ◁ T ᵖ:: Γ) (v ◁ T ᵖ:: Γ)
+  #[export] Instance etcx_extract_hd_copy {X Yl Γ v d} `{!Copy T sz} :
+    @EtcxExtract X (_ :: Yl) _ (v ◁{d} T) (v ◁{d} T ᵖ:: Γ) (v ◁{d} T ᵖ:: Γ)
       fst' (λ yyl, yyl) | 2.
   Proof. split=> ??. iIntros "[#T $]". iFrame "T". Qed.
   (** Extract from the tail *)

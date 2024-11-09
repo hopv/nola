@@ -82,17 +82,18 @@ Section ty_shrref.
   Qed.
 
   (** Read a copyable object from [ty_shrref] *)
-  Lemma read_ty_shrref `{!Ty (X:=X) T sz, !Copy T sz, !LftIncl κ α} :
-    Read κ (ty_shrref α T) T (ty_shrref α T) id id.
+  Lemma read_ty_shrref `{!Ty (X:=X) T sz, !Copy T sz, !LftIncl κ α} {d} :
+    Read κ (S d) (ty_shrref α T) d T (ty_shrref α T) id id.
   Proof.
     split=>/= >. iIntros "κ t". rewrite sty_shrref_unseal /=.
     iDestruct 1 as (???[= ->]??) "#sT".
     rewrite sem_cif_in /=. iMod (stored_acc with "sT") as "sT'".
     iDestruct (lft_incl'_live_acc (α:=α) with "κ") as (?) "[α →κ]".
     iMod (copy_shr_acc with "α t sT'") as (??) "(↦ & t & #T & cl)"=>//.
-    iModIntro. iDestruct (ty_own_clair with "T") as "$"=>//. iFrame "↦".
+    iModIntro. iDestruct (ty_own_depth (d':=d) with "T") as "T'"; [lia|].
+    iDestruct (ty_own_clair with "T'") as "$"=>//. iFrame "↦".
     iSplit=>//. iIntros "↦". iMod ("cl" with "↦ t") as "[α $]". iModIntro.
-    iDestruct ("→κ" with "α") as "$". iExists _, _, _, _. rewrite sem_cif_in /=.
+    iDestruct ("→κ" with "α") as "$". iExists _, _, _. rewrite sem_cif_in /=.
     by iFrame "sT".
   Qed.
 End ty_shrref.
