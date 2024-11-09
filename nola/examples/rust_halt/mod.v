@@ -69,4 +69,9 @@ Section ty_mod.
     - iIntros (????) "T". iApply (ty_own_clair with "T")=>//=.
     - iIntros (?????) "T". iApply (ty_shr_clair with "T")=>//=.
   Qed.
+
+  (** Resolution over [ty_mod] *)
+  #[export] Instance resol_mod `(!ResolAt T κ post d) :
+    ResolAt (ty_mod f T) κ (post ∘ f) d.
+  Proof. split=> > /=. exact: resol. Qed.
 End ty_mod.

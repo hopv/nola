@@ -112,6 +112,16 @@ Section ty_box.
       iIntros (????) "? !>". by iApply ("tosub" with "[//] [//]").
   Qed.
 
+  (** Resolution over [ty_box] *)
+  #[export] Instance resol_box `(!ResolLt (X:=X) T κ post d) :
+    ResolAt (ty_box T) κ post d.
+  Proof.
+    split=> >. rewrite ty_box_unseal /=. iIntros "κ".
+    iDestruct 1 as (?????? eq) "(_ & _ & T)". rewrite sem_cif_in /=.
+    iMod (stored_acc with "T") as "T". setoid_rewrite <-eq.
+    by iApply (resol_lt with "κ T").
+  Qed.
+
   (** Read from [ty_box] *)
   #[export] Instance read_box `{!Ty (X:=X) T sz} {κ d} :
     Read κ (S d) (ty_box T) d T (ty_box (ty_uninit sz)) id (λ _, ()) | 20.

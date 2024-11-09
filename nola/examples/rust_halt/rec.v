@@ -96,4 +96,25 @@ Section ty_rec.
   Lemma ty_rec_ty_op `(!∀ d T, TyOpLt T κ d → TyOpAt (F T) κ d) :
     TyOp (ty_rec F) κ.
   Proof. move=> ?. by apply (ty_rec_ty_op_lt ᵖ[] _). Qed.
+
+  (** Resolution over [ty_rec] *)
+  Lemma ty_rec_resol_lt {Yl} (Uposl : plist (λ Y, ty CON Σ Y *' (Y → Prop)) Yl)
+    `(Resol0: !∀ d T, ResolLt T κ post d →
+        TCPlistForall (λ _ '(U, pos)', ResolLt U κ pos d) Uposl →
+        ResolAt (F T) κ post d) {d} :
+    TCPlistForall (λ _ '(U, pos)', ResolLt U κ pos d) Uposl →
+      ResolAt (ty_rec F) κ post d.
+  Proof.
+    rewrite ty_rec_unfold=> ResolUl. apply Resol0; [|done].
+    rewrite ty_rec_unfold. move: ResolUl. elim: d; [move=> ??; lia|].
+    move=> d IH ResolUl d' ?. apply Resol0; last first.
+    { move: ResolUl. apply TCPlistForall_mono=> ??. apply: ResolLt_mono=>//=.
+      lia. }
+    have le : d' ≤ d by lia. apply: ResolLt_mono=>//. rewrite ty_rec_unfold.
+    apply IH. move: ResolUl. apply TCPlistForall_mono=> ??.
+    apply: ResolLt_mono=>//=. lia.
+  Qed.
+  Lemma ty_rec_resol `(!∀ d T, ResolLt T κ post d → ResolAt (F T) κ post d) :
+    Resol (ty_rec F) κ post.
+  Proof. move=> ?. by apply (ty_rec_resol_lt ᵖ[] _). Qed.
 End ty_rec.

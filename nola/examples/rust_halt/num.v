@@ -27,6 +27,14 @@ Section num.
   #[export] Instance ty_bool_pty : Pty pty_bool 1.
   Proof. split=>/= *; [exact _|]. by iIntros "->". Qed.
 
+  (** Trivial resolution over numeric types *)
+  #[export] Instance resol_int {κ} : Resol ty_int κ (λ _, True).
+  Proof. exact _. Qed.
+  #[export] Instance resol_nat {κ} : Resol ty_nat κ (λ _, True).
+  Proof. exact _. Qed.
+  #[export] Instance resol_bool {κ} : Resol ty_bool κ (λ _, True).
+  Proof. exact _. Qed.
+
   (** Subtyping *)
   Lemma subty_nat_int {δ} : ⊢ subty δ ty_nat ty_int id.
   Proof. iApply (subty_pty pty_nat pty_int). by iIntros (??). Qed.

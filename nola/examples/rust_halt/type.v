@@ -462,6 +462,82 @@ End subty.
 
 Notation subtyd := (subty der).
 
+(** ** Resolution over a type *)
+
+Section resol.
+  Context `{!rust_haltGS CON Σ, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ)}.
+
+  (** [ResolAt]: Resolution over a type at a depth *)
+  Class ResolAt {X} (T : ty CON Σ X) (κ : lft) (post : X → Prop) (d : nat)
+    : Prop := RESOL_AT {
+    resol {t xπ vl q} :
+      q.[κ] -∗ ⟦ T.1 t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
+        q.[κ] ∗ ⟨π, post (xπ π)⟩;
+  }.
+
+  (** [ResolAt] is monotone *)
+  #[export] Instance ResolAt_mono {X} :
+    Proper ((≡) ==> (⊑) --> pointwise_relation _ impl ==> (=) ==> impl)
+      (@ResolAt X).
+  Proof.
+    move=> ?? [eqv _] κ κ' /= ??? to ??<-?. have ? : LftIncl κ' κ by done.
+    split=>/= >. iIntros "κ' T".
+    iDestruct (lft_incl'_live_acc (α:=κ) with "κ'") as (?) "[κ →κ']".
+    rewrite -(eqv _ _ _ _). iMod (resol with "κ T") as "[κ post]".
+    iDestruct ("→κ'" with "κ") as "$". iModIntro.
+    iApply (proph_obs_impl with "post")=> ?. apply to.
+  Qed.
+  #[export] Instance ResolAt_flip_mono {X} :
+    Proper ((≡) ==> (⊑) ==> pointwise_relation _ (flip impl) ==> (=) ==>
+      flip impl) (@ResolAt X).
+  Proof.
+    move=> ?*?*?? to ?? <-. eapply ResolAt_mono; [done..|exact to|done].
+  Qed.
+  #[export] Instance ResolAt_proper {X} :
+    Proper ((≡) ==> (=) ==> pointwise_relation _ (↔) ==> (=) ==> (↔))
+      (@ResolAt X).
+  Proof.
+    move=> ?*?? <- ?? iff ?? <-.
+    split; apply ResolAt_mono=>//= ??; by apply iff.
+  Qed.
+
+  (** Trivial resolution *)
+  #[export] Instance resol_true {X T κ d} : @ResolAt X T κ (λ _, True) d | 100.
+  Proof. split=> >. iIntros "$ _ !>". by iApply proph_obs_true. Qed.
+
+  (** [ResolLt]: Resolution over a type below a depth *)
+  Class ResolLt {X} (T : ty CON Σ X) (κ : lft) (post : X → Prop) (d : nat)
+    : Prop :=
+    resol_lt' : ∀ {d'}, d' < d → ResolAt T κ post d'.
+
+  (** [ResolLt] is monotone *)
+  #[export] Instance ResolLt_mono {X} :
+    Proper ((≡) ==> (⊑) --> pointwise_relation _ impl ==> (≤) --> impl)
+      (@ResolLt X).
+  Proof.
+    move=> ?*?*?*?? /= ????. eapply ResolAt_mono=>//. apply resol_lt'. lia.
+  Qed.
+  #[export] Instance ResolLt_flip_mono {X} :
+    Proper ((≡) ==> (⊑) ==> pointwise_relation _ (flip impl) ==> (≤) ==>
+      flip impl) (@ResolLt X).
+  Proof. move=> ?*?*?*?*. by eapply ResolLt_mono. Qed.
+  #[export] Instance ResolLt_proper {X} :
+    Proper ((≡) ==> (=) ==> pointwise_relation _ (↔) ==> (=) ==> (↔))
+      (@ResolLt X).
+  Proof.
+    move=> ?*?? <- ?? iff ?? <-.
+    split; eapply ResolLt_mono=>//= ??; by apply iff.
+  Qed.
+
+  (** [resol] under [ResolLt] *)
+  Lemma resol_lt `{!@ResolLt X T κ post d} {d' t xπ vl q} : d' < d →
+    q.[κ] -∗ ⟦ T.1 t d' xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
+      q.[κ] ∗ ⟨π, post (xπ π)⟩.
+  Proof. move=> ?. by apply @resol, resol_lt'. Qed.
+End resol.
+(** [Resol]: Resolution over a type *)
+Notation Resol T κ post := (∀ d, ResolAt T κ post d).
+
 (** ** Type context *)
 
 (** Type context element *)
@@ -739,3 +815,38 @@ Section tcx_extract.
     iFrame "pre". by rewrite tcx_extract sem_tcx_app.
   Qed.
 End tcx_extract.
+
+(** ** Resolution over a type context *)
+
+Section resol_tcx.
+  Context `{!rust_haltGS CON Σ, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ)}.
+
+  (** [ResolTcx]: Resolution over a type context *)
+  Class ResolTcx {Xl} (Γ : tcx CON Σ Xl) (κ : lft) (post : xpred Xl) : Prop :=
+    RESOL_TCX {
+    resol_tcx {t xlπ q} :
+      q.[κ] -∗ sem_tcx t Γ xlπ =[rust_halt_wsat]{⊤}=∗ q.[κ] ∗ ⟨π, post (xlπ π)⟩;
+  }.
+
+  (** [ResolTcx] over nil *)
+  #[export] Instance resol_tcx_nil {κ} : ResolTcx ᵖ[] κ (λ _, True).
+  Proof. split=> >. iIntros "$ _ !>". by iApply proph_obs_true. Qed.
+  (** [ResolTcx] over cons *)
+  #[export] Instance resol_tcx_cons_owned {X}
+    `(!Resol T κ post, !@ResolTcx Yl Γ κ post') {v d} :
+    ResolTcx (Xl:=X::_) (v ◁{d} T ᵖ:: Γ) κ (λ '(x, yl)', post x ∧ post' yl).
+  Proof.
+    split=> > /=. iIntros "κ [T Γ]". iMod (resol with "κ T") as "[κ post]".
+    iMod (resol_tcx with "κ Γ") as "[$ post']". iModIntro.
+    iCombine "post post'" as "$".
+  Qed.
+  Lemma resol_tcx_cons `(!@ResolTcx Yl Γ κ post) {X E} :
+    ResolTcx (Xl:=X::_) (E ᵖ:: Γ) κ (λ '(_, yl)', post yl).
+  Proof. split=> > /=. iIntros "κ [_ Γ]". iApply (resol_tcx with "κ Γ"). Qed.
+  #[export] Instance resol_tcx_cons_frozen `(!@ResolTcx Yl Γ κ post) {X v α T} :
+    ResolTcx (Xl:=X::_) (v ◁[†α] T ᵖ:: Γ) κ (λ '(_, yl)', post yl).
+  Proof. exact: resol_tcx_cons. Qed.
+  #[export] Instance resol_tcx_cons_lft `(!@ResolTcx Yl Γ κ post) {α} :
+    ResolTcx (^[α] ᵖ:: Γ) κ (λ '(_, yl)', post yl).
+  Proof. exact: resol_tcx_cons. Qed.
+End resol_tcx.

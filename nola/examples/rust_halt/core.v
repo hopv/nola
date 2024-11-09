@@ -12,18 +12,22 @@ Section type.
 
   (** Leak *)
   Lemma sub_leak {Xl} Γ
-    `(!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Zl) Γ Γg Γr get getr) {κ} :
-    ⊢ sub κ Γg Γr (λ post yl, post (getr yl)).
+    `(!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Zl) Γ Γg Γr get getr,
+      !ResolTcx Γ κ postr) :
+    ⊢ sub κ Γg Γr (λ post yl, postr (get yl) → post (getr yl))%type.
   Proof.
-    rewrite sub_unseal. iIntros (????) "!>/= $ $ ?". rewrite tcx_extract.
-    by iIntros "[_ $]".
+    rewrite sub_unseal. iIntros (????) "!>/= κ $ pre". rewrite tcx_extract.
+    iIntros "[Γ $]". iMod (resol_tcx with "κ Γ") as "[$ post]". iModIntro.
+    iApply (proph_obs_impl2 with "post pre")=> ?? to. by apply to.
   Qed.
   Lemma sub_leak_rest {Xl} Γ
-    `(!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Zl) Γ Γg Γr get getr) {κ} :
-    ⊢ sub κ Γg Γ (λ post yl, post (get yl)).
+    `(!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Zl) Γ Γg Γr get getr,
+      !ResolTcx Γr κ postr) :
+    ⊢ sub κ Γg Γ (λ post yl, postr (getr yl) → post (get yl))%type.
   Proof.
-    rewrite sub_unseal. iIntros (????) "!>/= $ $ ?". rewrite tcx_extract.
-    by iIntros "[$ _]".
+    rewrite sub_unseal. iIntros (????) "!>/= κ $ pre". rewrite tcx_extract.
+    iIntros "[$ Γr]". iMod (resol_tcx with "κ Γr") as "[$ post]". iModIntro.
+    iApply (proph_obs_impl2 with "post pre")=> ?? to. by apply to.
   Qed.
   (** Modify by subtyping *)
   Lemma sub_subty v {X} T

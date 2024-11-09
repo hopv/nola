@@ -106,6 +106,11 @@ Section ty_shrref.
     by iFrame "sT".
   Qed.
 
+  (** Trivial resolution over [ty_shrref] *)
+  #[export] Instance resol_shrref {X T α κ} :
+    Resol (ty_shrref (X:=X) α T) κ (λ _, True).
+  Proof. exact _. Qed.
+
   (** The depth of [ty_shrref] is positive *)
   Lemma type_shrref_depth v
     `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (v ◁{d} @ty_shrref X α T) Γi Γr get getr)

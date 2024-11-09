@@ -84,6 +84,11 @@ Section ty_anydep.
     - iIntros (?????) "[% T]". iExists _. by iApply "subS".
   Qed.
 
+  (** Resolution over [ty_mod] *)
+  #[export] Instance resol_anydep {X} `(!Resol T κ post) :
+    Resol (ty_anydep (X:=X) T) κ post.
+  Proof. split=> > /=. iIntros "κ [% T]". iApply (resol with "κ T"). Qed.
+
   (** Eliminate [ty_anydep] *)
   Lemma type_anydep_elim v
     `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (v ◁{d'} @ty_anydep X T) Γi Γr get getr)
