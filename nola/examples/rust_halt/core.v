@@ -12,22 +12,23 @@ Section type.
 
   (** Leak *)
   Lemma sub_leak {Xl} Γ
-    `{!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Zl) Γ Γg Γr get getr} {α} :
+    `(!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Zl) Γ Γg Γr get getr) {α} :
     ⊢ sub α Γg Γr (λ post yl, post (getr yl)).
   Proof.
     rewrite sub_unseal. iIntros (????) "!>/= $ $ ?". rewrite tcx_extract.
     by iIntros "[_ $]".
   Qed.
   Lemma sub_leak_rest {Xl} Γ
-    `{!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Zl) Γ Γg Γr get getr} {α} :
+    `(!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Zl) Γ Γg Γr get getr) {α} :
     ⊢ sub α Γg Γ (λ post yl, post (get yl)).
   Proof.
     rewrite sub_unseal. iIntros (????) "!>/= $ $ ?". rewrite tcx_extract.
     by iIntros "[$ _]".
   Qed.
   (** Modify by subtyping *)
-  Lemma sub_subty v {X Y T} U (f : X → Y) {α}
-    `{!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (v ◁ T) Γ Γr get getr} :
+  Lemma sub_subty v {X} T
+    `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (v ◁ T) Γ Γr get getr)
+    {Y} U (f : X → Y) {α} :
     subtyd T U f ⊢
       sub α Γ (v ◁ U ᵖ:: Γr) (λ post zl, post (f (get zl), getr zl)').
   Proof.
@@ -35,8 +36,9 @@ Section type.
     rewrite etcx_extract. iIntros "[[% T] Γr] !>". iFrame "pre Γr".
     by iDestruct ("TU" with "T") as "$".
   Qed.
-  Lemma sub_subty_frozen v {X Y T} U f `{!@Inj X Y (=) (=) f} {α β}
-    `{!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (v ◁[†α] T) Γ Γr get getr} :
+  Lemma sub_subty_frozen v {X} T
+    `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (v ◁[†α] T) Γ Γr get getr)
+    {Y} U f `(!@Inj X Y (=) (=) f) {β} :
     subtyd T U f ⊢
       sub β Γ (v ◁[†α] U ᵖ:: Γr) (λ post zl, post (f (get zl), getr zl)').
   Proof.

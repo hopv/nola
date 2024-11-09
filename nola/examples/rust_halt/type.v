@@ -701,7 +701,7 @@ Section tcx_extract.
   Proof. split=> ??. iIntros "[#T $]". iFrame "T". Qed.
   (** Extract from the tail *)
   #[export] Instance etcx_extract_tl {X Y Yl Zl E'}
-    `{!EtcxExtract E Γ Γ' get getr} :
+    `(!EtcxExtract E Γ Γ' get getr) :
     @EtcxExtract X (Y :: Yl) (_ :: Zl) E (E' ᵖ:: Γ) (E' ᵖ:: Γ')
       (λ yyl, get yyl.2') (λ yyl, yyl.1' ᵖ:: getr yyl.2') | 10.
   Proof. split=>/= ??. rewrite etcx_extract. iIntros "[$ $]". Qed.
