@@ -179,11 +179,12 @@ Section ty_op.
 
   (** [TyOpAt] is monotone *)
   #[export] Instance TyOpAt_mono {X} :
-    Proper ((≡) ==> LftIncl --> (=) ==> impl) (@TyOpAt X).
+    Proper ((≡) ==> (⊑) --> (=) ==> impl) (@TyOpAt X).
   Proof.
-    move=> T T' [eqvO eqvS] κ κ' /= ??? <- ?. split.
+    move=> T T' [eqvO eqvS] κ κ' /= ??? <- ?. have ? : LftIncl κ' κ by done.
+    split.
     - move=> >. setoid_rewrite <-(eqvO _ _ _ _). iIntros "κ' T".
-      iDestruct (lft_incl'_live_acc (α:=κ) with "κ'") as (?) "[κ →κ']".
+      iDestruct (lft_incl'_live_acc (α:=κ) with "κ'") as (?) "[κ →κ']"=>//.
       iMod (ty_own_proph with "κ T") as (??) "($ & $ & →T)". iModIntro.
       iIntros "ξl". iMod ("→T" with "ξl") as "[κ $]". iModIntro.
       by iApply "→κ'".
@@ -200,11 +201,11 @@ Section ty_op.
       by rewrite (eqvO _ _ _ _).
   Qed.
   #[export] Instance TyOpAt_flip_mono {X} :
-    Proper ((≡) ==> LftIncl ==> (=) ==> flip impl) (@TyOpAt X).
+    Proper ((≡) ==> (⊑) ==> (=) ==> flip impl) (@TyOpAt X).
   Proof. move=> ?*?*??<- /=. by apply TyOpAt_mono. Qed.
   #[export] Instance TyOpAt_proper {X} :
     Proper ((≡) ==> (=) --> (=) ==> (↔)) (@TyOpAt X).
-  Proof. move=> ?*??<-??<-. split; apply TyOpAt_mono=>//=; exact _. Qed.
+  Proof. move=> ?*??<-??<-. split; by apply TyOpAt_mono. Qed.
 
   (** [TyOpLt]: Basic operations on a type below a depth *)
   Class TyOpLt {X} (T : ty CON Σ X) (κ : lft) (d : nat) : Prop :=
@@ -221,7 +222,7 @@ Section ty_op.
     Proper ((≡) ==> (⊑) ==> (≤) ==> flip impl) (@TyOpLt X).
   Proof. move=> ?*?*?* /=. by apply TyOpLt_mono. Qed.
   #[export] Instance TyOpLt_proper {X} :
-    Proper ((≡) ==> (=) --> (=) ==> (↔)) (@TyOpLt X).
+    Proper ((≡) ==> (=) ==> (=) ==> (↔)) (@TyOpLt X).
   Proof. move=> ?*?? <- ?? <-. split; by apply TyOpLt_mono. Qed.
 
   (** Lemmas under [TyOpLt] *)
