@@ -149,8 +149,8 @@ Section pborrow.
     iFrame "vopc". iApply (obor_tok_lft with "⊑ →β o").
   Qed.
 
-  (** Take out the full prophecy token from an open prophetic borrower *)
-  Lemma pobor_proph_tok {X α q ξ Φx} :
+  (** Take out the full prophecy token from an open prophetic borrower token *)
+  Lemma pobor_tok_proph {X α q ξ Φx} :
     @pobor_tok X α q ξ Φx -∗ 1:[ξ] ∗ (1:[ξ] -∗ pobor_tok α q ξ Φx).
   Proof.
     rewrite pobor_tok_unseal. iIntros "[%[(% & % & vo & pc) o]]".

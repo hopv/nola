@@ -118,6 +118,15 @@ Section pborrow_deriv.
     α ⊑□ β -∗ plend (X:=X) δ α xπ Φx -∗ plend δ β xπ Φx.
   Proof. exact lend_lft. Qed.
 
+  (** Take out the full prophecy token from an open prophetic borrower *)
+  Lemma pobor_proph {X α q ξ Φx} :
+    pobor (X:=X) δ α q ξ Φx -∗ 1:[ξ] ∗ (1:[ξ] -∗ pobor δ α q ξ Φx).
+  Proof.
+    rewrite pobor_unseal. iIntros "(% & ? & ? & o)".
+    iDestruct (pobor_tok_proph with "o") as "[$ →o]". iIntros "ξ".
+    iDestruct ("→o" with "ξ") as "$". iFrame.
+  Qed.
+
   (** Turn from tokens *)
   Lemma pbor_tok_pbor {X α a xπ ξ Φx} :
     pbor_tok (X:=X) α a xπ ξ Φx ⊢ pbor δ α a xπ ξ Φx.
