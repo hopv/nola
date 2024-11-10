@@ -111,7 +111,7 @@ Section ty_box.
 
   (** Subtyping over [ty_box] *)
   Lemma subty_box `{!Deriv ih δ} {X Y T U f} :
-    □ (∀ δ', ⌜Deriv ih δ'⌝ -∗ ⌜ih δ'⌝ -∗ subty (X:=X) (Y:=Y) δ' T U f) ⊢
+    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → subty (X:=X) (Y:=Y) δ' T U f) ⊢
       subty δ (ty_box T) (ty_box U) f.
   Proof.
     rewrite subty_unseal ty_box_unseal /=. iIntros "#tosub". iSplit=>//.

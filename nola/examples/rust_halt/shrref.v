@@ -93,7 +93,7 @@ Section ty_shrref.
 
   (** Subtyping over [ty_shrref] *)
   Lemma subty_shrref `{!Deriv ih δ} {X Y T U f α} :
-    □ (∀ δ', ⌜Deriv ih δ'⌝ -∗ ⌜ih δ'⌝ -∗ subty (X:=X) (Y:=Y) δ' T U f) ⊢
+    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → subty (X:=X) (Y:=Y) δ' T U f) ⊢
       subty δ (ty_shrref α T) (ty_shrref α U) f.
   Proof.
     iIntros "#tosub". iApply subty_sty=>//. rewrite sty_shrref_unseal.

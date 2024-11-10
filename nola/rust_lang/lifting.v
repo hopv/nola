@@ -553,7 +553,7 @@ Proof. iIntros (Hf). by iApply (wp_app_ind _ _ _ _ _ []). Qed.
 Lemma twp_app (Ql : list (val → iProp Σ)) W E f el Φ :
   length Ql = length el → AsVal f →
   ([∗ list] eQ ∈ zip el Ql, WP[W] eQ.1 @ E [{ eQ.2 }]) -∗
-    (∀ vl : list val, ⌜length vl = length el⌝ -∗
+    (∀ vl : list val, ⌜length vl = length el⌝ →
             ([∗ list] k ↦ vQ ∈ zip vl Ql, vQ.2 $ vQ.1) -∗
              WP[W] App f (of_val <$> (vl : list val)) @ E [{ Φ }]) -∗
     WP[W] App f el @ E [{ Φ }].
@@ -566,7 +566,7 @@ Qed.
 Lemma wp_app (Ql : list (val → iProp Σ)) W E f el Φ :
   length Ql = length el → AsVal f →
   ([∗ list] eQ ∈ zip el Ql, WP[W] eQ.1 @ E {{ eQ.2 }}) -∗
-    (∀ vl : list val, ⌜length vl = length el⌝ -∗
+    (∀ vl : list val, ⌜length vl = length el⌝ →
             ([∗ list] k ↦ vQ ∈ zip vl Ql, vQ.2 $ vQ.1) -∗
              WP[W] App f (of_val <$> (vl : list val)) @ E {{ Φ }}) -∗
     WP[W] App f el @ E {{ Φ }}.

@@ -623,7 +623,7 @@ Section subty.
 
   (** [subty] over [sty] *)
   Lemma subty_sty {δ X Y f} T U :
-    ⌜sty_size T = sty_size U⌝ -∗
+    sty_size T = sty_size U →
     □ (∀ t d xπ vl, ⟦ sty_own T t d xπ vl ⟧ᶜ(δ) -∗
         ⟦ sty_own U t d (λ π, f (xπ π)) vl ⟧ᶜ(δ)) -∗
       @subty δ X Y (ty_sty T) (ty_sty U) f.
@@ -633,7 +633,7 @@ Section subty.
   Qed.
   (** [subty] over [pty] *)
   Lemma subty_pty {δ X Y f} T U :
-    ⌜pty_size T = pty_size U⌝ -∗
+    pty_size T = pty_size U →
     □ (∀ x vl, ⟦ pty_own T x vl ⟧ᶜ(δ) -∗ ⟦ pty_own U (f x) vl ⟧ᶜ(δ)) -∗
       @subty δ X Y (ty_pty T) (ty_pty U) f.
   Proof.

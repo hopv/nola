@@ -511,8 +511,8 @@ Lemma wpw_strong_adequacy_gen hlc Σ Λ `{!invGpreS Σ} s es σ1 n κs t2 σ2 φ
       ∃ W : iProp Σ,
       W ∗ state_interp σ1 0 κs 0 ∗
       ([∗ list] e;Φ ∈ es;Φs, WP[W] e @ s; ⊤ {{ Φ }}) ∗
-      (∀ es' t2', ⌜t2 = es' ++ t2'⌝ -∗ ⌜length es' = length es⌝ -∗
-        ⌜∀ e2, s = NotStuck → e2 ∈ t2 → not_stuck e2 σ2⌝ -∗
+      (∀ es' t2', ⌜t2 = es' ++ t2'⌝ → ⌜length es' = length es⌝ →
+        ⌜∀ e2, s = NotStuck → e2 ∈ t2 → not_stuck e2 σ2⌝ →
         W -∗ state_interp σ2 n [] (length t2') -∗
         ([∗ list] e;Φ ∈ es';Φs, from_option Φ True (to_val e)) -∗
         ([∗ list] v ∈ omap to_val t2', fork_post v) ={⊤,∅}=∗ ⌜φ⌝)) →

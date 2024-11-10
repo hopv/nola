@@ -172,7 +172,7 @@ Proof. apply inv_pointsto_own_inv. Qed.
 Lemma inv_pointsto_own_acc_strong E :
   ↑inv_heapN ⊆ E →
   inv_heap_inv ={E, E ∖ ↑inv_heapN}=∗ ∀ l v I, l ↦_I v -∗
-    (⌜I v⌝ ∗ l ↦ v ∗ (∀ w, ⌜I w ⌝ -∗ l ↦ w ==∗
+    (⌜I v⌝ ∗ l ↦ v ∗ (∀ w, ⌜I w ⌝ → l ↦ w ==∗
       inv_pointsto_own l w I ∗ |={E ∖ ↑inv_heapN, E}=> True)).
 Proof.
   iIntros (?) "#Hinv".
@@ -184,7 +184,7 @@ Qed.
 Lemma inv_pointsto_own_acc E l v I:
   ↑inv_heapN ⊆ E →
   inv_heap_inv -∗ l ↦_I v ={E, E ∖ ↑inv_heapN}=∗
-    (⌜I v⌝ ∗ l ↦ v ∗ (∀ w, ⌜I w ⌝ -∗ l ↦ w ={E ∖ ↑inv_heapN, E}=∗ l ↦_I w)).
+    (⌜I v⌝ ∗ l ↦ v ∗ (∀ w, ⌜I w ⌝ → l ↦ w ={E ∖ ↑inv_heapN, E}=∗ l ↦_I w)).
 Proof.
   iIntros (?) "#Hinv Hl".
   iMod (inv_pointsto_own_acc with "Hinv Hl") as "(% & Hl & Hclose)"; first done.
@@ -480,7 +480,7 @@ Lemma wp_resolve W s E e Φ (p : proph_id) v (pvs : list (val * val)) :
   Atomic StronglyAtomic e →
   to_val e = None →
   proph p pvs -∗
-  WP[W] e @ s; E {{ r, ∀ pvs', ⌜pvs = (r, v)::pvs'⌝ -∗ proph p pvs' -∗ Φ r }} -∗
+  WP[W] e @ s; E {{ r, ∀ pvs', ⌜pvs = (r, v)::pvs'⌝ → proph p pvs' -∗ Φ r }} -∗
   WP[W] Resolve e (Val $ LitV $ LitProphecy p) (Val v) @ s; E {{ Φ }}.
 Proof.
   (* TODO we should try to use a generic lifting lemma (and avoid [wp_unfold])

@@ -398,7 +398,7 @@ Section pborrow.
     (∀ a' yπ', [†β] -∗ pbor_tok α a' yπ' η Ψx -∗ M
       ⟦ Φx a' (λ π, fπ π (yπ' π)) ⟧ᶜ(δ)) -∗
       modw M (borrow_wsat M ⟦⟧ᶜ(δ)) (1:[η] ∗ ⟦ Ψx a yπ ⟧ᶜ(δ) ∗
-        ∀ ζl s, ⌜∀ y, proph_dep (λ π, fπ π y) ζl⌝ -∗ s:∗[ζl]
+        ∀ ζl s, ⌜∀ y, proph_dep (λ π, fπ π y) ζl⌝ → s:∗[ζl]
           ==∗ ∃ η' : prvar _, ⟨π, π ξ = fπ π (π η')⟩ ∗ s:∗[ζl] ∗
             (1:[η] -∗ ⟦ Ψx a yπ ⟧ᶜ(δ) =[borrow_wsat M ⟦⟧ᶜ(δ)]=∗
               q.[β] ∗ r.[α] ∗ pbor_tok β a yπ η' Ψx)).
