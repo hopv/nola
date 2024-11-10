@@ -135,6 +135,7 @@ End fborrow.
 (** ** Constructor *)
 
 From nola.iris Require Import cif.
+Import CsemNotation.
 
 (** [fbor_tokCT]: Constructor *)
 Variant fbor_tokCT_id := .
@@ -170,8 +171,14 @@ Notation fbor_tokCS := (inCS fbor_tokCT).
 Section fbor_tokC.
   Context `{!fbor_tokC CON, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ),
     !borrowGS (cifOF CON) Σ, !fborrowGS (cifOF CON) Σ, !fbor_tokCS CON JUDG Σ}.
+
   (** Reify [fbor_tok] *)
   #[export] Program Instance fbor_tok_as_cif {α Φx} :
     AsCif CON (λ _, fbor_tok α Φx) := AS_CIF (cif_fbor_tok α Φx) _.
   Next Obligation. move=>/= >. by rewrite sem_cif_in. Qed.
+
+  (** Semantics of [cif_fbor_tok] is persistent *)
+  #[export] Instance sem_cif_fbor_tok_persistent {δ α Φx} :
+    Persistent ⟦ cif_fbor_tok α Φx ⟧ᶜ(δ).
+  Proof. rewrite sem_cif_in /=. exact _. Qed.
 End fbor_tokC.
