@@ -142,5 +142,6 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
       [`anydep`](nola/examples/rust_halt/anydep.v) (Any-depth type)
     * [`ptr`](nola/examples/rust_halt/ptr.v) (Utility for pointer types),
       [`box`](nola/examples/rust_halt/box.v) (Box pointer type),
-      [`shrref`](nola/examples/rust_halt/shrref.v) (Shared reference type)
+      [`shrref`](nola/examples/rust_halt/shrref.v) (Shared reference type),
+      [`mutref`](nola/examples/rust_halt/mutref.v) (Mutable reference type)
     * [`adequacy`](nola/examples/rust_halt/adequacy.v) (Adequacy)
