@@ -1,6 +1,6 @@
 (** * Product type *)
 
-From nola.examples.rust_halt Require Export type.
+From nola.examples.rust_halt Require Export type uninit.
 
 Section ty_prod.
   Context `{!Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), !rust_haltGS CON Σ,
@@ -177,5 +177,47 @@ Section ty_prod.
     - iIntros (????). iDestruct 1 as (??->) "[(% & % & -> & $ & $) $]".
       iExists _. by rewrite -assoc.
     - iIntros (?????) "[[$ $] ?]". by rewrite shift_loc_assoc_nat.
+  Qed.
+
+  (** Eliminate a size-0 type over [ty_prod] *)
+  Lemma subty_prod_0_elim_l {δ X T Y U} `{!Ty U} :
+    ty_size U = 0 → ⊢ subty δ (@ty_prod X Y T U) T fst'.
+  Proof.
+    rewrite ty_prod_unseal subty_unseal /= => eq0.
+    iSplit=>/=; [by rewrite eq0|]. iSplit; iModIntro.
+    - iIntros (????). iDestruct 1 as (? wl->) "[T U]".
+      iDestruct (ty_own_size with "U") as %eq. rewrite eq0 in eq.
+      destruct wl=>//. by rewrite right_id.
+    - iIntros (?????) "[$ _]".
+  Qed.
+  Lemma subty_prod_0_elim_r {δ X T Y U} `{!Ty T} :
+    ty_size T = 0 → ⊢ subty δ (@ty_prod X Y T U) U snd'.
+  Proof.
+    rewrite ty_prod_unseal subty_unseal /= => eq0.
+    iSplit=>/=; [by rewrite eq0|]. iSplit; iModIntro.
+    - iIntros (????). iDestruct 1 as (wl ?->) "[T U]".
+      iDestruct (ty_own_size with "T") as %eq. rewrite eq0 in eq.
+      by destruct wl.
+    - iIntros (?????) "[_ U]". by rewrite eq0 shift_loc_0.
+  Qed.
+
+  (** Introduce [ty_unit] over [ty_prod] *)
+  Lemma subty_prod_unit_intro_l {δ X T} :
+    ⊢ subty δ T (@ty_prod _ X ty_unit T) (λ x, ((), x)').
+  Proof.
+    rewrite ty_prod_unseal /ty_unit ty_pty_unseal subty_unseal.
+    iSplit=>/=; [done|]. iSplit; iModIntro.
+    - iIntros (????) "$". iExists []. iSplit=>//. by iExists ().
+    - iIntros (?????) "T". rewrite shift_loc_0. iFrame "T". iExists []=>/=.
+      iSplit=>//. by iExists ().
+  Qed.
+  Lemma subty_prod_unit_intro_r {δ X T} :
+    ⊢ subty δ T (@ty_prod X _ T ty_unit) (λ x, (x, ())').
+  Proof.
+    rewrite ty_prod_unseal /ty_unit ty_pty_unseal subty_unseal.
+    iSplit=>/=; [done|]. iSplit; iModIntro.
+    - iIntros (????) "$". iExists []. iSplit; [by rewrite right_id|].
+      by iExists ().
+    - iIntros (?????) "$". iExists []=>/=. iSplit=>//. by iExists ().
   Qed.
 End ty_prod.
