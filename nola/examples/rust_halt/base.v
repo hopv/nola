@@ -119,7 +119,6 @@ Class rust_haltC CON : Type := RUST_HALT_C {
   rust_haltC_borrow :: borrowC CON;
   rust_haltC_proph_ag :: proph_agC nat xty CON;
   rust_haltC_pborrow :: pborrowC nat xty CON;
-  rust_haltC_fbor_tok :: fbor_tokC CON;
   rust_haltC_custom :: customC CON;
 }.
 
@@ -140,7 +139,6 @@ Class rust_haltCS CON JUDG Σ `{!rust_haltGS CON Σ, !rust_haltC CON}
   rust_haltCS_borrow :: borrowCS CON JUDG Σ;
   rust_haltCS_proph_ag :: proph_agCS nat xty CON JUDG Σ;
   rust_haltCS_pborrow :: pborrowCS nat xty CON JUDG Σ;
-  rust_haltCS_fbor_tok :: fbor_tokCS CON JUDG Σ;
   rust_haltCS_custom :: customCS CON JUDG Σ;
 }.
 
@@ -216,25 +214,6 @@ Notation "[ ξ ]:ˢ[ α ]" := (sproph_tok α ξ) (format "[ ξ ]:ˢ[ α ]") : bi
 Notation sproph_toks α ξl := ([∗ list] ξ ∈ ξl, [ξ]:ˢ[α])%I.
 Notation "[ ξl ]:∗ˢ[ α ]" := (sproph_toks α ξl) (format "[ ξl ]:∗ˢ[ α ]")
   : bi_scope.
-
-(** Formula for [spointsto] *)
-Definition cif_spointsto `{!rust_haltGS CON Σ, !rust_haltC CON} α l v
-  : cif CON Σ :=
-  cif_fbor_tok α (λ q, l ↦{q} v)%cif.
-Notation "l ↦ˢ[ α ] v" := (cif_spointsto α l v) : cif_scope.
-(** Formula for [spointsto_vec] *)
-Notation cif_spointsto_vec α l vl :=
-  ([∗ list] k ↦ v ∈ vl, (l +ₗ k) ↦ˢ[α] v)%cif.
-Notation "l ↦∗ˢ[ α ] vl" := (cif_spointsto_vec α l vl) : cif_scope.
-
-(** Formula for [sproph_tok] *)
-Definition cif_sproph_tok `{!rust_haltGS CON Σ, !rust_haltC CON} α ξ
-  : cif CON Σ :=
-  cif_fbor_tok α (λ q, q:[ξ])%cif.
-Notation "[ ξ ]:ˢ[ α ]" := (cif_sproph_tok α ξ) : cif_scope.
-(** Formula for [sproph_toks] *)
-Notation cif_sproph_toks α ξl := ([∗ list] ξ ∈ ξl, [ξ]:ˢ[α])%cif.
-Notation "[ ξl ]:∗ˢ[ α ]" := (cif_sproph_toks α ξl) : cif_scope.
 
 Section fbor_tok.
   Context `{!rust_haltGS CON Σ, !rust_haltC CON}.
@@ -383,16 +362,4 @@ Section fbor_tok.
     iMod (IH with "α b'") as "[$$]".
     by iMod (fbor_tok_alloc (FML:=cifOF _) (λ q, q:[ξ])%cif with "b") as "$".
   Qed.
-
-  Context `{!rust_haltJ CON JUDG Σ, !rust_haltCS CON JUDG Σ}.
-
-  (** Semantics of [cif_spointsto_vec] *)
-  Lemma sem_cif_spointsto_vec {α l vl δ} : ⟦ l ↦∗ˢ[α] vl ⟧ᶜ(δ) ⊣⊢ l ↦∗ˢ[α] vl.
-  Proof.
-    rewrite sem_cif_big_sepL /spointsto_vec. do 3 f_equiv.
-    by rewrite sem_cif_in.
-  Qed.
-  #[export] Instance sem_cif_spointsto_vec_persistent {α l vl δ} :
-    Persistent ⟦ l ↦∗ˢ[α] vl ⟧ᶜ(δ).
-  Proof. rewrite sem_cif_spointsto_vec. exact _. Qed.
 End fbor_tok.

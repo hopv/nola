@@ -30,7 +30,7 @@ Notation sty_own T := T.2 (only parsing).
 Section ty_sty.
   Context `{!rust_haltGS CON Σ, !rust_haltC CON}.
   Definition ty'_sty_def {X} (T : sty CON Σ X) : ty' CON Σ X :=
-    (sty_own T, λ t d l α xπ, ∃ vl, l ↦∗ˢ[α] vl ∗ sty_own T t d xπ vl)%cif.
+    (sty_own T, λ t d l α xπ, ∃ vl, ▷ l ↦∗ˢ[α] vl ∗ sty_own T t d xπ vl)%cif.
   Lemma ty'_sty_aux : seal (@ty'_sty_def). Proof. by eexists. Qed.
   Definition ty'_sty {X} := ty'_sty_aux.(unseal) X.
   Lemma ty'_sty_unseal : @ty'_sty = @ty'_sty_def. Proof. exact: seal_eq. Qed.
@@ -347,8 +347,7 @@ Section ty_op.
       iMod (obord_subdiv (FML:=cifOF _) (M:=borrowM) [▷ _]%cif
         with "[] o [$↦ //] []") as "(α & _ & [b _])"=>/=.
       { iApply lft_sincl_refl. } { by iIntros "_ [$ _]". }
-      rewrite sem_cif_spointsto_vec.
-      by iMod (spointsto_vec_alloc with "α b") as "$".
+      by iMod (spointsto_vec_alloc with "α b") as "[$$]".
   Qed.
 
   (** Basic operations on a plain type at a depth *)
@@ -477,7 +476,7 @@ Section classes.
   #[export] Instance sty_copy `{!Sty (X:=X) T} : Copy (ty_sty (X:=X) T).
   Proof.
     rewrite ty_sty_unseal. split; [exact _|]=>/= *.
-    iIntros "α F (% & ↦ & $)". rewrite sem_cif_spointsto_vec.
+    iIntros "α F (% & >↦ & $)".
     iMod (spointsto_vec_acc with "α ↦") as (?) "[$ cl]".
     iDestruct (na_own_acc with "F") as "[$ →F]"; [set_solver|].
     iIntros "!> ↦s F∖". iMod ("cl" with "↦s") as "$". iModIntro. by iApply "→F".

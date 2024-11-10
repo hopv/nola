@@ -208,7 +208,7 @@ Section ty_prod.
     iSplit=>/=; [done|]. iSplit; iModIntro.
     - iIntros (????) "$". iExists []. iSplit=>//. by iExists ().
     - iIntros (?????) "T". rewrite shift_loc_0. iFrame "T". iExists []=>/=.
-      iSplit=>//. by iExists ().
+      iSplit; [by rewrite spointsto_vec_nil|]. by iExists ().
   Qed.
   Lemma subty_prod_unit_intro_r {δ X T} :
     ⊢ subty δ T (@ty_prod X _ T ty_unit) (λ x, (x, ())').
@@ -217,6 +217,7 @@ Section ty_prod.
     iSplit=>/=; [done|]. iSplit; iModIntro.
     - iIntros (????) "$". iExists []. iSplit; [by rewrite right_id|].
       by iExists ().
-    - iIntros (?????) "$". iExists []=>/=. iSplit=>//. by iExists ().
+    - iIntros (?????) "$". iExists []=>/=.
+      iSplit; [by rewrite spointsto_vec_nil|]. by iExists ().
   Qed.
 End ty_prod.
