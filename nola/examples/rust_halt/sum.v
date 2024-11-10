@@ -157,12 +157,12 @@ Section ty_sum.
     { apply: bi.exist_persistent. case=>/=; exact _. }
     iIntros (sub) "(α & α' & α'') t (%b & >↦ & S)".
     case: b=>/=; iDestruct "S" as (? eq) "(S & % & % & >↦r)";
-      (iMod (copy_shr_acc with "α t S") as (r ?) "(↦S & t & S & cl)";
+      (iMod (copy_shr_acc with "α t S") as (? r) "(↦S & t & S & cl)";
         [etrans; [|done]; apply union_subseteq_r', shr_locsE_mono=>/=; lia|]);
       iMod (spointsto_acc with "α' ↦") as (r') "[↦ →α']";
       iMod (spointsto_vec_acc with "α'' ↦r") as (r'') "[↦r →α'']"; iModIntro;
       case: (Qp.lower_bound r' r'')=> s[?[?[->->]]];
-      case: (Qp.lower_bound r s)=> s'[?[?[->->]]]; iExists s', (_ :: _ ++ _);
+      case: (Qp.lower_bound r s)=> ?[?[?[->->]]]; iExists (_ :: _ ++ _), _;
       rewrite heap_pointsto_vec_cons heap_pointsto_vec_app -!Qp.add_assoc;
       iDestruct "↦S" as "[$ ↦S']"; iDestruct "↦" as "[$ ↦']";
       [iDestruct (ty_own_size with "S") as %->|

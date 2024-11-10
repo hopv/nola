@@ -116,15 +116,15 @@ Section ty_prod.
   Proof.
     rewrite ty_prod_unseal. split=>/= >; [exact _|].
     iIntros (sub) "[α α'] t [T U]".
-    iMod (copy_shr_acc with "α t T") as (r ?) "(↦t & t & T & cl)".
+    iMod (copy_shr_acc with "α t T") as (? r) "(↦t & t & T & cl)".
     { etrans; [|done]. apply shr_locsE_mono=>/=. lia. }
     iDestruct (ty_own_size with "T") as %eq.
-    iMod (copy_shr_acc with "α' t U") as (r' ?) "(↦u & t & U & cl')".
+    iMod (copy_shr_acc with "α' t U") as (? r') "(↦u & t & U & cl')".
     { etrans; [|exact: difference_mono_r].
       rewrite -assoc (shr_locsE_add (sz:=T.1)).
       apply subseteq_difference_r; [|set_solver]. symmetry.
       exact shr_locsE_disj. }
-    iModIntro. case: (Qp.lower_bound r r')=> ?[?[?[->->]]]. iExists _, (_ ++ _).
+    iModIntro. case: (Qp.lower_bound r r')=> ?[?[?[->->]]]. iExists (_ ++ _), _.
     rewrite heap_pointsto_vec_app. iDestruct "↦t" as "[$ ↦t']". rewrite eq.
     iDestruct "↦u" as "[$ ↦u']". rewrite shr_locsE_add.
     rewrite difference_difference_l_L. iFrame "t T U". iSplit; [done|].

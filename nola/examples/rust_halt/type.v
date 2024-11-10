@@ -440,7 +440,7 @@ Section classes.
     (** Access via the sharing formula *)
     copy_shr_acc {t d l α xπ q F} : shr_locsE l (ty_size T + 1) ⊆ F →
       q.[α] -∗ na_own t F -∗ ⟦ ty_shr T t d l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
-        ∃ r vl, l ↦∗{r} vl ∗ na_own t (F ∖ shr_locsE l (ty_size T)) ∗
+        ∃ vl r, l ↦∗{r} vl ∗ na_own t (F ∖ shr_locsE l (ty_size T)) ∗
           ⟦ ty_own T t d xπ vl ⟧ᶜ ∗
           (l ↦∗{r} vl -∗ na_own t (F ∖ shr_locsE l (ty_size T))
             =[rust_halt_wsat]{⊤}=∗ q.[α] ∗ na_own t F);
