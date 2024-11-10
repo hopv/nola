@@ -857,13 +857,22 @@ Qed.
 Next Obligation. move=> >. split; [done|]=> eq ?. apply eq. Qed.
 
 (** [citPR]: Productivity structure for [cit], under UIP over [SEL] *)
+Definition proeqv_cit_def {SEL I C D} (k : nat) (t t' : @cit SEL I C D)
+  : Prop := of_cit t ≡[k]≡ of_cit t'.
+Lemma proeqv_cit_aux : seal (@proeqv_cit_def). Proof. by eexists. Qed.
+Definition proeqv_cit {SEL I C D} := proeqv_cit_aux.(unseal) SEL I C D.
+Lemma proeqv_cit_unseal : @proeqv_cit = @proeqv_cit_def.
+Proof. exact: seal_eq. Qed.
 Program Canonical citPR {SEL} `{!Uip SEL} I C D :=
-  Prost (@citO SEL I C D) (λ k t t', of_cit t ≡[k]≡ of_cit t') _ _ _.
-Next Obligation. split=> ?* //. by etrans. Qed.
-Next Obligation. move=> *. by eapply proeqv_anti. Qed.
+  Prost (@citO SEL I C D) proeqv_cit _ _ _.
 Next Obligation.
-  move=> ????? t t'. split. { move=> eq ?. by rewrite eq. }
-  move=> ?. rewrite -(to_of_cit (t:=t)) -(to_of_cit (t:=t')). by f_equiv.
+  rewrite proeqv_cit_unseal /proeqv_cit_def. split=> ?* //. by etrans.
+Qed.
+Next Obligation. rewrite proeqv_cit_unseal=> *. by eapply proeqv_anti. Qed.
+Next Obligation.
+  rewrite proeqv_cit_unseal /proeqv_cit_def=> ????? t t'. split.
+  - move=> eq ?. by rewrite eq.
+  - move=> ?. rewrite -(to_of_cit (t:=t)) -(to_of_cit (t:=t')). by f_equiv.
 Qed.
 
 Section citPR.
@@ -874,7 +883,7 @@ Section citPR.
   Proof. done. Qed.
   Lemma cit_proeqv `{!Uip SEL} :
     @proeqv (citPR I C D) = λ k t t', of_cit t ≡[k]≡ of_cit t'.
-  Proof. done. Qed.
+  Proof. by rewrite /proeqv /= proeqv_cit_unseal. Qed.
 
   (** [Citg] is size-preserving over the inductive arguments
     and [Productive] over the coinductive arguments *)
@@ -883,7 +892,7 @@ Section citPR.
       (≡[<k]@{_ -pr> _}≡) ==> (≡) ==> (≡[k]@{citPR I C D}≡)) (Citg s).
   Proof.
     move=> ?? eq ?? eq' ??<-. rewrite /proeqv /= cit_proeqv of_cit_unseal in eq.
-    apply equiv_dist=> n. apply citi_dist_Forall2.
+    rewrite cit_proeqv. apply equiv_dist=> n. apply citi_dist_Forall2.
     rewrite !of_cit_unseal. destruct k as [|k]=>/=; apply citg_Forall2_eq=>//.
     - move=> i. apply (citi_equiv_Forall2 (k:=1)), eq.
     - move=> i. apply (citi_equiv_Forall2 (k:=S (S k))), eq.
@@ -892,7 +901,7 @@ Section citPR.
 
   (** [of_cit] is size-preserving *)
   #[export] Instance of_cit_preserv `{!Uip SEL} : Preserv (@of_cit _ I C D).
-  Proof. by move=> ??. Qed.
+  Proof. move=> ???. by rewrite cit_proeqv. Qed.
 End citPR.
 
 (** ** Completeness of [cita] and [cit] *)
@@ -921,9 +930,11 @@ Section cit_cprost.
   Qed.
 
   (** Limit over [cit] *)
-  Definition cit_prolimit (c : prochain (citPR I C D)) : citPR I C D :=
-    to_cit (prolimit
-      (Prochain (λ k, of_cit (c k)) (λ _ _, c.(prochain_eqv)))).
+  Program Definition cit_prolimit (c : prochain (citPR I C D)) : citPR I C D :=
+    to_cit (prolimit (Prochain (λ k, of_cit (c k)) _)).
+  Next Obligation.
+    move=>/= c ?? le. move: (c.(prochain_eqv) le). by rewrite cit_proeqv.
+  Qed.
   (** [cit] is complete *)
   #[export] Program Instance cit_cprost : Cprost (citPR I C D) :=
     CPROST cit_prolimit _ _.

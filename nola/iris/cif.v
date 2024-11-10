@@ -164,7 +164,8 @@ Section cif.
   #[export] Instance cif_con_preserv_productive {s k} :
     Proper ((≡[k]≡) ==> (≡[<k]≡) ==> (≡) ==> (≡[k]≡)) (cif_con s).
   Proof.
-    move=> ?*?*?*. apply Citg_preserv_productive=>//. by destruct k as [|k].
+    move=> ?*?? eqv ?*. apply Citg_preserv_productive=>//=.
+    destruct k as [|k]=>// c. move: (eqv c). by rewrite cit_proeqv.
   Qed.
 
   (** Non-expansiveness *)
