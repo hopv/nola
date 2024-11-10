@@ -92,6 +92,7 @@ nola/examples/rust_halt/core.v
 nola/examples/rust_halt/num.v
 nola/examples/rust_halt/uninit.v
 nola/examples/rust_halt/prod.v
+nola/examples/rust_halt/sum.v
 nola/examples/rust_halt/rec.v
 nola/examples/rust_halt/mod.v
 nola/examples/rust_halt/anydep.v

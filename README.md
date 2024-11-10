@@ -135,7 +135,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     * [`core`](nola/examples/rust_halt/core.v) (Core features)
     * [`num`](nola/examples/rust_halt/num.v) (Numeric types),
       [`uninit`](nola/examples/rust_halt/uninit.v) (Uninitialized data type)
-    * [`prod`](nola/examples/rust_halt/prod.v) (Product type)
+    * [`prod`](nola/examples/rust_halt/prod.v) (Product type),
+      [`sum`](nola/examples/rust_halt/sum.v) (Sum type)
     * [`rec`](nola/examples/rust_halt/rec.v) (Recursive type),
       [`mod`](nola/examples/rust_halt/mod.v) (Modification type),
       [`anydep`](nola/examples/rust_halt/anydep.v) (Any-depth type)
