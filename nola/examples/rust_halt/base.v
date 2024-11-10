@@ -291,7 +291,7 @@ Section fbor_tok.
     move=> v vl IH l ?. rewrite spointsto_vec_cons. iIntros "[α α'] [↦ ↦s]".
     iMod (spointsto_acc with "α ↦") as (q) "[↦ →α]".
     iMod (IH with "α' ↦s") as (q') "[↦s →α']". iModIntro.
-    case (Qp.lower_bound q q')=> [q''[?[?[->->]]]]. iExists q''.
+    case: (Qp.lower_bound q q')=> q''[?[?[->->]]]. iExists q''.
     rewrite heap_pointsto_vec_cons. iDestruct "↦" as "[$ ↦']".
     iDestruct "↦s" as "[$ ↦s']". iIntros "[↦ ↦s]".
     iMod ("→α" with "[$↦ $↦']") as "$". iApply "→α'".
@@ -351,7 +351,7 @@ Section fbor_tok.
     iIntros (ξ ξl IH ?) "[α α'] [ξ ξl]".
     iMod (sproph_tok_acc with "α ξ") as (q) "[ξ →α]".
     iMod (IH with "α' ξl") as (q') "[ξl →α']". iModIntro.
-    case (Qp.lower_bound q q')=> [q''[?[?[->->]]]]. iExists q''.
+    case: (Qp.lower_bound q q')=> [q''[?[?[->->]]]]. iExists q''.
     iDestruct "ξ" as "[$ ξ']". iDestruct "ξl" as "[$ ξl']". iIntros "[ξ ξl]".
     iMod ("→α" with "[$ξ $ξ']") as "$". iApply "→α'". iFrame.
   Qed.

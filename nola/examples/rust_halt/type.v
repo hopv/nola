@@ -92,7 +92,7 @@ Section ty.
     T ≡[<k]@{ty CON Σ X}≡ U →
       (∀ t d xπ vl, ty_own T t d xπ vl ≡[<k]≡ ty_own U t d xπ vl) ∧
       (∀ t d l α xπ, ty_shr T t d l α xπ ≡[<k]≡ ty_shr U t d l α xπ).
-  Proof. by case k=>//= ?[??]. Qed.
+  Proof. by case: k=>//= ?[??]. Qed.
 
   (** Simplify [≡] over [sty] *)
   Lemma sty_equiv {X T U} :

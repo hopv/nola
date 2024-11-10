@@ -116,7 +116,7 @@ Section type.
   Proof.
     rewrite type_unseal. iIntros "#type !>/=" (q ???) "κ t pre Γi".
     rewrite etcx_extract /=. iDestruct "Γi" as "[[% α] Γr]".
-    case (Qp.lower_bound 1 q) as [?[?[?[->->]]]]. iDestruct "α" as "[α $]".
+    case: (Qp.lower_bound 1 q)=> [?[?[?[->->]]]]. iDestruct "α" as "[α $]".
     iDestruct "κ" as "[κ $]".
     iDestruct ("type" with "[$α $κ //] t pre Γr") as "twp".
     iApply (twp_wand with "twp"). by iIntros (?) ">(% & [$$] & $ & $ & $) !>".

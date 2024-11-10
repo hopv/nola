@@ -67,7 +67,7 @@ Section ty_prod.
     - iIntros (? xπ ??) "[κ κ']". iDestruct 1 as (??->) "[T U]".
       iMod (ty_own_proph with "κ T") as (ξl r ?) "[ξl →T]".
       iMod (ty_own_proph with "κ' U") as (ηl r' ?) "[ηl →U]". iModIntro.
-      iExists (ξl ++ ηl). case (Qp.lower_bound r r')=> ?[?[?[->->]]].
+      iExists (ξl ++ ηl). case: (Qp.lower_bound r r')=> ?[?[?[->->]]].
       iDestruct "ξl" as "[$ ξl']". iDestruct "ηl" as "[$ ηl']". iSplit.
       { iPureIntro. have -> : xπ = λ π, ((fst' ∘ xπ) π, (snd' ∘ xπ) π)' by done.
         by apply proph_dep_f2. }
@@ -76,7 +76,7 @@ Section ty_prod.
     - iIntros (??? xπ q) "[[κ κ'] [α α']] [T U]".
       iMod (ty_shr_proph (T:=T) with "[$κ $α //] T") as (ξl r ?) "[ξl →T]".
       iMod (ty_shr_proph (T:=U) with "[$κ' $α' //] U") as (ηl r' ?) "[ηl →U]".
-      iModIntro. iExists (ξl ++ ηl). case (Qp.lower_bound r r')=> ?[?[?[->->]]].
+      iModIntro. iExists (ξl ++ ηl). case: (Qp.lower_bound r r')=> ?[?[?[->->]]].
       iDestruct "ξl" as "[$ ξl']". iDestruct "ηl" as "[$ ηl']". iSplit.
       { iPureIntro. have -> : xπ = λ π, ((fst' ∘ xπ) π, (snd' ∘ xπ) π)' by done.
         by apply proph_dep_f2. }
@@ -124,7 +124,7 @@ Section ty_prod.
       rewrite -assoc (shr_locsE_add (sz:=T.1)).
       apply subseteq_difference_r; [|set_solver]. symmetry.
       exact shr_locsE_disj. }
-    iModIntro. case (Qp.lower_bound r r')=> ?[?[?[->->]]]. iExists _, (_ ++ _).
+    iModIntro. case: (Qp.lower_bound r r')=> ?[?[?[->->]]]. iExists _, (_ ++ _).
     rewrite heap_pointsto_vec_app. iDestruct "↦t" as "[$ ↦t']". rewrite eq.
     iDestruct "↦u" as "[$ ↦u']". rewrite shr_locsE_add.
     rewrite difference_difference_l_L. iFrame "t T U". iSplit; [done|].

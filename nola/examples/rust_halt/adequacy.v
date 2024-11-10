@@ -27,7 +27,7 @@ Theorem wp_adequacy `{!rust_haltGpreS CON Σ} {JUDG e σ φ} :
   adequate NotStuck e σ (λ v _, φ v).
 Proof.
   move=> totwp. eapply lrust_adequacy; [exact _|]=> ?.
-  iMod rust_wsat_alloc as (?<-) "→W". case (totwp _)=> ?[? twp].
+  iMod rust_wsat_alloc as (?<-) "→W". case: (totwp _)=> ?[? twp].
   iMod twp as "$". iModIntro. iApply "→W".
 Qed.
 
@@ -38,7 +38,7 @@ Theorem twp_total `{!rust_haltGpreS CON Σ} {JUDG e σ} :
   sn erased_step ([e], σ).
 Proof.
   move=> totwp. eapply lrust_total; [exact _|]=> ?.
-  iMod rust_wsat_alloc as (?<-) "→W". case (totwp _)=> ?[?[? twp]].
+  iMod rust_wsat_alloc as (?<-) "→W". case: (totwp _)=> ?[?[? twp]].
   iMod twp as "$". iModIntro. iApply "→W".
 Qed.
 
@@ -49,7 +49,7 @@ Theorem type_adeqaucy `{!rust_haltGpreS CON Σ} {JUDG Xl e Γo pre σ} :
     ⊢ type (Yl:=Xl) ⊤ ᵖ[] e (λ _, Γo) pre) →
   adequate NotStuck e σ (λ _ _, True).
 Proof.
-  move=> topre totyp. eapply wp_adequacy=> ?. case (totyp _)=> ?[? typ].
+  move=> topre totyp. eapply wp_adequacy=> ?. case: (totyp _)=> ?[? typ].
   exists _, _. rewrite type_unseal in typ.
   iMod (na_alloc (na_invG0:=rust_haltGS_na_inv)) as (t) "t". iModIntro.
   iDestruct (typ $! 1%Qp t (λ _ _, True) (λ _,()) with "[//] t [] [//]")
@@ -64,7 +64,7 @@ Theorem type_total `{!rust_haltGpreS CON Σ} {JUDG Xl e Γo pre σ} :
     ⊢ type (Yl:=Xl) ⊤ ᵖ[] e (λ _, Γo) pre) →
   sn erased_step ([e], σ).
 Proof.
-  move=> topre totyp. eapply twp_total=> ?. case (totyp _)=> ?[? typ].
+  move=> topre totyp. eapply twp_total=> ?. case: (totyp _)=> ?[? typ].
   exists _, _, (λ _, True)%I. rewrite type_unseal in typ.
   iMod (na_alloc (na_invG0:=rust_haltGS_na_inv)) as (t) "t". iModIntro.
   iDestruct (typ $! 1%Qp t (λ _ _, True) (λ _,()) with "[//] t [] [//]")
