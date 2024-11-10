@@ -59,29 +59,25 @@ Section borrow_deriv.
   Implicit Type (Px Qx : FML $oi Σ) (δ : JUDG -n> iProp Σ).
 
   (** Convert the body of borrower and lender propositions *)
-  Lemma bor_to {α Px Qx} :
+  Lemma bor_wand {α Px Qx} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      ⟦ Px ⟧(δ') ==∗ ⟦ Qx ⟧(δ')) -∗
-    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      ⟦ Qx ⟧(δ') ==∗ ⟦ Px ⟧(δ')) -∗
+      (⟦ Px ⟧(δ') ==∗ ⟦ Qx ⟧(δ')) ∧ (⟦ Qx ⟧(δ') ==∗ ⟦ Px ⟧(δ'))) -∗
     bor δ α Px -∗ bor δ α Qx.
   Proof.
-    rewrite bor_unseal. iIntros "#PQ #QP (%Rx & #PR & #RP & $)".
-    iSplit; [iApply (jbupd_trans with "QP PR")|
-      iApply (jbupd_trans' with "PQ RP")].
+    rewrite bor_unseal. iIntros "#PQ (%Rx & #PR & #RP & $)".
+    iSplit; iModIntro; [iApply jbupd_trans=>//=|iApply jbupd_trans'=>//=];
+      iIntros; by iApply "PQ".
   Qed.
-  Lemma obor_to {α q Px Qx} :
+  Lemma obor_wand {α q Px Qx} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      ⟦ Px ⟧(δ') ==∗ ⟦ Qx ⟧(δ')) -∗
-    □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      ⟦ Qx ⟧(δ') ==∗ ⟦ Px ⟧(δ')) -∗
+      (⟦ Px ⟧(δ') ==∗ ⟦ Qx ⟧(δ')) ∧ (⟦ Qx ⟧(δ') ==∗ ⟦ Px ⟧(δ'))) -∗
     obor δ α q Px -∗ obor δ α q Qx.
   Proof.
-    rewrite obor_unseal. iIntros "#PQ #QP (%Rx & #PR & #RP & $)".
-    iSplit; [iApply (jbupd_trans with "QP PR")|
-      iApply (jbupd_trans' with "PQ RP")].
+    rewrite obor_unseal. iIntros "#PQ (%Rx & #PR & #RP & $)".
+    iSplit; iModIntro; [iApply jbupd_trans=>//=|iApply jbupd_trans'=>//=];
+      iIntros; by iApply "PQ".
   Qed.
-  Lemma lend_to {α Px Qx} :
+  Lemma lend_wand {α Px Qx} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
       ⟦ Px ⟧(δ') ==∗ ⟦ Qx ⟧(δ')) -∗
     lend δ α Px -∗ lend δ α Qx.

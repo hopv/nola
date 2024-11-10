@@ -73,33 +73,35 @@ Section pborrow_deriv.
   Proof. exact der_jbupd. Qed.
 
   (** Convert the body of borrower and lender propositions *)
-  Lemma pbor_to {X α a xπ ξ Φx Ψx} :
+  Lemma pbor_wand {X α a xπ ξ Φx Ψx} :
     □ (∀ a xπ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      ⟦ Φx a xπ ⟧ᶜ(δ') ==∗ ⟦ Ψx a xπ ⟧ᶜ(δ')) -∗
-    □ (∀ a xπ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      ⟦ Ψx a xπ ⟧ᶜ(δ') ==∗ ⟦ Φx a xπ ⟧ᶜ(δ')) -∗
+      (⟦ Φx a xπ ⟧ᶜ(δ') ==∗ ⟦ Ψx a xπ ⟧ᶜ(δ')) ∧
+      (⟦ Ψx a xπ ⟧ᶜ(δ') ==∗ ⟦ Φx a xπ ⟧ᶜ(δ'))) -∗
     pbor (X:=X) δ α a xπ ξ Φx -∗ pbor δ α a xπ ξ Ψx.
   Proof.
-    rewrite pbor_unseal. iIntros "#ΦΨ #ΨΦ (%Ω & #ΦΩ & #ΩΦ & $)".
-    iSplit; iIntros "!>" (??); [by iApply jbupd_trans|].
-    iApply jbupd_trans'; by [iApply "ΦΨ"|].
+    rewrite pbor_unseal. iIntros "#ΦΨ (%Ω & #ΦΩ & #ΩΦ & $)".
+    iSplit; iIntros "!>" (??);
+      [iApply jbupd_trans=>//=|iApply jbupd_trans'=>//=];
+      iIntros; by iApply "ΦΨ".
   Qed.
-  Lemma pobor_to {X α q ξ Φx Ψx} :
+  Lemma pobor_wand {X α q ξ Φx Ψx} :
     □ (∀ a xπ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      ⟦ Φx a xπ ⟧ᶜ(δ') ==∗ ⟦ Ψx a xπ ⟧ᶜ(δ')) -∗
-    □ (∀ a xπ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
-      ⟦ Ψx a xπ ⟧ᶜ(δ') ==∗ ⟦ Φx a xπ ⟧ᶜ(δ')) -∗
+      (⟦ Φx a xπ ⟧ᶜ(δ') ==∗ ⟦ Ψx a xπ ⟧ᶜ(δ')) ∧
+      (⟦ Ψx a xπ ⟧ᶜ(δ') ==∗ ⟦ Φx a xπ ⟧ᶜ(δ'))) -∗
     pobor (X:=X) δ α q ξ Φx -∗ pobor δ α q ξ Ψx.
   Proof.
-    rewrite pobor_unseal. iIntros "#ΦΨ #ΨΦ (%Ω & #ΦΩ & #ΩΦ & $)".
-    iSplit; iIntros "!>" (??); [by iApply jbupd_trans|].
-    iApply jbupd_trans'; by [iApply "ΦΨ"|].
+    rewrite pobor_unseal. iIntros "#ΦΨ (%Ω & #ΦΩ & #ΩΦ & $)".
+    iSplit; iIntros "!>" (??);
+      [iApply jbupd_trans=>//=|iApply jbupd_trans'=>//=];
+      iIntros; by iApply "ΦΨ".
   Qed.
-  Lemma plend_to {X Y α xπ yπ Φx Ψx} :
+  Lemma plend_wand {X Y α xπ yπ Φx Ψx} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
       xplend δ' xπ Φx ==∗ xplend δ' yπ Ψx) -∗
     plend (X:=X) δ α xπ Φx -∗ plend (X:=Y) δ α yπ Ψx.
-  Proof. iIntros "?". iApply lend_to=>/=. by setoid_rewrite sem_cif_in=>/=. Qed.
+  Proof.
+    iIntros "?". iApply lend_wand=>/=. by setoid_rewrite sem_cif_in=>/=.
+  Qed.
 
   (** Modify the lifetime of borrower and lender propositions *)
   Lemma pbor_lft {X α β a xπ ξ Φx} :
