@@ -30,36 +30,36 @@ Section type.
     iApply (proph_obs_impl2 with "post pre")=> ?? to. by apply to.
   Qed.
   (** Modify by subtyping *)
-  Lemma sub_subty v {X} T
-    `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (v ◁{d} T) Γ Γr get getr)
+  Lemma sub_subty p {X} T
+    `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (p ◁{d} T) Γ Γr get getr)
     {Y} U (f : X → Y) {κ} :
     subtyd T U f ⊢
-      sub κ Γ (v ◁{d} U ᵖ:: Γr) (λ post zl, post (f (get zl), getr zl)').
+      sub κ Γ (p ◁{d} U ᵖ:: Γr) (λ post zl, post (f (get zl), getr zl)').
   Proof.
     rewrite subty_unseal sub_unseal. iIntros "[_[#TU _]] !>/=" (????) "$ $ pre".
-    rewrite etcx_extract /=. iIntros "[T Γr] !>". iFrame "pre Γr".
+    rewrite etcx_extract /=. iIntros "[(% & $ & T) Γr] !>". iFrame "pre Γr".
     by iDestruct ("TU" with "T") as "$".
   Qed.
-  Lemma sub_subty_frozen v {X} T
-    `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (v ◁[†α] T) Γ Γr get getr)
+  Lemma sub_subty_frozen p {X} T
+    `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (p ◁[†α] T) Γ Γr get getr)
     {Y} U f `(!@Inj X Y (=) (=) f) {κ} :
     subtyd T U f ⊢
-      sub κ Γ (v ◁[†α] U ᵖ:: Γr) (λ post zl, post (f (get zl), getr zl)').
+      sub κ Γ (p ◁[†α] U ᵖ:: Γr) (λ post zl, post (f (get zl), getr zl)').
   Proof.
     rewrite subty_unseal sub_unseal. iIntros "[_[#TU _]] !>/=" (????) "$ $ pre".
-    rewrite etcx_extract /=. iIntros "[→T Γr] !>". iFrame "pre Γr". iIntros "†".
-    iMod ("→T" with "†") as (??) "[eqz T]". iExists _, _.
+    rewrite etcx_extract /=. iIntros "[(% & $ & →T) Γr] !>". iFrame "pre Γr".
+    iIntros "†". iMod ("→T" with "†") as (??) "[eqz T]". iExists _, _.
     iDestruct ("TU" with "T") as "$". iApply (proph_eqz_f with "eqz").
   Qed.
   (** Bump up the depth of an object *)
-  Lemma sub_depth v d'
-    `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (v ◁{d} T) Γ Γr get getr,
+  Lemma sub_depth p d'
+    `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (p ◁{d} T) Γ Γr get getr,
       !Ty T) {κ} :
     d ≤ d' →
-    ⊢ sub κ Γ (v ◁{d'} T ᵖ:: Γr) (λ post zl, post (get zl, getr zl)').
+    ⊢ sub κ Γ (p ◁{d'} T ᵖ:: Γr) (λ post zl, post (get zl, getr zl)').
   Proof.
     rewrite sub_unseal=>/= ?. iIntros (????) "!> $ $ pre".
-    rewrite etcx_extract /=. iIntros "[T Γr] !>". iFrame "pre Γr".
+    rewrite etcx_extract /=. iIntros "[(% & $ & T) Γr] !>". iFrame "pre Γr".
     by iApply (ty_own_depth with "T").
   Qed.
 
@@ -77,7 +77,7 @@ Section type.
   (** Binding *)
   Lemma type_bind {Xl Yl Zl κ Γ Γ' Γ'' pre pre'} K e :
     type (Yl:=Yl) κ Γ e Γ' pre -∗
-    (∀ v, type κ (Γ' v) (fill K (of_val v)) Γ'' pre') -∗
+    (∀ p, type κ (Γ' p) (fill K (of_val p)) Γ'' pre') -∗
       type (Xl:=Xl) (Yl:=Zl) κ Γ (fill K e) Γ'' (pre ∘ pre').
   Proof.
     rewrite type_unseal. iIntros "#type #type' !>" (????) "κ t pre Γ".
@@ -89,7 +89,7 @@ Section type.
   Lemma type_let {Xl Yl Zl κ Γ Γ' Γ'' x e e' pre pre'}
     `{!Closed (x :b: []) e'} :
     type (Yl:=Yl) κ Γ e Γ' pre -∗
-    (∀ v, type κ (Γ' v) (subst' x v e') Γ'' pre') -∗
+    (∀ p, type κ (Γ' p) (subst' x p e') Γ'' pre') -∗
       type (Xl:=Xl) (Yl:=Zl) κ Γ (let: x := e in e') Γ'' (pre ∘ pre').
   Proof.
     iIntros "#type #type'". iApply (type_bind [LetCtx x e'] with "type")=>/=.
@@ -111,7 +111,7 @@ Section type.
   Lemma type_lft_use α
     `(!EtcxExtract (Yl:=Xl) (Zl:=Xl') ^[α] Γi Γr get getr) {Yl κ e Γo pre} :
     type (Yl:=Yl) (α ⊓ κ) Γr e Γo pre ⊢
-      type κ Γi e (λ v, ^[α] ᵖ:: Γo v)
+      type κ Γi e (λ p, ^[α] ᵖ:: Γo p)
         (λ post xl, pre (λ yl, post ((), yl)') (getr xl)).
   Proof.
     rewrite type_unseal. iIntros "#type !>/=" (q ???) "κ t pre Γi".
@@ -143,18 +143,18 @@ Section type.
     iMod (lft_kill with "α") as "†"=>//. iApply ("type" with "† κ t pre Γr").
   Qed.
   (** Retrieve a frozen object *)
-  Lemma type_retrieve v α
-    `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Zl) (v ◁[†α] T) Γ Γr get getr,
+  Lemma type_retrieve p α
+    `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Zl) (p ◁[†α] T) Γ Γr get getr,
       !TyOp T κ) {e Zl' Γo pre} :
-    [†α] -∗ (∀ d, type (Yl:=Zl') κ (v ◁{d} T ᵖ:: Γr) e Γo pre) -∗
+    [†α] -∗ (∀ d, type (Yl:=Zl') κ (p ◁{d} T ᵖ:: Γr) e Γo pre) -∗
       type κ Γ e Γo (λ post yl, pre post (get yl, getr yl)').
   Proof.
     rewrite type_unseal. iIntros "#† #type !>/=" (????) "κ t #pre".
-    rewrite etcx_extract /=. iIntros "[→T Γr]".
+    rewrite etcx_extract /=. iIntros "[(% & peq & →T) Γr]".
     iMod ("→T" with "†") as (? xπ') "[eqz T]".
     iMod (ty_own_proph with "κ T") as (???) "[ξl →T]".
     iMod ("eqz" with "[//] ξl") as "[ξl #eq]". iMod ("→T" with "ξl") as "[κ T]".
-    iApply ("type" $! _ _ _ _ (λ π, (xπ' π, _)') with "κ t [] [$Γr $T //]").
+    iApply ("type" $! _ _ _ _ (λ π, (xπ' π, _)') with "κ t [] [$Γr $T $peq]").
     by iApply (proph_obs_impl2 with "pre eq")=> ??<-.
   Qed.
 End type.

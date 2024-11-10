@@ -121,15 +121,16 @@ Section ty_shrref.
   Qed.
 
   (** The depth of [ty_shrref] is positive *)
-  Lemma type_shrref_depth v
-    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (v ◁{d} @ty_shrref X α T) Γi Γr get getr)
+  Lemma type_shrref_depth p
+    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (p ◁{d} @ty_shrref X α T) Γi Γr get getr)
     {Zl' κ e Γo pre} :
-    (⌜d > 0⌝ → type (Yl:=Zl') κ (v ◁{d} ty_shrref α T ᵖ:: Γr) e Γo pre) ⊢
+    (⌜d > 0⌝ → type (Yl:=Zl') κ (p ◁{d} ty_shrref α T ᵖ:: Γr) e Γo pre) ⊢
       type κ Γi e Γo (λ post xl, pre post (get xl, getr xl)').
   Proof.
     rewrite type_unseal. iIntros "#type !>/=" (????) "κ t pre".
-    rewrite etcx_extract ty_shrref_unseal /=.
-    iIntros "[shrrefT Γr]". iDestruct "shrrefT" as (?????) "big".
-    iApply ("type" with "[%] κ t pre [big $Γr]"); [lia|]=>/=. by iFrame.
+    rewrite etcx_extract ty_shrref_unseal /=. iIntros "[big Γr]".
+    iDestruct "big" as (???????) "big".
+    iApply ("type" with "[%] κ t pre [big $Γr]"); [lia|]=>/=. iFrame "big".
+    by iExists _.
   Qed.
 End ty_shrref.

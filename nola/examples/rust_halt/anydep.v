@@ -106,22 +106,22 @@ Section ty_anydep.
   Qed.
 
   (** Eliminate [ty_anydep] *)
-  Lemma type_anydep_elim v
-    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (v ◁{d'} @ty_anydep X T) Γi Γr get getr)
+  Lemma type_anydep_elim p
+    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (p ◁{d'} @ty_anydep X T) Γi Γr get getr)
     {Zl' κ e Γo pre} :
-    (∀ d, type (Yl:=Zl') κ (v ◁{d} T ᵖ:: Γr) e Γo pre) ⊢
+    (∀ d, type (Yl:=Zl') κ (p ◁{d} T ᵖ:: Γr) e Γo pre) ⊢
       type κ Γi e Γo (λ post xl, pre post (get xl, getr xl)').
   Proof.
     rewrite type_unseal. iIntros "#type !>/=" (????) "κ t pre".
-    rewrite etcx_extract ty_anydep_unseal /=. iIntros "[[% T] Γr]".
-    iApply ("type" with "κ t pre [$T $Γr]").
+    rewrite etcx_extract ty_anydep_unseal /=. iIntros "[(% & % & % & T) Γr]".
+    iApply ("type" with "κ t pre [$T $Γr //]").
   Qed.
 
   (** Update the depth under [ty_anydep] *)
-  Lemma sub_anydep_depth v
-    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (v ◁{d} @ty_anydep X T) Γi Γr get getr)
+  Lemma sub_anydep_depth p
+    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (p ◁{d} @ty_anydep X T) Γi Γr get getr)
     {κ d'} :
-    ⊢ sub κ Γi (v ◁{d'} ty_anydep T ᵖ:: Γr)
+    ⊢ sub κ Γi (p ◁{d'} ty_anydep T ᵖ:: Γr)
         (λ post xl, post (get xl, getr xl)').
   Proof.
     rewrite sub_unseal. iIntros (????) "!> $ $ pre". rewrite etcx_extract.

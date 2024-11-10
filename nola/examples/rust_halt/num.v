@@ -51,56 +51,60 @@ Section num.
   Proof.
     rewrite /ty_int ty_pty_unseal type_unseal /=.
     iIntros (????) "!>/= $ $ pre Γ". wp_value_head. iModIntro. iFrame "pre Γ".
-    iPureIntro. eexists _. split=>//=.
+    iPureIntro. eexists _. split; [by rewrite of_path_val|]=>/=. by eexists _.
   Qed.
-  Lemma type_add_int v v' {κ d d'}
-    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁{d} ty_int; v' ◁{d'} ty_int]
+  Lemma type_add_int p p' {κ d d'}
+    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[p ◁{d} ty_int; p' ◁{d'} ty_int]
         Γi Γr get getr) :
-    ⊢ type κ Γi (v + v') (λ r, r ◁{0} ty_int ᵖ:: Γr)
+    ⊢ type κ Γi (p + p') (λ r, r ◁{0} ty_int ᵖ:: Γr)
         (λ post xl, let '(n, n', _)' := get xl in post (n + n', getr xl)'%Z).
   Proof.
     rewrite /= type_unseal. iIntros (????) "!> $ $ pre".
     rewrite tcx_extract /ty_int ty_pty_unseal /=. iIntros "[%Γf Γr]".
-    destruct Γf as ((? & eq & [= ->]) & (? & eq' & [= ->]) & _). wp_op.
-    iModIntro. iFrame "pre Γr". iPureIntro. eexists _. split=>//= ?.
+    destruct Γf as ((? & ? & ? & eq & [= ->]) & (? & ? & ? & eq' & [= ->]) & _).
+    wp_path p. wp_path p'. wp_op. iModIntro. iFrame "pre Γr". iPureIntro.
+    eexists _. split; [by rewrite of_path_val|]. eexists _. split=>//= ?.
     by rewrite eq eq'.
   Qed.
-  Lemma type_sub_int v v' {κ d d'}
-    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁{d} ty_int; v' ◁{d'} ty_int]
+  Lemma type_sub_int p p' {κ d d'}
+    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[p ◁{d} ty_int; p' ◁{d'} ty_int]
         Γi Γr get getr) :
-    ⊢ type κ Γi (v - v') (λ r, r ◁{0} ty_int ᵖ:: Γr)
+    ⊢ type κ Γi (p - p') (λ r, r ◁{0} ty_int ᵖ:: Γr)
         (λ post xl, let '(n, n', _)' := get xl in post (n - n', getr xl)'%Z).
   Proof.
     rewrite /= type_unseal. iIntros (????) "!> $ $ pre".
     rewrite tcx_extract /ty_int ty_pty_unseal /=. iIntros "[%Γf Γr]".
-    destruct Γf as ((? & eq & [= ->]) & (? & eq' & [= ->]) & _). wp_op.
-    iModIntro. iFrame "pre Γr". iPureIntro. eexists _. split=>//= ?.
+    destruct Γf as ((? & ? & ? & eq & [= ->]) & (? & ? & ? & eq' & [= ->]) & _).
+    wp_path p. wp_path p'. wp_op. iModIntro. iFrame "pre Γr". iPureIntro.
+    eexists _. split; [by rewrite of_path_val|]. eexists _. split=>//= ?.
     by rewrite eq eq'.
   Qed.
-  Lemma type_int_eq v v' {κ d d'}
-    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁{d} ty_int; v' ◁{d'} ty_int]
+  Lemma type_int_eq p p' {κ d d'}
+    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[p ◁{d} ty_int; p' ◁{d'} ty_int]
         Γi Γr get getr) :
-    ⊢ type κ Γi (v = v') (λ r, r ◁{0} ty_bool ᵖ:: Γr)
+    ⊢ type κ Γi (p = p') (λ r, r ◁{0} ty_bool ᵖ:: Γr)
         (λ post xl, let '(n, n', _)' := get xl in
           post (bool_decide (n = n'), getr xl)').
   Proof.
     rewrite /= type_unseal. iIntros (????) "!> $ $ pre".
     rewrite tcx_extract /ty_int /ty_bool ty_pty_unseal /=. iIntros "[%Γf Γr]".
-    destruct Γf as ((? & eq & [= ->]) & (? & eq' & [= ->]) & _). wp_op.
-    iModIntro. iFrame "pre Γr". iPureIntro. eexists _. split=>//= ?.
+    destruct Γf as ((? & ? & ? & eq & [= ->]) & (? & ? & ? & eq' & [= ->]) & _).
+    wp_path p. wp_path p'. wp_op. iModIntro. iFrame "pre Γr". iPureIntro.
+    eexists _. split; [by rewrite of_path_val|]. eexists _. split=>//= ?.
     by rewrite eq eq'.
   Qed.
-  Lemma type_int_le v v' {κ d d'}
-    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁{d} ty_int; v' ◁{d'} ty_int]
+  Lemma type_int_le p p' {κ d d'}
+    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[p ◁{d} ty_int; p' ◁{d'} ty_int]
         Γi Γr get getr) :
-    ⊢ type κ Γi (v ≤ v') (λ r, r ◁{0} ty_bool ᵖ:: Γr)
+    ⊢ type κ Γi (p ≤ p') (λ r, r ◁{0} ty_bool ᵖ:: Γr)
         (λ post xl, let '(n, n', _)' := get xl in
           post (bool_decide (n ≤ n')%Z, getr xl)').
   Proof.
     rewrite /= type_unseal. iIntros (????) "!> $ $ pre".
     rewrite tcx_extract /ty_int /ty_bool ty_pty_unseal /=. iIntros "[%Γf Γr]".
-    destruct Γf as ((? & eq & [= ->]) & (? & eq' & [= ->]) & _). wp_op.
-    iModIntro. iFrame "pre Γr". iPureIntro. eexists _. split=>//= ?.
+    destruct Γf as ((? & ? & ? & eq & [= ->]) & (? & ? & ? & eq' & [= ->]) & _).
+    wp_path p. wp_path p'. wp_op. iModIntro. iFrame "pre Γr". iPureIntro.
+    eexists _. split; [by rewrite of_path_val|]. eexists _. split=>//= ?.
     by rewrite eq eq'.
   Qed.
 
@@ -111,60 +115,64 @@ Section num.
   Proof.
     rewrite /ty_nat ty_pty_unseal type_unseal /=.
     iIntros (????) "!>/= $ $ pre Γ". wp_value_head. iModIntro. iFrame "pre Γ".
-    iPureIntro. eexists _. split=>//=.
+    iPureIntro. eexists _. split; [by rewrite of_path_val|]=>/=. by eexists _.
   Qed.
-  Lemma type_add_nat v v' {κ d d'}
-    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁{d} ty_nat; v' ◁{d'} ty_nat]
+  Lemma type_add_nat p p' {κ d d'}
+    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[p ◁{d} ty_nat; p' ◁{d'} ty_nat]
         Γi Γr get getr) :
-    ⊢ type κ Γi (v + v') (λ r, r ◁{0} ty_nat ᵖ:: Γr)
+    ⊢ type κ Γi (p + p') (λ r, r ◁{0} ty_nat ᵖ:: Γr)
         (λ post xl, let '(n, n', _)' := get xl in post (n + n', getr xl)').
   Proof.
     rewrite /= type_unseal. iIntros (????) "!> $ $ pre".
     rewrite tcx_extract /ty_nat ty_pty_unseal /=. iIntros "[%Γf Γr]".
-    destruct Γf as ((? & eq & [= ->]) & (? & eq' & [= ->]) & _). wp_op.
-    iModIntro. iFrame "pre Γr". iPureIntro. eexists _. split=>/=.
+    destruct Γf as ((? & ? & ? & eq & [= ->]) & (? & ? & ? & eq' & [= ->]) & _).
+    wp_path p. wp_path p'. wp_op. iModIntro. iFrame "pre Γr". iPureIntro.
+    eexists _. split; [by rewrite of_path_val|]. eexists _. split=>//=.
     { move=> ?. by rewrite eq eq'. } { do 3 f_equal. lia. }
   Qed.
-  Lemma type_sub_nat v v' {κ d d'}
-    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁{d} ty_nat; v' ◁{d'} ty_nat]
+  Lemma type_sub_nat p p' {κ d d'}
+    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[p ◁{d} ty_nat; p' ◁{d'} ty_nat]
         Γi Γr get getr) :
-    ⊢ type κ Γi (v - v') (λ r, r ◁{0} ty_nat ᵖ:: Γr)
+    ⊢ type κ Γi (p - p') (λ r, r ◁{0} ty_nat ᵖ:: Γr)
         (λ post xl, let '(n, n', _)' := get xl in
           n ≥ n' ∧ post (n - n', getr xl)')%type.
   Proof.
     rewrite /= type_unseal. iIntros (????) "!> $ $ pre".
     rewrite tcx_extract /ty_nat ty_pty_unseal /=. iIntros "[%Γf Γr]".
-    destruct Γf as ((? & eq & [= ->]) & (? & eq' & [= ->]) & _). wp_op.
-    iModIntro. iExists (λ _, _). iSplit.
+    destruct Γf as ((? & ? & ? & eq & [= ->]) & (? & ? & ? & eq' & [= ->]) & _).
+    wp_path p. wp_path p'. wp_op. iModIntro. iExists (λ _, _). iSplit.
     { by iApply (proph_obs_impl with "pre")=>/= [?[??]]. }
-    iSplit=>//. iExists _. iSplit. { iPureIntro=> ?. by rewrite eq eq' /=. }
+    iSplit=>//. iExists _. iSplit; [by rewrite of_path_val|]. iExists _.
+    iSplit. { iPureIntro=> ?. by rewrite eq eq' /=. }
     rewrite proph_obs_sat. iRevert "pre". iPureIntro. case=>/= [?+].
     rewrite eq eq'. case=> ??. do 3 f_equal. lia.
   Qed.
-  Lemma type_nat_eq v v' {κ d d'}
-    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁{d} ty_nat; v' ◁{d'} ty_nat]
+  Lemma type_nat_eq p p' {κ d d'}
+    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[p ◁{d} ty_nat; p' ◁{d'} ty_nat]
         Γi Γr get getr) :
-    ⊢ type κ Γi (v = v') (λ r, r ◁{0} ty_bool ᵖ:: Γr)
+    ⊢ type κ Γi (p = p') (λ r, r ◁{0} ty_bool ᵖ:: Γr)
         (λ post xl, let '(n, n', _)' := get xl in
           post (bool_decide (n = n'), getr xl)').
   Proof.
     rewrite /= type_unseal. iIntros (????) "!> $ $ pre".
     rewrite tcx_extract /ty_nat /ty_bool ty_pty_unseal /=. iIntros "[%Γf Γr]".
-    destruct Γf as ((? & eq & [= ->]) & (? & eq' & [= ->]) & _). wp_op.
-    iModIntro. iFrame "pre Γr". iPureIntro. eexists _. split=>//= ?.
+    destruct Γf as ((? & ? & ? & eq & [= ->]) & (? & ? & ? & eq' & [= ->]) & _).
+    wp_path p. wp_path p'. wp_op. iModIntro. iFrame "pre Γr". iPureIntro.
+    eexists _. split; [by rewrite of_path_val|]. eexists _. split=>//= ?.
     rewrite eq eq'. apply bool_decide_ext. lia.
   Qed.
-  Lemma type_nat_le v v' {κ d d'}
-    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁{d} ty_nat; v' ◁{d'} ty_nat]
+  Lemma type_nat_le p p' {κ d d'}
+    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[p ◁{d} ty_nat; p' ◁{d'} ty_nat]
         Γi Γr get getr) :
-    ⊢ type κ Γi (v ≤ v') (λ r, r ◁{0} ty_bool ᵖ:: Γr)
+    ⊢ type κ Γi (p ≤ p') (λ r, r ◁{0} ty_bool ᵖ:: Γr)
         (λ post xl, let '(n, n', _)' := get xl in
           post (bool_decide (n ≤ n'), getr xl)').
   Proof.
     rewrite /= type_unseal. iIntros (????) "!> $ $ pre".
     rewrite tcx_extract /ty_nat /ty_bool ty_pty_unseal /=. iIntros "[%Γf Γr]".
-    destruct Γf as ((? & eq & [= ->]) & (? & eq' & [= ->]) & _). wp_op.
-    iModIntro. iFrame "pre Γr". iPureIntro. eexists _. split=>//= ?.
+    destruct Γf as ((? & ? & ? & eq & [= ->]) & (? & ? & ? & eq' & [= ->]) & _).
+    wp_path p. wp_path p'. wp_op. iModIntro. iFrame "pre Γr". iPureIntro.
+    eexists _. split; [by rewrite of_path_val|]. eexists _. split=>//= ?.
     rewrite eq eq'. apply bool_decide_ext. lia.
   Qed.
   Lemma type_ndnat {κ Xl Γ} :
@@ -175,7 +183,7 @@ Section num.
     iIntros (????) "!>/= $ $ pre Γ". wp_apply twp_ndnat=>//. iIntros (?) "_ !>".
     iExists _. iSplit.
     { iApply (proph_obs_impl with "pre")=> ? post. apply post. }
-    iSplit=>//=. by iExists _.
+    iSplit; [|done]. iExists _. iSplit; [done|]=>/=. by iExists _.
   Qed.
 
   (** Boolean operations *)
@@ -185,47 +193,51 @@ Section num.
   Proof.
     rewrite /ty_bool ty_pty_unseal type_unseal /=.
     iIntros (????) "!>/= $ $ pre Γ". wp_value_head. iModIntro. iFrame "pre Γ".
-    iPureIntro. eexists _. split=>//=.
+    iPureIntro. eexists _. split; [by rewrite of_path_val|]=>/=. by eexists _.
   Qed.
-  Lemma type_eq_bool v v' {κ}
-    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁{d} ty_bool; v' ◁{d'} ty_bool]
+  Lemma type_eq_bool p p' {κ}
+    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[p ◁{d} ty_bool; p' ◁{d'} ty_bool]
         Γi Γr get getr) :
-    ⊢ type κ Γi (v = v') (λ r, r ◁{0} ty_bool ᵖ:: Γr)
+    ⊢ type κ Γi (p = p') (λ r, r ◁{0} ty_bool ᵖ:: Γr)
       (λ post xl, let '(b, b', _)' := get xl in
         post (bool_decide (b = b'), getr xl)').
   Proof.
     rewrite /= type_unseal. iIntros (????) "!> $ $ pre".
     rewrite tcx_extract /ty_bool ty_pty_unseal /=. iIntros "[%Γf Γr]".
-    destruct Γf as ((b & eq & [= ->]) & (b' & eq' & [= ->]) & _). wp_op.
-    iModIntro. iFrame "pre Γr". iPureIntro. eexists _. split=>//= ?.
+    destruct Γf as
+      ((? & ? & b & eq & [= ->]) & (? & ? & b' & eq' & [= ->]) & _).
+    wp_path p. wp_path p'. wp_op. iModIntro. iFrame "pre Γr". iPureIntro.
+    eexists _. split; [by rewrite of_path_val|]. eexists _. split=>//= ?.
     rewrite eq eq'. apply bool_decide_ext. by case b; case b'.
   Qed.
-  Lemma type_le_bool v v' {κ}
-    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[v ◁{d} ty_bool; v' ◁{d'} ty_bool]
+  Lemma type_le_bool p p' {κ}
+    `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[p ◁{d} ty_bool; p' ◁{d'} ty_bool]
         Γi Γr get getr) :
-    ⊢ type κ Γi (v ≤ v') (λ r, r ◁{0} ty_bool ᵖ:: Γr)
+    ⊢ type κ Γi (p ≤ p') (λ r, r ◁{0} ty_bool ᵖ:: Γr)
       (λ post xl, let '(b, b', _)' := get xl in
         post (negb b || b', getr xl)').
   Proof.
-    rewrite type_unseal. iIntros (????) "!> $ $ pre".
+    rewrite /= type_unseal. iIntros (????) "!> $ $ pre".
     rewrite tcx_extract /ty_bool ty_pty_unseal /=. iIntros "[%Γf Γr]".
-    destruct Γf as ((b & eq & [= ->]) & (b' & eq' & [= ->]) & _). wp_op.
-    iModIntro. iFrame "pre Γr". iPureIntro. eexists _. split=>//= ?.
+    destruct Γf as
+      ((? & ? & b & eq & [= ->]) & (? & ? & b' & eq' & [= ->]) & _).
+    wp_path p. wp_path p'. wp_op. iModIntro. iFrame "pre Γr". iPureIntro.
+    eexists _. split; [by rewrite of_path_val|]. eexists _. split=>//= ?.
     rewrite eq eq'. by case b; case b'.
   Qed.
 
   (** If expression *)
-  Lemma type_if v
-    `(!EtcxExtract (Yl:=Xl) (Zl:=Yl) (v ◁{d} ty_bool) Γi Γr get getr)
+  Lemma type_if p
+    `(!EtcxExtract (Yl:=Xl) (Zl:=Yl) (p ◁{d} ty_bool) Γi Γr get getr)
     {Zl κ e e' Γo pre pre'} :
     type (Yl:=Zl) κ Γr e Γo pre -∗ type κ Γr e' Γo pre' -∗
-      type κ Γi (if: v then e else e') Γo
+      type κ Γi (if: p then e else e') Γo
         (λ post xl, if get xl then pre post (getr xl) else pre' post (getr xl)).
   Proof.
     rewrite type_unseal. iIntros "#type #type' !>/=" (????) "κ t #pre".
     rewrite etcx_extract /ty_bool ty_pty_unseal /=. iIntros "[%vb Γr]".
-    destruct vb as (b & eq & [= ->]).
-    destruct b; wp_if;
+    destruct vb as (? & ? & b & eq & [= ->]).
+    destruct b; wp_path p; wp_if;
       [iApply ("type" with "κ t [] Γr")|iApply ("type'" with "κ t [] Γr")];
       iApply (proph_obs_impl with "pre")=> ?; by rewrite eq.
   Qed.
@@ -244,30 +256,34 @@ Section num.
         S n' => pre (λ '(x', zl')', pre_nat_iter n' x' zl') (n', x, zl)' end.
   End pre_nat_iter.
   (** Typing [nat_iter] *)
-  Local Lemma type'_nat_iter {f : val} {κ d d' X T Zl v w Γ pre} :
-    (∀ v w, type (Xl:=_::X::Zl) κ (v ◁{d} ty_nat ᵖ:: w ◁{d'} T ᵖ:: Γ)
-      (f [v; w]%E) (λ r, r ◁{d'} T ᵖ:: Γ) pre) ⊢
-    type κ (v ◁{d} ty_nat ᵖ:: w ◁{d'} T ᵖ:: Γ) (nat_iter [f; v; w]%E)
+  Local Lemma type'_nat_iter {f : val} {κ d d' X T Zl p p' Γ pre} :
+    (∀ p p', type (Xl:=_::X::Zl) κ (p ◁{d} ty_nat ᵖ:: p' ◁{d'} T ᵖ:: Γ)
+      (f [p; p']%E) (λ r, r ◁{d'} T ᵖ:: Γ) pre) ⊢
+    type κ (p ◁{d} ty_nat ᵖ:: p' ◁{d'} T ᵖ:: Γ) (nat_iter [f; p; p']%E)
       (λ r, r ◁{d'} T ᵖ:: Γ)
       (λ post '(n, x, zl)', pre_nat_iter pre post n x zl).
   Proof.
     rewrite /ty_nat ty_pty_unseal type_unseal.
-    iIntros "#type !>/=" (?? postπ xlπ) "κ t pre (%vi & T & Γ)".
-    destruct vi as (n & eq & [= ->]). setoid_rewrite eq. clear.
-    iInduction n as [|n'] "IH" forall (postπ xlπ w); wp_rec; wp_op; wp_case.
-    { iModIntro. do 2 iFrame. }
+    iIntros "#type !>/=" (?? postπ xlπ) "κ t pre (%pi & (%v & % & T) & Γ)".
+    destruct pi as (? & ? & n & eq & [= ->]). setoid_rewrite eq. wp_path p.
+    wp_path p'. clear.
+    iInduction n as [|n'] "IH" forall (postπ xlπ v); wp_rec; wp_op; wp_case.
+    { iModIntro. rewrite of_path_val. by do 2 iFrame. }
     wp_op. have -> : (S n' - 1)%Z = n' by lia. wp_let. wp_bind (f _).
     iDestruct ("type" with "κ t pre [T Γ]") as "twp"=>/=.
-    { iFrame. by iExists _. }
-    iApply (twp_wand with "twp"). iIntros (?) ">(% & κ & t & pre & T & Γ)".
+    { iFrame. iSplit; [|by rewrite -of_path_val]. iExists _.
+      iSplit; [by rewrite -of_path_val|]. by iExists _. }
+    iApply (twp_wand with "twp").
+    iIntros (?) ">(% & κ & t & pre & (% & %eq & T) & Γ)". move: eq.
+    rewrite of_path_val=> [=->].
     iApply ("IH" $! _ (λ _,(0,_)') with "κ t pre T Γ").
   Qed.
   Lemma type_nat_iter {κ X T} {f : val}
-    `(!TcxExtract (Xl:=[_;X]) (Yl:=Yl) (Zl:=Zl) ᵖ[v ◁{d} ty_nat; w ◁{d'} T]
+    `(!TcxExtract (Xl:=[_;X]) (Yl:=Yl) (Zl:=Zl) ᵖ[p ◁{d} ty_nat; p' ◁{d'} T]
         Γi Γr get getr) {pre} :
-    (∀ v w, type κ (v ◁{d} ty_nat ᵖ:: w ◁{d'} T ᵖ:: Γr) (f [v; w]%E)
+    (∀ p p', type κ (p ◁{d} ty_nat ᵖ:: p' ◁{d'} T ᵖ:: Γr) (f [p; p']%E)
       (λ r, r ◁{d'} T ᵖ:: Γr) pre) ⊢
-    type κ Γi (nat_iter [f; v; w]%E) (λ r, r ◁{d'} T ᵖ:: Γr)
+    type κ Γi (nat_iter [f; p; p']%E) (λ r, r ◁{d'} T ᵖ:: Γr)
       (λ post yl, let '(n, x, _)' := get yl in
         pre_nat_iter pre post n x (getr yl))%type.
   Proof.

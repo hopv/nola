@@ -177,15 +177,16 @@ Section ty_box.
   Qed.
 
   (** The depth of [ty_box] is positive *)
-  Lemma type_box_depth v
-    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (v ◁{d} @ty_box X T) Γi Γr get getr)
+  Lemma type_box_depth p
+    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (p ◁{d} @ty_box X T) Γi Γr get getr)
     {Zl' κ e Γo pre} :
-    (⌜d > 0⌝ → type (Yl:=Zl') κ (v ◁{d} ty_box T ᵖ:: Γr) e Γo pre) ⊢
+    (⌜d > 0⌝ → type (Yl:=Zl') κ (p ◁{d} ty_box T ᵖ:: Γr) e Γo pre) ⊢
       type κ Γi e Γo (λ post xl, pre post (get xl, getr xl)').
   Proof.
     rewrite type_unseal. iIntros "#type !>/=" (????) "κ t pre".
-    rewrite etcx_extract ty_box_unseal /=. iIntros "[boxT Γr]".
-    iDestruct "boxT" as (??????) "big".
-    iApply ("type" with "[%] κ t pre [big $Γr]"); [lia|]=>/=. by iFrame.
+    rewrite etcx_extract ty_box_unseal /=. iIntros "[big Γr]".
+    iDestruct "big" as (????????) "big".
+    iApply ("type" with "[%] κ t pre [big $Γr]"); [lia|]=>/=. iFrame "big".
+    by iExists _.
   Qed.
 End ty_box.

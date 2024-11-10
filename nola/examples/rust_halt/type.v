@@ -645,16 +645,73 @@ End subty.
 
 Notation subtyd := (subty der).
 
+(** ** Path *)
+
+Definition path := expr.
+Bind Scope expr_scope with path.
+
+(** Evaluate a path to an optional value *)
+Fixpoint of_path (p : path) : option val :=
+  match p with
+  | BinOp OffsetOp e (#(LitInt n))%E => match of_path e with
+      Some #(LitLoc l) => Some #(l +ₗ n) | _ => None end
+  | e => to_val e
+  end.
+
+(** [of_path] over a value *)
+Lemma of_path_val {v : val} : of_path v = Some v.
+Proof. case v; [done|]=>/= >. by rewrite (decide_True_pi _). Qed.
+
+(** The path is closed if [of_path] is defined *)
+Lemma of_path_closed {p v} : of_path p = Some v → Closed [] p.
+Proof.
+  move: v. elim p=>//.
+  - move=> >. rewrite /of_path=> /of_to_val <-. apply is_closed_of_val.
+  - case=>// e IH. case=>//. case=>//= ? _. move: IH. case (of_path e)=>//.
+    case=>//. case=>// ? IH ? _. move: (IH _ eq_refl). apply _.
+Qed.
+
+Section twp.
+  Context `{!lrustGS_gen hlc Σ}.
+
+  (** A path evaluates to the value of [of_path] *)
+  Lemma twp_path p {W E v} :
+    of_path p = Some v → ⊢ WP[W] p @ E [{ v', ⌜v' = v⌝ }].
+  Proof.
+    move: v. elim: p=>//.
+    - move=> > [= eq]. by iApply twp_value.
+    - move=> > _ ? /of_to_val ?. by iApply twp_value.
+    - case=>// e IH. case=>//. case=>//= ?. move: IH. case (of_path e)=>//.
+      case=>//. case=>// ? IH _ ?[=<-]. wp_bind e.
+      iApply twp_wand; [by iApply IH|]. iIntros (?->). by wp_op.
+  Qed.
+  Lemma twp_path_bind K p {W E v Φ} :
+    of_path p = Some v →
+    WP[W] fill K (of_val v) @ E [{ Φ }] ⊢ WP[W] fill K p @ E [{ Φ }].
+  Proof.
+    move=> ?. iIntros "?". iApply twp_bind.
+    iDestruct twp_path as "twp"=>//. iApply (twp_wand with "twp").
+    by iIntros (?->).
+  Qed.
+End twp.
+(** Tactics for applying [twp_path_bind] *)
+Ltac wp_path p :=
+  lazymatch goal with
+  | |- envs_entails _ (twp _ _ ?eglob _) =>
+        reshape_expr eglob ltac:(fun K e => unify e p;
+          iApply (twp_path_bind K p)=>//=)
+  end.
+
 (** ** Type context *)
 
 (** Type context element *)
 Variant etcx CON Σ : xty → Type :=
-| Owned {X} (d : nat) (v : val) (T : ty CON Σ X) : etcx CON Σ X
-| Frozen {X} (α : lft) (v : val) (T : ty CON Σ X) : etcx CON Σ X
+| Owned {X} (d : nat) (p : path) (T : ty CON Σ X) : etcx CON Σ X
+| Frozen {X} (α : lft) (p : path) (T : ty CON Σ X) : etcx CON Σ X
 | Lft (α : lft) : etcx CON Σ unitₓ.
 Arguments Owned {_ _ _}. Arguments Frozen {_ _ _}. Arguments Lft {_ _}.
-Notation "v ◁{ d } T" := (Owned d v T) (at level 55, format "v  ◁{ d }  T").
-Notation "v ◁[† α ] T" := (Frozen α v T) (at level 55, format "v  ◁[† α ]  T").
+Notation "p ◁{ d } T" := (Owned d p T) (at level 55, format "p  ◁{ d }  T").
+Notation "p ◁[† α ] T" := (Frozen α p T) (at level 55, format "p  ◁[† α ]  T").
 Notation "^[ α ]" := (Lft α) (format "^[ α ]").
 
 (** Type context *)
@@ -666,9 +723,10 @@ Section tcx.
   (** Semantics of a type context element *)
   Definition sem_etcx {X} t (E : etcx CON Σ X) : clair X → iProp Σ :=
     match E with
-    | v ◁{d} T => λ xπ, ⟦ ty_own T t d xπ [v] ⟧ᶜ
-    | v ◁[†α] T => λ xπ, [†α] =[rust_halt_wsat]{⊤}=∗
-        ∃ d xπ', proph_eqz xπ xπ' ∗ ⟦ ty_own T t d xπ' [v] ⟧ᶜ
+    | p ◁{d} T => λ xπ, ∃ v, ⌜Some v = of_path p⌝ ∧ ⟦ ty_own T t d xπ [v] ⟧ᶜ
+    | p ◁[†α] T => λ xπ, ∃ v, ⌜Some v = of_path p⌝ ∧
+        ([†α] =[rust_halt_wsat]{⊤}=∗ ∃ d xπ',
+          proph_eqz xπ xπ' ∗ ⟦ ty_own T t d xπ' [v] ⟧ᶜ)
     | ^[α] => λ _, ⌜α ≠ ⊤⌝ ∧ 1.[α]
     end%I.
 
@@ -875,8 +933,8 @@ Section tcx_extract.
     @EtcxExtract X _ Yl E (E ᵖ:: Γ) Γ fst' snd' | 5.
   Proof. by split. Qed.
   (** Extract from the copyable head *)
-  #[export] Instance etcx_extract_hd_copy {X Yl Γ v d} `{!Copy T} :
-    @EtcxExtract X (_ :: Yl) _ (v ◁{d} T) (v ◁{d} T ᵖ:: Γ) (v ◁{d} T ᵖ:: Γ)
+  #[export] Instance etcx_extract_hd_copy {X Yl Γ p d} `{!Copy T} :
+    @EtcxExtract X (_ :: Yl) _ (p ◁{d} T) (p ◁{d} T ᵖ:: Γ) (p ◁{d} T ᵖ:: Γ)
       fst' (λ yyl, yyl) | 2.
   Proof. split=> ??. iIntros "[#T $]". iFrame "T". Qed.
   (** Extract from the tail *)
@@ -940,18 +998,19 @@ Section resol_tcx.
   Proof. split=> >. iIntros "$ _ !>". by iApply proph_obs_true. Qed.
   (** [ResolTcx] over cons *)
   #[export] Instance resol_tcx_cons_owned {X}
-    `(!Resol T κ post, !@ResolTcx Yl Γ κ post') {v d} :
-    ResolTcx (Xl:=X::_) (v ◁{d} T ᵖ:: Γ) κ (λ '(x, yl)', post x ∧ post' yl).
+    `(!Resol T κ post, !@ResolTcx Yl Γ κ post') {p d} :
+    ResolTcx (Xl:=X::_) (p ◁{d} T ᵖ:: Γ) κ (λ '(x, yl)', post x ∧ post' yl).
   Proof.
-    split=> > /=. iIntros "κ [T Γ]". iMod (resol with "κ T") as "[κ post]".
+    split=> > /=. iIntros "κ [(% & % & T) Γ]".
+    iMod (resol with "κ T") as "[κ post]".
     iMod (resol_tcx with "κ Γ") as "[$ post']". iModIntro.
     iCombine "post post'" as "$".
   Qed.
   Lemma resol_tcx_cons `(!@ResolTcx Yl Γ κ post) {X E} :
     ResolTcx (Xl:=X::_) (E ᵖ:: Γ) κ (λ '(_, yl)', post yl).
   Proof. split=> > /=. iIntros "κ [_ Γ]". iApply (resol_tcx with "κ Γ"). Qed.
-  #[export] Instance resol_tcx_cons_frozen `(!@ResolTcx Yl Γ κ post) {X v α T} :
-    ResolTcx (Xl:=X::_) (v ◁[†α] T ᵖ:: Γ) κ (λ '(_, yl)', post yl).
+  #[export] Instance resol_tcx_cons_frozen `(!@ResolTcx Yl Γ κ post) {X p α T} :
+    ResolTcx (Xl:=X::_) (p ◁[†α] T ᵖ:: Γ) κ (λ '(_, yl)', post yl).
   Proof. exact: resol_tcx_cons. Qed.
   #[export] Instance resol_tcx_cons_lft `(!@ResolTcx Yl Γ κ post) {α} :
     ResolTcx (^[α] ᵖ:: Γ) κ (λ '(_, yl)', post yl).
