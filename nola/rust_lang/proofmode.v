@@ -180,7 +180,7 @@ Proof.
   eapply wand_apply; first by apply wand_entails, twp_alloc.
   rewrite -persistent_and_sep. apply and_intro; first by auto.
   apply forall_intro=> l. apply forall_intro=>sz. apply wand_intro_l.
-  rewrite -assoc. rewrite sep_and. apply pure_elim_l=> Hn. apply wand_elim_r'.
+  rewrite -persistent_and_sep_assoc. apply pure_elim_l=> Hn. apply wand_elim_r'.
   destruct (HΔ l sz) as (Δ''&?&HΔ'); first done.
   rewrite envs_app_sound //; simpl. by rewrite right_id HΔ'.
 Qed.
@@ -198,8 +198,8 @@ Proof.
   eapply wand_apply; first by apply wand_entails, wp_alloc.
   rewrite -persistent_and_sep. apply and_intro; first by auto.
   rewrite into_laterN_env_sound; apply later_mono, forall_intro=> l.
-  apply forall_intro=>sz. apply wand_intro_l. rewrite -assoc.
-  rewrite sep_and. apply pure_elim_l=> Hn. apply wand_elim_r'.
+  apply forall_intro=>sz. apply wand_intro_l. rewrite -persistent_and_sep_assoc.
+  apply pure_elim_l=> Hn. apply wand_elim_r'.
   destruct (HΔ l sz) as (Δ''&?&HΔ'); first done.
   rewrite envs_app_sound //; simpl. by rewrite right_id HΔ'.
 Qed.

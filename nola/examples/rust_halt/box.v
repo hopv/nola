@@ -11,9 +11,9 @@ Section ty_box.
 
   (** [ty_box]: Box pointer type *)
   Definition ty'_box_def {X} (T : ty CON Σ X) : ty' CON Σ X :=
-    (λ t d xπ vl, ∃ l d' xπ' wl, ⌜vl = [ #l]⌝ ∗ ⌜d' < d⌝ ∗ ⌜∀ π, xπ' π = xπ π⌝ ∗
+    (λ t d xπ vl, ∃ l d' xπ' wl, ⌜vl = [ #l]⌝ ∧ ⌜d' < d⌝ ∧ ⌜∀ π, xπ' π = xπ π⌝ ∧
         ▷ l ↦∗ wl ∗ ▷ †l…(length wl) ∗ cif_store (ty_own T t d' xπ' wl),
-      λ t d l α xπ, ∃ l' d' xπ', ⌜d' < d⌝ ∗ ⌜∀ π, xπ' π = xπ π⌝ ∗
+      λ t d l α xπ, ∃ l' d' xπ', ⌜d' < d⌝ ∧ ⌜∀ π, xπ' π = xπ π⌝ ∧
         ▷ l ↦ˢ[α] #l' ∗ □ cif_store (ty_shr T t d' l' α xπ'))%cif.
   Lemma ty'_box_aux : seal (@ty'_box_def). Proof. by eexists. Qed.
   Definition ty'_box {X} := ty'_box_aux.(unseal) X.

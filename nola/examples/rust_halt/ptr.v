@@ -49,7 +49,7 @@ Section read_write.
     : Prop := READ {
     read {q t xπ v} :
       q.[κ] -∗ na_own t ⊤ -∗ ⟦ ty_own T t d xπ [v] ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
-        ∃ l wl r, ⌜v = # l⌝ ∗ l ↦∗{r} wl ∗ ⟦ ty_own U t du (get ∘ xπ) wl ⟧ᶜ ∗
+        ∃ l wl r, ⌜v = # l⌝ ∧ l ↦∗{r} wl ∗ ⟦ ty_own U t du (get ∘ xπ) wl ⟧ᶜ ∗
           (l ↦∗{r} wl =[rust_halt_wsat]{⊤}=∗
             q.[κ] ∗ na_own t ⊤ ∗ ⟦ ty_own T' t d (set ∘ xπ) [v] ⟧ᶜ);
   }.
@@ -60,7 +60,7 @@ Section read_write.
     (T' : ty CON Σ X') (get : X → Y) (set : X → Y' → X') : Prop := WRITE {
     write {q t xπ v} :
       q.[κ] -∗ ⟦ ty_own T t d xπ [v] ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ l wl,
-        ⌜v = # l⌝ ∗ l ↦∗ wl ∗ ⟦ ty_own U t du (get ∘ xπ) wl ⟧ᶜ ∗
+        ⌜v = # l⌝ ∧ l ↦∗ wl ∗ ⟦ ty_own U t du (get ∘ xπ) wl ⟧ᶜ ∗
         (∀ yπ' wl', l ↦∗ wl' -∗ ⟦ ty_own U' t du' yπ' wl' ⟧ᶜ
           =[rust_halt_wsat]{⊤}=∗
           q.[κ] ∗ ⟦ ty_own T' t d' (λ π, set (xπ π) (yπ' π)) [v] ⟧ᶜ);

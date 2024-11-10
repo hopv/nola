@@ -9,7 +9,7 @@ Section ty_prod.
   (** [ty_prod]: Product type *)
   Definition ty'_prod_def {X Y} (T : ty CON Σ X) (U : ty CON Σ Y)
     : ty' CON Σ (X *'ₓ Y) :=
-    (λ t d xyπ vl, ∃ wl wl', ⌜vl = wl ++ wl'⌝ ∗
+    (λ t d xyπ vl, ∃ wl wl', ⌜vl = wl ++ wl'⌝ ∧
       ty_own T t d (fst' ∘ xyπ) wl ∗ ty_own U t d (snd' ∘ xyπ) wl',
       λ t d l α xyπ, ty_shr T t d l α (fst' ∘ xyπ) ∗
         ty_shr U t d (l +ₗ ty_size T) α (snd' ∘ xyπ))%cif.

@@ -195,7 +195,7 @@ Proof. destruct b; solve_pure_exec. Qed.
 Lemma twp_alloc W E (n : Z) :
   0 < n →
   [[{ True }]][W] Alloc (Lit $ LitInt n) @ E
-  [[{ l (sz: nat), RET LitV $ LitLoc l; ⌜n = sz⌝ ∗ †l…sz ∗
+  [[{ l (sz: nat), RET LitV $ LitLoc l; ⌜n = sz⌝ ∧ †l…sz ∗
     l ↦∗ repeat (LitV LitPoison) sz }]].
 Proof.
   iIntros (? Φ) "_ HΦ". iApply twp_lift_atomic_base_step_no_fork; auto.
@@ -207,7 +207,7 @@ Qed.
 Lemma wp_alloc W E (n : Z) :
   0 < n →
   {{{ True }}}[W] Alloc (Lit $ LitInt n) @ E
-  {{{ l (sz: nat), RET LitV $ LitLoc l; ⌜n = sz⌝ ∗ †l…sz ∗
+  {{{ l (sz: nat), RET LitV $ LitLoc l; ⌜n = sz⌝ ∧ †l…sz ∗
     l ↦∗ repeat (LitV LitPoison) sz }}}.
 Proof.
   iIntros (??) "_ →Φ". iApply (twp_wp_step with "→Φ").
@@ -424,7 +424,7 @@ Lemma twp_cas_loc_nondet W E l l1 e2 l2 ll :
     CAS (Lit $ LitLoc l) (Lit $ LitLoc l1) e2 @ E
   [[{ b, RET LitV (lit_of_bool b);
       if b is true then l ↦ LitV (LitLoc l2)
-      else ⌜l1 ≠ ll⌝ ∗ l ↦ LitV (LitLoc ll) }]].
+      else ⌜l1 ≠ ll⌝ ∧ l ↦ LitV (LitLoc ll) }]].
 Proof.
   iIntros (<- Φ) "Hv HΦ". iApply twp_lift_atomic_base_step_no_fork; auto.
   iIntros (????) "[$ Hσ]". iDestruct (heap_read_1 with "Hσ Hv") as %?.
@@ -439,7 +439,7 @@ Lemma wp_cas_loc_nondet W E l l1 e2 l2 ll :
     CAS (Lit $ LitLoc l) (Lit $ LitLoc l1) e2 @ E
   {{{ b, RET LitV (lit_of_bool b);
       if b is true then l ↦ LitV (LitLoc l2)
-      else ⌜l1 ≠ ll⌝ ∗ l ↦ LitV (LitLoc ll) }}}.
+      else ⌜l1 ≠ ll⌝ ∧ l ↦ LitV (LitLoc ll) }}}.
 Proof.
   iIntros (??) "H →Φ". iApply (twp_wp_step with "→Φ").
   iApply (twp_cas_loc_nondet with "H"). iIntros "% ? →Φ !>". by iApply "→Φ".

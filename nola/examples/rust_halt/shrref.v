@@ -12,7 +12,7 @@ Section ty_shrref.
   (** [ty_shrref]: Shared reference type *)
   Definition sty'_shrref_def {X} (α : lft) (T : ty CON Σ X) : ownty CON Σ X :=
     λ t d xπ vl,
-      (∃ l d' xπ', ⌜vl = [ #l]⌝ ∗ ⌜d' < d⌝ ∗ ⌜∀ π, xπ' π = xπ π⌝ ∗
+      (∃ l d' xπ', ⌜vl = [ #l]⌝ ∧ ⌜d' < d⌝ ∧ ⌜∀ π, xπ' π = xπ π⌝ ∧
         □ cif_store (ty_shr T t d' l α xπ'))%cif.
   Lemma sty'_shrref_aux : seal (@sty'_shrref_def). Proof. by eexists. Qed.
   Definition sty'_shrref {X} := sty'_shrref_aux.(unseal) X.

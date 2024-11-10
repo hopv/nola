@@ -172,7 +172,7 @@ Module inv_landin. Section inv_landin.
 
   (** Allocation *)
   Context (ref : val → expr).
-  Hypothesis twp_ref : ∀{E v}, ⊢ twp E (ref v) (λ w, ∃ l, ⌜w = l⌝ ∗ l ↦ v).
+  Hypothesis twp_ref : ∀{E v}, ⊢ twp E (ref v) (λ w, ∃ l, ⌜w = l⌝ ∧ l ↦ v).
   (** Store *)
   Context (store : loc → val → expr).
   Local Notation "l <- v" := (store l v) (at level 20).
@@ -183,7 +183,7 @@ Module inv_landin. Section inv_landin.
   Local Notation "! l" := (load l) (at level 20).
   Hypothesis atomic_load : ∀{l}, atomic (!l).
   Hypothesis twp_load : ∀{E l v},
-    l ↦ v ⊢ twp E (!l) (λ v', ⌜v' = v⌝ ∗ l ↦ v).
+    l ↦ v ⊢ twp E (!l) (λ v', ⌜v' = v⌝ ∧ l ↦ v).
   (** Function call *)
   Context (call : vexpr).
   Hypothesis twp_call : ∀{E e Ψ}, twp E e Ψ ⊢ twp E (call (λ(), e)) Ψ.

@@ -407,7 +407,7 @@ Section heap.
   Lemma heap_free σ l vl (n : Z) :
     n = length vl →
     heap_ctx σ -∗ l ↦∗ vl -∗ †l…(length vl)
-    ==∗ ⌜0 < n⌝ ∗ ⌜∀ m, is_Some (σ !! (l +ₗ m)) ↔ (0 ≤ m < n)⌝ ∗
+    ==∗ ⌜0 < n⌝ ∧ ⌜∀ m, is_Some (σ !! (l +ₗ m)) ↔ (0 ≤ m < n)⌝ ∧
         heap_ctx (free_mem l (Z.to_nat n) σ).
   Proof.
     iDestruct 1 as (hF) "(Hvalσ & HhF & REL)"; iDestruct "REL" as %REL.
@@ -494,9 +494,9 @@ Section heap.
 
   Lemma heap_read_na σ l q v :
     heap_ctx σ -∗ l ↦{q} v ==∗ ∃ n,
-      ⌜σ !! l = Some (RSt n, v)⌝ ∗
+      ⌜σ !! l = Some (RSt n, v)⌝ ∧
       heap_ctx (<[l:=(RSt (S n), v)]> σ) ∗
-      ∀ σ2, heap_ctx σ2 ==∗ ∃ n2, ⌜σ2 !! l = Some (RSt (S n2), v)⌝ ∗
+      ∀ σ2, heap_ctx σ2 ==∗ ∃ n2, ⌜σ2 !! l = Some (RSt (S n2), v)⌝ ∧
         heap_ctx (<[l:=(RSt n2, v)]> σ2) ∗ l ↦{q} v.
   Proof.
     iDestruct 1 as (hF) "(Hσ & HhF & %)"; iIntros "Hmt".
@@ -536,9 +536,9 @@ Section heap.
 
   Lemma heap_write_na σ l v v' :
     heap_ctx σ -∗ l ↦ v ==∗
-      ⌜σ !! l = Some (RSt 0, v)⌝ ∗
+      ⌜σ !! l = Some (RSt 0, v)⌝ ∧
       heap_ctx (<[l:=(WSt, v)]> σ) ∗
-      ∀ σ2, heap_ctx σ2 ==∗ ⌜σ2 !! l = Some (WSt, v)⌝ ∗
+      ∀ σ2, heap_ctx σ2 ==∗ ⌜σ2 !! l = Some (WSt, v)⌝ ∧
         heap_ctx (<[l:=(RSt 0, v')]> σ2) ∗ l ↦ v'.
   Proof.
     iDestruct 1 as (hF) "(Hσ & HhF & %)"; iIntros "Hmt".

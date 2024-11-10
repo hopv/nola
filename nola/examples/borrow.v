@@ -57,12 +57,12 @@ Section borrow.
     [[{ β ⊑□ α ∗ q.[β] ∗
         pbor_tok (X:=X *'ₓ X) β () pπ η
           (λ _ pπ, ∃ l' (xπ : clair _ X) (ξ : prvar X),
-            ⌜pπ = λ π, (xπ π, π ξ)'⌝ ∗
+            ⌜pπ = λ π, (xπ π, π ξ)'⌝ ∧
             ▷ l ↦ #l' ∗ cif_pbor_tok α () xπ ξ (Φx l'))%cif }]]
       [borrow_wsat bupd ⟦⟧ᶜ]
       !#l
     [[{ l', RET #l'; ∃ (xπ : clair _ X) (ξ ξ' : prvar X),
-        ⌜pπ = λ π, (xπ π, π ξ)'⌝ ∗ ⟨π, π η = (π ξ', π ξ)'⟩ ∗ q.[β] ∗
+        ⌜pπ = λ π, (xπ π, π ξ)'⌝ ∧ ⟨π, π η = (π ξ', π ξ)'⟩ ∗ q.[β] ∗
         pbor_tok β () xπ ξ' (Φx l') }]].
   Proof.
     iIntros (Ψ) "(#⊑ & [β β'] & b) →Ψ".

@@ -422,7 +422,7 @@ Section borrow.
   Local Definition bor_wsat sm i α B : iProp Σ :=
     let '(Qx, b) := B in match b with
     | Clsd => sm Qx | Open q => q.[α]
-    | Rebor β => ⌜β ⊑ α⌝ ∗ ∃ i', ⌜i < i'⌝ ∗ lend_itok i' β Qx
+    | Rebor β => ⌜β ⊑ α⌝ ∧ ∃ i', ⌜i < i'⌝ ∧ lend_itok i' β Qx
     end.
 
   (** World satisfaction for a deposit, borrowed or retrieved *)
@@ -760,10 +760,10 @@ Section borrow.
   Qed.
   Local Lemma obor_toks_itoks {sm αqPxl β Dl} :
     ([∗ list] '(α, q, Px)' ∈ αqPxl, β ⊑□ α ∗ obor_tok α q Px) -∗
-    borrow_lwsat M sm Dl -∗ ∃ γ, ⌜γ ⊑ β⌝ ∗ β ⊑□ γ ∗
+    borrow_lwsat M sm Dl -∗ ∃ γ, ⌜γ ⊑ β⌝ ∧ β ⊑□ γ ∗
       borrow_lwsat M sm Dl ∗
       [∗ list] '(α, q, Px)' ∈ αqPxl, ∃ i α',
-        ⌜i < length Dl ∧ γ ⊑ α'⌝ ∗ obor_itok i α' α q Px.
+        ⌜i < length Dl ∧ γ ⊑ α'⌝ ∧ obor_itok i α' α q Px.
   Proof.
     elim: αqPxl=>/=.
     { iIntros "_ $". iExists β. iSplit; [done|]. iApply lft_sincl_refl. }

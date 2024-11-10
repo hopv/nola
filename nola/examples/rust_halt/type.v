@@ -48,7 +48,7 @@ Notation pty_size T := T.1 (only parsing).
 Notation pty_own T := T.2 (only parsing).
 Definition sty_pty {CON Σ X} (T : pty CON Σ X) : sty CON Σ X :=
   pair (pty_size T)
-    (λ _ _ xπ vl, ∃ x, ⌜∀ π, xπ π = x⌝ ∗ pty_own T x vl)%cif.
+    (λ _ _ xπ vl, ∃ x, ⌜∀ π, xπ π = x⌝ ∧ pty_own T x vl)%cif.
 Section ty_pty.
   Context `{!rust_haltGS CON Σ, !rust_haltC CON}.
   Definition ty_pty {X} (T : pty CON Σ X) : ty CON Σ X := ty_sty (sty_pty T).
@@ -247,11 +247,11 @@ Section ty_op.
     (** Take out prophecy tokens from ownership and sharing formulas *)
     ty_own_proph {t xπ vl q} :
       q.[κ] -∗ ⟦ ty_own T t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
-        ⌜proph_dep xπ ξl⌝ ∗ r:∗[ξl] ∗
+        ⌜proph_dep xπ ξl⌝ ∧ r:∗[ξl] ∗
         (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ] ∗ ⟦ ty_own T t d xπ vl ⟧ᶜ);
     ty_shr_proph {t l α xπ q} :
       q.[κ ⊓ α] -∗ ⟦ ty_shr T t d l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
-        ⌜proph_dep xπ ξl⌝ ∗ r:∗[ξl] ∗
+        ⌜proph_dep xπ ξl⌝ ∧ r:∗[ξl] ∗
         (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ ⊓ α] ∗ ⟦ ty_shr T t d l α xπ ⟧ᶜ);
     (** A borrow over the ownership formula can turn into the sharing formula *)
     ty_share {t l α xπ q} :
@@ -312,12 +312,12 @@ Section ty_op.
     Context `(!@TyOpLt X T κ d0).
     Lemma ty_own_proph_lt {t d xπ vl q} : d < d0 →
       q.[κ] -∗ ⟦ ty_own T t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
-        ⌜proph_dep xπ ξl⌝ ∗ r:∗[ξl] ∗
+        ⌜proph_dep xπ ξl⌝ ∧ r:∗[ξl] ∗
         (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ] ∗ ⟦ ty_own T t d xπ vl ⟧ᶜ).
     Proof. move=> ?. by apply ty_op_lt. Qed.
     Lemma ty_shr_proph_lt {t d l α xπ q} : d < d0 →
       q.[κ ⊓ α] -∗ ⟦ ty_shr T t d l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
-        ⌜proph_dep xπ ξl⌝ ∗ r:∗[ξl] ∗
+        ⌜proph_dep xπ ξl⌝ ∧ r:∗[ξl] ∗
         (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ ⊓ α] ∗ ⟦ ty_shr T t d l α xπ ⟧ᶜ).
     Proof. move=> ?. by apply ty_op_lt. Qed.
     Lemma ty_share_lt {t d l α xπ q} : d < d0 →
@@ -332,7 +332,7 @@ Section ty_op.
   Lemma sty_op_at `{!Sty (X:=X) T} {d} κ :
     (∀ t xπ vl q,
       q.[κ] -∗ ⟦ sty_own T t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
-        ⌜proph_dep xπ ξl⌝ ∗ r:∗[ξl] ∗
+        ⌜proph_dep xπ ξl⌝ ∧ r:∗[ξl] ∗
         (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ] ∗ ⟦ sty_own T t d xπ vl ⟧ᶜ)) →
     TyOpAt (ty_sty T) κ d.
   Proof.
@@ -572,7 +572,7 @@ Section subty.
   (** [subty]: Subtyping *)
   Definition subty_def δ {X Y} (T : ty CON Σ X) (U : ty CON Σ Y) (f : X → Y)
     : iProp Σ :=
-    (* Size equality *) ⌜ty_size T = ty_size U⌝ ∗
+    (* Size equality *) ⌜ty_size T = ty_size U⌝ ∧
     (* Ownership formula conversion *) □ (∀ t d xπ vl,
       ⟦ ty_own T t d xπ vl ⟧ᶜ(δ) -∗ ⟦ ty_own U t d (λ π, f (xπ π)) vl ⟧ᶜ(δ)) ∧
     (* Sharing formula conversion *) □ (∀ t d l α xπ,

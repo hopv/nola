@@ -27,7 +27,7 @@ Section inv.
 
   (** [inv_tok]: Invariant token *)
   Local Definition inv_tok_def (N : namespace) (Px : FML $oi Σ) : iProp Σ :=
-    ∃ i, ⌜i ∈ (↑N:coPset)⌝ ∗ sinv_tok i Px.
+    ∃ i, ⌜i ∈ (↑N:coPset)⌝ ∧ sinv_tok i Px.
   Local Definition inv_tok_aux : seal inv_tok_def. Proof. by eexists. Qed.
   Definition inv_tok := inv_tok_aux.(unseal).
   Local Lemma inv_tok_unseal : inv_tok = inv_tok_def.
@@ -82,7 +82,7 @@ Section inv.
 
   (** Allocate [ownD] *)
   Lemma alloc_ownD (I : gset positive) N :
-    ⊢ |==> ∃ i, ⌜i ∉ I⌝ ∗ ⌜i ∈ (↑N:coPset)⌝ ∗ ownD {[i]}.
+    ⊢ |==> ∃ i, ⌜i ∉ I⌝ ∧ ⌜i ∈ (↑N:coPset)⌝ ∧ ownD {[i]}.
   Proof.
     iMod (own_unit (gset_disjUR positive) disabled_name) as "D".
     iMod (own_updateP with "[$]") as (x) "[X D]".

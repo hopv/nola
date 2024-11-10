@@ -100,7 +100,7 @@ Notation lft_live α q := ([∗ mset] a ∈ α, alft_live a q)%I.
 Local Definition alft_dead `{!lftG Σ} (a : alft) : iProp Σ := own a (Cinr ()).
 (** Dead lifetime token *)
 Local Definition lft_dead_def `{!lftG Σ} (α : lft) : iProp Σ :=
-  ∃ a, ⌜a ∈ α⌝ ∗ alft_dead a.
+  ∃ a, ⌜a ∈ α⌝ ∧ alft_dead a.
 Local Lemma lft_dead_aux : seal (@lft_dead_def). Proof. by eexists. Qed.
 Definition lft_dead `{!lftG Σ} := lft_dead_aux.(unseal) _ _.
 Local Lemma lft_dead_unseal `{!lftG Σ} : @lft_dead = @lft_dead_def.
@@ -183,7 +183,7 @@ Section lft.
   Qed.
 
   (** Allcate a fresh lifetime *)
-  Lemma lft_alloc : ⊢ |==> ∃ α, ⌜α ≠ ⊤⌝ ∗ 1.[α].
+  Lemma lft_alloc : ⊢ |==> ∃ α, ⌜α ≠ ⊤⌝ ∧ 1.[α].
   Proof.
     iMod (own_alloc (Cinl (DfracOwn 1))) as (a) "a"; [done|]. iModIntro.
     iExists {[+a+]}. rewrite big_sepMS_singleton. by iFrame "a".

@@ -365,7 +365,7 @@ Qed.
 Lemma wp_resolve_proph W s E (p : proph_id) (pvs : list (val * val)) v :
   {{{ proph p pvs }}}[W]
     ResolveProph (Val $ LitV $ LitProphecy p) (Val v) @ s; E
-  {{{ pvs', RET (LitV LitUnit); ⌜pvs = (LitV LitUnit, v)::pvs'⌝ ∗ proph p pvs' }}}.
+  {{{ pvs', RET (LitV LitUnit); ⌜pvs = (LitV LitUnit, v)::pvs'⌝ ∧ proph p pvs' }}}.
 Proof.
   iIntros (Φ) "Hp HΦ". iApply (wp_resolve with "Hp"); first done.
   iApply @lifting.wp_pure_step_later; first done.
@@ -376,7 +376,7 @@ Lemma wp_resolve_cmpxchg_suc W s E l (p : proph_id) (pvs : list (val * val)) v1 
   vals_compare_safe v1 v1 →
   {{{ proph p pvs ∗ ▷ l ↦ v1 }}}[W]
     Resolve (CmpXchg #l v1 v2) #p v @ s; E
-  {{{ RET (v1, #true) ; ∃ pvs', ⌜pvs = ((v1, #true)%V, v)::pvs'⌝ ∗ proph p pvs' ∗ l ↦ v2 }}}.
+  {{{ RET (v1, #true) ; ∃ pvs', ⌜pvs = ((v1, #true)%V, v)::pvs'⌝ ∧ proph p pvs' ∗ l ↦ v2 }}}.
 Proof.
   iIntros (Hcmp Φ) "[Hp Hl] HΦ".
   iApply (wp_resolve with "Hp"); first done.
@@ -389,7 +389,7 @@ Lemma wp_resolve_cmpxchg_fail W s E l (p : proph_id) (pvs : list (val * val)) dq
   v' ≠ v1 → vals_compare_safe v' v1 →
   {{{ proph p pvs ∗ ▷ l ↦{dq} v' }}}[W]
     Resolve (CmpXchg #l v1 v2) #p v @ s; E
-  {{{ RET (v', #false) ; ∃ pvs', ⌜pvs = ((v', #false)%V, v)::pvs'⌝ ∗ proph p pvs' ∗ l ↦{dq} v' }}}.
+  {{{ RET (v', #false) ; ∃ pvs', ⌜pvs = ((v', #false)%V, v)::pvs'⌝ ∧ proph p pvs' ∗ l ↦{dq} v' }}}.
 Proof.
   iIntros (NEq Hcmp Φ) "[Hp Hl] HΦ".
   iApply (wp_resolve with "Hp"); first done.

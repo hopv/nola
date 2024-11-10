@@ -55,7 +55,7 @@ Section na_inv.
 
   (** Token for a non-atomic invariant *)
   Local Definition na_inv_tok_def p N Px : iProp Σ :=
-    ∃ i, ⌜i ∈ (↑N:coPset)⌝ ∗ inv_tok N (cif_na_body p i Px).
+    ∃ i, ⌜i ∈ (↑N:coPset)⌝ ∧ inv_tok N (cif_na_body p i Px).
   Local Lemma na_inv_tok_aux : seal na_inv_tok_def. Proof. by eexists. Qed.
   Definition na_inv_tok := na_inv_tok_aux.(unseal).
   Local Lemma na_inv_tok_unseal : na_inv_tok = na_inv_tok_def.

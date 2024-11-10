@@ -13,16 +13,16 @@ Section ty_sum.
   Definition ty'_sum_def {X Y} (T : ty CON Σ X) (U : ty CON Σ Y)
     : ty' CON Σ (X +ₓ Y) :=
     let sz := ty_size T `max` ty_size U in
-    (λ t d sπ vl, ∃ b wl wl', ⌜vl = #b :: wl ++ wl'⌝ ∗ if negb b
-      then ∃ xπ, ⌜∀ π, sπ π = inl (xπ π)⌝ ∗
-            ⌜length wl' = sz - ty_size T⌝ ∗ ty_own T t d xπ wl
-      else ∃ yπ, ⌜∀ π, sπ π = inr (yπ π)⌝ ∗
-            ⌜length wl' = sz - ty_size U⌝ ∗ ty_own U t d yπ wl,
+    (λ t d sπ vl, ∃ b wl wl', ⌜vl = #b :: wl ++ wl'⌝ ∧ if negb b
+      then ∃ xπ, ⌜∀ π, sπ π = inl (xπ π)⌝ ∧
+            ⌜length wl' = sz - ty_size T⌝ ∧ ty_own T t d xπ wl
+      else ∃ yπ, ⌜∀ π, sπ π = inr (yπ π)⌝ ∧
+            ⌜length wl' = sz - ty_size U⌝ ∧ ty_own U t d yπ wl,
       λ t d l α sπ, ∃ b, ▷ l ↦ˢ[α] #b ∗ if negb b
-        then ∃ xπ, ⌜∀ π, sπ π = inl (xπ π)⌝ ∗ ty_shr T t d (l +ₗ 1) α xπ ∗
-          ∃ wl, ⌜length wl = sz - ty_size T⌝ ∗ ▷ (l +ₗ 1 +ₗ ty_size T) ↦∗ˢ[α] wl
-        else ∃ yπ, ⌜∀ π, sπ π = inr (yπ π)⌝ ∗ ty_shr U t d (l +ₗ 1) α yπ ∗
-          ∃ wl, ⌜length wl = sz - ty_size U⌝ ∗ ▷ (l +ₗ 1 +ₗ ty_size U) ↦∗ˢ[α] wl
+        then ∃ xπ, ⌜∀ π, sπ π = inl (xπ π)⌝ ∧ ty_shr T t d (l +ₗ 1) α xπ ∗
+          ∃ wl, ⌜length wl = sz - ty_size T⌝ ∧ ▷ (l +ₗ 1 +ₗ ty_size T) ↦∗ˢ[α] wl
+        else ∃ yπ, ⌜∀ π, sπ π = inr (yπ π)⌝ ∧ ty_shr U t d (l +ₗ 1) α yπ ∗
+          ∃ wl, ⌜length wl = sz - ty_size U⌝ ∧ ▷ (l +ₗ 1 +ₗ ty_size U) ↦∗ˢ[α] wl
     )%cif.
   Lemma ty'_sum_aux : seal (@ty'_sum_def). Proof. by eexists. Qed.
   Definition ty'_sum {X Y} := ty'_sum_aux.(unseal) X Y.

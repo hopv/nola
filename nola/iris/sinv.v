@@ -104,7 +104,7 @@ Section sinv.
 
   (** Lemma for [sinv_tok_acc] *)
   Local Lemma sinv_auth_tok_lookup {M i Px} :
-    sinv_auth_tok M -∗ sinv_tok i Px -∗ ∃ Px', ⌜M !! i = Some Px'⌝ ∗ Px ≡ Px'.
+    sinv_auth_tok M -∗ sinv_tok i Px -∗ ∃ Px', ⌜M !! i = Some Px'⌝ ∧ Px ≡ Px'.
   Proof.
     rewrite sinv_tok_unseal. iIntros "● i".
     iDestruct (own_valid_2 with "● i") as "✓".
