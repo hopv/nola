@@ -52,9 +52,7 @@ Section ty_anydep.
     rewrite ty_anydep_unseal=> ?. split=>/= >.
     - iIntros "κ [% T]". iMod (ty_own_proph with "κ T") as (??) "($ & $ & →T)".
       iIntros "!> ξl". by iMod ("→T" with "ξl") as "[$$]".
-    - iIntros "κα [% T]".
-      iMod (ty_shr_proph with "κα T") as (??) "($ & $ & →T)". iIntros "!> ξl".
-      by iMod ("→T" with "ξl") as "[$$]".
+    - iIntros "κα [% T]". iApply (ty_shr_proph with "κα T").
     - iIntros "[κ α] b".
       iMod (bord_open (M:=borrowM) with "α b") as "/=[o (% & ↦ & % & T)]".
       iMod (obord_subdiv (M:=borrowM) [cif_pointsto_ty _ _ _ _ _]

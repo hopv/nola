@@ -60,14 +60,12 @@ Section ty_shrref.
     TyOpAt (ty_shrref α T) κ d.
   Proof.
     apply: sty_op_at=> >. rewrite sty_shrref_unseal /=. iIntros "κ".
-    iDestruct 1 as (??? -> ??) "#T". rewrite sem_cif_in /=.
-    iMod (stored_acc with "T") as "{T}T".
+    iDestruct 1 as (??? -> ??) "T". rewrite sem_cif_in /=.
+    iMod (stored_acc with "T") as "T".
     iDestruct (lft_incl'_live_acc (α:=κ ⊓ α) with "κ") as (?) "[κα →κ]".
-    iMod (ty_shr_proph_lt with "κα T") as (???) "[$ →T]"=>//. iModIntro.
+    iMod (ty_shr_proph_lt with "κα T") as (???) "[$ →κα]"=>//. iModIntro.
     iSplit. { iPureIntro. by eapply proph_dep_proper. }
-    iIntros "ξl". iMod ("→T" with "ξl") as "[κα T]".
-    iDestruct ("→κ" with "κα") as "$". iMod (store_alloc_pers with "T") as "T".
-    iModIntro. iExists _, _, _. rewrite sem_cif_in /=. by iFrame.
+    iIntros "ξl". iMod ("→κα" with "ξl") as "κα". iModIntro. by iApply "→κ".
   Qed.
 
   (** [ty_shrref] is [Send] when the body type is [Sync] *)

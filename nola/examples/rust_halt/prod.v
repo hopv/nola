@@ -74,14 +74,15 @@ Section ty_prod.
       iIntros "[ξl ηl]". iMod ("→T" with "[$ξl $ξl']") as "[$ $]".
       by iMod ("→U" with "[$ηl $ηl']") as "[$ $]".
     - iIntros (??? xπ q) "[[κ κ'] [α α']] [T U]".
-      iMod (ty_shr_proph (T:=T) with "[$κ $α //] T") as (ξl r ?) "[ξl →T]".
-      iMod (ty_shr_proph (T:=U) with "[$κ' $α' //] U") as (ηl r' ?) "[ηl →U]".
-      iModIntro. iExists (ξl ++ ηl). case: (Qp.lower_bound r r')=> ?[?[?[->->]]].
-      iDestruct "ξl" as "[$ ξl']". iDestruct "ηl" as "[$ ηl']". iSplit.
+      iMod (ty_shr_proph (T:=T) with "[$κ $α //] T") as (ξl r ?) "[ξl →κα]".
+      iMod (ty_shr_proph (T:=U) with "[$κ' $α' //] U") as (ηl r' ?) "[ηl →κα']".
+      iModIntro. iExists (ξl ++ ηl).
+      case: (Qp.lower_bound r r')=> ?[?[?[->->]]]. iDestruct "ξl" as "[$ ξl']".
+      iDestruct "ηl" as "[$ ηl']". iSplit.
       { iPureIntro. have -> : xπ = λ π, ((fst' ∘ xπ) π, (snd' ∘ xπ) π)' by done.
         by apply proph_dep_f2. }
-      iIntros "[ξl ηl]". iMod ("→T" with "[$ξl $ξl']") as "[$ $]".
-      by iMod ("→U" with "[$ηl $ηl']") as "[$ $]".
+      iIntros "[ξl ηl]". iMod ("→κα" with "[$ξl $ξl']") as "$".
+      iApply ("→κα'" with "[$ηl $ηl']").
     - iIntros (?????) "[κ α] b".
       iMod (bord_open (M:=borrowM) with "α b")
         as "/=[o (% & ↦ & % & % & -> & T & U)]".

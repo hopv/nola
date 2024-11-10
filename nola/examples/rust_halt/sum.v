@@ -96,11 +96,8 @@ Section ty_sum.
       case b=>/=; iDestruct "big" as (? eq) "(S & % & % & ↦r)";
         [iMod (ty_shr_proph with "κα S") as "big"|
           iMod (ty_shr_proph with "κα S") as "big"];
-        iDestruct "big" as (???) "[$ →S]"; iModIntro;
-        (iSplit; [iPureIntro; eapply proph_dep_proper;
-          [exact: eq|done|exact: proph_dep_f]|]);
-        iIntros "ξl"; iMod ("→S" with "ξl") as "[$ S]"; iModIntro;
-        iFrame "↦"=>/=; by iFrame.
+        iDestruct "big" as (???) "[$$]"; iPureIntro;
+        (eapply proph_dep_proper; [exact: eq|done|exact: proph_dep_f]).
     - iIntros (?????) "[κ α] b".
       iMod (bord_open (M:=borrowM) with "α b") as "/=[o (% & ↦ & %b & big)]".
       case b=>/=; iDestruct "big" as (?? -> ? eq ?) "S";

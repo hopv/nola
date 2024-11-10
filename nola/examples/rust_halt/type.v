@@ -251,8 +251,8 @@ Section ty_op.
         (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ] ∗ ⟦ ty_own T t d xπ vl ⟧ᶜ);
     ty_shr_proph {t l α xπ q} :
       q.[κ ⊓ α] -∗ ⟦ ty_shr T t d l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
-        ⌜proph_dep xπ ξl⌝ ∧ r:∗[ξl] ∗
-        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ ⊓ α] ∗ ⟦ ty_shr T t d l α xπ ⟧ᶜ);
+        ⌜proph_dep xπ ξl⌝ ∧
+        r:∗[ξl] ∗ (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ ⊓ α]);
     (** A borrow over the ownership formula can turn into the sharing formula *)
     ty_share {t l α xπ q} :
       q.[κ ⊓ α] -∗ bord α (cif_pointsto_ty T l t d xπ)
@@ -272,9 +272,8 @@ Section ty_op.
       by iApply "→κ'".
     - move=> ?? α ??. setoid_rewrite <-(eqvS _ _ _ _ _). iIntros "κ'α T".
       iDestruct (lft_incl'_live_acc (α:=κ ⊓ α) with "κ'α") as (?) "[κα →κ'α]".
-      iMod (ty_shr_proph with "κα T") as (??) "($ & $ & →T)". iModIntro.
-      iIntros "ξl". iMod ("→T" with "ξl") as "[α $]". iModIntro.
-      by iApply "→κ'α".
+      iMod (ty_shr_proph with "κα T") as (??) "($ & $ & →κα)". iModIntro.
+      iIntros "ξl". iMod ("→κα" with "ξl") as "κα". iModIntro. by iApply "→κ'α".
     - move=> ?? α ??. rewrite -(eqvS _ _ _ _ _). iIntros "κ'α b".
       iDestruct (lft_incl'_live_acc (α:=κ ⊓ α) with "κ'α") as (?) "[κα →κ'α]".
       iMod (ty_share with "κα [b]") as "[κα $]"; last first.
@@ -317,8 +316,8 @@ Section ty_op.
     Proof. move=> ?. by apply ty_op_lt. Qed.
     Lemma ty_shr_proph_lt {t d l α xπ q} : d < d0 →
       q.[κ ⊓ α] -∗ ⟦ ty_shr T t d l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
-        ⌜proph_dep xπ ξl⌝ ∧ r:∗[ξl] ∗
-        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ ⊓ α] ∗ ⟦ ty_shr T t d l α xπ ⟧ᶜ).
+        ⌜proph_dep xπ ξl⌝ ∧
+        r:∗[ξl] ∗ (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ ⊓ α]).
     Proof. move=> ?. by apply ty_op_lt. Qed.
     Lemma ty_share_lt {t d l α xπ q} : d < d0 →
       q.[κ ⊓ α] -∗ bord α (∃ vl, ▷ l ↦∗ vl ∗ ty_own T t d xπ vl)%cif
@@ -332,15 +331,14 @@ Section ty_op.
   Lemma sty_op_at `{!Sty (X:=X) T} {d} κ :
     (∀ t xπ vl q,
       q.[κ] -∗ ⟦ sty_own T t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
-        ⌜proph_dep xπ ξl⌝ ∧ r:∗[ξl] ∗
-        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ] ∗ ⟦ sty_own T t d xπ vl ⟧ᶜ)) →
+        ⌜proph_dep xπ ξl⌝ ∧ r:∗[ξl] ∗ (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ])) →
     TyOpAt (ty_sty T) κ d.
   Proof.
-    move=> sty_proph. rewrite ty_sty_unseal.
-    split=>/= >; [exact: sty_proph|..].
-    - iIntros "[κ $] (%vl & ↦ & T)".
+    move=> sty_proph. rewrite ty_sty_unseal. split=>/= >.
+    - iIntros "κ #T". iFrame "T". iApply (sty_proph with "κ T").
+    - iIntros "[κ $] (%vl & _ & T)".
       iMod (sty_proph with "κ T") as (??) "($ & $ & cl)". iIntros "!> ξl".
-      iFrame "↦". by iApply "cl".
+      by iApply "cl".
     - iIntros "[$ α] b".
       iMod (bord_open (M:=borrowM) with "α b") as "/=[o (% & >↦ & #T)]".
       iFrame "T".
@@ -355,8 +353,7 @@ Section ty_op.
     TyOpAt (ty_pty T) κ d.
   Proof.
     apply sty_op_at=>/= ????. iIntros "$ (% & % & ?) !>". iExists [], 1%Qp.
-    iSplit. { iPureIntro. by apply: proph_dep_const. }
-    iSplit=>//. iIntros "_ !>". iExists _. by iSplit.
+    iSplit; [iPureIntro; exact: proph_dep_const|]. iSplit=>//. by iIntros.
   Qed.
 End ty_op.
 Hint Mode TyOpAt - - - - - - - - ! - - : typeclass_instances.

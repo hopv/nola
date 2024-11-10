@@ -60,13 +60,11 @@ Section ty_box.
       iIntros "ξl". iMod ("→T" with "ξl") as "[$ T]".
       iMod (store_alloc with "T") as "T". iModIntro. iFrame "↦ †".
       iExists _, _. do 3 iSplit=>//. by rewrite sem_cif_in.
-    - iIntros "κα". iDestruct 1 as (???? eq) "[↦ #T]". rewrite sem_cif_in /=.
-      iMod (stored_acc with "T") as "{T}T".
-      iMod (ty_shr_proph_lt with "κα T") as (???) "[$ →T]"=>//. iModIntro.
+    - iIntros "κα". iDestruct 1 as (???? eq) "[↦ T]". rewrite sem_cif_in /=.
+      iMod (stored_acc with "T") as "T".
+      iMod (ty_shr_proph_lt with "κα T") as (???) "[$ →κα]"=>//. iModIntro.
       iSplit. { iPureIntro. by eapply proph_dep_proper. }
-      iIntros "ξl". iMod ("→T" with "ξl") as "[$ T]".
-      iMod (store_alloc_pers with "T") as "T". iModIntro. iFrame "↦".
-      iExists _, _. do 2 iSplit=>//. by rewrite sem_cif_in.
+      iIntros "ξl". iApply ("→κα" with "ξl").
     - iIntros "[κ α] b".
       iMod (bord_open (M:=borrowM) with "α b") as "/=[o (% & ↦ & big)]".
       iDestruct "big" as (???? -> ? eq) "(↦' & † & T)". rewrite sem_cif_in /=.
