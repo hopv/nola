@@ -93,8 +93,8 @@ Section read_write.
         (λ post zl, let '(x, y, _)' := get' zl in
           postr (get x) → post (set x y, getr zl)')%type.
   Proof.
-    rewrite type_unseal. iIntros (U'1 ????) "!> κ $ pre". rewrite tcx_extract /=.
-    iIntros "[(T & U & _) Γr]".
+    rewrite type_unseal. iIntros (U'1 ????) "!> κ $ pre".
+    rewrite tcx_extract /=. iIntros "[(T & U & _) Γr]".
     iMod (write with "κ T") as (? wl ->) "(↦ & U' & →T')".
     iDestruct (ty_own_size with "U'") as %lwl. rewrite U'1 in lwl.
     destruct wl as [|?[|??]]=>//. rewrite heap_pointsto_vec_singleton. wp_write.
