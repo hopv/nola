@@ -146,7 +146,7 @@ Section citg.
   (** Equivalence for [citg] *)
   Definition citg_equiv_def :=
     λ t t', ∀ n, citg_dist n t t' (** Trick to avoid UIP *).
-  Lemma citg_equiv_aux : seal citg_equiv_def. Proof. by eexists _. Qed.
+  Lemma citg_equiv_aux : seal citg_equiv_def. Proof. by eexists. Qed.
   Local Instance citg_equiv : Equiv (citg I C D CIT) :=
     citg_equiv_aux.(unseal).
   Lemma citg_equiv_unseal : (≡@{citg I C D CIT}) = citg_equiv_def.
@@ -628,7 +628,7 @@ Section of_cit.
   Definition of_cit_def (t : cit I C D) : cita I C D :=
     Cita (citg_map (λ _, id) (λ _, ()) t)
       (λ k, citg_map (λ _, id) (λ ta, cita_seq ta k) t) (wf_of_cit t).
-  Lemma of_cit_aux : seal of_cit_def. Proof. by eexists _. Qed.
+  Lemma of_cit_aux : seal of_cit_def. Proof. by eexists. Qed.
   Definition of_cit := of_cit_aux.(unseal).
   Lemma of_cit_unseal : of_cit = of_cit_def. Proof. exact: seal_eq. Qed.
 
@@ -644,7 +644,7 @@ Section of_cit.
       t.(citg_data).
   Definition to_cit_def (ta : cita I C D) : cit I C D :=
     to_cit' ta.(cita_head) ta.(cita_tail) ta.(cita_wf).
-  Lemma to_cit_aux : seal to_cit_def. Proof. by eexists _. Qed.
+  Lemma to_cit_aux : seal to_cit_def. Proof. by eexists. Qed.
   Definition to_cit := to_cit_aux.(unseal).
   Lemma to_cit_unseal : to_cit = to_cit_def. Proof. exact: seal_eq. Qed.
 

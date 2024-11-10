@@ -12,7 +12,7 @@ Section ty_mod.
   Definition ty'_mod_def {X Y} (f : Y → X) (T : ty CON Σ X) : ty' CON Σ Y :=
     (λ t d yπ vl, ty_own T t d (f ∘ yπ) vl,
       λ t d l α yπ, ty_shr T t d l α (f ∘ yπ)).
-  Lemma ty'_mod_aux : seal (@ty'_mod_def). Proof. by eexists _. Qed.
+  Lemma ty'_mod_aux : seal (@ty'_mod_def). Proof. by eexists. Qed.
   Definition ty'_mod {X Y} := ty'_mod_aux.(unseal) X Y.
   Lemma ty'_mod_unseal : @ty'_mod = @ty'_mod_def.
   Proof. by exact: seal_eq. Qed.

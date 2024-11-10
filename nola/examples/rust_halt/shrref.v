@@ -14,7 +14,7 @@ Section ty_shrref.
     λ t d xπ vl,
       (∃ l d' xπ', ⌜vl = [ #l]⌝ ∗ ⌜d' < d⌝ ∗ ⌜∀ π, xπ' π = xπ π⌝ ∗
         □ cif_store (ty_shr T t d' l α xπ'))%cif.
-  Lemma sty'_shrref_aux : seal (@sty'_shrref_def). Proof. by eexists _. Qed.
+  Lemma sty'_shrref_aux : seal (@sty'_shrref_def). Proof. by eexists. Qed.
   Definition sty'_shrref {X} := sty'_shrref_aux.(unseal) X.
   Lemma sty'_shrref_unseal : @sty'_shrref = @sty'_shrref_def.
   Proof. exact: seal_eq. Qed.

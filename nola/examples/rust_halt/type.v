@@ -31,7 +31,7 @@ Section ty_sty.
   Context `{!rust_haltGS CON Σ, !rust_haltC CON}.
   Definition ty'_sty_def {X} (T : sty CON Σ X) : ty' CON Σ X :=
     (sty_own T, λ t d l α xπ, ∃ vl, l ↦∗ˢ[α] vl ∗ sty_own T t d xπ vl)%cif.
-  Lemma ty'_sty_aux : seal (@ty'_sty_def). Proof. by eexists _. Qed.
+  Lemma ty'_sty_aux : seal (@ty'_sty_def). Proof. by eexists. Qed.
   Definition ty'_sty {X} := ty'_sty_aux.(unseal) X.
   Lemma ty'_sty_unseal : @ty'_sty = @ty'_sty_def. Proof. exact: seal_eq. Qed.
   Definition ty_sty {X} (T : sty CON Σ X) : ty CON Σ X :=
@@ -577,7 +577,7 @@ Section subty.
       ⟦ ty_own T t d xπ vl ⟧ᶜ(δ) -∗ ⟦ ty_own U t d (λ π, f (xπ π)) vl ⟧ᶜ(δ)) ∧
     (* Sharing formula conversion *) □ (∀ t d l α xπ,
       ⟦ ty_shr T t d l α xπ ⟧ᶜ(δ) -∗ ⟦ ty_shr U t d l α (λ π, f (xπ π)) ⟧ᶜ(δ)).
-  Lemma subty_aux : @subty_def.(seal). Proof. by eexists _. Qed.
+  Lemma subty_aux : @subty_def.(seal). Proof. by eexists. Qed.
   Definition subty δ {X Y} := subty_aux.(unseal) δ X Y.
   Lemma subty_unseal : @subty = @subty_def. Proof. exact: seal_eq. Qed.
 

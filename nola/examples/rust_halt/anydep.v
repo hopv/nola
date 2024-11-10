@@ -12,7 +12,7 @@ Section ty_anydep.
   Definition ty'_anydep_def {X} (T : ty CON Σ X) : ty' CON Σ X :=
     (λ t d xπ vl, ∃ d', ty_own T t d' xπ vl,
       λ t d l α xπ, ∃ d', ty_shr T t d' l α xπ)%cif.
-  Lemma ty'_anydep_aux : seal (@ty'_anydep_def). Proof. by eexists _. Qed.
+  Lemma ty'_anydep_aux : seal (@ty'_anydep_def). Proof. by eexists. Qed.
   Definition ty'_anydep {X} := ty'_anydep_aux.(unseal) X.
   Lemma ty'_anydep_unseal : @ty'_anydep = @ty'_anydep_def.
   Proof. by exact: seal_eq. Qed.

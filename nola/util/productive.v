@@ -227,7 +227,7 @@ Section profix.
   (** [profix]: Fixed point over a complete [prost] *)
   Definition profix_def (f : PR → PR) `{!Productive f} : PR :=
     prolimit (profix_chain f).
-  Lemma profix_aux : seal (@profix_def). Proof. by eexists _. Qed.
+  Lemma profix_aux : seal (@profix_def). Proof. by eexists. Qed.
   Definition profix (f : PR → PR) `{!Productive f} : PR :=
     profix_aux.(unseal) f _.
   Lemma profix_unseal : @profix = @profix_def. Proof. exact: seal_eq. Qed.

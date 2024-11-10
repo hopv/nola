@@ -144,7 +144,7 @@ Section psg.
 
   (** ** [psg]: Pseudo-gfp *)
   Definition psg_def f : OT := [⊓] o :: Psgoid f o, o.
-  Lemma psg_aux : seal psg_def. Proof. by eexists _. Qed.
+  Lemma psg_aux : seal psg_def. Proof. by eexists. Qed.
   Definition psg := psg_aux.(unseal).
   Lemma psg_unseal : psg = psg_def. Proof. exact: seal_eq. Qed.
 

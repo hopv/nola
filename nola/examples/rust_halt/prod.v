@@ -13,7 +13,7 @@ Section ty_prod.
       ty_own T t d (fst' ∘ xyπ) wl ∗ ty_own U t d (snd' ∘ xyπ) wl',
       λ t d l α xyπ, ty_shr T t d l α (fst' ∘ xyπ) ∗
         ty_shr U t d (l +ₗ ty_size T) α (snd' ∘ xyπ))%cif.
-  Lemma ty'_prod_aux : seal (@ty'_prod_def). Proof. by eexists _. Qed.
+  Lemma ty'_prod_aux : seal (@ty'_prod_def). Proof. by eexists. Qed.
   Definition ty'_prod {X Y} := ty'_prod_aux.(unseal) X Y.
   Lemma ty'_prod_unseal : @ty'_prod = @ty'_prod_def. Proof. exact: seal_eq. Qed.
   Definition ty_prod {X Y} (T : ty CON Σ X) (U : ty CON Σ Y)

@@ -370,7 +370,7 @@ Definition cif_in_def CON' `{!inC CON' CON} {Σ} (s : CON')
   : cif CON Σ :=
   cif_con (in_c_sel s) (λ i, Φx (in_c_idom i)) (λ c, Ψx (in_c_cdom c))
     (in_c_data d).
-Lemma cif_in_aux : seal (@cif_in_def). Proof. by eexists _. Qed.
+Lemma cif_in_aux : seal (@cif_in_def). Proof. by eexists. Qed.
 Definition cif_in CON' `{!inC CON' CON} {Σ} (s : CON')
   (Φx : CON'.(cifc_idom) s -pr> cif CON Σ)
   (Ψx : CON'.(cifc_cdom) s -pr> cif CON Σ) (d : CON'.(cifc_data) s $oi Σ)
