@@ -17,8 +17,7 @@ Section ty_prod.
   Definition ty'_prod {X Y} := ty'_prod_aux.(unseal) X Y.
   Lemma ty'_prod_unseal : @ty'_prod = @ty'_prod_def. Proof. exact: seal_eq. Qed.
   Definition ty_prod {X Y} (T : ty CON Σ X) (U : ty CON Σ Y)
-    : ty CON Σ (X *'ₓ Y) :=
-    (ty_size T + ty_size U, ty'_prod T U).
+    : ty CON Σ (X *'ₓ Y) := (ty_size T + ty_size U, ty'_prod T U).
   Lemma ty_prod_unseal :
     @ty_prod = λ _ _ T U, (ty_size T + ty_size U, ty'_prod_def T U).
   Proof. by rewrite /ty_prod ty'_prod_unseal. Qed.
