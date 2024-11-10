@@ -276,10 +276,10 @@ Section pborrow_deriv.
     (∀ a' yπ', [†β] -∗ pbord α a' yπ' η Ψx -∗ M
       ⟦ Φx a' (λ π, fπ π (yπ' π)) ⟧ᶜ) -∗
       modw M (borrow_wsat M ⟦⟧ᶜ) (1:[η] ∗ ⟦ Ψx a yπ ⟧ᶜ ∗
-        ∀ ζl s, ⌜∀ y, proph_dep (λ π, fπ π y) ζl⌝ → s:∗[ζl]
-          ==∗ ∃ η' : prvar _, ⟨π, π ξ = fπ π (π η')⟩ ∗ s:∗[ζl] ∗
-            (1:[η] -∗ ⟦ Ψx a yπ ⟧ᶜ =[borrow_wsat M ⟦⟧ᶜ]=∗
-              q.[β] ∗ r.[α] ∗ pbord β a yπ η' Ψx)).
+        ∀ ζl s, ⌜∀ y, proph_dep (λ π, fπ π y) ζl⌝ → s:∗[ζl] ==∗ ∃ η' : prvar _,
+          ⟨π, π ξ = fπ π (π η')⟩ ∗ s:∗[ζl] ∗
+          (1:[η] -∗ ⟦ Ψx a yπ ⟧ᶜ =[borrow_wsat M ⟦⟧ᶜ]=∗
+            q.[β] ∗ r.[α] ∗ pbord β a yπ η' Ψx)).
   Proof.
     rewrite pobor_unseal pbor_unseal. iIntros (?) "⊑ α".
     iIntros "(%Φx' & #ΦΦ' & #? & o) (%Ψx' & #ΨΨ' & #Ψ'Ψ & b) →Φx".
