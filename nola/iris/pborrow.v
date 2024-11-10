@@ -321,6 +321,31 @@ Section pborrow.
     iApply lft_sincl_refl.
   Qed.
 
+  (** Reborrow a prophetic borrower getting a non-prophetic borrower *)
+  Lemma pobor_tok_soft_reborrow `{!ModExcept0 M} {δ X α q ξ Φx} β a xπ :
+    β ⊑□ α -∗ @pobor_tok X α q ξ Φx -∗ ⟦ Φx a xπ ⟧ᶜ(δ) =[borrow_wsat M ⟦⟧ᶜ(δ)]=∗
+      q.[α] ∗ ([†β] -∗ pbor_tok α a xπ ξ Φx) ∗
+        bor_tok β (▷ 1:[ξ])%cif ∗ bor_tok β (Φx a xπ).
+  Proof.
+    rewrite pobor_tok_unseal pbor_tok_unseal.
+    iIntros "⊑ (% & (% & % & vo & pc) & o) Φx".
+    iMod (vo_pc_update with "vo pc") as "[vo pc]".
+    iDestruct (vo_pc_proph with "vo pc") as "(vo & vo' & ξ)".
+    iMod (obor_tok_subdiv (FML:=cifOF _) (M:=M) [▷ _; _]%cif
+      with "⊑ o [ξ Φx] [vo']") as "($ & →b & $ & $ & _)"=>/=. { iFrame. }
+    { iIntros "_ /=(>ξ & $ & _) !>". rewrite sem_cif_in /=.
+      iApply (vo_proph_pc with "vo' ξ"). }
+    iIntros "!> †". iRight. by iDestruct ("→b" with "†") as "$".
+  Qed.
+  Lemma pbor_tok_soft_reborrow `{!ModExcept0 M} {δ X α q ξ Φx a xπ} β :
+    β ⊑□ α -∗ q.[α] -∗ @pbor_tok X α a xπ ξ Φx -∗ modw M (borrow_wsat M ⟦⟧ᶜ(δ))
+      (q.[α] ∗ ([†β] -∗ pbor_tok α a xπ ξ Φx) ∗
+        bor_tok β (▷ 1:[ξ])%cif ∗ bor_tok β (Φx a xπ)).
+  Proof.
+    iIntros "⊑ α b". iMod (pbor_tok_open with "α b") as "[o Φx]".
+    by iMod (pobor_tok_soft_reborrow with "⊑ o Φx") as "$".
+  Qed.
+
   (** Lemma for [pobor_tok_subdiv] *)
   Local Lemma of_xpbl {δ Yl γl' ηl} {ayπΨxl : plist _ Yl} :
     ([∗ list] Qx ∈ cif_xpborl (plist_zip γl' (plist_zip ηl ayπΨxl)), ⟦ Qx ⟧ᶜ(δ))

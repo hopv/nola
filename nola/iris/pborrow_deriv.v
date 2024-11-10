@@ -234,6 +234,28 @@ Section pborrow_deriv.
     iApply lft_sincl_refl.
   Qed.
 
+  (** Reborrow a prophetic borrower getting non-prophetic borrowers *)
+  Lemma pobord_soft_reborrow `{!ModExcept0 M}
+    {X α q ξ Φx} β a (xπ : clair _ X) :
+    β ⊑□ α -∗ pobord α q ξ Φx -∗ ⟦ Φx a xπ ⟧ᶜ =[borrow_wsat M ⟦⟧ᶜ]=∗
+      q.[α] ∗ ([†β] -∗ pbord α a xπ ξ Φx) ∗
+      bor_tok β (▷ 1:[ξ])%cif ∗ bord β (Φx a xπ).
+  Proof.
+    rewrite pobor_unseal pbor_unseal borrow_deriv.bor_unseal.
+    iIntros "⊑ (% & #ΦΨ & #ΨΦ & po) Φx". iMod (der_jbupd' with "ΦΨ Φx") as "Ψx".
+    iMod (pobor_tok_soft_reborrow (M:=M) with "⊑ po Ψx") as "($ & →pb & $ & $)".
+    iModIntro. iSplitL "→pb"; [|by iSplit]. iIntros "†".
+    iDestruct ("→pb" with "†") as "$". by iSplit.
+  Qed.
+  Lemma pbord_soft_reborrow `{!ModExcept0 M} {X α q ξ Φx a} {xπ : clair _ X} β :
+    β ⊑□ α -∗ q.[α] -∗ pbord α a xπ ξ Φx -∗ modw M (borrow_wsat M ⟦⟧ᶜ)
+      (q.[α] ∗ ([†β] -∗ pbord α a xπ ξ Φx) ∗
+        bor_tok β (▷ 1:[ξ])%cif ∗ bord β (Φx a xπ)).
+  Proof.
+    iIntros "⊑ α b". iMod (pbord_open with "α b") as "[o Φx]".
+    by iMod (pobord_soft_reborrow with "⊑ o Φx") as "$".
+  Qed.
+
   (** Subdivide a prophetic borrower *)
   Lemma pobord_subdiv {X α q r ξ Φx}
     Yl (fπ : clair TY (_ → X)) ζl (ayπΨxl : plist _ Yl) Rxl β :
