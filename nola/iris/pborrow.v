@@ -306,7 +306,7 @@ Section pborrow.
     iIntros "⊑ [%[(% & % & vo & pc) o]] Ψx →Φx".
     iMod (vo_pc_update with "vo pc") as "[vo pc]".
     iMod (obor_tok_subdiv (FML:=cifOF _) (M:=M) [cif_xpbor _ _ Ψx]
-      with "⊑ o [pc Ψx] [→Φx]") as "[$[_[? _]]]"=>/=.
+      with "⊑ o [pc Ψx] [→Φx]") as "($ & _ & ? & _)"=>/=.
     { iFrame "Ψx". by rewrite sem_cif_in /=. }
     { iIntros "† [(% & % & $ & Ψx) _]". iApply ("→Φx" with "† Ψx"). }
     iModIntro. iRight. iExists _. iFrame.
@@ -415,7 +415,7 @@ Section pborrow.
     iMod (obor_tok_subdiv (FML:=cifOF _) (M:=M)
       [∃ a yπ, cif_proph_ctrl γ a (λ π, fπ π (yπ π)) ξ ∗
         cif_val_obs γ' a yπ ∗ cif_val_obs γx a yπ]%cif
-      with "[] o [pc vo' vox'] [→Φx →b']") as "[[β β'][_[b' _]]]"=>/=.
+      with "[] o [pc vo' vox'] [→Φx →b']") as "([β β'] & _ & b' & _)"=>/=.
     { iApply lft_sincl_refl. }
     { iSplit; [|done]. iExists _, _. rewrite !sem_cif_in /=. iFrame. }
     { iIntros "#† [(% & % & pc & vo' & _) _]". iFrame "pc".
