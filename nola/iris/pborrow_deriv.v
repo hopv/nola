@@ -214,13 +214,13 @@ Section pborrow_deriv.
   Qed.
 
   (** Subdivide a prophetic borrower without changing the prophecy *)
-  Lemma pobord_nsubdiv {X α q ξ Φx} Ψx a (xπ : clair TY X) β :
+  Lemma pobord_soft_subdiv {X α q ξ Φx} Ψx a (xπ : clair TY X) β :
     β ⊑□ α -∗ pobord α q ξ Φx -∗ ⟦ Ψx a xπ ⟧ᶜ -∗
     (∀ a' xπ', [†β] -∗ ⟦ Ψx a' xπ' ⟧ᶜ -∗ M ⟦ Φx a' xπ' ⟧ᶜ)
       =[borrow_wsat M ⟦⟧ᶜ]=∗ q.[α] ∗ pbor_tok β a xπ ξ Ψx.
   Proof.
     rewrite pobor_unseal. iIntros "⊑ (%Ω & #ΦΩ & _ & o) Ψx →Φx".
-    iApply (pobor_tok_nsubdiv (M:=M) with "⊑ o Ψx [ΦΩ →Φx]").
+    iApply (pobor_tok_soft_subdiv (M:=M) with "⊑ o Ψx [ΦΩ →Φx]").
     iIntros "%% † Ψx". iMod ("→Φx" with "† Ψx") as "Φx".
     by iMod (der_jbupd' with "ΦΩ Φx").
   Qed.
@@ -229,7 +229,8 @@ Section pborrow_deriv.
     pobord α q ξ Φx -∗ ⟦ Φx a xπ ⟧ᶜ =[borrow_wsat M ⟦⟧ᶜ]=∗
       q.[α] ∗ pbor_tok α a xπ ξ Φx.
   Proof.
-    iIntros "o Φx". iApply (pobord_nsubdiv Φx with "[] o Φx"); [|by iIntros].
+    iIntros "o Φx".
+    iApply (pobord_soft_subdiv Φx with "[] o Φx"); [|by iIntros].
     iApply lft_sincl_refl.
   Qed.
 
