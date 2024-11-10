@@ -86,6 +86,11 @@ Section ty_shrref.
   #[export] Instance ty_shrref_copy {X α T} : Copy (@ty_shrref X α T).
   Proof. exact _. Qed.
 
+  (** Trivial resolution over [ty_shrref] *)
+  #[export] Instance resol_shrref {X T α κ} :
+    Resol (ty_shrref (X:=X) α T) κ (λ _, True).
+  Proof. exact _. Qed.
+
   (** Subtyping over [ty_shrref] *)
   Lemma subty_shrref `{!Deriv ih δ} {X Y T U f α} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ -∗ ⌜ih δ'⌝ -∗ subty (X:=X) (Y:=Y) δ' T U f) ⊢
@@ -114,11 +119,6 @@ Section ty_shrref.
     iDestruct ("→κ" with "α") as "$". iExists _, _, _. rewrite sem_cif_in /=.
     by iFrame "sT".
   Qed.
-
-  (** Trivial resolution over [ty_shrref] *)
-  #[export] Instance resol_shrref {X T α κ} :
-    Resol (ty_shrref (X:=X) α T) κ (λ _, True).
-  Proof. exact _. Qed.
 
   (** The depth of [ty_shrref] is positive *)
   Lemma type_shrref_depth v

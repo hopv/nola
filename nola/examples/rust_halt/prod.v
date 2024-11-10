@@ -133,6 +133,16 @@ Section ty_prod.
     iMod ("cl'" with "↦u t") as "[$ t]". iApply ("cl" with "↦t t").
   Qed.
 
+  (** Resolution over [ty_prod] *)
+  #[export] Instance resol_prod
+    `(!ResolAt (X:=X) T κ post d, !ResolAt (X:=Y) U κ post' d) :
+    ResolAt (ty_prod T U) κ (λ '(x, y)', post x ∧ post' y) d.
+  Proof.
+    rewrite ty_prod_unseal. split=> > /=. iIntros "κ (% & % & -> & T & U)".
+    iMod (resol with "κ T") as "[κ post]".
+    iMod (resol with "κ U") as "[$ post']". by iCombine "post post'" as "$".
+  Qed.
+
   (** Subtyping on [ty_prod] *)
   Lemma subty_prod {δ X T X' T' f Y U Y' U' g} :
     subty (X:=X) (Y:=X') δ T T' f -∗ subty (X:=Y) (Y:=Y') δ U U' g -∗
@@ -167,15 +177,5 @@ Section ty_prod.
     - iIntros (????). iDestruct 1 as (??->) "[(% & % & -> & $ & $) $]".
       iExists _. by rewrite -assoc.
     - iIntros (?????) "[[$ $] ?]". by rewrite shift_loc_assoc_nat.
-  Qed.
-
-  (** Resolution over [ty_prod] *)
-  #[export] Instance resol_prod
-    `(!ResolAt (X:=X) T κ post d, !ResolAt (X:=Y) U κ post' d) :
-    ResolAt (ty_prod T U) κ (λ '(x, y)', post x ∧ post' y) d.
-  Proof.
-    rewrite ty_prod_unseal. split=> > /=. iIntros "κ (% & % & -> & T & U)".
-    iMod (resol with "κ T") as "[κ post]".
-    iMod (resol with "κ U") as "[$ post']". by iCombine "post post'" as "$".
   Qed.
 End ty_prod.

@@ -82,6 +82,14 @@ Section ty_anydep.
     iMod (copy_shr_acc with "α t T") as (??) "($ & $ & $ & $)"=>//.
   Qed.
 
+  (** Resolution over [ty_mod] *)
+  #[export] Instance resol_anydep {X} `(!Resol T κ post) :
+    Resol (ty_anydep (X:=X) T) κ post.
+  Proof.
+    rewrite ty_anydep_unseal. split=> > /=. iIntros "κ [% T]".
+    iApply (resol with "κ T").
+  Qed.
+
   (** Subtyping on [ty_anydep] *)
   Lemma subty_to_anydep {δ X T} : ⊢ subty (X:=X) δ T (ty_anydep T) id.
   Proof.
@@ -95,14 +103,6 @@ Section ty_anydep.
     iSplit=>//. iSplit; iModIntro=>/=.
     - iIntros (????) "[% T]". iExists _. by iApply "subO".
     - iIntros (?????) "[% T]". iExists _. by iApply "subS".
-  Qed.
-
-  (** Resolution over [ty_mod] *)
-  #[export] Instance resol_anydep {X} `(!Resol T κ post) :
-    Resol (ty_anydep (X:=X) T) κ post.
-  Proof.
-    rewrite ty_anydep_unseal. split=> > /=. iIntros "κ [% T]".
-    iApply (resol with "κ T").
   Qed.
 
   (** Eliminate [ty_anydep] *)

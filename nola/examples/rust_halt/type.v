@@ -487,6 +487,82 @@ Hint Mode Send - - - ! : typeclass_instances.
 Hint Mode Sync - - - ! : typeclass_instances.
 Hint Mode Copy - - - - - - - ! : typeclass_instances.
 
+(** ** Resolution over a type *)
+
+Section resol.
+  Context `{!rust_haltGS CON Σ, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ)}.
+
+  (** [ResolAt]: Resolution over a type at a depth *)
+  Class ResolAt {X} (T : ty CON Σ X) (κ : lft) (post : X → Prop) (d : nat)
+    : Prop := RESOL_AT {
+    resol {t xπ vl q} :
+      q.[κ] -∗ ⟦ ty_own T t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
+        q.[κ] ∗ ⟨π, post (xπ π)⟩;
+  }.
+
+  (** [ResolAt] is monotone *)
+  #[export] Instance ResolAt_mono {X} :
+    Proper ((≡) ==> (⊑) --> pointwise_relation _ impl ==> (=) ==> impl)
+      (@ResolAt X).
+  Proof.
+    move=> ?? /ty_equiv[_[eqv _]] κ κ' /= ??? to ??<-?.
+    have ? : LftIncl κ' κ by done. split=>/= >. iIntros "κ' T".
+    iDestruct (lft_incl'_live_acc (α:=κ) with "κ'") as (?) "[κ →κ']".
+    rewrite -(eqv _ _ _ _). iMod (resol with "κ T") as "[κ post]".
+    iDestruct ("→κ'" with "κ") as "$". iModIntro.
+    iApply (proph_obs_impl with "post")=> ?. apply to.
+  Qed.
+  #[export] Instance ResolAt_flip_mono {X} :
+    Proper ((≡) ==> (⊑) ==> pointwise_relation _ (flip impl) ==> (=) ==>
+      flip impl) (@ResolAt X).
+  Proof.
+    move=> ?*?*?? to ?? <-. eapply ResolAt_mono; [done..|exact to|done].
+  Qed.
+  #[export] Instance ResolAt_proper {X} :
+    Proper ((≡) ==> (=) ==> pointwise_relation _ (↔) ==> (=) ==> (↔))
+      (@ResolAt X).
+  Proof.
+    move=> ?*?? <- ?? iff ?? <-.
+    split; apply ResolAt_mono=>//= ??; by apply iff.
+  Qed.
+
+  (** Trivial resolution *)
+  #[export] Instance resol_true {X T κ d} : @ResolAt X T κ (λ _, True) d | 100.
+  Proof. split=> >. iIntros "$ _ !>". by iApply proph_obs_true. Qed.
+
+  (** [ResolLt]: Resolution over a type below a depth *)
+  Class ResolLt {X} (T : ty CON Σ X) (κ : lft) (post : X → Prop) (d : nat)
+    : Prop :=
+    resol_lt' : ∀ {d'}, d' < d → ResolAt T κ post d'.
+
+  (** [ResolLt] is monotone *)
+  #[export] Instance ResolLt_mono {X} :
+    Proper ((≡) ==> (⊑) --> pointwise_relation _ impl ==> (≤) --> impl)
+      (@ResolLt X).
+  Proof.
+    move=> ?*?*?*?? /= ????. eapply ResolAt_mono=>//. apply resol_lt'. lia.
+  Qed.
+  #[export] Instance ResolLt_flip_mono {X} :
+    Proper ((≡) ==> (⊑) ==> pointwise_relation _ (flip impl) ==> (≤) ==>
+      flip impl) (@ResolLt X).
+  Proof. move=> ?*?*?*?*. by eapply ResolLt_mono. Qed.
+  #[export] Instance ResolLt_proper {X} :
+    Proper ((≡) ==> (=) ==> pointwise_relation _ (↔) ==> (=) ==> (↔))
+      (@ResolLt X).
+  Proof.
+    move=> ?*?? <- ?? iff ?? <-.
+    split; eapply ResolLt_mono=>//= ??; by apply iff.
+  Qed.
+
+  (** [resol] under [ResolLt] *)
+  Lemma resol_lt `{!@ResolLt X T κ post d} {d' t xπ vl q} : d' < d →
+    q.[κ] -∗ ⟦ ty_own T t d' xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
+      q.[κ] ∗ ⟨π, post (xπ π)⟩.
+  Proof. move=> ?. by apply @resol, resol_lt'. Qed.
+End resol.
+(** [Resol]: Resolution over a type *)
+Notation Resol T κ post := (∀ d, ResolAt T κ post d).
+
 (** ** Subtyping *)
 
 Section subty.
@@ -568,82 +644,6 @@ Section subty.
 End subty.
 
 Notation subtyd := (subty der).
-
-(** ** Resolution over a type *)
-
-Section resol.
-  Context `{!rust_haltGS CON Σ, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ)}.
-
-  (** [ResolAt]: Resolution over a type at a depth *)
-  Class ResolAt {X} (T : ty CON Σ X) (κ : lft) (post : X → Prop) (d : nat)
-    : Prop := RESOL_AT {
-    resol {t xπ vl q} :
-      q.[κ] -∗ ⟦ ty_own T t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
-        q.[κ] ∗ ⟨π, post (xπ π)⟩;
-  }.
-
-  (** [ResolAt] is monotone *)
-  #[export] Instance ResolAt_mono {X} :
-    Proper ((≡) ==> (⊑) --> pointwise_relation _ impl ==> (=) ==> impl)
-      (@ResolAt X).
-  Proof.
-    move=> ?? /ty_equiv[_[eqv _]] κ κ' /= ??? to ??<-?.
-    have ? : LftIncl κ' κ by done. split=>/= >. iIntros "κ' T".
-    iDestruct (lft_incl'_live_acc (α:=κ) with "κ'") as (?) "[κ →κ']".
-    rewrite -(eqv _ _ _ _). iMod (resol with "κ T") as "[κ post]".
-    iDestruct ("→κ'" with "κ") as "$". iModIntro.
-    iApply (proph_obs_impl with "post")=> ?. apply to.
-  Qed.
-  #[export] Instance ResolAt_flip_mono {X} :
-    Proper ((≡) ==> (⊑) ==> pointwise_relation _ (flip impl) ==> (=) ==>
-      flip impl) (@ResolAt X).
-  Proof.
-    move=> ?*?*?? to ?? <-. eapply ResolAt_mono; [done..|exact to|done].
-  Qed.
-  #[export] Instance ResolAt_proper {X} :
-    Proper ((≡) ==> (=) ==> pointwise_relation _ (↔) ==> (=) ==> (↔))
-      (@ResolAt X).
-  Proof.
-    move=> ?*?? <- ?? iff ?? <-.
-    split; apply ResolAt_mono=>//= ??; by apply iff.
-  Qed.
-
-  (** Trivial resolution *)
-  #[export] Instance resol_true {X T κ d} : @ResolAt X T κ (λ _, True) d | 100.
-  Proof. split=> >. iIntros "$ _ !>". by iApply proph_obs_true. Qed.
-
-  (** [ResolLt]: Resolution over a type below a depth *)
-  Class ResolLt {X} (T : ty CON Σ X) (κ : lft) (post : X → Prop) (d : nat)
-    : Prop :=
-    resol_lt' : ∀ {d'}, d' < d → ResolAt T κ post d'.
-
-  (** [ResolLt] is monotone *)
-  #[export] Instance ResolLt_mono {X} :
-    Proper ((≡) ==> (⊑) --> pointwise_relation _ impl ==> (≤) --> impl)
-      (@ResolLt X).
-  Proof.
-    move=> ?*?*?*?? /= ????. eapply ResolAt_mono=>//. apply resol_lt'. lia.
-  Qed.
-  #[export] Instance ResolLt_flip_mono {X} :
-    Proper ((≡) ==> (⊑) ==> pointwise_relation _ (flip impl) ==> (≤) ==>
-      flip impl) (@ResolLt X).
-  Proof. move=> ?*?*?*?*. by eapply ResolLt_mono. Qed.
-  #[export] Instance ResolLt_proper {X} :
-    Proper ((≡) ==> (=) ==> pointwise_relation _ (↔) ==> (=) ==> (↔))
-      (@ResolLt X).
-  Proof.
-    move=> ?*?? <- ?? iff ?? <-.
-    split; eapply ResolLt_mono=>//= ??; by apply iff.
-  Qed.
-
-  (** [resol] under [ResolLt] *)
-  Lemma resol_lt `{!@ResolLt X T κ post d} {d' t xπ vl q} : d' < d →
-    q.[κ] -∗ ⟦ ty_own T t d' xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
-      q.[κ] ∗ ⟨π, post (xπ π)⟩.
-  Proof. move=> ?. by apply @resol, resol_lt'. Qed.
-End resol.
-(** [Resol]: Resolution over a type *)
-Notation Resol T κ post := (∀ d, ResolAt T κ post d).
 
 (** ** Type context *)
 

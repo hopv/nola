@@ -99,6 +99,16 @@ Section ty_box.
     apply: sync.
   Qed.
 
+  (** Resolution over [ty_box] *)
+  #[export] Instance resol_box `(!ResolLt (X:=X) T κ post d) :
+    ResolAt (ty_box T) κ post d.
+  Proof.
+    split=> >. rewrite ty_box_unseal /=. iIntros "κ".
+    iDestruct 1 as (?????? eq) "(_ & _ & T)". rewrite sem_cif_in /=.
+    iMod (stored_acc with "T") as "T". setoid_rewrite <-eq.
+    by iApply (resol_lt with "κ T").
+  Qed.
+
   (** Subtyping over [ty_box] *)
   Lemma subty_box `{!Deriv ih δ} {X Y T U f} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ -∗ ⌜ih δ'⌝ -∗ subty (X:=X) (Y:=Y) δ' T U f) ⊢
@@ -118,16 +128,6 @@ Section ty_box.
       { iPureIntro. (split=>//)=> ?. by rewrite eq. }
       iIntros (????) "? !>".
       iDestruct ("tosub" with "[//] [//]") as (_) "[_ sub]". by iApply "sub".
-  Qed.
-
-  (** Resolution over [ty_box] *)
-  #[export] Instance resol_box `(!ResolLt (X:=X) T κ post d) :
-    ResolAt (ty_box T) κ post d.
-  Proof.
-    split=> >. rewrite ty_box_unseal /=. iIntros "κ".
-    iDestruct 1 as (?????? eq) "(_ & _ & T)". rewrite sem_cif_in /=.
-    iMod (stored_acc with "T") as "T". setoid_rewrite <-eq.
-    by iApply (resol_lt with "κ T").
   Qed.
 
   (** Read from [ty_box] *)

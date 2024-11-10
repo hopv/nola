@@ -71,6 +71,11 @@ Section ty_mod.
     rewrite ty_mod_unseal. split=>/= >; [exact _|exact: copy_shr_acc].
   Qed.
 
+  (** Resolution over [ty_mod] *)
+  #[export] Instance resol_mod `(!ResolAt T κ post d) :
+    ResolAt (ty_mod f T) κ (post ∘ f) d.
+  Proof. rewrite ty_mod_unseal. split=> > /=. exact: resol. Qed.
+
   (** Subtyping on [ty_mod] *)
   Lemma subty_of_mod {δ T} : ⊢ subty δ (ty_mod f T) T f.
   Proof.
@@ -84,9 +89,4 @@ Section ty_mod.
     - iIntros (????) "T". iApply (ty_own_clair with "T")=>//=.
     - iIntros (?????) "T". iApply (ty_shr_clair with "T")=>//=.
   Qed.
-
-  (** Resolution over [ty_mod] *)
-  #[export] Instance resol_mod `(!ResolAt T κ post d) :
-    ResolAt (ty_mod f T) κ (post ∘ f) d.
-  Proof. rewrite ty_mod_unseal. split=> > /=. exact: resol. Qed.
 End ty_mod.
