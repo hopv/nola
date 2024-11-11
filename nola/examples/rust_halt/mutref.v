@@ -184,53 +184,36 @@ Section ty_mutref.
   Qed.
 
   (** Read a copyable object from [ty_mutref] *)
-  Lemma read_mutref `{!Ty (X:=X) T, !Copy T, !LftIncl κ α} {d} :
-    Read κ (S d) (ty_mutref α T) d T (ty_mutref α T) fst' id.
+  Lemma read_mutref `{!Ty (X:=X) T, !Copy T, !LftIncl κ α} :
+    Read κ (ty_mutref α T) T (ty_mutref α T) fst' id.
   Proof.
     rewrite ty_mutref_unseal. split=>/= >. iIntros "κ $".
     iDestruct 1 as (???? [= ->] ? eq) "b". rewrite sem_cif_in /=.
     iDestruct (lft_incl'_live_acc (α:=α) with "κ") as (?) "[α →κ]".
     iMod (pbord_open (M:=borrowM) with "α b") as "/=[o (% & >$ & #T)]".
-    iDestruct (ty_own_depth (d':=d) with "T") as "T'"; [lia|].
-    iDestruct (ty_own_clair with "T'") as "$". { move=>/= ?. by rewrite eq. }
+    iDestruct (ty_own_clair with "T") as "$". { move=>/= ?. by rewrite eq. }
     iModIntro. iSplit; [done|]. iIntros "↦".
     iMod (pobord_close (M:=borrowM) with "o [↦]") as "[α b]"=>/=; [by iFrame|].
     rewrite pbor_tok_pbor. iDestruct ("→κ" with "α") as "$". iModIntro.
-    iExists _, _, _, _. rewrite sem_cif_in /=. iFrame "b"=>/=. iPureIntro.
-    split=>//. split; [lia|]=> ?. by rewrite eq.
+    iExists _, _, _, _, _. rewrite sem_cif_in /=. iFrame "b"=>/=. iPureIntro.
+    split=>//. split=>// ?. by rewrite eq.
   Qed.
 
   (** Write to [ty_mutref], updating the current value and keeping the prophecy
     the same *)
-  #[export] Instance write_mutref `{!Ty (X:=X) T, !LftIncl κ α} {d d'} :
-    Write κ (S d) (ty_mutref α T) d T d' T (S d') (ty_mutref α T)
-      fst' (λ '(_, x')' x, (x, x')').
+  #[export] Instance write_mutref `{!Ty (X:=X) T, !LftIncl κ α} :
+    Write κ (ty_mutref α T) T T (ty_mutref α T) fst' (λ '(_, x')' x, (x, x')').
   Proof.
     rewrite ty_mutref_unseal. split=>/= >. iIntros "κ".
     iDestruct 1 as (???? [= ->] ? eq) "b". rewrite sem_cif_in /=.
     iDestruct (lft_incl'_live_acc (α:=α) with "κ") as (?) "[α →κ]".
     iMod (pbord_open (M:=borrowM) with "α b") as "/=[o (% & >$ & T)]".
-    iDestruct (ty_own_depth (d':=d) with "T") as "T"; [lia|].
     iDestruct (ty_own_clair with "T") as "$". { move=>/= ?. by rewrite eq. }
-    iModIntro. iSplit; [done|]. iIntros (??) "↦ T".
+    iModIntro. iSplit; [done|]. iIntros (? du' ?) "↦ T".
     iMod (pobord_close (M:=borrowM) with "o [↦ T]") as "[α b]"=>/=;
       [by iFrame|].
     rewrite pbor_tok_pbor. iDestruct ("→κ" with "α") as "$". iModIntro.
-    iExists _, _, _, _. rewrite sem_cif_in /=. iFrame "b". iPureIntro.
+    iExists (S du'), _, _, _, _. rewrite sem_cif_in /=. iFrame "b". iPureIntro.
     split=>//. split; [lia|]=> ?. by rewrite eq.
-  Qed.
-
-  (** The depth of [ty_mutref] is positive *)
-  Lemma type_mutref_depth p
-    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (p ◁{d} @ty_mutref X α T) Γi Γr get getr)
-    {Zl' κ e Γo pre} :
-    (⌜d > 0⌝ → type (Yl:=Zl') κ (p ◁{d} ty_mutref α T ᵖ:: Γr) e Γo pre) ⊢
-      type κ Γi e Γo (λ post xl, pre post (get xl, getr xl)').
-  Proof.
-    rewrite type_unseal. iIntros "#type !>/=" (????) "κ t pre".
-    rewrite etcx_extract ty_mutref_unseal /=. iIntros "[big Γr]".
-    iDestruct "big" as (????????) "big".
-    iApply ("type" with "[%] κ t pre [big $Γr]"); [lia|]=>/=. iFrame "big".
-    by iExists _.
   Qed.
 End ty_mutref.

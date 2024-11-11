@@ -95,7 +95,6 @@ nola/examples/rust_halt/prod.v
 nola/examples/rust_halt/sum.v
 nola/examples/rust_halt/rec.v
 nola/examples/rust_halt/mod.v
-nola/examples/rust_halt/anydep.v
 nola/examples/rust_halt/ptr.v
 nola/examples/rust_halt/box.v
 nola/examples/rust_halt/shrref.v

@@ -129,62 +129,45 @@ Section ty_box.
   Qed.
 
   (** Read from [ty_box] *)
-  #[export] Instance read_box `{!Ty (X:=X) T} {κ d} :
-    Read κ (S d) (ty_box T) d T (ty_box (ty_uninit (ty_size T))) id (λ _, ())
+  #[export] Instance read_box `{!Ty (X:=X) T} {κ} :
+    Read κ (ty_box T) T (ty_box (ty_uninit (ty_size T))) id (λ _, ())
     | 20.
   Proof.
-    rewrite ty_box_unseal /ty_uninit ty_pty_unseal /=. split=>/= ? t ??.
+    rewrite ty_box_unseal /ty_uninit ty_pty_unseal /=. split=>/= ? t >.
     iIntros "$ $". iDestruct 1 as (????[= ->]??) "(>$ & >† & T)".
     rewrite sem_cif_in /=. iMod (stored_acc with "T") as "T".
     iDestruct (ty_own_size with "T") as %?.
-    iDestruct (ty_own_depth (d':=d) with "T") as "T"; [lia|].
     iDestruct (ty_own_clair with "T") as "$"=>//.
     iMod (store_alloc (sty_own (sty_pty (pty_uninit _)) t 0 _ _) with "[]")
       as "u"=>/=; [by iExists ()|].
-    iModIntro. iSplit=>//. iIntros "$ !>". iFrame "†". iExists _, _.
+    iModIntro. iSplit=>//. iIntros "$ !>". iFrame "†". iExists _, _, _.
     rewrite sem_cif_in /=. by iFrame.
   Qed.
   (** Reading a copyable object from [ty_box] *)
-  #[export] Instance read_box_copy `{!Ty (X:=X) T, !Copy T} {κ d} :
-    Read κ (S d) (ty_box T) d T (ty_box T) id id.
+  #[export] Instance read_box_copy `{!Ty (X:=X) T, !Copy T} {κ} :
+    Read κ (ty_box T) T (ty_box T) id id.
   Proof.
     split=> >. iIntros "$ $". rewrite ty_box_unseal /=.
     iDestruct 1 as (????[= ->]??) "(>$ & >† & T)". rewrite sem_cif_in /=.
     iMod (stored_acc with "T") as "#T". iDestruct (ty_own_size with "T") as %?.
-    iDestruct (ty_own_depth (d':=d) with "T") as "T'"; [lia|].
-    iDestruct (ty_own_clair with "T'") as "$"=>//.
+    iDestruct (ty_own_clair with "T") as "$"=>//.
     iMod (store_alloc with "T") as "{T}T". iModIntro. iSplit=>//.
-    iIntros "↦ !>". iFrame "↦ †". iExists _, _. rewrite sem_cif_in /=.
+    iIntros "↦ !>". iFrame "↦ †". iExists _, _, _. rewrite sem_cif_in /=.
     by iFrame.
   Qed.
 
   (** Write to [ty_box] *)
-  #[export] Instance write_box `{!Ty (X:=X) T, !Ty (X:=Y) U} {κ d d'} :
+  #[export] Instance write_box `{!Ty (X:=X) T, !Ty (X:=Y) U} {κ} :
     TCEq (ty_size T) (ty_size U) →
-    Write κ (S d) (ty_box T) d T d' U (S d') (ty_box U) id (λ _, id).
+    Write κ (ty_box T) T U (ty_box U) id (λ _, id).
   Proof.
     move=> eq. split=> >. iIntros "$". rewrite ty_box_unseal /=.
     iDestruct 1 as (????[= ->]??) "(>$ & >† & T)". rewrite sem_cif_in /=.
     iMod (stored_acc with "T") as "T". iDestruct (ty_own_size with "T") as %->.
-    iDestruct (ty_own_depth (d':=d) with "T") as "T"; [lia|].
     iDestruct (ty_own_clair with "T") as "$"=>//. iModIntro. iSplit=>//.
-    iIntros (??) "↦ U". iFrame "↦". iDestruct (ty_own_size with "U") as %->.
+    iIntros (? du ?) "↦ U". iFrame "↦". iDestruct (ty_own_size with "U") as %->.
     iMod (store_alloc with "U") as "U". iModIntro. rewrite eq. iFrame "†".
-    iExists _, _. rewrite sem_cif_in /=. iFrame "U". iPureIntro. do 2 split=>//.
-    lia.
-  Qed.
-
-  (** The depth of [ty_box] is positive *)
-  Lemma type_box_depth p
-    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (p ◁{d} @ty_box X T) Γi Γr get getr)
-    {Zl' κ e Γo pre} :
-    (⌜d > 0⌝ → type (Yl:=Zl') κ (p ◁{d} ty_box T ᵖ:: Γr) e Γo pre) ⊢
-      type κ Γi e Γo (λ post xl, pre post (get xl, getr xl)').
-  Proof.
-    rewrite type_unseal. iIntros "#type !>/=" (????) "κ t pre".
-    rewrite etcx_extract ty_box_unseal /=. iIntros "[big Γr]".
-    iDestruct "big" as (????????) "big".
-    iApply ("type" with "[%] κ t pre [big $Γr]"); [lia|]=>/=. iFrame "big".
-    by iExists _.
+    iExists (S du), _, _. rewrite sem_cif_in /=. iFrame "U". iPureIntro.
+    do 2 split=>//. lia.
   Qed.
 End ty_box.

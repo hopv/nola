@@ -31,13 +31,13 @@ Section type.
   Qed.
   (** Modify by subtyping *)
   Lemma sub_subty p {X} T
-    `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (p ◁{d} T) Γ Γr get getr)
+    `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (p ◁ T) Γ Γr get getr)
     {Y} U (f : X → Y) {κ} :
     subtyd T U f ⊢
-      sub κ Γ (p ◁{d} U ᵖ:: Γr) (λ post zl, post (f (get zl), getr zl)').
+      sub κ Γ (p ◁ U ᵖ:: Γr) (λ post zl, post (f (get zl), getr zl)').
   Proof.
     rewrite subty_unseal sub_unseal. iIntros "[_[#TU _]] !>/=" (????) "$ $ pre".
-    rewrite etcx_extract /=. iIntros "[(% & $ & T) Γr] !>". iFrame "pre Γr".
+    rewrite etcx_extract /=. iIntros "[(% & % & $ & T) Γr] !>". iFrame "pre Γr".
     by iDestruct ("TU" with "T") as "$".
   Qed.
   Lemma sub_subty_frozen p {X} T
@@ -50,17 +50,6 @@ Section type.
     rewrite etcx_extract /=. iIntros "[(% & $ & →T) Γr] !>". iFrame "pre Γr".
     iIntros "†". iMod ("→T" with "†") as (??) "[eqz T]". iExists _, _.
     iDestruct ("TU" with "T") as "$". iApply (proph_eqz_f with "eqz").
-  Qed.
-  (** Bump up the depth of an object *)
-  Lemma sub_depth p d'
-    `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (p ◁{d} T) Γ Γr get getr,
-      !Ty T) {κ} :
-    d ≤ d' →
-    ⊢ sub κ Γ (p ◁{d'} T ᵖ:: Γr) (λ post zl, post (get zl, getr zl)').
-  Proof.
-    rewrite sub_unseal=>/= ?. iIntros (????) "!> $ $ pre".
-    rewrite etcx_extract /=. iIntros "[(% & $ & T) Γr] !>". iFrame "pre Γr".
-    by iApply (ty_own_depth with "T").
   Qed.
 
   (** ** Basic typing rules *)
@@ -143,19 +132,27 @@ Section type.
     iMod (lft_kill with "α") as "†"=>//. iApply ("type" with "† κ t pre Γr").
   Qed.
   (** Retrieve from a frozen object *)
-  Lemma type_retrieve p α
+  Lemma sub_retrieve p α
     `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Zl) (p ◁[†α] T) Γ Γr get getr,
-      !TyOp T κ) {e Zl' Γo pre} :
-    [†α] -∗ (∀ d, type (Yl:=Zl') κ (p ◁{d} T ᵖ:: Γr) e Γo pre) -∗
-      type κ Γ e Γo (λ post yl, pre post (get yl, getr yl)').
+      !TyOp T κ) :
+    [†α] -∗ sub κ Γ (p ◁ T ᵖ:: Γr) (λ post yl, post (get yl, getr yl)').
   Proof.
-    rewrite type_unseal. iIntros "#† #type !>/=" (????) "κ t #pre".
+    rewrite sub_unseal. iIntros "#† !>/=" (????) "κ $ #pre".
     rewrite etcx_extract /=. iIntros "[(% & peq & →T) Γr]".
     iMod ("→T" with "†") as (? xπ') "[eqz T]".
     iMod (ty_own_proph with "κ T") as (???) "[ξl →T]".
-    iMod ("eqz" with "[//] ξl") as "[ξl #eq]". iMod ("→T" with "ξl") as "[κ T]".
-    iApply ("type" $! _ _ _ _ (λ π, (xπ' π, _)') with "κ t [] [$Γr $T $peq]").
+    iMod ("eqz" with "[//] ξl") as "[ξl #eq]". iMod ("→T" with "ξl") as "[$ T]".
+    iModIntro. iExists (λ π, (xπ' π, _)'). iFrame "Γr T peq".
     by iApply (proph_obs_impl2 with "pre eq")=> ??<-.
+  Qed.
+  Lemma type_retrieve p α
+    `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Zl) (p ◁[†α] T) Γ Γr get getr,
+      !TyOp T κ) {e Zl' Γo pre} :
+    [†α] -∗ type (Yl:=Zl') κ (p ◁ T ᵖ:: Γr) e Γo pre -∗
+      type κ Γ e Γo (λ post yl, pre post (get yl, getr yl)').
+  Proof.
+    iIntros "#† type". iApply (type_in (prei:=λ post _, post _) with "[] type").
+    by iApply sub_retrieve.
   Qed.
 End type.
 

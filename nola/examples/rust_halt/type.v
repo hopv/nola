@@ -702,11 +702,11 @@ Ltac wp_path p :=
 
 (** Type context element *)
 Variant etcx CON Σ : xty → Type :=
-| Owned {X} (d : nat) (p : path) (T : ty CON Σ X) : etcx CON Σ X
+| Owned {X} (p : path) (T : ty CON Σ X) : etcx CON Σ X
 | Frozen {X} (α : lft) (p : path) (T : ty CON Σ X) : etcx CON Σ X
 | Lft (α : lft) : etcx CON Σ unitₓ.
 Arguments Owned {_ _ _}. Arguments Frozen {_ _ _}. Arguments Lft {_ _}.
-Notation "p ◁{ d } T" := (Owned d p T) (at level 55, format "p  ◁{ d }  T").
+Notation "p ◁ T" := (Owned p T) (at level 55, format "p  ◁  T").
 Notation "p ◁[† α ] T" := (Frozen α p T) (at level 55, format "p  ◁[† α ]  T").
 Notation "^[ α ]" := (Lft α) (format "^[ α ]").
 
@@ -719,7 +719,7 @@ Section tcx.
   (** Semantics of a type context element *)
   Definition sem_etcx {X} t (E : etcx CON Σ X) : clair X → iProp Σ :=
     match E with
-    | p ◁{d} T => λ xπ, ∃ v, ⌜Some v = of_path p⌝ ∧ ⟦ ty_own T t d xπ [v] ⟧ᶜ
+    | p ◁ T => λ xπ, ∃ v d, ⌜Some v = of_path p⌝ ∧ ⟦ ty_own T t d xπ [v] ⟧ᶜ
     | p ◁[†α] T => λ xπ, ∃ v, ⌜Some v = of_path p⌝ ∧
         ([†α] =[rust_halt_wsat]{⊤}=∗ ∃ d xπ',
           proph_eqz xπ xπ' ∗ ⟦ ty_own T t d xπ' [v] ⟧ᶜ)
@@ -929,8 +929,8 @@ Section tcx_extract.
     @EtcxExtract X _ Yl E (E ᵖ:: Γ) Γ fst' snd' | 5.
   Proof. by split. Qed.
   (** Extract from the copyable head *)
-  #[export] Instance etcx_extract_hd_copy {X Yl Γ p d} `{!Copy T} :
-    @EtcxExtract X (_ :: Yl) _ (p ◁{d} T) (p ◁{d} T ᵖ:: Γ) (p ◁{d} T ᵖ:: Γ)
+  #[export] Instance etcx_extract_hd_copy {X Yl Γ p} `{!Copy T} :
+    @EtcxExtract X (_ :: Yl) _ (p ◁ T) (p ◁ T ᵖ:: Γ) (p ◁ T ᵖ:: Γ)
       fst' (λ yyl, yyl) | 2.
   Proof. split=> ??. iIntros "[#T $]". iFrame "T". Qed.
   (** Extract from the tail *)
@@ -994,10 +994,10 @@ Section resol_tcx.
   Proof. split=> >. iIntros "$ _ !>". by iApply proph_obs_true. Qed.
   (** [ResolTcx] over cons *)
   #[export] Instance resol_tcx_cons_owned {X}
-    `(!Resol T κ post, !@ResolTcx Yl Γ κ post') {p d} :
-    ResolTcx (Xl:=X::_) (p ◁{d} T ᵖ:: Γ) κ (λ '(x, yl)', post x ∧ post' yl).
+    `(!Resol T κ post, !@ResolTcx Yl Γ κ post') {p} :
+    ResolTcx (Xl:=X::_) (p ◁ T ᵖ:: Γ) κ (λ '(x, yl)', post x ∧ post' yl).
   Proof.
-    split=> > /=. iIntros "κ [(% & % & T) Γ]".
+    split=> > /=. iIntros "κ [(% & % & % & T) Γ]".
     iMod (resol with "κ T") as "[κ post]".
     iMod (resol_tcx with "κ Γ") as "[$ post']". iModIntro.
     iCombine "post post'" as "$".

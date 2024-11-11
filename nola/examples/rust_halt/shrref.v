@@ -103,32 +103,17 @@ Section ty_shrref.
   Qed.
 
   (** Read a copyable object from [ty_shrref] *)
-  Lemma read_shrref `{!Ty (X:=X) T, !Copy T, !LftIncl κ α} {d} :
-    Read κ (S d) (ty_shrref α T) d T (ty_shrref α T) id id.
+  Lemma read_shrref `{!Ty (X:=X) T, !Copy T, !LftIncl κ α} :
+    Read κ (ty_shrref α T) T (ty_shrref α T) id id.
   Proof.
     rewrite ty_shrref_unseal. split=>/= >. iIntros "κ t".
     iDestruct 1 as (???[= ->]??) "#sT".
     rewrite sem_cif_in /=. iMod (stored_acc with "sT") as "sT'".
     iDestruct (lft_incl'_live_acc (α:=α) with "κ") as (?) "[α →κ]".
     iMod (copy_shr_acc with "α t sT'") as (??) "(↦ & t & #T & cl)"=>//.
-    iModIntro. iDestruct (ty_own_depth (d':=d) with "T") as "T'"; [lia|].
-    iDestruct (ty_own_clair with "T'") as "$"=>//. iFrame "↦".
+    iModIntro. iDestruct (ty_own_clair with "T") as "$"=>//. iFrame "↦".
     iSplit=>//. iIntros "↦". iMod ("cl" with "↦ t") as "[α $]". iModIntro.
-    iDestruct ("→κ" with "α") as "$". iExists _, _, _. rewrite sem_cif_in /=.
+    iDestruct ("→κ" with "α") as "$". iExists _, _, _, _. rewrite sem_cif_in /=.
     by iFrame "sT".
-  Qed.
-
-  (** The depth of [ty_shrref] is positive *)
-  Lemma type_shrref_depth p
-    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (p ◁{d} @ty_shrref X α T) Γi Γr get getr)
-    {Zl' κ e Γo pre} :
-    (⌜d > 0⌝ → type (Yl:=Zl') κ (p ◁{d} ty_shrref α T ᵖ:: Γr) e Γo pre) ⊢
-      type κ Γi e Γo (λ post xl, pre post (get xl, getr xl)').
-  Proof.
-    rewrite type_unseal. iIntros "#type !>/=" (????) "κ t pre".
-    rewrite etcx_extract ty_shrref_unseal /=. iIntros "[big Γr]".
-    iDestruct "big" as (???????) "big".
-    iApply ("type" with "[%] κ t pre [big $Γr]"); [lia|]=>/=. iFrame "big".
-    by iExists _.
   Qed.
 End ty_shrref.
