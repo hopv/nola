@@ -15,7 +15,7 @@ End plist.
 Definition pcons {A F a al} : F a → @plist A F al → plist F (a :: al) :=
   pair'.
 Definition pnil {A F} : @plist A F [] := ().
-Module PlistNotation.
+Module PlistNotation'.
   Infix "ᵖ::" := pcons (at level 60, right associativity).
   Infix "ᵖ::@{ F }" := (pcons (F:=F))
     (at level 60, right associativity, only parsing).
@@ -25,8 +25,8 @@ Module PlistNotation.
     (at level 1, format "ᵖ[ x ;  .. ;  z ]").
   Notation "ᵖ[ x ; .. ; z ]@{ F }" := (x ᵖ::@{F} .. (z ᵖ::@{F} ᵖ[]@{F}) ..)
     (at level 1, only parsing).
-End PlistNotation.
-Import PlistNotation.
+End PlistNotation'.
+Import PlistNotation'.
 
 (** [plist] as [list] *)
 Section of_plist.
@@ -98,13 +98,19 @@ Section plist_app_sep.
       λ '(x, xl)', let '(yl, zl)' := plist_sep xl in (x ᵖ:: yl, zl)' end.
 End plist_app_sep.
 
+Module PlistNotation.
+  Export PlistNotation'.
+  Infix "ᵖ++" := plist_app (at level 60, right associativity).
+End PlistNotation.
+Import PlistNotation.
+
 (** [plist_app] and [plist_sep] are mutually inverse *)
 Lemma plist_app_sep {A} {F : A → Type} {al bl}
   {xl : plist F al} {yl : plist F bl} :
-  plist_sep (plist_app xl yl) = (xl, yl)'.
+  plist_sep (xl ᵖ++ yl) = (xl, yl)'.
 Proof. elim: al xl yl; [by case|]=>/= ?? IH [??]?. by rewrite IH. Qed.
 Lemma plist_sep_app {A} {F : A → Type} {al bl} {xl : plist F (al ++ bl)} :
-  plist_app (plist_sep xl).1' (plist_sep xl).2' = xl.
+  (plist_sep xl).1' ᵖ++ (plist_sep xl).2' = xl.
 Proof. elim: al xl; [done|]=>/= ?? IH [??]. by rewrite IH. Qed.
 
 (** Map and fold over [plist] *)

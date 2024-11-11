@@ -840,10 +840,10 @@ Section tcx.
     match Xl with [] => λ _ _, True | _ :: _ => λ '(eΓ, Γ)' xlπ,
       sem_etcx t eΓ (λ π, (xlπ π).1') ∗ sem_tcx t Γ (λ π, (xlπ π).2') end%I.
 
-  (** [sem_tcx] over [plist_app] *)
+  (** [sem_tcx] over [ᵖ++] *)
   Lemma sem_tcx_app {t Xl Yl Γ Γ' xlπ ylπ} :
     @sem_tcx t Xl Γ xlπ ∗ @sem_tcx t Yl Γ' ylπ ⊣⊢
-      sem_tcx t (plist_app Γ Γ') (λ π, plist_app (xlπ π) (ylπ π)).
+      sem_tcx t (Γ ᵖ++ Γ') (λ π, xlπ π ᵖ++ ylπ π).
   Proof.
     move: Γ xlπ. elim: Xl=>/=. { move=> ??. by rewrite left_id. }
     move=> ?? IH ??. by rewrite -IH assoc.
@@ -1090,8 +1090,7 @@ Section tcx_extract.
   Qed.
   (** Type context inclusion by [TcxExtract] *)
   Lemma sub_tcx_extract `{!@TcxExtract Xl Yl Zl Γ Γg Γr get getr} {κ} :
-    ⊢ sub κ Γg (plist_app Γ Γr)
-      (λ post yl, post (plist_app (get yl) (getr yl))).
+    ⊢ sub κ Γg (Γ ᵖ++ Γr) (λ post yl, post (get yl ᵖ++ getr yl)).
   Proof.
     rewrite sub_unseal. iIntros (????) "!>/= $ $ pre Γ !>". iExists (λ _, _).
     iFrame "pre". by rewrite tcx_extract sem_tcx_app.
