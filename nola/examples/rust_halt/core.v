@@ -16,18 +16,18 @@ Section type.
       !ResolTcx Γ κ postr) :
     ⊢ sub κ Γg Γr (λ post yl, postr (get yl) → post (getr yl))%type.
   Proof.
-    rewrite sub_unseal. iIntros (????) "!>/= κ $ pre". rewrite tcx_extract.
-    iIntros "[Γ $]". iMod (resol_tcx with "κ Γ") as "[$ post]". iModIntro.
-    iApply (proph_obs_impl2 with "post pre")=> ?? to. by apply to.
+    rewrite sub_unseal. iIntros (????) "!>/= κ t pre". rewrite tcx_extract.
+    iIntros "[Γ $]". iMod (resol_tcx with "κ t Γ") as "($ & $ & post)".
+    iModIntro. iApply (proph_obs_impl2 with "post pre")=> ?? to. by apply to.
   Qed.
   Lemma sub_leak_rest {Xl} Γ
     `(!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Zl) Γ Γg Γr get getr,
       !ResolTcx Γr κ postr) :
     ⊢ sub κ Γg Γ (λ post yl, postr (getr yl) → post (get yl))%type.
   Proof.
-    rewrite sub_unseal. iIntros (????) "!>/= κ $ pre". rewrite tcx_extract.
-    iIntros "[$ Γr]". iMod (resol_tcx with "κ Γr") as "[$ post]". iModIntro.
-    iApply (proph_obs_impl2 with "post pre")=> ?? to. by apply to.
+    rewrite sub_unseal. iIntros (????) "!>/= κ t pre". rewrite tcx_extract.
+    iIntros "[$ Γr]". iMod (resol_tcx with "κ t Γr") as "($ & $ & post)".
+    iModIntro. iApply (proph_obs_impl2 with "post pre")=> ?? to. by apply to.
   Qed.
   (** Modify by subtyping *)
   Lemma sub_subty p {X} T

@@ -150,7 +150,7 @@ Section ty_mutref.
   #[export] Instance resol_mutref {X} `(!LftIncl κ α, !TyOp T κ) :
     Resol (ty_mutref (X:=X) α T) κ (λ '(x, x')', x' = x).
   Proof.
-    rewrite /= ty_mutref_unseal. split=>/= >. iIntros "[κ κ']".
+    rewrite /= ty_mutref_unseal. split=>/= >. iIntros "[κ κ'] $".
     iDestruct 1 as (?????? eq) "b". rewrite sem_cif_in /=.
     iDestruct (lft_incl'_live_acc (α:=α) with "κ") as (?) "[α →κ]".
     iMod (pbord_open (M:=borrowM) with "α b") as "/=[o (% & ↦ & T)]".

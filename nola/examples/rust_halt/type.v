@@ -492,8 +492,8 @@ Section resol.
   Class ResolAt {X} (T : ty CON Σ X) (κ : lft) (post : X → Prop) (d : nat)
     : Prop := RESOL_AT {
     resol {t xπ vl q} :
-      q.[κ] -∗ ⟦ ty_own T t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
-        q.[κ] ∗ ⟨π, post (xπ π)⟩;
+      q.[κ] -∗ na_own t ⊤ -∗ ⟦ ty_own T t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
+        q.[κ] ∗ na_own t ⊤ ∗ ⟨π, post (xπ π)⟩;
   }.
 
   (** [ResolAt] is monotone *)
@@ -502,9 +502,9 @@ Section resol.
       (@ResolAt X).
   Proof.
     move=> ?? /ty_equiv[_[eqv _]] κ κ' /= ??? to ??<-?.
-    have ? : LftIncl κ' κ by done. split=>/= >. iIntros "κ' T".
+    have ? : LftIncl κ' κ by done. split=>/= >. iIntros "κ' t T".
     iDestruct (lft_incl'_live_acc (α:=κ) with "κ'") as (?) "[κ →κ']".
-    rewrite -(eqv _ _ _ _). iMod (resol with "κ T") as "[κ post]".
+    rewrite -(eqv _ _ _ _). iMod (resol with "κ t T") as "(κ & $ & post)".
     iDestruct ("→κ'" with "κ") as "$". iModIntro.
     iApply (proph_obs_impl with "post")=> ?. apply to.
   Qed.
@@ -524,7 +524,7 @@ Section resol.
 
   (** Trivial resolution *)
   #[export] Instance resol_true {X T κ d} : @ResolAt X T κ (λ _, True) d | 100.
-  Proof. split=> >. iIntros "$ _ !>". by iApply proph_obs_true. Qed.
+  Proof. split=> >. iIntros "$ $ _ !>". by iApply proph_obs_true. Qed.
 
   (** [ResolLt]: Resolution over a type below a depth *)
   Class ResolLt {X} (T : ty CON Σ X) (κ : lft) (post : X → Prop) (d : nat)
@@ -552,8 +552,8 @@ Section resol.
 
   (** [resol] under [ResolLt] *)
   Lemma resol_lt `{!@ResolLt X T κ post d} {d' t xπ vl q} : d' < d →
-    q.[κ] -∗ ⟦ ty_own T t d' xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
-      q.[κ] ∗ ⟨π, post (xπ π)⟩.
+    q.[κ] -∗ na_own t ⊤ -∗ ⟦ ty_own T t d' xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
+      q.[κ] ∗ na_own t ⊤ ∗ ⟨π, post (xπ π)⟩.
   Proof. move=> ?. by apply @resol, resol_lt'. Qed.
 End resol.
 (** [Resol]: Resolution over a type *)
@@ -986,25 +986,28 @@ Section resol_tcx.
   Class ResolTcx {Xl} (Γ : tcx CON Σ Xl) (κ : lft) (post : xpred Xl) : Prop :=
     RESOL_TCX {
     resol_tcx {t xlπ q} :
-      q.[κ] -∗ sem_tcx t Γ xlπ =[rust_halt_wsat]{⊤}=∗ q.[κ] ∗ ⟨π, post (xlπ π)⟩;
+      q.[κ] -∗ na_own t ⊤ -∗ sem_tcx t Γ xlπ =[rust_halt_wsat]{⊤}=∗
+        q.[κ] ∗ na_own t ⊤ ∗ ⟨π, post (xlπ π)⟩;
   }.
 
   (** [ResolTcx] over nil *)
   #[export] Instance resol_tcx_nil {κ} : ResolTcx ᵖ[] κ (λ _, True).
-  Proof. split=> >. iIntros "$ _ !>". by iApply proph_obs_true. Qed.
+  Proof. split=> >. iIntros "$ $ _ !>". by iApply proph_obs_true. Qed.
   (** [ResolTcx] over cons *)
   #[export] Instance resol_tcx_cons_owned {X}
     `(!Resol T κ post, !@ResolTcx Yl Γ κ post') {p} :
     ResolTcx (Xl:=X::_) (p ◁ T ᵖ:: Γ) κ (λ '(x, yl)', post x ∧ post' yl).
   Proof.
-    split=> > /=. iIntros "κ [(% & % & % & T) Γ]".
-    iMod (resol with "κ T") as "[κ post]".
-    iMod (resol_tcx with "κ Γ") as "[$ post']". iModIntro.
+    split=> > /=. iIntros "κ t [(% & % & % & T) Γ]".
+    iMod (resol with "κ t T") as "(κ & t & post)".
+    iMod (resol_tcx with "κ t Γ") as "($ & $ & post')". iModIntro.
     iCombine "post post'" as "$".
   Qed.
   Lemma resol_tcx_cons `(!@ResolTcx Yl Γ κ post) {X E} :
     ResolTcx (Xl:=X::_) (E ᵖ:: Γ) κ (λ '(_, yl)', post yl).
-  Proof. split=> > /=. iIntros "κ [_ Γ]". iApply (resol_tcx with "κ Γ"). Qed.
+  Proof.
+    split=> > /=. iIntros "κ t [_ Γ]". iApply (resol_tcx with "κ t Γ").
+  Qed.
   #[export] Instance resol_tcx_cons_frozen `(!@ResolTcx Yl Γ κ post) {X p α T} :
     ResolTcx (Xl:=X::_) (p ◁[†α] T ᵖ:: Γ) κ (λ '(_, yl)', post yl).
   Proof. exact: resol_tcx_cons. Qed.

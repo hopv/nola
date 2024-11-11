@@ -92,7 +92,7 @@ Section read_write.
         (λ post zl, let '(x, y, _)' := get' zl in
           postr (get x) → post (set x y, getr zl)')%type.
   Proof.
-    rewrite type_unseal. iIntros (U'1 ????) "!> κ $ pre".
+    rewrite type_unseal. iIntros (U'1 ????) "!> κ t pre".
     rewrite tcx_extract /=.
     iIntros "[((% & % & % & T) & (% & % & % & U) & _) Γr]".
     iMod (write with "κ T") as (? wl ? ->) "(↦ & U' & →T')".
@@ -100,8 +100,8 @@ Section read_write.
     destruct wl as [|?[|??]]=>//. rewrite heap_pointsto_vec_singleton.
     wp_path p. wp_path p'. wp_write. rewrite -heap_pointsto_vec_singleton.
     iMod ("→T'" with "↦ U") as (?) "[κ Tt']".
-    iMod (resol with "κ U'") as "[$ postr]". iModIntro. iExists (λ _, (_, _)').
-    iFrame "Tt' Γr". iSplit; [|done].
+    iMod (resol with "κ t U'") as "($ & $ & postr)". iModIntro.
+    iExists (λ _, (_, _)'). iFrame "Tt' Γr". iSplit; [|done].
     iApply (proph_obs_impl2 with "postr pre")=>/= ?? to. by apply to.
   Qed.
 
@@ -125,9 +125,9 @@ Section read_write.
     iDestruct (ty_own_size with "U") as %lU. rewrite Usz in lU.
     iDestruct (ty_own_size with "U'") as %lU'. rewrite U'sz in lU'.
     wp_path pt. wp_path ps. wp_apply (twp_memcpy wls wlt with "[$↦s $↦t]")=>//.
-    iIntros "[↦s ↦t]". iMod ("→Ts'" with "↦s") as (?) "($ & $ & Ts')".
+    iIntros "[↦s ↦t]". iMod ("→Ts'" with "↦s") as (?) "($ & t & Ts')".
     iMod ("→Tt'" with "↦t U") as (?) "[κ Tt']".
-    iMod (resol with "κ U'") as "[$ postr]". iModIntro.
+    iMod (resol with "κ t U'") as "($ & $ & postr)". iModIntro.
     iExists (λ _, (_, _, _)'). iFrame "Ts' Tt' Γr". iSplit; [|done].
     iApply (proph_obs_impl2 with "postr pre")=>/= ?? to. by apply to.
   Qed.

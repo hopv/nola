@@ -101,10 +101,10 @@ Section ty_box.
   #[export] Instance resol_box `(!ResolLt (X:=X) T κ post d) :
     ResolAt (ty_box T) κ post d.
   Proof.
-    split=> >. rewrite ty_box_unseal /=. iIntros "κ".
+    split=> >. rewrite ty_box_unseal /=. iIntros "κ t".
     iDestruct 1 as (?????? eq) "(_ & _ & T)". rewrite sem_cif_in /=.
     iMod (stored_acc with "T") as "T". setoid_rewrite <-eq.
-    by iApply (resol_lt with "κ T").
+    by iApply (resol_lt with "κ t T").
   Qed.
 
   (** Subtyping over [ty_box] *)

@@ -138,9 +138,10 @@ Section ty_prod.
     `(!ResolAt (X:=X) T κ post d, !ResolAt (X:=Y) U κ post' d) :
     ResolAt (ty_prod T U) κ (λ '(x, y)', post x ∧ post' y) d.
   Proof.
-    rewrite ty_prod_unseal. split=> > /=. iIntros "κ (% & % & -> & T & U)".
-    iMod (resol with "κ T") as "[κ post]".
-    iMod (resol with "κ U") as "[$ post']". by iCombine "post post'" as "$".
+    rewrite ty_prod_unseal. split=> > /=. iIntros "κ t (% & % & -> & T & U)".
+    iMod (resol with "κ t T") as "(κ & t & post)".
+    iMod (resol with "κ t U") as "($ & $ & post')".
+    by iCombine "post post'" as "$".
   Qed.
 
   (** Subtyping on [ty_prod] *)

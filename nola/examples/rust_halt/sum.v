@@ -181,10 +181,10 @@ Section ty_sum.
     ResolAt (ty_sum T U) κ
       (λ s, match s with inl x => post x | inr y => post' y end) d.
   Proof.
-    rewrite ty_sum_unseal. split=> > /=. iIntros "κ (%b & % & % & -> & big)".
+    rewrite ty_sum_unseal. split=> > /=. iIntros "κ t (%b & % & % & -> & big)".
     case: b=>/=; iDestruct "big" as (? eq _) "S";
-      [iMod (resol with "κ S") as "[$ post]"|
-        iMod (resol with "κ S") as "[$ post]"]; iModIntro;
+      [iMod (resol with "κ t S") as "($ & $ & post)"|
+        iMod (resol with "κ t S") as "($ & $ & post)"]; iModIntro;
       iApply (proph_obs_impl with "post")=> ?; by rewrite eq.
   Qed.
 
