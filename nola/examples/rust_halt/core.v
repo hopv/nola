@@ -168,16 +168,16 @@ Section type.
   (** Use a local lifetime *)
   Lemma type_lft_use α
     `(!EtcxExtract (Yl:=Xl) (Zl:=Xl') ^[α] Γi Γr get getr) {Yl κ e Γo pre} :
-    type (Yl:=Yl) (α ⊓ κ) Γr e Γo pre ⊢
+    type (Yl:=Yl) (κ ⊓ α) Γr e Γo pre ⊢
       type κ Γi e (λ p, ^[α] ᵖ:: Γo p)
         (λ post xl, pre (λ yl, post ((), yl)') (getr xl)).
   Proof.
-    rewrite type_unseal. iIntros "#type !>/=" (q ???) "κ t pre Γi".
+    rewrite type_unseal. iIntros "#type !>/=" (????) "κ t pre Γi".
     rewrite etcx_extract /=. iDestruct "Γi" as "[[% α] Γr]".
-    case: (Qp.lower_bound 1 q)=> [?[?[?[->->]]]]. iDestruct "α" as "[α $]".
-    iDestruct "κ" as "[κ $]".
-    iDestruct ("type" with "[$α $κ //] t pre Γr") as "twp".
-    iApply (twp_wand with "twp"). by iIntros (?) ">(% & [$$] & $ & $ & $) !>".
+    iDestruct (lft_live_fuse with "κ α") as (?) "[κα →κα]".
+    iDestruct ("type" with "κα t pre Γr") as "twp".
+    iApply (twp_wand with "twp"). iIntros (?) ">(% & κα & $ & $ & $) !>".
+    by iDestruct ("→κα" with "κα") as "[$$]".
   Qed.
 
   (** Eternalize a lifetime *)

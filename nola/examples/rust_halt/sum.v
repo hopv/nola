@@ -154,25 +154,22 @@ Section ty_sum.
     { apply: bi.exist_persistent. case=>/=; exact _. }
     iIntros (sub) "(α & α' & α'') t (%b & >↦ & S)".
     case: b=>/=; iDestruct "S" as (? eq) "(S & % & % & >↦r)";
-      (iMod (copy_shr_acc with "α t S") as (? r) "(↦S & t & S & cl)";
+      (iMod (copy_shr_acc with "α t S") as (??) "(↦S & t & S & cl)";
         [etrans; [|done]; apply union_subseteq_r', shr_locsE_mono=>/=; lia|]);
-      iMod (spointsto_acc with "α' ↦") as (r') "[↦ →α']";
-      iMod (spointsto_vec_acc with "α'' ↦r") as (r'') "[↦r →α'']"; iModIntro;
-      case: (Qp.lower_bound r' r'')=> s[?[?[->->]]];
-      case: (Qp.lower_bound r s)=> ?[?[?[->->]]]; iExists (_ :: _ ++ _), _;
-      rewrite heap_pointsto_vec_cons heap_pointsto_vec_app -!Qp.add_assoc;
-      iDestruct "↦S" as "[$ ↦S']"; iDestruct "↦" as "[$ ↦']";
-      [iDestruct (ty_own_size with "S") as %->|
-        iDestruct (ty_own_size with "S") as %->];
-      iDestruct "↦r" as "[$ ↦r']";
+      iMod (spointsto_acc with "α' ↦") as (?) "[↦ →α']";
+      iMod (spointsto_vec_acc with "α'' ↦r") as (?) "[↦r →α'']"; iModIntro;
+      [iDestruct (ty_own_size with "S") as %leq|
+        iDestruct (ty_own_size with "S") as %leq]; rewrite -{3 4}leq;
+      iDestruct (heap_pointsto_vec_fuse with "↦S ↦r") as (?) "[↦Sr →↦Sr]";
+      iDestruct (heap_pointsto_just_vec_fuse with "↦ ↦Sr") as (?) "[$ →↦↦Sr]";
       (iDestruct (na_own_acc with "t") as "[$ →t]";
         [apply difference_mono_l, union_subseteq_r', shr_locsE_mono=>/=; lia|]);
       [iSplitL "S"; [iExists true=>/=; iFrame "S"; by iExists _|]|
         iSplitL "S"; [iExists false=>/=; iFrame "S"; by iExists _|]];
-      iIntros "(↦ & ↦S & ↦r) t'"; iDestruct ("→t" with "t'") as "t";
-      iCombine ("↦S ↦S'") as "↦S"; iMod ("cl" with "↦S t") as "[$$]";
-      iMod ("→α'" with "[$↦ $↦' //]") as "$"; iCombine ("↦r ↦r'") as "↦r";
-      by iMod ("→α''" with "↦r").
+      iIntros "↦↦Sr t'"; iDestruct ("→↦↦Sr" with "↦↦Sr") as "[↦ ↦Sr]";
+      iDestruct ("→↦Sr" with "↦Sr") as "[↦S ↦r]";
+      iDestruct ("→t" with "t'") as "t"; iMod ("cl" with "↦S t") as "[$$]";
+      iMod ("→α'" with "↦") as "$"; by iMod ("→α''" with "↦r").
   Qed.
 
   (** Resolution over [ty_sum] *)

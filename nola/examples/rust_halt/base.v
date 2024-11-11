@@ -296,13 +296,11 @@ Section fbor_tok.
     move: l r. elim: vl=>//=.
     { unfold heap_pointsto_vec=>/=. iIntros (??) "$ _ !>". by iExists 1%Qp. }
     move=> v vl IH l ?. rewrite spointsto_vec_cons. iIntros "[α α'] [↦ ↦s]".
-    iMod (spointsto_acc with "α ↦") as (q) "[↦ →α]".
-    iMod (IH with "α' ↦s") as (q') "[↦s →α']". iModIntro.
-    case: (Qp.lower_bound q q')=> q''[?[?[->->]]]. iExists q''.
-    rewrite heap_pointsto_vec_cons. iDestruct "↦" as "[$ ↦']".
-    iDestruct "↦s" as "[$ ↦s']". iIntros "[↦ ↦s]".
-    iMod ("→α" with "[$↦ $↦']") as "$". iApply "→α'".
-    rewrite heap_pointsto_vec_fractional. iFrame.
+    iMod (spointsto_acc with "α ↦") as (?) "[↦ →α]".
+    iMod (IH with "α' ↦s") as (?) "[↦s →α']". iModIntro.
+    iDestruct (heap_pointsto_just_vec_fuse with "↦ ↦s") as (?) "[$ →↦↦s]".
+    iIntros "↦↦s". iDestruct ("→↦↦s" with "↦↦s") as "[↦ ↦s]".
+    iMod ("→α" with "↦") as "$". by iApply "→α'".
   Qed.
 
   (** Allocate [spointsto] *)
@@ -356,11 +354,11 @@ Section fbor_tok.
   Proof.
     move: r. elim: ξl=>/=. { iIntros (?) "$ _ !>". by iExists 1%Qp. }
     iIntros (ξ ξl IH ?) "[α α'] [ξ ξl]".
-    iMod (sproph_tok_acc with "α ξ") as (q) "[ξ →α]".
-    iMod (IH with "α' ξl") as (q') "[ξl →α']". iModIntro.
-    case: (Qp.lower_bound q q')=> [q''[?[?[->->]]]]. iExists q''.
-    iDestruct "ξ" as "[$ ξ']". iDestruct "ξl" as "[$ ξl']". iIntros "[ξ ξl]".
-    iMod ("→α" with "[$ξ $ξ']") as "$". iApply "→α'". iFrame.
+    iMod (sproph_tok_acc with "α ξ") as (?) "[ξ →α]".
+    iMod (IH with "α' ξl") as (?) "[ξl →α']". iModIntro.
+    iDestruct (proph_tok_toks_fuse with "ξ ξl") as (?) "/=[$ →ξξl]".
+    iIntros "ξξl". iDestruct ("→ξξl" with "ξξl") as "[ξ ξl]".
+    iMod ("→α" with "ξ") as "$". by iApply "→α'".
   Qed.
 
   (** Allocate [sproph_tok] *)

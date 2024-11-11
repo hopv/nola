@@ -70,14 +70,13 @@ Section ty_mutref.
       iDestruct (lft_incl'_live_acc (α:=α) with "κ") as (?) "[α →κ]".
       iMod (pbord_open (M:=borrowM) with "α big") as "/=[o (% & ↦ & T)]".
       iDestruct (pobor_proph with "o") as "[ξ →o]". unfold cif_pointsto_ty.
-      iMod (ty_own_proph_lt with "κ' T") as (ηl q ?) "[ηl →T]"=>//. iModIntro.
-      case: (Qp.lower_bound 1%Qp q)=> ?[?[?[->->]]]. iExists (_ :: _), _.
-      iDestruct "ξ" as "[$ ξ']". iDestruct "ηl" as "[$ ηl']". iSplit.
+      iMod (ty_own_proph_lt with "κ' T") as (ηl ??) "[ηl →T]"=>//. iModIntro.
+      iDestruct (proph_tok_toks_fuse with "ξ ηl") as (?) "[$ →ξηl]"=>/=. iSplit.
       { iPureIntro. eapply proph_dep_proper; [exact: eq|done|].
         apply: (proph_dep_f2 (λ x x', (x', x)') _ _ [_]); [|done].
         exact: proph_dep_one. }
-      iIntros "[ξ ηl]". iDestruct ("→o" with "[$ξ $ξ' //]") as "o".
-      iMod ("→T" with "[$ηl $ηl' //]") as "[$ T]".
+      iIntros "ξηl". iDestruct ("→ξηl" with "ξηl") as "[ξ ηl]".
+      iDestruct ("→o" with "ξ") as "o". iMod ("→T" with "ηl") as "[$ T]".
       iMod (pobord_close (M:=borrowM) with "o [↦ T]") as "[α b]"=>/=;
         [by iFrame|].
       iDestruct ("→κ" with "α") as "$". iModIntro. iExists _, _, _, _.
@@ -86,20 +85,19 @@ Section ty_mutref.
       iDestruct 1 as (????? eq) "(_ & >ξ & T)".
       iDestruct (lft_incl'_live_acc (κ:=κ ⊓ β) (α:=α ⊓ β) with "[$κ $β]")
         as (?) "[αβ →κβ]".
-      iMod (sproph_tok_acc with "αβ ξ") as (s) "[ξ →αβ]". rewrite sem_cif_in /=.
+      iMod (sproph_tok_acc with "αβ ξ") as (?) "[ξ →αβ]". rewrite sem_cif_in /=.
       iMod (stored_acc with "T") as "T".
       iDestruct (lft_incl'_live_acc (κ:=κ ⊓ β) (α:=κ ⊓ (α ⊓ β))
         with "[$κ' $β']") as (?) "[καβ →κβ']".
-      iMod (ty_shr_proph_lt (T:=T) with "καβ T") as (ηl s' ?) "[ηl →καβ]"=>//.
-      case: (Qp.lower_bound s s')=> ?[?[?[->->]]]. iModIntro.
-      iExists (_ :: _), _. iDestruct "ξ" as "[$ ξ']".
-      iDestruct "ηl" as "[$ ηl']". iSplit.
+      iMod (ty_shr_proph_lt (T:=T) with "καβ T") as (ηl ??) "[ηl →καβ]"=>//.
+      iModIntro. iDestruct (proph_tok_toks_fuse with "ξ ηl") as (?) "[$ →ξηl]".
+      iSplit.
       { iPureIntro. eapply proph_dep_proper; [exact: eq|done|].
         apply: (proph_dep_f2 (λ x x', (x', x)') _ _ [_]); [|done].
         exact: proph_dep_one. }
-      iIntros "[ξ ηl]". iMod ("→αβ" with "[$ξ $ξ']") as "αβ".
-      iDestruct ("→κβ" with "αβ") as "$".
-      iMod ("→καβ" with "[$ηl $ηl']") as "καβ". iModIntro. by iApply "→κβ'".
+      iIntros "ξηl". iDestruct ("→ξηl" with "ξηl") as "[ξ ηl]".
+      iMod ("→αβ" with "ξ") as "αβ". iDestruct ("→κβ" with "αβ") as "$".
+      iMod ("→καβ" with "ηl") as "καβ". iModIntro. by iApply "→κβ'".
     - move=> ?? β ??. iIntros "[[κ κ'] [β β']] b".
       iMod (bord_open (M:=borrowM) with "β b") as "/=[o (% & ↦ & big)]".
       iDestruct "big" as (??? xπ  -> ? eq) "pb".
