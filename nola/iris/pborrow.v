@@ -386,7 +386,7 @@ Section pborrow.
     rewrite pobor_tok_unseal=> ??. iIntros "[%[(% & % & vo & pc) o]] ζl".
     iMod (proph_alloc_list (plist_map (λ _ '(_, yπ, _)', yπ inhabitant) ayπΨxl))
       as (ηl) "ηl".
-    iDestruct (proph_toks_combine with "ζl ηl") as (?) "[ζηl →ζlηl]".
+    iDestruct (proph_toks_fuse with "ζl ηl") as (?) "[ζηl →ζlηl]".
     iMod (vo_pc_preresolve with "vo pc ζηl") as "(ζηl & $ & →pc)".
     { apply proph_dep_fpi; [done|]. apply proph_dep_prvars. }
     iDestruct ("→ζlηl" with "ζηl") as "[$ ηl]". iIntros "!> ⊑ Ψxl Rxl →Φx".
@@ -454,12 +454,11 @@ Section pborrow.
     iDestruct (vo_pc_agree with "vo' pc'") as %[<-<-]. iFrame "Ψx".
     iDestruct (vo_pc_proph with "vo' pc'") as "(vo' & →pc' & $)". iModIntro.
     iIntros (ζl s ?) "ζl". iMod (proph_alloc (yπ inhabitant)) as (η') "η'".
-    iDestruct (proph_toks_combine (ηl:=[_]) with "ζl [$η' //]")
-      as (?) "[ζlη' →ζlη']".
+    iDestruct (proph_toks_tok_fuse with "ζl η'") as (?) "[ζlη' →ζlη']".
     iMod (vo_pc_preresolve (λ π, fπ π (π η')) with "vo pc ζlη'")
       as "[ζlη' [$ →pc]]".
     { apply proph_dep_fpi=>//. apply proph_dep_one. }
-    iDestruct ("→ζlη'" with "ζlη'") as "/=[$ [η' _]]". iIntros "!> η Ψx".
+    iDestruct ("→ζlη'" with "ζlη'") as "/=[$ η']". iIntros "!> η Ψx".
     iDestruct (vo_proph_pc with "→pc' η") as "pc'".
     iMod (vo_pc_alloc with "η'") as (γ'') "[vo'' pc'']".
     iMod (obor_tok_merge_subdiv (FML:=cifOF _) (M:=M) [(_,_,_)';(_,_,_)']

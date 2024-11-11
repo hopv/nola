@@ -359,13 +359,25 @@ Section lemmas.
   Lemma proph_toks_singleton {ξ q} : q:[ξ] ⊣⊢ q:∗[[ξ]].
   Proof. by rewrite /= right_id. Qed.
 
-  (** Combine [proph_toks]s *)
-  Lemma proph_toks_combine {ξl ηl q r} :
+  (** Fuse [proph_toks]s *)
+  Lemma proph_toks_fuse {ξl ηl q r} :
     q:∗[ξl] -∗ r:∗[ηl] -∗ ∃ s,
       s:∗[ξl ++ ηl] ∗ (s:∗[ξl ++ ηl] -∗ q:∗[ξl] ∗ r:∗[ηl]).
   Proof.
     case: (Qp.lower_bound q r)=> [s[?[?[->->]]]]. iIntros "[ξl ξl'][ηl ηl']".
     iExists s. iFrame "ξl ηl ξl' ηl'". iIntros "[$$]".
+  Qed.
+  Lemma proph_tok_toks_fuse {ξ ηl q r} :
+    q:[ξ] -∗ r:∗[ηl] -∗ ∃ s,
+      s:∗[ξ :: ηl] ∗ (s:∗[ξ :: ηl] -∗ q:[ξ] ∗ r:∗[ηl]).
+  Proof.
+    setoid_rewrite (proph_toks_singleton (ξ:=ξ)). exact: proph_toks_fuse.
+  Qed.
+  Lemma proph_toks_tok_fuse {ξl η q r} :
+    q:∗[ξl] -∗ r:[η] -∗ ∃ s,
+      s:∗[ξl ++ [η]] ∗ (s:∗[ξl ++ [η]] -∗ q:∗[ξl] ∗ r:[η]).
+  Proof.
+    setoid_rewrite (proph_toks_singleton (ξ:=η)). exact: proph_toks_fuse.
   Qed.
 
   (** [proph_obs] is persistent, timeless and monotone *)

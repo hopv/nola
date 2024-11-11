@@ -174,8 +174,8 @@ Section lft.
     Frame p q.[α] r.[α] s.[α] | 5.
   Proof. apply: frame_fractional. Qed.
 
-  (** Combine live lifetime tokens *)
-  Lemma lft_live_combine {α β q r} :
+  (** Fuse live lifetime tokens *)
+  Lemma lft_live_fuse {α β q r} :
     q.[α] -∗ r.[β] -∗ ∃ s, s.[α ⊓ β] ∗ (s.[α ⊓ β] -∗ q.[α] ∗ r.[β]).
   Proof.
     case: (Qp.lower_bound q r)=> [s[t[t'[->->]]]]. iIntros "[α α'][β β']".
@@ -368,7 +368,7 @@ Section lft_sincl.
     rewrite lft_sincl_unseal. iIntros "[†|∞] α".
     { iDestruct (lft_live_dead with "α †") as %[]. }
     iMod (lft_etern_live with "∞") as (r) "δ". iModIntro.
-    iDestruct (lft_live_combine with "α δ") as (s) "[αδ →]".
+    iDestruct (lft_live_fuse with "α δ") as (s) "[αδ →]".
     iDestruct (lft_incl_live_acc with "αδ") as (?) "[β →α]";
       [exact lft_meet_diff_incl|].
     iExists _. iFrame "β". iIntros "β". iDestruct ("→α" with "β") as "αδ".
