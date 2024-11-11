@@ -46,8 +46,7 @@ Section num.
 
   (** Integer operations *)
   Lemma type_int (n : Z) {κ Xl Γ} :
-    ⊢ type (Xl:=Xl) κ Γ #n (λ r, r ◁ ty_int ᵖ:: Γ)
-        (λ post xl, post (n, xl)').
+    ⊢ type (Xl:=Xl) κ Γ #n (λ r, r ◁ ty_int ᵖ:: Γ) (λ post xl, post (n, xl)').
   Proof.
     rewrite /ty_int ty_pty_unseal type_unseal /=.
     iIntros (????) "!>/= $ $ pre Γ". wp_value_head. iModIntro. iFrame "pre Γ".
@@ -111,8 +110,7 @@ Section num.
 
   (** Natural number operations *)
   Lemma type_nat (n : nat) {κ Xl Γ} :
-    ⊢ type (Xl:=Xl) κ Γ #n (λ r, r ◁ ty_nat ᵖ:: Γ)
-        (λ post xl, post (n, xl)').
+    ⊢ type (Xl:=Xl) κ Γ #n (λ r, r ◁ ty_nat ᵖ:: Γ) (λ post xl, post (n, xl)').
   Proof.
     rewrite /ty_nat ty_pty_unseal type_unseal /=.
     iIntros (????) "!>/= $ $ pre Γ". wp_value_head. iModIntro. iFrame "pre Γ".
@@ -190,8 +188,7 @@ Section num.
 
   (** Boolean operations *)
   Lemma type_bool (b : bool) {κ Xl Γ} :
-    ⊢ type (Xl:=Xl) κ Γ #b (λ r, r ◁ ty_bool ᵖ:: Γ)
-        (λ post xl, post (b, xl)').
+    ⊢ type (Xl:=Xl) κ Γ #b (λ r, r ◁ ty_bool ᵖ:: Γ) (λ post xl, post (b, xl)').
   Proof.
     rewrite /ty_bool ty_pty_unseal type_unseal /=.
     iIntros (????) "!>/= $ $ pre Γ". wp_value_head. iModIntro. iFrame "pre Γ".
