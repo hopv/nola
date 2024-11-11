@@ -142,7 +142,7 @@ Section type.
     rewrite etcx_extract /=. iIntros "[[% α] Γr]".
     iMod (lft_kill with "α") as "†"=>//. iApply ("type" with "† κ t pre Γr").
   Qed.
-  (** Retrieve a frozen object *)
+  (** Retrieve from a frozen object *)
   Lemma type_retrieve p α
     `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Zl) (p ◁[†α] T) Γ Γr get getr,
       !TyOp T κ) {e Zl' Γo pre} :
