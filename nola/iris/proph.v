@@ -355,9 +355,11 @@ Section lemmas.
     Frame p q:∗[ξl] r:∗[ξl] s:∗[ξl] | 5.
   Proof. apply: (frame_fractional _ _ _ _ _ _ _ proph_toks_as_fractional). Qed.
 
-  (** On [proph_toks] *)
+  (** [proph_toks] over a singleton list *)
   Lemma proph_toks_singleton {ξ q} : q:[ξ] ⊣⊢ q:∗[[ξ]].
   Proof. by rewrite /= right_id. Qed.
+
+  (** Combine [proph_toks]s *)
   Lemma proph_toks_combine {ξl ηl q r} :
     q:∗[ξl] -∗ r:∗[ηl] -∗ ∃ s,
       s:∗[ξl ++ ηl] ∗ (s:∗[ξl ++ ηl] -∗ q:∗[ξl] ∗ r:∗[ηl]).
