@@ -775,27 +775,28 @@ Proof.
     case=>//. case=>// ? IH ? _. move: (IH _ eq_refl). apply _.
 Qed.
 
+(** A path purely evaluates to the value of [of_path] *)
+Lemma of_path_pure_exec {p v} : of_path p = Some v → ∃ n, PureExec True n p v.
+Proof.
+  move: v. elim: p=>//.
+  - move=> > [= <-]. exists 0=>/= _. exact: nsteps_O.
+  - move=> > _ ? /of_to_val <-. exists 0=> _. exact: nsteps_O.
+  - case=>// e IH. case=>//. case=>//= k. move: IH. case (of_path e)=>//.
+    case=>//. case=>// l IH _ _ [= <-]. case: (IH (#l) eq_refl)=> n tol.
+    exists (S n)=> _. apply: nsteps_r; [|by apply nsteps_once_inv, pure_offset].
+    move: (tol I). apply (nsteps_congruence (λ e, e +ₗ #k)%E)=> ??.
+    apply: (pure_step_ctx (fill_item (BinOpLCtx _ _))).
+Qed.
+
 Section twp.
   Context `{!lrustGS_gen hlc Σ}.
 
   (** A path evaluates to the value of [of_path] *)
-  Lemma twp_path p {W E v} :
-    of_path p = Some v → ⊢ WP[W] p @ E [{ v', ⌜v' = v⌝ }].
-  Proof.
-    move: v. elim: p=>//.
-    - move=> > [= eq]. by iApply twp_value.
-    - move=> > _ ? /of_to_val ?. by iApply twp_value.
-    - case=>// e IH. case=>//. case=>//= ?. move: IH. case (of_path e)=>//.
-      case=>//. case=>// ? IH _ ?[=<-]. wp_bind e.
-      iApply twp_wand; [by iApply IH|]. iIntros (?->). by wp_op.
-  Qed.
   Lemma twp_path_bind K p {W E v Φ} :
     of_path p = Some v →
     WP[W] fill K (of_val v) @ E [{ Φ }] ⊢ WP[W] fill K p @ E [{ Φ }].
   Proof.
-    move=> ?. iIntros "?". iApply twp_bind.
-    iDestruct twp_path as "twp"=>//. iApply (twp_wand with "twp").
-    by iIntros (?->).
+    move=> /of_path_pure_exec[??]. iIntros "?". iApply twp_bind. by wp_pure _.
   Qed.
 End twp.
 (** Tactics for applying [twp_path_bind] *)
