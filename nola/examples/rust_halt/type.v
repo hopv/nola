@@ -898,6 +898,28 @@ Section type.
     iMod ("sub" with "κ t pre Γi") as (?) "(κ & t & pre & Γm)".
     iApply ("sub'" with "κ t pre Γm").
   Qed.
+
+  (** Modify the input type context of [type] *)
+  Lemma type_in {Xl' Xl Yl κ Γi' Γi e Γo prei pre} :
+    @sub Xl' _ κ Γi' Γi prei -∗ @type Xl Yl κ Γi e Γo pre -∗
+      type κ Γi' e Γo (prei ∘ pre).
+  Proof.
+    rewrite sub_unseal type_unseal.
+    iIntros "#sub #type !>" (????) "/= κ t pre Γi'".
+    iMod ("sub" with "κ t pre Γi'") as (?) "(κ & t & pre & Γi)".
+    iApply ("type" with "κ t pre Γi").
+  Qed.
+  (** Modify the output type context of [type] *)
+  Lemma type_out {Xl Yl Yl' κ Γi e Γo Γo' pre preo} :
+    @type Xl Yl κ Γi e Γo pre -∗ (∀ v, @sub Yl Yl' κ (Γo v) (Γo' v) preo) -∗
+      type κ Γi e Γo' (pre ∘ preo).
+  Proof.
+    rewrite sub_unseal type_unseal.
+    iIntros "#type #sub !>" (????) "/= κ t pre Γi".
+    iDestruct ("type" with "κ t pre Γi") as "twp". iApply (twp_wand with "twp").
+    iIntros (?) ">(% & κ & t & pre & Γo)". iApply ("sub" with "κ t pre Γo").
+  Qed.
+
   (** Modify the predicate transformer of [sub] *)
   Lemma sub_pre {Xl Yl κ Γi Γo pre pre'} :
     (∀ post xl, pre' post xl → pre post xl) →
@@ -907,6 +929,16 @@ Section type.
     iApply ("sub" with "κ t [] Γi"). iApply (proph_obs_impl with "pre")=> ?.
     apply to.
   Qed.
+  (** Modify the predicate transformer of [type] *)
+  Lemma type_pre {Xl Yl κ Γi e Γo pre pre'} :
+    (∀ post xl, pre' post xl → pre post xl) →
+    @type Xl Yl κ Γi e Γo pre ⊢ @type Xl Yl κ Γi e Γo pre'.
+  Proof.
+    rewrite type_unseal=> to. iIntros "#type !>" (????) "κ t #pre Γi".
+    iApply ("type" with "κ t [] Γi"). iApply (proph_obs_impl with "pre")=> ?.
+    apply to.
+  Qed.
+
   (** [sub] with an unsatisfiable predicate transformer *)
   Lemma sub_false {Xl Yl κ Γi Γo pre} :
     (∀ post xl, ¬ pre post xl) → ⊢ @sub Xl Yl κ Γi Γo pre.
@@ -914,6 +946,14 @@ Section type.
     rewrite sub_unseal=> ?. iIntros (????) "!> _ _ ?".
     by rewrite proph_obs_false.
   Qed.
+  (** [type] with an unsatisfiable predicate transformer *)
+  Lemma type_false {Xl Yl κ Γi e Γo pre} :
+    (∀ post xl, ¬ pre post xl) → ⊢ @type Xl Yl κ Γi e Γo pre.
+  Proof.
+    rewrite type_unseal=> ?. iIntros (????) "!> _ _ ?".
+    by rewrite proph_obs_false.
+  Qed.
+
   (** Modify the lifetime of [sub] *)
   Lemma sub_lft {Xl Yl κ κ' Γi Γo pre} :
     κ' ⊑□ κ -∗ @sub Xl Yl κ Γi Γo pre -∗ sub κ' Γi Γo pre.
@@ -922,6 +962,16 @@ Section type.
     iMod (lft_sincl_live_acc with "⊑ κ'") as (?) "[κ →κ']".
     iMod ("ty" with "κ t pre Γi") as (?) "[κ $]". iModIntro. by iApply "→κ'".
   Qed.
+  (** Modify the lifetime of [type] *)
+  Lemma type_lft {Xl Yl κ κ' Γi e Γo pre} :
+    κ' ⊑□ κ -∗ @type Xl Yl κ Γi e Γo pre -∗ @type Xl Yl κ' Γi e Γo pre.
+  Proof.
+    rewrite type_unseal. iIntros "#⊑ #type !>" (????) "κ' t pre Γi".
+    iMod (lft_sincl_live_acc with "⊑ κ'") as (?) "[κ →κ']".
+    iDestruct ("type" with "κ t pre Γi") as "twp". iApply (twp_wand with "twp").
+    iIntros (?) ">(% & κ & $) !>". by iApply "→κ'".
+  Qed.
+
   (** Frame the head in [sub] *)
   Lemma sub_frame_hd {X Yl Zl κ E Γi Γo pre} :
     @sub Yl Zl κ Γi Γo pre ⊢ @sub (X :: _) _ κ (E ᵖ:: Γi) (E ᵖ:: Γo)
@@ -930,6 +980,17 @@ Section type.
     rewrite sub_unseal. iIntros "#sub !>" (????) "/= κ t pre [E Γi]".
     by iMod ("sub" with "κ t pre Γi") as (?) "($ & $ & $ & $)".
   Qed.
+  (** Frame the head in [type] *)
+  Lemma type_frame_hd {X Yl Zl κ E Γi e Γo pre} :
+    @type Yl Zl κ Γi e Γo pre ⊢
+      @type (X :: _) _ κ (E ᵖ:: Γi) e (λ v, E ᵖ:: Γo v)
+        (λ post '(x, yl)', pre (λ zl, post (x, zl)') yl).
+  Proof.
+    rewrite type_unseal. iIntros "#type !>" (????) "/= κ t pre [E Γi]".
+    iDestruct ("type" with "κ t pre Γi") as "twp". iApply (twp_wand with "twp").
+    by iIntros (?) ">(% & $ & $ & $ & $) !>".
+  Qed.
+
   (** [sub] is monotone *)
   #[export] Instance sub_mono {Xl Yl} :
     Proper ((⊑) --> (=) ==> (=) ==>
@@ -952,61 +1013,6 @@ Section type.
     split; apply sub_mono=>//= ???; by apply to.
   Qed.
 
-  (** Modify the input type context of [type] *)
-  Lemma type_in {Xl' Xl Yl κ Γi' Γi e Γo prei pre} :
-    @sub Xl' _ κ Γi' Γi prei -∗ @type Xl Yl κ Γi e Γo pre -∗
-      type κ Γi' e Γo (prei ∘ pre).
-  Proof.
-    rewrite sub_unseal type_unseal.
-    iIntros "#sub #type !>" (????) "/= κ t pre Γi'".
-    iMod ("sub" with "κ t pre Γi'") as (?) "(κ & t & pre & Γi)".
-    iApply ("type" with "κ t pre Γi").
-  Qed.
-  (** Modify the output type context of [type] *)
-  Lemma type_out {Xl Yl Yl' κ Γi e Γo Γo' pre preo} :
-    @type Xl Yl κ Γi e Γo pre -∗ (∀ v, @sub Yl Yl' κ (Γo v) (Γo' v) preo) -∗
-      type κ Γi e Γo' (pre ∘ preo).
-  Proof.
-    rewrite sub_unseal type_unseal.
-    iIntros "#type #sub !>" (????) "/= κ t pre Γi".
-    iDestruct ("type" with "κ t pre Γi") as "twp". iApply (twp_wand with "twp").
-    iIntros (?) ">(% & κ & t & pre & Γo)". iApply ("sub" with "κ t pre Γo").
-  Qed.
-  (** Modify the predicate transformer of [type] *)
-  Lemma type_pre {Xl Yl κ Γi e Γo pre pre'} :
-    (∀ post xl, pre' post xl → pre post xl) →
-    @type Xl Yl κ Γi e Γo pre ⊢ @type Xl Yl κ Γi e Γo pre'.
-  Proof.
-    rewrite type_unseal=> to. iIntros "#type !>" (????) "κ t #pre Γi".
-    iApply ("type" with "κ t [] Γi"). iApply (proph_obs_impl with "pre")=> ?.
-    apply to.
-  Qed.
-  (** [type] with an unsatisfiable predicate transformer *)
-  Lemma type_false {Xl Yl κ Γi e Γo pre} :
-    (∀ post xl, ¬ pre post xl) → ⊢ @type Xl Yl κ Γi e Γo pre.
-  Proof.
-    rewrite type_unseal=> ?. iIntros (????) "!> _ _ ?".
-    by rewrite proph_obs_false.
-  Qed.
-  (** Modify the lifetime of [type] *)
-  Lemma type_lft {Xl Yl κ κ' Γi e Γo pre} :
-    κ' ⊑□ κ -∗ @type Xl Yl κ Γi e Γo pre -∗ @type Xl Yl κ' Γi e Γo pre.
-  Proof.
-    rewrite type_unseal. iIntros "#⊑ #type !>" (????) "κ' t pre Γi".
-    iMod (lft_sincl_live_acc with "⊑ κ'") as (?) "[κ →κ']".
-    iDestruct ("type" with "κ t pre Γi") as "twp". iApply (twp_wand with "twp").
-    iIntros (?) ">(% & κ & $) !>". by iApply "→κ'".
-  Qed.
-  (** Frame the head in [type] *)
-  Lemma type_frame_hd {X Yl Zl κ E Γi e Γo pre} :
-    @type Yl Zl κ Γi e Γo pre ⊢
-      @type (X :: _) _ κ (E ᵖ:: Γi) e (λ v, E ᵖ:: Γo v)
-        (λ post '(x, yl)', pre (λ zl, post (x, zl)') yl).
-  Proof.
-    rewrite type_unseal. iIntros "#type !>" (????) "/= κ t pre [E Γi]".
-    iDestruct ("type" with "κ t pre Γi") as "twp". iApply (twp_wand with "twp").
-    by iIntros (?) ">(% & $ & $ & $ & $) !>".
-  Qed.
   (** [type] is monotone *)
   #[export] Instance type_mono {Xl Yl} :
     Proper ((⊑) --> (=) ==> (=) ==> (=) ==>
