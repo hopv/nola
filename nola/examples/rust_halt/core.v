@@ -105,11 +105,31 @@ Section type.
     iIntros "[Γ $]". iMod (resol_tcx with "κ t Γ") as "($ & $ & post)".
     iModIntro. iApply (proph_obs_impl2 with "post pre")=> ?? to. by apply to.
   Qed.
+  Lemma type_leak {Xl} Γ
+    `(!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Yl') Γ Γi Γr get getr,
+      !ResolTcx Γ κ postr) {e Zl Γo pre} :
+    type (Yl:=Zl) κ Γr e Γo pre ⊢
+      type κ Γi e Γo (λ post yl, postr (get yl) → pre post (getr yl))%type.
+  Proof.
+    iIntros "type".
+    iApply (type_in (prei:=λ post _, _ → post _) with "[] type").
+    iApply sub_leak.
+  Qed.
   Lemma sub_leak_rest {Xl} Γ
     `(!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Zl) Γ Γg Γr get getr,
       !ResolTcx Γr κ postr) :
     ⊢ sub κ Γg Γ (λ post yl, postr (getr yl) → post (get yl))%type.
   Proof. apply: sub_leak=>//. split=> >. rewrite comm. exact: tcx_extract. Qed.
+  Lemma type_leak_rest {Xl} Γ
+    `(!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Yl') Γ Γi Γr get getr,
+      !ResolTcx Γr κ postr) {e Zl Γo pre} :
+    type (Yl:=Zl) κ Γ e Γo pre ⊢
+      type κ Γi e Γo (λ post yl, postr (getr yl) → pre post (get yl))%type.
+  Proof.
+    iIntros "type".
+    iApply (type_in (prei:=λ post _, _ → post _) with "[] type").
+    iApply sub_leak_rest.
+  Qed.
 
   (** Modify by subtyping *)
   Lemma sub_subty p {X} T
@@ -122,6 +142,16 @@ Section type.
     rewrite etcx_extract /=. iIntros "[(% & % & $ & T) Γr] !>". iFrame "pre Γr".
     by iDestruct ("TU" with "T") as "$".
   Qed.
+  Lemma type_subty p {X} T
+    `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (p ◁ T) Γi Γr get getr)
+    {Y} U f {κ Zl'' Γo e pre} :
+    subtyd' X Y T U f -∗ type (Yl:=Zl'') κ (p ◁ U ᵖ:: Γr) e Γo pre -∗
+      type κ Γi e Γo (λ post zl, pre post (f (get zl), getr zl)').
+  Proof.
+    iIntros "#sub type".
+    iApply (type_in (prei:=λ post _, post _) with "[] type").
+    by iApply sub_subty.
+  Qed.
   Lemma sub_subty_frozen p {X} T
     `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (p ◁[†α] T) Γ Γr get getr)
     {Y} U f `(!@Inj X Y (=) (=) f) {κ} :
@@ -132,6 +162,16 @@ Section type.
     rewrite etcx_extract /=. iIntros "[(% & $ & →T) Γr] !>". iFrame "pre Γr".
     iIntros "†". iMod ("→T" with "†") as (??) "[eqz T]". iExists _, _.
     iDestruct ("TU" with "T") as "$". iApply (proph_eqz_f with "eqz").
+  Qed.
+  Lemma type_subty_frozen p {X} T
+    `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (p ◁[†α] T) Γi Γr get getr)
+    {Y} U f `(!@Inj X Y (=) (=) f) {κ Zl'' Γo e pre} :
+    subtyd T U f -∗ type (Yl:=Zl'') κ (p ◁[†α] U ᵖ:: Γr) e Γo pre -∗
+      type κ Γi e Γo (λ post zl, pre post (f (get zl), getr zl)').
+  Proof.
+    iIntros "#sub type".
+    iApply (type_in (prei:=λ post _, post _) with "[] type").
+    by iApply sub_subty_frozen.
   Qed.
 
   (** Take out the real part of an object *)
