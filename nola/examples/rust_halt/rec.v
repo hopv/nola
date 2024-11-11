@@ -85,13 +85,12 @@ Section ty_rec.
         TyOpAt (F T) κ d) {d} :
     TCPlistForall (λ _ U, TyOpLt U κ d) Ul → TyOpAt (ty_rec F) κ d.
   Proof.
-    rewrite ty_rec_unfold=> OpUl. apply TyOp0; [|done]. rewrite ty_rec_unfold.
-    move: OpUl. elim: d; [move=> ??; lia|]=> d IH OpUl d' ?.
-    apply TyOp0; last first.
-    { move: OpUl. apply TCPlistForall_mono=> ??. apply: TyOpLt_mono=>//=. lia. }
-    have le : d' ≤ d by lia. apply: TyOpLt_mono=>//.
-    rewrite ty_rec_unfold. apply IH. move: OpUl. apply TCPlistForall_mono=> ??.
-    apply: TyOpLt_mono=>//=. lia.
+    rewrite ty_rec_unfold=> OpUl. apply TyOp0; [|done].
+    rewrite ty_rec_unfold=> +. move: OpUl.
+    elim: d; [move=> ??; lia|]=> d IH OpUl d' ?. apply TyOp0; last first.
+    { move: OpUl. apply TCPlistForall_mono=> ??. apply TyOpLt_mono=>//=. lia. }
+    move=> ??. rewrite ty_rec_unfold. apply IH; [|lia]. move: OpUl.
+    apply TCPlistForall_mono=> ??. apply TyOpLt_mono=>//=. lia.
   Qed.
   Lemma ty_rec_ty_op `(!∀ d T, TyOpLt T κ d → TyOpAt (F T) κ d) :
     TyOp (ty_rec F) κ.
@@ -106,13 +105,12 @@ Section ty_rec.
       ResolAt (ty_rec F) κ post d.
   Proof.
     rewrite ty_rec_unfold=> ResolUl. apply Resol0; [|done].
-    rewrite ty_rec_unfold. move: ResolUl. elim: d; [move=> ??; lia|].
+    rewrite ty_rec_unfold=> +. move: ResolUl. elim: d; [move=> ??; lia|].
     move=> d IH ResolUl d' ?. apply Resol0; last first.
-    { move: ResolUl. apply TCPlistForall_mono=> ??. apply: ResolLt_mono=>//=.
+    { move: ResolUl. apply TCPlistForall_mono=> ??. apply ResolLt_mono=>//=.
       lia. }
-    have le : d' ≤ d by lia. apply: ResolLt_mono=>//. rewrite ty_rec_unfold.
-    apply IH. move: ResolUl. apply TCPlistForall_mono=> ??.
-    apply: ResolLt_mono=>//=. lia.
+    move=> ??. rewrite ty_rec_unfold. apply IH; [|lia]. move: ResolUl.
+    apply TCPlistForall_mono=> ??. apply ResolLt_mono=>//=. lia.
   Qed.
   Lemma ty_rec_resol `(!∀ d T, ResolLt T κ post d → ResolAt (F T) κ post d) :
     Resol (ty_rec F) κ post.
@@ -128,13 +126,12 @@ Section ty_rec.
       RealAt (A:=A) (ty_rec F) κ get d.
   Proof.
     rewrite ty_rec_unfold=> RealUl. apply Real0; [|done].
-    rewrite ty_rec_unfold. move: RealUl. elim: d; [move=> ??; lia|].
+    rewrite ty_rec_unfold=> +. move: RealUl. elim: d; [move=> ??; lia|].
     move=> d IH RealUl d' ?. apply Real0; last first.
-    { move: RealUl. apply TCPlistForall_mono=>/= ?[??]. apply: RealLt_mono=>//=.
+    { move: RealUl. apply TCPlistForall_mono=>/= ?[??]. apply RealLt_mono=>//=.
       lia. }
-    have le : d' ≤ d by lia. apply: RealLt_mono=>//. rewrite ty_rec_unfold.
-    apply IH. move: RealUl. apply TCPlistForall_mono=> ?[??].
-    apply: RealLt_mono=>//=. lia.
+    move=> ??. rewrite ty_rec_unfold. apply IH; [|lia]. move: RealUl.
+    apply TCPlistForall_mono=> ?[??]. apply RealLt_mono=>//=. lia.
   Qed.
   Lemma ty_rec_real `(!∀ d T, RealLt (A:=A) T κ get d → RealAt (F T) κ get d) :
     Real (ty_rec F) κ get.
