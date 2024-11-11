@@ -21,7 +21,7 @@ Section ty_mod.
   Lemma ty_mod_unseal : @ty_mod = λ _ _ f T, (ty_size T, ty'_mod_def f T).
   Proof. by rewrite /ty_mod ty'_mod_unseal. Qed.
 
-  Context {X Y} {f : X → Y}.
+  Context {X Y} {f : Y → X}.
 
   (** [ty_mod] is size-preserving *)
   #[export] Instance ty_mod_preserv : Preserv (@ty_mod _ _ f).
