@@ -639,6 +639,7 @@ Section subty.
   Qed.
 End subty.
 
+(** Subtyping under [der] *)
 Notation subtyd := (subty der).
 
 (** ** Path *)
