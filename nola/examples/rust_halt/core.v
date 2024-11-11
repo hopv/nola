@@ -87,6 +87,12 @@ Section type.
     iIntros (?). by iApply (type_pure with "type'").
   Qed.
 
+  (** Sequential execution *)
+  Lemma type_seq {Xl Yl Zl κ Γ Γ' Γ'' e e' pre pre'} `{!Closed [] e'} :
+    type (Yl:=Yl) κ Γ e Γ' pre -∗ (∀ p, type κ (Γ' p) e' Γ'' pre') -∗
+      type (Xl:=Xl) (Yl:=Zl) κ Γ (e;; e') Γ'' (pre ∘ pre').
+  Proof. iIntros "#? #?". by iApply type_let. Qed.
+
   (** ** Operations on lifetimes *)
 
   (** Allocate a new local lifetime *)
