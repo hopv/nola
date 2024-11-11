@@ -72,8 +72,7 @@ Proof. elim: al xl yl; [case; by case|]=>/= ?? IH [??][??]. by rewrite IH. Qed.
 (** [plist] over [repeat] as [vec] *)
 Section plist_repeat.
   Context {A} {F : A → Type} {a : A}.
-  Fixpoint of_plist_repeat {n}
-    : plist F (repeat a n) → vec (F a) n :=
+  Fixpoint of_plist_repeat {n} : plist F (repeat a n) → vec (F a) n :=
     match n with 0 => λ _, [#] | S _ =>
       λ '(x, xl)', x ::: of_plist_repeat xl end.
   Fixpoint to_plist_repeat {n} (xl : vec (F a) n) : plist F (repeat a n) :=
@@ -91,12 +90,10 @@ Proof. by elim: xl=>/=; [done|]=> ???->. Qed.
 (** [plist] over [++] *)
 Section plist_app_sep.
   Context {A} {F : A → Type}.
-  Fixpoint plist_app {al bl}
-    : plist F al → plist F bl → plist F (al ++ bl) :=
+  Fixpoint plist_app {al bl} : plist F al → plist F bl → plist F (al ++ bl) :=
     match al with [] => λ _, id | _ :: _ =>
       λ '(x, xl)' yl, (x, plist_app xl yl)' end.
-  Fixpoint plist_sep {al bl}
-    : plist F (al ++ bl) → plist F al *' plist F bl :=
+  Fixpoint plist_sep {al bl} : plist F (al ++ bl) → plist F al *' plist F bl :=
     match al with [] => λ xl, (ᵖ[], xl)' | _ :: _ =>
       λ '(x, xl)', let '(yl, zl)' := plist_sep xl in (x ᵖ:: yl, zl)' end.
 End plist_app_sep.
@@ -106,8 +103,7 @@ Lemma plist_app_sep {A} {F : A → Type} {al bl}
   {xl : plist F al} {yl : plist F bl} :
   plist_sep (plist_app xl yl) = (xl, yl)'.
 Proof. elim: al xl yl; [by case|]=>/= ?? IH [??]?. by rewrite IH. Qed.
-Lemma plist_sep_app {A} {F : A → Type} {al bl}
-  {xl : plist F (al ++ bl)} :
+Lemma plist_sep_app {A} {F : A → Type} {al bl} {xl : plist F (al ++ bl)} :
   plist_app (plist_sep xl).1' (plist_sep xl).2' = xl.
 Proof. elim: al xl; [done|]=>/= ?? IH [??]. by rewrite IH. Qed.
 
