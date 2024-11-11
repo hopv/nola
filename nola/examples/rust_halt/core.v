@@ -8,7 +8,47 @@ Section type.
   Context `{!rust_haltGS CON Σ, !rust_haltC CON, !rust_haltJ CON JUDG Σ,
     !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), !rust_haltCS CON JUDG Σ}.
 
-  (** ** Operations on type contexts *)
+  (** ** Basic typing rules *)
+
+  (** Pure execution *)
+  Lemma type_pure {Xl Yl κ Γi e e' Γo pre n φ} :
+    PureExec φ n e e' → φ →
+    type (Xl:=Xl) (Yl:=Yl) κ Γi e' Γo pre ⊢ type κ Γi e Γo pre.
+  Proof.
+    rewrite type_unseal=> ??. iIntros "#type !>" (????) "κ t pre Γ".
+    wp_pure _. iApply ("type" with "κ t pre Γ").
+  Qed.
+
+  (** Binding *)
+  Lemma type_bind {Xl Yl Zl κ Γ Γ' Γ'' pre pre'} K e :
+    type (Yl:=Yl) κ Γ e Γ' pre -∗
+    (∀ p, type κ (Γ' p) (fill K (of_val p)) Γ'' pre') -∗
+      type (Xl:=Xl) (Yl:=Zl) κ Γ (fill K e) Γ'' (pre ∘ pre').
+  Proof.
+    rewrite type_unseal. iIntros "#type #type' !>" (????) "κ t pre Γ".
+    iApply twp_bind. iDestruct ("type" with "κ t pre Γ") as "big".
+    iApply (twp_wand with "big"). iIntros (?) ">(% & κ & t & pre & Γ')".
+    iApply ("type'" with "κ t pre Γ'").
+  Qed.
+
+  (** Let expression *)
+  Lemma type_let {Xl Yl Zl κ Γ Γ' Γ'' x e e' pre pre'}
+    `{!Closed (x :b: []) e'} :
+    type (Yl:=Yl) κ Γ e Γ' pre -∗
+    (∀ p, type κ (Γ' p) (subst' x p e') Γ'' pre') -∗
+      type (Xl:=Xl) (Yl:=Zl) κ Γ (let: x := e in e') Γ'' (pre ∘ pre').
+  Proof.
+    iIntros "#type #type'". iApply (type_bind [LetCtx x e'] with "type")=>/=.
+    iIntros (?). by iApply (type_pure with "type'").
+  Qed.
+
+  (** Sequential execution *)
+  Lemma type_seq {Xl Yl Zl κ Γ Γ' Γ'' e e' pre pre'} `{!Closed [] e'} :
+    type (Yl:=Yl) κ Γ e Γ' pre -∗ (∀ p, type κ (Γ' p) e' Γ'' pre') -∗
+      type (Xl:=Xl) (Yl:=Zl) κ Γ (e;; e') Γ'' (pre ∘ pre').
+  Proof. iIntros "#? #?". by iApply type_let. Qed.
+
+  (** ** Basic ghost operations *)
 
   (** Leak *)
   Lemma sub_leak {Xl} Γ
@@ -68,47 +108,7 @@ Section type.
     iApply (proph_obs_impl with "pre")=> π ?. by rewrite -(eq π).
   Qed.
 
-  (** ** Basic typing rules *)
-
-  (** Pure execution *)
-  Lemma type_pure {Xl Yl κ Γi e e' Γo pre n φ} :
-    PureExec φ n e e' → φ →
-    type (Xl:=Xl) (Yl:=Yl) κ Γi e' Γo pre ⊢ type κ Γi e Γo pre.
-  Proof.
-    rewrite type_unseal=> ??. iIntros "#type !>" (????) "κ t pre Γ".
-    wp_pure _. iApply ("type" with "κ t pre Γ").
-  Qed.
-
-  (** Binding *)
-  Lemma type_bind {Xl Yl Zl κ Γ Γ' Γ'' pre pre'} K e :
-    type (Yl:=Yl) κ Γ e Γ' pre -∗
-    (∀ p, type κ (Γ' p) (fill K (of_val p)) Γ'' pre') -∗
-      type (Xl:=Xl) (Yl:=Zl) κ Γ (fill K e) Γ'' (pre ∘ pre').
-  Proof.
-    rewrite type_unseal. iIntros "#type #type' !>" (????) "κ t pre Γ".
-    iApply twp_bind. iDestruct ("type" with "κ t pre Γ") as "big".
-    iApply (twp_wand with "big"). iIntros (?) ">(% & κ & t & pre & Γ')".
-    iApply ("type'" with "κ t pre Γ'").
-  Qed.
-
-  (** Let expression *)
-  Lemma type_let {Xl Yl Zl κ Γ Γ' Γ'' x e e' pre pre'}
-    `{!Closed (x :b: []) e'} :
-    type (Yl:=Yl) κ Γ e Γ' pre -∗
-    (∀ p, type κ (Γ' p) (subst' x p e') Γ'' pre') -∗
-      type (Xl:=Xl) (Yl:=Zl) κ Γ (let: x := e in e') Γ'' (pre ∘ pre').
-  Proof.
-    iIntros "#type #type'". iApply (type_bind [LetCtx x e'] with "type")=>/=.
-    iIntros (?). by iApply (type_pure with "type'").
-  Qed.
-
-  (** Sequential execution *)
-  Lemma type_seq {Xl Yl Zl κ Γ Γ' Γ'' e e' pre pre'} `{!Closed [] e'} :
-    type (Yl:=Yl) κ Γ e Γ' pre -∗ (∀ p, type κ (Γ' p) e' Γ'' pre') -∗
-      type (Xl:=Xl) (Yl:=Zl) κ Γ (e;; e') Γ'' (pre ∘ pre').
-  Proof. iIntros "#? #?". by iApply type_let. Qed.
-
-  (** ** Operations on lifetimes *)
+  (** ** Ghost operations on lifetimes *)
 
   (** Allocate a new local lifetime *)
   Lemma type_lft_new {Xl Yl κ Γi e Γo pre} :
