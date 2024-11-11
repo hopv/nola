@@ -29,6 +29,7 @@ Section type.
     iIntros "[$ Γr]". iMod (resol_tcx with "κ t Γr") as "($ & $ & post)".
     iModIntro. iApply (proph_obs_impl2 with "post pre")=> ?? to. by apply to.
   Qed.
+
   (** Modify by subtyping *)
   Lemma sub_subty p {X} T
     `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (p ◁ T) Γ Γr get getr)
@@ -74,6 +75,7 @@ Section type.
     iApply (twp_wand with "big"). iIntros (?) ">(% & κ & t & pre & Γ')".
     iApply ("type'" with "κ t pre Γ'").
   Qed.
+
   (** Let expression *)
   Lemma type_let {Xl Yl Zl κ Γ Γ' Γ'' x e e' pre pre'}
     `{!Closed (x :b: []) e'} :
@@ -96,6 +98,7 @@ Section type.
     iIntros "#type !>" (????) "κ t pre Γi". iMod lft_alloc as (α ?) "α".
     iApply ("type" with "κ t pre"). by iFrame.
   Qed.
+
   (** Use a local lifetime *)
   Lemma type_lft_use α
     `(!EtcxExtract (Yl:=Xl) (Zl:=Xl') ^[α] Γi Γr get getr) {Yl κ e Γo pre} :
@@ -110,6 +113,7 @@ Section type.
     iDestruct ("type" with "[$α $κ //] t pre Γr") as "twp".
     iApply (twp_wand with "twp"). by iIntros (?) ">(% & [$$] & $ & $ & $) !>".
   Qed.
+
   (** Eternalize a lifetime *)
   Lemma type_lft_eternal α
     `(!EtcxExtract (Yl:=Xl) (Zl:=Yl) ^[α] Γi Γr get getr) {Zl κ e Γo pre} :
@@ -121,6 +125,7 @@ Section type.
     iMod (lft_eternalize_sincl with "α") as "∞"=>//.
     iApply ("type" with "∞ κ t pre Γr").
   Qed.
+
   (** End a lifetime *)
   Lemma type_lft_end α
     `(!EtcxExtract (Yl:=Xl) (Zl:=Yl) ^[α] Γi Γr get getr) {Zl κ e Γo pre} :
@@ -131,6 +136,7 @@ Section type.
     rewrite etcx_extract /=. iIntros "[[% α] Γr]".
     iMod (lft_kill with "α") as "†"=>//. iApply ("type" with "† κ t pre Γr").
   Qed.
+
   (** Retrieve from a frozen object *)
   Lemma sub_retrieve p α
     `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Zl) (p ◁[†α] T) Γ Γr get getr,
