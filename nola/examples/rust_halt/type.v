@@ -824,17 +824,23 @@ Section type.
   (** [sub] is monotone *)
   #[export] Instance sub_mono {Xl Yl} :
     Proper ((⊑) --> (=) ==> (=) ==>
-      pointwise_relation _ (pointwise_relation _ impl) --> (⊢)) (@sub Xl Yl).
+      pointwise_relation _ (pointwise_relation _ (flip impl)) ==> (⊢))
+      (@sub Xl Yl).
   Proof.
-    move=>/= ?????<-??<-?? impl. rewrite sub_pre; [|exact impl].
+    move=>/= ?????<-??<-?? to. rewrite sub_pre; [|exact to].
     iApply sub_lft. by iApply lft_incl_sincl.
   Qed.
+  #[export] Instance sub_flip_mono {Xl Yl} :
+    Proper ((⊑) ==> (=) ==> (=) ==>
+      pointwise_relation _ (pointwise_relation _ impl) ==> flip (⊢))
+      (@sub Xl Yl).
+  Proof. solve_proper. Qed.
   #[export] Instance sub_proper {Xl Yl κ Γi Γo} :
-    Proper (pointwise_relation _ (pointwise_relation _ (↔)) --> (⊣⊢))
+    Proper (pointwise_relation _ (pointwise_relation _ (↔)) ==> (⊣⊢))
       (@sub Xl Yl κ Γi Γo).
   Proof.
-    move=> ?? impl. apply bi.equiv_entails.
-    split; apply sub_mono=>//= ???; by apply impl.
+    move=> ?? to. apply bi.equiv_entails.
+    split; apply sub_mono=>//= ???; by apply to.
   Qed.
 
   (** Modify the input type context of [type] *)
@@ -895,17 +901,23 @@ Section type.
   (** [type] is monotone *)
   #[export] Instance type_mono {Xl Yl} :
     Proper ((⊑) --> (=) ==> (=) ==> (=) ==>
-      pointwise_relation _ (pointwise_relation _ impl) --> (⊢)) (@type Xl Yl).
+      pointwise_relation _ (pointwise_relation _ (flip impl)) ==> (⊢))
+      (@type Xl Yl).
   Proof.
-    move=>/= ?????<-??<-??<-?? impl. rewrite type_pre; [|exact impl].
+    move=>/= ?????<-??<-??<-?? to. rewrite type_pre; [|exact to].
     iApply type_lft. by iApply lft_incl_sincl.
   Qed.
+  #[export] Instance type_flip_mono {Xl Yl} :
+    Proper ((⊑) ==> (=) ==> (=) ==> (=) ==>
+      pointwise_relation _ (pointwise_relation _ impl) ==> flip (⊢))
+      (@type Xl Yl).
+  Proof. solve_proper. Qed.
   #[export] Instance type_proper {Xl Yl κ Γi e Γo} :
-    Proper (pointwise_relation _ (pointwise_relation _ (↔)) --> (⊣⊢))
+    Proper (pointwise_relation _ (pointwise_relation _ (↔)) ==> (⊣⊢))
       (@type Xl Yl κ Γi e Γo).
   Proof.
-    move=> ?? impl. apply bi.equiv_entails.
-    split; apply type_mono=>//= ???; by apply impl.
+    move=> ?? to. apply bi.equiv_entails.
+    split; apply type_mono=>//= ???; by apply to.
   Qed.
 End type.
 Arguments type {_ _ _ _ _ _ _ _} _ _ _%_E _ _.
