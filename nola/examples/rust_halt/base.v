@@ -191,6 +191,34 @@ Lemma lft_incl'_live_acc `{!lftG Σ} `(!LftIncl κ α) {q} :
   q.[κ] ⊢ ∃ r, r.[α] ∗ (r.[α] -∗ q.[κ]).
 Proof. exact: lft_incl_live_acc. Qed.
 
+(** ** Utility on the language *)
+
+Section lrust.
+  Context `{!lrustGS_gen hlc Σ}.
+
+  (** Fuse points-to tokens *)
+  Lemma heap_pointsto_vec_fuse {l q vl r wl} :
+    l ↦∗{q} vl -∗ (l +ₗ length vl) ↦∗{r} wl -∗ ∃ s, l ↦∗{s} (vl ++ wl) ∗
+      (l ↦∗{s} (vl ++ wl) -∗ l ↦∗{q} vl ∗ (l +ₗ length vl) ↦∗{r} wl).
+  Proof.
+    case (Qp.lower_bound q r)=> s[?[?[->->]]]. iIntros "[↦ ↦'] [↦+ ↦+']".
+    iExists s. rewrite heap_pointsto_vec_app. iFrame "↦ ↦+". iIntros "[↦ ↦+]".
+    iCombine "↦ ↦'" as "$". iCombine "↦+ ↦+'" as "$".
+  Qed.
+  Lemma heap_pointsto_just_vec_fuse {l q v r wl} :
+    l ↦{q} v -∗ (l +ₗ 1) ↦∗{r} wl -∗ ∃ s, l ↦∗{s} (v :: wl) ∗
+      (l ↦∗{s} (v :: wl) -∗ l ↦{q} v ∗ (l +ₗ 1) ↦∗{r} wl).
+  Proof.
+    setoid_rewrite <-heap_pointsto_vec_singleton. exact: heap_pointsto_vec_fuse.
+  Qed.
+  Lemma heap_pointsto_vec_just_fuse {l q vl r w} :
+    l ↦∗{q} vl -∗ (l +ₗ length vl) ↦{r} w -∗ ∃ s, l ↦∗{s} (vl ++ [w]) ∗
+      (l ↦∗{s} (vl ++ [w]) -∗ l ↦∗{q} vl ∗ (l +ₗ length vl) ↦{r} w).
+  Proof.
+    setoid_rewrite <-heap_pointsto_vec_singleton. exact: heap_pointsto_vec_fuse.
+  Qed.
+End lrust.
+
 (** ** Shared borrows *)
 
 (** [spointsto]: Shared borrow over a points-to token *)
