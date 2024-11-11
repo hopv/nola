@@ -325,6 +325,11 @@ Section ty_op.
     Proof. move=> ?. by apply ty_op_lt. Qed.
   End ty_op_lt.
 
+  (** [TyOpLt] via universal quantification *)
+  #[export] Instance TyOp_TyOpLt `{!∀ d, @TyOpAt X T κ d} {d} :
+    TyOpLt T κ d | 10.
+  Proof. by move. Qed.
+
   Context `{!rust_haltC CON, !rust_haltCS CON JUDG Σ, !rust_haltJS CON JUDG Σ}.
 
   (** Basic operations on a simple type at a depth *)
@@ -556,6 +561,11 @@ Section resol.
     q.[κ] -∗ na_own t ⊤ -∗ ⟦ ty_own T t d' xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
       q.[κ] ∗ na_own t ⊤ ∗ ⟨π, post (xπ π)⟩.
   Proof. move=> ?. by apply @resol, resol_lt'. Qed.
+
+  (** [ResolLt] via universal quantification *)
+  #[export] Instance Resol_ResolLt `{!∀ d, @ResolAt X T κ post d} {d} :
+    ResolLt T κ post d | 10.
+  Proof. by move. Qed.
 End resol.
 (** [Resol]: Resolution over a type *)
 Notation Resol T κ post := (∀ d, ResolAt T κ post d).
@@ -659,6 +669,11 @@ Section real.
     q.[κ] -∗ na_own t ⊤ -∗ ⟦ ty_shr T t d' l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
       ⌜∃ y, ∀ π, get (xπ π) = y⌝ ∧ q.[κ] ∗ na_own t ⊤.
   Proof. move=> ?. by apply @real_shr, real_lt. Qed.
+
+  (** [RealLt] via universal quantification *)
+  #[export] Instance Real_RealLt `{!∀ d, @RealAt X A T κ get d} {d} :
+    RealLt T κ get d | 10.
+  Proof. by move. Qed.
 End real.
 (** [Real]: Taking the real part out of a type at a depth *)
 Notation Real T κ get := (∀ d, RealAt T κ get d).
