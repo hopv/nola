@@ -38,7 +38,7 @@ Section type.
     (∀ v, type κ (Γm v) (subst' x v e') Γo pre') -∗
       type (Xl:=Xl) (Yl:=Zl) κ Γi (let: x := e in e') Γo (pre ∘ pre').
   Proof.
-    iIntros "#type #type'". iApply (type_bind [LetCtx x e'] with "type")=>/=.
+    iIntros "type type'". iApply (type_bind [LetCtx x e'] with "type")=>/=.
     iIntros (?). by iApply (type_pure with "type'").
   Qed.
 
@@ -72,7 +72,7 @@ Section type.
       type (Yl:=Zl) κ Γi (fill K p) Γo
         (λ post zl, pre post (get zl, getr zl)').
   Proof.
-    iIntros "#type". iApply (type_bind (pre:=λ post _, post _) with "[] type").
+    iIntros "type". iApply (type_bind (pre:=λ post _, post _) with "[] type").
     iApply type_path.
   Qed.
   Lemma type_path_frozen_bind K p
@@ -82,7 +82,7 @@ Section type.
       type (Yl:=Zl) κ Γi (fill K p) Γo
         (λ post zl, pre post (get zl, getr zl)').
   Proof.
-    iIntros "#type". iApply (type_bind (pre:=λ post _, post _) with "[] type").
+    iIntros "type". iApply (type_bind (pre:=λ post _, post _) with "[] type").
     iApply type_path_frozen.
   Qed.
 
