@@ -842,11 +842,11 @@ Section tcx.
 
   (** [sem_tcx] over [ᵖ++] *)
   Lemma sem_tcx_app {t Xl Yl Γ Γ' xlπ ylπ} :
-    @sem_tcx t Xl Γ xlπ ∗ @sem_tcx t Yl Γ' ylπ ⊣⊢
-      sem_tcx t (Γ ᵖ++ Γ') (λ π, xlπ π ᵖ++ ylπ π).
+    sem_tcx t (Γ ᵖ++ Γ') (λ π, xlπ π ᵖ++ ylπ π) ⊣⊢
+      @sem_tcx t Xl Γ xlπ ∗ @sem_tcx t Yl Γ' ylπ.
   Proof.
     move: Γ xlπ. elim: Xl=>/=. { move=> ??. by rewrite left_id. }
-    move=> ?? IH ??. by rewrite -IH assoc.
+    move=> ?? IH ??. by rewrite IH assoc.
   Qed.
 End tcx.
 
@@ -1099,7 +1099,7 @@ Section tcx_extract.
     ⊢ sub κ Γg (Γ ᵖ++ Γr) (λ post yl, post (get yl ᵖ++ getr yl)).
   Proof.
     rewrite sub_unseal. iIntros (????) "!>/= $ $ pre Γ !>". iExists (λ _, _).
-    iFrame "pre". by rewrite tcx_extract sem_tcx_app.
+    iFrame "pre". by rewrite tcx_extract -sem_tcx_app.
   Qed.
 End tcx_extract.
 
