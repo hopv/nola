@@ -22,7 +22,7 @@ Section type.
   (** Binding *)
   Lemma type_bind {Xl Yl Zl κ Γ Γ' Γ'' pre pre'} K e :
     type (Yl:=Yl) κ Γ e Γ' pre -∗
-    (∀ p, type κ (Γ' p) (fill K (of_val p)) Γ'' pre') -∗
+    (∀ v, type κ (Γ' v) (fill K (of_val v)) Γ'' pre') -∗
       type (Xl:=Xl) (Yl:=Zl) κ Γ (fill K e) Γ'' (pre ∘ pre').
   Proof.
     rewrite type_unseal. iIntros "#type #type' !>" (????) "κ t pre Γ".
@@ -35,7 +35,7 @@ Section type.
   Lemma type_let {Xl Yl Zl κ Γ Γ' Γ'' x e e' pre pre'}
     `{!Closed (x :b: []) e'} :
     type (Yl:=Yl) κ Γ e Γ' pre -∗
-    (∀ p, type κ (Γ' p) (subst' x p e') Γ'' pre') -∗
+    (∀ v, type κ (Γ' v) (subst' x v e') Γ'' pre') -∗
       type (Xl:=Xl) (Yl:=Zl) κ Γ (let: x := e in e') Γ'' (pre ∘ pre').
   Proof.
     iIntros "#type #type'". iApply (type_bind [LetCtx x e'] with "type")=>/=.
@@ -44,7 +44,7 @@ Section type.
 
   (** Sequential execution *)
   Lemma type_seq {Xl Yl Zl κ Γ Γ' Γ'' e e' pre pre'} `{!Closed [] e'} :
-    type (Yl:=Yl) κ Γ e Γ' pre -∗ (∀ p, type κ (Γ' p) e' Γ'' pre') -∗
+    type (Yl:=Yl) κ Γ e Γ' pre -∗ (∀ v, type κ (Γ' v) e' Γ'' pre') -∗
       type (Xl:=Xl) (Yl:=Zl) κ Γ (e;; e') Γ'' (pre ∘ pre').
   Proof. iIntros "#? #?". by iApply type_let. Qed.
 
