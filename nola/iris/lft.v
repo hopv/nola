@@ -235,9 +235,9 @@ Section lft.
 
   (** Live lifetime token over [⊤]/[⊓] *)
   Lemma lft_live_top {q} : ⊢ q.[⊤].
-  Proof. by apply big_sepMS_empty'. Qed.
+  Proof. exact: big_sepMS_empty'. Qed.
   Lemma lft_live_meet {α β q} : q.[α ⊓ β] ⊣⊢ q.[α] ∗ q.[β].
-  Proof. by apply big_sepMS_disj_union. Qed.
+  Proof. exact: big_sepMS_disj_union. Qed.
 
   (** Dead lifetime token over [⊤]/[⊓] *)
   Lemma lft_dead_top : [†⊤] ⊢ False.
@@ -257,9 +257,9 @@ Section lft.
 
   (** Eternal lifetime token over [⊤]/[⊓] *)
   Lemma lft_etern_top : ⊢ [∞⊤].
-  Proof. by apply big_sepMS_empty'. Qed.
+  Proof. exact: big_sepMS_empty'. Qed.
   Lemma lft_etern_meet {α β} : [∞α ⊓ β] ⊣⊢ [∞α] ∗ [∞β].
-  Proof. by apply big_sepMS_disj_union. Qed.
+  Proof. exact: big_sepMS_disj_union. Qed.
 
   (** Access a live lifetime token using [⊑] *)
   Local Lemma alftl_incl_live_acc {α q} (bl : list alft) :

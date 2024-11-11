@@ -301,11 +301,11 @@ Section citi_Forall2.
     {k k' t t'} :
     @citi_Forall2 _ I C _ _ R k k' t t' → citi_Forall2 R t' t.
   Proof.
-    move=> F. apply citi_Forall2_flip. move: F. by apply citi_Forall2_mono.
+    move=> F. apply citi_Forall2_flip. move: F. exact: citi_Forall2_mono.
   Qed.
   #[export] Instance citi_Forall2_sym' `{!∀ s, @Symmetric (D s) (R s)} {k'} :
     Symmetric (@citi_Forall2 _ I C _ _ R k' _).
-  Proof. move=> ??. apply citi_Forall2_sym. Qed.
+  Proof. move=> ??. exact citi_Forall2_sym. Qed.
 
   (** Compose [citi_Forall2]s *)
   Lemma citi_Forall2_compose {D D' D'' R R' R'' k k' k'' t t' t''} :

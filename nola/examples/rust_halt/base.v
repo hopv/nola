@@ -189,7 +189,7 @@ Proof. unfold LftIncl. etrans; [exact lft_incl_meet_r|done]. Qed.
 
 Lemma lft_incl'_live_acc `{!lftG Σ} `(!LftIncl κ α) {q} :
   q.[κ] ⊢ ∃ r, r.[α] ∗ (r.[α] -∗ q.[κ]).
-Proof. by apply lft_incl_live_acc. Qed.
+Proof. exact: lft_incl_live_acc. Qed.
 
 (** ** Shared borrows *)
 

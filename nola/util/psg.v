@@ -39,7 +39,7 @@ Section psg.
     split; [done|]. by etrans.
   Qed.
   #[export] Instance Psgoid_proper {f} : Proper ((≡) ==> (≡)) (Psgoid f).
-  Proof. move=> ???; split; by apply Psgoid_proper'. Qed.
+  Proof. move=> ???; split; exact: Psgoid_proper'. Qed.
 
   (** ** [Psgoidp]: [Psgoid] parameterized with an inductive hypothesis [ih] *)
   Definition Psgoidp f (ih : OT -p> Prop) : OT -p> Prop :=
@@ -118,7 +118,7 @@ Section psg.
         apply factor'_Psgoid; (etrans; [|done]); [by apply big_meet_elim|].
       apply big_meet_intro=> o' s. move: (sub _ s)=> /Psgoid_factor ->.
       apply big_meet_mono; [|done]=> ?[??]. split; [done|]. etrans; [done|].
-      etrans; [|done]. by apply (big_meet_elim id).
+      etrans; [|done]. exact: (big_meet_elim id).
   Qed.
 
   (** ** Properties of [Psgoid] *)
@@ -138,7 +138,7 @@ Section psg.
     right. exists (λ o, ∃ a, S a ∧ o = g a). split.
     { move=> ?[?[?->]]. by apply Psgoid_Psgoid', sub. }
     apply equiv_ole. split; apply big_meet_intro=> ?.
-    { move=> [?[?->]]. by apply big_meet_elim. }
+    { move=> [?[?->]]. exact: big_meet_elim. }
     move=> ?. apply (big_meet_elim id). eauto.
   Qed.
 
@@ -150,11 +150,11 @@ Section psg.
 
   (** [psg f] is [Psgoid f] *)
   Lemma psg_Psgoid {f} : Psgoid f (psg f).
-  Proof. rewrite psg_unseal. by apply Psgoid_big_meet. Qed.
+  Proof. rewrite psg_unseal. exact: Psgoid_big_meet. Qed.
 
   (** [psg f] lower-bounds [Psgoid f] *)
   Lemma psg_Psgoid_lb {f o} : Psgoid f o → psg f ⊑ o.
-  Proof. rewrite psg_unseal. exact (big_meet_elim id). Qed.
+  Proof. rewrite psg_unseal. exact: (big_meet_elim id). Qed.
 
   (** [psg f] is a post-fixpoint *)
   Lemma psg_post {f} : psg f ⊑ f (psg f).

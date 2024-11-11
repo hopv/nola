@@ -46,7 +46,7 @@ Section deriv.
   (** [Deriv] is monotone over the inductive hypothesis *)
   Lemma Deriv_mono `{!Deriv ih δ} (ih' : _ → Prop) :
     (∀ δ', ih δ' → ih' δ') → Deriv ih' δ.
-  Proof. move=> to. move: Deriv0. by apply Psgoidp_mono. Qed.
+  Proof. move=> to. move: Deriv0. exact: Psgoidp_mono. Qed.
 
   (** Parameterized induction principle for [Deriv] *)
   Lemma Deriv_ind `{!Deriv ih' δ} ih : Deriv (λ δ', ih δ' ∧ ih' δ') ⊑ ih → ih δ.

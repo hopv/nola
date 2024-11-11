@@ -61,7 +61,7 @@ Section big_sepPL.
       (forall_relation (λ _, pointwise_relation _ (flip (⊢))) ==>
         forall_relation (λ _, (=) ==> flip (⊢)))
       (@big_sepPL PROP A F).
-  Proof. move=> ?*?*?*. by apply big_sepPL_mono. Qed.
+  Proof. move=> ?*?*?*. exact: big_sepPL_mono. Qed.
 
   (** [big_sepL] over [of_plist] as [big_sepPL] *)
   Lemma big_sepL_of_plist {B}

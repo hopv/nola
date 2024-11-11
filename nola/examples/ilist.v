@@ -28,7 +28,7 @@ Section ilist.
   Qed.
   #[export] Instance cif_ilist_gen_productive' {N Φx} :
     Productive (cif_ilist_gen N Φx).
-  Proof. move=> ?. by apply cif_ilist_gen_productive. Qed.
+  Proof. move=> ?. exact: cif_ilist_gen_productive. Qed.
   Definition cif_ilist N (Φx : loc -pr> cif CON Σ) : loc -pr> cif CON Σ :=
     profix (cif_ilist_gen N Φx).
   (** Unfold [cif_ilist] *)

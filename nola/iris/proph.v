@@ -89,7 +89,7 @@ Local Lemma proph_upds_eqv_out {TY} (L : proph_log TY) :
   ∀ π, prasn_eqv (.∉ pl_vars L) (:<[L]> π) π.
 Proof.
   elim L=>/= [|[??]? IH]; [done|]=> > /not_elem_of_cons [??].
-  rewrite IH; [|done]. by apply proph_upd_ne.
+  rewrite IH; [|done]. exact: proph_upd_ne.
 Qed.
 
 (** [L] can by satisfied by [:<[L]>] for valid [L] *)
@@ -104,7 +104,7 @@ Proof.
 Qed.
 (** [L] can by satisfied for valid [L] *)
 Local Lemma proph_valid_sat {TY} {L : proph_log TY} : .✓ L → ∃ π, π ◁ L.
-Proof. exists (:<[L]> inhabitant). by apply proph_valid_upds_sat. Qed.
+Proof. exists (:<[L]> inhabitant). exact: proph_valid_upds_sat. Qed.
 
 (** ** Prophecy resource algebra *)
 
@@ -378,7 +378,7 @@ Section lemmas.
     move=> imp' ??. by apply imp, imp'.
   Qed.
   #[export] Instance proph_obs_flip_mono :
-    Proper (pointwise_relation _ (flip impl) ==> flip (⊢)) proph_obs.
+    Proper (pointwise_relation _ impl --> flip (⊢)) proph_obs.
   Proof. solve_proper. Qed.
   #[export] Instance proph_obs_proper :
     Proper (pointwise_relation _ (↔) ==> (⊣⊢)) proph_obs.

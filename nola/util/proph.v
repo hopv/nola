@@ -147,7 +147,7 @@ Section lemmas.
   #[export] Instance proph_dep_flip_mono {A} :
     Proper (pointwise_relation _ (=) ==> flip (⊆) ==> flip impl)
       (@proph_dep TY A).
-  Proof. move=> ?*?*/=. by apply proph_dep_mono. Qed.
+  Proof. move=> ?*?*/=. exact: proph_dep_mono. Qed.
   #[export] Instance proph_dep_proper {A} :
     Proper (pointwise_relation _ (=) ==> (≡ₚ) ==> (↔)) (@proph_dep TY A).
   Proof. move=> ?*?? eq. split; apply proph_dep_mono=>//; by rewrite eq. Qed.

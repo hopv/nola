@@ -169,7 +169,7 @@ Section ty.
   (** [sty_own_clair] applied to [⊣⊢] *)
   Lemma sty_own_clair' `{!@Sty X T} {t d xπ xπ' vl δ} : (∀ π, xπ π = xπ' π) →
     ⟦ sty_own T t d xπ vl ⟧ᶜ(δ) ⊣⊢ ⟦ sty_own T t d xπ' vl ⟧ᶜ(δ).
-  Proof. move=> ?. apply bi.equiv_entails. split; by apply: sty_own_clair. Qed.
+  Proof. move=> ?. apply bi.equiv_entails. split; exact: sty_own_clair. Qed.
 
   (** Basic properties of a plain type *)
   Class Pty {X} (T : pty CON Σ X) : Prop := PTY {
@@ -283,10 +283,10 @@ Section ty_op.
   Qed.
   #[export] Instance TyOpAt_flip_mono {X} :
     Proper ((≡) ==> (⊑) ==> (=) ==> flip impl) (@TyOpAt X).
-  Proof. move=> ?*?*??<- /=. by apply TyOpAt_mono. Qed.
+  Proof. move=> ?*?*??<- /=. exact: TyOpAt_mono. Qed.
   #[export] Instance TyOpAt_proper {X} :
     Proper ((≡) ==> (=) --> (=) ==> (↔)) (@TyOpAt X).
-  Proof. move=> ?*??<-??<-. split; by apply TyOpAt_mono. Qed.
+  Proof. move=> ?*??<-??<-. split; exact: TyOpAt_mono. Qed.
 
   (** [TyOpLt]: Basic operations on a type below a depth *)
   Class TyOpLt {X} (T : ty CON Σ X) (κ : lft) (d : nat) : Prop :=
@@ -297,14 +297,14 @@ Section ty_op.
     Proper ((≡) ==> (⊑) --> (≤) --> impl) (@TyOpLt X).
   Proof.
     move=> ?*?* d d' /= ? wl d'' ?. have lt : d'' < d by lia. move: (wl _ lt).
-    by apply TyOpAt_mono.
+    exact: TyOpAt_mono.
   Qed.
   #[export] Instance TyOpLt_flip_mono {X} :
     Proper ((≡) ==> (⊑) ==> (≤) ==> flip impl) (@TyOpLt X).
-  Proof. move=> ?*?*?* /=. by apply TyOpLt_mono. Qed.
+  Proof. move=> ?*?*?* /=. exact: TyOpLt_mono. Qed.
   #[export] Instance TyOpLt_proper {X} :
     Proper ((≡) ==> (=) ==> (=) ==> (↔)) (@TyOpLt X).
-  Proof. move=> ?*?? <- ?? <-. split; by apply TyOpLt_mono. Qed.
+  Proof. move=> ?*?? <- ?? <-. split; exact: TyOpLt_mono. Qed.
 
   (** Lemmas under [TyOpLt] *)
   Section ty_op_lt.
@@ -541,7 +541,7 @@ Section resol.
   #[export] Instance ResolLt_flip_mono {X} :
     Proper ((≡) ==> (⊑) ==> pointwise_relation _ (flip impl) ==> (≤) ==>
       flip impl) (@ResolLt X).
-  Proof. move=> ?*?*?*?*. by eapply ResolLt_mono. Qed.
+  Proof. move=> ?*?*?*?*. exact: ResolLt_mono. Qed.
   #[export] Instance ResolLt_proper {X} :
     Proper ((≡) ==> (=) ==> pointwise_relation _ (↔) ==> (=) ==> (↔))
       (@ResolLt X).
