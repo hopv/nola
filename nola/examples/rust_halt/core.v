@@ -32,8 +32,8 @@ Section type.
   (** Modify by subtyping *)
   Lemma sub_subty p {X} T
     `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (p ◁ T) Γ Γr get getr)
-    {Y} U (f : X → Y) {κ} :
-    subtyd T U f ⊢
+    {Y} U f {κ} :
+    subtyd' X Y T U f ⊢
       sub κ Γ (p ◁ U ᵖ:: Γr) (λ post zl, post (f (get zl), getr zl)').
   Proof.
     rewrite subty_unseal sub_unseal. iIntros "[_[#TU _]] !>/=" (????) "$ $ pre".

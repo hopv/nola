@@ -361,6 +361,7 @@ Hint Mode TyOpLt - - - - - - - - ! - - : typeclass_instances.
 
 (** [TyOp]: Basic operations on a type *)
 Notation TyOp T κ := (∀ d, TyOpAt T κ d).
+Notation TyOp' X T κ := (∀ d, TyOpAt (X:=X) T κ d) (only parsing).
 
 (** ** Namespaces and masks *)
 
@@ -558,6 +559,7 @@ Section resol.
 End resol.
 (** [Resol]: Resolution over a type *)
 Notation Resol T κ post := (∀ d, ResolAt T κ post d).
+Notation Resol' X T κ post := (∀ d, ResolAt (X:=X) T κ post d) (only parsing).
 
 (** ** Subtyping *)
 
@@ -641,6 +643,7 @@ End subty.
 
 (** Subtyping under [der] *)
 Notation subtyd := (subty der).
+Notation subtyd' X Y := (subty (X:=X) (Y:=Y) der) (only parsing).
 
 (** ** Path *)
 
