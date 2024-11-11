@@ -890,21 +890,21 @@ Section type.
   (** [sub] is reflexive and transitive *)
   Lemma sub_refl {Xl κ Γ} : ⊢ @sub Xl _ κ Γ Γ id.
   Proof. rewrite sub_unseal. iIntros (????) "!>/= $ $ ? $ //". Qed.
-  Lemma sub_trans {Xl Yl Zl κ Γ Γ' Γ'' pre pre'} :
-    @sub Xl Yl κ Γ Γ' pre -∗ @sub _ Zl κ Γ' Γ'' pre' -∗
-      sub κ Γ Γ'' (pre ∘ pre').
+  Lemma sub_trans {Xl Yl Zl κ Γi Γm Γo pre pre'} :
+    @sub Xl Yl κ Γi Γm pre -∗ @sub _ Zl κ Γm Γo pre' -∗
+      sub κ Γi Γo (pre ∘ pre').
   Proof.
-    rewrite sub_unseal. iIntros "#sub #sub' !>" (????) "κ t pre Γ".
-    iMod ("sub" with "κ t pre Γ") as (?) "(κ & t & pre & Γ')".
-    iApply ("sub'" with "κ t pre Γ'").
+    rewrite sub_unseal. iIntros "#sub #sub' !>" (????) "κ t pre Γi".
+    iMod ("sub" with "κ t pre Γi") as (?) "(κ & t & pre & Γm)".
+    iApply ("sub'" with "κ t pre Γm").
   Qed.
   (** Modify the predicate transformer of [sub] *)
   Lemma sub_pre {Xl Yl κ Γi Γo pre pre'} :
     (∀ post xl, pre' post xl → pre post xl) →
     @sub Xl Yl κ Γi Γo pre ⊢ @sub Xl Yl κ Γi Γo pre'.
   Proof.
-    rewrite sub_unseal=> to. iIntros "#sub !>" (????) "κ t #pre Γ".
-    iApply ("sub" with "κ t [] Γ"). iApply (proph_obs_impl with "pre")=> ?.
+    rewrite sub_unseal=> to. iIntros "#sub !>" (????) "κ t #pre Γi".
+    iApply ("sub" with "κ t [] Γi"). iApply (proph_obs_impl with "pre")=> ?.
     apply to.
   Qed.
   (** [sub] with an unsatisfiable predicate transformer *)
