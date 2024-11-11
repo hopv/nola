@@ -561,6 +561,110 @@ End resol.
 Notation Resol T κ post := (∀ d, ResolAt T κ post d).
 Notation Resol' X T κ post := (∀ d, ResolAt (X:=X) T κ post d) (only parsing).
 
+(** ** Taking the real, or non-prophetic, part out of types *)
+
+Section real.
+  Context `{!rust_haltGS CON Σ, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ),
+    !rust_haltC CON, !rust_haltJ CON JUDG Σ, !rust_haltCS CON JUDG Σ}.
+
+  (** [RealAt]: Taking the real part out of a type at a depth *)
+  Class RealAt {X A} (T : ty CON Σ X) (κ : lft) (get : X → A) (d : nat)
+    : Prop := REAL_AT {
+    real_own {t xπ vl q} :
+      q.[κ] -∗ na_own t ⊤ -∗ ⟦ ty_own T t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
+        ⌜∃ y, ∀ π, get (xπ π) = y⌝ ∧
+        q.[κ] ∗ na_own t ⊤ ∗ ⟦ ty_own T t d xπ vl ⟧ᶜ;
+    real_shr {t l α xπ q} :
+      q.[κ] -∗ na_own t ⊤ -∗ ⟦ ty_shr T t d l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
+        ⌜∃ y, ∀ π, get (xπ π) = y⌝ ∧ q.[κ] ∗ na_own t ⊤;
+  }.
+
+  (** [RealAt] is monotone *)
+  #[export] Instance RealAt_mono {X A} :
+    Proper ((≡) ==> (⊑) --> (=) ==> (=) ==> impl) (@RealAt X A).
+  Proof.
+    move=> ?? /ty_equiv[_[eqvO eqvS]] κ κ' /= ???<-??<-?.
+    have ? : LftIncl κ' κ by done.
+    split=>/= >; iIntros "κ' t T";
+      iDestruct (lft_incl'_live_acc (α:=κ) with "κ'") as (?) "[κ →κ']";
+      [rewrite -(eqvO _ _ _ _);
+        iMod (real_own with "κ t T") as "($ & κ & $)"|
+        rewrite -(eqvS _ _ _ _ _);
+          iMod (real_shr with "κ t T") as "($ & κ & $)"];
+      by iDestruct ("→κ'" with "κ") as "$".
+  Qed.
+  #[export] Instance RealAt_flip_mono {X A} :
+    Proper ((≡) ==> (⊑) ==> (=) ==> (=) ==> flip impl) (@RealAt X A).
+  Proof. move=> ?*?*??<-??<-. exact: RealAt_mono. Qed.
+  #[export] Instance RealAt_proper {X A} :
+    Proper ((≡) ==> (=) ==> (=) ==> (=) ==> (↔)) (@RealAt X A).
+  Proof.
+    move=> ?*??<-??<-??<-. split; apply RealAt_mono=>//= ??; by apply iff.
+  Qed.
+  (** Update the getter function of [RealAt] *)
+  Lemma real_at_fun `(@RealAt X A T κ get d) {B} f :
+    @RealAt _ B T κ (f ∘ get) d.
+  Proof.
+    split=> >; iIntros "κ t T";
+      [iMod (real_own with "κ t T") as ([? eq]) "$"|
+        iMod (real_shr with "κ t T") as ([? eq]) "$"];
+      iPureIntro; eexists _=>/= ?; by rewrite eq.
+  Qed.
+
+  (** Trivial real part *)
+  #[export] Instance real_unit {X T κ d} : @RealAt X _ T κ (λ _, ()) d | 100.
+  Proof. split=> >; iIntros "$ $ ? !>"; iFrame; by iExists (). Qed.
+
+  (** [RealAt] over a simple type *)
+  Lemma sty_real `{!Sty (X:=X) T} {A κ get d} :
+    (∀ t xπ vl q,
+      q.[κ] -∗ na_own t ⊤ -∗ ⟦ sty_own T t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
+        ⌜∃ y, ∀ π, get (xπ π) = y⌝ ∧ q.[κ] ∗ na_own t ⊤) →
+    @RealAt X A (ty_sty T) κ get d.
+  Proof.
+    rewrite ty_sty_unseal=> real. split=>/= >.
+    - iIntros "κ t #T". by iMod (real with "κ t T") as "($ & $ & $)".
+    - iIntros "κ t (% & _ & T)". by iMod (real with "κ t T") as "($ & $ & $)".
+  Qed.
+  (** [RealAt] over a plain type *)
+  #[export] Instance pty_real `{!Pty (X:=X) T} {κ d} :
+    @RealAt X _ (ty_pty T) κ id d.
+  Proof. apply: sty_real=>/= >. iIntros "$ $ (% & % & _) !%". by eexists _. Qed.
+
+  (** [RealLt]: Taking the real part out of a type below a depth *)
+  Class RealLt {X A} (T : ty CON Σ X) (κ : lft) (get : X → A) (d : nat)
+    : Prop :=
+    real_lt : ∀ {d'}, d' < d → RealAt T κ get d'.
+
+  (** [RealLt] is monotone *)
+  #[export] Instance RealLt_mono {X A} :
+    Proper ((≡) ==> (⊑) --> (=) ==> (≤) --> impl) (@RealLt X A).
+  Proof.
+    move=> ?*?*?*?? /= ????. eapply RealAt_mono=>//. apply real_lt. lia.
+  Qed.
+  #[export] Instance RealLt_flip_mono {X A} :
+    Proper ((≡) ==> (⊑) ==> (=) ==> (≤) ==> flip impl) (@RealLt X A).
+  Proof. move=> ?*?*?*?*. by eapply RealLt_mono. Qed.
+  #[export] Instance RealLt_proper {X A} :
+    Proper ((≡) ==> (=) ==> (=) ==> (=) ==> (↔)) (@RealLt X A).
+  Proof. move=> ?*??<-??<-??<-.  split; by eapply RealLt_mono. Qed.
+
+  (** [real_own] and [real_shr] under [RealLt] *)
+  Lemma real_own_lt `{!@RealLt X A T κ get d} {d' t xπ vl q} : d' < d →
+    q.[κ] -∗ na_own t ⊤ -∗ ⟦ ty_own T t d' xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
+      ⌜∃ y, ∀ π, get (xπ π) = y⌝ ∧
+      q.[κ] ∗ na_own t ⊤ ∗ ⟦ ty_own T t d' xπ vl ⟧ᶜ.
+  Proof. move=> ?. by apply @real_own, real_lt. Qed.
+  Lemma real_shr_lt `{!@RealLt X A T κ get d} {d' t l α xπ q} : d' < d →
+    q.[κ] -∗ na_own t ⊤ -∗ ⟦ ty_shr T t d' l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
+      ⌜∃ y, ∀ π, get (xπ π) = y⌝ ∧ q.[κ] ∗ na_own t ⊤.
+  Proof. move=> ?. by apply @real_shr, real_lt. Qed.
+End real.
+(** [Real]: Taking the real part out of a type at a depth *)
+Notation Real T κ get := (∀ d, RealAt T κ get d).
+Notation Real' X A T κ get := (∀ d, RealAt (X:=X) (A:=A) T κ get d)
+  (only parsing).
+
 (** ** Subtyping *)
 
 Section subty.

@@ -107,6 +107,23 @@ Section ty_box.
     by iApply (resol_lt with "κ t T").
   Qed.
 
+  (** Real part of [ty_box] *)
+  #[export] Instance real_box `(!RealLt (X:=X) (A:=A) T κ get d) :
+    RealAt (ty_box T) κ get d.
+  Proof.
+    rewrite ty_box_unseal; split=>/= >; iIntros "κ t".
+    - iDestruct 1 as (????) "($ & % & %eq & $ & $ & T)". rewrite sem_cif_in /=.
+      iMod (stored_acc with "T") as "T".
+      iMod (real_own_lt with "κ t T") as ([? eq']) "($ & $ & T)"=>//.
+      iMod (store_alloc with "T") as "T". iModIntro. iSplit.
+      { iPureIntro. eexists _=> ?. by rewrite -eq. }
+      iExists _, _. rewrite sem_cif_in /=. by iFrame.
+    - iDestruct 1 as (???? eq) "[_ T]". rewrite sem_cif_in /=.
+      iMod (stored_acc with "T") as "T".
+      iMod (real_shr_lt with "κ t T") as ([? eq']) "[$ $]"=>//.
+      iPureIntro. eexists _=> ?. by rewrite -eq.
+  Qed.
+
   (** Subtyping over [ty_box] *)
   Lemma subty_box `{!Deriv ih δ} {X Y T U f} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → subty (X:=X) (Y:=Y) δ' T U f) ⊢

@@ -53,6 +53,21 @@ Section type.
     iDestruct ("TU" with "T") as "$". iApply (proph_eqz_f with "eqz").
   Qed.
 
+  (** Take out the real part of an object *)
+  Lemma type_real
+    `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Yl') (p ◁ T) Γi Γr get' getr,
+      !Real' X A T κ get) {Zl e Γo} pre :
+    (∀ a, type (Yl:=Zl) κ (p ◁ T ᵖ:: Γr) e Γo
+      (λ post '(x, yl')', get x = a ∧ pre post (x, yl')')%type) ⊢
+      type κ Γi e Γo (λ post yl, pre post (get' yl, getr yl)').
+  Proof.
+    rewrite type_unseal. iIntros "#type !>" (????) "κ t pre".
+    rewrite etcx_extract /=. iIntros "[(% & % & % & T) Γr]".
+    iMod (real_own with "κ t T") as ([a eq]) "(κ & t & T)".
+    iApply ("type" $! a _ _ _ (λ _, (_,_)') with "κ t [pre] [$Γr $T //]").
+    iApply (proph_obs_impl with "pre")=> π ?. by rewrite -(eq π).
+  Qed.
+
   (** ** Basic typing rules *)
 
   (** Pure execution *)

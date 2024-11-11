@@ -89,6 +89,17 @@ Section ty_shrref.
     Resol (ty_shrref (X:=X) α T) κ (λ _, True).
   Proof. exact _. Qed.
 
+  (** Real part of [ty_shrref] *)
+  #[export] Instance real_shrref `(!RealLt (X:=X) (A:=A) T κ get d) {α} :
+    RealAt (ty_shrref α T) κ get d.
+  Proof.
+    apply: sty_real=>/= >. rewrite sty'_shrref_unseal /=. iIntros "κ t".
+    iDestruct 1 as (??? _ ? eq) "T". rewrite sem_cif_in /=.
+    iMod (stored_acc with "T") as "T".
+    iMod (real_shr_lt with "κ t T") as ([? eq']) "[$ $]"=>//.
+    iPureIntro. eexists _=> π. by rewrite -(eq π).
+  Qed.
+
   (** Subtyping over [ty_shrref] *)
   Lemma subty_shrref `{!Deriv ih δ} {X Y T U f α} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → subty (X:=X) (Y:=Y) δ' T U f) ⊢

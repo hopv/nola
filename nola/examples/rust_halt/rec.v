@@ -117,4 +117,26 @@ Section ty_rec.
   Lemma ty_rec_resol `(!∀ d T, ResolLt T κ post d → ResolAt (F T) κ post d) :
     Resol (ty_rec F) κ post.
   Proof. move=> ?. by apply (ty_rec_resol_lt ᵖ[] _). Qed.
+
+  (** Real part over [ty_rec] *)
+  Lemma ty_rec_real_lt {Yl}
+    (BUgel : plist (λ Y, sigT (λ B, ty CON Σ Y *' (Y → B))) Yl)
+    `(Real0: !∀ d T, RealLt (A:=A) T κ get d →
+        TCPlistForall (λ _ '(existT B (U, ge)'), RealLt (A:=B) U κ ge d) BUgel →
+        RealAt (F T) κ get d) {d} :
+    TCPlistForall (λ _ '(existT B (U, ge)'), RealLt U κ ge d) BUgel →
+      RealAt (A:=A) (ty_rec F) κ get d.
+  Proof.
+    rewrite ty_rec_unfold=> RealUl. apply Real0; [|done].
+    rewrite ty_rec_unfold. move: RealUl. elim: d; [move=> ??; lia|].
+    move=> d IH RealUl d' ?. apply Real0; last first.
+    { move: RealUl. apply TCPlistForall_mono=>/= ?[??]. apply: RealLt_mono=>//=.
+      lia. }
+    have le : d' ≤ d by lia. apply: RealLt_mono=>//. rewrite ty_rec_unfold.
+    apply IH. move: RealUl. apply TCPlistForall_mono=> ?[??].
+    apply: RealLt_mono=>//=. lia.
+  Qed.
+  Lemma ty_rec_real `(!∀ d T, RealLt (A:=A) T κ get d → RealAt (F T) κ get d) :
+    Real (ty_rec F) κ get.
+  Proof. move=> ?. by apply (ty_rec_real_lt ᵖ[] _). Qed.
 End ty_rec.

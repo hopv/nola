@@ -188,6 +188,25 @@ Section ty_sum.
       iApply (proph_obs_impl with "post")=> ?; by rewrite eq.
   Qed.
 
+  (** Real part of [ty_sum] *)
+  #[export] Instance real_sum
+    `(!RealAt (A:=A) (X:=X) T κ get d, !RealAt (A:=B) (X:=Y) U κ get' d) :
+    RealAt (ty_sum T U) κ
+      (λ s, match s with inl x => inl (get x) | inr y => inr (get' y) end) d.
+  Proof.
+    rewrite ty_sum_unseal. split=> > /=; iIntros "κ t".
+    - iDestruct 1 as (b) "(% & % & $ & big)".
+      case: b=>/=; iDestruct "big" as (? eq) "[$ S]";
+        [iMod (real_own with "κ t S") as ([? eq']) "($ & $ & $)"|
+          iMod (real_own with "κ t S") as ([? eq']) "($ & $ & $)"]; iPureIntro;
+        (split; [|done]); eexists _=> ?; by rewrite eq eq'.
+    - iDestruct 1 as (b) "[_ big]".
+      case: b=>/=; iDestruct "big" as (? eq) "[S _]";
+        [iMod (real_shr with "κ t S") as ([? eq']) "[$ $]"|
+          iMod (real_shr with "κ t S") as ([? eq']) "[$ $]"]; iPureIntro;
+        eexists _=> ?; by rewrite eq eq'.
+  Qed.
+
   (** Subtyping on [ty_sum] *)
   Lemma subty_sum {δ X T X' T' f Y U Y' U' g} :
     subty (X:=X) (Y:=X') δ T T' f -∗ subty (X:=Y) (Y:=Y') δ U U' g -∗

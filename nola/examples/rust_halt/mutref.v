@@ -161,6 +161,28 @@ Section ty_mutref.
     iApply (proph_obs_impl with "obs")=> ?. by rewrite eq.
   Qed.
 
+  (** Real part of [ty_mutref], discarding  *)
+  #[export] Instance real_mutref
+    `(!RealLt (X:=X) (A:=A) T κ get d, !LftIncl κ α) :
+    RealAt (ty_mutref α T) κ (get ∘ fst') d.
+  Proof.
+    rewrite ty_mutref_unseal. split=>/= >.
+    - iIntros "[κ κ'] t". iDestruct 1 as (????) "($ & % & %eq & b)".
+      rewrite sem_cif_in /=.
+      iDestruct (lft_incl'_live_acc (α:=α) with "κ") as (?) "[α →κ]".
+      iMod (pbord_open (M:=borrowM) with "α b") as "/=[o (% & ↦ & T)]".
+      iMod (real_own_lt with "κ' t T") as ([? eq']) "($ & $ & T)"=>//.
+      iMod (pobord_close (M:=borrowM) with "o [↦ T]") as "[α b]"=>/=;
+        [by iFrame|].
+      iModIntro. iSplit. { iPureIntro. eexists _=> ?. by rewrite eq /=. }
+      iDestruct ("→κ" with "α") as "$". iExists _, _, _. rewrite sem_cif_in /=.
+      rewrite pbor_tok_pbor. by iFrame.
+    - iIntros "κ t". iDestruct 1 as (????? eq) "(_ & _ & T)".
+      rewrite sem_cif_in /=. iMod (stored_acc with "T") as "T".
+      iMod (real_shr_lt with "κ t T") as ([? eq']) "[$ $]"=>//. iPureIntro.
+      eexists _=> ?. by rewrite eq /=.
+  Qed.
+
   (** Subtyping over [ty_mutref] *)
   Lemma subty_mutref `{!Deriv ih δ} {X T U α} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →

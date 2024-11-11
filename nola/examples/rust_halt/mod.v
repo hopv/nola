@@ -76,6 +76,13 @@ Section ty_mod.
     ResolAt (ty_mod f T) κ (post ∘ f) d.
   Proof. rewrite ty_mod_unseal. split=> > /=. exact: resol. Qed.
 
+  (** Real part of [ty_mod] *)
+  Lemma real_mod `(!RealAt (A:=A) T κ get d) :
+    RealAt (ty_mod f T) κ (get ∘ f) d.
+  Proof.
+    rewrite ty_mod_unseal. split=>/= >; [exact: real_own|exact: real_shr].
+  Qed.
+
   (** Subtyping on [ty_mod] *)
   Lemma subty_of_mod {δ T} : ⊢ subty δ (ty_mod f T) T f.
   Proof.

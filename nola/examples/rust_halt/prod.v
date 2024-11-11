@@ -144,6 +144,21 @@ Section ty_prod.
     by iCombine "post post'" as "$".
   Qed.
 
+  (** Real part of [ty_prod] *)
+  #[export] Instance real_prod
+    `(!RealAt (A:=A) (X:=X) T κ get d, !RealAt (A:=B) (X:=Y) U κ get' d) :
+    RealAt (ty_prod T U) κ (λ '(x, y)', (get x, get' y)') d.
+  Proof.
+    rewrite ty_prod_unseal. split=> > /=; iIntros "κ t".
+    - iDestruct 1 as (??) "($ & T & U)".
+      iMod (real_own with "κ t T") as ([? eq]) "(κ & t & $)".
+      iMod (real_own with "κ t U") as ([? eq']) "($ & $ & $)". iPureIntro.
+      eexists _=> ?. by rewrite eq eq'.
+    - iIntros "[T U]". iMod (real_shr with "κ t T") as ([? eq]) "[κ t]".
+      iMod (real_shr with "κ t U") as ([? eq']) "$". iPureIntro. eexists _=> ?.
+      by rewrite eq eq'.
+  Qed.
+
   (** Subtyping on [ty_prod] *)
   Lemma subty_prod {δ X T X' T' f Y U Y' U' g} :
     subty (X:=X) (Y:=X') δ T T' f -∗ subty (X:=Y) (Y:=Y') δ U U' g -∗
