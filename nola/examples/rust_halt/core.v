@@ -86,6 +86,13 @@ Section type.
     iApply type_path_frozen.
   Qed.
 
+  (** Function call, where the arguments have been evaluated to values *)
+  Lemma type_call
+    `(!AsRec e f xl erec, !TCForall AsVal vl, !Closed (f :b: xl +b+ []) erec,
+      !DoSubstL (f :: xl) (e :: vl) erec erec') {Xl Yl κ Γi Γo pre} :
+    type (Xl:=Xl) (Yl:=Yl) κ Γi erec' Γo pre ⊢ type κ Γi (e vl) Γo pre.
+  Proof. by iApply type_pure. Qed.
+
   (** ** Basic ghost operations *)
 
   (** Leak *)
