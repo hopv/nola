@@ -25,6 +25,19 @@ Section ptrs_more.
       rewrite sem_cif_in /=; iFrame; [rewrite shift_loc_0|];
       unfold compose; by setoid_rewrite eq.
   Qed.
+  Lemma type_shrref_prod_split p
+    `(!EtcxExtract (X:=X *'ₓ Y) (Yl:=Zl) (Zl:=Zl')
+        (p ◁ ty_shrref α (ty_prod T U)) Γi Γr get getr, !Ty T, !Ty U)
+    {κ Zl'' Γo e pre} :
+    type (Yl:=Zl'') κ
+      (p +ₗ #0 ◁ ty_shrref α T ᵖ:: p +ₗ #(ty_size T) ◁ ty_shrref α U ᵖ:: Γr)
+      e Γo pre ⊢
+      type κ Γi e Γo
+        (λ post zl, let '(x, y)' := get zl in pre post (x, y, getr zl)').
+  Proof.
+    iIntros "type". iApply (type_in (prei:=λ post _, post _) with "[] type").
+    iApply sub_shrref_prod_split.
+  Qed.
 
   (** Split a mutable reference over a product, splitting the prophecy *)
   Lemma sub_mutref_prod_split p
@@ -68,5 +81,20 @@ Section ptrs_more.
       rewrite (eq π)=> + eq'. by rewrite eq'. }
     setoid_rewrite sem_cif_in=>/=. rewrite !pbor_tok_pbor. iFrame "b b'".
     rewrite shift_loc_0. iPureIntro. split; by eexists _, _.
+  Qed.
+  Lemma type_mutref_prod_split p
+    `(!EtcxExtract (Yl:=Zl) (Zl:=Zl')
+        (p ◁ ty_mutref (X:=X *'ₓ Y) α (ty_prod T U)) Γi Γr get getr,
+      !Ty T, !Ty U, !TyOp T κ, !TyOp U κ, !LftIncl κ α)
+    {Zl'' Γo e pre} :
+    type (Yl:=Zl'') κ
+      (p +ₗ #0 ◁ ty_mutref α T ᵖ:: p +ₗ #(ty_size T) ◁ ty_mutref α U ᵖ:: Γr)
+      e Γo pre ⊢
+      type κ Γi e Γo
+        (λ post zl, let '((x, y)', (x', y')')' := get zl in
+          pre post ((x, x')', (y, y')', getr zl)').
+  Proof.
+    iIntros "type". iApply (type_in (prei:=λ post _, post _) with "[] type").
+    iApply sub_mutref_prod_split.
   Qed.
 End ptrs_more.
