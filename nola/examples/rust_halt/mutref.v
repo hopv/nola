@@ -14,7 +14,7 @@ Section ty_mutref.
     : ty' CON Σ (X *'ₓ X) :=
     (λ t d (pπ : clair (X *' X)) vl, ∃ l d' (ξ : prvar X) xπ, ⌜vl = [ #l]⌝ ∧
       ⌜d' < d⌝ ∧ ⌜∀ π, pπ π = (xπ π, π ξ)'⌝ ∧
-      cif_pbor α d' xπ ξ (λ d' xπ, cif_pointsto_ty T l t d' xπ),
+      cif_pbor α d' xπ ξ (cif_pointsto_ty T l t),
       λ t d l β (pπ : clair (X *' X)), ∃ l' d' (ξ : prvar X) xπ, ⌜d' < d⌝ ∧
         ⌜∀ π, pπ π = (xπ π, π ξ)'⌝ ∧
         ▷ l ↦ˢ[α ⊓ β] #l' ∗ ▷ [ξ]:ˢ[α ⊓ β] ∗
