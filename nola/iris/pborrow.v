@@ -367,7 +367,7 @@ Section pborrow.
     Yl (fπ : clair TY (_ → X)) ζl (ayπΨxl : plist _ Yl) Rxl β :
     (∀ π π' p p', fπ π p = fπ π' p' → p = p') →
     (∀ p, proph_dep (λ π, fπ π p) ζl) →
-    pobor_tok α q ξ Φx =[r:∗[ζl]]=∗ ∃ ηl,
+    pobor_tok α q ξ Φx -∗ r:∗[ζl] ==∗ ∃ ηl, r:∗[ζl] ∗
       ⟨π, π (Aprvar _ ξ) = fπ π (app_prvars π ηl)⟩ ∗
       (β ⊑□ α -∗
         ([∗ plist] '(a, yπ, Ψx)' ∈ ayπΨxl, ⟦ Ψx a yπ ⟧ᶜ(δ)) -∗
@@ -404,13 +404,12 @@ Section pborrow.
   (** Resolve the prophecy of a prophetic borrower *)
   Lemma pobor_tok_resolve {δ X α q r ξ Φx} a xπ ηl :
     proph_dep xπ ηl →
-    @pobor_tok X α q ξ Φx =[r:∗[ηl]]=∗
-      ⟨π, π ξ = xπ π⟩ ∗
+    @pobor_tok X α q ξ Φx -∗ r:∗[ηl] ==∗ r:∗[ηl] ∗ ⟨π, π ξ = xπ π⟩ ∗
       (⟦ Φx a xπ ⟧ᶜ(δ) =[borrow_wsat M ⟦⟧ᶜ(δ)]=∗ q.[α] ∗ bor_tok α (Φx a xπ)).
   Proof.
-    iIntros "% o".
-    iMod (pobor_tok_subdiv [] (λ π _, xπ π) ηl () [Φx a xπ] with "o")
-      as "[%[$ big]]"=>//=. { by move=> ??[][]. }
+    iIntros "% o ηl".
+    iMod (pobor_tok_subdiv [] (λ π _, xπ π) ηl () [Φx a xπ] with "o ηl")
+      as (?) "($ & $ & big)"=>//=. { by move=> ??[][]. }
     iIntros "!> Φx".
     iMod ("big" with "[] [//] [$Φx //] []") as "($ & _ & $ & _)"=>//.
     { iApply lft_sincl_refl. } { by iIntros "_ _ _ [$ _]". }
