@@ -972,25 +972,6 @@ Section type.
     iIntros (?) ">(% & κ & $) !>". by iApply "→κ'".
   Qed.
 
-  (** Frame the head in [sub] *)
-  Lemma sub_frame_hd {X Yl Zl κ E Γi Γo pre} :
-    @sub Yl Zl κ Γi Γo pre ⊢ @sub (X :: _) _ κ (E ᵖ:: Γi) (E ᵖ:: Γo)
-      (λ post '(x, yl)', pre (λ zl, post (x, zl)') yl).
-  Proof.
-    rewrite sub_unseal. iIntros "#sub !>" (????) "/= κ t pre [E Γi]".
-    by iMod ("sub" with "κ t pre Γi") as (?) "($ & $ & $ & $)".
-  Qed.
-  (** Frame the head in [type] *)
-  Lemma type_frame_hd {X Yl Zl κ E Γi e Γo pre} :
-    @type Yl Zl κ Γi e Γo pre ⊢
-      @type (X :: _) _ κ (E ᵖ:: Γi) e (λ v, E ᵖ:: Γo v)
-        (λ post '(x, yl)', pre (λ zl, post (x, zl)') yl).
-  Proof.
-    rewrite type_unseal. iIntros "#type !>" (????) "/= κ t pre [E Γi]".
-    iDestruct ("type" with "κ t pre Γi") as "twp". iApply (twp_wand with "twp").
-    by iIntros (?) ">(% & $ & $ & $ & $) !>".
-  Qed.
-
   (** [sub] is monotone *)
   #[export] Instance sub_mono {Xl Yl} :
     Proper ((⊑) --> (=) ==> (=) ==>

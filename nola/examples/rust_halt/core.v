@@ -93,6 +93,35 @@ Section type.
     type (Xl:=Xl) (Yl:=Yl) κ Γi erec' Γo pre ⊢ type κ Γi (e vl) Γo pre.
   Proof. by iApply type_pure. Qed.
 
+  (** ** Framing *)
+
+  (** Framing on [sub] *)
+  Lemma sub_frame {Xl} Γ
+    `(!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Yl') Γ Γi Γr get getr)
+    {κ Zl Γo pre} :
+    sub (Yl:=Zl) κ Γ Γo pre ⊢
+      sub κ Γi (Γo ᵖ++ Γr)
+        (λ post yl, pre (λ zl, post (zl ᵖ++ getr yl)) (get yl)).
+  Proof.
+    rewrite sub_unseal. iIntros "#sub !>" (????) "/= κ t pre".
+    rewrite tcx_extract. iIntros "[Γ Γr]".
+    iMod ("sub" with "κ t pre Γ") as (?) "($ & $ & $ & Γo)". iModIntro.
+    rewrite sem_tcx_app. iFrame.
+  Qed.
+  (** Framing on [type] *)
+  Lemma type_frame {Xl} Γ
+    `(!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Yl') Γ Γi Γr get getr)
+    {κ Zl Γo e pre} :
+    type (Yl:=Zl) κ Γ e Γo pre ⊢
+      type κ Γi e (λ v, Γo v ᵖ++ Γr)
+        (λ post yl, pre (λ zl, post (zl ᵖ++ getr yl)) (get yl)).
+  Proof.
+    rewrite type_unseal. iIntros "#type !>" (????) "/= κ t pre".
+    rewrite tcx_extract. iIntros "[Γ Γr]".
+    iDestruct ("type" with "κ t pre Γ") as "twp". iApply (twp_wand with "twp").
+    iIntros (?) ">(% & $ & $ & $ & Γo)". iModIntro. rewrite sem_tcx_app. iFrame.
+  Qed.
+
   (** ** Basic ghost operations *)
 
   (** Leak *)
