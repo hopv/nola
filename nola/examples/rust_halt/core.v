@@ -2,7 +2,7 @@
 
 From nola.examples.rust_halt Require Export type.
 
-Implicit Type X Y : xty.
+Implicit Type (X Y : xty) (v : val).
 
 Section type.
   Context `{!rust_haltGS CON Σ, !rust_haltC CON, !rust_haltJ CON JUDG Σ,
@@ -47,6 +47,44 @@ Section type.
     type (Yl:=Yl) κ Γi e Γm pre -∗ (∀ v, type κ (Γm v) e' Γo pre') -∗
       type (Xl:=Xl) (Yl:=Zl) κ Γi (e;; e') Γo (pre ∘ pre').
   Proof. iIntros "#? #?". by iApply type_let. Qed.
+
+  (** Evaluate a path to a value *)
+  Lemma type_path p
+    `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Zl) (p ◁ T) Γ Γr get getr) {κ} :
+    ⊢ type κ Γ p (λ v, v ◁ T ᵖ:: Γr) (λ post zl, post (get zl, getr zl)').
+  Proof.
+    rewrite type_unseal. iIntros (????) "!> $ $ pre". rewrite etcx_extract /=.
+    iIntros "[(% & % & % & T) Γr]". wp_path p. wp_value_head. iModIntro.
+    iExists _. iFrame "pre". iFrame. by rewrite of_path_val.
+  Qed.
+  Lemma type_path_frozen p
+    `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Zl) (p ◁[†α] T) Γ Γr get getr) {κ} :
+    ⊢ type κ Γ p (λ v, v ◁[†α] T ᵖ:: Γr) (λ post zl, post (get zl, getr zl)').
+  Proof.
+    rewrite type_unseal. iIntros (????) "!> $ $ pre". rewrite etcx_extract /=.
+    iIntros "[(% & % & →T) Γr]". wp_path p. wp_value_head. iModIntro.
+    iExists _. iFrame "pre". iFrame. by rewrite of_path_val.
+  Qed.
+  Lemma type_path_bind K p
+    `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Yl') (p ◁ T) Γi Γr get getr)
+    {Zl Γo pre κ} :
+    (∀ v, type κ (v ◁ T ᵖ:: Γr) (fill K (of_val v)) Γo pre) ⊢
+      type (Yl:=Zl) κ Γi (fill K p) Γo
+        (λ post zl, pre post (get zl, getr zl)').
+  Proof.
+    iIntros "#type". iApply (type_bind (pre:=λ post _, post _) with "[] type").
+    iApply type_path.
+  Qed.
+  Lemma type_path_frozen_bind K p
+    `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Yl') (p ◁[†α] T) Γi Γr get getr)
+    {Zl Γo pre κ} :
+    (∀ v, type κ (v ◁[†α] T ᵖ:: Γr) (fill K (of_val v)) Γo pre) ⊢
+      type (Yl:=Zl) κ Γi (fill K p) Γo
+        (λ post zl, pre post (get zl, getr zl)').
+  Proof.
+    iIntros "#type". iApply (type_bind (pre:=λ post _, post _) with "[] type").
+    iApply type_path_frozen.
+  Qed.
 
   (** ** Basic ghost operations *)
 
@@ -193,3 +231,7 @@ Tactic Notation "type_bind" open_constr(e) :=
   type_reshape e ltac:(fun K => iApply (type_bind K e)).
 Tactic Notation "type_bind" open_constr(e) "with" open_constr(H) :=
   type_reshape e ltac:(fun K => iApply (type_bind K e with H)).
+Tactic Notation "type_path" open_constr(p) :=
+  type_reshape p ltac:(fun K => iApply (type_path_bind K p)).
+Tactic Notation "type_path_frozen" open_constr(p) :=
+  type_reshape p ltac:(fun K => iApply (type_path_frozen_bind K p)).
