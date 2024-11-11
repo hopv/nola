@@ -83,42 +83,46 @@ Section read_write.
   Qed.
 
   (** Writing a value to a pointer *)
-  Lemma type_write p p'
+  Lemma type_write p p' {Y Ya} Ua f
     `(!TcxExtract (Xl:=[X;Y]) (Yl:=Zl) (Zl:=Zl') ᵖ[p ◁ T; p' ◁ U] Γ Γr
         get' getr,
-      !Write (Y:=Y') (X':=X') κ T U' U T' get set, !Ty U', Resol U' κ postr) :
+      !Write (Y:=Y') (Y':=Ya) (X':=X') κ T U' Ua T' get set, !Ty U',
+      !Resol U' κ postr) :
     ty_size U' = 1 →
+    subtyd U Ua f
     ⊢ type κ Γ (p <- p') (λ _, p ◁ T' ᵖ:: Γr)
         (λ post zl, let '(x, y, _)' := get' zl in
-          postr (get x) → post (set x y, getr zl)')%type.
+          postr (get x) → post (set x (f y), getr zl)')%type.
   Proof.
-    rewrite type_unseal. iIntros (U'1 ????) "!> κ t pre".
-    rewrite tcx_extract /=.
+    rewrite subty_unseal type_unseal. iIntros (U'1) "[_[#UUa _]] !>".
+    iIntros (????) "κ t pre". rewrite tcx_extract /=.
     iIntros "[((% & % & % & T) & (% & % & % & U) & _) Γr]".
     iMod (write with "κ T") as (? wl ? ->) "(↦ & U' & →T')".
     iDestruct (ty_own_size with "U'") as %lwl. rewrite U'1 in lwl.
     destruct wl as [|?[|??]]=>//. rewrite heap_pointsto_vec_singleton.
     wp_path p. wp_path p'. wp_write. rewrite -heap_pointsto_vec_singleton.
-    iMod ("→T'" with "↦ U") as (?) "[κ Tt']".
+    iDestruct ("UUa" with "U") as "Ua".
+    iMod ("→T'" with "↦ Ua") as (?) "[κ Tt']".
     iMod (resol with "κ t U'") as "($ & $ & postr)". iModIntro.
     iExists (λ _, (_, _)'). iFrame "Tt' Γr". iSplit; [|done].
     iApply (proph_obs_impl2 with "postr pre")=>/= ?? to. by apply to.
   Qed.
 
   (** Memory copy *)
-  Lemma type_memcopy ps pt
+  Lemma type_memcopy ps pt {Y Ya} Ua f
     `(!TcxExtract (Xl:=[Xs; Xt]) (Yl:=Zl) (Zl:=Zl') ᵖ[ps ◁ Ts; pt ◁ Tt] Γ Γr
         get getr,
       !Read (Y:=Y) (X':=Xs') κ Ts U Ts' gets sets,
-      !Write (Y:=Y') (X':=Xt') κ Tt U' U Tt' gett sett, !Ty U, !Ty U',
+      !Write (Y:=Y') (Y':=Ya) (X':=Xt') κ Tt U' Ua Tt' gett sett, !Ty U, !Ty U',
       !Resol U' κ postr) {sz} :
     ty_size U = sz → ty_size U' = sz →
-    ⊢ type κ Γ (pt <-{sz} !ps)%E (λ _, ps ◁ Ts' ᵖ:: pt ◁ Tt' ᵖ:: Γr)
-        (λ post zl, let '(xs, xt, _)' := get zl in
-          postr (gett xt) → post (sets xs, sett xt (gets xs), getr zl)')%type.
+    subtyd U Ua f ⊢
+      type κ Γ (pt <-{sz} !ps)%E (λ _, ps ◁ Ts' ᵖ:: pt ◁ Tt' ᵖ:: Γr)
+        (λ post zl, let '(xs, xt, _)' := get zl in postr (gett xt) →
+          post (sets xs, sett xt (f (gets xs)), getr zl)')%type.
   Proof.
-    rewrite type_unseal. iIntros (Usz U'sz ????) "!> [κ κ'] t pre".
-    rewrite tcx_extract /=.
+    rewrite subty_unseal type_unseal. iIntros (Usz U'sz) "#[_[UUa _]] !>".
+    iIntros (????) "[κ κ'] t pre". rewrite tcx_extract /=.
     iIntros "[((% & % & % & Ts) & (% & % & % & Tt) & _) Γr]".
     iMod (read with "κ t Ts") as (? wls ?? ->) "(↦s & U & →Ts')".
     iMod (write with "κ' Tt") as (? wlt ? ->) "(↦t & U' & →Tt')".
@@ -126,7 +130,8 @@ Section read_write.
     iDestruct (ty_own_size with "U'") as %lU'. rewrite U'sz in lU'.
     wp_path pt. wp_path ps. wp_apply (twp_memcpy wls wlt with "[$↦s $↦t]")=>//.
     iIntros "[↦s ↦t]". iMod ("→Ts'" with "↦s") as (?) "($ & t & Ts')".
-    iMod ("→Tt'" with "↦t U") as (?) "[κ Tt']".
+    iDestruct ("UUa" with "U") as "Ua".
+    iMod ("→Tt'" with "↦t Ua") as (?) "[κ Tt']".
     iMod (resol with "κ t U'") as "($ & $ & postr)". iModIntro.
     iExists (λ _, (_, _, _)'). iFrame "Ts' Tt' Γr". iSplit; [|done].
     iApply (proph_obs_impl2 with "postr pre")=>/= ?? to. by apply to.
