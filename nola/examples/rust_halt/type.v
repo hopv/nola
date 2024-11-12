@@ -571,6 +571,9 @@ Section resol.
     ResolLt T κ post d | 10.
   Proof. by move. Qed.
 End resol.
+Hint Mode ResolAt - - - - - - - ! - - - : typeclass_instances.
+Hint Mode ResolLt - - - - - - - ! - - - : typeclass_instances.
+
 (** [Resol]: Resolution over a type *)
 Notation Resol T κ post := (∀ d, ResolAt T κ post d).
 Notation Resol' X T κ post := (∀ d, ResolAt (X:=X) T κ post d) (only parsing).
@@ -690,6 +693,9 @@ Section real.
     RealLt T κ get d | 10.
   Proof. by move. Qed.
 End real.
+Hint Mode RealAt - - - - - - - - ! - - - : typeclass_instances.
+Hint Mode RealLt - - - - - - - - ! - - - : typeclass_instances.
+
 (** [Real]: Taking the real part out of a type at a depth *)
 Notation Real T κ get := (∀ d, RealAt T κ get d).
 Notation Real' X A T κ get := (∀ d, RealAt (X:=X) (A:=A) T κ get d)
