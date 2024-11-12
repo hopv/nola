@@ -80,60 +80,63 @@ Section ty_rec.
   Proof. by rewrite ty_rec_unfold. Qed.
 
   (** [TyOp] on [ty_rec] *)
-  Lemma ty_rec_ty_op_lt {Yl} (Ul : plist (ty CON Σ) Yl)
-    `(TyOp0: !∀ d T, TyOpLt T κ d → TCPlistForall (λ _ U, TyOpLt U κ d) Ul →
-        TyOpAt (F T) κ d) {d} :
-    TCPlistForall (λ _ U, TyOpLt U κ d) Ul → TyOpAt (ty_rec F) κ d.
+  Lemma ty_rec_ty_op {Yl} (Tl : plist (ty CON Σ) Yl) {κ d} :
+    (∀ d, TyOpLt (ty_rec F) κ d →
+      TCPlistForall (λ _ T, TyOpLt T κ d) Tl → TyOpAt (F (ty_rec F)) κ d) →
+    TCPlistForall (λ _ T, TyOpLt T κ d) Tl → TyOpAt (ty_rec F) κ d.
   Proof.
-    rewrite ty_rec_unfold=> OpUl. apply TyOp0; [|done].
-    rewrite ty_rec_unfold=> +. move: OpUl.
-    elim: d; [move=> ??; lia|]=> d IH OpUl d' ?. apply TyOp0; last first.
-    { move: OpUl. apply TCPlistForall_mono=> ??. apply TyOpLt_mono=>//=. lia. }
-    move=> ??. rewrite ty_rec_unfold. apply IH; [|lia]. move: OpUl.
+    move=> Gen. rewrite ty_rec_unfold=> OnTl. apply Gen; [|done].
+    rewrite ty_rec_unfold=> +. move: OnTl.
+    elim: d; [move=> ??; lia|]=> d IH OnTl d' ?. apply Gen; last first.
+    { move: OnTl. apply TCPlistForall_mono=> ??. apply TyOpLt_mono=>//=. lia. }
+    move=> ??. rewrite ty_rec_unfold. apply IH; [|lia]. move: OnTl.
     apply TCPlistForall_mono=> ??. apply TyOpLt_mono=>//=. lia.
   Qed.
-  Lemma ty_rec_ty_op `(!∀ d T, TyOpLt T κ d → TyOpAt (F T) κ d) :
-    TyOp (ty_rec F) κ.
-  Proof. move=> ?. by apply (ty_rec_ty_op_lt ᵖ[] _). Qed.
+  Lemma ty_rec_ty_op' {κ} :
+    (∀ d, TyOpLt (ty_rec F) κ d → TyOpAt (F (ty_rec F)) κ d) →
+      TyOp (ty_rec F) κ.
+  Proof. move=> ??. exact: (ty_rec_ty_op ᵖ[]). Qed.
 
   (** Resolution over [ty_rec] *)
-  Lemma ty_rec_resol_lt {Yl} (Uposl : plist (λ Y, ty CON Σ Y *' (Y → Prop)) Yl)
-    `(Resol0: !∀ d T, ResolLt T κ post d →
-        TCPlistForall (λ _ '(U, pos)', ResolLt U κ pos d) Uposl →
-        ResolAt (F T) κ post d) {d} :
-    TCPlistForall (λ _ '(U, pos)', ResolLt U κ pos d) Uposl →
+  Lemma ty_rec_resol {Yl} (Tposl : plist (λ Y, ty CON Σ Y *' (Y → Prop)) Yl)
+    {κ post d} :
+    (∀ d, ResolLt (ty_rec F) κ post d →
+      TCPlistForall (λ _ '(T, pos)', ResolLt T κ pos d) Tposl →
+      ResolAt (F (ty_rec F)) κ post d) →
+    TCPlistForall (λ _ '(T, pos)', ResolLt T κ pos d) Tposl →
       ResolAt (ty_rec F) κ post d.
   Proof.
-    rewrite ty_rec_unfold=> ResolUl. apply Resol0; [|done].
-    rewrite ty_rec_unfold=> +. move: ResolUl. elim: d; [move=> ??; lia|].
-    move=> d IH ResolUl d' ?. apply Resol0; last first.
-    { move: ResolUl. apply TCPlistForall_mono=> ??. apply ResolLt_mono=>//=.
-      lia. }
-    move=> ??. rewrite ty_rec_unfold. apply IH; [|lia]. move: ResolUl.
+    move=> Gen. rewrite ty_rec_unfold=> OnTl. apply Gen; [|done].
+    rewrite ty_rec_unfold=> +. move: OnTl.
+    elim: d; [move=> ??; lia|]=> d IH OnTl d' ?. apply Gen; last first.
+    { move: OnTl. apply TCPlistForall_mono=> ??. apply ResolLt_mono=>//=. lia. }
+    move=> ??. rewrite ty_rec_unfold. apply IH; [|lia]. move: OnTl.
     apply TCPlistForall_mono=> ??. apply ResolLt_mono=>//=. lia.
   Qed.
-  Lemma ty_rec_resol `(!∀ d T, ResolLt T κ post d → ResolAt (F T) κ post d) :
-    Resol (ty_rec F) κ post.
-  Proof. move=> ?. by apply (ty_rec_resol_lt ᵖ[] _). Qed.
+  Lemma ty_rec_resol' {κ post} :
+    (∀ d T, ResolLt T κ post d → ResolAt (F T) κ post d) →
+      Resol (ty_rec F) κ post.
+  Proof. move=> ??. exact: (ty_rec_resol ᵖ[]). Qed.
 
   (** Real part over [ty_rec] *)
-  Lemma ty_rec_real_lt {Yl}
-    (BUgel : plist (λ Y, sigT (λ B, ty CON Σ Y *' (Y → B))) Yl)
-    `(Real0: !∀ d T, RealLt (A:=A) T κ get d →
-        TCPlistForall (λ _ '(existT B (U, ge)'), RealLt (A:=B) U κ ge d) BUgel →
-        RealAt (F T) κ get d) {d} :
-    TCPlistForall (λ _ '(existT B (U, ge)'), RealLt U κ ge d) BUgel →
+  Lemma ty_rec_real {Yl}
+    (BTgel : plist (λ Y, sigT (λ B, ty CON Σ Y *' (Y → B))) Yl) {A κ get d} :
+    (∀ d, RealLt (A:=A) (ty_rec F) κ get d →
+      TCPlistForall (λ _ '(existT B (T, ge)'), RealLt (A:=B) T κ ge d) BTgel →
+      RealAt (F (ty_rec F)) κ get d) →
+    TCPlistForall (λ _ '(existT B (T, ge)'), RealLt T κ ge d) BTgel →
       RealAt (A:=A) (ty_rec F) κ get d.
   Proof.
-    rewrite ty_rec_unfold=> RealUl. apply Real0; [|done].
-    rewrite ty_rec_unfold=> +. move: RealUl. elim: d; [move=> ??; lia|].
-    move=> d IH RealUl d' ?. apply Real0; last first.
-    { move: RealUl. apply TCPlistForall_mono=>/= ?[??]. apply RealLt_mono=>//=.
+    move=> Gen. rewrite ty_rec_unfold=> OnTl. apply Gen; [|done].
+    rewrite ty_rec_unfold=> +. move: OnTl.
+    elim: d; [move=> ??; lia|]=> d IH OnTl d' ?. apply Gen; last first.
+    { move: OnTl. apply TCPlistForall_mono=> ?[??]. apply RealLt_mono=>//=.
       lia. }
-    move=> ??. rewrite ty_rec_unfold. apply IH; [|lia]. move: RealUl.
+    move=> ??. rewrite ty_rec_unfold. apply IH; [|lia]. move: OnTl.
     apply TCPlistForall_mono=> ?[??]. apply RealLt_mono=>//=. lia.
   Qed.
-  Lemma ty_rec_real `(!∀ d T, RealLt (A:=A) T κ get d → RealAt (F T) κ get d) :
-    Real (ty_rec F) κ get.
-  Proof. move=> ?. by apply (ty_rec_real_lt ᵖ[] _). Qed.
+  Lemma ty_rec_real' {A κ get} :
+    (∀ d, RealLt (A:=A) (ty_rec F) κ get d → RealAt (F (ty_rec F)) κ get d) →
+      Real (ty_rec F) κ get.
+  Proof. move=> ??. exact: (ty_rec_real ᵖ[]). Qed.
 End ty_rec.
