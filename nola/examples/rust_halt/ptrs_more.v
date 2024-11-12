@@ -104,6 +104,26 @@ Section ptrs_more.
     by rewrite eq'.
   Qed.
 
+  (** Dereference a shared reference to a mutable reference *)
+  Lemma type_deref_shrref_mutref p
+    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl)
+        (p ◁ ty_shrref α (ty_mutref β (X:=X) T)) Γ Γr get getr,
+      !LftIncl κ α, !LftIncl κ β) :
+    ⊢ type κ Γ (!p) (λ r, r ◁ ty_shrref (α ⊓ β) T ᵖ:: Γr)
+        (λ post yl, post ((get yl).1', getr yl)').
+  Proof.
+    rewrite type_unseal. iIntros (??? xlπ) "!> κ $ pre".
+    rewrite etcx_extract ty_shrref_unseal ty_mutref_unseal /=. iIntros "[p Γr]".
+    iDestruct "p" as (??????[=->]? eq) "big". wp_path p. rewrite sem_cif_in /=.
+    iMod (stored_acc with "big") as "/=big".
+    iDestruct "big" as (????? eq') "(>↦ & _ & T)".
+    iDestruct (lft_incl'_live_acc (α:=β ⊓ α) with "κ") as (?) "[βα →κ]".
+    iMod (spointsto_acc with "βα ↦") as (?) "[↦ →βα]". wp_read=>/=.
+    iMod ("→βα" with "↦") as "βα". iDestruct ("→κ" with "βα") as "$". iModIntro.
+    rewrite [_ ⊓ _]comm. iFrame "pre Γr T". iPureIntro. eexists _, _.
+    do 3 split=>//=. move=> ?. by rewrite -eq eq'.
+  Qed.
+
   (** Dereference a mutable reference to a box pointer *)
   Lemma type_deref_mutref_box p
     `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (p ◁ ty_mutref α (ty_box (X:=X) T)) Γ Γr
