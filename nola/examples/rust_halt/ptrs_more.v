@@ -84,7 +84,7 @@ Section ptrs_more.
     iApply sub_borrow_box.
   Qed.
 
-  (** Dereference a mutable reference over a box pointer *)
+  (** Dereference a mutable reference to a box pointer *)
   Lemma type_deref_mutref_box p
     `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (p ◁ ty_mutref α (ty_box (X:=X) T)) Γ Γr
         get getr,
