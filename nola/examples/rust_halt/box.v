@@ -154,11 +154,10 @@ Section ty_box.
     iIntros "$ $". iDestruct 1 as (????[= ->]??) "(>$ & >† & T)".
     rewrite sem_cif_in /=. iMod (stored_acc with "T") as "T".
     iDestruct (ty_own_size with "T") as %?.
-    iDestruct (ty_own_clair with "T") as "$"=>//.
-    iMod (store_alloc (sty_own (sty_pty (pty_uninit _)) t 0 _ _) with "[]")
-      as "u"=>/=; [by iExists ()|].
-    iModIntro. iSplit=>//. iIntros "$ !>". iFrame "†". iExists _, _, _.
-    rewrite sem_cif_in /=. by iFrame.
+    iDestruct (ty_own_clair with "T") as "$"=>//. iModIntro. iSplit=>//.
+    iIntros "$ !>". iFrame "†". iExists _, _, _. do 3 iSplit=>//.
+    rewrite sem_cif_in /=. iApply store_acsr_store. iIntros (????) "!>/=".
+    by iExists _.
   Qed.
   (** Reading a copyable object from [ty_box] *)
   #[export] Instance read_box_copy `{!Ty (X:=X) T, !Copy T} {κ} :
