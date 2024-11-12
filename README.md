@@ -147,3 +147,6 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
         types)
     * [`sum_more`](nola/examples/rust_halt/sum_more.v) (More on the sum type)
     * [`adequacy`](nola/examples/rust_halt/adequacy.v) (Adequacy)
+    * [`verify/`](nola/examples/rust_halt/verify/) (Verification examples)
+      - [`list`](nola/examples/rust_halt/verify/list.v) (Singly linked list
+          type)
