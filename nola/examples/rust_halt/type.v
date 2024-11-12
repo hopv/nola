@@ -527,6 +527,10 @@ Section resol.
     move=> ?*?? <- ?? iff ?? <-.
     split; apply ResolAt_mono=>//= ??; by apply iff.
   Qed.
+  (** Modify the postcondition of [ResolAt] *)
+  Lemma resol_post {X T κ post post' d} :
+    @ResolAt X T κ post d → (∀ x, post x → post' x) → ResolAt T κ post' d.
+  Proof. move=> + ?. exact: ResolAt_mono. Qed.
 
   (** Trivial resolution *)
   #[export] Instance resol_true {X T κ d} : @ResolAt X T κ (λ _, True) d | 100.
