@@ -1,6 +1,6 @@
 (** * More on basic pointer types *)
 
-From nola.examples.rust_halt Require Export box shrref mutref prod sum.
+From nola.examples.rust_halt Require Export box shrref mutref prod.
 
 Section ptrs_more.
   Context `{!rust_haltGS CON Σ, rust_haltJ CON JUDG Σ, !Csem CON JUDG Σ,
