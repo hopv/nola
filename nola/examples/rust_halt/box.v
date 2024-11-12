@@ -2,7 +2,7 @@
 
 From nola.examples.rust_halt Require Export uninit ptr.
 
-Implicit Type l : loc.
+Implicit Type (l : loc) (sz : nat).
 
 Section ty_box.
   Context `{!rust_haltGS CON Σ, !rust_haltC CON, !rust_haltJ CON JUDG Σ,
@@ -185,5 +185,20 @@ Section ty_box.
     iMod (store_alloc with "U") as "U". iModIntro. rewrite eq. iFrame "†".
     iExists (S du), _, _. rewrite sem_cif_in /=. iFrame "U". iPureIntro.
     do 2 split=>//. lia.
+  Qed.
+
+  (** Allocate [ty_box] *)
+  Lemma type_alloc {Xl Γ κ sz} :
+    sz > 0 →
+    ⊢ type (Xl:=Xl) κ Γ (Alloc #sz) (λ r, r ◁ ty_box (ty_uninit sz) ᵖ:: Γ)
+        (λ post xl, post ((), xl)').
+  Proof.
+    rewrite type_unseal ty_box_unseal /ty_uninit ty_pty_unseal=> ?.
+    iIntros (????) "!>/= $ $ pre Γ". iApply twp_alloc=>//=; [lia|].
+    iIntros (??) "(%eq & † & $) !>". rewrite repeat_length. iFrame "† pre Γ".
+    iExists _, 1. iSplit=>//. iExists 0, _. iSplit=>//.
+    iSplit; [iPureIntro; lia|]. iSplit=>//. rewrite sem_cif_in /=.
+    iApply store_acsr_store. iIntros (????) "!>/= !%". eexists _. split=>//.
+    lia.
   Qed.
 End ty_box.
