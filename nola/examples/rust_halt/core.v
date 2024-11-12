@@ -203,11 +203,11 @@ Section type.
   Qed.
 
   (** Take out the real part of an object *)
-  Lemma type_real p A
-    `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Yl') (p ◁ T) Γi Γr get' getr,
-      !Real' X A T κ get) {Zl e Γo} pre :
+  Lemma type_real p A {X Yl' Zl} (pre : _ → xpred _)
+    `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Yl') (p ◁ T) Γi Γr get' getr)
+    `(!Real' X A T κ get) {e Γo} :
     (∀ a, type (Yl:=Zl) κ (p ◁ T ᵖ:: Γr) e Γo
-      (λ post '(x, yl')', get x = a ∧ pre post (x, yl')')%type) ⊢
+      (λ post '(x, yl')', get x = a ∧ pre post (x ᵖ:: yl'))%type) ⊢
       type κ Γi e Γo (λ post yl, pre post (get' yl, getr yl)').
   Proof.
     rewrite type_unseal. iIntros "#type !>" (????) "κ t pre".
