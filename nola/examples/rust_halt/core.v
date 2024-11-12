@@ -161,9 +161,8 @@ Section type.
   Qed.
 
   (** Modify by subtyping *)
-  Lemma sub_subty p {X} T
-    `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (p ◁ T) Γ Γr get getr)
-    {Y} U f {κ} :
+  Lemma sub_subty p {X} T {Y} U f
+    `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (p ◁ T) Γ Γr get getr) {κ} :
     subtyd' X Y T U f ⊢
       sub κ Γ (p ◁ U ᵖ:: Γr) (λ post zl, post (f (get zl), getr zl)').
   Proof.
@@ -171,9 +170,9 @@ Section type.
     rewrite etcx_extract /=. iIntros "[(% & % & $ & T) Γr] !>". iFrame "pre Γr".
     by iDestruct ("TU" with "T") as "$".
   Qed.
-  Lemma type_subty p {X} T
+  Lemma type_subty p {X} T {Y} U f
     `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (p ◁ T) Γi Γr get getr)
-    {Y} U f {κ Zl'' Γo e pre} :
+    {κ Zl'' Γo e pre} :
     subtyd' X Y T U f -∗ type (Yl:=Zl'') κ (p ◁ U ᵖ:: Γr) e Γo pre -∗
       type κ Γi e Γo (λ post zl, pre post (f (get zl), getr zl)').
   Proof.
@@ -181,9 +180,9 @@ Section type.
     iApply (type_in (prei:=λ post _, post _) with "[] type").
     by iApply sub_subty.
   Qed.
-  Lemma sub_subty_frozen p {X} T
-    `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (p ◁[†α] T) Γ Γr get getr)
-    {Y} U f `(!@Inj X Y (=) (=) f) {κ} :
+  Lemma sub_subty_frozen p {X} T {Y} U f
+    `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (p ◁[†α] T) Γ Γr get getr,
+      !@Inj X Y (=) (=) f) {κ} :
     subtyd T U f ⊢
       sub κ Γ (p ◁[†α] U ᵖ:: Γr) (λ post zl, post (f (get zl), getr zl)').
   Proof.
@@ -192,9 +191,9 @@ Section type.
     iIntros "†". iMod ("→T" with "†") as (??) "[eqz T]". iExists _, _.
     iDestruct ("TU" with "T") as "$". iApply (proph_eqz_f with "eqz").
   Qed.
-  Lemma type_subty_frozen p {X} T
-    `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (p ◁[†α] T) Γi Γr get getr)
-    {Y} U f `(!@Inj X Y (=) (=) f) {κ Zl'' Γo e pre} :
+  Lemma type_subty_frozen p {X} T {Y} U f
+    `(!EtcxExtract (X:=X) (Yl:=Zl) (Zl:=Zl') (p ◁[†α] T) Γi Γr get getr,
+      !@Inj X Y (=) (=) f) {κ Zl'' Γo e pre} :
     subtyd T U f -∗ type (Yl:=Zl'') κ (p ◁[†α] U ᵖ:: Γr) e Γo pre -∗
       type κ Γi e Γo (λ post zl, pre post (f (get zl), getr zl)').
   Proof.
