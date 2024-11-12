@@ -131,7 +131,7 @@ Section type.
 
   (** ** Basic ghost operations *)
 
-  (** Leak *)
+  (** Leak on [sub] *)
   Lemma sub_leak {Xl} Γ
     `(!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Zl) Γ Γg Γr get getr,
       !ResolTcx Γ κ postr) :
@@ -141,6 +141,13 @@ Section type.
     iIntros "[Γ $]". iMod (resol_tcx with "κ t Γ") as "($ & $ & post)".
     iModIntro. iApply (proph_obs_impl2 with "post pre")=> ?? to. by apply to.
   Qed.
+  Lemma sub_leak_rest {Xl} Γ
+    `(!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Zl) Γ Γg Γr get getr,
+      !ResolTcx Γr κ postr) :
+    ⊢ sub κ Γg Γ (λ post yl, postr (getr yl) → post (get yl))%type.
+  Proof. apply: sub_leak=>//. split=> >. rewrite comm. exact: tcx_extract. Qed.
+
+  (** Leak on [type] *)
   Lemma type_leak {Xl} Γ
     `(!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Yl') Γ Γi Γr get getr,
       !ResolTcx Γ κ postr) {e Zl Γo pre} :
@@ -151,11 +158,6 @@ Section type.
     iApply (type_in (prei:=λ post _, _ → post _) with "[] type").
     iApply sub_leak.
   Qed.
-  Lemma sub_leak_rest {Xl} Γ
-    `(!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Zl) Γ Γg Γr get getr,
-      !ResolTcx Γr κ postr) :
-    ⊢ sub κ Γg Γ (λ post yl, postr (getr yl) → post (get yl))%type.
-  Proof. apply: sub_leak=>//. split=> >. rewrite comm. exact: tcx_extract. Qed.
   Lemma type_leak_rest {Xl} Γ
     `(!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Yl') Γ Γi Γr get getr,
       !ResolTcx Γr κ postr) {e Zl Γo pre} :
