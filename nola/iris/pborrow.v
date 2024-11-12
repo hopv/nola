@@ -456,7 +456,7 @@ Section pborrow.
     iDestruct (proph_toks_tok_fuse with "ζl η'") as (?) "[ζlη' →ζlη']".
     iMod (vo_pc_preresolve (λ π, fπ π (π η')) with "vo pc ζlη'")
       as "[ζlη' [$ →pc]]".
-    { apply proph_dep_fpi=>//. apply proph_dep_one. }
+    { apply proph_dep_fpi=>//. apply proph_dep_prvar. }
     iDestruct ("→ζlη'" with "ζlη'") as "/=[$ η']". iIntros "!> η Ψx".
     iDestruct (vo_proph_pc with "→pc' η") as "pc'".
     iMod (vo_pc_alloc with "η'") as (γ'') "[vo'' pc'']".

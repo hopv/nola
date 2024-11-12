@@ -157,7 +157,7 @@ Section lemmas.
   Proof. move=> eq ???. by rewrite !eq. Qed.
 
   (** On the clairvoyant value for a prophecy variable *)
-  Lemma proph_dep_one ξ : proph_dep (λ π, π ξ) [ξ].
+  Lemma proph_dep_prvar ξ : proph_dep (λ π, π ξ) [ξ].
   Proof. move=> ?? eqv. apply eqv. constructor. Qed.
 
   (** Construct with a function *)

@@ -74,7 +74,7 @@ Section ty_mutref.
       iDestruct (proph_tok_toks_fuse with "ξ ηl") as (?) "[$ →ξηl]"=>/=. iSplit.
       { iPureIntro. eapply proph_dep_proper; [exact: eq|done|].
         apply: (proph_dep_f2 (λ x x', (x', x)') _ _ [_]); [|done].
-        exact: proph_dep_one. }
+        exact: proph_dep_prvar. }
       iIntros "ξηl". iDestruct ("→ξηl" with "ξηl") as "[ξ ηl]".
       iDestruct ("→o" with "ξ") as "o". iMod ("→T" with "ηl") as "[$ T]".
       iMod (pobord_close (M:=borrowM) with "o [↦ T]") as "[α b]"=>/=;
@@ -94,7 +94,7 @@ Section ty_mutref.
       iSplit.
       { iPureIntro. eapply proph_dep_proper; [exact: eq|done|].
         apply: (proph_dep_f2 (λ x x', (x', x)') _ _ [_]); [|done].
-        exact: proph_dep_one. }
+        exact: proph_dep_prvar. }
       iIntros "ξηl". iDestruct ("→ξηl" with "ξηl") as "[ξ ηl]".
       iMod ("→αβ" with "ξ") as "αβ". iDestruct ("→κβ" with "αβ") as "$".
       iMod ("→καβ" with "ηl") as "καβ". iModIntro. by iApply "→κβ'".

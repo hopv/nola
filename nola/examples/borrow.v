@@ -76,7 +76,7 @@ Section borrow.
     by iFrame. }
     iMod ("big" $! [Aprvar _ ξ] with "[%] [$ξ //]")
       as (?) "(obs & [ξ _ ] & big)".
-    { move=> ?. apply proph_dep_f. apply: proph_dep_one. }
+    { move=> ?. apply proph_dep_f. apply: proph_dep_prvar. }
     iMod ("big" with "ξ Φx") as "(β & α & b)". iModIntro. iApply "→Ψ".
     iDestruct ("→β'" with "α") as "$". by iFrame.
   Qed.
