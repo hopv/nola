@@ -10,6 +10,13 @@ Section type.
 
   (** ** Basic typing rules *)
 
+  (** Value that is discarded *)
+  Lemma type_value `(!AsVal e) {Xl κ Γ} : ⊢ type (Xl:=Xl) κ Γ e (λ _, Γ) id.
+  Proof.
+    rewrite type_unseal. case: as_val=>/= ? <-. iIntros (????) "!> $$ pre Γ".
+    wp_value_head. by iFrame.
+  Qed.
+
   (** Pure execution *)
   Lemma type_pure {Xl Yl κ Γi e e' Γo pre n φ} :
     PureExec φ n e e' → φ →
