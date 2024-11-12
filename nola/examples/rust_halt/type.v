@@ -977,19 +977,19 @@ Section type.
     apply to.
   Qed.
 
-  (** [sub] with an unsatisfiable predicate transformer *)
-  Lemma sub_false {Xl Yl κ Γi Γo pre} :
-    (∀ post xl, ¬ pre post xl) → ⊢ @sub Xl Yl κ Γi Γo pre.
+  (** [sub] with the absurd predicate transformer *)
+  Lemma sub_false {Xl Yl κ Γi Γo} :
+    ⊢ @sub Xl Yl κ Γi Γo (λ _ _, False)%type.
   Proof.
-    rewrite sub_unseal=> ?. iIntros (????) "!> _ _ ?".
-    by rewrite proph_obs_false.
+    rewrite sub_unseal. iIntros (????) "!> _ _ ?". rewrite proph_obs_false //.
+    auto.
   Qed.
-  (** [type] with an unsatisfiable predicate transformer *)
-  Lemma type_false {Xl Yl κ Γi e Γo pre} :
-    (∀ post xl, ¬ pre post xl) → ⊢ @type Xl Yl κ Γi e Γo pre.
+  (** [type] with the absurd predicate transformer *)
+  Lemma type_false {Xl Yl κ Γi e Γo} :
+    ⊢ @type Xl Yl κ Γi e Γo (λ _ _, False)%type.
   Proof.
-    rewrite type_unseal=> ?. iIntros (????) "!> _ _ ?".
-    by rewrite proph_obs_false.
+    rewrite type_unseal. iIntros (????) "!> _ _ ?". rewrite proph_obs_false //.
+    auto.
   Qed.
 
   (** Modify the lifetime of [sub] *)
