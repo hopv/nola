@@ -177,7 +177,7 @@ Section ty_mutref.
       rewrite pbor_tok_pbor. by iFrame.
     - iIntros "κ t". iDestruct 1 as (????? eq) "(_ & _ & T)".
       rewrite sem_cif_in /=. iMod (stored_acc with "T") as "T".
-      iMod (real_shr_lt with "κ t T") as ([? eq']) "[$ $]"=>//. iPureIntro.
+      iMod (real_shr_lt with "κ t T") as ([? eq']) "[$$]"=>//. iPureIntro.
       eexists _=> ?. by rewrite eq /=.
   Qed.
 
@@ -208,7 +208,7 @@ Section ty_mutref.
     Read κ (ty_mutref α T) T (ty_mutref α T) fst' id.
   Proof.
     rewrite ty_mutref_unseal. split=>/= >. iIntros "κ $".
-    iDestruct 1 as (???? [= ->] ? eq) "b". rewrite sem_cif_in /=.
+    iDestruct 1 as (????[=->]? eq) "b". rewrite sem_cif_in /=.
     iDestruct (lft_incl'_live_acc (α:=α) with "κ") as (?) "[α →κ]".
     iMod (pbord_open (M:=borrowM) with "α b") as "/=[o (% & >$ & #T)]".
     iDestruct (ty_own_clair with "T") as "$". { move=>/= ?. by rewrite eq. }
@@ -225,7 +225,7 @@ Section ty_mutref.
     Write κ (ty_mutref α T) T T (ty_mutref α T) fst' (λ '(_, x')' x, (x, x')').
   Proof.
     rewrite ty_mutref_unseal. split=>/= >. iIntros "κ".
-    iDestruct 1 as (???? [= ->] ? eq) "b". rewrite sem_cif_in /=.
+    iDestruct 1 as (????[=->]? eq) "b". rewrite sem_cif_in /=.
     iDestruct (lft_incl'_live_acc (α:=α) with "κ") as (?) "[α →κ]".
     iMod (pbord_open (M:=borrowM) with "α b") as "/=[o (% & >$ & T)]".
     iDestruct (ty_own_clair with "T") as "$". { move=>/= ?. by rewrite eq. }

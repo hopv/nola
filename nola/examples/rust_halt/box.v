@@ -120,7 +120,7 @@ Section ty_box.
       iExists _, _. rewrite sem_cif_in /=. by iFrame.
     - iDestruct 1 as (???? eq) "[_ T]". rewrite sem_cif_in /=.
       iMod (stored_acc with "T") as "T".
-      iMod (real_shr_lt with "κ t T") as ([? eq']) "[$ $]"=>//.
+      iMod (real_shr_lt with "κ t T") as ([? eq']) "[$$]"=>//.
       iPureIntro. eexists _=> ?. by rewrite -eq.
   Qed.
 
@@ -151,7 +151,7 @@ Section ty_box.
     | 20.
   Proof.
     rewrite ty_box_unseal /ty_uninit ty_pty_unseal /=. split=>/= ? t >.
-    iIntros "$ $". iDestruct 1 as (????[= ->]??) "(>$ & >† & T)".
+    iIntros "$$". iDestruct 1 as (????[=->]??) "(>$ & >† & T)".
     rewrite sem_cif_in /=. iMod (stored_acc with "T") as "T".
     iDestruct (ty_own_size with "T") as %?.
     iDestruct (ty_own_clair with "T") as "$"=>//. iModIntro. iSplit=>//.
@@ -163,8 +163,8 @@ Section ty_box.
   #[export] Instance read_box_copy `{!Ty (X:=X) T, !Copy T} {κ} :
     Read κ (ty_box T) T (ty_box T) id id.
   Proof.
-    split=> >. iIntros "$ $". rewrite ty_box_unseal /=.
-    iDestruct 1 as (????[= ->]??) "(>$ & >† & T)". rewrite sem_cif_in /=.
+    split=> >. iIntros "$$". rewrite ty_box_unseal /=.
+    iDestruct 1 as (????[=->]??) "(>$ & >† & T)". rewrite sem_cif_in /=.
     iMod (stored_acc with "T") as "#T". iDestruct (ty_own_size with "T") as %?.
     iDestruct (ty_own_clair with "T") as "$"=>//.
     iMod (store_alloc with "T") as "{T}T". iModIntro. iSplit=>//.
@@ -178,7 +178,7 @@ Section ty_box.
     Write κ (ty_box T) T U (ty_box U) id (λ _, id).
   Proof.
     move=> eq. split=> >. iIntros "$". rewrite ty_box_unseal /=.
-    iDestruct 1 as (????[= ->]??) "(>$ & >† & T)". rewrite sem_cif_in /=.
+    iDestruct 1 as (????[=->]??) "(>$ & >† & T)". rewrite sem_cif_in /=.
     iMod (stored_acc with "T") as "T". iDestruct (ty_own_size with "T") as %->.
     iDestruct (ty_own_clair with "T") as "$"=>//. iModIntro. iSplit=>//.
     iIntros (? du ?) "↦ U". iFrame "↦". iDestruct (ty_own_size with "U") as %->.

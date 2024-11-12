@@ -53,7 +53,7 @@ Section ptrs_more.
     ⊢ sub κ Γ (p ◁ ty_mutref α T ᵖ:: p ◁[†α] ty_box T ᵖ:: Γr) (λ post yl,
         ∀ x' : X, post ((get yl, x')', x', getr yl)')%type.
   Proof.
-    rewrite sub_unseal. iIntros (??? xlπ) "!> $ $ pre".
+    rewrite sub_unseal. iIntros (??? xlπ) "!> $$ pre".
     rewrite etcx_extract ty_box_unseal ty_mutref_unseal /=.
     iIntros "[p Γr]". iDestruct "p" as (??<-????[=->]? eq) "(↦ & †l & T)".
     rewrite sem_cif_in /=. iMod (stored_acc with "T") as "T".
@@ -209,7 +209,7 @@ Section ptrs_more.
         (p +ₗ #0 ◁ ty_shrref α T ᵖ:: p +ₗ #(ty_size T) ◁ ty_shrref α U ᵖ:: Γr)
         (λ post zl, let '(x, y)' := get zl in post (x, y, getr zl)').
   Proof.
-    rewrite sub_unseal. iIntros (????) "!> $ $ pre". rewrite etcx_extract.
+    rewrite sub_unseal. iIntros (????) "!> $$ pre". rewrite etcx_extract.
     rewrite ty_shrref_unseal ty_prod_unseal /=. iIntros "[p Γr]".
     iDestruct "p" as (?? <- ???[=->]? eq) "big". rewrite sem_cif_in /=.
     iMod (stored_acc with "big") as "/=[T U]".

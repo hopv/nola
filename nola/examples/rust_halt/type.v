@@ -530,7 +530,7 @@ Section resol.
 
   (** Trivial resolution *)
   #[export] Instance resol_true {X T κ d} : @ResolAt X T κ (λ _, True) d | 100.
-  Proof. split=> >. iIntros "$ $ _ !>". by iApply proph_obs_true. Qed.
+  Proof. split=> >. iIntros "$$ _ !>". by iApply proph_obs_true. Qed.
 
   (** [ResolLt]: Resolution over a type below a depth *)
   Class ResolLt {X} (T : ty CON Σ X) (κ : lft) (post : X → Prop) (d : nat)
@@ -630,7 +630,7 @@ Section real.
 
   (** Trivial real part *)
   #[export] Instance real_unit {X T κ d} : @RealAt X _ T κ (λ _, ()) d | 100.
-  Proof. split=> >; iIntros "$ $ ? !>"; iFrame; by iExists (). Qed.
+  Proof. split=> >; iIntros "$$ ? !>"; iFrame; by iExists (). Qed.
 
   (** [RealAt] over a simple type *)
   Lemma sty_real `{!Sty (X:=X) T} {A κ get d} :
@@ -646,7 +646,7 @@ Section real.
   (** [RealAt] over a plain type *)
   #[export] Instance pty_real `{!Pty (X:=X) T} {κ d} :
     @RealAt X _ (ty_pty T) κ id d.
-  Proof. apply: sty_real=>/= >. iIntros "$ $ (% & % & _) !%". by eexists _. Qed.
+  Proof. apply: sty_real=>/= >. iIntros "$$ (% & % & _) !%". by eexists _. Qed.
 
   (** [RealLt]: Taking the real part out of a type below a depth *)
   Class RealLt {X A} (T : ty CON Σ X) (κ : lft) (get : X → A) (d : nat)
@@ -804,10 +804,10 @@ Qed.
 Lemma of_path_pure_exec {p v} : of_path p = Some v → ∃ n, PureExec True n p v.
 Proof.
   move: v. elim: p=>//.
-  - move=> > [= <-]. exists 0=>/= _. exact: nsteps_O.
+  - move=> > [=<-]. exists 0=>/= _. exact: nsteps_O.
   - move=> > _ ? /of_to_val <-. exists 0=> _. exact: nsteps_O.
   - case=>// e IH. case=>//. case=>//= k. move: IH. case (of_path e)=>//.
-    case=>//. case=>// l IH _ _ [= <-]. case: (IH (#l) eq_refl)=> n tol.
+    case=>//. case=>// l IH _ _ [=<-]. case: (IH (#l) eq_refl)=> n tol.
     exists (S n)=> _. apply: nsteps_r; [|by apply nsteps_once_inv, pure_offset].
     move: (tol I). apply (nsteps_congruence (λ e, e +ₗ #k)%E)=> ??.
     apply: (pure_step_ctx (fill_item (BinOpLCtx _ _))).
@@ -914,7 +914,7 @@ Section type.
 
   (** [sub] is reflexive and transitive *)
   Lemma sub_refl {Xl κ Γ} : ⊢ @sub Xl _ κ Γ Γ id.
-  Proof. rewrite sub_unseal. iIntros (????) "!>/= $ $ ? $ //". Qed.
+  Proof. rewrite sub_unseal. iIntros (????) "!>/= $$ ? $ //". Qed.
   Lemma sub_trans {Xl Yl Zl κ Γi Γm Γo pre pre'} :
     @sub Xl Yl κ Γi Γm pre -∗ @sub _ Zl κ Γm Γo pre' -∗
       sub κ Γi Γo (pre ∘ pre').
@@ -1071,7 +1071,7 @@ Section tcx_extract.
     `(!EtcxExtract E Γ Γ' get getr) :
     @EtcxExtract X (Y :: Yl) (_ :: Zl) E (E' ᵖ:: Γ) (E' ᵖ:: Γ')
       (λ yyl, get yyl.2') (λ yyl, yyl.1' ᵖ:: getr yyl.2') | 10.
-  Proof. split=>/= ??. rewrite etcx_extract. iIntros "[$ $]". Qed.
+  Proof. split=>/= ??. rewrite etcx_extract. iIntros "[$$]". Qed.
 
   (** Extract a type context *)
   Class TcxExtract {Xl Yl Zl} (Γ : tcx CON Σ Xl) (Γg : tcx CON Σ Yl)
@@ -1091,20 +1091,20 @@ Section tcx_extract.
       !@TcxExtract Xl _ Zl Γ Γm Γr get' getr'} :
     TcxExtract (E ᵖ:: Γ) Γg Γr
       (λ yl, get yl ᵖ:: get' (getr yl)) (λ yl, getr' (getr yl)) | 20.
-  Proof. split=> ??. rewrite etcx_extract tcx_extract. iIntros "[$ $]". Qed.
+  Proof. split=> ??. rewrite etcx_extract tcx_extract. iIntros "[$$]". Qed.
 
   (** Type context inclusion by [EtcxExtract] *)
   Lemma sub_etcx_extract `{!@EtcxExtract X Yl Zl E Γ Γr get getr} {κ} :
     ⊢ sub κ Γ (E ᵖ:: Γr) (λ post yl, post (get yl, getr yl)').
   Proof.
-    rewrite sub_unseal. iIntros (????) "!>/= $ $ ?? !>". rewrite etcx_extract.
+    rewrite sub_unseal. iIntros (????) "!>/= $$ ?? !>". rewrite etcx_extract.
     iExists (λ _, (_,_)'). iFrame.
   Qed.
   (** Type context inclusion by [TcxExtract] *)
   Lemma sub_tcx_extract `{!@TcxExtract Xl Yl Zl Γ Γg Γr get getr} {κ} :
     ⊢ sub κ Γg (Γ ᵖ++ Γr) (λ post yl, post (get yl ᵖ++ getr yl)).
   Proof.
-    rewrite sub_unseal. iIntros (????) "!>/= $ $ pre Γ !>". iExists (λ _, _).
+    rewrite sub_unseal. iIntros (????) "!>/= $$ pre Γ !>". iExists (λ _, _).
     iFrame "pre". by rewrite tcx_extract -sem_tcx_app.
   Qed.
 End tcx_extract.
@@ -1124,7 +1124,7 @@ Section resol_tcx.
 
   (** [ResolTcx] over nil *)
   #[export] Instance resol_tcx_nil {κ} : ResolTcx ᵖ[] κ (λ _, True).
-  Proof. split=> >. iIntros "$ $ _ !>". by iApply proph_obs_true. Qed.
+  Proof. split=> >. iIntros "$$ _ !>". by iApply proph_obs_true. Qed.
   (** [ResolTcx] over cons *)
   #[export] Instance resol_tcx_cons_owned {X}
     `(!Resol T κ post, !@ResolTcx Yl Γ κ post') {p} :

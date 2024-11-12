@@ -96,7 +96,7 @@ Section ty_shrref.
     apply: sty_real=>/= >. rewrite sty'_shrref_unseal /=. iIntros "κ t".
     iDestruct 1 as (??? _ ? eq) "T". rewrite sem_cif_in /=.
     iMod (stored_acc with "T") as "T".
-    iMod (real_shr_lt with "κ t T") as ([? eq']) "[$ $]"=>//.
+    iMod (real_shr_lt with "κ t T") as ([? eq']) "[$$]"=>//.
     iPureIntro. eexists _=> π. by rewrite -(eq π).
   Qed.
 
@@ -118,7 +118,7 @@ Section ty_shrref.
     Read κ (ty_shrref α T) T (ty_shrref α T) id id.
   Proof.
     rewrite ty_shrref_unseal. split=>/= >. iIntros "κ t".
-    iDestruct 1 as (???[= ->]??) "#sT".
+    iDestruct 1 as (???[=->]??) "#sT".
     rewrite sem_cif_in /=. iMod (stored_acc with "sT") as "sT'".
     iDestruct (lft_incl'_live_acc (α:=α) with "κ") as (?) "[α →κ]".
     iMod (copy_shr_acc with "α t sT'") as (??) "(↦ & t & #T & cl)"=>//.

@@ -199,8 +199,8 @@ Section ty_sum.
         (split; [|done]); eexists _=> ?; by rewrite eq eq'.
     - iDestruct 1 as (b) "[_ big]".
       case: b=>/=; iDestruct "big" as (? eq) "[S _]";
-        [iMod (real_shr with "κ t S") as ([? eq']) "[$ $]"|
-          iMod (real_shr with "κ t S") as ([? eq']) "[$ $]"]; iPureIntro;
+        [iMod (real_shr with "κ t S") as ([? eq']) "[$$]"|
+          iMod (real_shr with "κ t S") as ([? eq']) "[$$]"]; iPureIntro;
         eexists _=> ?; by rewrite eq eq'.
   Qed.
 

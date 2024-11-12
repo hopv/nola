@@ -53,7 +53,7 @@ Section type.
     `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Zl) (p ◁ T) Γ Γr get getr) {κ} :
     ⊢ type κ Γ p (λ v, v ◁ T ᵖ:: Γr) (λ post zl, post (get zl, getr zl)').
   Proof.
-    rewrite type_unseal. iIntros (????) "!> $ $ pre". rewrite etcx_extract /=.
+    rewrite type_unseal. iIntros (????) "!> $$ pre". rewrite etcx_extract /=.
     iIntros "[(% & % & % & T) Γr]". wp_path p. wp_value_head. iModIntro.
     iExists _. iFrame "pre". iFrame. by rewrite of_path_val.
   Qed.
@@ -61,7 +61,7 @@ Section type.
     `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Zl) (p ◁[†α] T) Γ Γr get getr) {κ} :
     ⊢ type κ Γ p (λ v, v ◁[†α] T ᵖ:: Γr) (λ post zl, post (get zl, getr zl)').
   Proof.
-    rewrite type_unseal. iIntros (????) "!> $ $ pre". rewrite etcx_extract /=.
+    rewrite type_unseal. iIntros (????) "!> $$ pre". rewrite etcx_extract /=.
     iIntros "[(% & % & →T) Γr]". wp_path p. wp_value_head. iModIntro.
     iExists _. iFrame "pre". iFrame. by rewrite of_path_val.
   Qed.
@@ -167,7 +167,7 @@ Section type.
     subtyd' X Y T U f ⊢
       sub κ Γ (p ◁ U ᵖ:: Γr) (λ post zl, post (f (get zl), getr zl)').
   Proof.
-    rewrite subty_unseal sub_unseal. iIntros "[_[#TU _]] !>/=" (????) "$ $ pre".
+    rewrite subty_unseal sub_unseal. iIntros "[_[#TU _]] !>/=" (????) "$$ pre".
     rewrite etcx_extract /=. iIntros "[(% & % & $ & T) Γr] !>". iFrame "pre Γr".
     by iDestruct ("TU" with "T") as "$".
   Qed.
@@ -187,7 +187,7 @@ Section type.
     subtyd T U f ⊢
       sub κ Γ (p ◁[†α] U ᵖ:: Γr) (λ post zl, post (f (get zl), getr zl)').
   Proof.
-    rewrite subty_unseal sub_unseal. iIntros "[_[#TU _]] !>/=" (????) "$ $ pre".
+    rewrite subty_unseal sub_unseal. iIntros "[_[#TU _]] !>/=" (????) "$$ pre".
     rewrite etcx_extract /=. iIntros "[(% & $ & →T) Γr] !>". iFrame "pre Γr".
     iIntros "†". iMod ("→T" with "†") as (??) "[eqz T]". iExists _, _.
     iDestruct ("TU" with "T") as "$". iApply (proph_eqz_f with "eqz").

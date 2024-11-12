@@ -71,7 +71,7 @@ Section ty_prod.
       { iPureIntro. have -> : xπ = λ π, ((fst' ∘ xπ) π, (snd' ∘ xπ) π)' by done.
         by apply proph_dep_f2. }
       iIntros "ξηl". iDestruct ("→ξηl" with "ξηl") as "[ξl ηl]".
-      iMod ("→T" with "ξl") as "[$ $]". by iMod ("→U" with "ηl") as "[$ $]".
+      iMod ("→T" with "ξl") as "[$$]". by iMod ("→U" with "ηl") as "[$$]".
     - iIntros (??? xπ q) "[[κ κ'] [α α']] [T U]".
       iMod (ty_shr_proph (T:=T) with "[$κ $α //] T") as (ξl ??) "[ξl →κα]".
       iMod (ty_shr_proph (T:=U) with "[$κ' $α' //] U") as (ηl ??) "[ηl →κα']".
@@ -190,7 +190,7 @@ Section ty_prod.
     iSplit; iModIntro.
     - iIntros (????). iDestruct 1 as (??->) "[(% & % & -> & $ & $) $]".
       iExists _. by rewrite -assoc.
-    - iIntros (?????) "[[$ $] ?]". by rewrite shift_loc_assoc_nat.
+    - iIntros (?????) "[[$$] ?]". by rewrite shift_loc_assoc_nat.
   Qed.
 
   (** Eliminate a size-0 type over [ty_prod] *)
