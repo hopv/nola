@@ -29,10 +29,9 @@ Section sum_more.
     iMod ("→α" with "↦") as "α". iDestruct ("→κ" with "α") as "κ". wp_case.
     case: b=>/=; iDestruct "big" as (? eq') "[S _]";
       iMod (store_alloc_pers with "S") as "S";
-      [iApply ("type'" with "κ t"); [iApply (proph_obs_impl with "pre")=> ?;
-        rewrite -eq eq'=> pr; exact: pr|]|
-       iApply ("type" with "κ t"); [iApply (proph_obs_impl with "pre")=> ?;
-        rewrite -eq eq'=> pr; exact: pr|]];
+      ((iApply ("type'" with "κ t") || iApply ("type" with "κ t"));
+        [iApply (proph_obs_impl with "pre")=> ?; rewrite -eq eq'=> pr;
+          exact: pr|]);
       iFrame "Γr"; rewrite -peq; iExists _, _; (iSplit; [done|]);
       iExists _, _, _; rewrite sem_cif_in /=; by iFrame "S".
   Qed.
