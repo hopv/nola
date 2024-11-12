@@ -145,4 +145,5 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
       [`mutref`](nola/examples/rust_halt/mutref.v) (Mutable reference type),
       [`ptrs_more`](nola/examples/rust_halt/ptrs_more.v) (More on basic pointer
         types)
+    * [`sum_more`](nola/examples/rust_halt/sum_more.v) (More on the sum type)
     * [`adequacy`](nola/examples/rust_halt/adequacy.v) (Adequacy)
