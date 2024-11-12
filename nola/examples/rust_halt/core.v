@@ -204,7 +204,7 @@ Section type.
   Qed.
 
   (** Take out the real part of an object *)
-  Lemma type_real
+  Lemma type_real p A
     `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Yl') (p ◁ T) Γi Γr get' getr,
       !Real' X A T κ get) {Zl e Γo} pre :
     (∀ a, type (Yl:=Zl) κ (p ◁ T ᵖ:: Γr) e Γo
