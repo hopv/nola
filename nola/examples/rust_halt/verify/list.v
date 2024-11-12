@@ -87,6 +87,12 @@ Section list.
       eapply real_eq; [apply @real_prod; exact: real_lt|done]. }
     move=> [|??]//=.
   Qed.
+  #[export] Instance real_ty_list_length {X T κ} :
+    Real (ty_list (X:=X) T) κ (λ xl, length xl).
+  Proof.
+    move=> ?. eapply real_eq. { eapply (real_compose length). exact _. }
+    move=>/= ?. by rewrite length_map.
+  Qed.
 
   (** Fold and unfold [ty_list] *)
   Lemma ty_list_unfold {X T} :
