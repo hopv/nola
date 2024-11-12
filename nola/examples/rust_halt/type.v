@@ -1141,7 +1141,7 @@ Section resol_tcx.
   (** [ResolTcx] over cons *)
   #[export] Instance resol_tcx_cons_owned {X}
     `(!Resol T κ post, !@ResolTcx Yl Γ κ post') {p} :
-    ResolTcx (Xl:=X::_) (p ◁ T ᵖ:: Γ) κ (λ '(x, yl)', post x ∧ post' yl).
+    @ResolTcx (X::_) (p ◁ T ᵖ:: Γ) κ (λ '(x, yl)', post x ∧ post' yl).
   Proof.
     split=> > /=. iIntros "κ t [(% & % & % & T) Γ]".
     iMod (resol with "κ t T") as "(κ & t & post)".
@@ -1149,12 +1149,12 @@ Section resol_tcx.
     iCombine "post post'" as "$".
   Qed.
   Lemma resol_tcx_cons `(!@ResolTcx Yl Γ κ post) {X E} :
-    ResolTcx (Xl:=X::_) (E ᵖ:: Γ) κ (λ '(_, yl)', post yl).
+    @ResolTcx (X::_) (E ᵖ:: Γ) κ (λ '(_, yl)', post yl).
   Proof.
     split=> > /=. iIntros "κ t [_ Γ]". iApply (resol_tcx with "κ t Γ").
   Qed.
   #[export] Instance resol_tcx_cons_frozen `(!@ResolTcx Yl Γ κ post) {X p α T} :
-    ResolTcx (Xl:=X::_) (p ◁[†α] T ᵖ:: Γ) κ (λ '(_, yl)', post yl).
+    @ResolTcx (X::_) (p ◁[†α] T ᵖ:: Γ) κ (λ '(_, yl)', post yl).
   Proof. exact: resol_tcx_cons. Qed.
   #[export] Instance resol_tcx_cons_lft `(!@ResolTcx Yl Γ κ post) {α} :
     ResolTcx (^[α] ᵖ:: Γ) κ (λ '(_, yl)', post yl).
