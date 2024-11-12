@@ -62,11 +62,11 @@ Section ty_rec.
   Implicit Type δ : JUDG -n> iProp Σ.
 
   (** Unfold and fold [ty_rec] in subtyping *)
-  Lemma ty_rec_unfold_sub {δ} : ⊢ subty (X:=X) δ (ty_rec F) (F (ty_rec F)) id.
+  Lemma subty_rec_unfold {δ} : ⊢ subty (X:=X) δ (ty_rec F) (F (ty_rec F)) id.
   Proof.
     erewrite subty_proper; [exact subty_refl|exact ty_rec_unfold|done..].
   Qed.
-  Lemma ty_rec_fold_sub {δ} : ⊢ subty (X:=X) δ (F (ty_rec F)) (ty_rec F) id.
+  Lemma subty_rec_fold {δ} : ⊢ subty (X:=X) δ (F (ty_rec F)) (ty_rec F) id.
   Proof.
     erewrite subty_proper; [exact subty_refl|done|exact ty_rec_unfold|done].
   Qed.
