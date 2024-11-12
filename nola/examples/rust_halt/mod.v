@@ -89,7 +89,7 @@ Section ty_mod.
     rewrite subty_unseal ty_mod_unseal. iSplit=>//.
     iSplit; iModIntro; by iIntros.
   Qed.
-  Lemma subty_to_mod {δ g} `{!Ty T} :
+  Lemma subty_to_mod {δ} `{!Ty T} g :
     (∀ x, f (g x) = x) → ⊢ subty δ T (ty_mod f T) g.
   Proof.
     rewrite subty_unseal ty_mod_unseal=> eq. iSplit=>//. iSplit; iModIntro=>/=.
