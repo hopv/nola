@@ -591,28 +591,35 @@ Section real.
 
   (** [RealAt] is monotone *)
   #[export] Instance RealAt_mono {X A} :
-    Proper ((≡) ==> (⊑) --> (=) ==> (=) ==> impl) (@RealAt X A).
+    Proper ((≡) ==> (⊑) --> pointwise_relation _ (=) ==> (=) ==> impl)
+      (@RealAt X A).
   Proof.
-    move=> ?? /ty_equiv[_[eqvO eqvS]] κ κ' /= ???<-??<-?.
+    move=> ?? /ty_equiv[_[eqvO eqvS]] κ κ' /= ??? eq ??<-?.
     have ? : LftIncl κ' κ by done.
     split=>/= >; iIntros "κ' t T";
       iDestruct (lft_incl'_live_acc (α:=κ) with "κ'") as (?) "[κ →κ']";
       [rewrite -(eqvO _ _ _ _);
-        iMod (real_own with "κ t T") as "($ & κ & $)"|
+        iMod (real_own with "κ t T") as ([? eq']) "[κ $]"|
         rewrite -(eqvS _ _ _ _ _);
-          iMod (real_shr with "κ t T") as "($ & κ & $)"];
-      by iDestruct ("→κ'" with "κ") as "$".
+          iMod (real_shr with "κ t T") as ([? eq']) "[κ $]"];
+      iDestruct ("→κ'" with "κ") as "$"; iPureIntro;
+      eexists _=> ?; by rewrite -eq.
   Qed.
   #[export] Instance RealAt_flip_mono {X A} :
-    Proper ((≡) ==> (⊑) ==> (=) ==> (=) ==> flip impl) (@RealAt X A).
-  Proof. move=> ?*?*??<-??<-. exact: RealAt_mono. Qed.
+    Proper ((≡) ==> (⊑) ==> pointwise_relation _ (=) ==> (=) ==> flip impl)
+      (@RealAt X A).
+  Proof. move=> ?*?*?*??<-. exact: RealAt_mono. Qed.
   #[export] Instance RealAt_proper {X A} :
-    Proper ((≡) ==> (=) ==> (=) ==> (=) ==> (↔)) (@RealAt X A).
+    Proper ((≡) ==> (=) ==> pointwise_relation _ (=) ==> (=) ==> (↔))
+      (@RealAt X A).
   Proof.
-    move=> ?*??<-??<-??<-. split; apply RealAt_mono=>//= ??; by apply iff.
+    move=> ?*??<-?*??<-. split; apply RealAt_mono=>//= ??; by apply iff.
   Qed.
-  (** Update the getter function of [RealAt] *)
-  Lemma real_at_fun `(@RealAt X A T κ get d) {B} f :
+  (** Modify the getter function of [RealAt] *)
+  Lemma real_at_eq `(@RealAt X A T κ get d) get' :
+    (∀ x, get x = get' x) → RealAt T κ get' d.
+  Proof. move=> ?. by eapply RealAt_proper. Qed.
+  Lemma real_at_compose `(@RealAt X A T κ get d) {B} f :
     @RealAt _ B T κ (f ∘ get) d.
   Proof.
     split=> >; iIntros "κ t T";
@@ -648,16 +655,19 @@ Section real.
 
   (** [RealLt] is monotone *)
   #[export] Instance RealLt_mono {X A} :
-    Proper ((≡) ==> (⊑) --> (=) ==> (≤) --> impl) (@RealLt X A).
+    Proper ((≡) ==> (⊑) --> pointwise_relation _ (=) ==> (≤) --> impl)
+      (@RealLt X A).
   Proof.
     move=> ?*?*?*?? /= ????. eapply RealAt_mono=>//. apply real_lt. lia.
   Qed.
   #[export] Instance RealLt_flip_mono {X A} :
-    Proper ((≡) ==> (⊑) ==> (=) ==> (≤) ==> flip impl) (@RealLt X A).
+    Proper ((≡) ==> (⊑) ==> pointwise_relation _ (=) ==> (≤) ==> flip impl)
+      (@RealLt X A).
   Proof. move=> ?*?*?*?*. by eapply RealLt_mono. Qed.
   #[export] Instance RealLt_proper {X A} :
-    Proper ((≡) ==> (=) ==> (=) ==> (=) ==> (↔)) (@RealLt X A).
-  Proof. move=> ?*??<-??<-??<-.  split; by eapply RealLt_mono. Qed.
+    Proper ((≡) ==> (=) ==> pointwise_relation _ (=) ==> (=) ==> (↔))
+      (@RealLt X A).
+  Proof. move=> ?*??<-?*??<-. split; by eapply RealLt_mono. Qed.
 
   (** [real_own] and [real_shr] under [RealLt] *)
   Lemma real_own_lt `{!@RealLt X A T κ get d} {d' t xπ vl q} : d' < d →
