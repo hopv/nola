@@ -46,6 +46,44 @@ Section ptrs_more.
     iApply sub_share.
   Qed.
 
+  (** Mutably borrow a box pointer taking a fresh prophecy *)
+  Lemma sub_borrow_box p α
+    `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Zl) (p ◁ ty_box T) Γ Γr get getr,
+      !Ty T, !TyOp T κ) :
+    ⊢ sub κ Γ (p ◁ ty_mutref α T ᵖ:: p ◁[†α] ty_box T ᵖ:: Γr) (λ post yl,
+        ∀ x' : X, post ((get yl, x')', x', getr yl)')%type.
+  Proof.
+    rewrite sub_unseal. iIntros (??? xlπ) "!> $ $ pre".
+    rewrite etcx_extract ty_box_unseal ty_mutref_unseal /=.
+    iIntros "[p Γr]". iDestruct "p" as (??<-????[=->]? eq) "(↦ & †l & T)".
+    rewrite sem_cif_in /=. iMod (stored_acc with "T") as "T".
+    iDestruct (ty_own_size with "T") as %->.
+    iMod (pbor_plend_new (M:=borrowM) _ α _ _ (cif_pointsto_ty T _ _)
+      with "[↦ T]") as (ξ) "[b l]"=>/=; [by iFrame|].
+    iModIntro. iExists (λ π : prasn _, ((_, π ξ)', _, _)'). iSplit.
+    { iApply (proph_obs_impl with "pre")=> ?. by rewrite -eq=> ?. }
+    iFrame "Γr". iSplitL "b".
+    { iExists _, _. iSplit; [done|]. iExists _, _, _, _. rewrite sem_cif_in /=.
+      by iFrame. }
+    iExists _. iSplit; [done|]. iIntros "†".
+    iMod (plendd_retrieve (M:=borrowM) with "† l") as
+      (?) "/=[$ (%d' & % & $ & T)]".
+    iDestruct (ty_own_size with "T") as %eql. rewrite -eql. iFrame "†l".
+    iExists (S d'), _, _. rewrite sem_cif_in /=.
+    iMod (store_alloc with "T") as "$". iPureIntro. do 2 split=>//. lia.
+  Qed.
+  Lemma type_borrow_box p
+    `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Yl') (p ◁ ty_box T) Γi Γr get getr,
+      !Ty T, !TyOp T κ, !LftIncl κ α) {Zl Γo e pre} :
+    type (Yl:=Zl) κ (p ◁ ty_mutref α T ᵖ:: p ◁[†α] ty_box T ᵖ:: Γr) e Γo pre ⊢
+      type κ Γi e Γo (λ post yl,
+        ∀ x' : X, pre post ((get yl, x')', x', getr yl)')%type.
+  Proof.
+    iIntros "type".
+    iApply (type_in (prei:=λ post _, ∀ x', post _) with "[] type").
+    iApply sub_borrow_box.
+  Qed.
+
   (** Split a shared reference over a product *)
   Lemma sub_shrref_prod_split p
     `(!EtcxExtract (X:=X *'ₓ Y) (Yl:=Zl) (Zl:=Zl')
