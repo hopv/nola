@@ -2,8 +2,6 @@
 
 From nola.examples.rust_halt Require Export rec mod sum box prod.
 
-Implicit Type X : xty.
-
 Section list.
   Context `{!rust_haltGS CON Σ, !rust_haltC CON, !rust_haltJ CON JUDG Σ,
     !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ), !rust_haltCS CON JUDG Σ,
