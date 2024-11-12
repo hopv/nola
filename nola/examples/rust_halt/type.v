@@ -1153,15 +1153,15 @@ Section resol_tcx.
     iMod (resol_tcx with "κ t Γ") as "($ & $ & post')". iModIntro.
     iCombine "post post'" as "$".
   Qed.
-  Lemma resol_tcx_cons `(!@ResolTcx Yl Γ κ post) {X E} :
+  Lemma resol_tcx_cons_skip `(!@ResolTcx Yl Γ κ post) {X E} :
     @ResolTcx (X::_) (E ᵖ:: Γ) κ (λ '(_, yl)', post yl).
   Proof.
     split=> > /=. iIntros "κ t [_ Γ]". iApply (resol_tcx with "κ t Γ").
   Qed.
   #[export] Instance resol_tcx_cons_frozen `(!@ResolTcx Yl Γ κ post) {X p α T} :
     @ResolTcx (X::_) (p ◁[†α] T ᵖ:: Γ) κ (λ '(_, yl)', post yl).
-  Proof. exact: resol_tcx_cons. Qed.
+  Proof. exact: resol_tcx_cons_skip. Qed.
   #[export] Instance resol_tcx_cons_lft `(!@ResolTcx Yl Γ κ post) {α} :
     ResolTcx (^[α] ᵖ:: Γ) κ (λ '(_, yl)', post yl).
-  Proof. exact: resol_tcx_cons. Qed.
+  Proof. exact: resol_tcx_cons_skip. Qed.
 End resol_tcx.
