@@ -136,25 +136,23 @@ Section ptrs_more.
     rewrite etcx_extract ty_mutref_unseal ty_box_unseal /=. iIntros "[p Γr]".
     iDestruct "p" as (???????[=->]? eq) "b". wp_path p. rewrite sem_cif_in /=.
     iDestruct (lft_incl'_live_acc (α:=α) with "κ") as (?) "[α →κ]".
-    iMod (pbord_open (M:=borrowM) with "α b") as "/=[o (% & ↦ & big)]".
+    iMod (pbord_open (M:=borrowM) with "α b") as "/=[o (% & >↦ & big)]".
     iDestruct "big" as (????->? eq') "(↦' & † & T)". rewrite sem_cif_in /=.
     iMod (stored_acc with "T") as "T". rewrite heap_pointsto_vec_singleton.
-    iDestruct (ty_own_size with "T") as %->.
+    wp_read. iDestruct (ty_own_size with "T") as %->.
     iMod (ty_own_proph with "κ' T") as (ηl ??) "[ηl →T]".
     iMod (pobord_subdiv (M:=borrowM) [X] (λ _ '(p,_)', p) _
-      ᵖ[(_,_,cif_pointsto_ty T _ _)'] [▷ _]%cif with "o ηl")
+      ᵖ[(_,_,cif_pointsto_ty T _ _)'] [] with "o ηl")
       as ([ζ[]]) "(ηl & obs & big)".
     { by move=> ??[?[]][?[]]<-. } { done. }
     iMod ("→T" with "ηl") as "[$ T]".
-    iMod ("big" with "[] [↦' T] [↦] [†]") as "(α & [b _] & ↦ & _)"=>/=.
-    { iApply lft_sincl_refl. } { iFrame. } { iFrame. }
-    { iIntros (?) "_ [(%d' & % & ↦' & T) _] [↦ _]".
+    iMod ("big" with "[] [↦' T] [//] [↦ †]") as "(α & [b _] & _)"=>/=.
+    { iApply lft_sincl_refl. } { iFrame. }
+    { iIntros (?) "_ [(%d' & % & ↦' & T) _] _".
       rewrite -heap_pointsto_vec_singleton. iFrame "↦".
       iDestruct (ty_own_size with "T") as %eql. rewrite -eql. iFrame "† ↦'".
       iExists (S d'), _, _. rewrite sem_cif_in /=.
       iMod (store_alloc with "T") as "$". iPureIntro. do 2 split=>//. lia. }
-    iMod (bor_tok_open (M:=borrowM) with "α ↦") as "/=[o >↦]". wp_read.
-    iMod (obor_tok_close (M:=borrowM) with "o [↦]") as "[α _]"=>/=; [done|].
     iDestruct ("→κ" with "α") as "$". iModIntro.
     iExists (λ π : prasn, ((_, π ζ)', _)'). iFrame "Γr". iSplit.
     { iApply (proph_obs_impl2 with "pre obs")=> ? + <-. by rewrite eq. }
