@@ -615,12 +615,13 @@ Section real.
   Proof.
     move=> ?*??<-?*??<-. split; apply RealAt_mono=>//= ??; by apply iff.
   Qed.
-  (** Modify the getter function of [RealAt] *)
-  Lemma real_at_eq `(@RealAt X A T κ get d) get' :
-    (∀ x, get x = get' x) → RealAt T κ get' d.
-  Proof. move=> ?. by eapply RealAt_proper. Qed.
-  Lemma real_at_compose `(@RealAt X A T κ get d) {B} f :
-    @RealAt _ B T κ (f ∘ get) d.
+  (** Modify the getter of [RealAt] by equality *)
+  Lemma real_eq {X A T κ get get' d} :
+    @RealAt X A T κ get d → (∀ x, get x = get' x) → RealAt T κ get' d.
+  Proof. move=> + ?. by eapply RealAt_proper. Qed.
+  (** Modify the getter of [RealAt] by composing a function *)
+  Lemma real_compose {X A B T κ get d} f :
+    @RealAt X A T κ get d → @RealAt _ B T κ (f ∘ get) d.
   Proof.
     split=> >; iIntros "κ t T";
       [iMod (real_own with "κ t T") as ([? eq]) "$"|
