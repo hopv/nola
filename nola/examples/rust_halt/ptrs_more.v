@@ -123,6 +123,46 @@ Section ptrs_more.
     by rewrite eq'.
   Qed.
 
+  (** Dereference a mutable reference to a mutable reference, partially
+    resolving the outer prophecy *)
+  Lemma type_deref_mutref_mutref p
+    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl)
+        (p ◁ ty_mutref α (ty_mutref β (X:=X) T)) Γ Γr get getr,
+      !TyOp T κ, !LftIncl κ α, !LftIncl κ β) :
+    ⊢ type κ Γ (!p) (λ r, r ◁ ty_mutref (α ⊓ β) T ᵖ:: Γr)
+        (λ post yl, let '((x, x')', (xa, xa')')' := get yl in
+          xa' = x' → post ((x, xa)', getr yl)')%type.
+  Proof.
+    rewrite type_unseal. iIntros (??? xlπ) "!> (κ & κ' & κ'') $ pre".
+    rewrite etcx_extract ty_mutref_unseal /=. iIntros "[p Γr]".
+    iDestruct "p" as (????? ξ ?[=->]? eq) "b". wp_path p. rewrite sem_cif_in /=.
+    iDestruct (lft_incl'_live_acc (α:=α ⊓ β) with "κ'") as (?) "[αβ →κ']".
+    iDestruct (pbor_lft with "[] b") as "b"; [by iApply lft_sincl_meet_l|].
+    iMod (pbord_open (M:=borrowM) with "αβ b") as "/=[o (% & >↦ & big)]".
+    iDestruct "big" as (? d' η ?->? eq') "b'". rewrite sem_cif_in /=.
+    rewrite heap_pointsto_vec_singleton. wp_read.
+    iDestruct (lft_incl'_live_acc (α:=β) with "κ''") as (?) "[β →κ'']".
+    iMod (pobord_pbord_reborrow (TY:=xty) (M:=borrowM) (X:=_ *'ₓ _)
+      (λ π x', (x', π η)') S with "[] β o b' [↦]")
+      as "/=(η & (% & ↦' & T) & big)"=>/=.
+    { by move=> > [??]. } { iApply lft_sincl_meet_r. }
+    { iIntros (??) "_ b !>". rewrite -heap_pointsto_vec_singleton. iFrame "↦".
+      iExists _, _, _, _. rewrite sem_cif_in /=. iFrame "b". iPureIntro.
+      do 2 split=>//. lia. }
+    iMod (ty_own_proph with "κ T") as (ζl ??) "[ζl →T]".
+    iDestruct (proph_toks_tok_fuse with "ζl η") as (?) "[ζlη →ζlη]".
+    iMod ("big" with "[%] ζlη") as (?) "(obs & ζlη & big)".
+    { move=> ?. apply proph_dep_f2; [done|]. exact: proph_dep_prvar. }
+    iDestruct ("→ζlη" with "ζlη") as "[ζl η]". iMod ("→T" with "ζl") as "[$ T]".
+    iMod ("big" with "η [$↦' $T //]") as "(αβ & β & b)". iModIntro.
+    iDestruct ("→κ'" with "αβ") as "$". iDestruct ("→κ''" with "β") as "$".
+    iExists (λ _, (_, _)'). iFrame "Γr". iSplit.
+    { iApply (proph_obs_impl2 with "obs pre")=> ?. rewrite eq eq'=> -> to.
+      by apply to. }
+    iExists _, (S d'). iSplit; [done|]. iExists _, _, _, _.
+    rewrite sem_cif_in /=. iFrame "b". iPureIntro. do 2 split=>//. lia.
+  Qed.
+
   (** Split a shared reference over a product *)
   Lemma sub_shrref_prod_split p
     `(!EtcxExtract (X:=X *'ₓ Y) (Yl:=Zl) (Zl:=Zl')
