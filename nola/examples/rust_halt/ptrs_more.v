@@ -60,7 +60,7 @@ Section ptrs_more.
     iDestruct (ty_own_size with "T") as %->.
     iMod (pbor_plend_new (M:=borrowM) _ α _ _ (cif_pointsto_ty T _ _)
       with "[↦ T]") as (ξ) "[b l]"=>/=; [by iFrame|].
-    iModIntro. iExists (λ π : prasn _, ((_, π ξ)', _, _)'). iSplit.
+    iModIntro. iExists (λ π : prasn, ((_, π ξ)', _, _)'). iSplit.
     { iApply (proph_obs_impl with "pre")=> ?. by rewrite -eq=> ?. }
     iFrame "Γr". iSplitL "b".
     { iExists _, _. iSplit; [done|]. iExists _, _, _, _. rewrite sem_cif_in /=.
@@ -156,7 +156,7 @@ Section ptrs_more.
     iMod (bor_tok_open (M:=borrowM) with "α ↦") as "/=[o >↦]". wp_read.
     iMod (obor_tok_close (M:=borrowM) with "o [↦]") as "[α _]"=>/=; [done|].
     iDestruct ("→κ" with "α") as "$". iModIntro.
-    iExists (λ π : prasn _, ((_, π ζ)', _)'). iFrame "Γr". iSplit.
+    iExists (λ π : prasn, ((_, π ζ)', _)'). iFrame "Γr". iSplit.
     { iApply (proph_obs_impl2 with "pre obs")=> ? + <-. by rewrite eq. }
     iExists _, _. iSplit; [done|]. iExists _, _, _, _. rewrite sem_cif_in /=.
     rewrite pbor_tok_pbor. iFrame. iPureIntro. do 2 split=>//. move=> ?.

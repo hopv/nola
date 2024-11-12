@@ -15,7 +15,8 @@ Implicit Type Σ : gFunctors.
 
 (** ** Notation *)
 
-(** Clairvoyant value *)
+(** For prophecies *)
+Notation prasn := (prasn xty).
 Notation clair A := (clair xty A).
 
 (** Value for [list xty] *)
