@@ -64,13 +64,13 @@ Section sum_more.
         iDestruct (ty_own_size with "S") as %->];
       [iMod (ty_own_proph with "κ' S") as (ηl ??) "[ηl →S]"|
         iMod (ty_own_proph with "κ' S") as (ηl ??) "[ηl →S]"];
-      [iMod (pobord_subdiv (TY:=xty) (M:=borrowM) (X:=X +ₓ Y) [Y]
-        (λ _ '(y,_)', inr y) _ ᵖ[(_,_,cif_pointsto_ty U _ _)'] []
-        with "o ηl") as ([ζ[]]) "/=(ηl & #obs & big)"=>/=;
+      [iMod (pobord_subdiv (TY:=xty) (M:=borrowM) (X:=X +ₓ Y)
+        ᵖ[(_,_,cif_pointsto_ty U _ _)'] (λ _ '(y,_)', inr y) [] with "o ηl")
+        as ([ζ[]]) "/=(ηl & #obs & big)"=>/=;
         [by move=> ??[?[]][?[]]/=[<-]|by move=> [??]|]|
-       iMod (pobord_subdiv (TY:=xty) (M:=borrowM) (X:=X +ₓ Y) [X]
-        (λ _ '(x,_)', inl x) _ ᵖ[(_,_,cif_pointsto_ty T _ _)'] []
-        with "o ηl") as ([ζ[]]) "/=(ηl & #obs & big)"=>/=;
+       iMod (pobord_subdiv (TY:=xty) (M:=borrowM) (X:=X +ₓ Y)
+        ᵖ[(_,_,cif_pointsto_ty T _ _)'] (λ _ '(x,_)', inl x) [] with "o ηl")
+        as ([ζ[]]) "/=(ηl & #obs & big)"=>/=;
         [by move=> ??[?[]][?[]]/=[<-]|by move=> [??]|]];
       iMod ("→S" with "ηl") as "[$ S]";
       [iMod ("big" with "[] [$S $↦S] [//] [↦ ↦r]") as "(α & [b _] & _)";

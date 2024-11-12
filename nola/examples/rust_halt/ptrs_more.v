@@ -141,9 +141,8 @@ Section ptrs_more.
     iMod (stored_acc with "T") as "T". rewrite heap_pointsto_vec_singleton.
     wp_read. iDestruct (ty_own_size with "T") as %->.
     iMod (ty_own_proph with "κ' T") as (ηl ??) "[ηl →T]".
-    iMod (pobord_subdiv (M:=borrowM) [X] (λ _ '(p,_)', p) _
-      ᵖ[(_,_,cif_pointsto_ty T _ _)'] [] with "o ηl")
-      as ([ζ[]]) "(ηl & obs & big)".
+    iMod (pobord_subdiv (M:=borrowM) ᵖ[(_,_,cif_pointsto_ty T _ _)']
+      (λ _ '(p,_)', p) [] with "o ηl") as ([ζ[]]) "(ηl & obs & big)".
     { by move=> ??[?[]][?[]]<-. } { done. }
     iMod ("→T" with "ηl") as "[$ T]".
     iMod ("big" with "[] [↦' T] [//] [↦ †]") as "(α & [b _] & _)"=>/=.
@@ -254,10 +253,10 @@ Section ptrs_more.
     iMod (ty_own_proph with "κ' T") as (ηl ??) "[ηl →T]".
     iMod (ty_own_proph with "κ'' U") as (ηl' ??) "[ηl' →U]".
     iDestruct (proph_toks_fuse with "ηl ηl'") as (?) "[ηll' →ηll']".
-    iMod (pobord_subdiv (TY:=xty) (M:=borrowM) (X:=X *'ₓ Y) [X; Y]
-      (λ _ '(x,y,_)', (x,y)') _
-      ᵖ[(_,_,cif_pointsto_ty T _ _)'; (_,_,cif_pointsto_ty U _ _)'] []
-      with "o ηll'") as ([ζ[ζ'[]]]) "(ηll' & obs & big)"=>/=.
+    iMod (pobord_subdiv (TY:=xty) (M:=borrowM) (X:=X *'ₓ Y)
+      ᵖ[(_,_,cif_pointsto_ty T _ _)'; (_,_,cif_pointsto_ty U _ _)']
+      (λ _ '(x,y,_)', (x,y)') [] with "o ηll'")
+      as ([ζ[ζ'[]]]) "(ηll' & obs & big)"=>/=.
     { by move=> ??[?[?[]]][?[?[]]][<-<-]. } { done. }
     iDestruct ("→ηll'" with "ηll'") as "[ηl ηl']".
     iMod ("→T" with "ηl") as "[κ' T]". iMod ("→U" with "ηl'") as "[κ'' U]".

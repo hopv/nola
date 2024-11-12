@@ -4,8 +4,8 @@ From nola.bi Require Export plist.
 From nola.bi Require Import order.
 From nola.iris Require Export borrow proph_ag cif.
 From iris.proofmode Require Import proofmode.
-Import ProdNotation BigSepPLNotation FunPNotation BUpd0Notation iPropAppNotation
-  LftNotation ProphNotation ModwNotation CsemNotation.
+Import ProdNotation PlistNotation BigSepPLNotation FunPNotation BUpd0Notation
+  iPropAppNotation LftNotation ProphNotation ModwNotation CsemNotation.
 
 Implicit Type (A : Type) (TY : synty) (FML : oFunctor) (γ : positive) (α : lft)
   (q : Qp) (Σ : gFunctors).
@@ -363,8 +363,8 @@ Section pborrow.
     iFrame "Ψx Ψxl". iApply (proph_eqz_f2 with "eqz eqz'").
   Qed.
   (** Subdivide a prophetic borrower *)
-  Lemma pobor_tok_subdiv {δ X α q r ξ Φx}
-    Yl (fπ : clair TY (_ → X)) ζl (ayπΨxl : plist _ Yl) Rxl β :
+  Lemma pobor_tok_subdiv {δ X α q r ξ Φx Yl ζl β}
+    (ayπΨxl : plist _ Yl) (fπ : clair TY (_ → X)) Rxl :
     (∀ π π' p p', fπ π p = fπ π' p' → p = p') →
     (∀ p, proph_dep (λ π, fπ π p) ζl) →
     pobor_tok α q ξ Φx -∗ r:∗[ζl] ==∗ ∃ ηl, r:∗[ζl] ∗
@@ -408,7 +408,7 @@ Section pborrow.
       (⟦ Φx a xπ ⟧ᶜ(δ) =[borrow_wsat M ⟦⟧ᶜ(δ)]=∗ q.[α] ∗ bor_tok α (Φx a xπ)).
   Proof.
     iIntros "% o ηl".
-    iMod (pobor_tok_subdiv [] (λ π _, xπ π) ηl () [Φx a xπ] with "o ηl")
+    iMod (pobor_tok_subdiv ᵖ[] (λ π _, xπ π) [Φx a xπ] with "o ηl")
       as (?) "($ & $ & big)"=>//=. { by move=> ??[][]. }
     iIntros "!> Φx".
     iMod ("big" with "[] [//] [$Φx //] []") as "($ & _ & $ & _)"=>//.
