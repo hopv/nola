@@ -269,7 +269,7 @@ Section type.
   Qed.
 
   (** Retrieve from a frozen object *)
-  Lemma sub_retrieve p α
+  Lemma sub_retrieve p
     `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Zl) (p ◁[†α] T) Γ Γr get getr,
       !TyOp T κ) :
     [†α] -∗ sub κ Γ (p ◁ T ᵖ:: Γr) (λ post yl, post (get yl, getr yl)').
@@ -282,7 +282,7 @@ Section type.
     iModIntro. iExists (λ π, (xπ' π, _)'). iFrame "Γr T peq".
     by iApply (proph_obs_impl2 with "pre eq")=> ??<-.
   Qed.
-  Lemma type_retrieve p α
+  Lemma type_retrieve p
     `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Zl) (p ◁[†α] T) Γi Γr get getr,
       !TyOp T κ) {e Zl' Γo pre} :
     [†α] -∗ type (Yl:=Zl') κ (p ◁ T ᵖ:: Γr) e Γo pre -∗
