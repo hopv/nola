@@ -201,4 +201,21 @@ Section ty_box.
     iApply store_acsr_store. iIntros (????) "!>/= !%". eexists _. split=>//.
     lia.
   Qed.
+
+  (** Free [ty_box] *)
+  Lemma type_free p
+    `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Zl) (p ◁ ty_box T) Γ Γr get getr,
+      !Ty T, !Resol T κ postr) {sz} :
+    ty_size T = sz →
+    ⊢ type κ Γ (Free #sz p) (λ _, Γr)
+        (λ post yl, postr (get yl) → post (getr yl))%type.
+  Proof.
+    rewrite type_unseal=> <-. iIntros (????) "!>/= κ t pre".
+    rewrite etcx_extract ty_box_unseal /=. iIntros "[big Γr]".
+    iDestruct "big" as (???????[=->]? eq) "(>↦ & >† & T)". wp_path p.
+    rewrite sem_cif_in /=. iMod (stored_acc with "T") as "T".
+    iDestruct (ty_own_size with "T") as %leq. rewrite -leq.
+    iMod (resol with "κ t T") as "($ & $ & obs)". wp_free. iModIntro.
+    iFrame "Γr". iApply (proph_obs_impl2 with "pre obs")=> ?. by rewrite -eq.
+  Qed.
 End ty_box.
