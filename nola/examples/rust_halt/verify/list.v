@@ -65,7 +65,7 @@ Section list.
   Proof. exact _. Qed.
 
   (** [Resol] over [ty_list] *)
-  #[export] Instance resol_ty_list `(!ResolLt (X:=X) T κ post d) :
+  #[export] Instance resol_list `(!ResolLt (X:=X) T κ post d) :
     ResolAt (ty_list T) κ (λ xl, Forall post xl) d.
   Proof.
     apply (ty_rec_resol (F:=ty_list_gen T) ᵖ[(T, post)'])=>/=; [|exact _].
@@ -76,7 +76,7 @@ Section list.
   Qed.
 
   (** [Real] over [ty_list] *)
-  #[export] Instance real_ty_list `(!RealLt (X:=X) (A:=A) T κ get d) :
+  #[export] Instance real_list `(!RealLt (X:=X) (A:=A) T κ get d) :
     RealAt (ty_list T) κ (λ xl, get <$> xl) d.
   Proof.
     apply (ty_rec_real (F:=ty_list_gen T) ᵖ[existT A (T, get)'])=>/=;
@@ -87,7 +87,7 @@ Section list.
       eapply real_eq; [apply @real_prod; exact: real_lt|done]. }
     move=> [|??]//=.
   Qed.
-  #[export] Instance real_ty_list_length {X T κ} :
+  #[export] Instance real_list_length {X T κ} :
     Real (ty_list (X:=X) T) κ (λ xl, length xl).
   Proof.
     move=> ?. eapply real_eq. { eapply (real_compose length). exact _. }
