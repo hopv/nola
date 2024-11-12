@@ -39,8 +39,7 @@ Section type.
   Qed.
 
   (** Let expression *)
-  Lemma type_let {Xl Yl Zl κ Γi Γm Γo x e e' pre pre'}
-    `{!Closed (x :b: []) e'} :
+  Lemma type_let `(!Closed (x :b: []) e') {Xl Yl Zl κ Γi Γm Γo e pre pre'} :
     type (Yl:=Yl) κ Γi e Γm pre -∗
     (∀ v, type κ (Γm v) (subst' x v e') Γo pre') -∗
       type (Xl:=Xl) (Yl:=Zl) κ Γi (let: x := e in e') Γo (pre ∘ pre').
@@ -50,7 +49,7 @@ Section type.
   Qed.
 
   (** Sequential execution *)
-  Lemma type_seq {Xl Yl Zl κ Γi Γm Γo e e' pre pre'} `{!Closed [] e'} :
+  Lemma type_seq `(!Closed [] e') {Xl Yl Zl κ Γi Γm Γo e pre pre'} :
     type (Yl:=Yl) κ Γi e Γm pre -∗ (∀ v, type κ (Γm v) e' Γo pre') -∗
       type (Xl:=Xl) (Yl:=Zl) κ Γi (e;; e') Γo (pre ∘ pre').
   Proof. iIntros "#? #?". by iApply type_let. Qed.
