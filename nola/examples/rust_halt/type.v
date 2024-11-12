@@ -1135,6 +1135,11 @@ Section resol_tcx.
         q.[κ] ∗ na_own t ⊤ ∗ ⟨π, post (xlπ π)⟩;
   }.
 
+  (** Trivial resolution *)
+  #[export] Instance resol_tcx_true {Xl Γ κ} :
+    @ResolTcx Xl Γ κ (λ _, True) | 200.
+  Proof. split=> >. iIntros "$$ _ !>". by iApply proph_obs_true. Qed.
+
   (** [ResolTcx] over nil *)
   #[export] Instance resol_tcx_nil {κ} : ResolTcx ᵖ[] κ (λ _, True).
   Proof. split=> >. iIntros "$$ _ !>". by iApply proph_obs_true. Qed.
