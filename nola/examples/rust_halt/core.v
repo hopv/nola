@@ -106,28 +106,43 @@ Section type.
   Lemma sub_frame {Xl} Γ
     `(!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Yl') Γ Γi Γr get getr)
     {κ Zl Γo pre} :
-    sub (Yl:=Zl) κ Γ Γo pre ⊢
-      sub κ Γi (Γo ᵖ++ Γr)
-        (λ post yl, pre (λ zl, post (zl ᵖ++ getr yl)) (get yl)).
+    sub (Yl:=Zl) κ Γr Γo pre ⊢
+      sub κ Γi (Γ ᵖ++ Γo)
+        (λ post yl, pre (λ zl, post (get yl ᵖ++ zl)) (getr yl)).
   Proof.
     rewrite sub_unseal. iIntros "#sub !>" (????) "/= κ t pre".
     rewrite tcx_extract. iIntros "[Γ Γr]".
-    iMod ("sub" with "κ t pre Γ") as (?) "($ & $ & $ & Γo)". iModIntro.
+    iMod ("sub" with "κ t pre Γr") as (?) "($ & $ & $ & Γo)". iModIntro.
     rewrite sem_tcx_app. iFrame.
   Qed.
+  Lemma sub_frame_rest {Xl} Γ
+    `(!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Yl') Γ Γi Γr get getr)
+    {κ Zl Γo pre} :
+    sub (Yl:=Zl) κ Γ Γo pre ⊢
+      sub κ Γi (Γr ᵖ++ Γo)
+        (λ post yl, pre (λ zl, post (getr yl ᵖ++ zl)) (get yl)).
+  Proof. apply: sub_frame. split=> ??. rewrite comm. exact: tcx_extract. Qed.
+
   (** Framing on [type] *)
   Lemma type_frame {Xl} Γ
     `(!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Yl') Γ Γi Γr get getr)
     {κ Zl Γo e pre} :
-    type (Yl:=Zl) κ Γ e Γo pre ⊢
-      type κ Γi e (λ v, Γo v ᵖ++ Γr)
-        (λ post yl, pre (λ zl, post (zl ᵖ++ getr yl)) (get yl)).
+    type (Yl:=Zl) κ Γr e Γo pre ⊢
+      type κ Γi e (λ v, Γ ᵖ++ Γo v)
+        (λ post yl, pre (λ zl, post (get yl ᵖ++ zl)) (getr yl)).
   Proof.
     rewrite type_unseal. iIntros "#type !>" (????) "/= κ t pre".
     rewrite tcx_extract. iIntros "[Γ Γr]".
-    iDestruct ("type" with "κ t pre Γ") as "twp". iApply (twp_wand with "twp").
+    iDestruct ("type" with "κ t pre Γr") as "twp". iApply (twp_wand with "twp").
     iIntros (?) ">(% & $ & $ & $ & Γo)". iModIntro. rewrite sem_tcx_app. iFrame.
   Qed.
+  Lemma type_frame_rest {Xl} Γ
+    `(!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Yl') Γ Γi Γr get getr)
+    {κ Zl Γo e pre} :
+    type (Yl:=Zl) κ Γ e Γo pre ⊢
+      type κ Γi e (λ v, Γr ᵖ++ Γo v)
+        (λ post yl, pre (λ zl, post (getr yl ᵖ++ zl)) (get yl)).
+  Proof. apply: type_frame. split=> ??. rewrite comm. exact: tcx_extract. Qed.
 
   (** ** Basic ghost operations *)
 
