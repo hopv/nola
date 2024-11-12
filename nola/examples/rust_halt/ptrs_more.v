@@ -7,6 +7,45 @@ Section ptrs_more.
     !Jsem JUDG (iProp Σ), !rust_haltC CON, !rust_haltCS CON JUDG Σ,
     !rust_haltJS CON JUDG Σ}.
 
+  (** Turn a mutable reference into a shared reference, resolving the prophecy
+    to the actual value *)
+  Lemma sub_share p
+    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (p ◁ ty_mutref (X:=X) α T) Γ Γr get getr,
+      !Ty T, !TyOp T κ, !LftIncl κ α) :
+    ⊢ sub κ Γ (p ◁ ty_shrref α T ᵖ:: Γr) (λ post yl,
+        let '(x, x')' := get yl in x' = x → post (x, getr yl)')%type.
+  Proof.
+    rewrite sub_unseal. iIntros (????) "!> [κ κ'] $ pre".
+    rewrite etcx_extract ty_mutref_unseal ty_shrref_unseal /=.
+    iIntros "[(% & % & $ & big) Γr]". iDestruct "big" as (??? pπ [=->]? eq) "b".
+    rewrite sem_cif_in /=.
+    iDestruct (lft_incl'_live_acc (α:=α) with "κ") as (?) "[α →κ]".
+    iMod (pbord_open (M:=borrowM) with "α b") as "/=[o (% & ↦ & T)]".
+    iMod (ty_own_proph with "κ' T") as (ηl ??) "[ηl →T]".
+    iMod (pobord_resolve (M:=borrowM) with "o ηl") as "/=(ηl & obs & →b)";
+      [done|].
+    iMod ("→T" with "ηl") as "[$ T]".
+    iMod ("→b" with "[$↦ $T //]") as "[α b]". rewrite bor_tok_bor.
+    iDestruct ("→κ" with "α") as "κ".
+    iDestruct (lft_incl'_live_acc (α:=κ ⊓ α) with "κ") as (?) "[κα →κ]".
+    iMod (ty_share with "κα b") as "[κα T]". iDestruct ("→κ" with "κα") as "$".
+    iMod (store_alloc_pers with "T") as "T". iModIntro. iExists (λ _, (_, _)').
+    iFrame "Γr". iSplit.
+    { iApply (proph_obs_impl2 with "pre obs")=> ?. by rewrite eq=> ?. }
+    iExists _, _, _, _. rewrite sem_cif_in /=. by iFrame.
+  Qed.
+  Lemma type_share p
+    `(!EtcxExtract (Yl:=Yl) (Zl:=Yl') (p ◁ ty_mutref (X:=X) α T) Γi Γr get getr,
+      !Ty T, !TyOp T κ, !LftIncl κ α) {Zl Γo e pre} :
+    type (Yl:=Zl) κ (p ◁ ty_shrref α T ᵖ:: Γr) e Γo pre ⊢
+      type κ Γi e Γo (λ post yl,
+        let '(x, x')' := get yl in x' = x → pre post (x, getr yl)')%type.
+  Proof.
+    iIntros "type".
+    iApply (type_in (prei:=λ post _, _ → post _) with "[] type").
+    iApply sub_share.
+  Qed.
+
   (** Split a shared reference over a product *)
   Lemma sub_shrref_prod_split p
     `(!EtcxExtract (X:=X *'ₓ Y) (Yl:=Zl) (Zl:=Zl')
