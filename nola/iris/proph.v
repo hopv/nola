@@ -424,7 +424,7 @@ Section lemmas.
   (** Preliminaries for [proph_obs_forall] *)
   Local Definition proph_aitem_log_item (i : positive) (ai : proph_aitemR TY)
     : proph_log_item TY :=
-    let: xπ := (unagree ai).(projT2') in
+    let xπ := (unagree ai).(projT2') in
     .{Prvar (synty_to_inhab (xπ inhabitant)) i := xπ}.
   Local Definition proph_item_log (p : positive * proph_itemR TY)
     : proph_log TY :=
