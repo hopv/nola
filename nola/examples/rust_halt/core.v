@@ -306,9 +306,9 @@ Ltac type_reshape e tac :=
         reshape_expr eglob ltac:(fun K e' => unify e' e; tac K)
   end.
 Tactic Notation "type_bind" open_constr(e) :=
-  type_reshape e ltac:(fun K => iApply (type_bind K e)).
+  type_reshape e ltac:(fun K => iApply (type_bind K e)=>/=).
 Tactic Notation "type_bind" open_constr(e) "with" open_constr(H) :=
-  type_reshape e ltac:(fun K => iApply (type_bind K e with H)).
+  type_reshape e ltac:(fun K => iApply (type_bind K e with H)=>/=).
 Tactic Notation "type_path"
   open_constr(p) "as" "(" simple_intropattern(v) ")" :=
   type_reshape p ltac:(fun K =>
