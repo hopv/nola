@@ -416,12 +416,12 @@ Section pborrow.
   Qed.
 
   (** Reborrow a nested prophetic borrower *)
-  Lemma pobor_pbor_tok_reborrow {δ X Y α q ξ Φx β r η Ψx a yπ} fπ :
+  Lemma pobor_pbor_tok_reborrow {δ X Y α q ξ Φx β r η Ψx a yπ} fπ g :
     (∀ π π' y y', fπ π y = fπ π' y' → y = y') →
     β ⊑□ α -∗ r.[α] -∗
     @pobor_tok X β q ξ Φx -∗ @pbor_tok Y α a yπ η Ψx -∗
-    (∀ a' yπ', [†β] -∗ pbor_tok α a' yπ' η Ψx -∗ M
-      ⟦ Φx a' (λ π, fπ π (yπ' π)) ⟧ᶜ(δ)) -∗
+    (∀ a' yπ', [†β] -∗ pbor_tok α a' yπ' η Ψx -∗
+      M ⟦ Φx (g a') (λ π, fπ π (yπ' π)) ⟧ᶜ(δ)) -∗
       modw M (borrow_wsat M ⟦⟧ᶜ(δ)) (1:[η] ∗ ⟦ Ψx a yπ ⟧ᶜ(δ) ∗
         ∀ ζl s, ⌜∀ y, proph_dep (λ π, fπ π y) ζl⌝ → s:∗[ζl] ==∗ ∃ η' : prvar _,
           ⟨π, π ξ = fπ π (π η')⟩ ∗ s:∗[ζl] ∗
@@ -438,14 +438,14 @@ Section pborrow.
     { rewrite /=. iExists _, _. rewrite sem_cif_in /=. iFrame. }
     iMod vo_vo_alloc as (γx) "[vox vox']".
     iMod (obor_tok_subdiv (FML:=cifOF _) (M:=M)
-      [∃ a yπ, cif_proph_ctrl γ a (λ π, fπ π (yπ π)) ξ ∗
+      [∃ a yπ, cif_proph_ctrl γ (g a) (λ π, fπ π (yπ π)) ξ ∗
         cif_val_obs γ' a yπ ∗ cif_val_obs γx a yπ]%cif
       with "[] o [pc vo' vox'] [→Φx →b']") as "([β β'] & _ & b' & _)"=>/=.
     { iApply lft_sincl_refl. }
     { iSplit; [|done]. iExists _, _. rewrite !sem_cif_in /=. iFrame. }
-    { iIntros "#† [(% & % & pc & vo' & _) _]". iFrame "pc".
-      iApply ("→Φx" with "†"). rewrite pbor_tok_unseal. iRight. iExists _.
-      rewrite sem_cif_in /=. iFrame "vo'". by iApply "→b'". }
+    { iIntros "#† [(% & % & $ & vo' & _) _]". iApply ("→Φx" with "†").
+      rewrite pbor_tok_unseal. iRight. iExists _. rewrite sem_cif_in /=.
+      iFrame "vo'". by iApply "→b'". }
     iMod (bor_tok_open (M:=M) with "β b") as "/=[o (% & % & pc' & Ψx)]".
     iMod (bor_tok_open (M:=M) with "β' b'")
       as "/=[o' (% & % & pc & vo' & vox')]".

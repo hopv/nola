@@ -303,12 +303,12 @@ Section pborrow_deriv.
 
   (** Reborrow a nested prophetic borrower *)
   Lemma pobord_pbord_reborrow {X Y α q ξ Φx β r η Ψx a yπ}
-    (fπ : clair TY (Y → X)) :
+    (fπ : clair TY (Y → X)) g :
     (∀ π π' y y', fπ π y = fπ π' y' → y = y') →
     β ⊑□ α -∗ r.[α] -∗
     pobord β q ξ Φx -∗ pbord α a yπ η Ψx -∗
-    (∀ a' yπ', [†β] -∗ pbord α a' yπ' η Ψx -∗ M
-      ⟦ Φx a' (λ π, fπ π (yπ' π)) ⟧ᶜ) -∗
+    (∀ a' yπ', [†β] -∗ pbord α a' yπ' η Ψx -∗
+      M ⟦ Φx (g a') (λ π, fπ π (yπ' π)) ⟧ᶜ) -∗
       modw M (borrow_wsat M ⟦⟧ᶜ) (1:[η] ∗ ⟦ Ψx a yπ ⟧ᶜ ∗
         ∀ ζl s, ⌜∀ y, proph_dep (λ π, fπ π y) ζl⌝ → s:∗[ζl] ==∗ ∃ η' : prvar _,
           ⟨π, π ξ = fπ π (π η')⟩ ∗ s:∗[ζl] ∗

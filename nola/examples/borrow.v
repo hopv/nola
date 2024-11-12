@@ -70,7 +70,7 @@ Section borrow.
     iDestruct "big" as (l' xπ ξ ->) "[>↦ b]". rewrite sem_cif_in /=.
     iApply twpw_fupdw_nonval; [done|]. wp_read.
     iMod (lft_sincl_live_acc with "⊑ β'") as (?) "[α →β']".
-    iMod (pobor_pbor_tok_reborrow (M:=bupd) (λ π x, (x, π ξ)' : _ *'ₓ _)
+    iMod (pobor_pbor_tok_reborrow (M:=bupd) (λ π x, (x, π ξ)' : _ *'ₓ _) id
       with "⊑ α o b [↦]") as "(ξ & Φx & big)"=>/=. { by move=> ????[]. }
     { iIntros ([]?) "_ ? !>". iExists _, _, _. rewrite sem_cif_in /=.
     by iFrame. }
