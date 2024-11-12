@@ -290,4 +290,51 @@ Section ptrs_more.
     iIntros "type". iApply (type_in (prei:=λ post _, post _) with "[] type").
     iApply sub_mutref_prod_split.
   Qed.
+
+  (** Update the body type of a mutable reference by mutual subtyping *)
+  Lemma sub_mutref_subty p {X} T {Y} U f g
+    `(!EtcxExtract (Yl:=Zl) (Zl:=Zl') (p ◁ ty_mutref α T) Γ Γr get getr,
+      !TyOp T κ, !LftIncl κ α) :
+    (∀ x, f (g x) = x) →
+    subtyd' X Y T U f -∗ subtyd U T g -∗
+      sub κ Γ (p ◁ ty_mutref α U ᵖ:: Γr) (λ post zl,
+        let '(x, x')' := get zl in post ((f x, f x')', getr zl)').
+  Proof.
+    rewrite subty_unseal sub_unseal=> fg. iIntros "[_[#TU _]] [_[#UT _]] !>".
+    iIntros (????) "[κ κ'] $ pre". rewrite etcx_extract ty_mutref_unseal /=.
+    iIntros "[p Γr]". iDestruct "p" as (?? <- ??? pπ [=->]? eq) "b".
+    rewrite sem_cif_in /=.
+    iDestruct (lft_incl'_live_acc (α:=α) with "κ") as (?) "[α →κ]".
+    iMod (pbord_open (M:=borrowM) with "α b") as "/=[o (% & ↦ & T)]".
+    iMod (ty_own_proph with "κ' T") as (ηl ??) "[ηl →T]".
+    iMod (pobord_subdiv (TY:=xty) (M:=borrowM)
+      ᵖ[(_,_,cif_pointsto_ty U _ _)'] (λ _ '(y,_)', g y) [] with "o ηl")
+      as ([ζ[]]) "(ηl & obs & big)"=>/=.
+    { move=> ??[?[]][?[]] /(f_equal f). by rewrite !fg=> <-. } { done. }
+    iMod ("→T" with "ηl") as "[$ T]". iDestruct ("TU" with "T") as "U".
+    iMod ("big" with "[] [$↦ $U //] [//] []") as "(α & (b & _) & _)".
+    { iApply lft_sincl_refl. }
+    { iIntros (?) "_ [(% & % & ↦ & U) _] _ !>". iFrame "↦".
+      iDestruct ("UT" with "U") as "$". }
+    iModIntro. iDestruct ("→κ" with "α") as "$". iExists (λ _, (_, _)').
+    iFrame "Γr". iSplit.
+    { iApply (proph_obs_impl2 with "pre obs")=>/= π.
+      rewrite (eq π)=> + eq'. by rewrite eq'. }
+    iExists _, _. iSplit; [done|]. iExists _, _, _, _. rewrite sem_cif_in /=.
+    rewrite pbor_tok_pbor. iFrame "b". iPureIntro. do 2 split=>//.
+    move=> ?. by rewrite fg.
+  Qed.
+  Lemma type_mutref_subty p {X} T {Y} U f g
+    `(!EtcxExtract (Yl:=Zl) (Zl:=Zl') (p ◁ ty_mutref α T) Γi Γr get getr,
+      !TyOp T κ, !LftIncl κ α) {Zl'' Γo e pre} :
+    (∀ x, f (g x) = x) →
+    subtyd' X Y T U f -∗ subtyd U T g -∗
+      type (Yl:=Zl'') κ (p ◁ ty_mutref α U ᵖ:: Γr) e Γo pre -∗
+      type κ Γi e Γo (λ post zl,
+        let '(x, x')' := get zl in pre post ((f x, f x')', getr zl)').
+  Proof.
+    iIntros (fg) "#sub #sub' type".
+    iApply (type_in (prei:=λ post _, post _) with "[] type").
+    by iApply sub_mutref_subty.
+  Qed.
 End ptrs_more.
