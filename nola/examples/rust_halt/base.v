@@ -187,6 +187,10 @@ Proof. unfold LftIncl. etrans; [exact lft_incl_meet_l|done]. Qed.
   LftIncl (κ ⊓ κ') α | 30.
 Proof. unfold LftIncl. etrans; [exact lft_incl_meet_r|done]. Qed.
 
+(** [LftIncl] is transitive *)
+#[export] Instance lft_incl'_trans : Transitive LftIncl.
+Proof. exact: lft_incl_trans. Qed.
+
 Lemma lft_incl'_live_acc `{!lftG Σ} `(!LftIncl κ α) {q} :
   q.[κ] ⊢ ∃ r, r.[α] ∗ (r.[α] -∗ q.[κ]).
 Proof. exact: lft_incl_live_acc. Qed.
