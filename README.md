@@ -149,4 +149,6 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     * [`adequacy`](nola/examples/rust_halt/adequacy.v) (Adequacy)
     * [`verify/`](nola/examples/rust_halt/verify/) (Verification examples)
       - [`list`](nola/examples/rust_halt/verify/list.v) (Singly linked list
+          type),
+        [`list_more`](nola/examples/rust_halt/verify/list.v) (More on the list
           type)
