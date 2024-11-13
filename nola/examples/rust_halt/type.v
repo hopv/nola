@@ -1144,8 +1144,8 @@ Section resol_tcx.
   #[export] Instance resol_tcx_nil {κ} : ResolTcx ᵖ[] κ (λ _, True).
   Proof. split=> >. iIntros "$$ _ !>". by iApply proph_obs_true. Qed.
   (** [ResolTcx] over cons *)
-  #[export] Instance resol_tcx_cons_owned {X}
-    `(!Resol T κ post, !@ResolTcx Yl Γ κ post') {p} :
+  #[export] Instance resol_tcx_cons_owned
+    `(!Resol' X T κ post, !@ResolTcx Yl Γ κ post') {p} :
     @ResolTcx (X::_) (p ◁ T ᵖ:: Γ) κ (λ '(x, yl)', post x ∧ post' yl).
   Proof.
     split=> > /=. iIntros "κ t [(% & % & % & T) Γ]".
