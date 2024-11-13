@@ -886,6 +886,14 @@ Section tcx.
     move: Γ xlπ. elim: Xl=>/=. { move=> ??. by rewrite left_id. }
     move=> ?? IH ??. by rewrite IH assoc.
   Qed.
+  Lemma sem_tcx_app_sep {t Xl Yl Γ Γ' xylπ} :
+    sem_tcx t (Γ ᵖ++ Γ') xylπ ⊣⊢
+      @sem_tcx t Xl Γ (λ π, (plist_sep (xylπ π)).1') ∗
+      @sem_tcx t Yl Γ' (λ π, (plist_sep (xylπ π)).2').
+  Proof.
+    move: Γ xylπ. elim: Xl=>/=. { move=> ??. by rewrite left_id. }
+    move=> ?? IH ??. by rewrite IH assoc.
+  Qed.
 End tcx.
 
 (** ** Type context inclusion and expression typing *)
