@@ -1,7 +1,7 @@
-# Nola: Clearing the Later Modality from Higher-Order Ghost State
+# Nola: Modular Liveness Verification by Later-Free Ghost State
 
-Nola is a framework for _higher-order ghost state_ with the _later modality_
-_cleared_.
+Nola is a framework that enables _modular liveness verification_ by
+_higher-order ghost state_ with the _later modality cleared_.
 It is fully mechanized in [Coq](https://coq.inria.fr/) with the
 [Iris](https://iris-project.org/) separation logic framework.
 

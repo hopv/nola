@@ -1,5 +1,5 @@
 opam-version: "2.0"
-synopsis: "Clearing the Later Modality from Higher-Order Ghost State"
+synopsis: "Modular Liveness Verification by Later-Free Ghost State"
 maintainer: "Yusuke Matsushita <ysk.m24t@gmail.com>"
 authors: ["Yusuke Matsushita <ysk.m24t@gmail.com>"]
 license: "MIT"
