@@ -112,7 +112,7 @@ Section type.
     rewrite twp_mono //=. by iIntros.
   Qed.
 
-  (** ** Framing *)
+  (** ** Basic structural rules *)
 
   (** Framing on [sub] *)
   Lemma sub_frame {Xl} Γ
@@ -155,6 +155,31 @@ Section type.
       type κ Γi e (λ v, Γr ᵖ++ Γo v)
         (λ post yl, pre (λ zl, post (getr yl ᵖ++ zl)) (get yl)).
   Proof. apply: type_frame. split=> ??. rewrite comm. exact: tcx_extract. Qed.
+
+  (** Swapping over [ᵖ++] *)
+  Lemma sub_app_swap {Xl Yl} Γ Γ' {κ} :
+    ⊢ sub (Xl:=Xl++Yl) κ (Γ ᵖ++ Γ') (Γ' ᵖ++ Γ)
+      (λ post xyl, let '(xl, yl)' := plist_sep xyl in post (yl ᵖ++ xl)).
+  Proof.
+    rewrite sub_unseal. iIntros (????) "!> $$ pre". rewrite sem_tcx_app_sep.
+    iIntros "[Γ Γ'] !>". iFrame "pre". rewrite sem_tcx_app. iFrame.
+  Qed.
+  Lemma type_in_app_swap {Xl Yl} Γi Γi' {Zl Γo κ e pre} :
+    type (Xl:=Xl++Yl) (Yl:=Zl) κ (Γi' ᵖ++ Γi) e Γo pre ⊢
+      type κ (Γi ᵖ++ Γi') e Γo
+        (λ post xyl, let '(xl, yl)' := plist_sep xyl in pre post (yl ᵖ++ xl)).
+  Proof.
+    iIntros "type". iApply (type_in (prei:=λ post _, post _) with "[] type").
+    iApply sub_app_swap.
+  Qed.
+  Lemma type_out_app_swap {Xl Γi Yl Zl} Γo Γo' {κ e pre} :
+    type (Xl:=Xl) (Yl:=Yl++Zl) κ Γi e (λ v, Γo' v ᵖ++ Γo v) pre ⊢
+      type κ Γi e (λ v, Γo v ᵖ++ Γo' v) (λ post,
+        pre (λ yzl, let '(yl, zl)' := plist_sep yzl in post (zl ᵖ++ yl))).
+  Proof.
+    iIntros "type". iApply (type_out with "type"). iIntros (?).
+    iApply sub_app_swap.
+  Qed.
 
   (** ** Basic ghost operations *)
 
