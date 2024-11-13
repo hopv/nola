@@ -1122,6 +1122,32 @@ Section tcx_extract.
   Qed.
 End tcx_extract.
 
+(** ** Sendability of a type context *)
+
+Section send_tcx.
+  Context `{!rust_haltGS CON Σ, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ)}.
+
+  (** [SendTcx]: Sendability of a type context *)
+  Class SendTcx {Xl} (Γ : tcx CON Σ Xl) : Prop := SEND_TCX {
+    send_tcx {t t' xlπ} : sem_tcx t Γ xlπ ⊣⊢ sem_tcx t' Γ xlπ;
+  }.
+
+  (** [SendTcx] over nil *)
+  #[export] Instance send_tcx_nil : SendTcx ᵖ[].
+  Proof. done. Qed.
+  (** [SendTcx] over cons *)
+  #[export] Instance send_tcx_cons_owned `(!Send (X:=X) T, !@SendTcx Yl Γ) {p} :
+    SendTcx (p ◁ T ᵖ:: Γ).
+  Proof. split=>/= >. f_equiv; [|exact send_tcx]. do 6 f_equiv. exact send. Qed.
+  #[export] Instance send_tcx_cons_frozen `(!Send (X:=X) T, !@SendTcx Yl Γ)
+    {p α} :
+    SendTcx (p ◁[†α] T ᵖ:: Γ).
+  Proof. split=>/= >. f_equiv; [|exact send_tcx]. do 11 f_equiv. exact send. Qed.
+  #[export] Instance send_tcx_cons_lft `(!@SendTcx Yl Γ) {α} :
+    SendTcx (^[α] ᵖ:: Γ).
+  Proof. split=>/= >. f_equiv. exact send_tcx. Qed.
+End send_tcx.
+
 (** ** Resolution over a type context *)
 
 Section resol_tcx.
