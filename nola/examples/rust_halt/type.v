@@ -1067,7 +1067,7 @@ Section tcx_extract.
     (Γr : tcx CON Σ Zl) (get : xlist Yl → X) (getr : xlist Yl → xlist Zl)
     := ETCX_EXTRACT {
     etcx_extract : ∀ t ylπ, sem_tcx t Γ ylπ ⊢
-      sem_etcx t E (λ π, get (ylπ π)) ∗ sem_tcx t Γr (λ π, getr (ylπ π))
+      sem_etcx t E (λ π, get (ylπ π)) ∗ sem_tcx t Γr (λ π, getr (ylπ π));
   }.
 
   (** Extract from the head *)
@@ -1091,7 +1091,7 @@ Section tcx_extract.
     (Γr : tcx CON Σ Zl) (get : xlist Yl → xlist Xl) (getr : xlist Yl → xlist Zl)
     := TCX_EXTRACT {
     tcx_extract : ∀ t xlπ, sem_tcx t Γg xlπ ⊢
-      sem_tcx t Γ (λ π, get (xlπ π)) ∗ sem_tcx t Γr (λ π, getr (xlπ π))
+      sem_tcx t Γ (λ π, get (xlπ π)) ∗ sem_tcx t Γr (λ π, getr (xlπ π));
   }.
 
   (** Extract a nil *)
