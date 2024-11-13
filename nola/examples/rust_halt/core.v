@@ -99,6 +99,19 @@ Section type.
     type (Xl:=Xl) (Yl:=Yl) κ Γi erec' Γo pre ⊢ type κ Γi (e vl) Γo pre.
   Proof. by iApply type_pure. Qed.
 
+  (** Forking a new thread *)
+  Lemma type_fork `(!SendTcx (Xl:=Xl) Γ) {κ e} :
+    type (Xl:=Xl) ⊤ Γ e (λ _, ᵖ[]) (λ post _, post ᵖ[])%type ⊢
+      type κ Γ (Fork e) (λ _, ᵖ[]) (λ post _, post ᵖ[])%type.
+  Proof.
+    rewrite type_unseal. iIntros "#type !>" (????) "$$ #obs Γ".
+    iApply (twp_fork with "[Γ]"); last first.
+    {  iIntros "_ !>/=". iExists (λ _, ()). by iSplit. }
+    iMod na_alloc as (?) "t'". rewrite send_tcx.
+    iDestruct ("type" $! 1%Qp with "[//] t' obs Γ") as "?".
+    rewrite twp_mono //=. by iIntros.
+  Qed.
+
   (** ** Framing *)
 
   (** Framing on [sub] *)
