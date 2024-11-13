@@ -196,8 +196,8 @@ Module inv_landin. Section inv_landin.
   (** Later-free invariant on the bad proposition *)
   Context (inv_bad : loc → PROP).
   Hypothesis inv_bad_persistent : ∀{l}, Persistent (inv_bad l).
-  Hypothesis thoare_inv_bad_alloc : ∀{l e P Ψ},
-    thoare (inv_bad l ∗ P) ⊤ e Ψ ⊢ thoare (bad l ∗ P) ⊤ e Ψ.
+  Hypothesis thoare_inv_bad_alloc : ∀{l e Ψ},
+    thoare (inv_bad l) ⊤ e Ψ ⊢ thoare (bad l) ⊤ e Ψ.
   Hypothesis thoare_inv_bad_acc : ∀{l e P Ψ}, atomic e →
     thoare (bad l ∗ P) ⊤ e (λ v, bad l ∗ Ψ v) ⊢ thoare (inv_bad l ∗ P) ⊤ e Ψ.
 
@@ -228,9 +228,9 @@ Module inv_landin. Section inv_landin.
   Proof.
     iApply twp_bind. iApply twp_post; [by iApply twp_ref|].
     iIntros "!> % [%[% ↦]]". subst. rewrite landin_body_subst. iApply twp_seq.
-    iApply (thoare_inv_bad_alloc (P:=True)); last first.
-    { iFrame. iIntros "!> _". iApply twp_call. by iApply twp_nop. }
-    iIntros "!> [#i _]".
+    iApply (thoare_inv_bad_alloc); last first.
+    { iFrame "↦". iIntros "!> _". iApply twp_call. by iApply twp_nop. }
+    iIntros "!> #i".
     iApply (thoare_inv_bad_acc (P:=inv_bad l));
       [by apply atomic_store| |by iSplit].
     iIntros "!> [[%[↦ _]]_]".
