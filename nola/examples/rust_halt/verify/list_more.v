@@ -76,4 +76,30 @@ Section list.
     rewrite list_wrap_unwrap=> eq. move: (to _ _ eq). apply Proper0=> ??.
     split=>//. by case: leq.
   Qed.
+
+  (** Lemma for [type_iter_list_mut_fun] *)
+  Lemma pre_iter_list_mut_fun {X Yl} (g : X → X) {post xl xl' yl} :
+    @pre_iter_list_mut X Yl (λ post '((x, x')', yl)', x' = g x → post yl)
+      post xl xl' yl ↔ (xl' = g <$> xl → post yl).
+  Proof.
+    move: xl' yl. elim: xl=>//= ?? IH xl' yl. split.
+    - case: xl'=>//= ?? H [??]. subst. eapply IH; [by apply: H|done].
+    - move=> H ????. subst. apply IH=> ?. apply H. by f_equal.
+  Qed.
+  (** [type_iter_list_mut] over a typical predicate transformer that resolves
+    the prophecy by some function *)
+  Lemma type_iter_list_mut_fun {X} (g : X → X) {Yl}
+    `(!Ty (X:=X) T, !TyOp T κ, !LftIncl κ α, !Closed [] (of_val f)) {Γ p} :
+    (∀ v, type (Yl:=Yl) κ
+      (v ◁ ty_mutref α T ᵖ:: Γ) (f [of_val v]) (λ _, Γ)
+        (λ post '((x, x')', yl)', x' = g x → post yl)%type) ⊢
+      type κ (p ◁ ty_mutref α (ty_list T) ᵖ:: Γ)
+        (iter_list (ty_size T) [of_val f; p]) (λ _, Γ)
+          (λ post '((xl, xl')', yl)', xl' = g <$> xl → post yl)%type.
+  Proof.
+    iIntros "type". iApply type_pre; last first.
+    { iApply (type_iter_list_mut with "type"). move=>/= ?? to ? H ?.
+      by apply to, H. }
+    by move=>/= > /pre_iter_list_mut_fun.
+  Qed.
 End list.
