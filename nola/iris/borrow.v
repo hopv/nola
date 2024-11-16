@@ -101,8 +101,7 @@ Section borrow.
     reborrower *)
   Local Definition bor_tok_def α Px : iProp Σ :=
     [†α] ∨ ∃ α' i j, α ⊑□ α' ∗
-      (bor_jtok i j α' (Px, Clsd) ∨
-      ∃ β, [†β] ∗ bor_jtok i j α' (Px, Rebor β)).
+      (bor_jtok i j α' (Px, Clsd) ∨ ∃ β, [†β] ∗ bor_jtok i j α' (Px, Rebor β)).
   Local Lemma bor_tok_aux : seal bor_tok_def. Proof. by eexists. Qed.
   Definition bor_tok := bor_tok_aux.(unseal).
   Local Lemma bor_tok_unseal : bor_tok = bor_tok_def.
@@ -124,8 +123,7 @@ Section borrow.
   (** Lender token *)
   Local Definition lend_ktok i k α Px : iProp Σ :=
     own borrow_name (◯ {[i := (to_agree α, ε, {[k := Excl Px]})]}).
-  Local Definition lend_itok i α Px : iProp Σ :=
-    ∃ k, lend_ktok i k α Px.
+  Local Definition lend_itok i α Px : iProp Σ := ∃ k, lend_ktok i k α Px.
   Local Definition lend_tok_def α Px : iProp Σ :=
     ∃ α', α' ⊑□ α ∗ ∃ i, lend_itok i α' Px.
   Local Lemma lend_tok_aux : seal lend_tok_def. Proof. by eexists. Qed.
@@ -143,8 +141,7 @@ Section borrow.
   Proof. rewrite bor_tok_unseal. solve_proper. Qed.
   #[export] Instance bor_tok_proper {α} : Proper ((≡) ==> (⊣⊢)) (bor_tok α).
   Proof. apply ne_proper, _. Qed.
-  Local Instance obor_itok_ne {i α' α q} :
-    NonExpansive (obor_itok i α' α q).
+  Local Instance obor_itok_ne {i α' α q} : NonExpansive (obor_itok i α' α q).
   Proof. solve_proper. Qed.
   #[export] Instance obor_tok_ne {α q} : NonExpansive (obor_tok α q).
   Proof. rewrite obor_tok_unseal. solve_proper. Qed.

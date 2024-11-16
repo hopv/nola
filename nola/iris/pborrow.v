@@ -106,14 +106,12 @@ Section pborrow.
   #[export] Instance pbor_tok_proper {X α a xπ ξ} :
     Proper ((≡) ==> (⊣⊢)) (@pbor_tok X α a xπ ξ).
   Proof. apply ne_proper, _. Qed.
-  #[export] Instance pobor_tok_ne {X α q ξ} :
-    NonExpansive (@pobor_tok X α q ξ).
+  #[export] Instance pobor_tok_ne {X α q ξ} : NonExpansive (@pobor_tok X α q ξ).
   Proof. rewrite pobor_tok_unseal. solve_proper. Qed.
   #[export] Instance pobor_tok_proper {X α q ξ} :
     Proper ((≡) ==> (⊣⊢)) (@pobor_tok X α q ξ).
   Proof. apply ne_proper, _. Qed.
-  #[export] Instance plend_tok_ne {X α xπ} :
-    NonExpansive (@plend_tok X α xπ).
+  #[export] Instance plend_tok_ne {X α xπ} : NonExpansive (@plend_tok X α xπ).
   Proof. solve_proper. Qed.
   #[export] Instance plend_tok_proper {X α xπ} :
     Proper ((≡) ==> (⊣⊢)) (@plend_tok X α xπ).
