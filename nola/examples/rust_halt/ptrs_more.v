@@ -49,7 +49,7 @@ Section ptrs_more.
   (** Mutably borrow a box pointer taking a fresh prophecy *)
   Lemma sub_borrow_box p α
     `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Zl) (p ◁ ty_box T) Γ Γr get getr,
-      !Ty T, !TyOp T κ) :
+      !Ty T) {κ} :
     ⊢ sub κ Γ (p ◁ ty_mutref α T ᵖ:: p ◁[†α] ty_box T ᵖ:: Γr) (λ post yl,
         ∀ x' : X, post ((get yl, x')', x', getr yl)')%type.
   Proof.
@@ -74,7 +74,7 @@ Section ptrs_more.
   Qed.
   Lemma type_borrow_box p
     `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Yl') (p ◁ ty_box T) Γi Γr get getr,
-      !Ty T, !TyOp T κ, !LftIncl κ α) {Zl Γo e pre} :
+      !Ty T, !LftIncl κ α) {Zl Γo e pre} :
     type (Yl:=Zl) κ (p ◁ ty_mutref α T ᵖ:: p ◁[†α] ty_box T ᵖ:: Γr) e Γo pre ⊢
       type κ Γi e Γo (λ post yl,
         ∀ x' : X, pre post ((get yl, x')', x', getr yl)')%type.
