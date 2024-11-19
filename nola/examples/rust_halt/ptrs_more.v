@@ -84,6 +84,55 @@ Section ptrs_more.
     iApply sub_borrow_box.
   Qed.
 
+  (** Mutably reborrow a mutable reference, taking a fresh prophecy *)
+  Lemma sub_reborrow p β
+    `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (p ◁ ty_mutref (X:=X) α T) Γ Γr get getr,
+      !LftIncl κ β, !LftIncl β α) :
+    ⊢ sub κ Γ (p ◁ ty_mutref β T ᵖ:: p ◁[†β] ty_mutref α T ᵖ:: Γr) (λ post yl,
+        let '(x, x')' := get yl in
+        ∀ x'' : X, post ((x, x'')', (x'', x')', getr yl)')%type.
+  Proof.
+    rewrite sub_unseal. iIntros (? t ? xlπ) "!> [κ κ'] $ pre".
+    rewrite etcx_extract ty_mutref_unseal /=. iIntros "[p Γr]".
+    iDestruct "p" as (?? <- l ? ξ xπ [=->]? eq) "b". rewrite sem_cif_in /=.
+    iMod (pbor_plend_new (M:=borrowM) _ β _ _
+      (λ d xπ, cif_pbor α d xπ ξ (cif_pointsto_ty T l t)) with "[b]")
+      as (η) "[b' l]"=>/=; [by rewrite sem_cif_in /=|].
+    iDestruct (lft_incl'_live_acc β with "κ") as (?) "[β →κ]".
+    iMod (pbord_open (M:=borrowM) with "β b'") as "/=[o b]".
+    rewrite sem_cif_in /=.
+    iDestruct (lft_incl'_live_acc α with "κ'") as (?) "[α →κ']"; [by etrans|].
+    iMod (pobord_pbord_reborrow (M:=borrowM) (λ _, id) with "[] α o b []")
+      as "(ξ & ↦T & big)"=>/=. { done. } { by iApply lft_incl_sincl. }
+    { iIntros (??) "_ b". by rewrite sem_cif_in /=. }
+    iMod ("big" $! [] 1%Qp with "[//] [//]") as (ζ) "(obs & _ & big)".
+    iMod ("big" with "ξ ↦T") as "(β & α & b)". iDestruct ("→κ" with "β") as "$".
+    iDestruct ("→κ'" with "α") as "$". iModIntro.
+    iExists (λ π, ((xπ π, π ζ)', (π η, π ξ)', _)'). iFrame "Γr". iSplit.
+    { iApply (proph_obs_impl2 with "pre obs")=> π. by rewrite (eq π)=> to ->. }
+    iSplitL "b".
+    { iExists _, _. iSplit; [done|]. iExists _, _, _, _. rewrite sem_cif_in /=.
+      by iFrame "b". }
+    iExists _. iSplit; [done|]. iIntros "†".
+    iMod (plendd_retrieve (M:=borrowM) with "† l") as (xπ') "/=[eqz [%d' b]]".
+    rewrite sem_cif_in /=. iModIntro. iExists (S d'), _. iSplitL "eqz".
+    { iApply (proph_eqz_fpi (λ π x, (x, π ξ)') with "eqz")=> > []//. }
+    iExists _, _, _, _. rewrite sem_cif_in /=. iFrame "b". iPureIntro.
+    do 2 split=>//. lia.
+  Qed.
+  Lemma type_reborrow p β
+    `(!EtcxExtract (Yl:=Yl) (Zl:=Yl') (p ◁ ty_mutref (X:=X) α T) Γi Γr get getr,
+      !LftIncl κ β, !LftIncl β α) {Zl Γo e pre} :
+    type (Yl:=Zl) κ
+      (p ◁ ty_mutref β T ᵖ:: p ◁[†β] ty_mutref α T ᵖ:: Γr) e Γo pre ⊢
+      type κ Γi e Γo (λ post yl, let '(x, x')' := get yl in
+        ∀ x'' : X, pre post ((x, x'')', (x'', x')', getr yl)')%type.
+  Proof.
+    iIntros "type".
+    iApply (type_in (prei:=λ post _, ∀ x', post _) with "[] type").
+    iApply sub_reborrow.
+  Qed.
+
   (** Dereference a shared reference to a box pointer *)
   Lemma type_deref_shrref_box p
     `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (p ◁ ty_shrref α (ty_box (X:=X) T)) Γ Γr
