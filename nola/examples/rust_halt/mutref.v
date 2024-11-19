@@ -67,7 +67,7 @@ Section ty_mutref.
     rewrite ty_mutref_unseal. split=>/=.
     - move=> >. iIntros "[κ κ']". iDestruct 1 as (? ξ ???? eq) "big".
       rewrite sem_cif_in /=.
-      iDestruct (lft_incl'_live_acc (α:=α) with "κ") as (?) "[α →κ]".
+      iDestruct (lft_incl'_live_acc α with "κ") as (?) "[α →κ]".
       iMod (pbord_open (M:=borrowM) with "α big") as "/=[o (% & ↦ & T)]".
       iDestruct (pobor_proph with "o") as "[ξ →o]". unfold cif_pointsto_ty.
       iMod (ty_own_proph_lt with "κ' T") as (ηl ??) "[ηl →T]"=>//. iModIntro.
@@ -83,12 +83,12 @@ Section ty_mutref.
       do 3 (iSplit; [done|]). by rewrite pbor_tok_pbor sem_cif_in /=.
     - move=> ?? β ??. iIntros "[[κ κ'] [β β']]".
       iDestruct 1 as (????? eq) "(_ & >ξ & T)".
-      iDestruct (lft_incl'_live_acc (κ:=κ ⊓ β) (α:=α ⊓ β) with "[$κ $β]")
+      iDestruct (lft_incl'_live_acc (κ:=κ ⊓ β) (α ⊓ β) with "[$κ $β]")
         as (?) "[αβ →κβ]".
       iMod (sproph_tok_acc with "αβ ξ") as (?) "[ξ →αβ]". rewrite sem_cif_in /=.
       iMod (stored_acc with "T") as "T".
-      iDestruct (lft_incl'_live_acc (κ:=κ ⊓ β) (α:=κ ⊓ (α ⊓ β))
-        with "[$κ' $β']") as (?) "[καβ →κβ']".
+      iDestruct (lft_incl'_live_acc (κ:=κ ⊓ β) (κ ⊓ (α ⊓ β)) with "[$κ' $β']")
+        as (?) "[καβ →κβ']".
       iMod (ty_shr_proph_lt (T:=T) with "καβ T") as (ηl ??) "[ηl →καβ]"=>//.
       iModIntro. iDestruct (proph_tok_toks_fuse with "ξ ηl") as (?) "[$ →ξηl]".
       iSplit.
@@ -102,16 +102,15 @@ Section ty_mutref.
       iMod (bord_open (M:=borrowM) with "β b") as "/=[o (% & ↦ & big)]".
       iDestruct "big" as (??? xπ  -> ? eq) "pb".
       rewrite heap_pointsto_vec_singleton sem_cif_in /=.
-      iDestruct (lft_incl'_live_acc (α:=α) with "κ") as (?) "[α →κ]".
+      iDestruct (lft_incl'_live_acc α with "κ") as (?) "[α →κ]".
       iMod (pbord_soft_reborrow (M:=borrowM) (α ⊓ β) with "[] α pb")
         as "(α & →pb & bξ & bT)"; [iApply lft_sincl_meet_l|].
       iDestruct ("→κ" with "α") as "$".
-      iDestruct (lft_incl'_live_acc (κ:=κ ⊓ β) (α:=α ⊓ β)
-        with "[$κ' $β']") as (?) "[αβ →κβ]".
+      iDestruct (lft_incl'_live_acc (κ:=κ ⊓ β) (α ⊓ β) with "[$κ' $β']")
+        as (?) "[αβ →κβ]".
       iMod (sproph_tok_alloc with "αβ bξ") as "[αβ $]".
       iDestruct ("→κβ" with "αβ") as "κβ".
-      iDestruct (lft_incl'_live_acc (α:=κ ⊓ (α ⊓ β)) with "κβ")
-        as (?) "[καβ →κβ]".
+      iDestruct (lft_incl'_live_acc (κ ⊓ (α ⊓ β)) with "κβ") as (?) "[καβ →κβ]".
       iMod (ty_share_lt (T:=T) with "καβ bT") as "[καβ #T]"=>//.
       iDestruct ("→κβ" with "καβ") as "[κ $]".
       iMod (obord_subdiv (FML:=cifOF _) (M:=borrowM) [▷ _ ↦ _]%cif (α ⊓ β)
@@ -120,8 +119,8 @@ Section ty_mutref.
       { iIntros "† [↦ _] !>". iExists [_]. rewrite heap_pointsto_vec_singleton.
         iFrame "↦". iExists _, _, _, _. rewrite sem_cif_in /=.
         by iDestruct ("→pb" with "†") as "$". }
-      iDestruct (lft_incl'_live_acc (κ:=κ ⊓ β) (α:=α ⊓ β)
-        with "[$κ $β]") as (?) "[αβ →κβ]".
+      iDestruct (lft_incl'_live_acc (κ:=κ ⊓ β) (α ⊓ β) with "[$κ $β]")
+        as (?) "[αβ →κβ]".
       iMod (spointsto_alloc with "αβ ↦") as "[αβ $]".
       iDestruct ("→κβ" with "αβ") as "[$$]". iExists _, _.
       rewrite sem_cif_in /=. by iMod (store_alloc_pers with "T") as "$".
@@ -150,7 +149,7 @@ Section ty_mutref.
   Proof.
     rewrite /= ty_mutref_unseal. split=>/= >. iIntros "[κ κ'] $".
     iDestruct 1 as (?????? eq) "b". rewrite sem_cif_in /=.
-    iDestruct (lft_incl'_live_acc (α:=α) with "κ") as (?) "[α →κ]".
+    iDestruct (lft_incl'_live_acc α with "κ") as (?) "[α →κ]".
     iMod (pbord_open (M:=borrowM) with "α b") as "/=[o (% & ↦ & T)]".
     iMod (ty_own_proph with "κ' T") as (ηl ??) "[ηl →T]".
     iMod (pobord_resolve (M:=borrowM) with "o ηl") as "/=(ηl & obs & →α)"=>//.
@@ -167,7 +166,7 @@ Section ty_mutref.
     rewrite ty_mutref_unseal. split=>/= >.
     - iIntros "[κ κ'] t". iDestruct 1 as (????) "($ & % & %eq & b)".
       rewrite sem_cif_in /=.
-      iDestruct (lft_incl'_live_acc (α:=α) with "κ") as (?) "[α →κ]".
+      iDestruct (lft_incl'_live_acc α with "κ") as (?) "[α →κ]".
       iMod (pbord_open (M:=borrowM) with "α b") as "/=[o (% & ↦ & T)]".
       iMod (real_own_lt with "κ' t T") as ([? eq']) "($ & $ & T)"=>//.
       iMod (pobord_close (M:=borrowM) with "o [↦ T]") as "[α b]"=>/=;
@@ -209,7 +208,7 @@ Section ty_mutref.
   Proof.
     rewrite ty_mutref_unseal. split=>/= >. iIntros "κ $".
     iDestruct 1 as (????[=->]? eq) "b". rewrite sem_cif_in /=.
-    iDestruct (lft_incl'_live_acc (α:=α) with "κ") as (?) "[α →κ]".
+    iDestruct (lft_incl'_live_acc α with "κ") as (?) "[α →κ]".
     iMod (pbord_open (M:=borrowM) with "α b") as "/=[o (% & >$ & #T)]".
     iDestruct (ty_own_clair with "T") as "$". { move=>/= ?. by rewrite eq. }
     iModIntro. iSplit; [done|]. iIntros "↦".
@@ -226,7 +225,7 @@ Section ty_mutref.
   Proof.
     rewrite ty_mutref_unseal. split=>/= >. iIntros "κ".
     iDestruct 1 as (????[=->]? eq) "b". rewrite sem_cif_in /=.
-    iDestruct (lft_incl'_live_acc (α:=α) with "κ") as (?) "[α →κ]".
+    iDestruct (lft_incl'_live_acc α with "κ") as (?) "[α →κ]".
     iMod (pbord_open (M:=borrowM) with "α b") as "/=[o (% & >$ & T)]".
     iDestruct (ty_own_clair with "T") as "$". { move=>/= ?. by rewrite eq. }
     iModIntro. iSplit; [done|]. iIntros (? du' ?) "↦ T".

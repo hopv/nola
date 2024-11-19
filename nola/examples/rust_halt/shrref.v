@@ -62,7 +62,7 @@ Section ty_shrref.
     apply: sty_op_at=> >. rewrite sty_shrref_unseal /=. iIntros "κ".
     iDestruct 1 as (??? -> ??) "T". rewrite sem_cif_in /=.
     iMod (stored_acc with "T") as "T".
-    iDestruct (lft_incl'_live_acc (α:=κ ⊓ α) with "κ") as (?) "[κα →κ]".
+    iDestruct (lft_incl'_live_acc (κ ⊓ α) with "κ") as (?) "[κα →κ]".
     iMod (ty_shr_proph_lt with "κα T") as (???) "[$ →κα]"=>//. iModIntro.
     iSplit. { iPureIntro. by eapply proph_dep_proper. }
     iIntros "ξl". iMod ("→κα" with "ξl") as "κα". iModIntro. by iApply "→κ".
@@ -120,7 +120,7 @@ Section ty_shrref.
     rewrite ty_shrref_unseal. split=>/= >. iIntros "κ t".
     iDestruct 1 as (???[=->]??) "#sT".
     rewrite sem_cif_in /=. iMod (stored_acc with "sT") as "sT'".
-    iDestruct (lft_incl'_live_acc (α:=α) with "κ") as (?) "[α →κ]".
+    iDestruct (lft_incl'_live_acc α with "κ") as (?) "[α →κ]".
     iMod (copy_shr_acc with "α t sT'") as (??) "(↦ & t & #T & cl)"=>//.
     iModIntro. iDestruct (ty_own_clair with "T") as "$"=>//. iFrame "↦".
     iSplit=>//. iIntros "↦". iMod ("cl" with "↦ t") as "[α $]". iModIntro.

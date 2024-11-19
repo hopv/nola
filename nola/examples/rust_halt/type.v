@@ -266,16 +266,16 @@ Section ty_op.
     move=> T T' /ty_equiv[?[eqvO eqvS]] κ κ' /= ??? <- ?.
     have ? : LftIncl κ' κ by done. split.
     - move=> >. setoid_rewrite <-(eqvO _ _ _ _). iIntros "κ' T".
-      iDestruct (lft_incl'_live_acc (α:=κ) with "κ'") as (?) "[κ →κ']"=>//.
+      iDestruct (lft_incl'_live_acc κ with "κ'") as (?) "[κ →κ']"=>//.
       iMod (ty_own_proph with "κ T") as (??) "($ & $ & →T)". iModIntro.
       iIntros "ξl". iMod ("→T" with "ξl") as "[κ $]". iModIntro.
       by iApply "→κ'".
     - move=> ?? α ??. setoid_rewrite <-(eqvS _ _ _ _ _). iIntros "κ'α T".
-      iDestruct (lft_incl'_live_acc (α:=κ ⊓ α) with "κ'α") as (?) "[κα →κ'α]".
+      iDestruct (lft_incl'_live_acc (κ ⊓ α) with "κ'α") as (?) "[κα →κ'α]".
       iMod (ty_shr_proph with "κα T") as (??) "($ & $ & →κα)". iModIntro.
       iIntros "ξl". iMod ("→κα" with "ξl") as "κα". iModIntro. by iApply "→κ'α".
     - move=> ?? α ??. rewrite -(eqvS _ _ _ _ _). iIntros "κ'α b".
-      iDestruct (lft_incl'_live_acc (α:=κ ⊓ α) with "κ'α") as (?) "[κα →κ'α]".
+      iDestruct (lft_incl'_live_acc (κ ⊓ α) with "κ'α") as (?) "[κα →κ'α]".
       iMod (ty_share with "κα [b]") as "[κα $]"; last first.
       { iModIntro. by iApply "→κ'α". }
       iStopProof. apply bi.equiv_entails. unfold cif_pointsto_ty.
@@ -509,7 +509,7 @@ Section resol.
   Proof.
     move=> ?? /ty_equiv[_[eqv _]] κ κ' /= ??? to ??<-?.
     have ? : LftIncl κ' κ by done. split=>/= >. iIntros "κ' t T".
-    iDestruct (lft_incl'_live_acc (α:=κ) with "κ'") as (?) "[κ →κ']".
+    iDestruct (lft_incl'_live_acc κ with "κ'") as (?) "[κ →κ']".
     rewrite -(eqv _ _ _ _). iMod (resol with "κ t T") as "(κ & $ & post)".
     iDestruct ("→κ'" with "κ") as "$". iModIntro.
     iApply (proph_obs_impl with "post")=> ?. apply to.
@@ -604,7 +604,7 @@ Section real.
     move=> ?? /ty_equiv[_[eqvO eqvS]] κ κ' /= ??? eq ??<-?.
     have ? : LftIncl κ' κ by done.
     split=>/= >; iIntros "κ' t T";
-      iDestruct (lft_incl'_live_acc (α:=κ) with "κ'") as (?) "[κ →κ']";
+      iDestruct (lft_incl'_live_acc κ with "κ'") as (?) "[κ →κ']";
       [rewrite -(eqvO _ _ _ _);
         iMod (real_own with "κ t T") as ([? eq']) "[κ $]"|
         rewrite -(eqvS _ _ _ _ _);

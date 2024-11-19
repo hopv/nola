@@ -24,7 +24,7 @@ Section sum_more.
     iDestruct "p" as (?? peq ???[=->]? eq) "sum". wp_path p.
     rewrite sem_cif_in /=. iMod (stored_acc with "sum") as "sum"=>/=.
     iDestruct "sum" as (b) "[>↦ big]".
-    iDestruct (lft_incl'_live_acc (α:=α) with "κ") as (?) "[α →κ]".
+    iDestruct (lft_incl'_live_acc α with "κ") as (?) "[α →κ]".
     iMod (spointsto_acc with "α ↦") as (?) "[↦ →α]". wp_read.
     iMod ("→α" with "↦") as "α". iDestruct ("→κ" with "α") as "κ". wp_case.
     case: b=>/=; iDestruct "big" as (? eq') "[S _]";
@@ -54,7 +54,7 @@ Section sum_more.
     rewrite etcx_extract ty_mutref_unseal ty_sum_unseal /=. iIntros "[p Γr]".
     iDestruct "p" as (?? peq ? d' ??[=->]? eq) "b". wp_path p.
     rewrite sem_cif_in /=.
-    iDestruct (lft_incl'_live_acc (α:=α) with "κ") as (?) "[α →κ]".
+    iDestruct (lft_incl'_live_acc α with "κ") as (?) "[α →κ]".
     iMod (pbord_open (M:=borrowM) with "α b") as "/=[o (% & ↦ & big)]".
     iDestruct "big" as (b ??->) "big".
     rewrite heap_pointsto_vec_cons heap_pointsto_vec_app.
