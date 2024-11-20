@@ -1,4 +1,4 @@
-(** * Derivability *)
+(** * Magic derivability *)
 
 From nola.util Require Export psg.
 From nola.bi Require Export order.

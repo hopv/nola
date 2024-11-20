@@ -78,7 +78,7 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`gmap`](nola/bi/gmap.v) (On `gmap`),
     [`plist`](nola/bi/plist.v) (On `plist`)
   + [`order`](nola/bi/order.v) (Order theory),
-    [`deriv`](nola/bi/deriv.v) (Derivability)
+    [`deriv`](nola/bi/deriv.v) (Magic derivability)
   + [`mod`](nola/bi/mod.v) (Modality classes),
     [`modw`](nola/bi/modw.v) (Modality with a custom world satisfaction),
     [`wpw`](nola/bi/wpw.v) (Weakest precondition with a custom world
