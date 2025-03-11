@@ -9,7 +9,7 @@ Lemma csum_equiv' {A B : ofe} {s s' : csum A B} :
     match s, s' with
     | Cinl a, Cinl a' => a ≡ a'
     | Cinr b, Cinr b' => b ≡ b'
-    | CsumBot, CsumBot => True
+    | CsumInvalid, CsumInvalid => True
     | _, _ => False
     end.
 Proof. split; [by case|]. case: s; case: s'=>//= *; by f_equiv. Qed.
@@ -19,7 +19,7 @@ Lemma csum_dist' {A B : ofe} {n} {s s' : csum A B} :
     match s, s' with
     | Cinl a, Cinl a' => a ≡{n}≡ a'
     | Cinr b, Cinr b' => b ≡{n}≡ b'
-    | CsumBot, CsumBot => True
+    | CsumInvalid, CsumInvalid => True
     | _, _ => False
     end.
 Proof. split; [by case|]. case: s; case: s'=>//= *; by f_equiv. Qed.
@@ -28,7 +28,7 @@ Proof. split; [by case|]. case: s; case: s'=>//= *; by f_equiv. Qed.
 Lemma csum_included' {A B : cmra} {s s' : csum A B} :
   s ≼ s' ↔
     match s, s' with
-    | _, CsumBot => True
+    | _, CsumInvalid => True
     | Cinl a, Cinl a' => a ≼ a'
     | Cinr b, Cinr b' => b ≼ b'
     | _, _ => False
@@ -38,7 +38,7 @@ Proof. rewrite csum_included. case: s; case: s'; naive_solver. Qed.
 Lemma csum_includedN {A B : cmra} {s s' : csum A B} {n} :
   s ≼{n} s' ↔
     match s, s' with
-    | _, CsumBot => True
+    | _, CsumInvalid => True
     | Cinl a, Cinl a' => a ≼{n} a'
     | Cinr b, Cinr b' => b ≼{n} b'
     | _, _ => False

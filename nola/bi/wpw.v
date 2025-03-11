@@ -4,7 +4,7 @@ From nola.bi Require Export modw.
 From nola.bi Require Import util.
 From iris.program_logic Require Export weakestpre total_weakestpre adequacy
   total_adequacy.
-From iris.bi Require Import fixpoint.
+From iris.bi.lib Require Import fixpoint_mono.
 From iris.proofmode Require Import proofmode.
 Import BUpd0Notation ModwNotation.
 
