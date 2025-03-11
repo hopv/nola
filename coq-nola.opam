@@ -1,5 +1,5 @@
 opam-version: "2.0"
-synopsis: "Modular Liveness Verification by Later-Free Ghost State"
+synopsis: "Later-Free Ghost State for Verifying Termination"
 maintainer: "Yusuke Matsushita <ysk.m24t@gmail.com>"
 authors: ["Yusuke Matsushita <ysk.m24t@gmail.com>"]
 license: "MIT"

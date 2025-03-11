@@ -1,12 +1,13 @@
-# Nola: Modular Liveness Verification by Later-Free Ghost State
+# Nola: Later-Free Ghost State for Verifying Termination
 
-Nola is a framework that enables _modular liveness verification_ by
-_higher-order ghost state_ with the _later modality cleared_.
-It is fully mechanized in [Coq](https://coq.inria.fr/) with the
+Nola is a framework for _later-free higher-order ghost state_, enabling
+termination verification in the presence of advanced features.
+
+It is fully mechanized in [Coq](https://coq.inria.fr/) as a library for the
 [Iris](https://iris-project.org/) separation logic framework.
 
 The name Nola comes from '_No_ *la*ter' and the nickname for New Orleans,
-Louisiana, US.
+Louisiana, USA, in memory of POPL 2020 held in that city.
 
 - [Publication](#publication)
 - [Getting Started](#getting-started)
