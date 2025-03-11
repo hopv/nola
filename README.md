@@ -22,33 +22,60 @@ Louisiana, USA, in memory of POPL 2020 held in that city.
 
 ## Getting Started
 
-We use [opam](https://opam.ocaml.org/) ver 2.* for package management.
+Now we explain how to get started.
 
-To set up an [opam switch](https://opam.ocaml.org/doc/man/opam-switch.html)
-named `nola` and link it to the folder:
+- [Setting up Opam](#setting-up-opam)
+- [Building Nola](#building-nola)
+
+### Setting up Opam
+
+We use [opam](https://opam.ocaml.org/) ver `2.*` for package management. To
+install opam, you can refer to
+[the official installation guide](https://opam.ocaml.org/doc/Install.html).
+
+To create a new [opam switch](https://opam.ocaml.org/doc/man/opam-switch.html)
+named `for_nola` (you can choose any name), run:
 ```bash
-opam switch create nola 5.0.0 # Choose an OCaml version
-opam switch link nola .
+opam switch create for_nola 4.14.2 # Choose any OCaml version you like
+```
+To activate the opam switch `for_nola` just globally, run:
+```bash
+opam switch set for_nola
+```
+Or, to activate the opam switch `for_nola` locally in the directory `NOLA_DIR`
+where this `README.md` is located, run:
+```bash
+opam switch link for_nola NOLA_DIR
 ```
 
-To set up opam repos for Coq and Iris for the current opam switch:
+To set up opam repos for Coq and Iris for the active opam switch, run:
 ```bash
 opam repo add coq-released https://coq.inria.fr/opam/released
 opam repo add iris-dev https://gitlab.mpi-sws.org/iris/opam.git
 ```
 
-To fix development dependencies and compile Coq code:
+### Building Nola
+
+First, go to the directory `NOLA_DIR` where this `README.md` is located:
 ```bash
-make devdep
-make -j16 # Choose a job number
+cd NOLA_DIR
 ```
 
-Or to install as a library locally:
+To fix development dependencies and install them, run:
+```bash
+make devdep
+```
+
+To build Nola's code locally, run:
+```bash
+make -j16 # Choose a job number
+```
+Or, to install Nola as an opam library, run:
 ```bash
 opam install .
 ```
 
-To generate and browse a document:
+To generate and browse a document for Nola's Coq code, run:
 ```bash
 make viewdoc
 ```
