@@ -9,16 +9,22 @@ It is fully mechanized in [Coq](https://coq.inria.fr/) as a library for the
 The name Nola comes from '_No_ *la*ter' and the nickname for New Orleans,
 Louisiana, USA, in memory of POPL 2020 held in that city.
 
-- [Publication](#publication)
+- [Publications](#publications)
 - [Getting Started](#getting-started)
 - [Architecture](#architecture)
 
-## Publication
+## Publications
 
-- Non-Step-Indexed Separation Logic with Invariants and Rust-Style Borrows.
-  Yusuke Matsushita. Ph.D. Thesis, University of Tokyo. Dec 2023.
-  [Paper](https://shiatsumat.github.io/papers/phd-thesis.pdf)
-  [Talk slides](https://shiatsumat.github.io/talks/phd-thesis-talk.pdf)
+- Yusuke Matsushita. Non-Step-Indexed Separation Logic with Invariants and
+    Rust-Style Borrows. \
+  Ph.D. Dissertation, University of Tokyo. Dec 6, 2023.
+    [Paper](https://shiatsumat.github.io/papers/phd-thesis.pdf),
+    [Talk slides](https://shiatsumat.github.io/talks/phd-thesis-talk.pdf).
+- Yusuke Matsushita. Non-Step-Indexed Separation Logic with Invariants and
+    Rust-Style Borrows. \
+  Bulletin of Ph.D. Dissertations in AY 2023 Recommended by SIGs, Information
+    Processing Society of Japan. Aug 15, 2024.
+    [HTML](https://note.com/ipsj/n/nc0ae275045eb) (Japanese).
 
 ## Getting Started
 
