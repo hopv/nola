@@ -1,7 +1,7 @@
 (** * Fractured borrows *)
 
 From nola.iris Require Export dinv borrow.
-From iris.bi Require Export lib.fractional.
+From iris.bi.lib Require Export fractional.
 From iris.proofmode Require Import proofmode.
 Import ProdNotation iPropAppNotation ModwNotation LftNotation.
 

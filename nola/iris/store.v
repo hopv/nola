@@ -2,7 +2,7 @@
 
 From nola.bi Require Export internal modw.
 From nola.iris Require Export cif dinv.
-From iris.base_logic Require Export lib.token.
+From iris.base_logic.lib Require Export token.
 From iris.proofmode Require Import proofmode.
 Import iPropAppNotation ModwNotation CsemNotation.
 

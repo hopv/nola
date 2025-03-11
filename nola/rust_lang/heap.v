@@ -2,7 +2,7 @@ From stdpp Require Import coPset.
 From iris.algebra Require Import big_op gmap frac agree numbers.
 From iris.algebra Require Import csum excl auth cmra_big_op.
 From iris.bi Require Import fractional.
-From iris.base_logic Require Export lib.own.
+From iris.base_logic.lib Require Export own.
 From iris.proofmode Require Export proofmode.
 From nola.rust_lang Require Export lang.
 From iris.prelude Require Import options.

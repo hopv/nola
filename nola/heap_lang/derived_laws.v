@@ -5,7 +5,7 @@ For utility functions on arrays (e.g., freeing/copying an array), see
 [heap_lang.lib.array].  *)
 
 From stdpp Require Import fin_maps.
-From iris.bi Require Import lib.fractional.
+From iris.bi.lib Require Import fractional.
 From iris.proofmode Require Import proofmode.
 From nola.heap_lang Require Export primitive_laws.
 From nola.heap_lang Require Import tactics notation.
