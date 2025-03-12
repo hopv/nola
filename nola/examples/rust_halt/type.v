@@ -840,7 +840,7 @@ End twp.
 (** Tactics for applying [twp_path_bind] *)
 Ltac wp_path p :=
   lazymatch goal with
-  | |- envs_entails _ (twp _ _ ?eglob _) =>
+  | |- envs_entails _ (twpw _ _ _ ?eglob _) =>
         reshape_expr eglob ltac:(fun K e => unify e p;
           iApply (twp_path_bind K p)=>//=)
   end.

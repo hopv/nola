@@ -49,19 +49,19 @@ Qed.
 Tactic Notation "wp_pure" open_constr(efoc) :=
   iStartProof;
   lazymatch goal with
+  | |- envs_entails _ (twpw ?W ?s ?E ?e ?Q) => reshape_expr e ltac:(fun K e' =>
+    unify e' efoc;
+    eapply (tac_twp_pure K);
+    [simpl; tc_solve                (* PureExec *)
+    |try done                       (* The pure condition for PureExec *)
+    |simpl_subst; try wp_value_head (* new goal *)])
+   || fail "wp_pure: cannot find" efoc "in" e "or" efoc "is not a reduct"
   | |- envs_entails _ (wpw ?W ?s ?E ?e ?Q) => reshape_expr e ltac:(fun K e' =>
     unify e' efoc;
     eapply (tac_wp_pure K);
     [simpl; tc_solve                (* PureExec *)
     |try done                       (* The pure condition for PureExec *)
     |tc_solve                       (* IntoLaters *)
-    |simpl_subst; try wp_value_head (* new goal *)])
-   || fail "wp_pure: cannot find" efoc "in" e "or" efoc "is not a reduct"
-  | |- envs_entails _ (twpw ?W ?s ?E ?e ?Q) => reshape_expr e ltac:(fun K e' =>
-    unify e' efoc;
-    eapply (tac_twp_pure K);
-    [simpl; tc_solve                (* PureExec *)
-    |try done                       (* The pure condition for PureExec *)
     |simpl_subst; try wp_value_head (* new goal *)])
    || fail "wp_pure: cannot find" efoc "in" e "or" efoc "is not a reduct"
   | _ => fail "wp_pure: not a 'wp'"
