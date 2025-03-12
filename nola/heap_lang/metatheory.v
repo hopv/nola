@@ -1,3 +1,5 @@
+(** * Metatheory on the language *)
+
 From stdpp Require Import gmap stringmap.
 From nola.heap_lang Require Export lang.
 From iris.prelude Require Import options.

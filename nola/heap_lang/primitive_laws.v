@@ -1,3 +1,5 @@
+(** * Primitive laws of the program logic *)
+
 (** This file proves the basic laws of the HeapLang program logic by applying
 the Iris lifting lemmas. *)
 From iris.proofmode Require Import proofmode.

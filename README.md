@@ -152,6 +152,29 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`paradox`](nola/iris/paradox.v) (Paradox)
 - [`heap_lang/`](nola/heap_lang/) : Variant of Iris HeapLang, supporting `Ndnat`
     (infinite non-determinism) and program logic with custom world satisfactions
+    for Nola
+  + [`locations`](nola/heap_lang/locations.v) (On locations)
+  + [`lang`](nola/heap_lang/lang.v) (Language),
+    [`pretty`](nola/heap_lang/pretty.v) (Pretty printing for the language),
+    [`notation`](nola/heap_lang/notation.v) (Notation for the language),
+    [`tactics`](nola/heap_lang/tactics.v) (Tactics for the language)
+  + [`metatheory`](nola/heap_lang/metatheory.v) (Metatheory on the language),
+    [`proph_erasure`](nola/heap_lang/proph_erasure.v) (Prophecy erasure theorem
+      for the language)
+  + [`class_instances`](nola/heap_lang/class_instances.v) (Class instances for
+      the program logic),
+    [`definitions`](nola/heap_lang/definitions.v) (Definitions for the program
+      logic),
+    [`primitive_laws`](nola/heap_lang/primitive_laws.v) (Primitive laws of the
+      program logic),
+    [`derived_laws`](nola/heap_lang/derived_laws.v) (Derived laws of the program
+      logic),
+    [`proofmode`](nola/heap_lang/proofmode.v) (Proof mode utility for the
+      program logic)
+  + [`adequacy`](nola/heap_lang/adequacy.v) (Safety adequacy of the program
+      logic),
+    [`total_adequacy`](nola/heap_lang/total_adequacy.v) (Termination adequacy of
+      the program logic)
 - [`rust_lang/`](nola/lrust/) : Variant of RustBelt's language, supporting
     `Ndnat` and program logic with termination sensitivity and custom world
     satisfactions

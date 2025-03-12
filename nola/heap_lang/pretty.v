@@ -1,9 +1,8 @@
-From stdpp Require Export pretty.
+(** * Pretty printing for HeapLang values *)
 
+From stdpp Require Export pretty.
 From nola.heap_lang Require Import lang.
 From iris.prelude Require Import options.
-
-(** * Pretty printing for HeapLang values *)
 
 Global Instance pretty_loc : Pretty loc :=
   λ l, pretty l.(loc_car).

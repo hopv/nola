@@ -1,3 +1,5 @@
+(** * Notation for the language *)
+
 From iris.program_logic Require Import language.
 From nola.heap_lang Require Export lang.
 From iris.prelude Require Import options.

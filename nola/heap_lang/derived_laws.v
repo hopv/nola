@@ -1,3 +1,4 @@
+(** * Derived laws of the program logic *)
 (** This file extends the HeapLang program logic with some derived laws (not
 using the lifting lemmas) about arrays and prophecies.
 

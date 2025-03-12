@@ -1,3 +1,5 @@
+(** * Class instances for the program logic *)
+
 From iris.program_logic Require Export language.
 From nola.heap_lang Require Export lang.
 From nola.heap_lang Require Import tactics notation.

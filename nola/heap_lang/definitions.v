@@ -1,4 +1,5 @@
-(** Definitions (cut out from [primitive_laws] for better compilation) *)
+(** * Definitions for the program logic *)
+(* This file was cut out from [primitive_laws] for faster compilation *)
 
 From iris.proofmode Require Import proofmode.
 From iris.base_logic.lib Require Import mono_nat.
@@ -91,6 +92,8 @@ Notation "l '↦_' I □" := (inv_pointsto l I%stdpp%type)
 Notation "l ↦_ I v" := (inv_pointsto_own l v I%stdpp%type)
   (at level 20, I at level 9, format "l  ↦_ I  v") : bi_scope.
 
+(** By using [iris'GS_gen] instead of [irisGS_gen], we can support custom world
+  satisfactions for Nola *)
 Global Program Instance heapGS_iris'GS `{!heapGS_gen hlc Σ} :
   iris'GS_gen hlc heap_ectxi_lang Σ := {
   iris'_invGS := heapGS_invGS;

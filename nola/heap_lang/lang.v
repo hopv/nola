@@ -1,3 +1,5 @@
+(** * Language *)
+
 From stdpp Require Export binders strings.
 From stdpp Require Import gmap.
 From iris.algebra Require Export ofe.
@@ -60,6 +62,9 @@ cannot be taken by the context. For example:
 The mechanism described above supports nesting [Resolve] expressions to
 attach several prophecy resolutions to a head-redex. *)
 
+(* For Nola, we also newly added [Ndnat], taking a non-deterministic natural
+  number *)
+
 Delimit Scope expr_scope with E.
 Delimit Scope val_scope with V.
 
@@ -121,7 +126,7 @@ Inductive expr : Set :=
   | NewProph
   | Resolve (e0 : expr) (e1 : expr) (e2 : expr) (* wrapped expr, proph, val *)
   (* Non-determinism *)
-  | Ndnat
+  | Ndnat (* Non-deterministic natural number, newly added for Nola *)
 with val :=
   | LitV (l : base_lit)
   | RecV (f x : binder) (e : expr)

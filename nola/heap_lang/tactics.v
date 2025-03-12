@@ -1,3 +1,5 @@
+(** * Tactics for the language *)
+
 From stdpp Require Import fin_maps.
 From nola.heap_lang Require Export lang.
 From iris.prelude Require Import options.

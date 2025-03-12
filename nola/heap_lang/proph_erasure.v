@@ -1,3 +1,5 @@
+(** * Prophecy erasure theorem for the language *)
+
 From iris.program_logic Require Export adequacy.
 From nola.heap_lang Require Export lang notation tactics.
 From iris.prelude Require Import options.

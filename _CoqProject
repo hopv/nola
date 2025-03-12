@@ -58,9 +58,9 @@ nola/iris/paradox.v
 nola/heap_lang/locations.v
 nola/heap_lang/lang.v
 nola/heap_lang/pretty.v
-nola/heap_lang/metatheory.v
 nola/heap_lang/notation.v
 nola/heap_lang/tactics.v
+nola/heap_lang/metatheory.v
 nola/heap_lang/proph_erasure.v
 nola/heap_lang/class_instances.v
 nola/heap_lang/definitions.v

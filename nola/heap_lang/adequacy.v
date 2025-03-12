@@ -1,3 +1,5 @@
+(** * Safety adequacy of the program logic *)
+
 From iris.algebra Require Import auth.
 From iris.base_logic.lib Require Import mono_nat.
 From iris.proofmode Require Import proofmode.
@@ -20,6 +22,7 @@ Definition heapΣ : gFunctors :=
 Global Instance subG_heapGpreS {Σ} : subG heapΣ Σ → heapGpreS Σ.
 Proof. solve_inG. Qed.
 
+(** Safety adequacy of the partial weakest precondition *)
 Theorem heap_adequacy Σ `{!heapGpreS Σ} hlc s e σ φ :
   (∀ `{!heapGS_gen hlc Σ},
     inv_heap_inv ={⊤}=∗ ∃ W : iProp Σ, W ∗ WP[W] e @ s; ⊤ {{ v, ⌜φ v⌝ }}) →
