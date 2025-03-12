@@ -19,9 +19,9 @@ Proof. rewrite envs_entails_unseal=> ? ->. by apply wp_value. Qed.
 
 Ltac wp_value_head :=
   lazymatch goal with
-  | |- envs_entails _ (twp _ _ _ _) =>
+  | |- envs_entails _ (twpw _ _ _ _ _) =>
       eapply tac_twp_value; [tc_solve|reduction.pm_prettify]
-  | |- envs_entails _ (wp _ _ _ _) =>
+  | |- envs_entails _ (wpw _ _ _ _ _) =>
       eapply tac_wp_value; [tc_solve|reduction.pm_prettify]
   end.
 
