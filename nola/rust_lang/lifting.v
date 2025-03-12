@@ -97,16 +97,17 @@ Implicit Types e : expr.
 Implicit Types ef : option expr.
 
 (** Base axioms for core primitives of the language: Stateless reductions *)
-Lemma twp_fork W E e :
-  [[{ WP[W] e [{ _, True }] }]][W] Fork e @ E [[{ RET LitV LitPoison; True }]].
+Lemma twp_fork W s E e :
+  [[{ WP[W] e @ s; ⊤ [{ _, True }] }]][W] Fork e @ s; E
+  [[{ RET LitV LitPoison; True }]].
 Proof.
   iIntros (?) "?HΦ". iApply twp_lift_atomic_base_step; [done|].
   iIntros (σ1 ns κs nt) "[$ Hσ] !>". iSplit; first by eauto.
   iIntros (?????) "!>". inv_base_step. iSplit; [done|]. iFrame.
   by iApply "HΦ".
 Qed.
-Lemma wp_fork W E e :
-  {{{ ▷ WP[W] e {{ _, True }} }}}[W] Fork e @ E
+Lemma wp_fork W s E e :
+  {{{ ▷ WP[W] e @ s; ⊤ {{ _, True }} }}}[W] Fork e @ s; E
   {{{ RET LitV LitPoison; True }}}.
 Proof.
   iIntros (?) "?HΦ". iApply wp_lift_atomic_base_step; [done|].
@@ -116,8 +117,8 @@ Proof.
 Qed.
 
 (** Non-determinism *)
-Lemma twp_ndnat W E :
-  [[{ True }]][W] Ndnat @ E [[{ (n : nat), RET (LitV (LitInt n)); True }]].
+Lemma twp_ndnat W s E :
+  [[{ True }]][W] Ndnat @ s; E [[{ (n : nat), RET (LitV (LitInt n)); True }]].
 Proof.
   iIntros (Φ) "_ HΦ". iApply twp_lift_atomic_base_step_no_fork; first done.
   iIntros (????) "[W ?] !>". iSplit.
@@ -125,8 +126,8 @@ Proof.
   iIntros (?????). inv_base_step. iModIntro. do 2 (iSplit=>//). iFrame.
   by iApply "HΦ".
 Qed.
-Lemma wp_ndnat W E :
-  {{{ True }}}[W] Ndnat @ E {{{ (n : nat), RET (LitV (LitInt n)); True }}}.
+Lemma wp_ndnat W s E :
+  {{{ True }}}[W] Ndnat @ s; E {{{ (n : nat), RET (LitV (LitInt n)); True }}}.
 Proof.
   iIntros (Φ) "_ HΦ". iApply (twp_wp_step with "HΦ"). iApply twp_ndnat; [done|].
   iIntros (n) "_ HΦ". by iApply "HΦ".
@@ -196,9 +197,9 @@ Global Instance pure_if b e1 e2 :
 Proof. destruct b; solve_pure_exec. Qed.
 
 (** Heap *)
-Lemma twp_alloc W E (n : Z) :
+Lemma twp_alloc W s E (n : Z) :
   0 < n →
-  [[{ True }]][W] Alloc (Lit $ LitInt n) @ E
+  [[{ True }]][W] Alloc (Lit $ LitInt n) @ s; E
   [[{ l (sz: nat), RET LitV $ LitLoc l; ⌜n = sz⌝ ∧ †l…sz ∗
     l ↦∗ repeat (LitV LitPoison) sz }]].
 Proof.
@@ -208,9 +209,9 @@ Proof.
   iModIntro; do 2 (iSplit=> //). iFrame.
   iApply ("HΦ" $! _ (Z.to_nat n)). iFrame. iPureIntro. rewrite Z2Nat.id; lia.
 Qed.
-Lemma wp_alloc W E (n : Z) :
+Lemma wp_alloc W s E (n : Z) :
   0 < n →
-  {{{ True }}}[W] Alloc (Lit $ LitInt n) @ E
+  {{{ True }}}[W] Alloc (Lit $ LitInt n) @ s; E
   {{{ l (sz: nat), RET LitV $ LitLoc l; ⌜n = sz⌝ ∧ †l…sz ∗
     l ↦∗ repeat (LitV LitPoison) sz }}}.
 Proof.
@@ -218,10 +219,10 @@ Proof.
   iApply twp_alloc=>//. iIntros (??) "? →Φ". by iApply "→Φ".
 Qed.
 
-Lemma twp_free W E (n:Z) l vl :
+Lemma twp_free W s E (n:Z) l vl :
   n = length vl →
   [[{ l ↦∗ vl ∗ †l…(length vl) }]][W]
-    Free (Lit $ LitInt n) (Lit $ LitLoc l) @ E
+    Free (Lit $ LitInt n) (Lit $ LitLoc l) @ s; E
   [[{ RET LitV LitPoison; True }]].
 Proof.
   iIntros (? Φ) "[Hmt Hf] HΦ". iApply twp_lift_atomic_base_step_no_fork; auto.
@@ -230,18 +231,18 @@ Proof.
   iModIntro; iSplit; first by auto. iIntros (?????) "!>". inv_base_step.
   do 2 (iSplit=> //). iFrame. by iApply "HΦ".
 Qed.
-Lemma wp_free W E (n:Z) l vl :
+Lemma wp_free W s E (n:Z) l vl :
   n = length vl →
   {{{ l ↦∗ vl ∗ †l…(length vl) }}}[W]
-    Free (Lit $ LitInt n) (Lit $ LitLoc l) @ E
+    Free (Lit $ LitInt n) (Lit $ LitLoc l) @ s; E
   {{{ RET LitV LitPoison; True }}}.
 Proof.
   iIntros (??) "H →Φ". iApply (twp_wp_step with "→Φ").
   iApply (twp_free with "H")=>//. iIntros "_ →Φ !>". by iApply "→Φ".
 Qed.
 
-Lemma twp_read_sc W E l q v :
-  [[{ l ↦{q} v }]][W] Read ScOrd (Lit $ LitLoc l) @ E
+Lemma twp_read_sc W s E l q v :
+  [[{ l ↦{q} v }]][W] Read ScOrd (Lit $ LitLoc l) @ s; E
   [[{ RET v; l ↦{q} v }]].
 Proof.
   iIntros (?) "Hv HΦ". iApply twp_lift_atomic_base_step_no_fork; auto.
@@ -249,16 +250,16 @@ Proof.
   iModIntro; iSplit; first by eauto. iIntros (?????) "!>". inv_base_step.
   do 2 (iSplit=> //). iFrame. by iApply "HΦ".
 Qed.
-Lemma wp_read_sc W E l q v :
-  {{{ l ↦{q} v }}}[W] Read ScOrd (Lit $ LitLoc l) @ E
+Lemma wp_read_sc W s E l q v :
+  {{{ l ↦{q} v }}}[W] Read ScOrd (Lit $ LitLoc l) @ s; E
   {{{ RET v; l ↦{q} v }}}.
 Proof.
   iIntros (?) "H →Φ". iApply (twp_wp_step with "→Φ").
   iApply (twp_read_sc with "H"). iIntros "? →Φ !>". by iApply "→Φ".
 Qed.
 
-Lemma twp_read_na W E l q v :
-  [[{ l ↦{q} v }]][W] Read Na1Ord (Lit $ LitLoc l) @ E
+Lemma twp_read_na W s E l q v :
+  [[{ l ↦{q} v }]][W] Read Na1Ord (Lit $ LitLoc l) @ s; E
   [[{ RET v; l ↦{q} v }]].
 Proof.
   iIntros (Φ) "Hv HΦ". iApply twp_lift_base_step; auto.
@@ -274,17 +275,17 @@ Proof.
   iModIntro; iSplit; first by eauto. iIntros (?????) "!>". inv_base_step.
   do 2 (iSplit=> //). iFrame "Hσ". by iApply "HΦ".
 Qed.
-Lemma wp_read_na W E l q v :
-  {{{ l ↦{q} v }}}[W] Read Na1Ord (Lit $ LitLoc l) @ E
+Lemma wp_read_na W s E l q v :
+  {{{ l ↦{q} v }}}[W] Read Na1Ord (Lit $ LitLoc l) @ s; E
   {{{ RET v; l ↦{q} v }}}.
 Proof.
   iIntros (?) "H →Φ". iApply (twp_wp_step with "→Φ").
   iApply (twp_read_na with "H"). iIntros "? →Φ !>". by iApply "→Φ".
 Qed.
 
-Lemma twp_write_sc W E l e v v' :
+Lemma twp_write_sc W s E l e v v' :
   IntoVal e v →
-  [[{ l ↦ v' }]][W] Write ScOrd (Lit $ LitLoc l) e @ E
+  [[{ l ↦ v' }]][W] Write ScOrd (Lit $ LitLoc l) e @ s; E
   [[{ RET LitV LitPoison; l ↦ v }]].
 Proof.
   iIntros (<- Φ) "Hv HΦ". iApply twp_lift_atomic_base_step_no_fork; auto.
@@ -293,18 +294,18 @@ Proof.
   iModIntro; iSplit; first by eauto. iIntros (?????) "!>". inv_base_step.
   do 2 (iSplit=> //). iFrame. by iApply "HΦ".
 Qed.
-Lemma wp_write_sc W E l e v v' :
+Lemma wp_write_sc W s E l e v v' :
   IntoVal e v →
-  {{{ l ↦ v' }}}[W] Write ScOrd (Lit $ LitLoc l) e @ E
+  {{{ l ↦ v' }}}[W] Write ScOrd (Lit $ LitLoc l) e @ s; E
   {{{ RET LitV LitPoison; l ↦ v }}}.
 Proof.
   iIntros (??) "H →Φ". iApply (twp_wp_step with "→Φ").
   iApply (twp_write_sc with "H"). iIntros "? →Φ !>". by iApply "→Φ".
 Qed.
 
-Lemma twp_write_na W E l e v v' :
+Lemma twp_write_na W s E l e v v' :
   IntoVal e v →
-  [[{ l ↦ v' }]][W] Write Na1Ord (Lit $ LitLoc l) e @ E
+  [[{ l ↦ v' }]][W] Write Na1Ord (Lit $ LitLoc l) e @ s; E
   [[{ RET LitV LitPoison; l ↦ v }]].
 Proof.
   iIntros (<- Φ) "Hv HΦ". iApply twp_lift_base_step; auto.
@@ -318,19 +319,19 @@ Proof.
   iSplit; first by eauto. iIntros (?????) "!>". inv_base_step.
   do 2 (iSplit=> //). iFrame "Hσ". by iApply "HΦ".
 Qed.
-Lemma wp_write_na W E l e v v' :
+Lemma wp_write_na W s E l e v v' :
   IntoVal e v →
-  {{{ l ↦ v' }}}[W] Write Na1Ord (Lit $ LitLoc l) e @ E
+  {{{ l ↦ v' }}}[W] Write Na1Ord (Lit $ LitLoc l) e @ s; E
   {{{ RET LitV LitPoison; l ↦ v }}}.
 Proof.
   iIntros (??) "H →Φ". iApply (twp_wp_step with "→Φ").
   iApply (twp_write_na with "H"). iIntros "? →Φ !>". by iApply "→Φ".
 Qed.
 
-Lemma twp_cas_int_fail W E l q z1 e2 lit2 zl :
+Lemma twp_cas_int_fail W s E l q z1 e2 lit2 zl :
   IntoVal e2 (LitV lit2) → z1 ≠ zl →
   [[{ l ↦{q} LitV (LitInt zl) }]][W]
-    CAS (Lit $ LitLoc l) (Lit $ LitInt z1) e2 @ E
+    CAS (Lit $ LitLoc l) (Lit $ LitInt z1) e2 @ s; E
   [[{ RET LitV false; l ↦{q} LitV (LitInt zl) }]].
 Proof.
   iIntros (<- ? Φ) "Hv HΦ". iApply twp_lift_atomic_base_step_no_fork; auto.
@@ -338,20 +339,20 @@ Proof.
   iModIntro; iSplit; first by eauto. iIntros (?????) "!>".
   inv_base_step; inv_lit. do 2 (iSplit=> //). iFrame. by iApply "HΦ".
 Qed.
-Lemma wp_cas_int_fail W E l q z1 e2 lit2 zl :
+Lemma wp_cas_int_fail W s E l q z1 e2 lit2 zl :
   IntoVal e2 (LitV lit2) → z1 ≠ zl →
   {{{ l ↦{q} LitV (LitInt zl) }}}[W]
-    CAS (Lit $ LitLoc l) (Lit $ LitInt z1) e2 @ E
+    CAS (Lit $ LitLoc l) (Lit $ LitInt z1) e2 @ s; E
   {{{ RET LitV false; l ↦{q} LitV (LitInt zl) }}}.
 Proof.
   iIntros (???) "H →Φ". iApply (twp_wp_step with "→Φ").
   iApply (twp_cas_int_fail with "H")=>//. iIntros "? →Φ !>". by iApply "→Φ".
 Qed.
 
-Lemma twp_cas_suc W E l lit1 e2 lit2 :
+Lemma twp_cas_suc W s E l lit1 e2 lit2 :
   IntoVal e2 (LitV lit2) → lit1 ≠ LitPoison →
   [[{ l ↦ LitV lit1 }]][W]
-    CAS (Lit $ LitLoc l) (Lit lit1) e2 @ E
+    CAS (Lit $ LitLoc l) (Lit lit1) e2 @ s; E
   [[{ RET LitV true; l ↦ LitV lit2 }]].
 Proof.
   iIntros (<- ? Φ) "Hv HΦ". iApply twp_lift_atomic_base_step_no_fork; auto.
@@ -360,46 +361,46 @@ Proof.
   inv_base_step; [inv_lit|]. iMod (heap_write with "Hσ Hv") as "[$ Hv]".
   iModIntro. do 2 (iSplitR=> //). by iApply "HΦ".
 Qed.
-Lemma wp_cas_suc W E l lit1 e2 lit2 :
+Lemma wp_cas_suc W s E l lit1 e2 lit2 :
   IntoVal e2 (LitV lit2) → lit1 ≠ LitPoison →
   {{{ l ↦ LitV lit1 }}}[W]
-    CAS (Lit $ LitLoc l) (Lit lit1) e2 @ E
+    CAS (Lit $ LitLoc l) (Lit lit1) e2 @ s; E
   {{{ RET LitV true; l ↦ LitV lit2 }}}.
 Proof.
   iIntros (???) "H →Φ". iApply (twp_wp_step with "→Φ").
   iApply (twp_cas_suc with "H")=>//. iIntros "? →Φ !>". by iApply "→Φ".
 Qed.
 
-Lemma twp_cas_int_suc W E l z1 e2 lit2 :
+Lemma twp_cas_int_suc W s E l z1 e2 lit2 :
   IntoVal e2 (LitV lit2) →
   [[{ l ↦ LitV (LitInt z1) }]][W]
-    CAS (Lit $ LitLoc l) (Lit $ LitInt z1) e2 @ E
+    CAS (Lit $ LitLoc l) (Lit $ LitInt z1) e2 @ s; E
   [[{ RET LitV true; l ↦ LitV lit2 }]].
 Proof. intros ?. by apply twp_cas_suc. Qed.
-Lemma wp_cas_int_suc W E l z1 e2 lit2 :
+Lemma wp_cas_int_suc W s E l z1 e2 lit2 :
   IntoVal e2 (LitV lit2) →
   {{{ l ↦ LitV (LitInt z1) }}}[W]
-    CAS (Lit $ LitLoc l) (Lit $ LitInt z1) e2 @ E
+    CAS (Lit $ LitLoc l) (Lit $ LitInt z1) e2 @ s; E
   {{{ RET LitV true; l ↦ LitV lit2 }}}.
 Proof. intros ?. by apply wp_cas_suc. Qed.
 
-Lemma twp_cas_loc_suc W E l l1 e2 lit2 :
+Lemma twp_cas_loc_suc W s E l l1 e2 lit2 :
   IntoVal e2 (LitV lit2) →
   [[{ l ↦ LitV (LitLoc l1) }]][W]
-    CAS (Lit $ LitLoc l) (Lit $ LitLoc l1) e2 @ E
+    CAS (Lit $ LitLoc l) (Lit $ LitLoc l1) e2 @ s; E
   [[{ RET LitV true; l ↦ LitV lit2 }]].
 Proof. intros ?. by apply twp_cas_suc. Qed.
-Lemma wp_cas_loc_suc W E l l1 e2 lit2 :
+Lemma wp_cas_loc_suc W s E l l1 e2 lit2 :
   IntoVal e2 (LitV lit2) →
   {{{ l ↦ LitV (LitLoc l1) }}}[W]
-    CAS (Lit $ LitLoc l) (Lit $ LitLoc l1) e2 @ E
+    CAS (Lit $ LitLoc l) (Lit $ LitLoc l1) e2 @ s; E
   {{{ RET LitV true; l ↦ LitV lit2 }}}.
 Proof. intros ?. by apply wp_cas_suc. Qed.
 
-Lemma twp_cas_loc_fail W E l q q' q1 l1 v1' e2 lit2 l' vl' :
+Lemma twp_cas_loc_fail W s E l q q' q1 l1 v1' e2 lit2 l' vl' :
   IntoVal e2 (LitV lit2) → l1 ≠ l' →
   [[{ l ↦{q} LitV (LitLoc l') ∗ l' ↦{q'} vl' ∗ l1 ↦{q1} v1' }]][W]
-    CAS (Lit $ LitLoc l) (Lit $ LitLoc l1) e2 @ E
+    CAS (Lit $ LitLoc l) (Lit $ LitLoc l1) e2 @ s; E
   [[{ RET LitV false;
       l ↦{q} LitV (LitLoc l') ∗ l' ↦{q'} vl' ∗ l1 ↦{q1} v1' }]].
 Proof.
@@ -411,10 +412,10 @@ Proof.
   iModIntro; iSplit; first by eauto. iIntros (?????). inv_base_step; inv_lit.
   iModIntro. do 2 (iSplit=> //). iFrame. iApply "HΦ". iFrame.
 Qed.
-Lemma wp_cas_loc_fail W E l q q' q1 l1 v1' e2 lit2 l' vl' :
+Lemma wp_cas_loc_fail W s E l q q' q1 l1 v1' e2 lit2 l' vl' :
   IntoVal e2 (LitV lit2) → l1 ≠ l' →
   {{{ l ↦{q} LitV (LitLoc l') ∗ l' ↦{q'} vl' ∗ l1 ↦{q1} v1' }}}[W]
-    CAS (Lit $ LitLoc l) (Lit $ LitLoc l1) e2 @ E
+    CAS (Lit $ LitLoc l) (Lit $ LitLoc l1) e2 @ s; E
   {{{ RET LitV false;
       l ↦{q} LitV (LitLoc l') ∗ l' ↦{q'} vl' ∗ l1 ↦{q1} v1' }}}.
 Proof.
@@ -422,10 +423,10 @@ Proof.
   iApply (twp_cas_loc_fail with "H")=>//. iIntros "? →Φ !>". by iApply "→Φ".
 Qed.
 
-Lemma twp_cas_loc_nondet W E l l1 e2 l2 ll :
+Lemma twp_cas_loc_nondet W s E l l1 e2 l2 ll :
   IntoVal e2 (LitV $ LitLoc l2) →
   [[{ l ↦ LitV (LitLoc ll) }]][W]
-    CAS (Lit $ LitLoc l) (Lit $ LitLoc l1) e2 @ E
+    CAS (Lit $ LitLoc l) (Lit $ LitLoc l1) e2 @ s; E
   [[{ b, RET LitV (lit_of_bool b);
       if b is true then l ↦ LitV (LitLoc l2)
       else ⌜l1 ≠ ll⌝ ∧ l ↦ LitV (LitLoc ll) }]].
@@ -437,10 +438,10 @@ Proof.
   - inv_lit. iFrame "Hσ". iApply "HΦ". auto.
   - iMod (heap_write with "Hσ Hv") as "[$ Hv]". iModIntro. by iApply "HΦ".
 Qed.
-Lemma wp_cas_loc_nondet W E l l1 e2 l2 ll :
+Lemma wp_cas_loc_nondet W s E l l1 e2 l2 ll :
   IntoVal e2 (LitV $ LitLoc l2) →
   {{{ l ↦ LitV (LitLoc ll) }}}[W]
-    CAS (Lit $ LitLoc l) (Lit $ LitLoc l1) e2 @ E
+    CAS (Lit $ LitLoc l) (Lit $ LitLoc l1) e2 @ s; E
   {{{ b, RET LitV (lit_of_bool b);
       if b is true then l ↦ LitV (LitLoc l2)
       else ⌜l1 ≠ ll⌝ ∧ l ↦ LitV (LitLoc ll) }}}.
@@ -449,10 +450,10 @@ Proof.
   iApply (twp_cas_loc_nondet with "H"). iIntros "% ? →Φ !>". by iApply "→Φ".
 Qed.
 
-Lemma twp_eq_loc W E (l1 : loc) (l2: loc) q1 q2 v1 v2 P Φ :
+Lemma twp_eq_loc W s E (l1 : loc) (l2: loc) q1 q2 v1 v2 P Φ :
   (P ⊢ l1 ↦{q1} v1) → (P ⊢ l2 ↦{q2} v2) →
   (P ⊢ Φ (LitV (bool_decide (l1 = l2)))) →
-  P ⊢ WP[W] BinOp EqOp (Lit (LitLoc l1)) (Lit (LitLoc l2)) @ E [{ Φ }].
+  P ⊢ WP[W] BinOp EqOp (Lit (LitLoc l1)) (Lit (LitLoc l2)) @ s; E [{ Φ }].
 Proof.
   iIntros (Hl1 Hl2 Hpost) "P".
   destruct (bool_decide_reflect (l1 = l2)) as [->|].
@@ -472,10 +473,10 @@ Proof.
       iDestruct (heap_read with "Hσ1 Hl2") as %[??]. simplify_eq.
     + by iDestruct "P" as "[_ [_ $]]".
 Qed.
-Lemma wp_eq_loc W E (l1 : loc) (l2: loc) q1 q2 v1 v2 P Φ :
+Lemma wp_eq_loc W s E (l1 : loc) (l2: loc) q1 q2 v1 v2 P Φ :
   (P ⊢ ▷ l1 ↦{q1} v1) → (P ⊢ ▷ l2 ↦{q2} v2) →
   (P ⊢ ▷ Φ (LitV (bool_decide (l1 = l2)))) →
-  P ⊢ WP[W] BinOp EqOp (Lit (LitLoc l1)) (Lit (LitLoc l2)) @ E {{ Φ }}.
+  P ⊢ WP[W] BinOp EqOp (Lit (LitLoc l1)) (Lit (LitLoc l2)) @ s; E {{ Φ }}.
 Proof.
   iIntros (Hl1 Hl2 Hpost) "P".
   destruct (bool_decide_reflect (l1 = l2)) as [->|].
@@ -498,13 +499,13 @@ Proof.
 Qed.
 
 (** Proof rules for working on the n-ary argument list. *)
-Lemma twp_app_ind W E f (el : list expr) (Ql : vec (val → iProp Σ) (length el))
+Lemma twp_app_ind W s E f (el : list expr) (Ql : vec (val → iProp Σ) (length el))
   vs Φ :
   AsVal f →
-  ([∗ list] eQ ∈ zip el Ql, WP[W] eQ.1 @ E [{ eQ.2 }]) -∗
+  ([∗ list] eQ ∈ zip el Ql, WP[W] eQ.1 @ s; E [{ eQ.2 }]) -∗
     (∀ vl : vec val (length el), ([∗ list] vQ ∈ zip vl Ql, vQ.2 $ vQ.1) -∗
-                    WP[W] App f (of_val <$> vs ++ vl) @ E [{ Φ }]) -∗
-    WP[W] App f ((of_val <$> vs) ++ el) @ E [{ Φ }].
+                    WP[W] App f (of_val <$> vs ++ vl) @ s; E [{ Φ }]) -∗
+    WP[W] App f ((of_val <$> vs) ++ el) @ s; E [{ Φ }].
 Proof.
   intros [vf <-]. revert vs Ql.
   induction el as [|e el IH]=>/= vs Ql; inv_vec Ql; simpl.
@@ -518,13 +519,13 @@ Proof.
     iApply (IH _ _ with "Hl"). iIntros "%vl Hvl". rewrite -assoc.
     iApply ("HΦ" $! (v:::vl)). iFrame.
 Qed.
-Lemma wp_app_ind W E f (el : list expr) (Ql : vec (val → iProp Σ) (length el))
+Lemma wp_app_ind W s E f (el : list expr) (Ql : vec (val → iProp Σ) (length el))
   vs Φ :
   AsVal f →
-  ([∗ list] eQ ∈ zip el Ql, WP[W] eQ.1 @ E {{ eQ.2 }}) -∗
+  ([∗ list] eQ ∈ zip el Ql, WP[W] eQ.1 @ s; E {{ eQ.2 }}) -∗
     (∀ vl : vec val (length el), ([∗ list] vQ ∈ zip vl Ql, vQ.2 $ vQ.1) -∗
-                    WP[W] App f (of_val <$> vs ++ vl) @ E {{ Φ }}) -∗
-    WP[W] App f ((of_val <$> vs) ++ el) @ E {{ Φ }}.
+                    WP[W] App f (of_val <$> vs ++ vl) @ s; E {{ Φ }}) -∗
+    WP[W] App f ((of_val <$> vs) ++ el) @ s; E {{ Φ }}.
 Proof.
   intros [vf <-]. revert vs Ql.
   induction el as [|e el IH]=>/= vs Ql; inv_vec Ql; simpl.
@@ -539,41 +540,41 @@ Proof.
     iApply ("HΦ" $! (v:::vl)). iFrame.
 Qed.
 
-Lemma twp_app_vec W E f el (Ql : vec (val → iProp Σ) (length el)) Φ :
+Lemma twp_app_vec W s E f el (Ql : vec (val → iProp Σ) (length el)) Φ :
   AsVal f →
-  ([∗ list] eQ ∈ zip el Ql, WP[W] eQ.1 @ E [{ eQ.2 }]) -∗
+  ([∗ list] eQ ∈ zip el Ql, WP[W] eQ.1 @ s; E [{ eQ.2 }]) -∗
     (∀ vl : vec val (length el), ([∗ list] vQ ∈ zip vl Ql, vQ.2 $ vQ.1) -∗
-                    WP[W] App f (of_val <$> (vl : list val)) @ E [{ Φ }]) -∗
-    WP[W] App f el @ E [{ Φ }].
-Proof. iIntros (Hf). by iApply (twp_app_ind _ _ _ _ _ []). Qed.
-Lemma wp_app_vec W E f el (Ql : vec (val → iProp Σ) (length el)) Φ :
+                    WP[W] App f (of_val <$> (vl : list val)) @ s; E [{ Φ }]) -∗
+    WP[W] App f el @ s; E [{ Φ }].
+Proof. iIntros (Hf). by iApply (twp_app_ind _ _ _ _ _ _ []). Qed.
+Lemma wp_app_vec W s E f el (Ql : vec (val → iProp Σ) (length el)) Φ :
   AsVal f →
-  ([∗ list] eQ ∈ zip el Ql, WP[W] eQ.1 @ E {{ eQ.2 }}) -∗
+  ([∗ list] eQ ∈ zip el Ql, WP[W] eQ.1 @ s; E {{ eQ.2 }}) -∗
     (∀ vl : vec val (length el), ([∗ list] vQ ∈ zip vl Ql, vQ.2 $ vQ.1) -∗
-                    WP[W] App f (of_val <$> (vl : list val)) @ E {{ Φ }}) -∗
-    WP[W] App f el @ E {{ Φ }}.
-Proof. iIntros (Hf). by iApply (wp_app_ind _ _ _ _ _ []). Qed.
+                    WP[W] App f (of_val <$> (vl : list val)) @ s; E {{ Φ }}) -∗
+    WP[W] App f el @ s; E {{ Φ }}.
+Proof. iIntros (Hf). by iApply (wp_app_ind _ _ _ _ _ _ []). Qed.
 
-Lemma twp_app (Ql : list (val → iProp Σ)) W E f el Φ :
+Lemma twp_app (Ql : list (val → iProp Σ)) W s E f el Φ :
   length Ql = length el → AsVal f →
-  ([∗ list] eQ ∈ zip el Ql, WP[W] eQ.1 @ E [{ eQ.2 }]) -∗
+  ([∗ list] eQ ∈ zip el Ql, WP[W] eQ.1 @ s; E [{ eQ.2 }]) -∗
     (∀ vl : list val, ⌜length vl = length el⌝ →
             ([∗ list] k ↦ vQ ∈ zip vl Ql, vQ.2 $ vQ.1) -∗
-             WP[W] App f (of_val <$> (vl : list val)) @ E [{ Φ }]) -∗
-    WP[W] App f el @ E [{ Φ }].
+             WP[W] App f (of_val <$> (vl : list val)) @ s; E [{ Φ }]) -∗
+    WP[W] App f el @ s; E [{ Φ }].
 Proof.
   iIntros (Hlen Hf) "Hel HΦ". rewrite -(vec_to_list_to_vec Ql).
   generalize (list_to_vec Ql). rewrite Hlen. clear Hlen Ql=>Ql.
   iApply (twp_app_vec with "Hel"). iIntros (vl) "Hvl".
   iApply ("HΦ" with "[%] Hvl"). by rewrite length_vec_to_list.
 Qed.
-Lemma wp_app (Ql : list (val → iProp Σ)) W E f el Φ :
+Lemma wp_app (Ql : list (val → iProp Σ)) W s E f el Φ :
   length Ql = length el → AsVal f →
-  ([∗ list] eQ ∈ zip el Ql, WP[W] eQ.1 @ E {{ eQ.2 }}) -∗
+  ([∗ list] eQ ∈ zip el Ql, WP[W] eQ.1 @ s; E {{ eQ.2 }}) -∗
     (∀ vl : list val, ⌜length vl = length el⌝ →
             ([∗ list] k ↦ vQ ∈ zip vl Ql, vQ.2 $ vQ.1) -∗
-             WP[W] App f (of_val <$> (vl : list val)) @ E {{ Φ }}) -∗
-    WP[W] App f el @ E {{ Φ }}.
+             WP[W] App f (of_val <$> (vl : list val)) @ s; E {{ Φ }}) -∗
+    WP[W] App f el @ s; E {{ Φ }}.
 Proof.
   iIntros (Hlen Hf) "Hel HΦ". rewrite -(vec_to_list_to_vec Ql).
   generalize (list_to_vec Ql). rewrite Hlen. clear Hlen Ql=>Ql.
