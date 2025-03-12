@@ -175,9 +175,18 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
       logic),
     [`total_adequacy`](nola/heap_lang/total_adequacy.v) (Termination adequacy of
       the program logic)
-- [`rust_lang/`](nola/lrust/) : Variant of RustBelt's language, supporting
-    `Ndnat` and program logic with termination sensitivity and custom world
-    satisfactions
+- [`rust_lang/`](nola/rust_lang/) : Variant of RustBelt's language, supporting
+    `Ndnat` (infinite non-determinism) and program logic with termination
+    sensitivity and custom world satisfactions for Nola
+  + [`lang`](nola/rust_lang/lang.v) (Language),
+    [`notation`](nola/rust_lang/notation.v) (Notation for the language),
+    [`tactics`](nola/rust_lang/tactics.v) (Tactics for the language)
+  + [`races`](nola/rust_lang/races.v) (Race freedom guarantee of the language)
+  + [`heap`](nola/rust_lang/heap.v) (Ghost state for the heap),
+    [`lifting`](nola/rust_lang/lifting.v) (Program logic),
+    [`proofmode`](nola/rust_lang/proofmode.v) (Proof mode utility for the
+      program logic)
+  + [`adequacy`](nola/rust_lang/adequacy.v) (Adequacy of the program logic)
 - [`examples/`](nola/examples/) : Examples
   + [`xty`](nola/examples/xty.v) (Syntactic type),
   + [`con`](nola/examples/con.v) (Constructors),

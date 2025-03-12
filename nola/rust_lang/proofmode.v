@@ -1,3 +1,5 @@
+(** * Proof mode utility for the program logic *)
+
 From iris.proofmode Require Import coq_tactics reduction.
 From iris.proofmode Require Export proofmode.
 From iris.program_logic Require Export weakestpre total_weakestpre.

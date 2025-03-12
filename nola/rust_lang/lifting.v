@@ -1,3 +1,5 @@
+(** * Program logic *)
+
 From iris.proofmode Require Import proofmode.
 From nola.bi Require Export wpw.
 From iris.program_logic Require Import ectx_lifting total_ectx_lifting.
@@ -11,6 +13,8 @@ Class lrustGS_gen hlc Σ : Type := LRustGS {
   lrustGS_heapGS :: heapGS Σ;
 }.
 
+(** By using [iris'GS_gen] instead of [irisGS_gen], we can support custom world
+  satisfactions for Nola *)
 Global Instance lrustGS_iris'GS `{!lrustGS_gen hlc Σ}
   : iris'GS_gen hlc lrust_lang Σ := {
   iris'_invGS := lrustGS_invGS;

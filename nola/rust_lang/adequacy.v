@@ -1,3 +1,5 @@
+(** ** Adequacy of the program logic *)
+
 From iris.program_logic Require Export adequacy weakestpre.
 From iris.algebra Require Import auth.
 From nola.rust_lang Require Export heap.

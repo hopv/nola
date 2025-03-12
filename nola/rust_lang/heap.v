@@ -1,3 +1,5 @@
+(** * Ghost state for the heap *)
+
 From stdpp Require Import coPset.
 From iris.algebra Require Import big_op gmap frac agree numbers.
 From iris.algebra Require Import csum excl auth cmra_big_op.

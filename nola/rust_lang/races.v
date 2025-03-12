@@ -1,3 +1,5 @@
+(** * Race freedom guarantee of the language *)
+
 From stdpp Require Import gmap.
 From iris.program_logic Require Import adequacy.
 From nola.rust_lang Require Import tactics.

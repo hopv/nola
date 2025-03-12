@@ -1,3 +1,6 @@
+(** * Language *)
+(* Newly added [Ndnat], taking a non-deterministic natural number, for Nola *)
+
 From iris.program_logic Require Export language ectx_language ectxi_language.
 From stdpp Require Export strings binders.
 From stdpp Require Import gmap.
@@ -42,7 +45,7 @@ Inductive expr : Set :=
 | Free (e1 e2 : expr)
 | Case (e : expr) (el : list expr)
 | Fork (e : expr)
-| Ndnat.
+| Ndnat (* Taking a non-deterministic natural number, newly added for Nola *).
 
 Global Arguments App _%_E _%_E.
 Global Arguments Case _%_E _%_E.
