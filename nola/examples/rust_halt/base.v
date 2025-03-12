@@ -5,7 +5,7 @@ From nola.util Require Export fn.
 From nola.iris Require Export cif inv_deriv na_inv_deriv store_deriv
   pborrow_deriv fborrow.
 From nola.examples Require Export xty.
-From nola.rust_lang Require Export proofmode adequacy notation.
+From nola.rust_lang Require Export proofmode notation.
 Export ProdNotation PlistNotation ProeqvNotation FunPRNotation BigSepPLNotation
   ModwNotation WpwNotation iPropAppNotation ProphNotation LftNotation
   CsemNotation XtyNotation.
@@ -40,23 +40,6 @@ Class rust_haltGS CON Σ : Type := RustHaltGS {
   rust_haltGS_proph_ag :: proph_agG nat xty Σ;
   rust_haltGS_fborrow :: fborrowGS (cifOF CON) Σ;
 }.
-Class rust_haltGpreS CON Σ : Type := RustHaltGpreS {
-  rust_haltGpreS_lrust :: lrustGpreS Σ;
-  rust_haltGoreS_inv :: inv'GpreS (cifOF CON) Σ;
-  rust_haltGpreS_na_inv :: na_invG Σ;
-  rust_haltGpreS_dinv :: dinvGpreS (cifOF CON) Σ;
-  rust_haltGpreS_token :: tokenG Σ;
-  rust_haltGpreS_borrow :: borrowGpreS (cifOF CON) Σ;
-  rust_haltGpreS_proph :: prophGpreS xty Σ;
-  rust_haltGpreS_proph_ag :: proph_agG nat xty Σ;
-  rust_haltGpreS_fborrow :: fborrowGpreS (cifOF CON) Σ;
-}.
-Definition rust_haltΣ CON : gFunctors :=
-  #[lrustΣ; inv'Σ (cifOF CON); na_invΣ; dinvΣ (cifOF CON); tokenΣ;
-    borrowΣ (cifOF CON); prophΣ xty; proph_agΣ nat xty; fborrowΣ (cifOF CON)].
-Global Instance subG_rust_haltGpreS `{!subG (rust_haltΣ CON) Σ} :
-  rust_haltGpreS CON Σ.
-Proof. solve_inG. Qed.
 
 (** ** Custom constructors *)
 
