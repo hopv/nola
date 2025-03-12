@@ -120,10 +120,10 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`judg`](nola/bi/judg.v) (Judgments)
   + [`paradox`](nola/bi/paradox.v) (Paradoxes)
 - [`iris/`](nola/iris/) : Libraries for Iris base logic
-  + [`iprop`](nola/iris/iprop.v) (`iprop`)
-  + [`own`](nola/iris/own.v) (On `own`)
-  + [`list`](nol/iris/list.v) (On lists)
-  + [`option`](nola/iris/option.v) (On `option`),
+  + [`iprop`](nola/iris/iprop.v) (Utility for `iProp`),
+    [`own`](nola/iris/own.v) (Utility for `own`)
+  + [`list`](nol/iris/list.v) (On lists),
+    [`option`](nola/iris/option.v) (On `option`),
     [`agree`](nola/iris/agree.v) (On `agree`),
     [`csum`](nola/iris/csum.v) (On `csum`)
   + [`sinv`](nola/iris/sinv.v) (Simple invariants)
@@ -136,8 +136,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     [`dinv_deriv`](nola/iris/dinv_deriv.v) (Direct invariants relaxed with
       derivability),
     [`store`](nola/iris/store.v) (Stored propositions),
-    [`store_deriv`](nola/iris/store_deriv.v) (Stored propositions relaxed
-      with derivability)
+    [`store_deriv`](nola/iris/store_deriv.v) (Stored propositions relaxed with
+      derivability)
   + [`lft`](nola/iris/lft.v) (Lifetime),
     [`borrow`](nola/iris/borrow.v) (Borrows),
     [`borrow_deriv`](nola/iris/borrow_deriv.v) (Borrows relaxed with
