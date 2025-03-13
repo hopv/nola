@@ -187,6 +187,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     [`proofmode`](nola/rust_lang/proofmode.v) (Proof mode utility for the
       program logic)
   + [`adequacy`](nola/rust_lang/adequacy.v) (Adequacy of the program logic)
+  + [`cfml`](nola/rust_lang/cfml.v) (Demonstration of how our program logic can
+      emulate CFML)
 - [`examples/`](nola/examples/) : Examples
   + [`xty`](nola/examples/xty.v) (Syntactic type),
   + [`con`](nola/examples/con.v) (Constructors),

@@ -78,6 +78,7 @@ nola/rust_lang/heap.v
 nola/rust_lang/lifting.v
 nola/rust_lang/proofmode.v
 nola/rust_lang/adequacy.v
+nola/rust_lang/cfml.v
 
 nola/examples/xty.v
 nola/examples/con.v
