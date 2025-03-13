@@ -105,7 +105,8 @@ Tactic Notation "wp_rec" := wp_pure (App _ _).
 Tactic Notation "wp_lam" := wp_rec.
 Tactic Notation "wp_let" := wp_lam.
 Tactic Notation "wp_seq" := wp_let.
-Tactic Notation "wp_op" := wp_pure (BinOp _ _ _) || wp_eq_loc.
+Tactic Notation "wp_op" :=
+  wp_pure (UnOp _ _) || wp_pure (BinOp _ _ _) || wp_eq_loc.
 Tactic Notation "wp_if" := wp_pure (If _ _ _).
 Tactic Notation "wp_case" := wp_pure (Case _ _); try wp_value_head.
 

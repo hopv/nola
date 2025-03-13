@@ -19,8 +19,12 @@ Global Open Scope loc_scope.
 
 Inductive base_lit : Set :=
 | LitPoison | LitLoc (l : loc) | LitInt (n : Z).
+Inductive un_op : Set :=
+| OppOp | NegbOp. (** Added in Nola *)
 Inductive bin_op : Set :=
-| PlusOp | MinusOp | LeOp | EqOp | OffsetOp.
+| EqOp | PlusOp | MinusOp | MulOp | DivOp | ModOp
+| LeOp | LtOp | GeOp | GtOp | OffsetOp. (** Enriched in Nola *)
+
 Inductive order : Set :=
 | ScOrd | Na1Ord | Na2Ord.
 
@@ -36,6 +40,7 @@ Inductive expr : Set :=
 | Var (x : string)
 | Lit (l : base_lit)
 | Rec (f : binder) (xl : list binder) (e : expr)
+| UnOp (op : un_op) (e : expr) (** Added in Nola *)
 | BinOp (op : bin_op) (e1 e2 : expr)
 | App (e : expr) (el : list expr)
 | Read (o : order) (e : expr)
@@ -58,7 +63,7 @@ Fixpoint is_closed (X : list string) (e : expr) : bool :=
   | BinOp _ e1 e2 | Write _ e1 e2 | Free e1 e2 =>
     is_closed X e1 && is_closed X e2
   | App e el | Case e el => is_closed X e && forallb (is_closed X) el
-  | Read _ e | Alloc e | Fork e => is_closed X e
+  | UnOp _ e | Read _ e | Alloc e | Fork e => is_closed X e
   | CAS e0 e1 e2 => is_closed X e0 && is_closed X e1 && is_closed X e2
   | Ndnat => true
   end.
@@ -96,6 +101,7 @@ Definition state := gmap loc (lock_state * val).
 
 (** Evaluation contexts *)
 Inductive ectx_item : Set :=
+| UnOpCtx (op : un_op)
 | BinOpLCtx (op : bin_op) (e2 : expr)
 | BinOpRCtx (op : bin_op) (v1 : val)
 | AppLCtx (e2 : list expr)
@@ -113,6 +119,7 @@ Inductive ectx_item : Set :=
 
 Definition fill_item (Ki : ectx_item) (e : expr) : expr :=
   match Ki with
+  | UnOpCtx op => UnOp op e
   | BinOpLCtx op e2 => BinOp op e e2
   | BinOpRCtx op v1 => BinOp op (of_val v1) e
   | AppLCtx e2 => App e e2
@@ -136,6 +143,7 @@ Fixpoint subst (x : string) (es : expr) (e : expr)  : expr :=
   | Lit l => Lit l
   | Rec f xl e =>
     Rec f xl $ if bool_decide (BNamed x ≠ f ∧ BNamed x ∉ xl) then subst x es e else e
+  | UnOp op e => UnOp op (subst x es e)
   | BinOp op e1 e2 => BinOp op (subst x es e1) (subst x es e2)
   | App e el => App (subst x es e) (map (subst x es) el)
   | Read o e => Read o (subst x es e)
@@ -222,23 +230,44 @@ Inductive lit_neq : base_lit → base_lit → Prop :=
 | LocNeqNullL l :
     lit_neq (LitInt 0) (LitLoc l).
 
+Inductive un_op_eval : un_op → base_lit → base_lit → Prop :=
+| UnOpOpp z :
+    un_op_eval OppOp (LitInt z) (LitInt (- z))
+| UnOpNegb b :
+    un_op_eval NegbOp (lit_of_bool b) (lit_of_bool (negb b)).
+
 Inductive bin_op_eval (σ : state) : bin_op → base_lit → base_lit → base_lit → Prop :=
-| BinOpPlus z1 z2 :
-    bin_op_eval σ PlusOp (LitInt z1) (LitInt z2) (LitInt (z1 + z2))
-| BinOpMinus z1 z2 :
-    bin_op_eval σ MinusOp (LitInt z1) (LitInt z2) (LitInt (z1 - z2))
-| BinOpLe z1 z2 :
-    bin_op_eval σ LeOp (LitInt z1) (LitInt z2) (lit_of_bool $ bool_decide (z1 ≤ z2))
 | BinOpEqTrue l1 l2 :
     lit_eq σ l1 l2 → bin_op_eval σ EqOp l1 l2 (lit_of_bool true)
 | BinOpEqFalse l1 l2 :
     lit_neq l1 l2 → bin_op_eval σ EqOp l1 l2 (lit_of_bool false)
+| BinOpPlus z1 z2 :
+    bin_op_eval σ PlusOp (LitInt z1) (LitInt z2) (LitInt (z1 + z2))
+| BinOpMinus z1 z2 :
+    bin_op_eval σ MinusOp (LitInt z1) (LitInt z2) (LitInt (z1 - z2))
+| BinOpMul z1 z2 :
+    bin_op_eval σ MulOp (LitInt z1) (LitInt z2) (LitInt (z1 * z2))
+| BinOpDiv z1 z2 :
+    bin_op_eval σ DivOp (LitInt z1) (LitInt z2) (LitInt (z1 / z2))
+| BinOpMod z1 z2 :
+    bin_op_eval σ ModOp (LitInt z1) (LitInt z2) (LitInt (z1 `mod` z2))
+| BinOpLe z1 z2 :
+    bin_op_eval σ LeOp (LitInt z1) (LitInt z2) (lit_of_bool $ bool_decide (z1 ≤ z2))
+| BinOpLt z1 z2 :
+    bin_op_eval σ LtOp (LitInt z1) (LitInt z2) (lit_of_bool $ bool_decide (z1 < z2))
+| BinOpGe z1 z2 :
+    bin_op_eval σ GeOp (LitInt z1) (LitInt z2) (lit_of_bool $ bool_decide (z1 >= z2))
+| BinOpGt z1 z2 :
+    bin_op_eval σ GtOp (LitInt z1) (LitInt z2) (lit_of_bool $ bool_decide (z1 > z2))
 | BinOpOffset l z :
     bin_op_eval σ OffsetOp (LitLoc l) (LitInt z) (LitLoc $ l +ₗ z).
 
 Definition stuck_term := App (Lit $ LitInt 0) [].
 
 Inductive base_step : expr → state → list Empty_set → expr → state → list expr → Prop :=
+| UnOpS op l l' σ :
+    un_op_eval op l l' →
+    base_step (UnOp op (Lit l)) σ [] (Lit l') σ []
 | BinOpS op l1 l2 l' σ :
     bin_op_eval σ op l1 l2 l' →
     base_step (BinOp op (Lit l1) (Lit l2)) σ [] (Lit l') σ []
@@ -390,8 +419,8 @@ Lemma fill_item_no_val_inj Ki1 Ki2 e1 e2 :
   to_val e1 = None → to_val e2 = None →
   fill_item Ki1 e1 = fill_item Ki2 e2 → Ki1 = Ki2.
 Proof.
-  destruct Ki1 as [| | |v1 vl1 el1| | | | | | | | | |],
-           Ki2 as [| | |v2 vl2 el2| | | | | | | | | |];
+  destruct Ki1 as [| | | |v1 vl1 el1| | | | | | | | | |],
+           Ki2 as [| | | |v2 vl2 el2| | | | | | | | | |];
   intros He1 He2 EQ; try discriminate; simplify_eq/=;
     repeat match goal with
     | H : to_val (of_val _) = None |- _ => by rewrite to_of_val in H
@@ -559,9 +588,11 @@ Proof. inversion 1. Qed.
 (** Equality and other typeclass stuff *)
 Global Instance base_lit_dec_eq : EqDecision base_lit.
 Proof. solve_decision. Defined.
+Global Instance un_op_dec_eq : EqDecision un_op.
+Proof. solve_decision. Defined.
 Global Instance bin_op_dec_eq : EqDecision bin_op.
 Proof. solve_decision. Defined.
-Global Instance un_op_dec_eq : EqDecision order.
+Global Instance order_dec_eq : EqDecision order.
 Proof. solve_decision. Defined.
 
 Fixpoint expr_beq (e : expr) (e' : expr) : bool :=
@@ -577,6 +608,8 @@ Fixpoint expr_beq (e : expr) (e' : expr) : bool :=
   | Lit l, Lit l' => bool_decide (l = l')
   | Rec f xl e, Rec f' xl' e' =>
     bool_decide (f = f') && bool_decide (xl = xl') && expr_beq e e'
+  | UnOp op e, UnOp op' e' =>
+    bool_decide (op = op') && expr_beq e e'
   | BinOp op e1 e2, BinOp op' e1' e2' =>
     bool_decide (op = op') && expr_beq e1 e1' && expr_beq e2 e2'
   | App e el, App e' el' | Case e el, Case e' el' =>
@@ -594,8 +627,8 @@ Fixpoint expr_beq (e : expr) (e' : expr) : bool :=
 Lemma expr_beq_correct (e1 e2 : expr) : expr_beq e1 e2 ↔ e1 = e2.
 Proof.
   revert e1 e2; fix FIX 1. intros e1 e2.
-    destruct e1 as [| | | |? el1| | | | | |? el1| |],
-             e2 as [| | | |? el2| | | | | |? el2| |]; simpl; try done;
+    destruct e1 as [| | | | |? el1| | | | | |? el1| |],
+             e2 as [| | | | |? el2| | | | | |? el2| |]; simpl; try done;
   rewrite ?andb_True ?bool_decide_spec ?FIX;
   try (split; intro; [destruct_and?|split_and?]; congruence).
   - match goal with |- context [?F el1 el2] => assert (F el1 el2 ↔ el1 = el2) end.

@@ -32,16 +32,31 @@ Notation "'if:' e1 'then' e2 'else' e3" := (If e1%E e2%E e3%E)
 Notation "☠" := LitPoison : val_scope.
 Notation "! e" := (Read Na1Ord e%E) (at level 9, format "! e") : expr_scope.
 Notation "!ˢᶜ e" := (Read ScOrd e%E) (at level 9, format "!ˢᶜ e") : expr_scope.
+Notation "- e" := (UnOp OppOp e%E)
+  (at level 35) : expr_scope.
+Notation Negb := (UnOp NegbOp).
+Notation "e1 = e2" := (BinOp EqOp e1%E e2%E)
+  (at level 70) : expr_scope.
 Notation "e1 + e2" := (BinOp PlusOp e1%E e2%E)
   (at level 50, left associativity) : expr_scope.
 Notation "e1 - e2" := (BinOp MinusOp e1%E e2%E)
   (at level 50, left associativity) : expr_scope.
+Notation "e1 * e2" := (BinOp MulOp e1%E e2%E)
+  (at level 40, left associativity) : expr_scope.
+Notation "e1 / e2" := (BinOp DivOp e1%E e2%E)
+  (at level 40, left associativity) : expr_scope.
+Notation "e1 `mod` e2" := (BinOp ModOp e1%E e2%E)
+  (at level 35) : expr_scope.
 Notation "e1 ≤ e2" := (BinOp LeOp e1%E e2%E)
   (at level 70) : expr_scope.
-Notation "e1 < e2" := (e1+#1 ≤ e2)%E
+Notation "e1 < e2" := (BinOp LtOp e1%E e2%E)
   (at level 70) : expr_scope.
-Notation "e1 = e2" := (BinOp EqOp e1%E e2%E)
+Notation "e1 ≥ e2" := (BinOp GeOp e1%E e2%E)
   (at level 70) : expr_scope.
+Notation "e1 > e2" := (BinOp GtOp e1%E e2%E)
+  (at level 70) : expr_scope.
+Notation "e1 +ₗ e2" := (BinOp OffsetOp e1%E e2%E)
+  (at level 50, left associativity) : expr_scope.
 (* The unicode ← is already part of the notation "_ ← _; _" for bind. *)
 Notation "e1 <-ˢᶜ e2" := (Write ScOrd e1%E e2%E)
   (at level 80) : expr_scope.
@@ -51,8 +66,6 @@ Notation "'rec:' f xl := e" := (Rec f%binder xl%binder e%E)
   (at level 102, f, xl at level 1, e at level 200) : expr_scope.
 Notation "'rec:' f xl := e" := (locked (RecV f%binder xl%binder e%E))
   (at level 102, f, xl at level 1, e at level 200) : val_scope.
-Notation "e1 +ₗ e2" := (BinOp OffsetOp e1%E e2%E)
-  (at level 50, left associativity) : expr_scope.
 
 (** Derived notions. The notations for let and seq are stated
 explicitly instead of relying on the Notations Let and Seq as defined

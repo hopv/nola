@@ -51,6 +51,12 @@ Ltac inv_lit :=
   | H : lit_neq ?x ?y |- _ => inversion H; clear H; simplify_map_eq/=
   end.
 
+Ltac inv_un_op_eval :=
+  repeat match goal with
+  | H : un_op_eval ?c _ _ |- _ => is_constructor c; inversion H; clear H;
+    simplify_eq/=
+  | H : Z.b2z ?b = Z.b2z ?b' |- _ => apply Z.b2z_inj in H; simplify_eq/=
+  end.
 Ltac inv_bin_op_eval :=
   repeat match goal with
   | H : bin_op_eval _ ?c _ _ _ |- _ => is_constructor c; inversion H; clear H;
@@ -62,7 +68,7 @@ Local Hint Extern 0 (base_reducible _ _) => eexists _, _, _, _; simpl : core.
 Local Hint Extern 0 (base_reducible_no_obs _ _) => eexists _, _, _; simpl
   : core.
 
-Local Hint Constructors base_step bin_op_eval lit_neq lit_eq : core.
+Local Hint Constructors base_step un_op_eval bin_op_eval lit_neq lit_eq : core.
 Local Hint Resolve alloc_fresh : core.
 Local Hint Resolve to_of_val : core.
 
@@ -138,7 +144,7 @@ Local Ltac solve_exec_safe :=
   intros; destruct_and?; subst; do 3 eexists; econstructor; simpl;
   eauto with lia.
 Local Ltac solve_exec_puredet :=
-  simpl; intros; destruct_and?; inv_base_step; inv_bin_op_eval; inv_lit; done.
+  simpl; intros; destruct_and?; inv_base_step; inv_un_op_eval; inv_bin_op_eval; inv_lit; done.
 Local Ltac solve_pure_exec :=
   intros ?; apply nsteps_once, pure_base_step_pure_step;
     constructor; [solve_exec_safe | solve_exec_puredet].
@@ -154,20 +160,21 @@ Proof.
   eapply Forall_impl; [exact Hel|]. intros e' [v <-]. rewrite to_of_val; eauto.
 Qed.
 
-Global Instance pure_le n1 n2 :
-  PureExec True 1 (BinOp LeOp (Lit (LitInt n1)) (Lit (LitInt n2)))
-                  (Lit (bool_decide (n1 ≤ n2))).
+Global Instance pure_opp z :
+  PureExec True 1 (UnOp OppOp (Lit $ LitInt z)) (Lit $ LitInt $ -z).
+Proof. solve_pure_exec. Qed.
+Global Instance pure_negb b :
+  PureExec True 1 (UnOp NegbOp (Lit $ lit_of_bool b))
+    (Lit $ lit_of_bool $ negb b).
 Proof. solve_pure_exec. Qed.
 
 Global Instance pure_eq_int n1 n2 :
   PureExec True 1 (BinOp EqOp (Lit (LitInt n1)) (Lit (LitInt n2)))
     (Lit (bool_decide (n1 = n2))).
 Proof. case_bool_decide; solve_pure_exec. Qed.
-
 Global Instance pure_eq_loc_0_r l :
   PureExec True 1 (BinOp EqOp (Lit (LitLoc l)) (Lit false)) (Lit false).
 Proof. solve_pure_exec. Qed.
-
 Global Instance pure_eq_loc_0_l l :
   PureExec True 1 (BinOp EqOp (Lit false) (Lit (LitLoc l))) (Lit false).
 Proof. solve_pure_exec. Qed.
@@ -176,10 +183,38 @@ Global Instance pure_plus z1 z2 :
   PureExec True 1 (BinOp PlusOp (Lit $ LitInt z1) (Lit $ LitInt z2))
     (Lit $ LitInt $ z1 + z2).
 Proof. solve_pure_exec. Qed.
-
 Global Instance pure_minus z1 z2 :
   PureExec True 1 (BinOp MinusOp (Lit $ LitInt z1) (Lit $ LitInt z2))
     (Lit $ LitInt $ z1 - z2).
+Proof. solve_pure_exec. Qed.
+Global Instance pure_mul z1 z2 :
+  PureExec True 1 (BinOp MulOp (Lit $ LitInt z1) (Lit $ LitInt z2))
+    (Lit $ LitInt $ z1 * z2).
+Proof. solve_pure_exec. Qed.
+Global Instance pure_div z1 z2 :
+  PureExec True 1 (BinOp DivOp (Lit $ LitInt z1) (Lit $ LitInt z2))
+    (Lit $ LitInt $ z1 / z2).
+Proof. solve_pure_exec. Qed.
+Global Instance pure_mod z1 z2 :
+  PureExec True 1 (BinOp ModOp (Lit $ LitInt z1) (Lit $ LitInt z2))
+    (Lit $ LitInt $ z1 `mod` z2).
+Proof. solve_pure_exec. Qed.
+
+Global Instance pure_le n1 n2 :
+  PureExec True 1 (BinOp LeOp (Lit (LitInt n1)) (Lit (LitInt n2)))
+    (Lit (bool_decide (n1 ≤ n2))).
+Proof. solve_pure_exec. Qed.
+Global Instance pure_lt n1 n2 :
+  PureExec True 1 (BinOp LtOp (Lit (LitInt n1)) (Lit (LitInt n2)))
+    (Lit (bool_decide (n1 < n2))).
+Proof. solve_pure_exec. Qed.
+Global Instance pure_ge n1 n2 :
+  PureExec True 1 (BinOp GeOp (Lit (LitInt n1)) (Lit (LitInt n2)))
+    (Lit (bool_decide (n1 >= n2))).
+Proof. solve_pure_exec. Qed.
+Global Instance pure_gt n1 n2 :
+  PureExec True 1 (BinOp GtOp (Lit (LitInt n1)) (Lit (LitInt n2)))
+    (Lit (bool_decide (n1 > n2))).
 Proof. solve_pure_exec. Qed.
 
 Global Instance pure_offset l z  :
