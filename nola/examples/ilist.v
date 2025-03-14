@@ -61,6 +61,33 @@ Section ilist.
     Proper ((≡) ==> (≡)) (cif_ilist N N').
   Proof. apply ne_proper, _. Qed.
 
+  (** Turn cyclic references into [ilist] *)
+  Lemma twp_new_ilist_cyclic {N N' E Φx l} : ↑N' ⊆ E →
+    inv_tok N (Φx l) -∗ (l +ₗ 1) ↦ #l =[inv_wsat ⟦⟧ᶜ]{E}=∗ ilist N N' Φx l.
+  Proof.
+    iIntros (?) "#$ ↦". iMod inv_tok_alloc_open as "[#$ cl]"=>//=. iApply "cl".
+    iExists _. iFrame "↦". rewrite sem_ilist. by iSplit.
+  Qed.
+  Lemma twp_new_ilist_cyclic2 {N N' E Φx l l'} : ↑N' ⊆ E →
+    inv_tok N (Φx l) -∗ inv_tok N (Φx l') -∗ (l +ₗ 1) ↦ #l' -∗ (l' +ₗ 1) ↦ #l
+      =[inv_wsat ⟦⟧ᶜ]{E}=∗ ilist N N' Φx l ∗ ilist N N' Φx l'.
+  Proof.
+    iIntros (?) "#$ #$ ↦ ↦'".
+    iMod (inv_tok_alloc_open _ (N'.@ 0)) as "[#l cl]"; [solve_ndisj|].
+    iMod (inv_tok_alloc_open _ (N'.@ 1)) as "[#l' cl']"; [solve_ndisj|].
+    rewrite !(inv_tok_subset (N:=_.@_)); [iFrame "l l'"|solve_ndisj..]=>/=.
+    iMod ("cl'" with "[$↦']"); [|iApply "cl"; iFrame "↦"]; rewrite sem_ilist;
+      by iSplit.
+  Qed.
+
+  (** Construct [ilist] from the head and tail *)
+  Lemma twp_new_ilist_cons {N N' Φx l l'} :
+    inv_tok N (Φx l) -∗ (l +ₗ 1) ↦ #l' -∗ ilist N N' Φx l' =[inv_wsat ⟦⟧ᶜ]=∗
+      ilist N N' Φx l.
+  Proof.
+    iIntros "$ ↦ ?". iApply inv_tok_alloc=>/=. iFrame "↦". by rewrite sem_ilist.
+  Qed.
+
   (** Access the tail of a list *)
   Definition tail_ilist : val := λ: ["l"], !ˢᶜ("l" +ₗ #1).
   Lemma twp_tail_list {N N' E Φx l} : ↑N ⊆ E → ↑N' ⊆ E →
