@@ -99,6 +99,17 @@ Section na_inv_deriv.
 
   Context `{!Deriv (JUDG:=JUDG) ih δ}.
 
+  (** Weaken the namespace of [na_inv'] *)
+  Lemma na_inv'_subset {p N N' Px} : ↑N ⊆@{coPset} ↑N' →
+    na_inv' δ p N Px ⊢ na_inv' δ p N' Px.
+  Proof.
+    rewrite na_inv'_unseal=> ?. iIntros "#δ !>". iApply (Deriv_map with "[] δ").
+    iIntros (????). rewrite !in_js /=. iIntros "acc" (????) "p"=>/=.
+    iMod ("acc" with "[%] [%] p") as "/=(p & $ & cl)"; [set_solver..|].
+    iModIntro. iDestruct (na_own_acc with "p") as "[$ →p]"; [set_solver|].
+    iIntros "p Px". iDestruct ("→p" with "p") as "p". iApply ("cl" with "p Px").
+  Qed.
+
   (** Turn [na_inv_acsr] into [na_inv'] *)
   Lemma na_inv_acsr_inv' {p N Px} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →

@@ -101,6 +101,17 @@ Section inv_deriv.
 
   Context `{!Deriv (JUDG:=JUDG) ih δ}.
 
+  (** Weaken the namespace of [inv'] *)
+  Lemma inv'_subset {N N' Px} : ↑N ⊆@{coPset} ↑N' →
+    inv' δ N Px ⊢ inv' δ N' Px.
+  Proof.
+    rewrite inv'_unseal=> ?. iIntros "#δ !>". iApply (Deriv_map with "[] δ").
+    iIntros (????). rewrite !in_js /=. iIntros "acc" (??)=>/=.
+    iMod ("acc" with "[%]") as "/=[$ cl]"; [set_solver|].
+    iApply fupdw_mask_intro; [set_solver|]. iIntros "cl' Px". iMod "cl'".
+    iApply ("cl" with "Px").
+  Qed.
+
   (** Turn [inv_acsr] into [inv'] *)
   Lemma inv_acsr_inv' {N Px} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →

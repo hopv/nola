@@ -74,6 +74,14 @@ Section na_inv.
     Persistent (na_inv_tok p N Px).
   Proof. rewrite na_inv_tok_unseal. exact _. Qed.
 
+  (** Weaken the namespace of [na_inv_tok] *)
+  Lemma na_inv_tok_subset {p N N' Px} : ↑N ⊆@{coPset} ↑N' →
+    na_inv_tok p N Px ⊢ na_inv_tok p N' Px.
+  Proof.
+    rewrite na_inv_tok_unseal=> ?. iIntros "[%[% i]]".
+    rewrite inv_tok_subset //. iFrame. iPureIntro. set_solver.
+  Qed.
+
   (** Allocate [na_inv_tok] suspending the world satisfaction *)
   Lemma na_inv_tok_alloc_suspend {δ} Px p N :
     inv_wsat ⟦⟧(δ) ==∗ na_inv_tok p N Px ∗ (⟦Px⟧(δ) -∗ inv_wsat ⟦⟧(δ)).

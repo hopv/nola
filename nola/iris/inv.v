@@ -46,6 +46,11 @@ Section inv.
     Timeless (inv_tok N Px).
   Proof. rewrite inv_tok_unseal. exact _. Qed.
 
+  (** Weaken the namespace of [inv_tok] *)
+  Lemma inv_tok_subset {N N' Px} : ↑N ⊆@{coPset} ↑N' →
+    inv_tok N Px ⊢ inv_tok N' Px.
+  Proof. rewrite inv_tok_unseal=> ?. iIntros "[%[% $]] !%". set_solver. Qed.
+
   (** Semantics *)
   Local Definition inv_sem sm i Px : iProp Σ :=
     sm Px ∗ ownD {[i]} ∨ ownE {[i]}.
