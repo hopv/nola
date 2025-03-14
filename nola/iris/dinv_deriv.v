@@ -8,12 +8,11 @@ Import iPropAppNotation ModwNotation DsemNotation.
 
 Implicit Type (Σ : gFunctors) (FM : ofe).
 
-(** ** [dinvJT]: Judgment type for [dinv] *)
+(** [dinvJT]: Judgment type for [dinv] *)
 Variant dinvJT_id FM := .
-Definition dinvJT (FM : ofe) : ofe :=
-  (** Accessor judgment *) tagged (dinvJT_id FM) FM.
+Definition dinvJT (FM : ofe) : ofe := tagged (dinvJT_id FM) FM.
 
-(** ** [dinvJ]: [dinvJT] registered *)
+(** [dinvJ]: [dinvJT] registered *)
 Notation dinvJ FM := (inJ (dinvJT FM)).
 
 Section dinvJ.

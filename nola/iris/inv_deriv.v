@@ -9,12 +9,12 @@ Import iPropAppNotation ModwNotation WpwNotation DsemNotation.
 
 Implicit Type (Σ : gFunctors) (N : namespace) (FM : ofe).
 
-(** ** [invJT]: Judgment type for [inv] *)
+(** [invJT]: Judgment type for [inv] *)
 Variant invJT_id FM := .
 Definition invJT (FM : ofe) : ofe :=
-  (** Accessor judgment *) tagged (invJT_id FM) (leibnizO namespace * FM).
+  tagged (invJT_id FM) (leibnizO namespace * FM).
 
-(** ** [invJ]: [invJT] registered *)
+(** [invJ]: [invJT] registered *)
 Notation invJ FM := (inJ (invJT FM)).
 
 Section invJ.

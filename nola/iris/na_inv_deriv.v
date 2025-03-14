@@ -9,13 +9,10 @@ Import ProdNotation iPropAppNotation ModwNotation DsemNotation.
 
 Implicit Type (p : na_inv_pool_name) (N : namespace) (FM : ofe) (Σ : gFunctors).
 
-(** ** Judgment for [na_inv] *)
-
 (** [na_invJT]: Judgment type for [na_inv] *)
 Variant na_invJT_id FM := .
 Definition na_invJT (FM : ofe) : ofe :=
-  (** Accessor judgment *)
-    tagged (na_invJT_id FM) (leibnizO (na_inv_pool_name *' namespace) * FM).
+  tagged (na_invJT_id FM) (leibnizO (na_inv_pool_name *' namespace) * FM).
 (** [na_invJ]: [na_invJT] registered *)
 Notation na_invJ FM JUDG := (inJ (na_invJT FM) JUDG).
 

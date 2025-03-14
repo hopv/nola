@@ -8,12 +8,9 @@ Import iPropAppNotation ModwNotation DsemNotation CsemNotation.
 
 Implicit Type (Σ : gFunctors) (FM : ofe).
 
-(** ** Judgment *)
-
-(* [storeJT]: Judgment type for [store] *)
+(** [storeJT]: Judgment type for [store] *)
 Variant storeJT_id FM := .
-Definition storeJT FM : ofe :=
-  (** Accessor judgment *) tagged (storeJT_id FM) FM.
+Definition storeJT FM : ofe := tagged (storeJT_id FM) FM.
 (** [storeJ]: [storeJT] registered *)
 Notation storeJ FM JUDG := (inJ (storeJT FM) JUDG).
 
