@@ -111,13 +111,11 @@ Section ilist.
     [[{ c ↦ #n ∗ ilist N N' Φx l }]][inv_wsat ⟦⟧ᶜ]
       iter_ilist [f; #c; #l] @ E [[{ RET #☠; c ↦ #0 }]].
   Proof.
-    iIntros "%% #f /=" (Ψ) "!> [c↦ #l] →Ψ".
-    iInduction n as [|m] "IH" forall (l) "l".
-    { wp_rec. wp_read. wp_op. wp_if. by iApply "→Ψ". }
-    wp_rec. wp_read. wp_op. wp_if. wp_apply "f".
-    { iDestruct "l" as "[$ _]". }
-    iIntros (?) "_". wp_seq. wp_read. wp_op. wp_write.
-    have -> : (S m - 1)%Z = m by lia.
+    iIntros "%% #f" (Ψ) "!> [c↦ #l] →Ψ".
+    iInduction n as [|m] "IH" forall (l) "l"; wp_rec; wp_read; wp_op; wp_if;
+      [by iApply "→Ψ"|].
+    wp_apply "f"; [by iDestruct "l" as "[$ _]"|]. iIntros (?) "_". wp_seq.
+    wp_read. wp_op. wp_write. have -> : (S m - 1)%Z = m by lia.
     wp_apply twp_tail_list; [|done..|]=>//. iIntros (l') "#ltl".
     iApply ("IH" with "c↦ →Ψ ltl").
   Qed.
@@ -151,9 +149,10 @@ Section ilist.
     [[{ k ↦ #n ∗ ilist N N' Φx l }]][inv_wsat ⟦⟧ᶜ]
       forks_iter_ilist [f; #k; #l] @ E [[{ RET #☠; k ↦ #0 }]].
   Proof.
-    iIntros "#f" (Ψ) "!> [↦ #l] →Ψ". iInduction n as [|m] "IH" forall (l) "l".
-    { wp_rec. wp_read. wp_op. wp_if. by iApply "→Ψ". }
-    wp_rec. wp_read. wp_op. wp_if. wp_apply twp_fork.
+    iIntros "#f" (Ψ) "!> [↦ #l] →Ψ".
+    iInduction n as [|m] "IH" forall (l) "l"; wp_rec; wp_read; wp_op; wp_if;
+      [by iApply "→Ψ"|].
+    wp_apply twp_fork.
     { wp_alloc c as "↦" "†". rewrite heap_pointsto_vec_singleton. wp_let.
       wp_apply twp_ndnat; [done|]. iIntros (?) "_". wp_write.
       wp_apply (twp_iter_ilist with "f [$↦ $l //]"); by [|iIntros]. }
