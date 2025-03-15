@@ -103,6 +103,7 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`proph`](nola/util/proph.v) (Prophecy)
   + [`order`](nola/util/order.v) (Order theory),
     [`psg`](nola/util/psg.v) (Pseudo-gfp)
+  + [`wf`](nola/util/wf.v) (Well-foundedness)
   + [`productive`](nola/util/productive.v) (Productivity)
   + [`nary`](nola/util/nary.v) (N-ary maps),
     [`cit`](nola/util/cit.v) (Coinductive-inductive tree)

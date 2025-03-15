@@ -13,6 +13,7 @@ nola/util/tagged.v
 nola/util/proph.v
 nola/util/order.v
 nola/util/psg.v
+nola/util/wf.v
 nola/util/productive.v
 nola/util/nary.v
 nola/util/cit.v
