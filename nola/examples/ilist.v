@@ -240,6 +240,27 @@ Section ilist.
     by iApply "→Ψ".
   Qed.
 
+  (** Iterate over a list using any step function [s] that is guaranteed to
+    eventually cause termination by any well-founded relation [Rel] *)
+  Definition iter_step_ilist : val := rec: "self" ["f"; "s"; "l"] :=
+    if:: "s" [] then "f" ["l"];; "self" ["f"; "s"; tail_ilist ["l"]].
+  Lemma twp_iter_step_ilist {N N' E Φx l A Rel Ω P a} {f s : val} :
+    @Acc A Rel a → ↑N ⊆ E → ↑N' ⊆ E →
+    (∀ a, [[{ Ω a }]][inv_wsat ⟦⟧ᶜ] s [] @ E
+      [[{ (b : bool), RET #b; if b then ∃ a', ⌜Rel a' a⌝ ∗ Ω a' else P }]]) -∗
+    (∀ l', [[{ inv_tok N (Φx l') }]][inv_wsat ⟦⟧ᶜ] f [ #l'] @ E
+      [[{ v, RET v; True }]]) -∗
+    [[{ Ω a ∗ ilist N N' Φx l }]][inv_wsat ⟦⟧ᶜ]
+      iter_step_ilist [f; s; #l] @ E [[{ RET #☠; P }]].
+  Proof.
+    iIntros "%Acc %% #s #f" (Ψ) "!> [Ω #l] →Ψ".
+    iInduction Acc as [] "IH" forall (l) "l". wp_rec. wp_apply ("s" with "Ω").
+    iIntros ([|]); last first. { iIntros "?". wp_case. by iApply "→Ψ". }
+    iIntros "[%[% Ω]]". wp_case. wp_apply "f"; [by iDestruct "l" as "[$ _]"|].
+    iIntros (?) "_". wp_seq. wp_apply twp_tail_list; [|done..|]=>//.
+    iIntros (l') "#ltl". iApply ("IH" with "[//] Ω →Ψ ltl").
+  Qed.
+
   (** Example invariant: [l] stores a multiple of 3 *)
   Definition cif_mul3 (l : loc) : cif CON Σ := ∃ k : Z, ▷ l ↦ #(3 * k).
   (** Function that atomically increments [l] by 3 *)
