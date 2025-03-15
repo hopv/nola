@@ -1,6 +1,6 @@
 (** * Utility *)
 
-From nola.util Require Export prod.
+From nola.util Require Export prod bin.
 Import ProdNotation.
 
 (** [list_unwrap]: Unwrap function for the list type *)
@@ -18,4 +18,21 @@ Definition list_wrap {A} (s : unit + A *' list A) : list A :=
 Lemma list_wrap_unwrap {A l} : @list_wrap A (list_unwrap l) = l.
 Proof. by case l. Qed.
 Lemma list_unwrap_wrap {A s} : @list_unwrap A (list_wrap s) = s.
+Proof. by case s=> [[]|?]. Qed.
+
+(** [bin_unwrap]: Unwrap function for the [bin] type *)
+Definition bin_unwrap {A} (t : bin A) : unit + A *' bin A *' bin A :=
+  match t with BinLeaf => inl () | BinNode a tl tr => inr (a, tl, tr)' end.
+(** [bin_unwrap] is injective *)
+#[export] Instance bin_unwrap_inj {A} : Inj (=) (=) (@bin_unwrap A).
+Proof. by move=> [|???][|???]//=[<-<-<-]. Qed.
+
+(** [bin_wrap]: Wrap function for the [bin] type *)
+Definition bin_wrap {A} (s : unit + A *' bin A *' bin A) : bin A :=
+  match s with inl () => BinLeaf | inr (a, tl, tr)' => BinNode a tl tr end.
+
+(** [bin_wrap] and [bin_unwrap] are mutually inverse *)
+Lemma bin_wrap_unwrap {A t} : @bin_wrap A (bin_unwrap t) = t.
+Proof. by case t. Qed.
+Lemma bin_unwrap_wrap {A s} : @bin_unwrap A (bin_wrap s) = s.
 Proof. by case s=> [[]|?]. Qed.
