@@ -56,14 +56,14 @@ Section ty_shrref.
 
   (** [ty_shrref] satisfies [TyOp] *)
   #[export] Instance ty_shrref_ty_op `{!Ty (X:=X) T}
-    `(!TyOpLt T κ d, !LftIncl κ α) :
+    `(!TyOpLe T κ 1 d, !LftIncl κ α) :
     TyOpAt (ty_shrref α T) κ d.
   Proof.
     apply: sty_op_at=> >. rewrite sty_shrref_unseal /=. iIntros "κ".
     iDestruct 1 as (??? -> ??) "T". rewrite sem_cif_in /=.
     iMod (stored_acc with "T") as "T".
     iDestruct (lft_incl'_live_acc (κ ⊓ α) with "κ") as (?) "[κα →κ]".
-    iMod (ty_shr_proph_lt with "κα T") as (???) "[$ →κα]"=>//. iModIntro.
+    iMod (ty_shr_proph_le with "κα T") as (???) "[$ →κα]"=>//. iModIntro.
     iSplit. { iPureIntro. by eapply proph_dep_proper. }
     iIntros "ξl". iMod ("→κα" with "ξl") as "κα". iModIntro. by iApply "→κ".
   Qed.
@@ -90,13 +90,13 @@ Section ty_shrref.
   Proof. exact _. Qed.
 
   (** Real part of [ty_shrref] *)
-  #[export] Instance real_shrref `(!RealLt (X:=X) (A:=A) T κ get d) {α} :
+  #[export] Instance real_shrref `(!RealLe (X:=X) (A:=A) T κ get 1 d) {α} :
     RealAt (ty_shrref α T) κ get d.
   Proof.
     apply: sty_real=>/= >. rewrite sty'_shrref_unseal /=. iIntros "κ t".
     iDestruct 1 as (??? _ ? eq) "T". rewrite sem_cif_in /=.
     iMod (stored_acc with "T") as "T".
-    iMod (real_shr_lt with "κ t T") as ([? eq']) "[$$]"=>//.
+    iMod (real_shr_le with "κ t T") as ([? eq']) "[$$]"=>//.
     iPureIntro. eexists _=> π. by rewrite -(eq π).
   Qed.
 

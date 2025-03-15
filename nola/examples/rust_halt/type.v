@@ -288,46 +288,43 @@ Section ty_op.
     Proper ((≡) ==> (=) --> (=) ==> (↔)) (@TyOpAt X).
   Proof. move=> ?*??<-??<-. split; exact: TyOpAt_mono. Qed.
 
-  (** [TyOpLt]: Basic operations on a type below a depth *)
-  Class TyOpLt {X} (T : ty CON Σ X) (κ : lft) (d : nat) : Prop :=
-    ty_op_lt : ∀ {d'}, d' < d → TyOpAt T κ d'.
+  (** [TyOpLe]: Basic operations on a type below a depth with a gap [k] *)
+  Class TyOpLe {X} (T : ty CON Σ X) (κ : lft) (k d : nat) : Prop :=
+    ty_op_le : ∀ {d'}, k + d' ≤ d → TyOpAt T κ d'.
 
-  (** [TyOpLt] is monotone *)
-  #[export] Instance TyOpLt_mono {X} :
-    Proper ((≡) ==> (⊑) --> (≤) --> impl) (@TyOpLt X).
+  (** [TyOpLe] is monotone *)
+  #[export] Instance TyOpLe_mono {X} :
+    Proper ((≡) ==> (⊑) --> (≤) ==> (≤) --> impl) (@TyOpLe X).
   Proof.
-    move=> ?*?* d d' /= ? wl d'' ?. have lt : d'' < d by lia. move: (wl _ lt).
-    exact: TyOpAt_mono.
+    move=> ?*?* k k' ? d d' /= ? wl d'' ?. have le : k + d'' ≤ d by lia.
+    move: (wl _ le). exact: TyOpAt_mono.
   Qed.
-  #[export] Instance TyOpLt_flip_mono {X} :
-    Proper ((≡) ==> (⊑) ==> (≤) ==> flip impl) (@TyOpLt X).
-  Proof. move=> ?*?*?* /=. exact: TyOpLt_mono. Qed.
-  #[export] Instance TyOpLt_proper {X} :
-    Proper ((≡) ==> (=) ==> (=) ==> (↔)) (@TyOpLt X).
-  Proof. move=> ?*?? <- ?? <-. split; exact: TyOpLt_mono. Qed.
+  #[export] Instance TyOpLe_flip_mono {X} :
+    Proper ((≡) ==> (⊑) ==> (≤) --> (≤) ==> flip impl) (@TyOpLe X).
+  Proof. move=> ?*?*?*?* /=. exact: TyOpLe_mono. Qed.
+  #[export] Instance TyOpLe_proper {X} :
+    Proper ((≡) ==> (=) ==> (=) ==> (=) ==> (↔)) (@TyOpLe X).
+  Proof. move=> ?*?? <- ?? <- ?? <-. split; exact: TyOpLe_mono. Qed.
 
-  (** Lemmas under [TyOpLt] *)
-  Section ty_op_lt.
-    Context `(!@TyOpLt X T κ d0).
-    Lemma ty_own_proph_lt {t d xπ vl q} : d < d0 →
-      q.[κ] -∗ ⟦ ty_own T t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
-        ⌜proph_dep xπ ξl⌝ ∧ r:∗[ξl] ∗
-        (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ] ∗ ⟦ ty_own T t d xπ vl ⟧ᶜ).
-    Proof. move=> ?. by apply ty_op_lt. Qed.
-    Lemma ty_shr_proph_lt {t d l α xπ q} : d < d0 →
-      q.[κ ⊓ α] -∗ ⟦ ty_shr T t d l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
-        ⌜proph_dep xπ ξl⌝ ∧
-        r:∗[ξl] ∗ (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ ⊓ α]).
-    Proof. move=> ?. by apply ty_op_lt. Qed.
-    Lemma ty_share_lt {t d l α xπ q} : d < d0 →
-      q.[κ ⊓ α] -∗ bord α (∃ vl, ▷ l ↦∗ vl ∗ ty_own T t d xπ vl)%cif
-        =[rust_halt_wsat]{⊤}=∗ q.[κ ⊓ α] ∗ ⟦ ty_shr T t d l α xπ ⟧ᶜ.
-    Proof. move=> ?. by apply ty_op_lt. Qed.
-  End ty_op_lt.
+  (** Lemmas under [TyOpLe] *)
+  Lemma ty_own_proph_le `(!@TyOpLe X T κ k d0) {t d xπ vl q} : k + d ≤ d0 →
+    q.[κ] -∗ ⟦ ty_own T t d xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
+      ⌜proph_dep xπ ξl⌝ ∧ r:∗[ξl] ∗
+      (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ] ∗ ⟦ ty_own T t d xπ vl ⟧ᶜ).
+  Proof. move=> ?. by apply ty_op_le. Qed.
+  Lemma ty_shr_proph_le `(!@TyOpLe X T κ k d0) {t d l α xπ q} : k + d ≤ d0 →
+    q.[κ ⊓ α] -∗ ⟦ ty_shr T t d l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗ ∃ ξl r,
+      ⌜proph_dep xπ ξl⌝ ∧
+      r:∗[ξl] ∗ (r:∗[ξl] =[rust_halt_wsat]{⊤}=∗ q.[κ ⊓ α]).
+  Proof. move=> ?. by apply ty_op_le. Qed.
+  Lemma ty_share_le `(!@TyOpLe X T κ k d0) {t d l α xπ q} : k + d ≤ d0 →
+    q.[κ ⊓ α] -∗ bord α (∃ vl, ▷ l ↦∗ vl ∗ ty_own T t d xπ vl)%cif
+      =[rust_halt_wsat]{⊤}=∗ q.[κ ⊓ α] ∗ ⟦ ty_shr T t d l α xπ ⟧ᶜ.
+  Proof. move=> ?. by apply ty_op_le. Qed.
 
-  (** [TyOpLt] via universal quantification *)
-  #[export] Instance TyOp_TyOpLt `{!∀ d, @TyOpAt X T κ d} {d} :
-    TyOpLt T κ d | 10.
+  (** [TyOpLe] via universal quantification *)
+  #[export] Instance TyOp_TyOpLe `{!∀ d, @TyOpAt X T κ d} {k d} :
+    TyOpLe T κ k d | 10.
   Proof. by move. Qed.
 
   Context `{!rust_haltC CON, !rust_haltCS CON JUDG Σ, !rust_haltJS CON JUDG Σ}.
@@ -362,7 +359,7 @@ Section ty_op.
   Qed.
 End ty_op.
 Hint Mode TyOpAt - - - - - - - - ! - - : typeclass_instances.
-Hint Mode TyOpLt - - - - - - - - ! - - : typeclass_instances.
+Hint Mode TyOpLe - - - - - - - - ! - - - : typeclass_instances.
 
 (** [TyOp]: Basic operations on a type *)
 Notation TyOp T κ := (∀ d, TyOpAt T κ d).
@@ -536,43 +533,43 @@ Section resol.
   #[export] Instance resol_true {X T κ d} : @ResolAt X T κ (λ _, True) d | 100.
   Proof. split=> >. iIntros "$$ _ !>". by iApply proph_obs_true. Qed.
 
-  (** [ResolLt]: Resolution over a type below a depth *)
-  Class ResolLt {X} (T : ty CON Σ X) (κ : lft) (post : X → Prop) (d : nat)
+  (** [ResolLe]: Resolution over a type below a depth with a gap [k] *)
+  Class ResolLe {X} (T : ty CON Σ X) (κ : lft) (post : X → Prop) (k d : nat)
     : Prop :=
-    resol_lt' : ∀ {d'}, d' < d → ResolAt T κ post d'.
+    resol_le' : ∀ {d'}, k + d' ≤ d → ResolAt T κ post d'.
 
-  (** [ResolLt] is monotone *)
-  #[export] Instance ResolLt_mono {X} :
-    Proper ((≡) ==> (⊑) --> pointwise_relation _ impl ==> (≤) --> impl)
-      (@ResolLt X).
+  (** [ResolLe] is monotone *)
+  #[export] Instance ResolLe_mono {X} :
+    Proper ((≡) ==> (⊑) --> pointwise_relation _ impl ==> (≤) ==> (≤) --> impl)
+      (@ResolLe X).
   Proof.
-    move=> ?*?*?*?? /= ????. eapply ResolAt_mono=>//. apply resol_lt'. lia.
+    move=> ?*?*?*?*?? /= ????. eapply ResolAt_mono=>//. apply resol_le'. lia.
   Qed.
-  #[export] Instance ResolLt_flip_mono {X} :
-    Proper ((≡) ==> (⊑) ==> pointwise_relation _ (flip impl) ==> (≤) ==>
-      flip impl) (@ResolLt X).
-  Proof. move=> ?*?*?*?*. exact: ResolLt_mono. Qed.
-  #[export] Instance ResolLt_proper {X} :
-    Proper ((≡) ==> (=) ==> pointwise_relation _ (↔) ==> (=) ==> (↔))
-      (@ResolLt X).
+  #[export] Instance ResolLe_flip_mono {X} :
+    Proper ((≡) ==> (⊑) ==> pointwise_relation _ (flip impl) ==> (≤) --> (≤) ==>
+      flip impl) (@ResolLe X).
+  Proof. move=> ?*?*?*?*?*. exact: ResolLe_mono. Qed.
+  #[export] Instance ResolLe_proper {X} :
+    Proper ((≡) ==> (=) ==> pointwise_relation _ (↔) ==> (=) ==> (=) ==> (↔))
+      (@ResolLe X).
   Proof.
-    move=> ?*?? <- ?? iff ?? <-.
-    split; eapply ResolLt_mono=>//= ??; by apply iff.
+    move=> ?*?? <- ?? iff ?? <- ?? <-.
+    split; eapply ResolLe_mono=>//= ??; by apply iff.
   Qed.
 
-  (** [resol] under [ResolLt] *)
-  Lemma resol_lt `{!@ResolLt X T κ post d} {d' t xπ vl q} : d' < d →
+  (** [resol] under [ResolLe] *)
+  Lemma resol_le `{!@ResolLe X T κ post k d} {d' t xπ vl q} : k + d' ≤ d →
     q.[κ] -∗ na_own t ⊤ -∗ ⟦ ty_own T t d' xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
       q.[κ] ∗ na_own t ⊤ ∗ ⟨π, post (xπ π)⟩.
-  Proof. move=> ?. by apply @resol, resol_lt'. Qed.
+  Proof. move=> ?. by apply @resol, resol_le'. Qed.
 
-  (** [ResolLt] via universal quantification *)
-  #[export] Instance Resol_ResolLt `{!∀ d, @ResolAt X T κ post d} {d} :
-    ResolLt T κ post d | 10.
+  (** [ResolLe] via universal quantification *)
+  #[export] Instance Resol_ResolLe `{!∀ d, @ResolAt X T κ post d} {k d} :
+    ResolLe T κ post k d | 10.
   Proof. by move. Qed.
 End resol.
 Hint Mode ResolAt - - - - - - - ! - - - : typeclass_instances.
-Hint Mode ResolLt - - - - - - - ! - - - : typeclass_instances.
+Hint Mode ResolLe - - - - - - - ! - - - - : typeclass_instances.
 
 (** [Resol]: Resolution over a type *)
 Notation Resol T κ post := (∀ d, ResolAt T κ post d).
@@ -656,45 +653,46 @@ Section real.
     @RealAt X _ (ty_pty T) κ id d.
   Proof. apply: sty_real=>/= >. iIntros "$$ (% & % & _) !%". by eexists _. Qed.
 
-  (** [RealLt]: Taking the real part out of a type below a depth *)
-  Class RealLt {X A} (T : ty CON Σ X) (κ : lft) (get : X → A) (d : nat)
+  (** [RealLe]: Taking the real part out of a type below a depth with a gap [k]
+    *)
+  Class RealLe {X A} (T : ty CON Σ X) (κ : lft) (get : X → A) (k d : nat)
     : Prop :=
-    real_lt : ∀ {d'}, d' < d → RealAt T κ get d'.
+    real_le : ∀ {d'}, k + d' ≤ d → RealAt T κ get d'.
 
-  (** [RealLt] is monotone *)
-  #[export] Instance RealLt_mono {X A} :
-    Proper ((≡) ==> (⊑) --> pointwise_relation _ (=) ==> (≤) --> impl)
-      (@RealLt X A).
+  (** [RealLe] is monotone *)
+  #[export] Instance RealLe_mono {X A} :
+    Proper ((≡) ==> (⊑) --> pointwise_relation _ (=) ==> (≤) ==> (≤) --> impl)
+      (@RealLe X A).
   Proof.
-    move=> ?*?*?*?? /= ????. eapply RealAt_mono=>//. apply real_lt. lia.
+    move=> ?*?*?*?*?? /= ????. eapply RealAt_mono=>//. apply real_le. lia.
   Qed.
-  #[export] Instance RealLt_flip_mono {X A} :
-    Proper ((≡) ==> (⊑) ==> pointwise_relation _ (=) ==> (≤) ==> flip impl)
-      (@RealLt X A).
-  Proof. move=> ?*?*?*?*. by eapply RealLt_mono. Qed.
-  #[export] Instance RealLt_proper {X A} :
-    Proper ((≡) ==> (=) ==> pointwise_relation _ (=) ==> (=) ==> (↔))
-      (@RealLt X A).
-  Proof. move=> ?*??<-?*??<-. split; by eapply RealLt_mono. Qed.
+  #[export] Instance RealLe_flip_mono {X A} :
+    Proper ((≡) ==> (⊑) ==> pointwise_relation _ (=) ==> (≤) --> (≤) ==>
+      flip impl) (@RealLe X A).
+  Proof. move=> ?*?*?*?*?*. by eapply RealLe_mono. Qed.
+  #[export] Instance RealLe_proper {X A} :
+    Proper ((≡) ==> (=) ==> pointwise_relation _ (=) ==> (=) ==> (=) ==> (↔))
+      (@RealLe X A).
+  Proof. move=> ?*??<-?*??<-??<-. split; by eapply RealLe_mono. Qed.
 
-  (** [real_own] and [real_shr] under [RealLt] *)
-  Lemma real_own_lt `{!@RealLt X A T κ get d} {d' t xπ vl q} : d' < d →
+  (** [real_own] and [real_shr] under [RealLe] *)
+  Lemma real_own_le `(!@RealLe X A T κ get k d) {d' t xπ vl q} : k + d' ≤ d →
     q.[κ] -∗ na_own t ⊤ -∗ ⟦ ty_own T t d' xπ vl ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
       ⌜∃ y, ∀ π, get (xπ π) = y⌝ ∧
       q.[κ] ∗ na_own t ⊤ ∗ ⟦ ty_own T t d' xπ vl ⟧ᶜ.
-  Proof. move=> ?. by apply @real_own, real_lt. Qed.
-  Lemma real_shr_lt `{!@RealLt X A T κ get d} {d' t l α xπ q} : d' < d →
+  Proof. move=> ?. by apply @real_own, real_le. Qed.
+  Lemma real_shr_le `(!@RealLe X A T κ get k d) {d' t l α xπ q} : k + d' ≤ d →
     q.[κ] -∗ na_own t ⊤ -∗ ⟦ ty_shr T t d' l α xπ ⟧ᶜ =[rust_halt_wsat]{⊤}=∗
       ⌜∃ y, ∀ π, get (xπ π) = y⌝ ∧ q.[κ] ∗ na_own t ⊤.
-  Proof. move=> ?. by apply @real_shr, real_lt. Qed.
+  Proof. move=> ?. by apply @real_shr, real_le. Qed.
 
-  (** [RealLt] via universal quantification *)
-  #[export] Instance Real_RealLt `{!∀ d, @RealAt X A T κ get d} {d} :
-    RealLt T κ get d | 10.
+  (** [RealLe] via universal quantification *)
+  #[export] Instance Real_RealLe `{!∀ d, @RealAt X A T κ get d} {k d} :
+    RealLe T κ get k d | 10.
   Proof. by move. Qed.
 End real.
 Hint Mode RealAt - - - - - - - - ! - - - : typeclass_instances.
-Hint Mode RealLt - - - - - - - - ! - - - : typeclass_instances.
+Hint Mode RealLe - - - - - - - - ! - - - - : typeclass_instances.
 
 (** [Real]: Taking the real part out of a type at a depth *)
 Notation Real T κ get := (∀ d, RealAt T κ get d).

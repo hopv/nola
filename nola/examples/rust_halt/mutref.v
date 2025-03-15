@@ -61,7 +61,7 @@ Section ty_mutref.
 
   (** [ty_mutref] satisfies [TyOp] *)
   #[export] Instance ty_mutref_ty_op `{!Ty (X:=X) T}
-    `(!TyOpLt T κ d, !LftIncl κ α) :
+    `(!TyOpLe T κ 1 d, !LftIncl κ α) :
     TyOpAt (ty_mutref α T) κ d.
   Proof.
     rewrite ty_mutref_unseal. split=>/=.
@@ -70,7 +70,7 @@ Section ty_mutref.
       iDestruct (lft_incl'_live_acc α with "κ") as (?) "[α →κ]".
       iMod (pbord_open (M:=borrowM) with "α big") as "/=[o (% & ↦ & T)]".
       iDestruct (pobor_proph with "o") as "[ξ →o]". unfold cif_pointsto_ty.
-      iMod (ty_own_proph_lt with "κ' T") as (ηl ??) "[ηl →T]"=>//. iModIntro.
+      iMod (ty_own_proph_le with "κ' T") as (ηl ??) "[ηl →T]"=>//. iModIntro.
       iDestruct (proph_tok_toks_fuse with "ξ ηl") as (?) "[$ →ξηl]"=>/=. iSplit.
       { iPureIntro. eapply proph_dep_proper; [exact: eq|done|].
         apply: (proph_dep_f2 (λ x x', (x', x)') _ _ [_]); [|done].
@@ -89,7 +89,7 @@ Section ty_mutref.
       iMod (stored_acc with "T") as "T".
       iDestruct (lft_incl'_live_acc (κ:=κ ⊓ β) (κ ⊓ (α ⊓ β)) with "[$κ' $β']")
         as (?) "[καβ →κβ']".
-      iMod (ty_shr_proph_lt (T:=T) with "καβ T") as (ηl ??) "[ηl →καβ]"=>//.
+      iMod (ty_shr_proph_le (T:=T) with "καβ T") as (ηl ??) "[ηl →καβ]"=>//.
       iModIntro. iDestruct (proph_tok_toks_fuse with "ξ ηl") as (?) "[$ →ξηl]".
       iSplit.
       { iPureIntro. eapply proph_dep_proper; [exact: eq|done|].
@@ -111,7 +111,7 @@ Section ty_mutref.
       iMod (sproph_tok_alloc with "αβ bξ") as "[αβ $]".
       iDestruct ("→κβ" with "αβ") as "κβ".
       iDestruct (lft_incl'_live_acc (κ ⊓ (α ⊓ β)) with "κβ") as (?) "[καβ →κβ]".
-      iMod (ty_share_lt (T:=T) with "καβ bT") as "[καβ #T]"=>//.
+      iMod (ty_share_le (T:=T) with "καβ bT") as "[καβ #T]"=>//.
       iDestruct ("→κβ" with "καβ") as "[κ $]".
       iMod (obord_subdiv (FML:=cifOF _) (M:=borrowM) [▷ _ ↦ _]%cif (α ⊓ β)
         with "[] o [↦] [→pb]") as "(β & _ & ↦ & _)"=>/=.
@@ -160,7 +160,7 @@ Section ty_mutref.
 
   (** Real part of [ty_mutref], discarding  *)
   #[export] Instance real_mutref
-    `(!RealLt (X:=X) (A:=A) T κ get d, !LftIncl κ α) :
+    `(!RealLe (X:=X) (A:=A) T κ get 1 d, !LftIncl κ α) :
     RealAt (ty_mutref α T) κ (get ∘ fst') d.
   Proof.
     rewrite ty_mutref_unseal. split=>/= >.
@@ -168,7 +168,7 @@ Section ty_mutref.
       rewrite sem_cif_in /=.
       iDestruct (lft_incl'_live_acc α with "κ") as (?) "[α →κ]".
       iMod (pbord_open (M:=borrowM) with "α b") as "/=[o (% & ↦ & T)]".
-      iMod (real_own_lt with "κ' t T") as ([? eq']) "($ & $ & T)"=>//.
+      iMod (real_own_le with "κ' t T") as ([? eq']) "($ & $ & T)"=>//.
       iMod (pobord_close (M:=borrowM) with "o [↦ T]") as "[α b]"=>/=;
         [by iFrame|].
       iModIntro. iSplit. { iPureIntro. eexists _=> ?. by rewrite eq /=. }
@@ -176,7 +176,7 @@ Section ty_mutref.
       rewrite pbor_tok_pbor. by iFrame.
     - iIntros "κ t". iDestruct 1 as (????? eq) "(_ & _ & T)".
       rewrite sem_cif_in /=. iMod (stored_acc with "T") as "T".
-      iMod (real_shr_lt with "κ t T") as ([? eq']) "[$$]"=>//. iPureIntro.
+      iMod (real_shr_le with "κ t T") as ([? eq']) "[$$]"=>//. iPureIntro.
       eexists _=> ?. by rewrite eq /=.
   Qed.
 

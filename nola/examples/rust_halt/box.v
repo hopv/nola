@@ -49,20 +49,20 @@ Section ty_box.
   Qed.
 
   (** [ty_box] satisfies [TyOp] *)
-  #[export] Instance ty_box_ty_op `(!Ty (X:=X) T, !TyOpLt T κ d) :
+  #[export] Instance ty_box_ty_op `(!Ty (X:=X) T, !TyOpLe T κ 1 d) :
     TyOpAt (ty_box T) κ d.
   Proof.
     rewrite ty_box_unseal. split=>/= *.
     - iIntros "κ". iDestruct 1 as (???? -> ? eq) "(↦ & † & T)".
       rewrite sem_cif_in /=. iMod (stored_acc with "T") as "T".
-      iMod (ty_own_proph_lt with "κ T") as (???) "[$ →T]"=>//. iModIntro.
+      iMod (ty_own_proph_le with "κ T") as (???) "[$ →T]"=>//. iModIntro.
       iSplit. { iPureIntro. by eapply proph_dep_proper. }
       iIntros "ξl". iMod ("→T" with "ξl") as "[$ T]".
       iMod (store_alloc with "T") as "T". iModIntro. iFrame "↦ †".
       iExists _, _. do 3 iSplit=>//. by rewrite sem_cif_in.
     - iIntros "κα". iDestruct 1 as (???? eq) "[↦ T]". rewrite sem_cif_in /=.
       iMod (stored_acc with "T") as "T".
-      iMod (ty_shr_proph_lt with "κα T") as (???) "[$ →κα]"=>//. iModIntro.
+      iMod (ty_shr_proph_le with "κα T") as (???) "[$ →κα]"=>//. iModIntro.
       iSplit. { iPureIntro. by eapply proph_dep_proper. }
       iIntros "ξl". iApply ("→κα" with "ξl").
     - iIntros "[κ α] b".
@@ -80,7 +80,7 @@ Section ty_box.
         iMod (store_alloc with "T") as "T". iModIntro. iFrame "↦ †".
         iExists _, _. do 3 iSplit=>//. by rewrite sem_cif_in. }
       iMod (spointsto_alloc with "α b") as "[α $]". rewrite bor_tok_bor.
-      iMod (ty_share_lt (T:=T) with "[$κ $α //] b'") as "[$ T]"=>//.
+      iMod (ty_share_le (T:=T) with "[$κ $α //] b'") as "[$ T]"=>//.
       iMod (store_alloc_pers with "T") as "T". iModIntro. iExists _, _.
       do 2 iSplit=>//. by rewrite sem_cif_in /=.
   Qed.
@@ -98,29 +98,29 @@ Section ty_box.
   Qed.
 
   (** Resolution over [ty_box] *)
-  #[export] Instance resol_box `(!ResolLt (X:=X) T κ post d) :
+  #[export] Instance resol_box `(!ResolLe (X:=X) T κ post 1 d) :
     ResolAt (ty_box T) κ post d.
   Proof.
     split=> >. rewrite ty_box_unseal /=. iIntros "κ t".
     iDestruct 1 as (?????? eq) "(_ & _ & T)". rewrite sem_cif_in /=.
     iMod (stored_acc with "T") as "T". setoid_rewrite <-eq.
-    by iApply (resol_lt with "κ t T").
+    by iApply (resol_le with "κ t T").
   Qed.
 
   (** Real part of [ty_box] *)
-  #[export] Instance real_box `(!RealLt (X:=X) (A:=A) T κ get d) :
+  #[export] Instance real_box `(!RealLe (X:=X) (A:=A) T κ get 1 d) :
     RealAt (ty_box T) κ get d.
   Proof.
     rewrite ty_box_unseal; split=>/= >; iIntros "κ t".
     - iDestruct 1 as (????) "($ & % & %eq & $ & $ & T)". rewrite sem_cif_in /=.
       iMod (stored_acc with "T") as "T".
-      iMod (real_own_lt with "κ t T") as ([? eq']) "($ & $ & T)"=>//.
+      iMod (real_own_le with "κ t T") as ([? eq']) "($ & $ & T)"=>//.
       iMod (store_alloc with "T") as "T". iModIntro. iSplit.
       { iPureIntro. eexists _=> ?. by rewrite -eq. }
       iExists _, _. rewrite sem_cif_in /=. by iFrame.
     - iDestruct 1 as (???? eq) "[_ T]". rewrite sem_cif_in /=.
       iMod (stored_acc with "T") as "T".
-      iMod (real_shr_lt with "κ t T") as ([? eq']) "[$$]"=>//.
+      iMod (real_shr_le with "κ t T") as ([? eq']) "[$$]"=>//.
       iPureIntro. eexists _=> ?. by rewrite -eq.
   Qed.
 

@@ -49,12 +49,12 @@ Section list.
   Proof. exact _. Qed.
 
   (** [ty_list] satisfies [TyOp] *)
-  #[export] Instance ty_list_ty_op `(!Ty (X:=X) T, !TyOpLt T κ d) :
+  #[export] Instance ty_list_ty_op `(!Ty (X:=X) T, !TyOpLe T κ 1 d) :
     TyOpAt (ty_list T) κ d.
   Proof.
-    apply (ty_rec_ty_op (F:=ty_list_gen T) ᵖ[T])=>/=; [|exact _]=> ??[??].
+    apply (ty_rec_ty_op (F:=ty_list_gen T) ᵖ[(T, 1)'])=>/=; [|exact _]=> ??[??].
     apply: ty_mod_ty_op. apply: ty_sum_ty_op. apply: ty_box_ty_op=> ??.
-    apply: ty_prod_ty_op; by apply ty_op_lt.
+    apply: ty_prod_ty_op; by apply ty_op_le.
   Qed.
 
   (** [ty_list] preserves [Send] *)
@@ -65,26 +65,26 @@ Section list.
   Proof. exact _. Qed.
 
   (** [Resol] over [ty_list] *)
-  #[export] Instance resol_list `(!ResolLt (X:=X) T κ post d) :
+  #[export] Instance resol_list `(!ResolLe (X:=X) T κ post 1 d) :
     ResolAt (ty_list T) κ (λ xl, Forall post xl) d.
   Proof.
-    apply (ty_rec_resol (F:=ty_list_gen T) ᵖ[(T, post)'])=>/=; [|exact _].
+    apply (ty_rec_resol (F:=ty_list_gen T) ᵖ[(T, post, 1)'])=>/=; [|exact _].
     move=> ??[??]. eapply resol_post.
     { apply @resol_mod, @resol_sum; [exact: _|]. eapply resol_box=> ??.
-      eapply resol_post; [apply @resol_prod; exact: resol_lt'|done]. }
+      eapply resol_post; [apply @resol_prod; exact: resol_le'|done]. }
     move=>/= [|??]//= ?. by apply Forall_cons.
   Qed.
 
   (** [Real] over [ty_list] *)
-  #[export] Instance real_list `(!RealLt (X:=X) (A:=A) T κ get d) :
+  #[export] Instance real_list `(!RealLe (X:=X) (A:=A) T κ get 1 d) :
     RealAt (ty_list T) κ (λ xl, get <$> xl) d.
   Proof.
-    apply (ty_rec_real (F:=ty_list_gen T) ᵖ[existT A (T, get)'])=>/=;
+    apply (ty_rec_real (F:=ty_list_gen T) ᵖ[(T, existT A get, 1)'])=>/=;
       [|exact _]=> ??[??].
     eapply real_eq.
     { apply @real_mod. eapply (real_compose list_wrap).
       apply @real_sum; [exact: _|]. apply real_box=> ??.
-      eapply real_eq; [apply @real_prod; exact: real_lt|done]. }
+      eapply real_eq; [apply @real_prod; exact: real_le|done]. }
     move=> [|??]//=.
   Qed.
   #[export] Instance real_list_length {X T κ} :
