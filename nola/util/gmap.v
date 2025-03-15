@@ -139,7 +139,7 @@ Section map_with.
   (** [map_without m l] and [m] are disjoint *)
   Lemma map_without_disj {A} {m : gmap K A} {l} : map_without m l ##ₘ m.
   Proof.
-    elim: l; [by apply map_disjoint_empty_l|]=>/= ?? IH.
+    elim: l; [exact: map_disjoint_empty_l|]=>/= ?? IH.
     apply map_disjoint_insert_l. split; [|done]. exact map_with_fresh.
   Qed.
 End map_with.

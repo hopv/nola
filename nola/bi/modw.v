@@ -536,7 +536,7 @@ Section is_fupdw.
     move=> ?.
     rewrite /ElimModal bi.intuitionistically_if_elim mod_frame_r bi.wand_elim_r
       (fupdw_incl (W:=W)).
-    by apply is_fupdw.
+    exact: is_fupdw.
   Qed.
   #[export] Instance elim_modal_idw_is_fupdw `{!WsatIncl W W' Wr} {p Q} :
     ElimModal φ p false (|->[W'] Q) Q P P.

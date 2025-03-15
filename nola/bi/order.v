@@ -35,9 +35,9 @@ Qed.
   BIG_MEET (λ _ S Φ, ∀ a, ⌜S a⌝ → Φ a)%I _ _ _.
 Next Obligation. move=> *?? eqv. do 3 f_equiv. apply (eqv _). Qed.
 Next Obligation. move=> *. iIntros "to". by iApply "to". Qed.
-Next Obligation. move=> > to. iIntros "?" (??). iStopProof. by apply to. Qed.
+Next Obligation. move=> > to. iIntros "?" (??). iStopProof. exact: to. Qed.
 #[export] Program Instance big_join_bi {PROP} : BigJoin PROP :=
   BIG_JOIN (λ _ S Φ, ∃ a, ⌜S a⌝ ∧ Φ a)%I _ _ _.
 Next Obligation. move=> *?? eqv. do 3 f_equiv. apply (eqv _). Qed.
 Next Obligation. move=> *. iIntros "?". iExists _. by iSplit. Qed.
-Next Obligation. move=> > to. iIntros "[%[% ?]]". iStopProof. by apply to. Qed.
+Next Obligation. move=> > to. iIntros "[%[% ?]]". iStopProof. exact: to. Qed.

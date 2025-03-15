@@ -45,7 +45,7 @@ Definition prvar_by_inhab {PTY} (X : PTY) (h : synpty_inhab X)
 (** Negated [synpty_inhab] ensures the emptiness of [prvar] *)
 Lemma prvar_neg_inhab {PTY} (X : PTY) :
   ¬ synpty_inhab X → prvar X → False.
-Proof. move=> neg [??]. by apply neg. Qed.
+Proof. move=> neg [??]. exact: neg. Qed.
 
 (** Prophecy variable of any type *)
 #[projections(primitive)]
@@ -171,7 +171,7 @@ Section lemmas.
   Qed.
   Lemma proph_dep_f {A B} (f : A → B) aπ ξl :
     proph_dep aπ ξl → proph_dep (λ π, f (aπ π)) ξl.
-  Proof. move=> dep ?? /dep ?. by apply (f_equal f). Qed.
+  Proof. move=> dep ?? /dep ?. exact: (f_equal f). Qed.
   Lemma proph_dep_f2 {A B C} (f: A → B → C) aπ bπ ξl ηl :
     proph_dep aπ ξl → proph_dep bπ ηl →
       proph_dep (λ π, f (aπ π) (bπ π)) (ξl ++ ηl).

@@ -17,7 +17,7 @@ Definition tagged_dist {ID} {A : ofe} n : relation (tagged ID A) :=
 Program Canonical taggedO (ID : Type) (A : ofe) :=
   @Ofe (tagged ID A) tagged_equiv tagged_dist _.
 Next Obligation.
-  move=> ??. split=> >; [by apply equiv_dist| |by apply dist_lt].
+  move=> ??. split=> >; [exact: equiv_dist| |exact: dist_lt].
   unfold dist, tagged_dist. split; [by move..|]=> ???. apply transitivity.
 Qed.
 (** [Tagged] is non-expansive *)

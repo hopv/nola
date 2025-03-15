@@ -56,7 +56,7 @@ Section psg.
   (** Parameterized induction principle for [Psgoidp] *)
   Lemma Psgoidp_ind {f ih'} ih o :
     Psgoidp f ih' o → Psgoidp f (ih ⊓ ih') ⊑ ih → ih o.
-  Proof. move=> + H. by apply (lfp_para_ind' (o:=ih) H o). Qed.
+  Proof. move=> + H. exact: (lfp_para_ind' (o:=ih) H o). Qed.
 
   (** Factorizing [Psgoidp] *)
   Lemma Psgoidp_factor' {f ih o} :
@@ -115,7 +115,7 @@ Section psg.
       etrans; [|done]. apply big_meet_intro=> ?[??]. apply (big_meet_elim id).
       eauto.
     - apply lfp_ind=> o [[o'[? /equiv_ole[??]]]|[S[sub /equiv_ole[??]]]];
-        apply factor'_Psgoid; (etrans; [|done]); [by apply big_meet_elim|].
+        apply factor'_Psgoid; (etrans; [|done]); [exact: big_meet_elim|].
       apply big_meet_intro=> o' s. move: (sub _ s)=> /Psgoid_factor ->.
       apply big_meet_mono; [|done]=> ?[??]. split; [done|]. etrans; [done|].
       etrans; [|done]. exact: (big_meet_elim id).
@@ -169,7 +169,7 @@ Section psg_gfp.
   Lemma Psgoid_gfp {o} : Psgoid f o → gfp f ⊑ o.
   Proof.
     apply (lfp_ind (OT:=_-p>_) (o:=(gfp f ⊑.)))=> ??. etrans; [|done].
-    apply big_meet_intro=> ?[??]. etrans; [apply gfp_unfold_1|]. by apply mono.
+    apply big_meet_intro=> ?[??]. etrans; [apply gfp_unfold_1|]. exact: mono.
   Qed.
 
   (** [psg f] agrees with [gfp f] *)

@@ -50,7 +50,7 @@ Proof.
   have pro : Proper ((≡) ==> (≡) ==> impl) (≡[k]@{PR}≡); last first.
   { move=> ?*?*. by split; apply pro. }
   move=> ?? /equiv_proeqv eq ?? /equiv_proeqv eq' ?.
-  etrans; [symmetry; by apply eq|]. by etrans.
+  etrans; [symmetry; exact: eq|]. by etrans.
 Qed.
 
 (** [proeqv_later] is an equivalence relation *)
@@ -130,7 +130,7 @@ Notation Preserv' PR PR' f := (∀ k, Proper ((≡[k]@{PR}≡) ==> (≡[k]@{PR'}
 
 (** [Productive] entails [Preserv] *)
 Lemma productive_preserv `(!Productive' PR PR' f) : Preserv f.
-Proof. move=> ????. f_equiv. by apply proeqv_to_later. Qed.
+Proof. move=> ????. f_equiv. exact: proeqv_to_later. Qed.
 
 (** [Preserv] entails [Proper] *)
 Lemma preserv_proper `(!Preserv' PR PR' f) : Proper ((≡) ==> (≡)) f.
@@ -206,9 +206,7 @@ Next Obligation. move=> ?? c ????/=. by apply c.(prochain_eqv). Qed.
 #[export] Program Instance fun_cprost {A PRF} `{!∀ a, Cprost (PRF a)} :
   Cprost (@funPR A PRF) := CPROST (λ c a, prolimit (prochain_app c a)) _ _.
 Next Obligation. move=> *>. by etrans; [exact prolimit_eqv|]. Qed.
-Next Obligation.
-  move=> > ?? eq a. apply prolimit_ne=> k. by apply (eq k a).
-Qed.
+Next Obligation. move=> > ?? eq a. apply prolimit_ne=> k. exact: (eq k a). Qed.
 
 (** ** Fixed point *)
 
@@ -258,8 +256,8 @@ Section profix.
   Proof.
     move=> eq. etrans; [exact profix_iter|].
     etrans; [|symmetry; exact profix_iter]=>/=. move: {2 3}k.
-    elim=>/=; [by apply eq|]=>/= ? IH. etrans; [by apply eq|]. f_equiv.
-    move: IH. apply proeqv_to_later.
+    elim=>/=; [exact: eq|]=>/= ? IH. etrans; [exact: eq|]. f_equiv. move: IH.
+    apply proeqv_to_later.
   Qed.
   Lemma profix_proper `{!Productive f, !Productive g} :
     (∀ a, f a ≡ g a) → profix f ≡ profix g.
@@ -270,11 +268,11 @@ Section profix.
   Lemma profix_map_preserv {PR'} {f : PR' → PR → PR}
     `{!∀ b, Productive (f b), Pres : !∀ a, Preserv (λ b, f b a)} :
     Preserv (λ b, profix (f b)).
-  Proof. move=> ????. apply profix_preserv=> ?. by apply Pres. Qed.
+  Proof. move=> ????. apply profix_preserv=> ?. exact: Pres. Qed.
   Lemma profix_map_productive {PR'} {f : PR' → PR → PR}
     `{!∀ b, Productive (f b), Prod : !∀ a, Productive (λ b, f b a)} :
     Productive (λ b, profix (f b)).
-  Proof. move=> ????. apply profix_preserv=> ?. by apply Prod. Qed.
+  Proof. move=> ????. apply profix_preserv=> ?. exact: Prod. Qed.
 
   (** Relation between [profix]s *)
   Lemma profix_rel `{!Equivalence R}
@@ -283,7 +281,7 @@ Section profix.
     (∀ a a', R a a' → R (f a) (g a')) → R (profix f) (profix g).
   Proof.
     move=> eq. rewrite profix_unseal /profix_def. f_equiv=>/= +.
-    elim=>/= *; by apply eq.
+    elim=>/= *; exact: eq.
   Qed.
   Lemma profix_ne `{!Productive f, !Productive g} {n} :
     (∀ a a', a ≡{n}≡ a' → f a ≡{n}≡ g a') → profix f ≡{n}≡ profix g.

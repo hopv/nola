@@ -396,7 +396,7 @@ Section pborrowC.
   Qed.
   #[export] Instance cif_plend_productive {X α xπ} :
     Productive (@cif_plend X α xπ).
-  Proof. move=> ????. by apply cif_in_preserv_productive. Qed.
+  Proof. move=> ????. exact: cif_in_preserv_productive. Qed.
 
   Context `{!borrowGS (cifOF CON) Σ, !bupdJ (cif CON Σ) JUDG, !prophGS TY Σ,
     !proph_agG A TY Σ, !proph_agC A TY CON}.

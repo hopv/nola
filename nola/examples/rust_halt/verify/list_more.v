@@ -58,7 +58,7 @@ Section list.
         iApply (type_case_sum_mutref v); [|by iApply type_false].
         iApply (type_leak ᵖ[_]). iApply type_value. }
       move=>/= ?[[[|??]?]?]/=[? to]//[] /(f_equal list_wrap)/=.
-      rewrite list_wrap_unwrap=> ? _. by apply to. }
+      rewrite list_wrap_unwrap=> ? _. exact: to. }
     iApply type_pre; last first.
     { type_path p as (v). iApply type_call.
       iApply (type_mutref_subty v);
@@ -83,7 +83,7 @@ Section list.
       post xl xl' yl ↔ (xl' = g <$> xl → post yl).
   Proof.
     move: xl' yl. elim: xl=>//= ?? IH xl' yl. split.
-    - case: xl'=>//= ?? H [??]. subst. eapply IH; [by apply: H|done].
+    - case: xl'=>//= ?? H [??]. subst. eapply IH; [exact: H|done].
     - move=> H ????. subst. apply IH=> ?. apply H. by f_equal.
   Qed.
   (** [type_iter_list_mut] over a typical predicate transformer that resolves

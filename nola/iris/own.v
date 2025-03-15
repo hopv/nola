@@ -51,7 +51,7 @@ Section own.
   Lemma iRes_at_valid `{i : !inG Σ A} {γ r} : ✓ r → ✓ iRes_at (i:=i) γ r.
   Proof.
     move=> /cmra_valid_validN ?. apply cmra_valid_validN=> ?.
-    by apply iRes_at_validN.
+    exact: iRes_at_validN.
   Qed.
 
   (** [iRes_at] over [iRes_singleton] *)

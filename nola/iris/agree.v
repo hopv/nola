@@ -28,13 +28,13 @@ Proof.
 Qed.
 Lemma unagree_equiv {A : ofe} {ag ag' : agree A} :
   ✓ ag → ag ≡ ag' → unagree ag ≡ unagree ag'.
-Proof. move=> ??. apply equiv_dist=> ?. by apply unagree_dist. Qed.
+Proof. move=> ??. apply equiv_dist=> ?. exact: unagree_dist. Qed.
 (** Modify [unagree] with [≼] *)
 Lemma unagree_included {A : ofe} {ag ag' : agree A} :
   ✓ ag → ag' ≼ ag → unagree ag ≡ unagree ag'.
 Proof.
   move=> ??. apply equiv_dist=> ?. apply unagree_includedN; [done|].
-  by apply cmra_included_includedN.
+  exact: cmra_included_includedN.
 Qed.
 
 (** [unagree] over [to_agree] *)

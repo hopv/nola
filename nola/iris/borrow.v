@@ -293,7 +293,7 @@ Section borrow.
     rewrite /of_depo_stl fmap_snoc list_to_gmap_snoc length_fmap.
     apply auth_update_alloc, alloc_singleton_local_update.
     - by rewrite lookup_of_depo_stl fmap_None lookup_ge_None.
-    - split; [split|]=>/=; [done|by apply: gmap_fmap_valid..].
+    - split; [split|]=>/=; [done|exact: gmap_fmap_valid..].
   Qed.
 
   (** Lemmas for [depo_stl_lend_agree] and [depo_stl_bor_agree] *)
@@ -336,7 +336,7 @@ Section borrow.
       depo_stl_tok (<[i := (α, Bl, delete k Lm)']> Dl).
   Proof.
     move=> eq. iIntros "● l". iMod (own_update_2 with "● l") as "[$_]"; [|done].
-    apply auth_update. rewrite of_depo_stl_insert; [|by apply: lookup_lt_Some].
+    apply auth_update. rewrite of_depo_stl_insert; [|exact: lookup_lt_Some].
     eapply (singleton_local_update _ _ _ _ _ (_,_,_)).
     { by rewrite lookup_of_depo_stl eq. }
     apply prod_local_update; [apply prod_local_update|]=>/=; [done..|].
@@ -351,7 +351,7 @@ Section borrow.
         Some (to_agree α, ε, Excl <$> map_without Lm Qxl)).
   Proof.
     apply local_update_unital=> n ?[/=??]. rewrite (left_id None)=> <-. split.
-    { split; [done|]. by apply: gmap_fmap_valid. }
+    { split; [done|]. exact: gmap_fmap_valid. }
     rewrite -Some_op. f_equiv.
     split; [split|]=>/=; [by rewrite agree_idemp|by rewrite left_id|].
     rewrite gmap_op_disj; [|by apply map_disjoint_fmap, map_without_disj].
@@ -365,7 +365,7 @@ Section borrow.
   Proof.
     move=> eq. iIntros "●". iMod (own_update with "●") as "[$ ?]"; last first.
     { iModIntro. by iApply to_lend_ktoks. }
-    rewrite of_depo_stl_insert; [|by apply: lookup_lt_Some].
+    rewrite of_depo_stl_insert; [|exact: lookup_lt_Some].
     apply auth_update_alloc, gmap_local_update. move=> i'.
     case: (decide (i = i'))=> [<-|?]; last first.
     { rewrite lookup_insert_ne; [|done]. by rewrite lookup_singleton_ne. }
@@ -403,14 +403,14 @@ Section borrow.
     iDestruct (depo_stl_bor_agree with "● B") as (??? eq' eq'') "#_".
     move: eq' eq''. rewrite eq. move=> [<-_] ?.
     iMod (own_update_2 with "● B") as "[$$]"; [|done].
-    apply auth_update. rewrite of_depo_stl_insert; [|by apply: lookup_lt_Some].
+    apply auth_update. rewrite of_depo_stl_insert; [|exact: lookup_lt_Some].
     eapply singleton_local_update. { by rewrite lookup_of_depo_stl eq. }
     apply prod_local_update; [apply prod_local_update|]=>/=; [done| |done].
-    rewrite list_to_gmap_insert; [|by apply: lookup_lt_Some].
+    rewrite list_to_gmap_insert; [|exact: lookup_lt_Some].
     rewrite fmap_insert. apply: singleton_local_update.
     { rewrite lookup_fmap_Some. eexists _.
       split; by [|rewrite lookup_list_to_gmap]. }
-    by apply exclusive_local_update.
+    exact: exclusive_local_update.
   Qed.
 
   (** ** World satisfactions *)
@@ -459,7 +459,7 @@ Section borrow.
     Proper (((≡{n}≡) ==> (≡{n}≡)) ==> (≡{n}≡) ==> (≡{n}≡)) borrow_wsat.
   Proof.
     rewrite borrow_wsat_unseal /borrow_wsat_def /borrow_lwsat. move=> ?*?*.
-    repeat f_equiv=>//. by apply depo_wsat_ne.
+    repeat f_equiv=>//. exact: depo_wsat_ne.
   Qed.
   #[export] Instance borrow_wsat_proper `{!NonExpansive M} :
     Proper ((≡) ==> (≡)) (borrow_wsat M).
@@ -476,7 +476,7 @@ Section borrow.
     Mono (OT:=_-p>_ : bi) (OT':=_-p>_ : bi) borrow_wsat.
   Proof.
     rewrite borrow_wsat_unseal /borrow_wsat_def /borrow_lwsat. move=> ????.
-    repeat f_equiv. by apply: depo_wsat_mono.
+    repeat f_equiv. exact: depo_wsat_mono.
   Qed.
 
   (** ** Proof rules *)
@@ -532,7 +532,7 @@ Section borrow.
     iRewrite -("Ne" with "≡") in "PQ".
     iMod (depo_stl_lend_delete with "● l") as "●"; [done|].
     iMod (depo_stl_lend_add Qxl with "●") as "[● ls]".
-    { apply list_lookup_insert. by apply: lookup_lt_Some. }
+    { apply list_lookup_insert. exact: lookup_lt_Some. }
     iModIntro. iSplitR "ls"; last first.
     { rewrite big_sepM_map_without'. iApply (big_sepL_impl with "ls").
       iIntros "!> %% ⊑ [% ?]". iExists _. iSplit; [done|]. by iExists _, _. }
@@ -694,7 +694,7 @@ Section borrow.
     iSplitR "→Qm"=>/=; [by iApply "→Bl"|]. iIntros "† big".
     iApply ("→Qm" with "†"). rewrite -{2}(list_insert_id _ _ _ eq).
     iDestruct (big_sepL_insert_acc _ _ j with "big") as "[Px big]".
-    { apply list_lookup_insert. by apply: lookup_lt_Some. }
+    { apply list_lookup_insert. exact: lookup_lt_Some. }
     setoid_rewrite list_insert_insert. iApply "big". rewrite prod_equivI /=.
     iDestruct "≡" as "[≡ _]". by iRewrite ("Ne" with "≡").
   Qed.
@@ -738,7 +738,7 @@ Section borrow.
     iIntros "† big". iApply ("→Lm" with "†").
     rewrite -{2}(list_insert_id _ _ _ eq).
     iDestruct (big_sepL_insert_acc _ _ j with "big") as "[Px big]".
-    { apply list_lookup_insert. by apply: lookup_lt_Some. }
+    { apply list_lookup_insert. exact: lookup_lt_Some. }
     setoid_rewrite list_insert_insert. iApply "big". case B'=>/= ??.
     rewrite prod_equivI /=. iDestruct "≡" as "[≡ _]".
     by iRewrite ("Ne" with "≡").
@@ -753,7 +753,7 @@ Section borrow.
   Proof.
     iIntros "(% & % & _ & _ & _ & o) (_ & ● & _)".
     iDestruct (depo_stl_bor_agree with "● o") as (?????) "_". iPureIntro.
-    by apply: lookup_lt_Some.
+    exact: lookup_lt_Some.
   Qed.
   Local Lemma obor_toks_itoks {sm αqPxl β Dl} :
     ([∗ list] '(α, q, Px)' ∈ αqPxl, β ⊑□ α ∗ obor_tok α q Px) -∗

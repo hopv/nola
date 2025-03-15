@@ -62,7 +62,7 @@ Local Lemma of_either_xpty_inhab {X} :
 Proof.
   move: X. fix FIX 1. move=> X. split.
   - case: X=>//=; try by (move=> *; exact inhabitant).
-    + move=> ?. by apply (aprvar_by_inhab unitₓ).
+    + move=> ?. exact: (aprvar_by_inhab unitₓ).
     + move=> X h. exact (prvar_by_inhab X h).
     + move=> ?[|?]?; [exact inhabitant|]. by apply vreplicate, FIX.
     + move=> ?? /andb_True[??]. constructor; by apply FIX.

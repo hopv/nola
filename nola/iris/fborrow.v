@@ -158,7 +158,7 @@ Section fbor_tokC.
   Proof. apply ne_proper, _. Qed.
   (** [cif_fbor_tok] is productive *)
   #[export] Instance cif_fbor_tok_productive {α} : Productive (cif_fbor_tok α).
-  Proof. move=> ????. by apply cif_in_preserv_productive. Qed.
+  Proof. move=> ????. exact: cif_in_preserv_productive. Qed.
 
   Context `{!borrowGS (cifOF CON) Σ, !fborrowGS (cifOF CON) Σ} {JUDG}.
   #[export] Program Instance fbor_tokCT_ecsem : Ecsem fbor_tokCT CON JUDG Σ :=

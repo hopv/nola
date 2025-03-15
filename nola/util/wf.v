@@ -37,4 +37,4 @@ Qed.
 (** Well-foundedness of the lexicographic order over [sig] *)
 Lemma wf_sig_lexico `{!Lexico A} {P : A → Prop} `{!∀ a, ProofIrrel (P a)} :
   @well_founded A lexico → @well_founded (sig P) lexico.
-Proof. by apply (wf_projected _ proj1_sig). Qed.
+Proof. exact: (wf_projected _ proj1_sig). Qed.

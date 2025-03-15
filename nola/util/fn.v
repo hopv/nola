@@ -7,4 +7,4 @@ From iris.algebra Require Import ofe.
 #[export] Instance discrete_fun_discrete_by_lookup {A} {F : A → ofe}
   {f : discrete_fun F} `{!∀ a, Discrete (f a)} :
   Discrete f.
-Proof. move=> ???. by apply discrete_0. Qed.
+Proof. move=> ???. exact: discrete_0. Qed.

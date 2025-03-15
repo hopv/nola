@@ -86,7 +86,7 @@ Section cfml.
     (P ⊢ P' ∗ R) → (∀ v, Ψ' v ∗ R ⊢ Ψ v) →
     [[{ P' }]][W] e @ s; E [[{ v, RET v; Ψ' v }]] ⊢
       [[{ P }]][W] e @ s; E [[{ v, RET v; Ψ v }]].
-  Proof. move=> ??. rewrite triple_frame. by apply triple_conseq. Qed.
+  Proof. move=> ??. rewrite triple_frame. exact: triple_conseq. Qed.
 
   (** Ramified frame rule *)
   Lemma triple_ramified_frame {W s E e P P' Ψ Ψ'} :
@@ -316,7 +316,7 @@ Section cfml.
   Lemma wp_conseq_frame {W s E e R Ψ Ψ'} :
     (∀ v, Ψ v ∗ R ⊢ Ψ' v) →
     WP[W] e @ s; E [{ v, Ψ v }] ∗ R ⊢ WP[W] e @ s; E [{ v, Ψ' v }].
-  Proof. move=> ?. rewrite wp_frame. by apply wp_conseq. Qed.
+  Proof. move=> ?. rewrite wp_frame. exact: wp_conseq. Qed.
   Lemma wp_ramified_trans {W s E e P Ψ Ψ'} :
     (P ⊢ WP[W] e @ s; E [{ v, Ψ v }] ∗ (∀ v, Ψ v -∗ Ψ' v)) →
     (P ⊢ WP[W] e @ s; E [{ v, Ψ' v }]).

@@ -244,7 +244,7 @@ Section ptrs_more.
     iDestruct ("→κ'" with "αβ") as "$". iDestruct ("→κ''" with "β") as "$".
     iExists (λ _, (_, _)'). iFrame "Γr". iSplit.
     { iApply (proph_obs_impl2 with "obs pre")=> ?. rewrite eq eq'=> -> to.
-      by apply to. }
+      exact: to. }
     iExists _, (S d'). iSplit; [done|]. iExists _, _, _, _.
     rewrite sem_cif_in /=. iFrame "b". iPureIntro. do 2 split=>//. lia.
   Qed.

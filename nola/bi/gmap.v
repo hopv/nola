@@ -55,7 +55,7 @@ Section big_sepM.
     ([∗ map] i ↦ x ∈ map_without m l, Φ i x) ⊢ [∗ list] x ∈ l, ∃ i, Φ i x.
   Proof.
     elim: l; [by rewrite big_sepM_empty|]=>/= a l <-.
-    rewrite big_sepM_insert; [|by apply map_without_with_fresh]. f_equiv.
+    rewrite big_sepM_insert; [|exact: map_without_with_fresh]. f_equiv.
     iIntros. by iExists _.
   Qed.
 

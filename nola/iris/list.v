@@ -33,6 +33,6 @@ Section big_cmra_opL.
     ([∗ list] k ↦ a ∈ al, own γ (f k a)) ⊢
       |==> own γ ([^op list] k ↦ a ∈ al, f k a).
   Proof.
-    case al; [by apply own_unit|]=> ??. rewrite big_opL_own; by [iIntros|].
+    case al; [exact: own_unit|]=> ??. rewrite big_opL_own; by [iIntros|].
   Qed.
 End big_cmra_opL.

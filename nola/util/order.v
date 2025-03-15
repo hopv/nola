@@ -30,7 +30,7 @@ Proof. move=> >. apply equiv_ole. Qed.
 Proof. move=>/= ???????. etrans; by [|etrans]. Qed.
 #[export] Instance ole_proper_ole_flip {OT} :
   Proper ((⊑) ==> (⊑) --> flip impl) (⊑@{OT}).
-Proof. move=> ?*?*. by apply: ole_proper_ole. Qed.
+Proof. move=> ?*?*. exact: ole_proper_ole. Qed.
 #[export] Instance ole_proper {OT} : Proper ((≡) ==> (≡) ==> (↔)) (⊑@{OT}).
 Proof.
   move=> ?? eqv ?? eqv'. by split=> ?; [rewrite -eqv -eqv'|rewrite eqv eqv'].

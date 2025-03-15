@@ -50,7 +50,7 @@ Section deriv.
 
   (** Parameterized induction principle for [Deriv] *)
   Lemma Deriv_ind `{!Deriv ih' δ} ih : Deriv (λ δ', ih δ' ∧ ih' δ') ⊑ ih → ih δ.
-  Proof. by apply Psgoidp_ind. Qed.
+  Proof. exact: Psgoidp_ind. Qed.
 
   (** Factorize the derivability [δ J] by semantics *)
   Lemma Deriv_factor' `{!Deriv ih δ} {J} :

@@ -195,7 +195,7 @@ Section lft.
     case: (gmultiset_choose_or_empty α); [|done]=> [[a ?]_].
     rewrite big_sepMS_elem_of; [|done]. iIntros "a".
     iMod (own_update _ _ (Cinr ()) with "a") as "†".
-    { by apply cmra_update_exclusive. }
+    { exact: cmra_update_exclusive. }
     iModIntro. rewrite lft_dead_unseal. iExists a. by iFrame "†".
   Qed.
 
@@ -400,7 +400,7 @@ Section lft_sincl.
 
   (** [⊑□] is reflexive, is transitive, has the maximum [⊤] *)
   Lemma lft_sincl_refl {α} : ⊢ α ⊑□ α.
-  Proof. by apply lft_incl_sincl. Qed.
+  Proof. exact: lft_incl_sincl. Qed.
   Lemma lft_sincl_trans {α β γ} : α ⊑□ β -∗ β ⊑□ γ -∗ α ⊑□ γ.
   Proof.
     rewrite lft_sincl_unseal. iIntros "[$|∞]"; [by iIntros|]. iIntros "[†|∞']".

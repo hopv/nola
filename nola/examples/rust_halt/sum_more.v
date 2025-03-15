@@ -90,7 +90,7 @@ Section sum_more.
       iDestruct ("→κ" with "α") as "κ";
       ((iApply ("type'" with "κ t []") || iApply ("type" with "κ t []"));
         [iApply (proph_obs_impl2 with "obs pre")=> ?; rewrite eq eq'=> -> to;
-          by apply to|]);
+          exact: to|]);
       iFrame "Γr"; iExists _, (S d'); rewrite -peq; (iSplit; [done|]);
       iExists _, _, _, _; rewrite sem_cif_in /= pbor_tok_pbor; iFrame "b";
       iPureIntro; do 2 split=>//; lia.

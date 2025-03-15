@@ -37,7 +37,7 @@ Section list.
     Productive (@ty_list_gen X T).
   Proof.
     move=> k ???. apply: ty_mod_preserv. apply: ty_sum_preserv=>//.
-    apply ty_box_productive. destruct k=>//=. by apply ty_prod_preserv.
+    apply ty_box_productive. destruct k=>//=. exact: ty_prod_preserv.
   Qed.
 
   (** [ty_list]: List type *)
@@ -54,7 +54,7 @@ Section list.
   Proof.
     apply (ty_rec_ty_op (F:=ty_list_gen T) ᵖ[T])=>/=; [|exact _]=> ??[??].
     apply: ty_mod_ty_op. apply: ty_sum_ty_op. apply: ty_box_ty_op=> ??.
-    apply: ty_prod_ty_op; exact: ty_op_lt.
+    apply: ty_prod_ty_op; by apply ty_op_lt.
   Qed.
 
   (** [ty_list] preserves [Send] *)

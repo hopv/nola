@@ -458,7 +458,7 @@ Section mod_acsr.
     Proper (((≡{n}≡) ==> (≡{n}≡)) ==> (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡)) mod_acsr.
   Proof.
     move=> ?? eqv ??????. unfold mod_acsr. f_equiv=>//. apply eqv.
-    do 2 f_equiv=>//. by apply eqv.
+    do 2 f_equiv=>//. exact: eqv.
   Qed.
   #[export] Instance mod_acsr_ne `{!NonExpansive M} :
     NonExpansive2 (mod_acsr M).
@@ -467,7 +467,7 @@ Section mod_acsr.
     Proper (((≡) ==> (≡)) ==> (≡) ==> (≡) ==> (≡)) mod_acsr.
   Proof.
     move=> ?? eqv ??????. unfold mod_acsr. f_equiv=>//. apply eqv.
-    do 2 f_equiv=>//. by apply eqv.
+    do 2 f_equiv=>//. exact: eqv.
   Qed.
 
   Context `{!@Mod PROP M, !ModIntro M}.
@@ -508,14 +508,14 @@ Section mod_iff.
   #[export] Instance mod_iff_ne_gen {n} :
     Proper (((≡{n}≡) ==> (≡{n}≡)) ==> (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡)) mod_iff.
   Proof.
-    move=> ?? eqv ??????. unfold mod_iff. do 2 f_equiv=>//; by apply eqv.
+    move=> ?? eqv ??????. unfold mod_iff. do 2 f_equiv=>//; exact: eqv.
   Qed.
   #[export] Instance mod_iff_ne `{!NonExpansive M} : NonExpansive2 (mod_iff M).
   Proof. exact _. Qed.
   #[export] Instance mod_iff_proper_gen :
     Proper (((≡) ==> (≡)) ==> (≡) ==> (≡) ==> (≡)) mod_iff.
   Proof.
-    move=> ?? eqv ??????. unfold mod_iff. do 2 f_equiv=>//; by apply eqv.
+    move=> ?? eqv ??????. unfold mod_iff. do 2 f_equiv=>//; exact: eqv.
   Qed.
   #[export] Instance mod_iff_proper `{!Proper ((≡) ==> (≡)) M} :
     Proper ((≡) ==> (≡) ==> (≡)) (mod_iff M).

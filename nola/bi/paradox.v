@@ -232,7 +232,7 @@ Module inv_landin. Section inv_landin.
     { iFrame "↦". iIntros "!> _". iApply twp_call. by iApply twp_nop. }
     iIntros "!> #i".
     iApply (thoare_inv_bad_acc (P:=inv_bad l));
-      [by apply atomic_store| |by iSplit].
+      [exact: atomic_store| |by iSplit].
     iIntros "!> [[%[↦ _]]_]".
     iApply (twp_post with "[↦]"); [by iApply twp_store|]. iIntros "!> % $".
     iSplit; [|by iApply twp_badcall]. iIntros "!> _". iApply twp_call.
@@ -297,7 +297,7 @@ Module exist_laterSI. Section exist_laterSI.
     - move=> ? IH ??. rewrite rec_succ holds_later=> ??. apply IH.
       by eapply lt_le_lt.
     - move=> α ? IH β βα. rewrite rec_limit // holds_exist.
-      apply is_limit_lt in βα=>//. exists (existT (succ β) βα)=>/=. by apply IH.
+      apply is_limit_lt in βα=>//. exists (existT (succ β) βα)=>/=. exact: IH.
   Qed.
 
   (** Anti-adequacy for [∃ α : SI, ▷^α P]], saying that a proposition weakened

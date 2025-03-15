@@ -424,7 +424,7 @@ Proof.
   - done.
   - subst. by rewrite to_of_val in H1.
   - subst. by rewrite to_of_val in H2.
-  - destruct (IHvl1 vl2); auto. split; f_equal; auto. by apply (inj of_val).
+  - destruct (IHvl1 vl2); auto. split; f_equal; auto. exact: (inj of_val).
 Qed.
 
 Lemma fill_item_no_val_inj Ki1 Ki2 e1 e2 :

@@ -145,11 +145,11 @@ Section ty.
   (** [ty_own_clair] applied to [⊣⊢] *)
   Lemma ty_own_clair' `{!@Ty X T} {t d xπ xπ' vl δ} : (∀ π, xπ π = xπ' π) →
     ⟦ ty_own T t d xπ vl ⟧ᶜ(δ) ⊣⊢ ⟦ ty_own T t d xπ' vl ⟧ᶜ(δ).
-  Proof. move=> ?. apply bi.equiv_entails. split; by apply: ty_own_clair. Qed.
+  Proof. move=> ?. apply bi.equiv_entails. split; exact: ty_own_clair. Qed.
   (** [ty_shr_clair] applied to [⊣⊢] *)
   Lemma ty_shr_clair' `{!@Ty X T} {t d l α xπ xπ' δ} : (∀ π, xπ π = xπ' π) →
     ⟦ ty_shr T t d l α xπ ⟧ᶜ(δ) ⊣⊢ ⟦ ty_shr T t d l α xπ' ⟧ᶜ(δ).
-  Proof. move=> ?. apply bi.equiv_entails. split; by apply: ty_shr_clair. Qed.
+  Proof. move=> ?. apply bi.equiv_entails. split; exact: ty_shr_clair. Qed.
 
   (** Basic properties of a simple type *)
   Class Sty {X} (T : sty CON Σ X) : Prop := STY {
@@ -183,7 +183,7 @@ Section ty.
   #[export] Instance Ty_proper {X} : Proper ((≡) ==> (↔)) (@Ty X).
   Proof.
     have pro : Proper ((≡) ==> impl) (@Ty X); last first.
-    { move=> ?*. split; by apply pro. }
+    { move=> ?*. split; exact: pro. }
     move=> ?? /ty_equiv[eqZ[eqvO eqvS]]. split=>/= >.
     - rewrite -(eqvS _ _ _ _ _). exact _.
     - rewrite -(eqvO _ _ _ _) -eqZ. exact ty_own_size.
@@ -195,7 +195,7 @@ Section ty.
   #[export] Instance Sty_proper {X} : Proper ((≡) ==> (↔)) (@Sty X).
   Proof.
     have pro : Proper ((≡) ==> impl) (@Sty X); last first.
-    { move=> ?*. split; by apply pro. }
+    { move=> ?*. split; exact: pro. }
     move=> ?? /sty_equiv[eqZ eqvO]. split=> >; rewrite -!(eqvO _ _ _ _).
     { exact _. } { rewrite -eqZ. exact sty_own_size. }
     { exact sty_own_depth. } { exact sty_own_clair. }
@@ -203,7 +203,7 @@ Section ty.
   #[export] Instance Pty_proper {X} : Proper ((≡) ==> (↔)) (@Pty X).
   Proof.
     have pro : Proper ((≡) ==> impl) (@Pty X); last first.
-    { move=> ?*. split; by apply pro. }
+    { move=> ?*. split; exact: pro. }
     move=> ?? /pty_equiv[eqZ eqvO]. split=> >; rewrite -(eqvO _ _).
     { exact _. } { rewrite -eqZ. exact pty_own_size. }
   Qed.
@@ -216,8 +216,8 @@ Section ty.
   Proof.
     rewrite ty_sty_unseal. split=>/= >. { exact _. }
     { exact sty_own_size. } { exact sty_own_depth. }
-    { move=> ?. do 3 f_equiv. by apply sty_own_depth. } { exact sty_own_clair. }
-    { move=> ?. do 3 f_equiv. by apply sty_own_clair. }
+    { move=> ?. do 3 f_equiv. exact: sty_own_depth. } { exact sty_own_clair. }
+    { move=> ?. do 3 f_equiv. exact: sty_own_clair. }
   Qed.
 
   (** [Pty] entails [Sty] *)
@@ -452,7 +452,7 @@ Section classes.
   #[export] Instance Copy_proper {X} : Proper ((≡) ==> (↔)) (@Copy X).
   Proof.
     have pro: Proper ((≡) ==> impl) (@Copy X); last first.
-    { move=> ???. split; by apply pro. }
+    { move=> ???. split; exact: pro. }
     move=> ?? /ty_equiv[eqZ[eqvO eqvS]]. split=> *.
     - rewrite -(eqvO _ _ _ _). exact _.
     - rewrite -(eqvS _ _ _ _ _) -eqZ. setoid_rewrite <-(eqvO _ _ _ _).
@@ -739,7 +739,7 @@ Section subty.
   Proof.
     have pro : Proper (pointwise_relation _ (=) ==> (⊢)) (@subty δ X Y T U);
       last first.
-    { move=> ?*. apply bi.equiv_entails. split; by apply pro. }
+    { move=> ?*. apply bi.equiv_entails. split; exact: pro. }
     rewrite subty_unseal /subty_def=> ?*. do 12 f_equiv; [exact: ty_own_clair|].
     do 2 f_equiv. exact: ty_shr_clair.
   Qed.

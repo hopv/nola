@@ -58,7 +58,7 @@ Section citg_Forall2.
     citg_Forall2 R CITF (Citg s ti tc d) (Citg s ti' tc' d').
   Proof.
     move=> ???.
-    by apply (Citgf2 (t:=Citg s _ _ _) (t':=Citg s _ _ _) (eq_refl (x:=s))).
+    exact: (Citgf2 (t:=Citg s _ _ _) (t':=Citg s _ _ _) (eq_refl (x:=s))).
   Qed.
 
   (** [citg_Forall2] is monotone *)
@@ -76,13 +76,13 @@ Section citg_Forall2.
   #[export] Instance citg_Forall2_refl {CIT}
     `{!∀ s, @Reflexive (D s) (R s), !Reflexive CITF} :
     Reflexive (@citg_Forall2 _ I C _ _ CIT _ R CITF).
-  Proof. move=> t. elim: t=> *. by apply citg_Forall2_eq. Qed.
+  Proof. move=> t. elim: t=> *. exact: citg_Forall2_eq. Qed.
 
   (** Flip [citg_Forall2] *)
   Lemma citg_Forall2_flip {D D' CIT CIT' R CITF t t'} :
     citg_Forall2 (λ s, flip (R s)) (flip CITF) t' t →
       @citg_Forall2 _ I C D D' CIT CIT' R CITF t t'.
-  Proof. elim. move=> [????][????]/=?????. subst. by apply citg_Forall2_eq. Qed.
+  Proof. elim. move=> [????][????]/=?????. subst. exact: citg_Forall2_eq. Qed.
   (** [citg_Forall2] preserves symmetricity *)
   #[export] Instance citg_Forall2_sym {CIT}
     `{!∀ s, @Symmetric (D s) (R s), !Symmetric CITF} :
@@ -103,7 +103,7 @@ Section citg_Forall2.
   Proof.
     move=> comp comp' F. move: t''. elim: F.
     move=> [????][????]/=?? IH ??[????][/=????].
-    subst=>/=. simpl in *. apply citg_Forall2_eq. { move=> ?. by apply IH. }
+    subst=>/=. simpl in *. apply citg_Forall2_eq. { move=> ?. exact: IH. }
     { move=> ?. by eapply comp'. } { by eapply comp. }
   Qed.
   (** [citg_Forall2] preserves transitivity *)
@@ -189,7 +189,7 @@ Section citg_map.
       ==> (≡{n}≡) ==> (≡{n}≡)) (@citg_map _ I C D D' CIT CIT').
   Proof.
     move=> ?? to ?? to' ??. elim. move=> [????][????]/=?. subst=>/= ? IH ??.
-    apply citg_Forall2_eq=>//. { move=> ?. by apply to'. } { by apply to. }
+    apply citg_Forall2_eq=>//. { move=> ?. by apply to'. } { exact: to. }
   Qed.
 
   (** [citg_map] over an identity function *)
@@ -207,7 +207,7 @@ Section citg_map.
     citg_Forall2 R CITF
       (citg_map f' g' (@citg_map _ I C D D' CIT CIT' f g t))
       (citg_map (D':=D'') (CIT':=CIT'') (λ s, f' s ∘ f s) (g' ∘ g) t).
-  Proof. elim: t=>/= *. by apply citg_Forall2_eq. Qed.
+  Proof. elim: t=>/= *. exact: citg_Forall2_eq. Qed.
 End citg_map.
 
 (** ** [citg_fold]: Fold [citg] *)
@@ -229,7 +229,7 @@ Section citg_fold.
       (≡{n}≡) ==> (≡{n}≡)) (@citg_fold _ I C D CIT A).
   Proof.
     move=> ?? to ??. elim=>/=. move=> [????][????]/= ?. subst=>/= ????.
-    by apply to.
+    exact: to.
   Qed.
   #[export] Instance citg_fold_ne {n}
     `{!∀ s, Proper ((≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡)) (f s)} :
@@ -294,7 +294,7 @@ Section citi_Forall2.
   Proof.
     move: k' t t'. elim: k; [done|]=> ? IH. case; [done|]=>/= ??? all.
     apply citg_Forall2_flip. move: all. apply citg_Forall2_mono'=> ???.
-    by apply IH.
+    exact: IH.
   Qed.
   (** [citi_Forall2] preserves symmetricity *)
   Lemma citi_Forall2_sym `{!∀ s, @Symmetric (D s) (R s)}
@@ -322,7 +322,7 @@ Section citi_Forall2.
     {k k' k'' t t' t''} :
     min k k'' ≤ k' → @citi_Forall2 _ I C D _ R k k' t t' →
       citi_Forall2 (k':=k'') R t' t'' → citi_Forall2 R t t''.
-  Proof. by apply citi_Forall2_compose. Qed.
+  Proof. exact: citi_Forall2_compose. Qed.
   #[export] Instance citi_Forall2_trans' `{!∀ s, @Transitive (D s) (R s)} {k} :
     Transitive (@citi_Forall2 _ I C _ _ R k _).
   Proof. move=> ???. apply citi_Forall2_trans. lia. Qed.
@@ -376,7 +376,7 @@ Section citi_map.
   Lemma citi_map_id {D f k t} :
     (∀ s d, f s d ≡ d) → @citi_map _ I C D _ f k t ≡ t.
   Proof.
-    move=> ?. move: t. elim: k; [done|]=>/= ???. by apply citg_map_id.
+    move=> ?. move: t. elim: k; [done|]=>/= ???. exact: citg_map_id.
   Qed.
 
   (** [citi_map] over [∘] *)
@@ -385,7 +385,7 @@ Section citi_map.
       citi_map (D':=D'') (λ s, g s ∘ f s) t.
   Proof.
     apply equiv_dist=> ?. move: t. elim: k; [done|]=>/= ??. elim=>/= *.
-    by apply citg_Forall2_eq.
+    exact: citg_Forall2_eq.
   Qed.
 End citi_map.
 
@@ -422,7 +422,7 @@ Section wfcit.
   Proof.
     move: tl. elim: t=>/= s ti IH tc d tl[/=sel ?? deq].
     apply (Citgf2 (t:=Citg s _ _ _) (sel k)); [|done..]=>/= i.
-    by apply (IH i (λ k, _)).
+    exact: (IH i (λ k, _)).
   Qed.
   (** [wfcit] into equivalence between elements in the tail *)
   Lemma wfcit_equiv_tt {t tl k k'} :
@@ -430,7 +430,7 @@ Section wfcit.
   Proof.
     move=> wf. wlog: k k' / k < k'.
     { move=> goal. have : k < k' ∨ k = k' ∨ k > k' by lia.
-      case=> [?|[?|gt]]; [by apply goal|by subst|]. apply citi_Forall2_flip.
+      case=> [?|[?|gt]]; [exact: goal|by subst|]. apply citi_Forall2_flip.
       move: (goal _ _ gt). by apply citi_Forall2_mono=> ????. }
     case: k'; [lia|]=> k' lt /=. move: k k' lt t tl wf. fix FIX 1=> k k' lt.
     elim=>/= s ti IH tc d tl [/=sel wfi wfc deq].
@@ -532,10 +532,10 @@ Section citaO.
   Lemma cita_ofe_mixin : OfeMixin (cita I C D).
   Proof.
     split.
-    - move=> ??. split. { move=> eq ??. apply equiv_dist. by apply eq. }
+    - move=> ??. split. { move=> eq ??. apply equiv_dist. exact: eq. }
       { move=> eq ?. apply equiv_dist=> ?. apply eq. }
     - move=> ?. split. { by move=> ??. } { move=> ????. by symmetry. }
-      { move=> ??? eq ??. by etrans; [by apply eq|]. }
+      { move=> ??? eq ??. by etrans; [exact: eq|]. }
     - move=> ???? eq ??. eapply dist_lt; [|done]. apply eq.
   Qed.
   (** OFE of [cita] *)
@@ -574,7 +574,7 @@ Section citO.
   #[export] Instance Citg_ne {CIT s n} :
     Proper (pointwise_relation _ (≡{n}≡) ==> pointwise_relation _ (≡{n}≡) ==>
       (≡{n}≡) ==> (≡{n}≡)) (@Citg _ I C D CIT s).
-  Proof. move=> ?*?*?*. by apply citg_Forall2_eq. Qed.
+  Proof. move=> ?*?*?*. exact: citg_Forall2_eq. Qed.
   #[export] Instance Citg_proper {CIT s} :
     Proper (pointwise_relation _ (≡) ==> pointwise_relation _ (≡) ==>
       (≡) ==> (≡)) (@Citg _ I C D CIT s).
@@ -652,7 +652,7 @@ Section of_cit.
   Lemma to_of_cit {t} : to_cit (of_cit t) ≡ t.
   Proof.
     rewrite to_cit_unseal of_cit_unseal. apply equiv_dist=> ?.
-    elim: t=>/= ?????. by apply citg_Forall2_eq.
+    elim: t=>/= ?????. exact: citg_Forall2_eq.
   Qed.
 
   (** Simplify [of_cit] over [to_cit] *)
@@ -779,7 +779,7 @@ Section cit_map.
   Proof.
     move=> ?? to ???. apply citg_map_ne_gen; [..|done].
     { move=> ???<-. apply to. }
-    move=> ???. by apply cita_map_ne_gen.
+    move=> ???. exact: cita_map_ne_gen.
   Qed.
   #[export] Instance cit_map_ne {D D' f} :
     NonExpansive (@cit_map _ I C D D' f).
@@ -788,7 +788,7 @@ Section cit_map.
   (** [cit_map] over an identity function *)
   Lemma cit_map_id {D t} {f : ∀ s, D s -n> _} :
     (∀ s d, f s d ≡ d) → @cit_map _ I C D _ f t ≡ t.
-  Proof. move=> ?. apply citg_map_id; [done|]=> ?. by apply cita_map_id. Qed.
+  Proof. move=> ?. apply citg_map_id; [done|]=> ?. exact: cita_map_id. Qed.
 
   (** [cit_map] over [∘] *)
   Lemma cit_map_compose {D D' D'' f g t} :
@@ -967,5 +967,5 @@ Qed.
   oFunctorContractive (citOF (SEL:=SEL) I C D).
 Proof.
   move=> > ? * ? /=. apply cit_map_ne_gen; [|done]=> ??.
-  by apply oFunctor_map_contractive.
+  exact: oFunctor_map_contractive.
 Qed.

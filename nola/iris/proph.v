@@ -184,7 +184,7 @@ Local Instance proph_sim_proper {TY} :
   Proper ((≡) ==> (=) ==> iff) (proph_sim (TY:=TY)).
 Proof.
   have H (M M' : proph_mapUR TY) L : M ≡ M' → M :~ L → M' :~ L; last first.
-  { move=> ?? eq ??<-. split; by apply H. }
+  { move=> ?? eq ??<-. split; exact: H. }
   move=> eq [sim sim']. split.
   - move=> ?[q eq']. apply sim. exists q. by rewrite -eq'.
   - move=> ?? eq'. apply sim'. by rewrite -eq'.
@@ -498,7 +498,7 @@ Section lemmas.
     move=> [M] val /Some_included_total ?. apply pli_item_included_1.
     { apply val. }
     apply proph_included'. etrans; [|done].
-    by etrans; [|by apply: big_cmra_opL_included].
+    by etrans; [|exact: big_cmra_opL_included].
   Qed.
   Local Lemma to_proph_obs_uPred_holds {n r φπ} :
     ✓{n} r → (∀ π, π ◁ iRes_log r → φπ π) → uPred_holds .⟨φπ⟩ n r.
@@ -515,7 +515,7 @@ Section lemmas.
   Lemma proph_obs_forall {A φπf} : (∀ a : A, .⟨φπf a⟩) ⊢ ⟨π, ∀ a, φπf a π⟩.
   Proof.
     uPred.unseal. split=> ?? val obs. apply (to_proph_obs_uPred_holds val).
-    move=> ?? a. by apply (of_proph_obs_uPred_holds val (obs a)).
+    move=> ?? a. exact: (of_proph_obs_uPred_holds val (obs a)).
   Qed.
 
   (** Update of [proph_alloc] *)
@@ -659,7 +659,7 @@ Section lemmas.
     case: (M !! ξ.(prvar_id)); [|by rewrite right_id]. case; [done| |done].
     move=> ? /Some_valid/Cinr_valid val'. apply Some_proper.
     apply (Cinr_proper (B:=proph_aitemR TY)). symmetry.
-    by apply agree_valid_included.
+    exact: agree_valid_included.
   Qed.
   (** Get the satisfiability from a prophecy observation *)
   Lemma proph_obs_sat {φπ} : .⟨φπ⟩ ⊢ ⌜∃ π, φπ π⌝.
@@ -667,7 +667,7 @@ Section lemmas.
     rewrite proph_obs_unseal. iDestruct 1 as (L to) "aobss".
     iMod (big_opL_own_2 with "aobss") as "aitems".
     iDestruct (own_valid with "aitems") as %val. iPureIntro.
-    move: val=> /aitems_sat[π sat]. exists π. by apply to.
+    move: val=> /aitems_sat[π sat]. exists π. exact: to.
   Qed.
   (** Get a pure proposition from a prophecy observation *)
   Lemma proph_obs_elim ψ {φπ} : (∀ π, φπ π → ψ) → .⟨φπ⟩ ⊢ ⌜ψ⌝.
@@ -675,7 +675,7 @@ Section lemmas.
   Lemma proph_obs_false {φπ} : (∀ π, ¬ φπ π) → .⟨φπ⟩ ⊢ False.
   Proof. move=> ?. by rewrite (proph_obs_elim False). Qed.
   Lemma proph_obs_const {φ} : .⟨λ _, φ⟩ ⊢ ⌜φ⌝.
-  Proof. by apply proph_obs_elim. Qed.
+  Proof. exact: proph_obs_elim. Qed.
 End lemmas.
 
 (** ** Prophecy equalizer *)
@@ -701,7 +701,7 @@ Section proph_eqz.
   Lemma proph_eqz_obs {A aπ aπ'} : ⟨π, aπ π = aπ' π⟩ ⊢ @proph_eqz A aπ aπ'.
   Proof. by iIntros "?" (???). Qed.
   Lemma proph_eqz_refl {A aπ} : ⊢ @proph_eqz A aπ aπ.
-  Proof. rewrite -proph_eqz_obs. by apply proph_obs_true. Qed.
+  Proof. rewrite -proph_eqz_obs. exact: proph_obs_true. Qed.
 
   (** Modify the assignee of a prophecy equalizer *)
   Lemma proph_eqz_modify {A aπ aπ' aπ''} :

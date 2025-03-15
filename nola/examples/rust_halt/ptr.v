@@ -105,7 +105,7 @@ Section read_write.
     iMod ("→T'" with "↦ Ua") as (?) "[κ Tt']".
     iMod (resol with "κ t U'") as "($ & $ & postr)". iModIntro.
     iExists (λ _, (_, _)'). iFrame "Tt' Γr". iSplit; [|done].
-    iApply (proph_obs_impl2 with "postr pre")=>/= ?? to. by apply to.
+    iApply (proph_obs_impl2 with "postr pre")=>/= ?? to. exact: to.
   Qed.
 
   (** Memory copy *)
@@ -134,6 +134,6 @@ Section read_write.
     iMod ("→Tt'" with "↦t Ua") as (?) "[κ Tt']".
     iMod (resol with "κ t U'") as "($ & $ & postr)". iModIntro.
     iExists (λ _, (_, _, _)'). iFrame "Ts' Tt' Γr". iSplit; [|done].
-    iApply (proph_obs_impl2 with "postr pre")=>/= ?? to. by apply to.
+    iApply (proph_obs_impl2 with "postr pre")=>/= ?? to. exact: to.
   Qed.
 End read_write.

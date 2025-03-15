@@ -191,7 +191,7 @@ Section type.
   Proof.
     rewrite sub_unseal. iIntros (????) "!>/= κ t pre". rewrite tcx_extract.
     iIntros "[Γ $]". iMod (resol_tcx with "κ t Γ") as "($ & $ & post)".
-    iModIntro. iApply (proph_obs_impl2 with "post pre")=> ?? to. by apply to.
+    iModIntro. iApply (proph_obs_impl2 with "post pre")=> ?? to. exact: to.
   Qed.
   Lemma sub_leak_rest {Xl} Γ
     `(!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Zl) Γ Γg Γr get getr,

@@ -187,11 +187,11 @@ Section cif.
   #[export] Instance cif_un_proper {s} : Proper ((≡) ==> (≡)) (cif_un s).
   Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_pure_ne : NonExpansive cif_pure.
-  Proof. move=> ??*. by apply Citg_ne. Qed.
+  Proof. move=> ??*. exact: Citg_ne. Qed.
   #[export] Instance cif_pure_proper : Proper ((≡) ==> (≡)) cif_pure.
   Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_later_contractive : Contractive cif_later.
-  Proof. move=> ??*. by apply Citg_ne. Qed.
+  Proof. move=> ??*. exact: Citg_ne. Qed.
   #[export] Instance cif_later_proper : Proper ((≡) ==> (≡)) cif_later.
   Proof. apply ne_proper, _. Qed.
   #[export] Instance cif_con_ne {s} : NonExpansive3 (cif_con s).
@@ -295,14 +295,14 @@ Section iris.
       (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡)))) cif_bsem.
   Proof.
     move=> ????. case=>/=; try solve_proper.
-    { move=> ?*?*?*. by apply later_contractive. } { by apply csem_ne. }
+    { move=> ?*?*?*. exact: later_contractive. } { exact: csem_ne. }
   Qed.
 
   (** [cif_sem_gen]: Generator of [cif_sem] *)
   Definition cif_sem_gen sm : (JUDG -n> iProp Σ) -d> cif CON Σ -d> iProp Σ :=
     λ δ, cit_fold (cif_bsem sm δ).
   #[export] Instance cif_sem_gen_contractive : Contractive cif_sem_gen.
-  Proof. move=> ??*?*?. apply cit_fold_ne_gen=>// *. by apply cif_bsem_ne. Qed.
+  Proof. move=> ??*?*?. apply cit_fold_ne_gen=>// *. exact: cif_bsem_ne. Qed.
 
   (** [cif_sem]: Semantics of [cif] *)
   Definition cif_sem' : (JUDG -n> iProp Σ) -d> cif CON Σ -d> iProp Σ :=
@@ -318,7 +318,7 @@ Section iris.
   (** [cif_sem] is non-expansive *)
   #[export] Instance cif_sem_ne {δ} : NonExpansive (cif_sem δ).
   Proof.
-    move=> ??*. apply: cit_fold_ne=>//. move=> ??*?*?*. by apply cif_bsem_ne.
+    move=> ??*. apply: cit_fold_ne=>//. move=> ??*?*?*. exact: cif_bsem_ne.
   Qed.
   #[export] Instance cif_sem_proper {δ} : Proper ((≡) ==> (≡)) (cif_sem δ).
   Proof. apply ne_proper, _. Qed.
@@ -437,7 +437,7 @@ Program Definition sigTCT_Csem {JUDG A}
   `{ecsem : !∀ a, Ecsem (CONF a) (@sigTCT A CONF) JUDG Σ}
   : Csem (sigTCT CONF) JUDG Σ :=
   CSEM (λ sm δ s, ecsem _ sm δ (projT2 s)) _.
-Next Obligation. move=> *?*???*?*?*. by apply ecsem_ne. Qed.
+Next Obligation. move=> *?*???*?*?*. exact: ecsem_ne. Qed.
 
 (** Inclusion with respect to [inCS] and [Csem] *)
 Class inCS CON' CON JUDG Σ `{!inC CON' CON}
