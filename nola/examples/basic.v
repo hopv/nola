@@ -6,7 +6,7 @@ Import ModwNotation WpwNotation CsemNotation.
 
 (** Vacuous loop of [n] steps *)
 Definition just_loop : val := rec: "self" ["n"] :=
-  if: "n" = #0 then #☠ else "self" ["n" - #1].
+  if:: "n" > #0 then "self" ["n" - #1].
 
 Section basic.
   Context `{!lrustGS_gen hlc Σ}.

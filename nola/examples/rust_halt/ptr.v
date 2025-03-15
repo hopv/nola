@@ -8,7 +8,7 @@ Implicit Type l : loc.
 
 (** Memory copy *)
 Definition memcpy : val := rec: "memcpy" ["tgt"; "len"; "src"] :=
-  if: "len" ≤ #0 then #☠ else
+  if:: "len" > #0 then
     "tgt" <- !"src";; "memcpy" ["tgt" +ₗ #1 ; "len" - #1 ; "src" +ₗ #1].
 Notation "e1 <-{ n } ! e2" :=
   (App (of_val memcpy) [e1%E; Lit (LitInt n); e2%E])

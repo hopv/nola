@@ -103,7 +103,7 @@ Section ilist.
 
   (** Iterate over a list *)
   Definition iter_ilist : val := rec: "self" ["f"; "c"; "l"] :=
-    if: !"c" ≤ #0 then #☠ else
+    if:: !"c" > #0 then
       "f" ["l"];; "c" <- !"c" - #1;; "self" ["f"; "c"; tail_ilist ["l"]].
   Lemma twp_iter_ilist {N N' E Φx c l} {f : val} {n : nat} : ↑N ⊆ E → ↑N' ⊆ E →
     (∀ l', [[{ inv_tok N (Φx l') }]][inv_wsat ⟦⟧ᶜ] f [ #l'] @ E
@@ -142,7 +142,7 @@ Section ilist.
   (** Iterate over an unbounded number of elements of a list with an unbounded
     number of threads *)
   Definition forks_iter_ilist : val := rec: "self" ["f"; "k"; "l"] :=
-    if: !"k" ≤ #0 then #☠ else
+    if:: !"k" > #0 then
       Fork (let: "c" := Alloc #1 in "c" <- Ndnat;; iter_ilist ["f"; "c"; "l"]);;
       "k" <- !"k" - #1;; "self" ["f"; "k"; "l"].
   Lemma twp_forks_iter_ilist {N N' E Φx k l} {f : val} {n : nat} :
