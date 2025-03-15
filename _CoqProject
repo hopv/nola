@@ -105,5 +105,6 @@ nola/examples/rust_halt/mutref.v
 nola/examples/rust_halt/ptrs_more.v
 nola/examples/rust_halt/sum_more.v
 nola/examples/rust_halt/adequacy.v
+nola/examples/rust_halt/verify/util.v
 nola/examples/rust_halt/verify/list.v
 nola/examples/rust_halt/verify/list_more.v
