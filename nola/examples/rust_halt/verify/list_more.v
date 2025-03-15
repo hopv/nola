@@ -13,7 +13,7 @@ Section list.
   Definition iter_list (sz : nat) : val := rec: "self" ["f"; "l"] :=
     case! !"l" of [
       #☠;
-      let: "l'" := !("l" +ₗ #1) in "f" ["l'" +ₗ #0];; "self" ["f"; "l'" +ₗ #sz]
+      "f" ["l" +ₗ #1 +ₗ #0];; "self" ["f"; !("l" +ₗ #1 +ₗ #sz)]
     ].
 
   (** Predicate transformer for [type_iter_list_mut] *)
@@ -34,8 +34,7 @@ Section list.
     `(!Ty (X:=X) T, !TyOp T κ, !LftIncl κ α, !Closed [] (of_val f),
       !Proper (pointwise_relation _ impl ==> pointwise_relation _ impl) pre)
     {Γ p} :
-    (∀ v, type (Yl:=Yl) κ
-      (v ◁ ty_mutref α T ᵖ:: Γ) (f [of_val v]) (λ _, Γ) pre) ⊢
+    (∀ q, type (Yl:=Yl) κ (q ◁ ty_mutref α T ᵖ:: Γ) (f [q]) (λ _, Γ) pre) ⊢
       type κ (p ◁ ty_mutref α (ty_list T) ᵖ:: Γ)
         (iter_list (ty_size T) [of_val f; p]) (λ _, Γ) (pre_iter_list_mut' pre).
   Proof.
@@ -53,7 +52,7 @@ Section list.
     { iApply type_pre; last first.
       { type_path p as (v). iApply type_call.
         iApply (type_mutref_subty v);
-          [|iApply subty_list_unfold|iApply subty_list_fold|].
+          [|iApply (subty_list_unfold (T:=T))|iApply (subty_list_fold (T:=T))|].
         { move=> ?. exact list_unwrap_wrap. }
         iApply (type_case_sum_mutref v); [|by iApply type_false].
         iApply (type_leak ᵖ[_]). iApply type_value. }
@@ -62,16 +61,14 @@ Section list.
     iApply type_pre; last first.
     { type_path p as (v). iApply type_call.
       iApply (type_mutref_subty v);
-        [|iApply subty_list_unfold|iApply subty_list_fold|].
+        [|iApply (subty_list_unfold (T:=T))|iApply (subty_list_fold (T:=T))|].
       { move=> ?. exact list_unwrap_wrap. }
       iApply (type_case_sum_mutref v); [by iApply type_false|].
-      iApply type_let; [by iApply type_deref_mutref_box|]. iIntros (v').
-      simpl_subst. iApply type_mutref_prod_split.
-      type_bind (v' +ₗ #0)%E; [by iApply type_path|]. iIntros (?).
-      iApply type_seq.
-      { iApply (type_frame ᵖ[v' +ₗ _ ◁ _]); [|by iApply "f"].
+      iApply type_mutref_prod_split. iApply type_seq.
+      { iApply (type_frame ᵖ[_]); [|by iApply "f"].
         apply: tcx_extract_cons; [|exact _]. exact: etcx_extract_tl. }
-      iIntros (?). iApply "IH". }
+      iIntros (?). type_bind (!_)%E; [by iApply type_deref_mutref_box|].
+      iIntros (v'). iApply "IH". }
     move=>/= ?[[[|??]?]?]/=[leq to]//=[??]/(f_equal list_wrap)/=.
     rewrite list_wrap_unwrap=> eq. move: (to _ _ eq). apply Proper0=> ??.
     split=>//. by case: leq.
@@ -90,8 +87,8 @@ Section list.
     the prophecy by some function *)
   Lemma type_iter_list_mut_fun {X} (g : X → X) {Yl}
     `(!Ty (X:=X) T, !TyOp T κ, !LftIncl κ α, !Closed [] (of_val f)) {Γ p} :
-    (∀ v, type (Yl:=Yl) κ
-      (v ◁ ty_mutref α T ᵖ:: Γ) (f [of_val v]) (λ _, Γ)
+    (∀ q, type (Yl:=Yl) κ
+      (q ◁ ty_mutref α T ᵖ:: Γ) (f [q]) (λ _, Γ)
         (λ post '((x, x')', yl)', x' = g x → post yl)%type) ⊢
       type κ (p ◁ ty_mutref α (ty_list T) ᵖ:: Γ)
         (iter_list (ty_size T) [of_val f; p]) (λ _, Γ)
