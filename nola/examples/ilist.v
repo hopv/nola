@@ -123,20 +123,20 @@ Section ilist.
   Qed.
 
   (** Iterate over a list with two threads *)
-  Definition fork2_iter_ilist : val := λ: ["f"; "c'"; "c"; "l"],
-    Fork (iter_ilist ["f"; "c'"; "l"]);; iter_ilist ["f"; "c"; "l"].
-  Lemma twp_fork2_iter_ilist {N N' E Φx c' c l} {f : val} {m n : nat} :
+  Definition fork2_iter_ilist : val := λ: ["f"; "c"; "c'"; "l"],
+    Fork (iter_ilist ["f"; "c"; "l"]);; iter_ilist ["f"; "c'"; "l"].
+  Lemma twp_fork2_iter_ilist {N N' E Φx c c' l} {f : val} {m n : nat} :
     ↑N ⊆ E → ↑N' ⊆ E →
     (∀ l', [[{ inv_tok N (Φx l') }]][inv_wsat ⟦⟧ᶜ] f [ #l'] @ E
       [[{ v, RET v; True }]]) -∗
-    [[{ c' ↦ #m ∗ c ↦ #n ∗ ilist N N' Φx l }]][inv_wsat ⟦⟧ᶜ]
-      fork2_iter_ilist [f; #c'; #c; #l] @ E [[{ RET #☠; c ↦ #0 }]].
+    [[{ c ↦ #m ∗ c' ↦ #n ∗ ilist N N' Φx l }]][inv_wsat ⟦⟧ᶜ]
+      fork2_iter_ilist [f; #c; #c'; #l] @ E [[{ RET #☠; c' ↦ #0 }]].
   Proof.
-    iIntros "%% #f" (Ψ) "!> (↦' & ↦ & #l) →Ψ". wp_rec.
-    wp_apply (twp_fork with "[↦']").
+    iIntros "%% #f" (Ψ) "!> (↦ & ↦' & #l) →Ψ". wp_rec.
+    wp_apply (twp_fork with "[↦]").
     { iApply (twp_mask_mono _ E); [done|].
-      wp_apply (twp_iter_ilist with "f [$↦' $l //]"); [done..|]. by iIntros. }
-    iIntros. wp_seq. by wp_apply (twp_iter_ilist with "f [$↦ $l //]").
+      wp_apply (twp_iter_ilist with "f [$↦ $l //]"); [done..|]. by iIntros. }
+    iIntros. wp_seq. by wp_apply (twp_iter_ilist with "f [$↦' $l //]").
   Qed.
 
   (** Iterate over an unbounded number of elements of a list with an unbounded
