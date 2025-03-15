@@ -21,6 +21,7 @@ Inductive expr : Set :=
 | Read (o : order) (e : expr)
 | Write (o : order) (e1 e2: expr)
 | CAS (e0 e1 e2 : expr)
+| FAA (e1 e2 : expr)
 | Alloc (e : expr)
 | Free (e1 e2 : expr)
 | Case (e : expr) (el : list expr)
@@ -40,6 +41,7 @@ Fixpoint to_expr (e : expr) : lang.expr :=
   | Read o e => lang.Read o (to_expr e)
   | Write o e1 e2 => lang.Write o (to_expr e1) (to_expr e2)
   | CAS e0 e1 e2 => lang.CAS (to_expr e0) (to_expr e1) (to_expr e2)
+  | FAA e1 e2 => lang.FAA (to_expr e1) (to_expr e2)
   | Alloc e => lang.Alloc (to_expr e)
   | Free e1 e2 => lang.Free (to_expr e1) (to_expr e2)
   | Case e el => lang.Case (to_expr e) (map to_expr el)
@@ -63,6 +65,8 @@ Ltac of_expr e :=
   | lang.CAS ?e0 ?e1 ?e2 =>
      let e0 := of_expr e0 in let e1 := of_expr e1 in let e2 := of_expr e2 in
      constr:(CAS e0 e1 e2)
+  | lang.FAA ?e1 ?e2 =>
+    let e1 := of_expr e1 in let e2 := of_expr e2 in constr:(FAA e1 e2)
   | lang.Alloc ?e => let e := of_expr e in constr:(Alloc e)
   | lang.Free ?e1 ?e2 =>
     let e1 := of_expr e1 in let e2 := of_expr e2 in constr:(Free e1 e2)
@@ -87,7 +91,7 @@ Fixpoint is_closed (X : list string) (e : expr) : bool :=
   | Var x => bool_decide (x ∈ X)
   | Lit _ => true
   | Rec f xl e => is_closed (f :b: xl +b+ X) e
-  | BinOp _ e1 e2 | Write _ e1 e2 | Free e1 e2 =>
+  | BinOp _ e1 e2 | Write _ e1 e2 | FAA e1 e2 | Free e1 e2 =>
     is_closed X e1 && is_closed X e2
   | App e el | Case e el => is_closed X e && forallb (is_closed X) el
   | UnOp _ e | Read _ e | Alloc e | Fork e => is_closed X e
@@ -141,6 +145,7 @@ Fixpoint subst (x : string) (es : expr) (e : expr)  : expr :=
   | Read o e => Read o (subst x es e)
   | Write o e1 e2 => Write o (subst x es e1) (subst x es e2)
   | CAS e0 e1 e2 => CAS (subst x es e0) (subst x es e1) (subst x es e2)
+  | FAA e1 e2 => FAA (subst x es e1) (subst x es e2)
   | Alloc e => Alloc (subst x es e)
   | Free e1 e2 => Free (subst x es e1) (subst x es e2)
   | Case e el => Case (subst x es e) (map (subst x es) el)
@@ -159,7 +164,7 @@ Qed.
 Definition is_atomic (e: expr) : bool :=
   match e with
   | Read (ScOrd | Na2Ord) e | Alloc e => bool_decide (is_Some (to_val e))
-  | Write (ScOrd | Na2Ord) e1 e2 | Free e1 e2 =>
+  | Write (ScOrd | Na2Ord) e1 e2 | FAA e1 e2 | Free e1 e2 =>
     bool_decide (is_Some (to_val e1) ∧ is_Some (to_val e2))
   | CAS e0 e1 e2 =>
     bool_decide (is_Some (to_val e0) ∧ is_Some (to_val e1) ∧ is_Some (to_val e2))
@@ -296,6 +301,8 @@ Ltac reshape_expr e tac :=
      [ reshape_val e1 ltac:(fun v1 => go (CasRCtx v0 v1 :: K) e2)
      | go (CasMCtx v0 e2 :: K) e1 ])
   | CAS ?e0 ?e1 ?e2 => go (CasLCtx e1 e2 :: K) e0
+  | FAA ?e1 ?e2 => reshape_val e1 ltac:(fun v1 => go (FaaRCtx v1 :: K) e2)
+  | FAA ?e1 ?e2 => go (FaaLCtx e2 :: K) e1
   | Alloc ?e => go (AllocCtx :: K) e
   | Free ?e1 ?e2 => reshape_val e1 ltac:(fun v1 => go (FreeRCtx v1 :: K) e2)
   | Free ?e1 ?e2 => go (FreeLCtx e2 :: K) e1

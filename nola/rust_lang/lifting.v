@@ -485,6 +485,24 @@ Proof.
   iApply (twp_cas_loc_nondet with "H"). iIntros "% ? →Φ !>". by iApply "→Φ".
 Qed.
 
+Lemma twp_faa W s E l z z' :
+  [[{ l ↦ LitV (LitInt z) }]][W] FAA (Lit $ LitLoc l) (Lit $ LitInt z') @ s; E
+  [[{ RET LitV LitPoison; l ↦ LitV (LitInt $ z + z') }]].
+Proof.
+  iIntros (Φ) "Hv HΦ". iApply twp_lift_atomic_base_step_no_fork; auto.
+  iIntros (????) "[$ Hσ]". iDestruct (heap_read_1 with "Hσ Hv") as %?.
+  iMod (heap_write with "Hσ Hv") as "[Hσ Hv]".
+  iModIntro; iSplit; first by eauto. iIntros (?????) "!>". inv_base_step.
+  do 2 (iSplit=> //). iFrame. by iApply "HΦ".
+Qed.
+Lemma wp_faa W s E l z z' :
+  {{{ l ↦ LitV (LitInt z) }}}[W] FAA (Lit $ LitLoc l) (Lit $ LitInt z') @ s; E
+  {{{ RET LitV LitPoison; l ↦ LitV (LitInt $ z + z') }}}.
+Proof.
+  iIntros (?) "H →Φ". iApply (twp_wp_step with "→Φ"). iApply (twp_faa with "H").
+  iIntros "? →Φ !>". by iApply "→Φ".
+Qed.
+
 Lemma twp_eq_loc W s E (l1 : loc) (l2: loc) q1 q2 v1 v2 P Φ :
   (P ⊢ l1 ↦{q1} v1) → (P ⊢ l2 ↦{q2} v2) →
   (P ⊢ Φ (LitV (bool_decide (l1 = l2)))) →

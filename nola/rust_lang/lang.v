@@ -46,6 +46,7 @@ Inductive expr : Set :=
 | Read (o : order) (e : expr)
 | Write (o : order) (e1 e2: expr)
 | CAS (e0 e1 e2 : expr)
+| FAA (e1 e2 : expr) (* Fetch-and-add, newly added in Nola *)
 | Alloc (e : expr)
 | Free (e1 e2 : expr)
 | Case (e : expr) (el : list expr)
@@ -60,7 +61,7 @@ Fixpoint is_closed (X : list string) (e : expr) : bool :=
   | Var x => bool_decide (x ∈ X)
   | Lit _ => true
   | Rec f xl e => is_closed (f :b: xl +b+ X) e
-  | BinOp _ e1 e2 | Write _ e1 e2 | Free e1 e2 =>
+  | BinOp _ e1 e2 | Write _ e1 e2 | FAA e1 e2 | Free e1 e2 =>
     is_closed X e1 && is_closed X e2
   | App e el | Case e el => is_closed X e && forallb (is_closed X) el
   | UnOp _ e | Read _ e | Alloc e | Fork e => is_closed X e
@@ -112,6 +113,8 @@ Inductive ectx_item : Set :=
 | CasLCtx (e1 e2: expr)
 | CasMCtx (v0 : val) (e2 : expr)
 | CasRCtx (v0 : val) (v1 : val)
+| FaaLCtx (e2 : expr)
+| FaaRCtx (v1 : val)
 | AllocCtx
 | FreeLCtx (e2 : expr)
 | FreeRCtx (v1 : val)
@@ -130,6 +133,8 @@ Definition fill_item (Ki : ectx_item) (e : expr) : expr :=
   | CasLCtx e1 e2 => CAS e e1 e2
   | CasMCtx v0 e2 => CAS (of_val v0) e e2
   | CasRCtx v0 v1 => CAS (of_val v0) (of_val v1) e
+  | FaaLCtx e2 => FAA e e2
+  | FaaRCtx v1 => FAA (of_val v1) e
   | AllocCtx => Alloc e
   | FreeLCtx e2 => Free e e2
   | FreeRCtx v1 => Free (of_val v1) e
@@ -149,6 +154,7 @@ Fixpoint subst (x : string) (es : expr) (e : expr)  : expr :=
   | Read o e => Read o (subst x es e)
   | Write o e1 e2 => Write o (subst x es e1) (subst x es e2)
   | CAS e0 e1 e2 => CAS (subst x es e0) (subst x es e1) (subst x es e2)
+  | FAA e1 e2 => FAA (subst x es e1) (subst x es e2)
   | Alloc e => Alloc (subst x es e)
   | Free e1 e2 => Free (subst x es e1) (subst x es e2)
   | Case e el => Case (subst x es e) (map (subst x es) el)
@@ -347,6 +353,12 @@ Inductive base_step : expr → state → list Empty_set → expr → state → l
               []
               stuck_term σ
               []
+| FaaS l z z' σ:
+    σ !! l = Some (RSt 0, LitV $ LitInt z) →
+    base_step (FAA (Lit $ LitLoc l) (Lit $ LitInt z')) σ
+              []
+              (Lit LitPoison) (<[l:=(RSt 0, LitV $ LitInt (z + z'))]>σ)
+              []
 | AllocS n l σ :
     0 < n →
     (∀ m, σ !! (l +ₗ m) = None) →
@@ -419,8 +431,8 @@ Lemma fill_item_no_val_inj Ki1 Ki2 e1 e2 :
   to_val e1 = None → to_val e2 = None →
   fill_item Ki1 e1 = fill_item Ki2 e2 → Ki1 = Ki2.
 Proof.
-  destruct Ki1 as [| | | |v1 vl1 el1| | | | | | | | | |],
-           Ki2 as [| | | |v2 vl2 el2| | | | | | | | | |];
+  destruct Ki1 as [| | | |v1 vl1 el1| | | | | | | | | | | |],
+           Ki2 as [| | | |v2 vl2 el2| | | | | | | | | | | |];
   intros He1 He2 EQ; try discriminate; simplify_eq/=;
     repeat match goal with
     | H : to_val (of_val _) = None |- _ => by rewrite to_of_val in H
@@ -620,15 +632,16 @@ Fixpoint expr_beq (e : expr) (e' : expr) : bool :=
   | CAS e0 e1 e2, CAS e0' e1' e2' =>
     expr_beq e0 e0' && expr_beq e1 e1' && expr_beq e2 e2'
   | Alloc e, Alloc e' | Fork e, Fork e' => expr_beq e e'
-  | Free e1 e2, Free e1' e2' => expr_beq e1 e1' && expr_beq e2 e2'
+  | FAA e1 e2, FAA e1' e2' | Free e1 e2, Free e1' e2' =>
+      expr_beq e1 e1' && expr_beq e2 e2'
   | Ndnat, Ndnat => true
   | _, _ => false
   end.
 Lemma expr_beq_correct (e1 e2 : expr) : expr_beq e1 e2 ↔ e1 = e2.
 Proof.
   revert e1 e2; fix FIX 1. intros e1 e2.
-    destruct e1 as [| | | | |? el1| | | | | |? el1| |],
-             e2 as [| | | | |? el2| | | | | |? el2| |]; simpl; try done;
+    destruct e1 as [| | | | |? el1| | | | | | |? el1| |],
+             e2 as [| | | | |? el2| | | | | | |? el2| |]; simpl; try done;
   rewrite ?andb_True ?bool_decide_spec ?FIX;
   try (split; intro; [destruct_and?|split_and?]; congruence).
   - match goal with |- context [?F el1 el2] => assert (F el1 el2 ↔ el1 = el2) end.

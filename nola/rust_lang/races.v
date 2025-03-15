@@ -23,18 +23,15 @@ Inductive next_access_head : expr → state → access_kind * order → loc → 
     to_val e1 = Some (LitV lit1) → to_val e2 = Some (LitV lit2) →
     lit_eq σ lit1 litl → σ !! l = Some (st, LitV litl) →
     next_access_head (CAS (Lit $ LitLoc l) e1 e2) σ (WriteAcc, ScOrd) l
+| Access_faa l st e z z' σ :
+    to_val e = Some (LitV $ LitInt z') → σ !! l = Some (st, LitV $ LitInt z) →
+    next_access_head (FAA (Lit $ LitLoc l) e) σ (WriteAcc, ScOrd) l
 | Access_free n l σ i :
     0 ≤ i < n →
     next_access_head (Free (Lit $ LitInt n) (Lit $ LitLoc l))
                      σ (FreeAcc, Na2Ord) (l +ₗ i).
 
 (* Some sanity checks to make sure the definition above is not entirely insensible. *)
-Goal ∀ e1 e2 e3 σ, base_reducible (CAS e1 e2 e3) σ →
-                   ∃ a l, next_access_head (CAS e1 e2 e3) σ a l.
-Proof.
-  intros ??? σ (?&?&?&?&H). inversion H; do 2 eexists;
-    (eapply Access_cas_fail; done) || eapply Access_cas_suc; done.
-Qed.
 Goal ∀ o e σ, base_reducible (Read o e) σ →
               ∃ a l, next_access_head (Read o e) σ a l.
 Proof.
@@ -45,6 +42,17 @@ Goal ∀ o e1 e2 σ, base_reducible (Write o e1 e2) σ →
 Proof.
   intros ??? σ (?&?&?&?&H). inversion H; do 2 eexists;
     eapply Access_write; try done; eexists; done.
+Qed.
+Goal ∀ e1 e2 e3 σ, base_reducible (CAS e1 e2 e3) σ →
+              ∃ a l, next_access_head (CAS e1 e2 e3) σ a l.
+Proof.
+  intros ??? σ (?&?&?&?&H). inversion H; do 2 eexists;
+    (eapply Access_cas_fail; done) || eapply Access_cas_suc; done.
+Qed.
+Goal ∀ e1 e2 σ, base_reducible (FAA e1 e2) σ →
+              ∃ a l, next_access_head (FAA e1 e2) σ a l.
+Proof.
+  intros ?? σ (?&?&?&?&H). inversion H; do 2 eexists; eapply Access_faa; done.
 Qed.
 Goal ∀ e1 e2 σ, base_reducible (Free e1 e2) σ →
               ∃ a l, next_access_head (Free e1 e2) σ a l.
@@ -282,7 +290,7 @@ Proof.
   { destruct a2 as [[]?]; inversion 1.
     eauto using next_access_base_Free_concurent_step. }
 
-  destruct Ha1 as [[]|[]| | |], Ha2 as [[]|[]| | |]=>//=; simpl in *;
+  destruct Ha1 as [[]|[]| | | |], Ha2 as [[]|[]| | | |]=>//=; simpl in *;
     repeat match goal with
     | H : _ = Na1Ord → _ |- _ => specialize (H (eq_refl Na1Ord)) || clear H
     | H : False |- _ => destruct H
