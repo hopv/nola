@@ -98,6 +98,7 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`gmap`](nola/util/gmap.v) (On `gmap`),
     [`gmultiset`](nola/util/gmultiset.v) (On `gmultiset`)
   + [`prod`](nola/util/prod.v) (Modified product),
+    [`bin`](nola/util/tree.v) (Binary tree),
     [`plist`](nola/util/plist.v) (Product list),
     [`tagged`](nola/util/tagged.v) (Tagged type)
   + [`proph`](nola/util/proph.v) (Prophecy)
