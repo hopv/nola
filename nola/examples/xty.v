@@ -1,14 +1,15 @@
 (** * Syntactic type *)
 
-From nola.util Require Export prod proph.
+From nola.util Require Export prod bin proph.
 Import ProdNotation.
 
 (** Syntactic type *)
 Inductive xpty : Set :=
 | aprvarₓ | prvarₓ (X : xpty) | xptyₓ
 | Empty_setₓ | unitₓ | boolₓ | natₓ | Zₓ | Propₓ
-| optionₓ (X : xpty) | listₓ (X : xpty) | vecₓ (X : xpty) (n : nat)
-| prod'ₓ (X Y : xpty) | sumₓ (X Y : xpty) | funₓ (X Y : xpty).
+| optionₓ (X : xpty) | listₓ (X : xpty) | binₓ (X : xpty)
+| vecₓ (X : xpty) (n : nat) | prod'ₓ (X Y : xpty) | sumₓ (X Y : xpty)
+| funₓ (X Y : xpty).
 Implicit Type (X Y : xpty).
 
 Module XtyNotation.
@@ -50,7 +51,7 @@ Fixpoint xpty_ty (X : xpty) : Type :=
   | Empty_setₓ => Empty_set | unitₓ => () | boolₓ => bool | natₓ => nat
   | Zₓ => Z | Propₓ => Prop
   | optionₓ X => option (xpty_ty X) | listₓ X => list (xpty_ty X)
-  | vecₓ X n => vec (xpty_ty X) n
+  | binₓ X => bin (xpty_ty X) | vecₓ X n => vec (xpty_ty X) n
   | X *'ₓ Y => xpty_ty X *' xpty_ty Y | X +ₓ Y => xpty_ty X + xpty_ty Y
   | X →ₓ Y => xpty_ty X → xpty_ty Y
   end.
