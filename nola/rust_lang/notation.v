@@ -29,6 +29,9 @@ Notation "'case!' e0 'of' el" := (Case e0%E el%E)
   (* Instead of 'case:' to avoid conflicts with SSReflect *).
 Notation "'if:' e1 'then' e2 'else' e3" := (If e1%E e2%E e3%E)
   (only parsing, at level 102, e1, e2, e3 at level 150) : expr_scope.
+Notation "'if::' e1 'then' e2" := (If e1%E e2%E (Lit LitPoison))
+  (only parsing, at level 102, e1, e2 at level 150) : expr_scope.
+  (* Newly added in Nola *)
 Notation "☠" := LitPoison : val_scope.
 Notation "! e" := (Read Na1Ord e%E) (at level 9, format "! e") : expr_scope.
 Notation "!ˢᶜ e" := (Read ScOrd e%E) (at level 9, format "!ˢᶜ e") : expr_scope.

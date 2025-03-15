@@ -103,6 +103,8 @@ Notation "'rec:' f x := e" := (RecV f%binder x%binder e%E)
    format "'[' 'rec:'  f  x  :=  '/  ' e ']'") : val_scope.
 Notation "'if:' e1 'then' e2 'else' e3" := (If e1%E e2%E e3%E)
   (at level 200, e1, e2, e3 at level 200) : expr_scope.
+Notation "'if::' e1 'then' e2" := (If e1%E e2%E (Val (LitV LitUnit)))
+  (at level 200, e1, e2 at level 200) : expr_scope. (* Newly added in Nola *)
 
 (** Derived notions, in order of declaration. The notations for let and seq
 are stated explicitly instead of relying on the Notations Let and Seq as
