@@ -82,6 +82,7 @@ nola/rust_lang/cfml.v
 
 nola/examples/xty.v
 nola/examples/con.v
+nola/examples/basic.v
 nola/examples/ilist.v
 nola/examples/borrow.v
 nola/examples/mutex.v

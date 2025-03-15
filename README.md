@@ -191,7 +191,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
       emulate CFML)
 - [`examples/`](nola/examples/) : Examples
   + [`xty`](nola/examples/xty.v) (Syntactic type),
-  + [`con`](nola/examples/con.v) (Constructors),
+  + [`con`](nola/examples/con.v) (Constructors)
+  + [`basic`](nola/examples/basic.v) (Basic examples),
     [`ilist`](nola/examples/ilist.v) (Infinite list),
     [`borrow`](nola/examples/borrow.v) (Borrow),
     [`mutex`](nola/examples/mutex.v) (Mutex),
