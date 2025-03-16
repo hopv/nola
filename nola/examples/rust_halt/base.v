@@ -268,6 +268,26 @@ Section fbor_tok.
   Context `{!rust_haltJ CON JUDG Σ, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ),
     !rust_haltCS CON JUDG Σ}.
 
+  (** Modify the lifetime of [spointsto] *)
+  Lemma spointsto_lft {α β l v} : β ⊑□ α -∗ l ↦ˢ[α] v -∗ l ↦ˢ[β] v.
+  Proof. exact fbor_tok_lft. Qed.
+  (** Modify the lifetime of [spointsto_vec] *)
+  Lemma spointsto_vec_lft {α β l vl} : β ⊑□ α -∗ l ↦∗ˢ[α] vl -∗ l ↦∗ˢ[β] vl.
+  Proof.
+    iIntros "#⊑ ↦". iApply (big_sepL_impl with "↦"). iIntros "!>" (?? _).
+    by iApply spointsto_lft.
+  Qed.
+
+  (** Modify the lifetime of [sproph_tok] *)
+  Lemma sproph_tok_lft {α β ξ} : β ⊑□ α -∗ [ξ]:ˢ[α] -∗ [ξ]:ˢ[β].
+  Proof. exact fbor_tok_lft. Qed.
+  (** Modify the lifetime of [sproph_toks] *)
+  Lemma sproph_toks_lft {α β ξl} : β ⊑□ α -∗ [ξl]:∗ˢ[α] -∗ [ξl]:∗ˢ[β].
+  Proof.
+    iIntros "#⊑ ↦". iApply (big_sepL_impl with "↦"). iIntros "!>" (?? _).
+    by iApply sproph_tok_lft.
+  Qed.
+
   (** Access [spointsto] *)
   Lemma spointsto_acc {α l v r} :
     r.[α] -∗ l ↦ˢ[α] v =[rust_halt_wsat]{⊤}=∗ ∃ q,
