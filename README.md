@@ -11,20 +11,24 @@ Louisiana, USA, in memory of POPL 2020 held in that city.
 
 - [Publications](#publications)
 - [Getting Started](#getting-started)
-- [Architecture](#architecture)
+- [Connection with the PLDI 2025 Paper](#connection-with-the-pldi-2025-paper)
+- [Contents](#Contents)
 
 ## Publications
 
+- Yusuke Matsushita and Takeshi Tsukada. Nola: Later-Free Ghost State for
+    Verifying Termination. \
+  ACM PLDI 2025. June 2025.
 - Yusuke Matsushita. Non-Step-Indexed Separation Logic with Invariants and
     Rust-Style Borrows. \
   Ph.D. Dissertation, University of Tokyo. Dec 6, 2023.
     [Paper](https://shiatsumat.github.io/papers/phd-thesis.pdf),
     [Talk slides](https://shiatsumat.github.io/talks/phd-thesis-talk.pdf).
-- Yusuke Matsushita. Non-Step-Indexed Separation Logic with Invariants and
-    Rust-Style Borrows. \
-  Bulletin of Ph.D. Dissertations in AY 2023 Recommended by SIGs, Information
-    Processing Society of Japan. Aug 15, 2024.
-    [HTML](https://note.com/ipsj/n/nc0ae275045eb) (Japanese).
+  + Yusuke Matsushita. Non-Step-Indexed Separation Logic with Invariants and
+      Rust-Style Borrows. \
+    Bulletin of Ph.D. Dissertations in AY 2023 Recommended by SIGs, Information
+      Processing Society of Japan. Aug 15, 2024.
+      [HTML](https://note.com/ipsj/n/nc0ae275045eb) (Japanese).
 
 ## Getting Started
 
@@ -86,7 +90,127 @@ To generate and browse a document for Nola's Coq code, run:
 make viewdoc
 ```
 
-## Architecture
+## Connection with the PLDI 2025 Paper
+
+To check statements of the paper, you can refer to the following parts of our
+Coq mechanization.
+
+- [Paradoxes](#paradoxes)
+- [Later-Free Ghost State](#later-free-ghost-state)
+- [View Shifts and Hoare Triples](#view-shifts-and-hoare-triples)
+- [Modular Construction of Formula Syntax](#modular-construction-of-formula-syntax)
+- [Magic Derivability](#magic-derivability)
+- [Examples and RustHalt](#examples-and-rusthalt)
+
+### Paradoxes
+
+- Paradoxes of the naive later-free invariant.
+  + Paradox for the program logic based on Landin's knot:
+      [`nola.bi.paradox.inv_landin`](nola/bi/paradox.v).
+  + Purely logical paradox using view shifts:
+      [`nola.bi.paradox.inv_fupd`](nola/bi/paradox.v).
+- Paradox of the step-indexed total Hoare triple:
+    [`nola.bi.paradox.twp`](nola/bi/paradox.v).
+- Paradoxes of unbounded later weakening.
+  + Paradoxes under finite step-indexing.
+    * One based on the `bi` axioms:
+        [`nola.bi.paradox.exist_laterN`](nola/bi/paradox.v).
+    * One based on the `uPred` model:
+        [`nola.iris.paradox.exist_laterN_uPred`](nola/iris/paradox.v).
+  + Paradox under transfinite step-indexing:
+      [`nola.bi.paradox.exist_laterOrd`](nola/bi/paradox.v).
+
+### Later-Free Ghost State
+
+All the proof rules are proved to be sound with respect to the semantic model.
+
+- Nola's later-free invariant: [`nola.iris.inv`](nola/iris/inv.v).
+  + INV-PERSIST: `inv_tok_persistent`, INV-ALLOC: `inv_tok_alloc`,
+      INV-ACC: `inv_tok_acc_vs`, THOARE-INV: `inv_tok_acc_twp`,
+      WINV-CREATE: `inv_wsat_alloc`.
+- Nola's later-free borrow.
+  + Lifetime: [`nola.iris.lft`](nola/iris/lft.v)
+    * LFT-ALLOC: `lft_alloc`, LFT-END: `lft_end`.
+  + Borrow: [`nola.iris.borrow`](nola/iris/borrow.v)
+    * BOR-LEND-NEW: `bor_lend_tok_new`, LEND-BACK: `lend_tok_retrieve`,
+        BOR-OPEN: `bor_tok_open`, OBOR-CLOSE: `obor_tok_close`,
+        WBOR-CREATE: `borrow_wsat_alloc`.
+  + Prophetic borrow: [`nola.iris.pborrow`](nola/iris/pborrow.v)
+
+### View Shifts and Hoare Triples
+
+- Parameterized view shifts: [`nola.iris.modw`](nola/bi/modw.v).
+  + VS-EXPAND: `vsw-expand`.
+- Parameterized Hoare triples: [`nola.iris.wpw`](nola/bi/wpw.v).
+  + VS-THOARE: `vsw-thoarew`, THOARE-VS: `thoarew-vsw`,
+      THOARE-EXPAND: `thoarew-expand`.
+- Extended HeapLang: [`nola.heap_lang`](nola/heap_lang/).
+  + Adequacy of the total Hoare triple:
+      [`total_adequacy.heap_total`](nola/heap_lang/total_adequacy.v).
+- Extended λRust, RustBelt's core language: [`nola.lrust`](nola/lrust/).
+  + Adequacy of the total Hoare triple:
+      [`adequacy.lrust_total`](nola/lrust/adequacy.v).
+
+### Modular Construction of Formula Syntax
+
+- Modular construction of formula syntax: [`nola.iris.cif`](nola/iris/cif.v).
+
+### Magic Derivability
+
+- Magic derivability: [`nola.bi.deriv`](nola/bi/deriv.v).
+  + DER-SOUND: `der_sound`, DER-DERIV: `der_Deriv`, DERIV-MAP: `Deriv_mapl`.
+
+### Examples and RustHalt
+
+- Demonstration of how our program logic can emulate CFML:
+    [`nola.examples.cfml`](nola/examples/cfml.v).
+- Simple example of an unbounded loop:
+    [`nola.examples.basic.twp_just_loop_nd`](nola/examples/basic.v).
+- Examples of shared mutable infinite lists:
+    [`nola.examples.ilist`](nola/examples/ilist.v).
+  + Verifying tail access: `twp_tail_list`.
+  + Verifying iterc: `twp_iter_ilist`,
+      Verifying two threads running iterc: `twp_fork2_iter_ilist`,
+      Verifying iterc for the multiple-of-three invariant:
+        `twp_iter_ilist_faa3_mul3`.
+  + Verifying iterc2, with two counters under the lexicographic order:
+      `twp_iter2_ilist`.
+  + Verifying iteration using any step function under any well-founded relation:
+      `twp_iter_step_ilist`.
+- Examples for magic derivability:
+    [`nola.examples.deriv`](nola/examples/deriv.v).
+  + Examples of semantic alteration: `inv'_sep_comm`, `inv'_inv'_sep_comm` and
+      `inv'_bor_lft`.
+  + Access via a view shift `invd_acc_vs`,
+      Access via a total Hoare triple `invd_acc_thoare`,
+      Allocation `inv'_alloc`,
+      General rule for semantic alteration: `inv'_iff'`.
+- RustHalt: [`nola.examples.rust_halt`](nola/examples/rust_halt/).
+  + INT-ADD: [`num.type_add_int`](nola/examples/rust_halt/num.v),
+      BOX-MUT-BORROW:
+        [`ptrs_more.sub_borrow_box`](nola/examples/rust_halt/ptrs_more.v),
+      MUT-REF-WRITE:
+        [`mutref.write_mutref`](nola/examples/rust_halt/mutref.v),
+      MUT-REF-SHARE:
+        [`ptrs_more.type_share`](nola/examples/rust_halt/ptrs_more.v),
+      FN-REC-CALL: [`core.type_call`](nola/examples/rust_halt/core.v),
+      REAL: [`core.type_real`](nola/examples/rust_halt/core.v).
+  + Borrow subdivision:
+      [`prod_more.sub_mutref_prod_split`](nola/examples/rust_halt/prod_more.v),
+      [`sum_more.type_case_sum_mutref`](nola/examples/rust_halt/sum_more.v)
+      etc.,
+    Reborrowing:
+      [`ptrs_more.sub_reborrow`](nola/examples/rust_halt/ptrs_more.v),
+      [`ptrs_more.type_deref_mutref_mutref`](nola/examples/rust_halt/ptrs_more.v)
+      etc.
+  + Verification examples: [`verify`](nola/examples/rust_halt/verify/).
+    * Verifying mutation of a list:
+        [`list_more.type_iter_list_mut_fun`](nola/examples/rust_halt/verify/list_more.v).
+    * Verifying mutation of a rich list over a mutable reference:
+        [`mutlist_more.type_iter_mutlist_mut_fun`](nola/examples/rust_halt/verify/mutlist_more.v).
+  + Adequacy: [`adequacy`](nola/examples/rust_halt/adequacy.v).
+
+## Contents
 
 All the Coq code is in [`nola/`](nola/) and structured as follows:
 - [`prelude`](nola/prelude.v) : Prelude
