@@ -175,9 +175,12 @@ Proof. unfold LftIncl. etrans; [exact lft_incl_meet_r|done]. Qed.
 #[export] Instance lft_incl'_trans : Transitive LftIncl.
 Proof. exact: lft_incl_trans. Qed.
 
+(** Utility for [LftIncl] *)
 Lemma lft_incl'_live_acc `{!lftG Σ} α `(!LftIncl κ α) {q} :
   q.[κ] ⊢ ∃ r, r.[α] ∗ (r.[α] -∗ q.[κ]).
 Proof. exact: lft_incl_live_acc. Qed.
+Lemma lft_incl'_sincl `{!lftG Σ} `(!LftIncl κ α) : ⊢ κ ⊑□ α.
+Proof. exact: lft_incl_sincl. Qed.
 
 (** ** Utility for the program logic *)
 

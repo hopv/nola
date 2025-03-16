@@ -103,7 +103,7 @@ Section ptrs_more.
     rewrite sem_cif_in /=.
     iDestruct (lft_incl'_live_acc α with "κ'") as (?) "[α →κ']"; [by etrans|].
     iMod (pobord_pbord_reborrow (M:=borrowM) (λ _, id) with "[] α o b []")
-      as "(ξ & ↦T & big)"=>/=. { done. } { by iApply lft_incl_sincl. }
+      as "(ξ & ↦T & big)"=>/=. { done. } { iApply lft_incl'_sincl. }
     { iIntros (??) "_ b". by rewrite sem_cif_in /=. }
     iMod ("big" $! [] 1%Qp with "[//] [//]") as (ζ) "(obs & _ & big)".
     iMod ("big" with "ξ ↦T") as "(β & α & b)". iDestruct ("→κ" with "β") as "$".
