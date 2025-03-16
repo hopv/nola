@@ -36,3 +36,11 @@ Lemma bin_wrap_unwrap {A t} : @bin_wrap A (bin_unwrap t) = t.
 Proof. by case t. Qed.
 Lemma bin_unwrap_wrap {A s} : @bin_unwrap A (bin_wrap s) = s.
 Proof. by case s=> [[]|?]. Qed.
+
+(** Apply a function to each element of the left spine of [bin] *)
+Section bin_lspine_map.
+  Context {A} (f : A → A).
+  Fixpoint bin_lspine_map (t : bin A) : bin A :=
+    match t with BinLeaf => BinLeaf |
+      BinNode a tl tr => BinNode (f a) (bin_lspine_map tl) tr end.
+End bin_lspine_map.

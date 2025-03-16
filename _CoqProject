@@ -110,3 +110,4 @@ nola/examples/rust_halt/verify/util.v
 nola/examples/rust_halt/verify/list.v
 nola/examples/rust_halt/verify/list_more.v
 nola/examples/rust_halt/verify/mutlist.v
+nola/examples/rust_halt/verify/mutlist_more.v
