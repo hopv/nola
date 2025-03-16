@@ -1,6 +1,6 @@
 (** * Adequacy *)
 
-From nola.rust_lang Require Export adequacy.
+From nola.lrust Require Export adequacy.
 From nola.examples.rust_halt Require Export type num.
 
 Implicit Type JUDG : ofe.

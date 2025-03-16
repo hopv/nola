@@ -1,5 +1,5 @@
 (** * Notation for the language *)
-From nola.rust_lang Require Export lang.
+From nola.lrust Require Export lang.
 From iris.prelude Require Import options.
 
 Coercion LitInt : Z >-> base_lit.

@@ -4,7 +4,7 @@ From iris.proofmode Require Import coq_tactics reduction.
 From iris.proofmode Require Export proofmode.
 From iris.program_logic Require Export weakestpre total_weakestpre.
 From iris.program_logic Require Import lifting.
-From nola.rust_lang Require Export tactics lifting.
+From nola.lrust Require Export tactics lifting.
 From iris.prelude Require Import options.
 Import uPred WpwNotation.
 

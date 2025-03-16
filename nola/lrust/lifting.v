@@ -3,8 +3,8 @@
 From iris.proofmode Require Import proofmode.
 From nola.bi Require Export wpw.
 From iris.program_logic Require Import ectx_lifting total_ectx_lifting.
-From nola.rust_lang Require Export lang heap.
-From nola.rust_lang Require Import tactics.
+From nola.lrust Require Export lang heap.
+From nola.lrust Require Import tactics.
 From iris.prelude Require Import options.
 Import uPred ModwNotation WpwNotation.
 

@@ -2,7 +2,7 @@
 (** Based on
   https://softwarefoundations.cis.upenn.edu/slf-current/LibSepReference.html *)
 
-From nola.rust_lang Require Import notation proofmode adequacy.
+From nola.lrust Require Import notation proofmode adequacy.
 Import ModwNotation WpwNotation.
 
 (** ** Soundness of the Hoare triple *)

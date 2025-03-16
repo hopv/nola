@@ -177,19 +177,19 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
       logic),
     [`total_adequacy`](nola/heap_lang/total_adequacy.v) (Termination adequacy of
       the program logic)
-- [`rust_lang/`](nola/rust_lang/) : Variant of RustBelt's language, supporting
-    `Ndnat` (infinite non-determinism) and program logic with termination
-    sensitivity and custom world satisfactions for Nola
-  + [`lang`](nola/rust_lang/lang.v) (Language),
-    [`notation`](nola/rust_lang/notation.v) (Notation for the language),
-    [`tactics`](nola/rust_lang/tactics.v) (Tactics for the language)
-  + [`races`](nola/rust_lang/races.v) (Race freedom guarantee of the language)
-  + [`heap`](nola/rust_lang/heap.v) (Ghost state for the heap),
-    [`lifting`](nola/rust_lang/lifting.v) (Program logic),
-    [`proofmode`](nola/rust_lang/proofmode.v) (Proof mode utility for the
-      program logic)
-  + [`adequacy`](nola/rust_lang/adequacy.v) (Adequacy of the program logic)
-  + [`cfml`](nola/rust_lang/cfml.v) (Demonstration of how our program logic can
+- [`lrust/`](nola/lrust/) : Variant of λRust, or RustBelt's core language,
+    supporting `Ndnat` (infinite non-determinism) and program logic with
+    termination sensitivity and custom world satisfactions for Nola
+  + [`lang`](nola/lrust/lang.v) (Language),
+    [`notation`](nola/lrust/notation.v) (Notation for the language),
+    [`tactics`](nola/lrust/tactics.v) (Tactics for the language)
+  + [`races`](nola/lrust/races.v) (Race freedom guarantee of the language)
+  + [`heap`](nola/lrust/heap.v) (Ghost state for the heap),
+    [`lifting`](nola/lrust/lifting.v) (Program logic),
+    [`proofmode`](nola/lrust/proofmode.v) (Proof mode utility for the program
+      logic)
+  + [`adequacy`](nola/lrust/adequacy.v) (Adequacy of the program logic)
+  + [`cfml`](nola/lrust/cfml.v) (Demonstration of how our program logic can
       emulate CFML)
 - [`examples/`](nola/examples/) : Examples
   + [`xty`](nola/examples/xty.v) (Syntactic type),

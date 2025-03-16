@@ -2,8 +2,8 @@
 
 From iris.program_logic Require Export adequacy weakestpre.
 From iris.algebra Require Import auth.
-From nola.rust_lang Require Export heap.
-From nola.rust_lang Require Import proofmode notation.
+From nola.lrust Require Export heap.
+From nola.lrust Require Import proofmode notation.
 From iris.prelude Require Import options.
 Import WpwNotation.
 

@@ -2,7 +2,7 @@
 
 From stdpp Require Import gmap.
 From iris.program_logic Require Import adequacy.
-From nola.rust_lang Require Import tactics.
+From nola.lrust Require Import tactics.
 From iris.prelude Require Import options.
 
 Inductive access_kind : Type := ReadAcc | WriteAcc | FreeAcc.

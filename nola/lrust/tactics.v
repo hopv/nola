@@ -1,7 +1,7 @@
 (** * Tactics for the language *)
 
 From stdpp Require Import fin_maps.
-From nola.rust_lang Require Export lang.
+From nola.lrust Require Export lang.
 From iris.prelude Require Import options.
 
 (** We define an alternative representation of expressions in which the

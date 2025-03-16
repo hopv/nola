@@ -1,7 +1,7 @@
 (** * Borrow examples *)
 
 From nola.examples Require Export xty con.
-From nola.rust_lang Require Export notation proofmode.
+From nola.lrust Require Export notation proofmode.
 Import ProdNotation FunPRNotation ModwNotation WpwNotation CsemNotation
   LftNotation ProphNotation XtyNotation.
 

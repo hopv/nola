@@ -1,7 +1,7 @@
 (** * Infinite shared mutable linked list examples *)
 
 From nola.examples Require Export con.
-From nola.rust_lang Require Export notation proofmode.
+From nola.lrust Require Export notation proofmode.
 Import ProeqvNotation FunPRNotation ModwNotation WpwNotation CsemNotation.
 
 Section ilist.

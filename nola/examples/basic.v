@@ -1,7 +1,7 @@
 (** * Basic examples *)
 
 From nola.examples Require Export con.
-From nola.rust_lang Require Export notation proofmode.
+From nola.lrust Require Export notation proofmode.
 Import ModwNotation WpwNotation CsemNotation.
 
 (** Vacuous loop of [n] steps *)
