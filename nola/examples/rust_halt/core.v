@@ -325,7 +325,7 @@ Section type.
   Proof.
     rewrite type_unseal. iIntros "#type !>/=" (????) "κ t pre".
     rewrite etcx_extract /=. iIntros "[[% α] Γr]".
-    iMod (lft_kill with "α") as "†"=>//. iApply ("type" with "† κ t pre Γr").
+    iMod (lft_end with "α") as "†"=>//. iApply ("type" with "† κ t pre Γr").
   Qed.
 
   (** Retrieve from a frozen object *)

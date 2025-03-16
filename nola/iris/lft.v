@@ -189,8 +189,8 @@ Section lft.
     iExists {[+a+]}. rewrite big_sepMS_singleton. by iFrame "a".
   Qed.
 
-  (** Kill a lifetime *)
-  Lemma lft_kill {α} : α ≠ ⊤ → 1.[α] ==∗ [†α].
+  (** End a lifetime *)
+  Lemma lft_end {α} : α ≠ ⊤ → 1.[α] ==∗ [†α].
   Proof.
     case: (gmultiset_choose_or_empty α); [|done]=> [[a ?]_].
     rewrite big_sepMS_elem_of; [|done]. iIntros "a".
