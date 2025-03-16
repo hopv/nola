@@ -80,10 +80,10 @@ nola/lrust/heap.v
 nola/lrust/lifting.v
 nola/lrust/proofmode.v
 nola/lrust/adequacy.v
-nola/lrust/cfml.v
 
 nola/examples/xty.v
 nola/examples/con.v
+nola/examples/cfml.v
 nola/examples/basic.v
 nola/examples/ilist.v
 nola/examples/borrow.v

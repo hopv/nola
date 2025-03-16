@@ -189,12 +189,12 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     [`proofmode`](nola/lrust/proofmode.v) (Proof mode utility for the program
       logic)
   + [`adequacy`](nola/lrust/adequacy.v) (Adequacy of the program logic)
-  + [`cfml`](nola/lrust/cfml.v) (Demonstration of how our program logic can
-      emulate CFML)
 - [`examples/`](nola/examples/) : Examples
   + [`xty`](nola/examples/xty.v) (Syntactic type),
   + [`con`](nola/examples/con.v) (Constructors)
-  + [`basic`](nola/examples/basic.v) (Basic examples),
+  + [`cfml`](nola/examples/cfml.v) (Demonstration of how our program logic can
+      emulate CFML),
+    [`basic`](nola/examples/basic.v) (Basic examples),
     [`ilist`](nola/examples/ilist.v) (Infinite list),
     [`borrow`](nola/examples/borrow.v) (Borrow),
     [`mutex`](nola/examples/mutex.v) (Mutex),
