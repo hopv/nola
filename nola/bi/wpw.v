@@ -355,6 +355,16 @@ Section wpw.
     IsFUpdW True W E (WP[W] e @ s; E [{ v, |=[W]{E}=> Φ v }])%I.
   Proof. move=> _. exact fupdw_twpw_fupdw'. Qed.
 
+  (** Modify the precondition of a total Hoare triple with a view shift, for
+    presentation *)
+  Lemma vsw_thoarew {e s E W P P' Ψ} : to_val e = None →
+    □ (P =[W]{E}=∗ P') -∗ [[{ P' }]][W] e @ s; E [[{ v, RET v; Ψ v }]] -∗
+      [[{ P }]][W] e @ s; E [[{ v, RET v; Ψ v }]].
+  Proof.
+    iIntros (?) "#PP' #→wp !> % P". iMod ("PP'" with "P") as "P'".
+    iApply ("→wp" with "P'").
+  Qed.
+
   (** Mask-changing [fupdw] over atomic [wpw] *)
   Lemma wpw_atomic `{!Atomic (stuckness_to_atomicity s) e} {E E' W Φ} :
     to_val e = None →
@@ -450,6 +460,18 @@ Section wpw.
     WP[W] e @ s; E [{ v, |=[W]{E}=> Φ v }] ⊢ WP[W] e @ s; E [{ Φ }].
   Proof. move=> ?. by rewrite twpw_fupdw_fupdw fupdw_twpw_nonval. Qed.
 
+  (** Modify the postcondition of a total Hoare triple with a view shift, for
+    presentation *)
+  Lemma thoarew_vsw {e s E W P Ψ Ψ'} : to_val e = None →
+    [[{ P }]][W] e @ s; E [[{ v, RET v; Ψ v }]] -∗
+    □ (∀ v, Ψ v =[W]{E}=∗ Ψ' v) -∗
+      [[{ P }]][W] e @ s; E [[{ v, RET v; Ψ' v }]].
+  Proof.
+    iIntros (?) "#→wp #ΨΨ' !> % P →Φ". iApply twpw_fupdw_nonval=>//.
+    iApply ("→wp" with "P"). iIntros (?) "Ψ". iMod ("ΨΨ'" with "Ψ") as "Ψ'".
+    iApply ("→Φ" with "Ψ'").
+  Qed.
+
   (** Modify the world satisfaction of [wpw] *)
   Lemma wpw_incl_fupd {e s E F W W' Φ} :
     E ⊆ F → □ (W ={E}=∗ W' ∗ (W' ={E}=∗ W)) -∗
@@ -499,6 +521,12 @@ Section wpw.
     iApply (twpw_incl_fupd (E:=E)); [done|]. rewrite (wsat_incl W W').
     by iIntros "!> [$$]".
   Qed.
+
+  (** Expand the world satisfaction of a total Hoare triple, for presentation *)
+  Lemma thoarew_expand {e s E P Ψ W W'} :
+    [[{ P }]][W] e @ s; E [[{ v, RET v; Ψ v }]] -∗
+      [[{ P }]][W ∗ W'] e @ s; E [[{ v, RET v; Ψ v }]].
+  Proof. iIntros "#? !> %". by rewrite -(twpw_incl (W':=W)). Qed.
 End wpw.
 
 (** ** Adequacy of [wpw] *)

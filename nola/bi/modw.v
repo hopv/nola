@@ -419,6 +419,11 @@ Section fupdw.
     (|=[W']{E,E'}=> P) ⊢ |=[W]{E,E'}=> P.
   Proof. exact modw_incl. Qed.
 
+  (** Expand the world satisfaction of a view shift, for presentation *)
+  Lemma vsw_expand {W W' E E' P Q} :
+    □ (P =[W]{E,E'}=∗ Q) -∗ □ (P =[W ∗ W']{E,E'}=∗ Q).
+  Proof. iIntros "#? !>". by rewrite -(fupdw_incl (W':=W)). Qed.
+
   (** Introduce [fupdw] *)
   Lemma fupdw_mask_intro {E E' W P} : E' ⊆ E →
     ((|={E',E}=> emp) -∗ P) ⊢ |=[W]{E,E'}=> P.
