@@ -187,6 +187,23 @@ Section ty_mutref.
       eexists _=> ?. by rewrite eq /=.
   Qed.
 
+  (** Modify the lifetime of [ty_mutref] *)
+  Lemma subty_mutref_lft `{!Deriv ih δ, !Ty (X:=X) T} {β α} :
+    β ⊑□ α ⊢ subty δ (ty_mutref α T) (ty_mutref β T) id.
+  Proof.
+    rewrite subty_unseal ty_mutref_unseal. iIntros "#⊑". iSplit; [done|].
+    iSplit; iModIntro=>/=.
+    - iIntros (????). iDestruct 1 as (????) "($ & $ & $ & ?)".
+      rewrite !sem_cif_in /= /cif_pointsto_ty. by iApply pbor_lft.
+    - iIntros (?????). iDestruct 1 as (???????) "($ & #↦ & #ξ & #T)".
+      iExists _, _, _, _. do 2 iSplit=>//.
+      iSplit; [|iSplit];
+        [iNext; iApply fbor_tok_lft; by [iApply lft_sincl_meet_mono_l|]..|].
+      iModIntro. rewrite !sem_cif_in /=. iApply (store_wand with "[] T").
+      iIntros (????) "{T}T !>". iApply (ty_shr_lft with "[] T").
+      by iApply lft_sincl_meet_mono_l.
+  Qed.
+
   (** Subtyping over [ty_mutref] *)
   Lemma subty_mutref `{!Deriv ih δ} {X T U α} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ →

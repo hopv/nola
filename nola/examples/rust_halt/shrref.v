@@ -100,6 +100,16 @@ Section ty_shrref.
     iPureIntro. eexists _=> π. by rewrite -(eq π).
   Qed.
 
+  (** Modify the lifetime of [ty_shrref] *)
+  Lemma subty_shrref_lft `{!Deriv ih δ, !Ty (X:=X) T} {β α} :
+    β ⊑□ α ⊢ subty δ (ty_shrref α T) (ty_shrref β T) id.
+  Proof.
+    iIntros "#⊑". iApply subty_sty=>//. rewrite sty_shrref_unseal.
+    iIntros (????) "!>/=". iDestruct 1 as (???) "($ & $ & $ & #?)". iModIntro.
+    rewrite !sem_cif_in /=. iApply store_wand; [|done]. iIntros (????) "T !>".
+    by iApply (ty_shr_lft with "⊑ T").
+  Qed.
+
   (** Subtyping over [ty_shrref] *)
   Lemma subty_shrref `{!Deriv ih δ} {X Y T U f α} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → subty (X:=X) (Y:=Y) δ' T U f) ⊢
