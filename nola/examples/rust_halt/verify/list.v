@@ -71,7 +71,7 @@ Section list.
     move=>/= [|??]//=.
   Qed.
   #[export] Instance real_list_length {X T κ} :
-    Real (ty_list (X:=X) T) κ (λ xl, length xl).
+    Real (ty_list (X:=X) T) κ (λ xl, length xl) | 80.
   Proof.
     move=> ?. eapply real_eq. { eapply (real_compose length). exact _. }
     move=>/= ?. by rewrite length_map.
