@@ -96,4 +96,22 @@ Section list.
     { iApply subty_trans; [by iApply subty_rec_unfold|]. iApply subty_of_mod. }
     by case.
   Qed.
+
+  (** Subtyping over [ty_list] *)
+  Lemma subty_list `{!Deriv ih δ, !Ty (X:=X) T, !Ty (X:=Y) U} {f} :
+    (∀ δ', ⌜Deriv ih δ'⌝ → subty δ' T U f) ⊢
+      subty δ (ty_list T) (ty_list U) (fmap f).
+  Proof.
+    apply Deriv_ind. clear dependent δ=> δ ?. iIntros "#TU".
+    erewrite subty_proper_fun.
+    { iApply subty_trans; [iApply (subty_list_unfold (T:=T))|].
+      iApply subty_trans; [|iApply (subty_list_fold (T:=U))].
+      iApply (subty_sum (T:=ty_unit) (T':=ty_unit)
+        (U:=ty_prod _ (ty_box (ty_list _)))
+        (U':=ty_prod _ (ty_box (ty_list _)))); [by iApply subty_refl|].
+      iApply (subty_prod (U:=ty_box (ty_list _)) (U':=ty_box (ty_list _))).
+      { iApply "TU". iPureIntro. by apply Deriv_mono=> ?[_ ?]. }
+      iApply subty_box. iIntros "!>" (??[IH ?]). by iApply IH. }
+    move=>/= [|??]//=.
+  Qed.
 End list.
