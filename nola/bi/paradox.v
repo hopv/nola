@@ -29,20 +29,21 @@ Module twp. Section twp.
   Proof. iLöb as "IH". by iApply twp_step; [apply loop_loop|]. Qed.
 End twp. End twp.
 
-(** ** Paradox of the later-free invariant over an unguarded fancy update
+(** ** Paradox of the later-free invariant over an unguarded view shift / fancy
+  update
 
   This is a minimal construction, not using nested invariants or impredicative
   quantifiers, simplifying the known paradox (published in Krebbers et al.'s
   ESOP 2017 paper).
   The construction is analogous to Landin's knot but at the logic level. *)
-Module inv_fupd. Section inv_fupd.
+Module inv_vs. Section inv_vs.
   (** Separation logic *)
   Context `{!BiAffine PROP}.
 
   (** Binary mask *)
   Context {mask : Type} (mask_empty mask_full : mask).
   Local Notation "∅" := mask_empty. Local Notation "⊤" := mask_full.
-  (** Update modality *)
+  (** Fancy update modality *)
   Context (fupd : mask → PROP → PROP).
   Local Notation "|={ E }=> P" := (fupd E P) : bi_scope.
   Hypothesis fupd_intro : ∀{E P}, P ⊢ |={E}=> P.
@@ -114,7 +115,7 @@ Module inv_fupd. Section inv_fupd.
     iApply fupd_elim; [|by iApply inv_bad_init]. iDestruct 1 as (γ) "#e".
     by iApply inv_bad_no.
   Qed.
-End inv_fupd. End inv_fupd.
+End inv_vs. End inv_vs.
 
 (** ** Paradox of the later-free invariant over an unguarded total Hoare triple,
   via Landin's knot *)
