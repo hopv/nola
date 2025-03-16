@@ -1,12 +1,4 @@
-.vscode/
-.DS_Store
-
-# opam
-
-_opam
-
 # Makefile
-
 Makefile.coq
 Makefile.coq.conf
 .Makefile.coq.d
@@ -14,7 +6,6 @@ devdep/
 html/
 
 # Coq
-
 *.vo
 *.vok
 *.vos
