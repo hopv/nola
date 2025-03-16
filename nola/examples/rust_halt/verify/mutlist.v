@@ -110,4 +110,26 @@ Section mutlist.
     { iApply subty_trans; [by iApply subty_rec_unfold|]. iApply subty_of_mod. }
     by case.
   Qed.
+
+  (** Subtyping over [ty_mutlist] *)
+  Lemma subty_mutlist `{!Deriv ih δ, !Ty (X:=X) T, !Ty U} {α} :
+    (∀ δ', ⌜Deriv ih δ'⌝ → subty δ' T U id ∧ subty δ' U T id) ⊢
+      subty δ (ty_mutlist α T) (ty_mutlist α U) id.
+  Proof.
+    move: T Ty0 U Ty1. apply Deriv_ind. clear dependent δ=> δ ?.
+    iIntros (????) "#TU". erewrite subty_proper_fun.
+    { iApply subty_trans; [iApply (subty_mutlist_unfold (T:=T))|].
+      iApply subty_trans; [|iApply (subty_mutlist_fold (T:=U))].
+      iApply (subty_sum (T:=ty_unit) (T':=ty_unit)
+        (U:=ty_prod _ (ty_mutref _ (ty_mutlist _ _)))
+        (U':=ty_prod _ (ty_mutref _ (ty_mutlist _ _))));
+        [by iApply subty_refl|].
+      iApply (subty_prod (U:=ty_mutref _ (ty_mutlist _ _))
+        (U':=ty_mutref _ (ty_mutlist _ _))).
+      { iApply bi.and_elim_l. iApply "TU". iPureIntro.
+        by apply Deriv_mono=> ?[_ ?]. }
+      iApply subty_mutref. iIntros "!>" (??[IH ?]).
+      iSplit; iApply IH; by [|setoid_rewrite bi.and_comm at 2]. }
+    move=>/= [|??]//=.
+  Qed.
 End mutlist.
