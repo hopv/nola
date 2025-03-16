@@ -81,7 +81,7 @@ Section mutlist.
       apply @real_prod; [exact: real_le|exact: real_mutref]. }
     move=>/= [|???]//=.
   Qed.
-  #[export] Instance real_list_length `(!LftIncl κ α, !TyOp' X T κ) :
+  #[export] Instance real_mutlist_length `(!LftIncl κ α, !TyOp' X T κ) :
     Real (ty_mutlist α (X:=X) T) κ (λ t, length (bin_lefts t)).
   Proof.
     move=> ?. eapply real_eq. { eapply (real_compose length). exact _. }
