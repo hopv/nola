@@ -48,7 +48,7 @@ Section deriv.
     iMod ("vs" with "Px Q") as "[Px $]". by iApply "cl".
   Qed.
   (** Access the body of a relaxed invariant via a total Hoare triple *)
-  Lemma invd_acc_twp {N Px E Q Ψ} `{!Atomic (stuckness_to_atomicity s) e} :
+  Lemma invd_acc_thoare {N Px E Q Ψ} `{!Atomic (stuckness_to_atomicity s) e} :
     ↑N ⊆ E → to_val e = None →
     [[{ ⟦ Px ⟧ᶜ ∗ Q }]][inv_wsat ⟦⟧ᶜ] e @ s; E∖↑N
     [[{ v, RET v; ⟦ Px ⟧ᶜ ∗ Ψ v }]] -∗
