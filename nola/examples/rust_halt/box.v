@@ -13,8 +13,9 @@ Section ty_box.
   Definition ty'_box_def {X} (T : ty CON Σ X) : ty' CON Σ X :=
     (λ t d xπ vl, ∃ l d' xπ' wl, ⌜vl = [ #l]⌝ ∧ ⌜d' < d⌝ ∧ ⌜∀ π, xπ' π = xπ π⌝ ∧
         ▷ l ↦∗ wl ∗ ▷ †l…(length wl) ∗ cif_store (ty_own T t d' xπ' wl),
-      λ t d l α xπ, ∃ l' d' xπ', ⌜d' < d⌝ ∧ ⌜∀ π, xπ' π = xπ π⌝ ∧
-        ▷ l ↦ˢ[α] #l' ∗ □ cif_store (ty_shr T t d' l' α xπ'))%cif.
+      λ t d l α xπ, ∃ l' d' α' xπ', ⌜d' < d⌝ ∧ ⌜∀ π, xπ' π = xπ π⌝ ∧
+        ▷ (α ⊑□ α') ∗ ▷ l ↦ˢ[α] #l' ∗
+        □ cif_store (ty_shr T t d' l' α' xπ'))%cif.
   Lemma ty'_box_aux : seal (@ty'_box_def). Proof. by eexists. Qed.
   Definition ty'_box {X} := ty'_box_aux.(unseal) X.
   Lemma ty'_box_unseal : @ty'_box = @ty'_box_def. Proof. exact: seal_eq. Qed.
@@ -28,7 +29,7 @@ Section ty_box.
     rewrite ty_box_unseal=> ??? /ty_proeqv_later[eqvO eqvS].
     apply ty_proeqv=>/=. split=>//. split=> >.
     - do 4 f_equiv=> ?. by rewrite eqvO.
-    - do 3 f_equiv=> ?. by rewrite eqvS.
+    - do 4 f_equiv=> ?. by rewrite eqvS.
   Qed.
   #[export] Instance ty_box_proper {X} : Proper ((≡) ==> (≡)) (@ty_box X).
   Proof. apply productive_proper, _. Qed.
@@ -44,8 +45,10 @@ Section ty_box.
   Proof.
     rewrite ty_box_unseal. split=>/= *. { exact _. }
     { by iDestruct 1 as (???? ->) "_". } { (do 11 f_equiv)=> ?. lia. }
-    { (do 8 f_equiv)=> ?. lia. } { (do 12 f_equiv)=> eq ?. by rewrite eq. }
-    { (do 9 f_equiv)=> eq ?. by rewrite eq. }
+    { (do 10 f_equiv)=> ?. lia. } { (do 12 f_equiv)=> eq ?. by rewrite eq. }
+    { (do 11 f_equiv)=> eq ?. by rewrite eq. }
+    iIntros "#⊑". iDestruct 1 as (??????) "(#? & #↦ & $)". do 2 iSplit=>//.
+    iSplit; iNext; by [iApply lft_sincl_trans|iApply fbor_tok_lft].
   Qed.
 
   (** [ty_box] satisfies [TyOp] *)
@@ -60,11 +63,13 @@ Section ty_box.
       iIntros "ξl". iMod ("→T" with "ξl") as "[$ T]".
       iMod (store_alloc with "T") as "T". iModIntro. iFrame "↦ †".
       iExists _, _. do 3 iSplit=>//. by rewrite sem_cif_in.
-    - iIntros "κα". iDestruct 1 as (???? eq) "[↦ T]". rewrite sem_cif_in /=.
-      iMod (stored_acc with "T") as "T".
-      iMod (ty_shr_proph_le with "κα T") as (???) "[$ →κα]"=>//. iModIntro.
+    - iIntros "κα". iDestruct 1 as (????? eq) "(>#⊑ & >#↦ & T)".
+      rewrite sem_cif_in /=. iMod (stored_acc with "T") as "T".
+      iMod (lft_sincl_live_acc with "[] κα") as (?) "[κα' →κα]";
+        [by iApply lft_sincl_meet_mono_r|].
+      iMod (ty_shr_proph_le with "κα' T") as (???) "[$ →κα']"=>//. iModIntro.
       iSplit. { iPureIntro. by eapply proph_dep_proper. }
-      iIntros "ξl". iApply ("→κα" with "ξl").
+      iIntros "ξl". iMod ("→κα'" with "ξl") as "κα'". iApply ("→κα" with "κα'").
     - iIntros "[κ α] b".
       iMod (bord_open (M:=borrowM) with "α b") as "/=[o (% & ↦ & big)]".
       iDestruct "big" as (???? -> ? eq) "(↦' & † & T)". rewrite sem_cif_in /=.
@@ -81,8 +86,9 @@ Section ty_box.
         iExists _, _. do 3 iSplit=>//. by rewrite sem_cif_in. }
       iMod (spointsto_alloc with "α b") as "[α $]". rewrite bor_tok_bor.
       iMod (ty_share_le (T:=T) with "[$κ $α //] b'") as "[$ T]"=>//.
-      iMod (store_alloc_pers with "T") as "T". iModIntro. iExists _, _.
-      do 2 iSplit=>//. by rewrite sem_cif_in /=.
+      iMod (store_alloc_pers with "T") as "T". iModIntro. iExists _, _, _.
+      do 2 iSplit=>//. iSplit; [|by rewrite sem_cif_in /=]. iNext.
+      iApply lft_sincl_refl.
   Qed.
 
   (** [ty_box] preserves [Send] *)
@@ -93,7 +99,7 @@ Section ty_box.
   (** [ty_box] preserves [Sync] *)
   #[export] Instance ty_box_sync `{!Sync (X:=X) T} : Sync (ty_box T).
   Proof.
-    rewrite ty_box_unseal=> > /=. do 3 f_equiv=> ?. do 5 f_equiv.
+    rewrite ty_box_unseal=> > /=. do 4 f_equiv=> ?. do 6 f_equiv.
     apply: sync.
   Qed.
 
@@ -118,7 +124,7 @@ Section ty_box.
       iMod (store_alloc with "T") as "T". iModIntro. iSplit.
       { iPureIntro. eexists _=> ?. by rewrite -eq. }
       iExists _, _. rewrite sem_cif_in /=. by iFrame.
-    - iDestruct 1 as (???? eq) "[_ T]". rewrite sem_cif_in /=.
+    - iDestruct 1 as (????? eq) "(_ & _ & T)". rewrite sem_cif_in /=.
       iMod (stored_acc with "T") as "T".
       iMod (real_shr_le with "κ t T") as ([? eq']) "[$$]"=>//.
       iPureIntro. eexists _=> ?. by rewrite -eq.
@@ -137,8 +143,8 @@ Section ty_box.
       { iPureIntro. (do 2 split=>//)=> ?. by rewrite eq. }
       iIntros (????) "? !>".
       iDestruct ("tosub" with "[//] [//]") as (_) "[sub _]". by iApply "sub".
-    - iIntros (?????) "(% & % & %xπ' & % & %eq & $ & #T)". iExists _, (f ∘ xπ').
-      rewrite !sem_cif_in /=.
+    - iIntros (?????) "(% & % & % & %xπ' & % & %eq & $ & $ & #T)".
+      iExists _, (f ∘ xπ'). rewrite !sem_cif_in /=.
       iDestruct (store_wand with "[] T") as "$"; last first.
       { iPureIntro. (split=>//)=> ?. by rewrite eq. }
       iIntros (????) "? !>".

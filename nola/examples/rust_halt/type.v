@@ -120,7 +120,7 @@ End ty.
 (** ** Basic properties of a type *)
 
 Section ty.
-  Context `{!Csem CON JUDG Σ}.
+  Context `{!Csem CON JUDG Σ, !rust_haltGS CON Σ}.
 
   (** Basic properties of a type *)
   Class Ty {X} (T : ty CON Σ X) : Prop := TY {
@@ -140,6 +140,9 @@ Section ty.
       ⟦ ty_own T t d xπ vl ⟧ᶜ(δ) ⊢ ⟦ ty_own T t d xπ' vl ⟧ᶜ(δ);
     ty_shr_clair {t d l α xπ xπ' δ} : (∀ π, xπ π = xπ' π) →
       ⟦ ty_shr T t d l α xπ ⟧ᶜ(δ) ⊢ ⟦ ty_shr T t d l α xπ' ⟧ᶜ(δ);
+    (** The sharing predicate is antitone over the lifetime parameter *)
+    ty_shr_lft {t d l α β xπ δ} :
+      β ⊑□ α -∗ ⟦ ty_shr T t d l α xπ ⟧ᶜ(δ) -∗ ⟦ ty_shr T t d l β xπ ⟧ᶜ(δ);
   }.
 
   (** [ty_own_clair] applied to [⊣⊢] *)
@@ -191,6 +194,7 @@ Section ty.
     - rewrite -!(eqvS _ _ _ _ _). exact ty_shr_depth.
     - rewrite -!(eqvO _ _ _ _). exact ty_own_clair.
     - rewrite -!(eqvS _ _ _ _ _). exact ty_shr_clair.
+    - rewrite -!(eqvS _ _ _ _ _). exact ty_shr_lft.
   Qed.
   #[export] Instance Sty_proper {X} : Proper ((≡) ==> (↔)) (@Sty X).
   Proof.
@@ -208,8 +212,7 @@ Section ty.
     { exact _. } { rewrite -eqZ. exact pty_own_size. }
   Qed.
 
-  Context `{!rust_haltGS CON Σ, !rust_haltC CON, !rust_haltJ CON JUDG Σ,
-    !rust_haltCS CON JUDG Σ}.
+  Context `{!rust_haltC CON, !rust_haltJ CON JUDG Σ, !rust_haltCS CON JUDG Σ}.
 
   (** [Sty] entails [Ty] *)
   #[export] Instance Ty_Sty `{!@Sty X T} : Ty (ty_sty T).
@@ -218,6 +221,7 @@ Section ty.
     { exact sty_own_size. } { exact sty_own_depth. }
     { move=> ?. do 3 f_equiv. exact: sty_own_depth. } { exact sty_own_clair. }
     { move=> ?. do 3 f_equiv. exact: sty_own_clair. }
+    { iIntros "#? [%[? $]]". iNext. by iApply spointsto_vec_lft. }
   Qed.
 
   (** [Pty] entails [Sty] *)
@@ -228,7 +232,7 @@ Section ty.
     - move=> eq. f_equiv=> ?. do 2 f_equiv. move=> ??. by rewrite -eq.
   Qed.
 End ty.
-Hint Mode Ty - - - - - ! : typeclass_instances.
+Hint Mode Ty - - - - - - ! : typeclass_instances.
 Hint Mode Sty - - - - - ! : typeclass_instances.
 Hint Mode Pty - - - - - ! : typeclass_instances.
 

@@ -45,6 +45,7 @@ Section ty_mod.
     { exact: ty_own_size. } { exact: ty_own_depth. } { exact: ty_shr_depth. }
     { move=> eq. apply: ty_own_clair=>/= ?. by rewrite eq. }
     { move=> eq. apply: ty_shr_clair=>/= ?. by rewrite eq. }
+    { iApply (ty_shr_lft (T:=T)). }
   Qed.
 
   (** [ty_mod] preserves [TyOpAt] *)

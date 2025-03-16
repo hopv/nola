@@ -137,7 +137,7 @@ Section ptrs_more.
   Lemma type_deref_shrref_box p
     `(!EtcxExtract (Yl:=Yl) (Zl:=Zl) (p ◁ ty_shrref α (ty_box (X:=X) T)) Γ Γr
         get getr,
-      !LftIncl κ α) :
+      !Ty T, !LftIncl κ α) :
     ⊢ type κ Γ (!p) (λ r, r ◁ ty_shrref α T ᵖ:: Γr)
         (λ post yl, post (get yl, getr yl)').
   Proof.
@@ -145,19 +145,21 @@ Section ptrs_more.
     rewrite etcx_extract ty_shrref_unseal ty_box_unseal /=. iIntros "[p Γr]".
     iDestruct "p" as (??????[=->]? eq) "big". wp_path p. rewrite sem_cif_in /=.
     iMod (stored_acc with "big") as "/=big".
-    iDestruct "big" as (???? eq') "[>↦ T]".
+    iDestruct "big" as (????? eq') "(>#⊑ & >↦ & #?)".
     iDestruct (lft_incl'_live_acc α with "κ") as (?) "[α →κ]".
     iMod (spointsto_acc with "α ↦") as (?) "[↦ →α]". wp_read.
     iMod ("→α" with "↦") as "α". iDestruct ("→κ" with "α") as "$". iModIntro.
-    iFrame "pre Γr T"=>/=. iPureIntro. eexists _, _. do 3 split=>//=. move=> ?.
-    by rewrite eq'.
+    iFrame "pre Γr"=>/=. iExists _, _. iSplit=>//. iExists _, _, _.
+    do 2 iSplit=>//. iSplit. { iPureIntro=> ?. etrans; [exact: eq'|exact: eq]. }
+    iModIntro. rewrite !sem_cif_in /=. iApply store_wand; [|done].
+    iIntros (????) "T !>". by iApply (ty_shr_lft with "⊑ T").
   Qed.
 
   (** Dereference a shared reference to a mutable reference *)
   Lemma type_deref_shrref_mutref p
     `(!EtcxExtract (Yl:=Yl) (Zl:=Zl)
         (p ◁ ty_shrref α (ty_mutref β (X:=X) T)) Γ Γr get getr,
-      !LftIncl κ α, !LftIncl κ β) :
+      !Ty T, !LftIncl κ α, !LftIncl κ β) :
     ⊢ type κ Γ (!p) (λ r, r ◁ ty_shrref (α ⊓ β) T ᵖ:: Γr)
         (λ post yl, post ((get yl).1', getr yl)').
   Proof.
@@ -165,12 +167,16 @@ Section ptrs_more.
     rewrite etcx_extract ty_shrref_unseal ty_mutref_unseal /=. iIntros "[p Γr]".
     iDestruct "p" as (??????[=->]? eq) "big". wp_path p. rewrite sem_cif_in /=.
     iMod (stored_acc with "big") as "/=big".
-    iDestruct "big" as (????? eq') "(>↦ & _ & T)".
+    iDestruct "big" as (?????? eq') "(>#⊑ & >↦ & _ & #?)".
     iDestruct (lft_incl'_live_acc (β ⊓ α) with "κ") as (?) "[βα →κ]".
     iMod (spointsto_acc with "βα ↦") as (?) "[↦ →βα]". wp_read=>/=.
     iMod ("→βα" with "↦") as "βα". iDestruct ("→κ" with "βα") as "$". iModIntro.
-    rewrite [_ ⊓ _]comm. iFrame "pre Γr T". iPureIntro. eexists _, _.
-    do 3 split=>//=. move=> ?. by rewrite -eq eq'.
+    rewrite [_ ⊓ _]comm. iFrame "pre Γr". iExists _, _. iSplit=>//.
+    iExists _, _, _. do 2 iSplit=>//. iSplit; last first.
+    { iModIntro. rewrite !sem_cif_in /=. iApply store_wand; [|done].
+      iIntros (????) "T !>". iApply (ty_shr_lft with "[] T").
+      by iApply lft_sincl_meet_mono_l. }
+    iPureIntro=> ?. by rewrite -eq eq'.
   Qed.
 
   (** Dereference a mutable reference to a box pointer *)

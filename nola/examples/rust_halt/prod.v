@@ -56,6 +56,8 @@ Section ty_prod.
     - move=> ?. f_equiv; exact: ty_shr_depth.
     - move=> eq. do 6 f_equiv; apply: ty_own_clair=>/= ?; by rewrite eq.
     - move=> eq. f_equiv; apply: ty_shr_clair=>/= ?; by rewrite eq.
+    - iIntros "#⊑ [#T #U]".
+      iSplit; by [iApply (ty_shr_lft (T:=T))|iApply (ty_shr_lft (T:=U))].
   Qed.
 
   (** [ty_prod] preserves [TyOpAt] *)

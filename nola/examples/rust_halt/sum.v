@@ -75,6 +75,13 @@ Section ty_sum.
       case: b=>/=; (do 4 f_equiv)=> ??; by rewrite -eq.
     - move=> eq. f_equiv=> b. f_equiv.
       case: b=>/=; (do 4 f_equiv)=> ??; by rewrite -eq.
+    - iIntros "#⊑".
+      iDestruct 1 as ([|]) "/=[#↦ (% & % & #↦S & % & % & #↦r)]";
+        [iExists true|iExists false]=>/=;
+        (iSplit; [iNext; by iApply fbor_tok_lft|]); iExists _; (iSplit=>//);
+        [iSplit; [by iApply (ty_shr_lft (T:=U))|]|
+          iSplit; [by iApply (ty_shr_lft (T:=T))|]]; iExists _; (iSplit=>//);
+          iNext; by iApply spointsto_vec_lft.
   Qed.
 
   (** [ty_sum] preserves [TyOpAt] *)
