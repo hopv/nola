@@ -79,7 +79,7 @@ Section num.
     eexists _, 0. split; [by rewrite of_path_val|]. eexists _. split=>//= ?.
     by rewrite eq eq'.
   Qed.
-  Lemma type_int_eq p p' {κ}
+  Lemma type_eq_int p p' {κ}
     `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[p ◁ ty_int; p' ◁ ty_int] Γi Γr get getr) :
     ⊢ type κ Γi (p = p') (λ r, r ◁ ty_bool ᵖ:: Γr)
         (λ post xl, let '(n, n', _)' := get xl in
@@ -93,7 +93,7 @@ Section num.
     eexists _, 0. split; [by rewrite of_path_val|]. eexists _. split=>//= ?.
     by rewrite eq eq'.
   Qed.
-  Lemma type_int_le p p' {κ}
+  Lemma type_le_int p p' {κ}
     `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[p ◁ ty_int; p' ◁ ty_int] Γi Γr get getr) :
     ⊢ type κ Γi (p ≤ p') (λ r, r ◁ ty_bool ᵖ:: Γr)
         (λ post xl, let '(n, n', _)' := get xl in
@@ -147,7 +147,7 @@ Section num.
     rewrite proph_obs_sat. iRevert "pre". iPureIntro. case=>/= [?+].
     rewrite eq eq'. case=> ??. do 3 f_equal. lia.
   Qed.
-  Lemma type_nat_eq p p' {κ}
+  Lemma type_eq_nat p p' {κ}
     `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[p ◁ ty_nat; p' ◁ ty_nat] Γi Γr get getr) :
     ⊢ type κ Γi (p = p') (λ r, r ◁ ty_bool ᵖ:: Γr)
         (λ post xl, let '(n, n', _)' := get xl in
@@ -161,7 +161,7 @@ Section num.
     eexists _, 0. split; [by rewrite of_path_val|]. eexists _. split=>//= ?.
     rewrite eq eq'. apply bool_decide_ext. lia.
   Qed.
-  Lemma type_nat_le p p' {κ}
+  Lemma type_le_nat p p' {κ}
     `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[p ◁ ty_nat; p' ◁ ty_nat] Γi Γr get getr) :
     ⊢ type κ Γi (p ≤ p') (λ r, r ◁ ty_bool ᵖ:: Γr)
         (λ post xl, let '(n, n', _)' := get xl in
