@@ -179,7 +179,7 @@ Lemma lft_incl'_live_acc `{!lftG Σ} α `(!LftIncl κ α) {q} :
   q.[κ] ⊢ ∃ r, r.[α] ∗ (r.[α] -∗ q.[κ]).
 Proof. exact: lft_incl_live_acc. Qed.
 
-(** ** Utility on the language *)
+(** ** Utility for the program logic *)
 
 Section lrust.
   Context `{!lrustGS_gen hlc Σ}.

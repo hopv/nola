@@ -1,4 +1,4 @@
-(** * Utility on equality *)
+(** * Utility for equality *)
 
 From nola Require Export prelude.
 Import EqNotations.
