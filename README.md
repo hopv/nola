@@ -213,10 +213,12 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     * [`ptr`](nola/examples/rust_halt/ptr.v) (Utility for pointer types),
       [`box`](nola/examples/rust_halt/box.v) (Box pointer type),
       [`shrref`](nola/examples/rust_halt/shrref.v) (Shared reference type),
-      [`mutref`](nola/examples/rust_halt/mutref.v) (Mutable reference type),
-      [`ptrs_more`](nola/examples/rust_halt/ptrs_more.v) (More on basic pointer
-        types)
-    * [`sum_more`](nola/examples/rust_halt/sum_more.v) (More on the sum type)
+      [`mutref`](nola/examples/rust_halt/mutref.v) (Mutable reference type)
+    * [`ptrs_more`](nola/examples/rust_halt/ptrs_more.v) (More on basic pointer
+        types),
+      [`prod_more`](nola/examples/rust_halt/prod_more.v) (More on the product
+        type)
+      [`sum_more`](nola/examples/rust_halt/sum_more.v) (More on the sum type)
     * [`adequacy`](nola/examples/rust_halt/adequacy.v) (Adequacy)
     * [`verify/`](nola/examples/rust_halt/verify/) (Verification examples)
       - [`util`](nola/examples/rust_halt/verify/util.v) (Utility)

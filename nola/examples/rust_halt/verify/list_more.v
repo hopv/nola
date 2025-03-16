@@ -1,6 +1,7 @@
 (** * More on the list type *)
 
-From nola.examples.rust_halt Require Export verify.list ptrs_more sum_more core.
+From nola.examples.rust_halt Require Export verify.list ptrs_more prod_more
+  sum_more core.
 
 Implicit Type (X : xty) (v : val).
 
