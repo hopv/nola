@@ -25,6 +25,10 @@ Section deriv.
     iSplit; by iIntros.
   Qed.
 
+  (** Allocate a relaxed invariant *)
+  Lemma inv'_alloc `{!Deriv ih δ} {N Px} : ⟦ Px ⟧ᶜ =[inv_wsat ⟦⟧ᶜ]=∗ inv' δ N Px.
+  Proof. rewrite -inv_tok_inv'. exact: inv_tok_alloc. Qed.
+
   (** Access the body of a relaxed invariant *)
   Lemma invd_acc {N Px E} : ↑N ⊆ E →
     invd N Px =[inv_wsat ⟦⟧ᶜ]{E,E∖↑N}=∗
