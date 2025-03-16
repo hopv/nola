@@ -1065,8 +1065,7 @@ Arguments type {_ _ _ _ _ _ _ _} _ _ _%_E _ _.
 (** ** Extraction from a type context *)
 
 Section tcx_extract.
-  Context `{!rust_haltGS CON Σ, !Csem CON JUDG Σ,
-    !Jsem JUDG (iProp Σ)}.
+  Context `{!rust_haltGS CON Σ, !Csem CON JUDG Σ, !Jsem JUDG (iProp Σ)}.
 
   (** Extract a type context element *)
   Class EtcxExtract {X Yl Zl} (E : etcx CON Σ X) (Γ : tcx CON Σ Yl)
