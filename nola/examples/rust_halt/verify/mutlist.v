@@ -111,6 +111,25 @@ Section mutlist.
     by case.
   Qed.
 
+  (** Modify the lifetime of [ty_mutlist] *)
+  Lemma subty_mutlist_lft `{!Deriv ih δ, !Ty (X:=X) T} {β α} :
+    α ⊑□ β -∗ β ⊑□ α -∗ subty δ (ty_mutlist α T) (ty_mutlist β T) id.
+  Proof.
+    move: α β. apply Deriv_ind. clear dependent δ=> δ ?. iIntros (??) "#αβ #βα".
+    erewrite subty_proper_fun.
+    { iApply subty_trans; [iApply (subty_mutlist_unfold (T:=T))|].
+      iApply subty_trans; [|iApply (subty_mutlist_fold (T:=T))].
+      iApply (subty_sum (T:=ty_unit) (T':=ty_unit)
+        (U:=ty_prod _ (ty_mutref _ (ty_mutlist _ _)))
+        (U':=ty_prod _ (ty_mutref _ (ty_mutlist _ _))));
+        [by iApply subty_refl|].
+      iApply (subty_prod (U:=ty_mutref _ (ty_mutlist _ _))
+        (U':=ty_mutref _ (ty_mutlist _ _))); [by iApply subty_refl|].
+      iApply subty_trans; [by iApply (subty_mutref_lft (T:=ty_mutlist α T))|].
+      iApply subty_mutref. iIntros "!>" (??[IH ?]). iSplit; by iApply IH. }
+    move=>/= [|???]//=.
+  Qed.
+
   (** Subtyping over [ty_mutlist] *)
   Lemma subty_mutlist `{!Deriv ih δ, !Ty (X:=X) T, !Ty U} {α} :
     (∀ δ', ⌜Deriv ih δ'⌝ → subty δ' T U id ∧ subty δ' U T id) ⊢
