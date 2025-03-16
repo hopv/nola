@@ -25,7 +25,7 @@ Section deriv.
     iSplit; by iIntros.
   Qed.
 
-  (** Access using [invd] *)
+  (** Access the body of a relaxed invariant *)
   Lemma invd_acc {N Px E} : ↑N ⊆ E →
     invd N Px =[inv_wsat ⟦⟧ᶜ]{E,E∖↑N}=∗
       ⟦ Px ⟧ᶜ ∗ (⟦ Px ⟧ᶜ =[inv_wsat ⟦⟧ᶜ]{E∖↑N,E}=∗ True).
@@ -35,7 +35,7 @@ Section deriv.
     iDestruct ("PQ" with "Qx") as "$". iIntros "!> Px". iApply "cl".
     by iApply "PQ".
   Qed.
-  (** Access using [invd] via view shift *)
+  (** Access the body of a relaxed invariant via a view shift *)
   Lemma invd_acc_vs {N Px E Q R} : ↑N ⊆ E →
     □ (⟦ Px ⟧ᶜ -∗ Q =[inv_wsat ⟦⟧ᶜ]{E∖↑N}=∗ ⟦ Px ⟧ᶜ ∗ R) -∗
       □ (invd N Px -∗ Q =[inv_wsat ⟦⟧ᶜ]{E}=∗ R).
@@ -43,7 +43,7 @@ Section deriv.
     iIntros (?) "#vs !> i Q". iMod (invd_acc with "i") as "[Px cl]"; [done|].
     iMod ("vs" with "Px Q") as "[Px $]". by iApply "cl".
   Qed.
-  (** Access using [invd] via [twp] *)
+  (** Access the body of a relaxed invariant via a total Hoare triple *)
   Lemma invd_acc_twp {N Px E Q Ψ} `{!Atomic (stuckness_to_atomicity s) e} :
     ↑N ⊆ E → to_val e = None →
     [[{ ⟦ Px ⟧ᶜ ∗ Q }]][inv_wsat ⟦⟧ᶜ] e @ s; E∖↑N
@@ -56,7 +56,7 @@ Section deriv.
     iMod ("cl" with "Px") as "_". iModIntro. by iApply "→Φ".
   Qed.
 
-  (** General rule for semantic alteration *)
+  (** General rule for semantic alteration of relaxed invariants *)
   Lemma inv'_iff `{!Deriv ih δ} {N Px Qx} :
     □ (∀ δ', ⌜Deriv ih δ'⌝ → ⌜ih δ'⌝ → ⌜dinto δ δ'⌝ →
       ⟦ Px ⟧ᶜ(δ') ∗-∗ ⟦ Qx ⟧ᶜ(δ')) -∗
@@ -77,7 +77,7 @@ Section deriv.
     rewrite bi.wand_iff_sym. by iApply "iff".
   Qed.
 
-  (** Derived semantic alteration *)
+  (** Derived semantic alteration of relaxed invariants *)
   Local Lemma inv'_sep_comm' `{!Deriv ih δ} {N Px Qx} :
     inv' δ N (Px ∗ Qx)%cif ⊢ inv' δ N (Qx ∗ Px)%cif.
   Proof.
