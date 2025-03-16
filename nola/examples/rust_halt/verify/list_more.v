@@ -69,15 +69,16 @@ Section list.
         apply: tcx_extract_cons; [|exact _]. exact: etcx_extract_tl. }
       iIntros (?). type_bind (!_)%E; [by iApply type_deref_mutref_box|].
       iIntros (v'). iApply "IH". }
-    move=>/= ?[[[|??]?]?]/=[leq to]//=[??]/(f_equal list_wrap)/=.
+    move=>/= ?[[[|??]?]?]/=[leq to]//=[??] /(f_equal list_wrap)/=.
     rewrite list_wrap_unwrap=> eq. move: (to _ _ eq). apply Proper0=> ??.
     split=>//. by case: leq.
   Qed.
 
   (** Lemma for [type_iter_list_mut_fun] *)
   Lemma pre_iter_list_mut_fun {X Yl} (g : X → X) {post xl xl' yl} :
-    @pre_iter_list_mut X Yl (λ post '((x, x')', yl)', x' = g x → post yl)
-      post xl xl' yl ↔ (xl' = g <$> xl → post yl).
+    @pre_iter_list_mut X Yl
+      (λ post '((x, x')', yl)', x' = g x → post yl) post xl xl' yl ↔
+      (xl' = g <$> xl → post yl).
   Proof.
     move: xl' yl. elim: xl=>//= ?? IH xl' yl. split.
     - case: xl'=>//= ?? H [??]. subst. eapply IH; [exact: H|done].
