@@ -176,7 +176,8 @@ All the proof rules are proved to be sound with respect to the semantic model.
   + Verifying iterc2, with two counters under the lexicographic order:
       `twp_iter2_ilist`.
   + Verifying iteration using any step function under any well-founded relation:
-      `twp_iter_step_ilist`.
+      `twp_iterst_ilist`, with an instantiation example
+      `twp_iterst_ilist_step2`.
 - Examples for magic derivability:
     [`nola.examples.deriv`](nola/examples/deriv.v).
   + Examples of semantic alteration: `inv'_sep_comm`, `inv'_inv'_sep_comm` and

@@ -1,5 +1,6 @@
 (** * Infinite shared mutable linked list examples *)
 
+From nola.util Require Export wf.
 From nola.examples Require Export con.
 From nola.lrust Require Export notation proofmode.
 Import ProeqvNotation FunPRNotation ModwNotation WpwNotation CsemNotation.
@@ -178,7 +179,7 @@ Section ilist.
     performing an unbounded number of steps by bumping up [c'] to a
     non-deterministic natural number when decrementing [c] *)
   Definition iter2_ilist : val := rec: "self" ["f"; "c"; "c'"; "l"] :=
-    if:: !"c" > #0 then
+    if:: (!"c" > #0) || (!"c'" > #0) then
       "f" ["l"];;
       (if: !"c'" > #0 then "c'" <- !"c'" - #1
         else "c" <- !"c" - #1;; "c'" <- Ndnat);;
@@ -188,18 +189,19 @@ Section ilist.
     (∀ l', [[{ inv_tok N (Φx l') }]][inv_wsat ⟦⟧ᶜ] f [ #l'] @ E
       [[{ v, RET v; True }]]) -∗
     [[{ c ↦ #m ∗ c' ↦ #n ∗ ilist N N' Φx l }]][inv_wsat ⟦⟧ᶜ]
-      iter2_ilist [f; #c; #c'; #l] @ E [[{ RET #☠; c ↦ #0 }]].
+      iter2_ilist [f; #c; #c'; #l] @ E [[{ RET #☠; c ↦ #0 ∗ c' ↦ #0 }]].
   Proof.
     iIntros "%% #f" (Ψ) "!> (↦ & ↦' & #l) →Ψ".
-    iInduction m as [|m] "IH" forall (n l) "l".
-    { wp_rec. wp_read. wp_op. wp_if. by iApply "→Ψ". }
-    iInduction n as [|n] "IH'" forall (l) "l"; wp_rec; wp_read; wp_op; wp_if;
+    iInduction m as [|m] "IH" forall (n l) "l";
+      iInduction n as [|n] "IH'" forall (l) "l";
+      wp_rec; wp_read; wp_op; wp_read; do 2 wp_op; wp_if;
+      [iApply ("→Ψ" with "[$↦ $↦']")|..]; last 2 first;
       (wp_apply "f"; [by iDestruct "l" as "[$ _]"|]); iIntros (?) "_"; wp_seq;
       wp_read; wp_op; wp_case; wp_read; wp_op; wp_write;
-      [wp_apply twp_ndnat=>//; iIntros (?) "_"; wp_write|];
-      (wp_apply twp_tail_list; [|done..|]=>//); iIntros (l') "#ltl".
-    - have -> : (S m - 1)%Z = m by lia. iApply ("IH" with "↦ ↦' →Ψ ltl").
-    - have -> : (S n - 1)%Z = n by lia. iApply ("IH'" with "↦ ↦' →Ψ ltl").
+      [wp_apply twp_ndnat=>//; iIntros (?) "_"; wp_write|..];
+      (wp_apply twp_tail_list; [|done..|]=>//); iIntros (l') "#ltl";
+      [(have -> : S m - 1 = m by lia); iApply ("IH" with "↦ ↦' →Ψ ltl")|
+        (have -> : S n - 1 = n by lia); iApply ("IH'" with "↦ ↦' →Ψ ltl")..].
   Qed.
   (** Perform [iter2_ilist] with an unbounded number of threads *)
   Definition forks_iter2_ilist : val := rec: "self" ["f"; "k"; "l"] :=
@@ -242,16 +244,16 @@ Section ilist.
 
   (** Iterate over a list using any step function [s] that is guaranteed to
     eventually cause termination by any well-founded relation [Rel] *)
-  Definition iter_step_ilist : val := rec: "self" ["f"; "s"; "l"] :=
-    if:: "s" [] then "f" ["l"];; "self" ["f"; "s"; tail_ilist ["l"]].
-  Lemma twp_iter_step_ilist {N N' E Φx l A Rel Ω P a} {f s : val} :
+  Definition iterst_ilist : val := rec: "self" ["f"; "s"; "c"; "l"] :=
+    if:: "s" ["c"] then "f" ["l"];; "self" ["f"; "s"; "c"; tail_ilist ["l"]].
+  Lemma twp_iterst_ilist {N N' E Φx l A Rel Ω P a} {f s c : val} :
     @Acc A Rel a → ↑N ⊆ E → ↑N' ⊆ E →
-    (∀ a, [[{ Ω a }]][inv_wsat ⟦⟧ᶜ] s [] @ E
+    (∀ a, [[{ Ω a }]][inv_wsat ⟦⟧ᶜ] s [c] @ E
       [[{ (b : bool), RET #b; if b then ∃ a', ⌜Rel a' a⌝ ∗ Ω a' else P }]]) -∗
     (∀ l', [[{ inv_tok N (Φx l') }]][inv_wsat ⟦⟧ᶜ] f [ #l'] @ E
       [[{ v, RET v; True }]]) -∗
     [[{ Ω a ∗ ilist N N' Φx l }]][inv_wsat ⟦⟧ᶜ]
-      iter_step_ilist [f; s; #l] @ E [[{ RET #☠; P }]].
+      iterst_ilist [f; s; c; #l] @ E [[{ RET #☠; P }]].
   Proof.
     iIntros "%Acc %% #s #f" (Ψ) "!> [Ω #l] →Ψ".
     iInduction Acc as [] "IH" forall (l) "l". wp_rec. wp_apply ("s" with "Ω").
@@ -259,6 +261,43 @@ Section ilist.
     iIntros "[%[% Ω]]". wp_case. wp_apply "f"; [by iDestruct "l" as "[$ _]"|].
     iIntros (?) "_". wp_seq. wp_apply twp_tail_list; [|done..|]=>//.
     iIntros (l') "#ltl". iApply ("IH" with "[//] Ω →Ψ ltl").
+  Qed.
+
+  (** Example step function: Lexicographic order over two natural numbers *)
+  Definition step2 : val := λ: ["c"],
+    let: "c'" := "c" +ₗ #1 in
+    if: (!"c" ≤ #0) && (!"c'" ≤ #0) then #false else
+      (if: ! "c'" > #0 then "c'" <- !"c'" - #1 else
+        "c" <- !"c" - #1;; "c'" <- Ndnat);; #true.
+  Definition pred_step2 (c : loc) (mn : nat * nat) : iProp Σ :=
+    c ↦ #mn.1 ∗ (c +ₗ 1) ↦ #mn.2.
+  Lemma twp_step2 {E c mn} :
+    [[{ pred_step2 c mn }]][inv_wsat ⟦⟧ᶜ]
+      step2 [ #c] @ E
+    [[{ (b : bool), RET #b; if b then ∃ mn', ⌜lexico mn' mn⌝ ∗ pred_step2 c mn'
+          else c ↦ #0 ∗ (c +ₗ 1) ↦ #0 }]].
+  Proof.
+    case: mn=> [m n]. iIntros (?) "[↦ ↦']/= →Φ". wp_rec. wp_op. wp_let. wp_read.
+    wp_op. wp_read. do 2 wp_op. wp_case. rewrite andb_comm.
+    case: n=>/= [|n]; [case: m=>/= [|m]|];
+      [wp_value_head; iApply "→Φ"; by iFrame|..]; wp_read; wp_op; wp_case;
+      wp_read; wp_op; wp_write;
+      [wp_apply twp_ndnat=>//; iIntros (?) "_"; wp_write|]; iApply "→Φ";
+      iExists (_, _)=>/=;
+        [have ->: S m - 1 = m by lia|have ->: S n - 1 = n by lia]; iFrame;
+        iPureIntro; [left|right; split=>//]=>/=; exact: le_n.
+  Qed.
+  Lemma twp_iterst_ilist_step2 {N N' E Φx l mn c} {f : val} :
+    ↑N ⊆ E → ↑N' ⊆ E →
+    (∀ l', [[{ inv_tok N (Φx l') }]][inv_wsat ⟦⟧ᶜ] f [ #l'] @ E
+      [[{ v, RET v; True }]]) -∗
+    [[{ pred_step2 c mn ∗ ilist N N' Φx l }]][inv_wsat ⟦⟧ᶜ]
+      iterst_ilist [f; step2; #c; #l] @ E [[{ RET #☠; c ↦ #0 ∗ (c +ₗ 1) ↦ #0 }]].
+  Proof.
+    iIntros (??) "#i".
+    iApply (twp_iterst_ilist (c:=#c) with "[] i");
+      [|done..|iIntros (?) "!> %"; by iApply twp_step2].
+    apply wf_prod_lexico; exact wf_nat_lt.
   Qed.
 
   (** Example invariant: [l] stores a multiple of 3 *)
