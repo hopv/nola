@@ -15,7 +15,7 @@ Section sum_more.
     {Zl'' Γo e e' pre pre'} :
     type (Yl:=Zl'') κ (p +ₗ #1 ◁ ty_shrref α T ᵖ:: Γr) e Γo pre -∗
     type κ (p +ₗ #1 ◁ ty_shrref α U ᵖ:: Γr) e' Γo pre' -∗
-      type κ Γi (case! !p of [e; e']) Γo (λ post zl, let zl' := getr zl in
+      type κ Γi (case:: !p of [e; e']) Γo (λ post zl, let zl' := getr zl in
         match get zl with
           inl x => pre post (x, zl')' | inr y => pre' post (y, zl')' end).
   Proof.
@@ -44,7 +44,7 @@ Section sum_more.
     {Zl'' Γo e e' pre pre'} :
     type (Yl:=Zl'') κ (p +ₗ #1 ◁ ty_mutref α T ᵖ:: Γr) e Γo pre -∗
     type κ (p +ₗ #1 ◁ ty_mutref α U ᵖ:: Γr) e' Γo pre' -∗
-      type κ Γi (case! !p of [e; e']) Γo (λ post zl, let zl' := getr zl in
+      type κ Γi (case:: !p of [e; e']) Γo (λ post zl, let zl' := getr zl in
         let '(s, s')' := get zl in
         match s with
         | inl x => ∀ x' : X, s' = inl x' → pre post ((x, x')', zl')'

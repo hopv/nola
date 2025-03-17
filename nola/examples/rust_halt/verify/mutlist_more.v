@@ -12,7 +12,7 @@ Section mutlist.
 
   (** [iter_mutlist]: Iterate over [mutlist] *)
   Definition iter_mutlist (sz : nat) : val := rec: "self" ["f"; "l"] :=
-    case! !"l" of [
+    case:: !"l" of [
       #☠;
       "f" ["l" +ₗ #1 +ₗ #0];; "self" ["f"; !("l" +ₗ #1 +ₗ #sz)]
     ].

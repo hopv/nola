@@ -24,7 +24,7 @@ Notation "# l" := (Lit l%Z%V%L) (at level 8, format "# l") : expr_scope.
 (** Syntax inspired by Coq/Ocaml. Constructions with higher precedence come
     first. *)
 
-Notation "'case!' e0 'of' el" := (Case e0%E el%E)
+Notation "'case::' e0 'of' el" := (Case e0%E el%E)
   (at level 102, e0, el at level 150) : expr_scope
   (* Instead of 'case:' to avoid conflicts with SSReflect *).
 Notation "'if:' e1 'then' e2 'else' e3" := (If e1%E e2%E e3%E)
