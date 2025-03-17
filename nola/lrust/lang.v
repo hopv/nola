@@ -53,6 +53,8 @@ Inductive expr : Set :=
 | Fork (e : expr)
 | Ndnat (* Taking a non-deterministic natural number, newly added for Nola *).
 
+Bind Scope expr_scope with expr.
+
 Global Arguments App _%_E _%_E.
 Global Arguments Case _%_E _%_E.
 
