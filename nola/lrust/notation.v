@@ -60,6 +60,10 @@ Notation "e1 > e2" := (BinOp GtOp e1%E e2%E)
   (at level 70) : expr_scope.
 Notation "e1 +ₗ e2" := (BinOp OffsetOp e1%E e2%E)
   (at level 50, left associativity) : expr_scope.
+Notation "e1 && e2" := (BinOp AndOp e1%E e2%E)
+  (at level 40, left associativity) : expr_scope.
+Notation "e1 || e2" := (BinOp OrOp e1%E e2%E)
+  (at level 50, left associativity) : expr_scope.
 (* The unicode ← is already part of the notation "_ ← _; _" for bind. *)
 Notation "e1 <-ˢᶜ e2" := (Write ScOrd e1%E e2%E)
   (at level 80) : expr_scope.

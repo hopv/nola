@@ -23,7 +23,7 @@ Inductive un_op : Set :=
 | OppOp | NegbOp. (** Added in Nola *)
 Inductive bin_op : Set :=
 | EqOp | PlusOp | MinusOp | MulOp | DivOp | ModOp
-| LeOp | LtOp | GeOp | GtOp | OffsetOp. (** Enriched in Nola *)
+| LeOp | LtOp | GeOp | GtOp | OffsetOp | AndOp | OrOp. (** Enriched in Nola *)
 
 Inductive order : Set :=
 | ScOrd | Na1Ord | Na2Ord.
@@ -268,7 +268,11 @@ Inductive bin_op_eval (σ : state) : bin_op → base_lit → base_lit → base_l
 | BinOpGt z1 z2 :
     bin_op_eval σ GtOp (LitInt z1) (LitInt z2) (lit_of_bool $ bool_decide (z1 > z2))
 | BinOpOffset l z :
-    bin_op_eval σ OffsetOp (LitLoc l) (LitInt z) (LitLoc $ l +ₗ z).
+    bin_op_eval σ OffsetOp (LitLoc l) (LitInt z) (LitLoc $ l +ₗ z)
+| BinOpAnd b1 b2 :
+    bin_op_eval σ AndOp (lit_of_bool b1) (lit_of_bool b2) (lit_of_bool $ b1 && b2)
+| BinOpOr b1 b2 :
+    bin_op_eval σ OrOp (lit_of_bool b1) (lit_of_bool b2) (lit_of_bool $ b1 || b2).
 
 Definition stuck_term := App (Lit $ LitInt 0) [].
 

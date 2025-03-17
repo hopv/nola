@@ -61,6 +61,7 @@ Ltac inv_bin_op_eval :=
   repeat match goal with
   | H : bin_op_eval _ ?c _ _ _ |- _ => is_constructor c; inversion H; clear H;
     simplify_eq/=
+  | H : Z.b2z ?b = Z.b2z ?b' |- _ => apply Z.b2z_inj in H; simplify_eq/=
   end.
 
 Local Hint Extern 0 (atomic _) => solve_atomic : core.
@@ -215,6 +216,15 @@ Proof. solve_pure_exec. Qed.
 Global Instance pure_gt n1 n2 :
   PureExec True 1 (BinOp GtOp (Lit (LitInt n1)) (Lit (LitInt n2)))
     (Lit (bool_decide (n1 > n2))).
+Proof. solve_pure_exec. Qed.
+
+Global Instance pure_and b1 b2 :
+  PureExec True 1 (BinOp AndOp (Lit (lit_of_bool b1)) (Lit (lit_of_bool b2)))
+    (Lit (lit_of_bool $ b1 && b2)).
+Proof. solve_pure_exec. Qed.
+Global Instance pure_or b1 b2 :
+  PureExec True 1 (BinOp OrOp (Lit (lit_of_bool b1)) (Lit (lit_of_bool b2)))
+    (Lit (lit_of_bool $ b1 || b2)).
 Proof. solve_pure_exec. Qed.
 
 Global Instance pure_offset l z  :
