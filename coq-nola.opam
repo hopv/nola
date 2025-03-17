@@ -1,5 +1,5 @@
 opam-version: "2.0"
-synopsis: "Later-Free Ghost State for Verifying Termination"
+synopsis: "Later-free ghost state for verifying termination in Iris"
 maintainer: "Yusuke Matsushita <ysk.m24t@gmail.com>"
 authors: ["Yusuke Matsushita <ysk.m24t@gmail.com>"]
 license: "MIT"

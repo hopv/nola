@@ -1,4 +1,4 @@
-# Nola: Later-Free Ghost State for Verifying Termination
+# Nola: Later-Free Ghost State for Verifying Termination in Iris
 
 Nola is a framework for _later-free higher-order ghost state_, enabling
 termination verification in the presence of advanced features.
@@ -17,7 +17,7 @@ Louisiana, USA, in memory of POPL 2020 held in that city.
 ## Publications
 
 - Yusuke Matsushita and Takeshi Tsukada. Nola: Later-Free Ghost State for
-    Verifying Termination. \
+    Verifying Termination in Iris. \
   ACM PLDI 2025. June 2025.
 - Yusuke Matsushita. Non-Step-Indexed Separation Logic with Invariants and
     Rust-Style Borrows. \
