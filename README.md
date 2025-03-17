@@ -104,21 +104,14 @@ Coq mechanization.
 
 ### Paradoxes
 
-- Paradoxes of the naive later-free invariant.
-  + Paradox for the program logic based on Landin's knot:
-      [`nola.bi.paradox.inv_landin`](nola/bi/paradox.v).
-  + Purely logical paradox using view shifts:
-      [`nola.bi.paradox.inv_fupd`](nola/bi/paradox.v).
-- Paradox of the step-indexed total Hoare triple:
-    [`nola.bi.paradox.twp`](nola/bi/paradox.v).
-- Paradoxes of unbounded later weakening.
-  + Paradoxes under finite step-indexing.
-    * One based on the `bi` axioms:
-        [`nola.bi.paradox.exist_laterN`](nola/bi/paradox.v).
-    * One based on the `uPred` model:
-        [`nola.iris.paradox.exist_laterN_uPred`](nola/iris/paradox.v).
-  + Paradox under transfinite step-indexing:
-      [`nola.bi.paradox.exist_laterOrd`](nola/bi/paradox.v).
+- Paradoxes: [`nola.bi.paradox`](nola/bi/paradox.v).
+  + Paradoxes of the naive later-free invariant.
+    * For the program logic based on Landin's knot: `inv_landin`.
+    * Purely logically for view shifts: `inv_vs`.
+  + Paradox of the step-indexed total Hoare triple: `twp`.
+  + Paradoxes of unbounded later weakening.
+    * Under finite step-indexing: `exist_laterN`.
+    * Under transfinite step-indexing: `exist_laterOrd`.
 
 ### Later-Free Ghost State
 
