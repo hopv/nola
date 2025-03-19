@@ -1,7 +1,8 @@
 # Nola: Later-Free Ghost State for Verifying Termination in Iris
 
 Nola is a framework for _later-free higher-order ghost state_, enabling
-termination verification in the presence of advanced features.
+termination verification in the presence of advanced features such as Rust's
+ownership types.
 
 It is fully mechanized in [Coq](https://coq.inria.fr/) as a library for the
 [Iris](https://iris-project.org/) separation logic framework.
@@ -12,7 +13,7 @@ Louisiana, USA, in memory of POPL 2020 held in that city.
 - [Publications](#publications)
 - [Getting Started](#getting-started)
 - [Connection with the PLDI 2025 Paper](#connection-with-the-pldi-2025-paper)
-- [Contents](#Contents)
+- [Overview of the Coq Code](#overview-of-the-coq-code)
 
 ## Publications
 
@@ -34,10 +35,10 @@ Louisiana, USA, in memory of POPL 2020 held in that city.
 
 Now we explain how to get started.
 
-- [Setting up Opam](#setting-up-opam)
+- [Setting Up Opam](#setting-up-opam)
 - [Building Nola](#building-nola)
 
-### Setting up Opam
+### Setting Up Opam
 
 We use [opam](https://opam.ocaml.org/) ver `2.*` for package management. To
 install opam, you can refer to
@@ -71,12 +72,12 @@ First, go to the directory `NOLA_DIR` where this `README.md` is located:
 cd NOLA_DIR
 ```
 
-To fix development dependencies and install them, run:
+To fix the development dependencies and install them, run:
 ```bash
 make devdep
 ```
 
-To build Nola's code locally, run:
+To build Nola's Coq code locally, run:
 ```bash
 make -j16 # Choose a job number
 ```
@@ -204,16 +205,16 @@ All the proof rules are proved to be sound with respect to the semantic model.
         [`mutlist_more.type_iter_mutlist_mut_fun`](nola/examples/rust_halt/verify/mutlist_more.v).
   + Adequacy: [`adequacy`](nola/examples/rust_halt/adequacy.v).
 
-## Contents
+## Overview of the Coq Code
 
-All the Coq code is in [`nola/`](nola/) and structured as follows:
+The Coq code is all in [`nola/`](nola/) and is structured as follows:
 - [`prelude`](nola/prelude.v) : Prelude
 - [`util/`](nola/util/) : General-purpose utilities, extending
-  [`stdpp`](https://gitlab.mpi-sws.org/iris/stdpp)
-  + [`eq`](nola/util/eq.v) (Equality)
-  + [`uip`](nola/util/uip.v) (UIP)
-  + [`fn`](nola/util/fn.v) (Functions)
-  + [`gmap`](nola/util/gmap.v) (On `gmap`),
+  [std++](https://gitlab.mpi-sws.org/iris/stdpp)
+  + [`eq`](nola/util/eq.v) (Equality),
+    [`uip`](nola/util/uip.v) (UIP)
+  + [`fn`](nola/util/fn.v) (Functions),
+    [`gmap`](nola/util/gmap.v) (On `gmap`),
     [`gmultiset`](nola/util/gmultiset.v) (On `gmultiset`)
   + [`prod`](nola/util/prod.v) (Modified product),
     [`bin`](nola/util/tree.v) (Binary tree),
@@ -270,9 +271,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
       derivability)
   + [`cif`](nola/iris/cif.v) (Coinductive-inductive formula)
   + [`paradox`](nola/iris/paradox.v) (Paradox)
-- [`heap_lang/`](nola/heap_lang/) : Variant of Iris HeapLang, supporting `Ndnat`
-    (infinite non-determinism) and program logic with custom world satisfactions
-    for Nola
+- [`heap_lang/`](nola/heap_lang/) : Variant of Iris HeapLang, supporting program
+    logic with custom world satisfactions for Nola
   + [`locations`](nola/heap_lang/locations.v) (On locations)
   + [`lang`](nola/heap_lang/lang.v) (Language),
     [`pretty`](nola/heap_lang/pretty.v) (Pretty printing for the language),
@@ -295,9 +295,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
       logic),
     [`total_adequacy`](nola/heap_lang/total_adequacy.v) (Termination adequacy of
       the program logic)
-- [`lrust/`](nola/lrust/) : Variant of λRust, or RustBelt's core language,
-    supporting `Ndnat` (infinite non-determinism) and program logic with
-    termination sensitivity and custom world satisfactions for Nola
+- [`lrust/`](nola/lrust/) : Variant of λRust, RustBelt's core language,
+    supporting program logic with custom world satisfactions for Nola
   + [`lang`](nola/lrust/lang.v) (Language),
     [`notation`](nola/lrust/notation.v) (Notation for the language),
     [`tactics`](nola/lrust/tactics.v) (Tactics for the language)
@@ -309,7 +308,7 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
   + [`adequacy`](nola/lrust/adequacy.v) (Adequacy of the program logic)
 - [`examples/`](nola/examples/) : Examples
   + [`xty`](nola/examples/xty.v) (Syntactic type),
-  + [`con`](nola/examples/con.v) (Constructors)
+    [`con`](nola/examples/con.v) (Constructors)
   + [`cfml`](nola/examples/cfml.v) (Demonstration of how our program logic can
       emulate CFML),
     [`basic`](nola/examples/basic.v) (Basic examples),
@@ -317,8 +316,8 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     [`borrow`](nola/examples/borrow.v) (Borrow),
     [`mutex`](nola/examples/mutex.v) (Mutex),
     [`deriv`](nola/examples/deriv.v) (Derivability)
-  + [`rust_halt/`](nola/examples/rust_halt/) : RustHalt, a formal foundation of
-      functional and termination-sensitive Rust program verification
+  + [`rust_halt/`](nola/examples/rust_halt/) : RustHalt, a semantic foundation
+      for total correctness verification of Rust programs
     * [`base`](nola/examples/rust_halt/base.v) (Basics),
       [`type`](nola/examples/rust_halt/type.v) (Type model)
     * [`core`](nola/examples/rust_halt/core.v) (Core features)
@@ -335,10 +334,10 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
     * [`ptrs_more`](nola/examples/rust_halt/ptrs_more.v) (More on basic pointer
         types),
       [`prod_more`](nola/examples/rust_halt/prod_more.v) (More on the product
-        type)
+        type),
       [`sum_more`](nola/examples/rust_halt/sum_more.v) (More on the sum type)
     * [`adequacy`](nola/examples/rust_halt/adequacy.v) (Adequacy)
-    * [`verify/`](nola/examples/rust_halt/verify/) (Verification examples)
+    * [`verify/`](nola/examples/rust_halt/verify/) : Verification examples
       - [`util`](nola/examples/rust_halt/verify/util.v) (Utility)
       - [`list`](nola/examples/rust_halt/verify/list.v) (Singly linked list
           type),
