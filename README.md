@@ -347,4 +347,4 @@ All the Coq code is in [`nola/`](nola/) and structured as follows:
       - [`mutlist`](nola/examples/rust_halt/verify/mutlist.v) (Singly linked
           list over a mutable reference),
         [`mutlist_more`](nola/examples/rust_halt/verify/mutlist_more.v) (More on
-          `mutlist`)
+          the `mutlist` type)

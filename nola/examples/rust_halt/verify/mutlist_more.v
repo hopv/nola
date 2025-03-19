@@ -1,4 +1,4 @@
-(** * More on [mutlist] *)
+(** * More on the [mutlist] type *)
 
 From nola.examples.rust_halt Require Export verify.mutlist ptrs_more prod_more
   sum_more core.
