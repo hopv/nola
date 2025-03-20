@@ -158,8 +158,9 @@ All the proof rules are proved to be sound with respect to the semantic model.
 
 - Demonstration of how our program logic can emulate CFML:
     [`nola.examples.cfml`](nola/examples/cfml.v).
-- Simple example of an unbounded loop:
-    [`nola.examples.basic.twp_just_loop_nd`](nola/examples/basic.v).
+- Basic examples: [`nola.examples.basic`](nola/examples/basic.v).
+  + Loop decrementing the value of a location: `twp_decr_loop`,
+      With non-deterministic initialization: `twp_decr_loop_nd`.
 - Examples of shared mutable infinite lists:
     [`nola.examples.ilist`](nola/examples/ilist.v).
   + Verifying tail access: `twp_tail_list`.
