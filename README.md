@@ -172,6 +172,12 @@ All the proof rules are proved to be sound with respect to the semantic model.
   + Verifying iteration using any step function under any well-founded relation:
       `twp_iterst_ilist`, with an instantiation example
       `twp_iterst_ilist_step2`.
+- Basic examples for borrows: [`nola.examples.borrow`](nola/examples/borrow.v).
+  + Dereference of nested mutable borrows: `bor_bor_deref`.
+  + Load from an immutable shared borrow over an integer: `imbor_load`.
+- Mutex examples for borrows: [`nola.examples.mutex`](nola/examples/mutex.v).
+  + Acquiring a lock via a shared borrow of a mutex: `mutex_bor_try_acquire`,
+      Create a shared borrow of a mutex: `mutex_bor_lend_new`.
 - Examples for magic derivability:
     [`nola.examples.deriv`](nola/examples/deriv.v).
   + Examples of semantic alteration: `inv'_sep_comm`, `inv'_inv'_sep_comm` and
@@ -269,7 +275,8 @@ The Coq code is all in [`nola/`](nola/) and is structured as follows:
     [`pborrow`](nola/iris/pborrow.v) (Prophetic borrows),
     [`pborrow_deriv`](nola/iris/pborrow_deriv.v) (Prophetic borrows relaxed with
       derivability)
-  + [`cif`](nola/iris/cif.v) (Coinductive-inductive formula)
+  + [`cif`](nola/iris/cif.v) (Modular construction of coinductive-inductive
+      formulas)
   + [`paradox`](nola/iris/paradox.v) (Paradox)
 - [`heap_lang/`](nola/heap_lang/) : Variant of Iris HeapLang, supporting program
     logic with custom world satisfactions for Nola
