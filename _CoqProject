@@ -108,6 +108,7 @@ nola/examples/rust_halt/prod_more.v
 nola/examples/rust_halt/sum_more.v
 nola/examples/rust_halt/adequacy.v
 nola/examples/rust_halt/verify/util.v
+nola/examples/rust_halt/verify/ack.v
 nola/examples/rust_halt/verify/list.v
 nola/examples/rust_halt/verify/list_more.v
 nola/examples/rust_halt/verify/mutlist.v

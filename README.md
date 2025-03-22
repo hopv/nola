@@ -347,6 +347,7 @@ The Coq code is all in [`nola/`](nola/) and is structured as follows:
     * [`adequacy`](nola/examples/rust_halt/adequacy.v) (Adequacy)
     * [`verify/`](nola/examples/rust_halt/verify/) : Verification examples
       - [`util`](nola/examples/rust_halt/verify/util.v) (Utility)
+      - [`ack`](nola/examples/rust_halt/verify/ack.v) (Ackermann function)
       - [`list`](nola/examples/rust_halt/verify/list.v) (Singly linked list
           type),
         [`list_more`](nola/examples/rust_halt/verify/list.v) (More on the list
