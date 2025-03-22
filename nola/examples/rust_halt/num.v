@@ -44,15 +44,40 @@ Section num.
     ⊢ subty δ ty_bool ty_nat (λ b, if b then 1 else 0).
   Proof. iApply (subty_pty pty_bool pty_nat)=>//. by iIntros ([|]?). Qed.
 
-  (** Integer operations *)
-  Lemma type_int (n : Z) {κ Xl Γ} :
-    ⊢ type (Xl:=Xl) κ Γ #n (λ r, r ◁ ty_int ᵖ:: Γ) (λ post xl, post (n, xl)').
+  (** Literals *)
+  #[export] Instance etcx_extract_int {Xl Γ} (n : Z) :
+    EtcxExtract (Yl:=Xl) (#n ◁ ty_int) Γ Γ (λ _, n) id | 20.
   Proof.
-    rewrite /ty_int ty_pty_unseal type_unseal /=.
-    iIntros (????) "!>/= $$ pre Γ". wp_value_head. iModIntro. iFrame "pre Γ".
-    iPureIntro. eexists _, 0. split; [by rewrite of_path_val|]=>/=.
-    by eexists _.
+    constructor. iIntros (??) "$". iExists _, 0. iSplit; [done|].
+    rewrite /ty_int ty_pty_unseal /=. by iExists _.
   Qed.
+  #[export] Instance etcx_extract_nat {Xl Γ} (n : nat) :
+    EtcxExtract (Yl:=Xl) (#n ◁ ty_nat) Γ Γ (λ _, n) id | 20.
+  Proof.
+    constructor. iIntros (??) "$". iExists _, 0. iSplit; [done|].
+    rewrite /ty_nat ty_pty_unseal /=. by iExists _.
+  Qed.
+  #[export] Instance etcx_extract_nat_zero {Xl Γ} :
+    EtcxExtract (Yl:=Xl) (#0 ◁ ty_nat) Γ Γ (λ _, 0) id | 5.
+  Proof. exact (etcx_extract_nat 0). Qed.
+  #[export] Instance etcx_extract_nat_pos {Xl Γ} (n : positive) :
+    EtcxExtract (Yl:=Xl) (#(Z.pos n) ◁ ty_nat) Γ Γ
+      (λ _, Pos.to_nat n) id | 5.
+  Proof. have ->: Z.pos n = Pos.to_nat n by lia. exact _. Qed.
+  #[export] Instance etcx_extract_bool {Xl Γ} (b : bool) :
+    EtcxExtract (Yl:=Xl) (#b ◁ ty_bool) Γ Γ (λ _, b) id | 20.
+  Proof.
+    constructor. iIntros (??) "$". iExists _, 0. iSplit; [done|].
+    rewrite /ty_bool ty_pty_unseal /=. by iExists _.
+  Qed.
+  #[export] Instance etcx_extract_bool_true {Xl Γ} :
+    EtcxExtract (Yl:=Xl) (#1 ◁ ty_bool) Γ Γ (λ _, true) id | 5.
+  Proof. exact (etcx_extract_bool true). Qed.
+  #[export] Instance etcx_extract_bool_false {Xl Γ} :
+    EtcxExtract (Yl:=Xl) (#0 ◁ ty_bool) Γ Γ (λ _, false) id | 5.
+  Proof. exact (etcx_extract_bool false). Qed.
+
+  (** Integer operations *)
   Lemma type_add_int p p' {κ}
     `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[p ◁ ty_int; p' ◁ ty_int] Γi Γr get getr) :
     ⊢ type κ Γi (p + p') (λ r, r ◁ ty_int ᵖ:: Γr)
@@ -109,14 +134,6 @@ Section num.
   Qed.
 
   (** Natural number operations *)
-  Lemma type_nat (n : nat) {κ Xl Γ} :
-    ⊢ type (Xl:=Xl) κ Γ #n (λ r, r ◁ ty_nat ᵖ:: Γ) (λ post xl, post (n, xl)').
-  Proof.
-    rewrite /ty_nat ty_pty_unseal type_unseal /=.
-    iIntros (????) "!>/= $$ pre Γ". wp_value_head. iModIntro. iFrame "pre Γ".
-    iPureIntro. eexists _, 0. split; [by rewrite of_path_val|]=>/=.
-    by eexists _.
-  Qed.
   Lemma type_add_nat p p' {κ}
     `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[p ◁ ty_nat; p' ◁ ty_nat] Γi Γr get getr) :
     ⊢ type κ Γi (p + p') (λ r, r ◁ ty_nat ᵖ:: Γr)
@@ -187,14 +204,6 @@ Section num.
   Qed.
 
   (** Boolean operations *)
-  Lemma type_bool (b : bool) {κ Xl Γ} :
-    ⊢ type (Xl:=Xl) κ Γ #b (λ r, r ◁ ty_bool ᵖ:: Γ) (λ post xl, post (b, xl)').
-  Proof.
-    rewrite /ty_bool ty_pty_unseal type_unseal /=.
-    iIntros (????) "!>/= $$ pre Γ". wp_value_head. iModIntro. iFrame "pre Γ".
-    iPureIntro. eexists _, 0. split; [by rewrite of_path_val|]=>/=.
-    by eexists _.
-  Qed.
   Lemma type_eq_bool p p' {κ}
     `(!TcxExtract (Yl:=Xl) (Zl:=Yl) ᵖ[p ◁ ty_bool; p' ◁ ty_bool] Γi Γr
         get getr) :
