@@ -1109,6 +1109,10 @@ Section tcx_extract.
     TcxExtract (E ᵖ:: Γ) Γg Γr
       (λ yl, get yl ᵖ:: get' (getr yl)) (λ yl, getr' (getr yl)).
   Proof. split=> ??. rewrite etcx_extract tcx_extract. iIntros "[$$]". Qed.
+  (** Extract all *)
+  #[export] Instance tcx_extract_all {Xl Γ} :
+    @TcxExtract _ Xl _ Γ Γ ᵖ[] id (λ _, ()).
+  Proof. split=> ??. by iIntros "$". Qed.
 
   (** Type context inclusion by [EtcxExtract] *)
   Lemma sub_etcx_extract `(!@EtcxExtract X Yl Zl E Γ Γr get getr) {κ} :
