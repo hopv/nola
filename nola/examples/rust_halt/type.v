@@ -1111,17 +1111,17 @@ Section tcx_extract.
   Proof. split=> ??. rewrite etcx_extract tcx_extract. iIntros "[$$]". Qed.
 
   (** Type context inclusion by [EtcxExtract] *)
-  Lemma sub_etcx_extract `{!@EtcxExtract X Yl Zl E Γ Γr get getr} {κ} :
+  Lemma sub_etcx_extract `(!@EtcxExtract X Yl Zl E Γ Γr get getr) {κ} :
     ⊢ sub κ Γ (E ᵖ:: Γr) (λ post yl, post (get yl, getr yl)').
   Proof.
     rewrite sub_unseal. iIntros (????) "!>/= $$ ?? !>". rewrite etcx_extract.
     iExists (λ _, (_,_)'). iFrame.
   Qed.
   (** Type context inclusion by [TcxExtract] *)
-  Lemma sub_tcx_extract `{!@TcxExtract Xl Yl Zl Γ Γg Γr get getr} {κ} :
+  Lemma sub_tcx_extract `(!@TcxExtract Xl Yl Zl Γ Γg Γr get getr) {κ} :
     ⊢ sub κ Γg (Γ ᵖ++ Γr) (λ post yl, post (get yl ᵖ++ getr yl)).
   Proof.
-    rewrite sub_unseal. iIntros (????) "!>/= $$ pre Γ !>". iExists (λ _, _).
+    rewrite sub_unseal. iIntros (????) "!>/= $$ pre ? !>". iExists (λ _, _).
     iFrame "pre". by rewrite tcx_extract -sem_tcx_app.
   Qed.
 End tcx_extract.
