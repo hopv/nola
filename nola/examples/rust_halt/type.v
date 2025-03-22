@@ -1083,11 +1083,6 @@ Section tcx_extract.
   #[export] Instance etcx_extract_hd {X Yl E Γ} :
     @EtcxExtract X _ Yl E (E ᵖ:: Γ) Γ fst' snd' | 5.
   Proof. by split. Qed.
-  (** Extract from the copyable head *)
-  #[export] Instance etcx_extract_hd_copy {X Yl Γ p} `{!Copy T} :
-    @EtcxExtract X (_ :: Yl) _ (p ◁ T) (p ◁ T ᵖ:: Γ) (p ◁ T ᵖ:: Γ)
-      fst' (λ yyl, yyl) | 2.
-  Proof. split=> ??. iIntros "[#T $]". iFrame "T". Qed.
   (** Extract from the tail *)
   #[export] Instance etcx_extract_tl {X Y Yl Zl E'}
     `(!EtcxExtract E Γ Γ' get getr) :

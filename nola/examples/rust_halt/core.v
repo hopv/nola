@@ -114,6 +114,26 @@ Section type.
 
   (** ** Basic structural rules *)
 
+  (** Copy a path *)
+  Lemma sub_copy p
+    `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Zl) (p ◁ T) Γi Γr get getr, !Copy T)
+    {κ} :
+    ⊢ sub κ Γi (p ◁ T ᵖ:: p ◁ T ᵖ:: Γr)
+        (λ post yl, post (get yl, get yl, getr yl)').
+  Proof.
+    rewrite sub_unseal. iIntros "!>" (????) "/= $ $ pre". rewrite etcx_extract.
+    iIntros "[#T Γr] !>". iFrame "pre T Γr".
+  Qed.
+  Lemma type_copy p
+    `(!EtcxExtract (X:=X) (Yl:=Yl) (Zl:=Yl') (p ◁ T) Γi Γr get getr, !Copy T)
+    {κ Zl Γo e pre} :
+    type (Yl:=Zl) κ (p ◁ T ᵖ:: p ◁ T ᵖ:: Γr) e Γo pre ⊢
+      type κ Γi e Γo (λ post yl, pre post (get yl, get yl, getr yl)').
+  Proof.
+    iIntros "type". iApply (type_in (prei:=λ post _, post _) with "[] type").
+    iApply sub_copy.
+  Qed.
+
   (** Framing on [sub] *)
   Lemma sub_frame {Xl} Γ
     `(!TcxExtract (Xl:=Xl) (Yl:=Yl) (Zl:=Yl') Γ Γi Γr get getr)
