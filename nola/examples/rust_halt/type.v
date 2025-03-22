@@ -1100,14 +1100,14 @@ Section tcx_extract.
 
   (** Extract a nil *)
   #[export] Instance tcx_extract_nil {Xl Γ} :
-    @TcxExtract _ Xl _ ᵖ[] Γ Γ (λ _, ()) (λ xl, xl) | 10.
+    @TcxExtract _ Xl _ ᵖ[] Γ Γ (λ _, ()) id.
   Proof. split=> ??. by iIntros "$". Qed.
   (** Extract a cons *)
   #[export] Instance tcx_extract_cons
-    `{!@EtcxExtract X Yl Yl' E Γg Γm get getr,
-      !@TcxExtract Xl _ Zl Γ Γm Γr get' getr'} :
+    `(!@EtcxExtract X Yl Yl' E Γg Γm get getr,
+      !@TcxExtract Xl _ Zl Γ Γm Γr get' getr') :
     TcxExtract (E ᵖ:: Γ) Γg Γr
-      (λ yl, get yl ᵖ:: get' (getr yl)) (λ yl, getr' (getr yl)) | 20.
+      (λ yl, get yl ᵖ:: get' (getr yl)) (λ yl, getr' (getr yl)).
   Proof. split=> ??. rewrite etcx_extract tcx_extract. iIntros "[$$]". Qed.
 
   (** Type context inclusion by [EtcxExtract] *)
