@@ -124,7 +124,7 @@ Section ty_shrref.
   Qed.
 
   (** Read a copyable object from [ty_shrref] *)
-  Lemma read_shrref `{!Ty (X:=X) T, !Copy T, !LftIncl κ α} :
+  #[export] Instance read_shrref `{!Ty (X:=X) T, !Copy T, !LftIncl κ α} :
     Read κ (ty_shrref α T) T (ty_shrref α T) id id.
   Proof.
     rewrite ty_shrref_unseal. split=>/= >. iIntros "κ t".

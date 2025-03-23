@@ -227,7 +227,7 @@ Section ty_mutref.
   Qed.
 
   (** Read a copyable object from [ty_mutref] *)
-  Lemma read_mutref `{!Ty (X:=X) T, !Copy T, !LftIncl κ α} :
+  #[export] Instance read_mutref `{!Ty (X:=X) T, !Copy T, !LftIncl κ α} :
     Read κ (ty_mutref α T) T (ty_mutref α T) fst' id.
   Proof.
     rewrite ty_mutref_unseal. split=>/= >. iIntros "κ $".
