@@ -536,6 +536,10 @@ Section resol.
   (** Trivial resolution *)
   Lemma resol_true {X T κ} d : @ResolAt X T κ (λ _, True) d.
   Proof. split=> >. iIntros "$$ _ !>". by iApply proph_obs_true. Qed.
+  (** Trivial resolution over plain types *)
+  #[export] Instance resol_pty `{!rust_haltC CON} {X T κ} d :
+    @ResolAt X (ty_pty T) κ (λ _, True) d.
+  Proof. exact: resol_true. Qed.
 
   (** [ResolLe]: Resolution over a type below a depth with a gap [k] *)
   Class ResolLe {X} (T : ty CON Σ X) (κ : lft) (post : X → Prop) (k d : nat)
