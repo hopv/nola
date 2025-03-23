@@ -41,17 +41,16 @@ Section ack.
       by move=>/=. }
     clear p q Xl Γ. elim.
     { move=> n p q Xl Γ. iApply type_pre; last first.
-      { type_path p as (?). type_path q as (?).
-        iApply type_call. type_bind (_ = _)%E.
-        { iApply type_eq_nat. solve_extract. }
+      { type_path p as (?). type_path q as (?). iApply type_call.
+        type_bind (_ = _)%E. { iApply type_eq_nat. solve_extract. }
         iIntros (veq). iApply (type_if veq _); [|by iApply type_false].
         iApply type_add_nat. }
       move=>/= ?[?[??]][->[->/=]]. by have ->: n + Pos.to_nat 1 = S n by lia. }
     move=> m IH. elim.
     { move=> p q ??. iApply type_pre; last first.
-      { type_path p as (v). type_path q as (?).
-        iApply type_call. iApply (type_copy v); [solve_extract|exact _|].
-        type_bind (_ = _)%E. { iApply type_eq_nat. solve_extract. }
+      { type_path p as (v). type_path q as (?). iApply type_call.
+        iApply (type_copy v); [solve_extract|exact _|]. type_bind (_ = _)%E.
+        { iApply type_eq_nat. solve_extract. }
         iIntros (veq). iApply (type_if veq _); [by iApply type_false|].
         type_bind (_ = _)%E. { iApply type_eq_nat. solve_extract. }
         iIntros (veq'). iApply (type_if veq' _); [|by iApply type_false].
@@ -60,10 +59,9 @@ Section ack.
       move=>/= ?[?[??]][->[->/=?]]. do 2 (split; [lia|]).
       by have ->: m - 0 = m by lia. }
     move=> n IH' p q ??. iApply type_pre; last first.
-    { type_path p as (v). type_path q as (v').
-      iApply type_call. iApply (type_copy v' _).
-      iApply (type_copy v); [solve_extract|exact _|]. type_bind (_ = _)%E.
-      { iApply type_eq_nat. solve_extract. }
+    { type_path p as (v). type_path q as (v'). iApply type_call.
+      iApply (type_copy v' _). iApply (type_copy v); [solve_extract|exact _|].
+      type_bind (_ = _)%E. { iApply type_eq_nat. solve_extract. }
       iIntros (veq). iApply (type_if veq _); [by iApply type_false|].
       type_bind (_ = _)%E. { iApply type_eq_nat. solve_extract. }
       iIntros (veq'). iApply (type_if veq' _); [by iApply type_false|].
