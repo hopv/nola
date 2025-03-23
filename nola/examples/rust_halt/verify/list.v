@@ -53,7 +53,7 @@ Section list.
   Proof.
     apply (ty_rec_resol (F:=ty_list_gen T) ᵖ[(T, post, 0)'])=>/=; [|exact _].
     move=> ??[??]. eapply resol_post.
-    { apply @resol_mod, @resol_sum; [exact: _|].
+    { apply @resol_mod, @resol_sum; [exact: resol_true|].
       apply @resol_prod; [exact: resol_le'|exact: resol_box]. }
     move=>/= [|??]//= ?. by apply Forall_cons.
   Qed.

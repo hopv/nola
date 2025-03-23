@@ -534,7 +534,7 @@ Section resol.
   Proof. move=> + ?. exact: ResolAt_mono. Qed.
 
   (** Trivial resolution *)
-  #[export] Instance resol_true {X T κ d} : @ResolAt X T κ (λ _, True) d | 100.
+  Lemma resol_true {X T κ} d : @ResolAt X T κ (λ _, True) d.
   Proof. split=> >. iIntros "$$ _ !>". by iApply proph_obs_true. Qed.
 
   (** [ResolLe]: Resolution over a type below a depth with a gap [k] *)

@@ -60,7 +60,7 @@ Section mutlist.
   Proof.
     rewrite /ty_mutlist. setoid_rewrite (ty_rec_unfold (F:=ty_mutlist_gen _ _)).
     eapply resol_post.
-    { apply @resol_mod, @resol_sum; [exact: _|].
+    { apply @resol_mod, @resol_sum; [exact: resol_true|].
       apply @resol_prod; [exact: _|exact: resol_mutref]. }
     move=>/= [|??]//=.
   Qed.

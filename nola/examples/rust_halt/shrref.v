@@ -87,7 +87,7 @@ Section ty_shrref.
   (** Trivial resolution over [ty_shrref] *)
   #[export] Instance resol_shrref {X T α κ} :
     Resol (ty_shrref (X:=X) α T) κ (λ _, True).
-  Proof. exact _. Qed.
+  Proof. exact resol_true. Qed.
 
   (** Real part of [ty_shrref] *)
   #[export] Instance real_shrref `(!RealLe (X:=X) (A:=A) T κ get 1 d) {α} :
