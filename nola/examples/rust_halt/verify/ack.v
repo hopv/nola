@@ -29,17 +29,16 @@ Section ack.
   Proof.
     have: ∀ (m n : nat) (p q : path) Xl Γ, ⊢ type (Yl:=_ :: Xl) κ
       (p ◁ ty_nat ᵖ:: q ◁ ty_nat ᵖ:: Γ) (ackr [p; q]) (λ r, r ◁ ty_nat ᵖ:: Γ)
-      (λ post '(m', n', xl)', m' = m ∧ (n' = n ∧ post (ack m' n', xl)'))%type;
+      (λ post '(m', n', xl)', m' = m ∧ n' = n ∧ post (ack m' n', xl)')%type;
       last first.
-    { move=> goal.
-      iApply (type_real (X:=natₓ) (Yl':=natₓ::_) (Zl:=natₓ::_) q nat
-        (λ post '(n, m, xl)', post (ack m n, xl)')
-        (etcx_extract_tl etcx_extract_hd)).
-      iIntros (n').
-      iApply (type_real (X:=natₓ) (Yl':=natₓ::_) (Zl:=natₓ::_) p nat
-        (λ post '(m, n, xl)', n = n' ∧ post (ack m n, xl)')
-        (etcx_extract_tl etcx_extract_hd)).
-      iIntros (m'). iApply goal. }
+    { move=> goal. iApply type_pre; last first.
+      { iApply (type_real (Yl':=_::_) q nat (λ _ '(_, _, _)', _)). iIntros (n).
+        iApply type_pre; last first.
+        { iApply (type_real (Yl':=_::_) p nat (λ _ '(_, _, _)', _ = n ∧ _)).
+          iIntros (?). iApply type_pre; [|by iApply goal]. by move=>/= ?[?[??]].
+          }
+        by move=>/= ?[?[??]]/=. }
+      by move=>/=. }
     clear p q Xl Γ. elim.
     { move=> n p q Xl Γ. iApply type_pre; last first.
       { type_path p as (?). type_path q as (?).
