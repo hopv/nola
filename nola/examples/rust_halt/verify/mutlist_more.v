@@ -1,7 +1,7 @@
 (** * More on the [mutlist] type *)
 
-From nola.examples.rust_halt Require Export verify.mutlist ptrs_more prod_more
-  sum_more core.
+From nola.examples.rust_halt Require Export core ptrs_more prod_more sum_more
+  verify.mutlist.
 
 Implicit Type (X : xty) (v : val).
 

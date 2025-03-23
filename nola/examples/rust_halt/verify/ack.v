@@ -1,6 +1,6 @@
 (** * Ackermann function *)
 
-From nola.examples.rust_halt Require Export num mutref core.
+From nola.examples.rust_halt Require Export core num.
 
 (** Ackermann function in Coq *)
 Fixpoint ack (m n : nat) : nat :=
