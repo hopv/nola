@@ -12,10 +12,10 @@ Fixpoint ack (m n : nat) : nat :=
   end.
 
 (** Ackermann function in λRust *)
-Definition ackr : val := rec: "ack" ["m"; "n"] :=
+Definition ackr : val := rec: "ackr" ["m"; "n"] :=
   if: "m" = #0 then "n" + #1
-  else if: "n" = #0 then "ack" ["m" - #1; #1]
-  else "ack" ["m" - #1; "ack" ["m"; "n" - #1]].
+  else if: "n" = #0 then "ackr" ["m" - #1; #1]
+  else "ackr" ["m" - #1; "ackr" ["m"; "n" - #1]].
 
 Section ack.
   Context `{!rust_haltGS CON Σ, !rust_haltC CON, !rust_haltJ CON JUDG Σ,
