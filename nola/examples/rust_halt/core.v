@@ -384,16 +384,10 @@ Tactic Notation "type_bind" open_constr(e) :=
 Tactic Notation "type_bind" open_constr(e) "with" open_constr(H) :=
   type_reshape e ltac:(fun K => iApply (type_bind K e with H)=>/=).
 Tactic Notation "type_path"
-  open_constr(p) open_constr(Ex) "as" "(" simple_intropattern(v) ")" :=
-  type_reshape p ltac:(fun K =>
-    iApply (type_path_bind K p Ex)=>/=; iIntros (v)).
-Tactic Notation "type_path"
   open_constr(p) "as" "(" simple_intropattern(v) ")" :=
-  type_path p _ as (v).
-Tactic Notation "type_path_frozen"
-  open_constr(p) open_constr(Ex) "as" "(" simple_intropattern(v) ")" :=
   type_reshape p ltac:(fun K =>
-    iApply (type_path_frozen_bind K p Ex)=>/=; iIntros (v)).
+    iApply (type_path_bind K p)=>/=; try solve_extract; iIntros (v)).
 Tactic Notation "type_path_frozen"
   open_constr(p) "as" "(" simple_intropattern(v) ")" :=
-  type_path_frozen p _ as (v).
+  type_reshape p ltac:(fun K =>
+    iApply (type_path_frozen_bind K p)=>/=; try solve_extract; iIntros (v)).

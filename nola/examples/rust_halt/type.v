@@ -1130,6 +1130,16 @@ Section tcx_extract.
   Qed.
 End tcx_extract.
 
+(** Solve [TcxExtract] and [EtcxExtract] *)
+Ltac solve_extract :=
+  match goal with
+  | |- TcxExtract (_ ᵖ:: _) _ _ _ _ => apply: tcx_extract_cons; solve_extract
+  | |- EtcxExtract _ (_ ᵖ:: _) _ _ _ =>
+      exact: etcx_extract_hd || apply: etcx_extract_tl; solve_extract
+  | |- TcxExtract _ _ _ _ _ => exact: _
+  | |- EtcxExtract _ _ _ _ _ => exact: _
+  end.
+
 (** ** Sendability of a type context *)
 
 Section send_tcx.

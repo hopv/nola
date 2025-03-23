@@ -66,8 +66,7 @@ Section list.
       { move=> ?. exact list_unwrap_wrap. }
       iApply (type_case_sum_mutref v); [by iApply type_false|].
       iApply type_mutref_prod_split. iApply type_seq.
-      { iApply (type_frame ᵖ[_]); [|by iApply "f"].
-        apply: tcx_extract_cons; [|exact _]. exact: etcx_extract_tl. }
+      { iApply (type_frame ᵖ[_ +ₗ #T.1 ◁ _]); [solve_extract|by iApply "f"]. }
       iIntros (?). type_bind (!_)%E; [by iApply type_deref_mutref_box|].
       iIntros (v'). iApply "IH". }
     move=>/= ?[[[|??]?]?]/=[leq to]//=[??] /(f_equal list_wrap)/=.

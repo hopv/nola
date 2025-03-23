@@ -72,8 +72,7 @@ Section mutlist.
       { move=> ?. exact bin_unwrap_wrap. }
       iApply (type_case_sum_mutref v); [by iApply type_false|].
       iApply type_mutref_prod_split. iApply type_seq.
-      { iApply (type_frame ᵖ[_]); [|by iApply "f"].
-        apply: tcx_extract_cons; [|exact _]. exact: etcx_extract_tl. }
+      { iApply (type_frame ᵖ[_ +ₗ #T.1 ◁ _]); [solve_extract|by iApply "f"]. }
       iIntros (?). type_bind (!_)%E; [by iApply type_deref_mutref_mutref|].
       iIntros (v'). iApply type_subty; [|by iApply "IH"].
       iApply (subty_mutref_lft (T:=ty_mutlist _ T)).
