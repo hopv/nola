@@ -56,7 +56,7 @@ Section list.
           [|iApply (subty_list_unfold (T:=T))|iApply (subty_list_fold (T:=T))|].
         { move=> ?. exact list_unwrap_wrap. }
         iApply (type_case_sum_mutref v); [|by iApply type_false].
-        iApply (type_leak ᵖ[_]). iApply type_value. }
+        iApply (type_leak ᵖ[_]); [exact resol_tcx_true|]. iApply type_value. }
       move=>/= ?[[[|??]?]?]/=[? to]//[] /(f_equal list_wrap)/=.
       rewrite list_wrap_unwrap=> ? _. exact: to. }
     iApply type_pre; last first.

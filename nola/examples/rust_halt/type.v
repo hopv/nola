@@ -1180,8 +1180,7 @@ Section resol_tcx.
   }.
 
   (** Trivial resolution *)
-  #[export] Instance resol_tcx_true {Xl Γ κ} :
-    @ResolTcx Xl Γ κ (λ _, True) | 200.
+  Lemma resol_tcx_true {Xl Γ κ} : @ResolTcx Xl Γ κ (λ _, True).
   Proof. split=> >. iIntros "$$ _ !>". by iApply proph_obs_true. Qed.
 
   (** [ResolTcx] over nil *)
