@@ -170,7 +170,7 @@ All the proof rules are proved to be sound with respect to the semantic model.
   + Verifying iterc: `twp_iter_ilist`,
       Verifying two threads running iterc: `twp_fork2_iter_ilist`,
       Verifying iterc for the multiple-of-three invariant:
-        `twp_iter_ilist_faa3_mul3`.
+        `twp_iter_ilist_add3_mul3`.
   + Verifying iterc2, with two counters under the lexicographic order:
       `twp_iter2_ilist`.
   + Verifying iteration using any step function under any well-founded relation:

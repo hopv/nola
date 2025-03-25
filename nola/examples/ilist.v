@@ -302,49 +302,50 @@ Section ilist.
 
   (** Example invariant: [l] stores a multiple of 3 *)
   Definition cif_mul3 (l : loc) : cif CON Σ := ∃ k : Z, ▷ l ↦ #(3 * k).
-  (** Function that atomically increments [l] by 3 *)
-  Definition faa3 : val := λ: ["l"], FAA "l" #3.
-  (** [faa3] preserves the invariant of [cif_mul3] *)
-  Lemma twp_faa3_mul3 {N E l} : ↑N ⊆ E →
-    [[{ inv_tok N (cif_mul3 l) }]][inv_wsat ⟦⟧ᶜ] faa3 [ #l] @ E
+  (** Function that increments [l] by 3 *)
+  Definition add3 : val := λ: ["l"], "l" <-ˢᶜ !ˢᶜ "l" + #3.
+  (** [add3] preserves the invariant of [cif_mul3] *)
+  Lemma twp_add3_mul3 {N E l} : ↑N ⊆ E →
+    [[{ inv_tok N (cif_mul3 l) }]][inv_wsat ⟦⟧ᶜ] add3 [ #l] @ E
     [[{ v, RET v; True }]].
   Proof.
-    iIntros (??) "i →Φ". wp_rec.
-    iMod (inv_tok_acc with "i") as "/=[[%k >↦] cl]"; [done|].
-    wp_apply (twp_faa with "↦"). iIntros "↦".
-    have ->: 3 * k + 3 = 3 * (k + 1) by lia. iMod ("cl" with "[$↦]"). iModIntro.
-    by iApply "→Φ".
+    iIntros (??) "#i →Φ". wp_rec. wp_bind (!ˢᶜ _)%E.
+    iMod (inv_tok_acc with "i") as "/=[[%k >↦] cl]"; [done|]. wp_read.
+    iMod ("cl" with "[$↦]"). iModIntro. wp_op.
+    have ->: 3 * k + 3 = 3 * (k + 1) by lia.
+    iMod (inv_tok_acc with "i") as "/=[[% >↦] cl]"; [done|]. wp_write.
+    iMod ("cl" with "[$↦]"). iModIntro. by iApply "→Φ".
   Qed.
   (** On [iter_ilist] *)
-  Lemma twp_iter_ilist_faa3_mul3 {N N' E c l} {n : nat} : ↑N ⊆ E → ↑N' ⊆ E →
+  Lemma twp_iter_ilist_add3_mul3 {N N' E c l} {n : nat} : ↑N ⊆ E → ↑N' ⊆ E →
     [[{ c ↦ #n ∗ ilist N N' cif_mul3 l }]][inv_wsat ⟦⟧ᶜ]
-      iter_ilist [faa3; #c; #l] @ E
+      iter_ilist [add3; #c; #l] @ E
     [[{ RET #☠; c ↦ #0 }]].
   Proof.
     move=> ??. iApply (twp_iter_ilist with "[]")=>//. iIntros (??).
-    by iApply twp_faa3_mul3.
+    by iApply twp_add3_mul3.
   Qed.
-  Lemma twp_fork2_iter_ilist_faa3_mul3 {N N' E c' c l} {m n : nat} :
+  Lemma twp_fork2_iter_ilist_add3_mul3 {N N' E c' c l} {m n : nat} :
     ↑N ⊆ E → ↑N' ⊆ E →
     [[{ c' ↦ #m ∗ c ↦ #n ∗ ilist N N' cif_mul3 l }]][inv_wsat ⟦⟧ᶜ]
-      fork2_iter_ilist [faa3; #c'; #c; #l] @ E [[{ RET #☠; c ↦ #0 }]].
+      fork2_iter_ilist [add3; #c'; #c; #l] @ E [[{ RET #☠; c ↦ #0 }]].
   Proof.
     move=> ??. iApply (twp_fork2_iter_ilist with "[]")=>//. iIntros (??).
-    by iApply twp_faa3_mul3.
+    by iApply twp_add3_mul3.
   Qed.
-  Lemma twp_forks_iter_ilist_faa3_mul3 {N N' E k l} {n : nat} :
+  Lemma twp_forks_iter_ilist_add3_mul3 {N N' E k l} {n : nat} :
     ↑N ⊆ E → ↑N' ⊆ E →
     [[{ k ↦ #n ∗ ilist N N' cif_mul3 l }]][inv_wsat ⟦⟧ᶜ]
-      forks_iter_ilist [faa3; #k; #l] @ E [[{ RET #☠; k ↦ #0 }]].
+      forks_iter_ilist [add3; #k; #l] @ E [[{ RET #☠; k ↦ #0 }]].
   Proof.
     move=> ??. iApply (twp_forks_iter_ilist with "[]")=>//. iIntros (??).
-    by iApply twp_faa3_mul3.
+    by iApply twp_add3_mul3.
   Qed.
-  Lemma twp_nd_forks_iter_ilist_faa3_mul3 {N N' E l} : ↑N ⊆ E → ↑N' ⊆ E →
+  Lemma twp_nd_forks_iter_ilist_add3_mul3 {N N' E l} : ↑N ⊆ E → ↑N' ⊆ E →
     [[{ ilist N N' cif_mul3 l }]][inv_wsat ⟦⟧ᶜ]
-      nd_forks_iter_ilist [faa3; #l] @ E [[{ RET #☠; True }]].
+      nd_forks_iter_ilist [add3; #l] @ E [[{ RET #☠; True }]].
   Proof.
     move=> ??. iApply (twp_nd_forks_iter_ilist with "[]")=>//. iIntros (??).
-    by iApply twp_faa3_mul3.
+    by iApply twp_add3_mul3.
   Qed.
 End ilist.
