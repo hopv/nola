@@ -281,10 +281,10 @@ Section borrow.
   Proof.
     move=> ? Bl. iIntros "●".
     iMod (own_update with "●") as "[$[b l]]"; last first.
-    { iModIntro. iSplitL "b".
-      - erewrite to_bor_jtoks, (big_sepM_list_to_gmap Bl). iStopProof.
+    { iModIntro. iSplitL "b"; iStopProof.
+      - etrans; [by eapply to_bor_jtoks|]. erewrite (big_sepM_list_to_gmap Bl).
         do 3 f_equiv. iIntros "$".
-      - iStopProof. erewrite to_lend_ktoks. apply big_sepM_map_by'. }
+      - etrans; [by eapply to_lend_ktoks|]. apply big_sepM_map_by'. }
     rewrite -auth_frag_op singleton_op.
     have <- : ∀ x y, ((to_agree α, x, y) : depoRF _ $ri _) ≡
       ((to_agree α, x, ε) : depoRF _ $ri _) ⋅ (to_agree α, ε, y).
