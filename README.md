@@ -20,6 +20,9 @@ Louisiana, USA, in memory of POPL 2020 held in that city.
 - Yusuke Matsushita and Takeshi Tsukada. Nola: Later-Free Ghost State for
     Verifying Termination in Iris. \
   ACM PLDI 2025. June 2025.
+  + Yusuke Matsushita and Takeshi Tsukada. Artifact for "Nola: Later-Free Ghost
+      State for Verifying Termination in Iris". Zenodo. 2025.
+      https://doi.org/10.5281/zenodo.15050271
 - Yusuke Matsushita. Non-Step-Indexed Separation Logic with Invariants and
     Rust-Style Borrows. \
   Ph.D. Dissertation, University of Tokyo. Dec 6, 2023.
