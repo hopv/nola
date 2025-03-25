@@ -96,8 +96,8 @@ make viewdoc
 
 ## Connection with the PLDI 2025 Paper
 
-To check statements of the paper, you can refer to the following parts of our
-Coq mechanization.
+To check statements of the PLDI 2025 paper, you can refer to the following parts
+of our Coq mechanization.
 
 - [Paradoxes](#paradoxes)
 - [Later-Free Ghost State](#later-free-ghost-state)
