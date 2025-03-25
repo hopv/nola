@@ -4,8 +4,9 @@ Nola is a framework for _later-free higher-order ghost state_, enabling
 termination verification in the presence of advanced features such as Rust's
 ownership types.
 
-It is fully mechanized in [Coq](https://coq.inria.fr/) as a library for the
-[Iris](https://iris-project.org/) separation logic framework.
+It is fully mechanized in [Rocq](https://rocq-prover.org/) (formerly known as
+Coq) as a library for the [Iris](https://iris-project.org/) separation logic
+framework.
 
 The name Nola comes from '_No_ *la*ter' and the nickname for New Orleans,
 Louisiana, USA, in memory of POPL 2020 held in that city.
@@ -13,7 +14,7 @@ Louisiana, USA, in memory of POPL 2020 held in that city.
 - [Publications](#publications)
 - [Getting Started](#getting-started)
 - [Connection with the PLDI 2025 Paper](#connection-with-the-pldi-2025-paper)
-- [Overview of the Coq Code](#overview-of-the-coq-code)
+- [Overview of the Rocq Code](#overview-of-the-rocq-code)
 
 ## Publications
 
@@ -80,7 +81,7 @@ To fix the development dependencies and install them, run:
 make devdep
 ```
 
-To build Nola's Coq code locally, run:
+To build Nola's Rocq code locally, run:
 ```bash
 make -j16 # Choose a job number
 ```
@@ -89,7 +90,7 @@ Or, to install Nola as an opam library, run:
 opam install .
 ```
 
-To generate and browse a document for Nola's Coq code, run:
+To generate and browse a document for Nola's Rocq code, run:
 ```bash
 make viewdoc
 ```
@@ -97,7 +98,7 @@ make viewdoc
 ## Connection with the PLDI 2025 Paper
 
 To check statements of the PLDI 2025 paper, you can refer to the following parts
-of our Coq mechanization.
+of our Rocq mechanization.
 
 - [Paradoxes](#paradoxes)
 - [Later-Free Ghost State](#later-free-ghost-state)
@@ -215,9 +216,9 @@ All the proof rules are proved to be sound with respect to the semantic model.
         [`mutlist_more.type_iter_mutlist_mut_fun`](nola/examples/rust_halt/verify/mutlist_more.v).
   + Adequacy: [`adequacy`](nola/examples/rust_halt/adequacy.v).
 
-## Overview of the Coq Code
+## Overview of the Rocq Code
 
-The Coq code is all in [`nola/`](nola/) and is structured as follows:
+The Rocq code is all in [`nola/`](nola/) and is structured as follows:
 - [`prelude`](nola/prelude.v) : Prelude
 - [`util/`](nola/util/) : General-purpose utilities, extending
   [std++](https://gitlab.mpi-sws.org/iris/stdpp)
