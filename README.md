@@ -62,9 +62,9 @@ where this `README.md` is located, run:
 opam switch link for_nola NOLA_DIR
 ```
 
-To set up opam repos for Coq and Iris for the active opam switch, run:
+To enable installing a development version of Iris for the active opam switch,
+run:
 ```bash
-opam repo add coq-released https://coq.inria.fr/opam/released
 opam repo add iris-dev https://gitlab.mpi-sws.org/iris/opam.git
 ```
 
