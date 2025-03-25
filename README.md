@@ -5,7 +5,7 @@ termination verification in the presence of advanced features such as Rust's
 ownership types.
 
 It is fully mechanized in [Rocq](https://rocq-prover.org/) (formerly known as
-Coq) as a library for the [Iris](https://iris-project.org/) separation logic
+Coq) as a library of the [Iris](https://iris-project.org/) separation logic
 framework.
 
 The name Nola comes from '_No_ *la*ter' and the nickname for New Orleans,
