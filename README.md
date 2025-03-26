@@ -58,7 +58,7 @@ To activate the opam switch `for_nola` just globally, run:
 opam switch set for_nola
 ```
 Or, to activate the opam switch `for_nola` locally in the directory `NOLA_DIR`
-where this `README.md` is located, run:
+(typically named `nola`) where this `README.md` is located, run:
 ```bash
 opam switch link for_nola NOLA_DIR
 ```
@@ -71,7 +71,8 @@ opam repo add iris-dev https://gitlab.mpi-sws.org/iris/opam.git
 
 ### Building Nola
 
-First, go to the directory `NOLA_DIR` where this `README.md` is located:
+First, go to the directory `NOLA_DIR` (typically named `nola`) where this
+`README.md` is located:
 ```bash
 cd NOLA_DIR
 ```
