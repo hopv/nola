@@ -104,7 +104,7 @@ of our Rocq mechanization.
 - [Paradoxes](#paradoxes)
 - [Later-Free Ghost State](#later-free-ghost-state)
 - [View Shifts and Hoare Triples](#view-shifts-and-hoare-triples)
-- [Modular Construction of Formula Syntax](#modular-construction-of-formula-syntax)
+- [Extensible Construction of Formula Syntax](#extensible-construction-of-formula-syntax)
 - [Magic Derivability](#magic-derivability)
 - [Examples and RustHalt](#examples-and-rusthalt)
 
@@ -150,9 +150,9 @@ All the proof rules are proved to be sound with respect to the semantic model.
   + Adequacy of the total Hoare triple:
       [`adequacy.lrust_total`](nola/lrust/adequacy.v).
 
-### Modular Construction of Formula Syntax
+### Extensible Construction of Formula Syntax
 
-- Modular construction of formula syntax: [`nola.iris.cif`](nola/iris/cif.v).
+- Extensible construction of formula syntax: [`nola.iris.cif`](nola/iris/cif.v).
 
 ### Magic Derivability
 
@@ -281,7 +281,7 @@ The Rocq code is all in [`nola/`](nola/) and is structured as follows:
     [`pborrow`](nola/iris/pborrow.v) (Prophetic borrows),
     [`pborrow_deriv`](nola/iris/pborrow_deriv.v) (Prophetic borrows relaxed with
       derivability)
-  + [`cif`](nola/iris/cif.v) (Modular construction of coinductive-inductive
+  + [`cif`](nola/iris/cif.v) (Extensible construction of coinductive-inductive
       formulas)
   + [`paradox`](nola/iris/paradox.v) (Paradox)
 - [`heap_lang/`](nola/heap_lang/) : Variant of Iris HeapLang, supporting program
