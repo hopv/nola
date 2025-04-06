@@ -192,7 +192,8 @@ All the proof rules are proved to be sound with respect to the semantic model.
       Access via a total Hoare triple `invd_acc_thoare`,
       Allocation `inv'_alloc`,
       General rule for semantic alteration: `inv'_iff'`.
-- RustHalt: [`nola.examples.rust_halt`](nola/examples/rust_halt/).
+- A prototype of RustHalt:
+    [`nola.examples.rust_halt`](nola/examples/rust_halt/).
   + INT-ADD: [`num.type_add_int`](nola/examples/rust_halt/num.v),
       BOX-MUT-BORROW:
         [`ptrs_more.sub_borrow_box`](nola/examples/rust_halt/ptrs_more.v),
@@ -329,8 +330,8 @@ The Rocq code is all in [`nola/`](nola/) and is structured as follows:
     [`borrow`](nola/examples/borrow.v) (Borrow),
     [`mutex`](nola/examples/mutex.v) (Mutex),
     [`deriv`](nola/examples/deriv.v) (Derivability)
-  + [`rust_halt/`](nola/examples/rust_halt/) : RustHalt, a semantic foundation
-      for total correctness verification of Rust programs
+  + [`rust_halt/`](nola/examples/rust_halt/) : A prototype of RustHalt, a
+      semantic foundation for total correctness verification of Rust programs
     * [`base`](nola/examples/rust_halt/base.v) (Basics),
       [`type`](nola/examples/rust_halt/type.v) (Type model)
     * [`core`](nola/examples/rust_halt/core.v) (Core features)
