@@ -128,13 +128,13 @@ All the proof rules are proved to be sound with respect to the semantic model.
       INV-ACC: `inv_tok_acc_vs`, THOARE-INV: `inv_tok_acc_twp`,
       WINV-CREATE: `inv_wsat_alloc`.
 - Nola's later-free borrow.
-  + Lifetime: [`nola.iris.lft`](nola/iris/lft.v)
+  + Lifetime: [`nola.iris.lft`](nola/iris/lft.v),
     * LFT-ALLOC: `lft_alloc`, LFT-END: `lft_end`.
-  + Borrow: [`nola.iris.borrow`](nola/iris/borrow.v)
+  + Borrow: [`nola.iris.borrow`](nola/iris/borrow.v).
     * BOR-LEND-NEW: `bor_lend_tok_new`, LEND-BACK: `lend_tok_retrieve`,
         BOR-OPEN: `bor_tok_open`, OBOR-CLOSE: `obor_tok_close`,
         WBOR-CREATE: `borrow_wsat_alloc`.
-  + Prophetic borrow: [`nola.iris.pborrow`](nola/iris/pborrow.v)
+  + Prophetic borrow: [`nola.iris.pborrow`](nola/iris/pborrow.v).
 
 ### View Shifts and Hoare Triples
 
