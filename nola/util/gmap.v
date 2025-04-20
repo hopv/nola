@@ -4,10 +4,12 @@ From nola Require Export prelude.
 From stdpp Require Export gmap.
 From iris.algebra Require Import gmap.
 
+Implicit Type SI : sidx.
+
 (** ** Basic operations *)
 
 Section gmap.
-  Context `{!EqDecision K, !Countable K} {A : ofe}.
+  Context {SI} `{!EqDecision K, !Countable K} {A : ofe}.
 
   (** [lookup] is proper *)
   #[export] Instance lookup_proper {i} :

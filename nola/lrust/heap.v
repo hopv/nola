@@ -398,7 +398,7 @@ Section heap.
     assert (([^op list] k↦y ∈ vl,
       {[l +ₗ (1 + k) := (1%Qp, Cinr 0%nat, to_agree y)]} : heapUR) !! l = None).
     { move: (Hvalid l). rewrite lookup_op lookup_singleton.
-      by move=> /(cmra_discrete_valid_iff 0) /exclusiveN_Some_l. }
+      by move=> /(cmra_discrete_valid_iff 0ᵢ) /exclusiveN_Some_l. }
     rewrite -insert_singleton_op //. etrans.
     { apply (delete_local_update _ _ l (1%Qp, Cinr 0%nat, to_agree v)).
       by rewrite lookup_insert. }

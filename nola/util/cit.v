@@ -4,13 +4,13 @@ From nola.util Require Export eq order productive.
 From iris.algebra Require Export ofe.
 Import EqNotations ProeqvNotation FunPNotation FunPRNotation.
 
-Implicit Type SEL : Type.
+Implicit Type (SI : sidx) (SEL : Type).
 
 (** ** [citg]: Generator of [cit] *)
 
 (** [citg]: Generator of [cit] *)
 Section citg.
-  Context {SEL} (I C : SEL → Type) (D : SEL → ofe) (CIT : ofe).
+  Context {SI SEL} (I C : SEL → Type) (D : SEL → ofe) (CIT : ofe).
   Inductive citg : Type := Citg {
     (** Selector *) citg_sel : SEL;
     (** Inductive children *) citg_ikids : I citg_sel → citg;
@@ -19,15 +19,15 @@ Section citg.
   }.
 End citg.
 Add Printing Constructor citg.
-Arguments Citg {_ _ _ _ _}. Arguments citg_sel {_ _ _ _ _}.
-Arguments citg_ikids {_ _ _ _ _}. Arguments citg_ckids {_ _ _ _ _}.
-Arguments citg_data {_ _ _ _ _}.
+Arguments Citg {_ _ _ _ _ _}. Arguments citg_sel {_ _ _ _ _ _}.
+Arguments citg_ikids {_ _ _ _ _ _}. Arguments citg_ckids {_ _ _ _ _ _}.
+Arguments citg_data {_ _ _ _ _ _}.
 
 (** ** [citg_Forall2]: Universal relation between [citg]s *)
 
 (** [citg_Forall2]: Universal relation between [citg]s *)
 Section citg_Forall2.
-  Context {SEL} {I C : SEL → Type} {D D' : SEL → ofe} {CIT CIT' : ofe}.
+  Context {SI SEL} {I C : SEL → Type} {D D' : SEL → ofe} {CIT CIT' : ofe}.
   Context (R : funP (λ s, D s -p> D' s -p> Prop))
     (CITF : CIT -p> CIT' -p> Prop).
   Inductive citg_Forall2
@@ -41,19 +41,19 @@ Section citg_Forall2.
       t.(citg_data) (rew[D'] eq_sym citgf2_sel in t'.(citg_data));
   }.
 End citg_Forall2.
-Arguments Citgf2 {_ _ _ _ _ _ _ _ _ _ _}.
-Arguments citgf2_sel {_ _ _ _ _ _ _ _ _ _ _}.
-Arguments citgf2_ikids {_ _ _ _ _ _ _ _ _ _ _}.
-Arguments citgf2_ckids {_ _ _ _ _ _ _ _ _ _ _}.
-Arguments citgf2_data {_ _ _ _ _ _ _ _ _ _ _}.
+Arguments Citgf2 {_ _ _ _ _ _ _ _ _ _ _ _}.
+Arguments citgf2_sel {_ _ _ _ _ _ _ _ _ _ _ _}.
+Arguments citgf2_ikids {_ _ _ _ _ _ _ _ _ _ _ _}.
+Arguments citgf2_ckids {_ _ _ _ _ _ _ _ _ _ _ _}.
+Arguments citgf2_data {_ _ _ _ _ _ _ _ _ _ _ _}.
 
 Section citg_Forall2.
-  Context {SEL} {I C : SEL → Type}.
+  Context {SI SEL} {I C : SEL → Type}.
   Implicit Type D : SEL → ofe.
 
   (** Introduce [citg_Forall2] for [citg]s with the same [citg_sel] *)
   Lemma citg_Forall2_eq {D D' CIT CIT' R CITF s ti ti' tc tc' d d'} :
-    (∀ i, @citg_Forall2 _ I C D D' CIT CIT' R CITF (ti i) (ti' i)) →
+    (∀ i, @citg_Forall2 _ _ I C D D' CIT CIT' R CITF (ti i) (ti' i)) →
     (∀ c, CITF (tc c) (tc' c)) → R s d d' →
     citg_Forall2 R CITF (Citg s ti tc d) (Citg s ti' tc' d').
   Proof.
@@ -63,30 +63,30 @@ Section citg_Forall2.
 
   (** [citg_Forall2] is monotone *)
   #[export] Instance citg_Forall2_mono {D D' CIT CIT'} :
-    Mono2 (OT'':=_-p>_-p>_) (@citg_Forall2 _ I C D D' CIT CIT').
+    Mono2 (OT'':=_-p>_-p>_) (@citg_Forall2 _ _ I C D D' CIT CIT').
   Proof.
     move=>/= ?? to ?? to' ??. elim=> ?? eq ? IH ??.
     apply (Citgf2 eq); [done|..]=> *; by [apply to'|apply to].
   Qed.
   #[export] Instance citg_Forall2_mono' {D D' CIT CIT' R} :
-    Mono (OT':=_-p>_-p>_) (@citg_Forall2 _ I C D D' CIT CIT' R).
+    Mono (OT':=_-p>_-p>_) (@citg_Forall2 _ _ I C D D' CIT CIT' R).
   Proof. exact _. Qed.
 
   (** [citg_Forall2] preserves reflexivity *)
   #[export] Instance citg_Forall2_refl {CIT}
     `{!∀ s, @Reflexive (D s) (R s), !Reflexive CITF} :
-    Reflexive (@citg_Forall2 _ I C _ _ CIT _ R CITF).
+    Reflexive (@citg_Forall2 _ _ I C _ _ CIT _ R CITF).
   Proof. move=> t. elim: t=> *. exact: citg_Forall2_eq. Qed.
 
   (** Flip [citg_Forall2] *)
   Lemma citg_Forall2_flip {D D' CIT CIT' R CITF t t'} :
     citg_Forall2 (λ s, flip (R s)) (flip CITF) t' t →
-      @citg_Forall2 _ I C D D' CIT CIT' R CITF t t'.
+      @citg_Forall2 _ _ I C D D' CIT CIT' R CITF t t'.
   Proof. elim. move=> [????][????]/=?????. subst. exact: citg_Forall2_eq. Qed.
   (** [citg_Forall2] preserves symmetricity *)
   #[export] Instance citg_Forall2_sym {CIT}
     `{!∀ s, @Symmetric (D s) (R s), !Symmetric CITF} :
-    Symmetric (@citg_Forall2 _ I C _ _ CIT _ R CITF).
+    Symmetric (@citg_Forall2 _ _ I C _ _ CIT _ R CITF).
   Proof.
     move=> ?? F. apply citg_Forall2_flip. move: F. apply citg_Forall2_mono.
     { move=> ????. by symmetry. } { move=> ???. by symmetry. }
@@ -97,7 +97,7 @@ Section citg_Forall2.
     {D D' D'' CIT CIT' CIT'' R R' R'' CITF CITF' CITF'' t t' t''} :
     (∀ s d d' d'', R s d d' → R' s d' d'' → R'' s d d'') →
     (∀ ct ct' ct'', CITF ct ct' → CITF' ct' ct'' → CITF'' ct ct'') →
-    @citg_Forall2 _ I C D D' CIT CIT' R CITF t t' →
+    @citg_Forall2 _ _ I C D D' CIT CIT' R CITF t t' →
     citg_Forall2 (D':=D'') (CIT':=CIT'') R' CITF' t' t'' →
       citg_Forall2 R'' CITF'' t t''.
   Proof.
@@ -109,19 +109,19 @@ Section citg_Forall2.
   (** [citg_Forall2] preserves transitivity *)
   #[export] Instance citg_Forall2_trans {CIT}
     `{!∀ s, @Transitive (D s) (R s), !Transitive CITF} :
-    Transitive (@citg_Forall2 _ I C _ _ CIT _ R CITF).
+    Transitive (@citg_Forall2 _ _ I C _ _ CIT _ R CITF).
   Proof. move=> ?*. by eapply citg_Forall2_compose. Qed.
 
   (** [citg_Forall2] preserves equivalence-ness *)
   #[export] Instance citg_Forall2_equivalence {CIT}
     `{!∀ s, @Equivalence (D s) (R s), !Equivalence CITF} :
-    Equivalence (@citg_Forall2 _ I C _ _ CIT _ R CITF).
+    Equivalence (@citg_Forall2 _ _ I C _ _ CIT _ R CITF).
   Proof. split; exact _. Qed.
 
   (** Convert universally quantified [citg_Forall2], under UIP over [SEL] *)
   Lemma citg_Forall2_forall `{!Uip SEL, !Inhabited A}
     {D D' CIT CIT' R CITF t t'} :
-    (∀ a : A, @citg_Forall2 _ I C D D' CIT CIT' (R a) (CITF a) t t') →
+    (∀ a : A, @citg_Forall2 _ _ I C D D' CIT CIT' (R a) (CITF a) t t') →
       citg_Forall2 (λ _ d d', ∀ a, R a _ d d') (λ t t', ∀ a, CITF a t t') t t'.
   Proof.
     move=> Fs. have F := Fs inhabitant. elim: F Fs.
@@ -137,7 +137,7 @@ End citg_Forall2.
 
 (** ** [citgO]: OFE structure over [citg] *)
 Section citg.
-  Context {SEL} {I C : SEL → Type} {D : SEL → ofe} {CIT : ofe}.
+  Context {SI SEL} {I C : SEL → Type} {D : SEL → ofe} {CIT : ofe}.
 
   (** Distance for [citg] *)
   Local Instance citg_dist : Dist (citg I C D CIT) :=
@@ -157,18 +157,18 @@ Section citg.
   Proof.
     split; [by rewrite citg_equiv_unseal|exact _|]=> ???? F ?. move: F.
     apply citg_Forall2_mono.
-    { move=> ????. by eapply dist_lt. } { move=> ???. by eapply dist_lt. }
+    { move=> ????. by eapply dist_le. } { move=> ???. by eapply dist_le. }
   Qed.
   (** OFE of [citg] *)
   Canonical citgO : ofe := Ofe (citg I C D CIT) citg_ofe_mixin.
 End citg.
-Arguments citgO {_} _ _ _.
+Arguments citgO {_ _} _ _ _.
 
 (** ** [citg_map]: Map over [citg] *)
 
 (** [citg_map]: Map over [citg] *)
 Section citg_map.
-  Context {SEL} {I C : SEL → Type} {D D' : SEL → ofe} {CIT CIT' : ofe}.
+  Context {SI SEL} {I C : SEL → Type} {D D' : SEL → ofe} {CIT CIT' : ofe}.
   Context (f : ∀ s, D s → D' s) (g : CIT → CIT').
   Fixpoint citg_map (t : citg I C D CIT) : citg I C D' CIT' :=
     Citg t.(citg_sel) (λ i, citg_map (t.(citg_ikids) i))
@@ -176,17 +176,17 @@ Section citg_map.
 End citg_map.
 
 Section citg_map.
-  Context {SEL} {I C : SEL → Type}.
+  Context {SI SEL} {I C : SEL → Type}.
 
   (** [citg_sel] over [citg_map] *)
   Definition citg_sel_map {D D' CIT CIT' f g} {t : citg I C D CIT} :
-    (@citg_map _ I C D D' CIT CIT' f g t).(citg_sel) = t.(citg_sel) :=
+    (@citg_map _ _ I C D D' CIT CIT' f g t).(citg_sel) = t.(citg_sel) :=
     let: Citg _ _ _ _ := t in eq_refl.
 
   (** [citg_map] is non-expansive *)
   #[export] Instance citg_map_ne_gen {D D' CIT CIT' n} :
     Proper (forall_relation (λ _, (≡{n}≡) ==> (≡{n}≡)) ==> ((≡{n}≡) ==> (≡{n}≡))
-      ==> (≡{n}≡) ==> (≡{n}≡)) (@citg_map _ I C D D' CIT CIT').
+      ==> (≡{n}≡) ==> (≡{n}≡)) (@citg_map _ _ I C D D' CIT CIT').
   Proof.
     move=> ?? to ?? to' ??. elim. move=> [????][????]/=?. subst=>/= ? IH ??.
     apply citg_Forall2_eq=>//. { move=> ?. by apply to'. } { exact: to. }
@@ -195,7 +195,7 @@ Section citg_map.
   (** [citg_map] over an identity function *)
   Lemma citg_map_id {D CIT f g t} :
     (∀ s d, f s d ≡ d) → (∀ ct, g ct ≡ ct) →
-      @citg_map _ I C D _ CIT _ f g t ≡ t.
+      @citg_map _ _ I C D _ CIT _ f g t ≡ t.
   Proof.
     move=> eq eq'. apply equiv_dist=> ?. elim: t=>/= ?? IH ??.
     apply citg_Forall2_eq=>// >; by apply equiv_dist.
@@ -205,14 +205,14 @@ Section citg_map.
   Lemma citg_map_compose {D D' D'' CIT CIT' CIT'' f f' g g' t}
     `{!∀ s, Reflexive (R s), !Reflexive CITF} :
     citg_Forall2 R CITF
-      (citg_map f' g' (@citg_map _ I C D D' CIT CIT' f g t))
+      (citg_map f' g' (@citg_map _ _ I C D D' CIT CIT' f g t))
       (citg_map (D':=D'') (CIT':=CIT'') (λ s, f' s ∘ f s) (g' ∘ g) t).
   Proof. elim: t=>/= *. exact: citg_Forall2_eq. Qed.
 End citg_map.
 
 (** ** [citg_fold]: Fold [citg] *)
 Section citg_fold.
-  Context {SEL} {I C : SEL → Type} {D : SEL → ofe} {CIT A : ofe}.
+  Context {SI SEL} {I C : SEL → Type} {D : SEL → ofe} {CIT A : ofe}.
   Context (f : ∀ s, (I s -d> A) → (C s -d> CIT) → D s → A).
   Fixpoint citg_fold (t : citg I C D CIT) : A :=
     f t.(citg_sel) (λ i, citg_fold (t.(citg_ikids) i)) t.(citg_ckids)
@@ -220,32 +220,32 @@ Section citg_fold.
 End citg_fold.
 
 Section citg_fold.
-  Context {SEL} {I C : SEL → Type} {D : SEL → ofe} {CIT A : ofe}.
+  Context {SI SEL} {I C : SEL → Type} {D : SEL → ofe} {CIT A : ofe}.
 
   (** [citg_fold] is non-expansive *)
   #[export] Instance citg_fold_ne_gen {n} :
     Proper (forall_relation (λ _,
       (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡)) ==>
-      (≡{n}≡) ==> (≡{n}≡)) (@citg_fold _ I C D CIT A).
+      (≡{n}≡) ==> (≡{n}≡)) (@citg_fold _ _ I C D CIT A).
   Proof.
     move=> ?? to ??. elim=>/=. move=> [????][????]/= ?. subst=>/= ????.
     exact: to.
   Qed.
   #[export] Instance citg_fold_ne {n}
     `{!∀ s, Proper ((≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡)) (f s)} :
-    Proper ((≡{n}≡) ==> (≡{n}≡)) (@citg_fold _ I C D CIT A f).
+    Proper ((≡{n}≡) ==> (≡{n}≡)) (@citg_fold _ _ I C D CIT A f).
   Proof. apply citg_fold_ne_gen. solve_proper. Qed.
 End citg_fold.
 
 (** ** [citi]: Iteration of [citg] *)
-Definition citiO {SEL} (I C : SEL → Type) (D : SEL → ofe) (k : nat) : ofe :=
-  Nat.iter k (@citgO SEL I C D) unitO.
-Definition citi {SEL} (I C : SEL → Type) (D : SEL → ofe) (k : nat) : Type :=
+Definition citiO {SI SEL} (I C : SEL → Type) (D : SEL → ofe) (k : nat) : ofe :=
+  Nat.iter k (@citgO _ SEL I C D) unitO.
+Definition citi {SI SEL} (I C : SEL → Type) (D : SEL → ofe) (k : nat) : Type :=
   citiO I C D k.
 
 (** ** [citi_Forall2]: Universal relation between [citi]s *)
 Section citi_Forall2.
-  Context {SEL} {I C : SEL → Type} {D D' : SEL → ofe}.
+  Context {SI SEL} {I C : SEL → Type} {D D' : SEL → ofe}.
   Context (R : funP (λ s, D s -p> D' s -p> Prop)).
   Fixpoint citi_Forall2 {k k'} : citi I C D k -p> citi I C D' k' -p> Prop :=
     match k, k' with
@@ -255,62 +255,62 @@ Section citi_Forall2.
 End citi_Forall2.
 
 Section citi_Forall2.
-  Context {SEL} {I C : SEL → Type}.
+  Context {SI SEL} {I C : SEL → Type}.
   Implicit Type D : SEL → ofe.
 
   (** [citi_Forall2] is monotone *)
   Lemma citi_Forall2_mono {D D' k k' R R'} :
-    (∀ s, R s ⊑ R' s) → @citi_Forall2 _ I C D D' R k k' ⊑ citi_Forall2 R'.
+    (∀ s, R s ⊑ R' s) → @citi_Forall2 _ _ I C D D' R k k' ⊑ citi_Forall2 R'.
   Proof.
     move=> to. move: k'. elim: k; [done|]=>/= k IH. case; [done|]=> ?.
     apply citg_Forall2_mono; [done|]. apply IH.
   Qed.
   (** Turn [citi_Forall2 (λ _, (≡))] to [citi_Forall2 (λ _, (≡{n}≡))] *)
   Lemma citi_Forall2_equiv_dist {D k k' n t t'} :
-    @citi_Forall2 _ I C D _ (λ _, (≡)) k k' t t' →
+    @citi_Forall2 _ _ I C D _ (λ _, (≡)) k k' t t' →
       citi_Forall2 (λ _, (≡{n}≡)) t t'.
   Proof. by apply citi_Forall2_mono=> ??? /equiv_dist. Qed.
 
   (** Unfold [≡{_}≡] over [citi] *)
   Lemma citi_dist_Forall2 {D k n t t'} :
-    t ≡{n}≡ t' ↔ @citi_Forall2 _ I C D _ (λ _, (≡{n}≡)) k _ t t'.
+    t ≡{n}≡ t' ↔ @citi_Forall2 _ _ I C D _ (λ _, (≡{n}≡)) k _ t t'.
   Proof.
     move: t t'. elim: k; [done|]=>/= ? IH ??.
     split; apply citg_Forall2_mono'=> ???; by apply IH.
   Qed.
   (** Unfold [≡] over [citi] *)
   Lemma citi_equiv_Forall2 {D k t t'} :
-    t ≡ t' ↔ ∀ n, @citi_Forall2 _ I C D _ (λ _, (≡{n}≡)) k _ t t'.
+    t ≡ t' ↔ ∀ n, @citi_Forall2 _ _ I C D _ (λ _, (≡{n}≡)) k _ t t'.
   Proof. rewrite equiv_dist. split=> ??; by apply citi_dist_Forall2. Qed.
 
   (** [citi_Forall2] preserves reflexivity *)
   #[export] Instance citi_Forall2_refl `{!∀ s, @Reflexive (D s) (R s)} {k} :
-    Reflexive (@citi_Forall2 _ I C _ _ R k _).
+    Reflexive (@citi_Forall2 _ _ I C _ _ R k _).
   Proof. elim: k; [done|]=>/= ??. exact _. Qed.
 
   (** Flip [citi_Forall2] *)
   Lemma citi_Forall2_flip {D D' R k k' t t'} :
-    citi_Forall2 (λ s, flip (R s)) t' t → @citi_Forall2 _ I C D D' R k k' t t'.
+    citi_Forall2 (λ s, flip (R s)) t' t →
+      @citi_Forall2 _ _ I C D D' R k k' t t'.
   Proof.
     move: k' t t'. elim: k; [done|]=> ? IH. case; [done|]=>/= ??? all.
     apply citg_Forall2_flip. move: all. apply citg_Forall2_mono'=> ???.
     exact: IH.
   Qed.
   (** [citi_Forall2] preserves symmetricity *)
-  Lemma citi_Forall2_sym `{!∀ s, @Symmetric (D s) (R s)}
-    {k k' t t'} :
-    @citi_Forall2 _ I C _ _ R k k' t t' → citi_Forall2 R t' t.
+  Lemma citi_Forall2_sym `{!∀ s, @Symmetric (D s) (R s)} {k k' t t'} :
+    @citi_Forall2 _ _ I C _ _ R k k' t t' → citi_Forall2 R t' t.
   Proof.
     move=> F. apply citi_Forall2_flip. move: F. exact: citi_Forall2_mono.
   Qed.
   #[export] Instance citi_Forall2_sym' `{!∀ s, @Symmetric (D s) (R s)} {k'} :
-    Symmetric (@citi_Forall2 _ I C _ _ R k' _).
+    Symmetric (@citi_Forall2 _ _ I C _ _ R k' _).
   Proof. move=> ??. exact citi_Forall2_sym. Qed.
 
   (** Compose [citi_Forall2]s *)
   Lemma citi_Forall2_compose {D D' D'' R R' R'' k k' k'' t t' t''} :
     (∀ s d d' d'', R s d d' → R' s d' d'' → R'' s d d'') →
-    min k k'' ≤ k' → @citi_Forall2 _ I C D D' R k k' t t' →
+    min k k'' ≤ k' → @citi_Forall2 _ _ I C D D' R k k' t t' →
       citi_Forall2 (D':=D'') (k':=k'') R' t' t'' → citi_Forall2 R'' t t''.
   Proof.
     move=> tr. move: k'' k' t t' t''. elim: k; [done|]=> k IH.
@@ -320,22 +320,22 @@ Section citi_Forall2.
   (** [citi_Forall2] preserves transitivity *)
   Lemma citi_Forall2_trans `{!∀ s, @Transitive (D s) (R s)}
     {k k' k'' t t' t''} :
-    min k k'' ≤ k' → @citi_Forall2 _ I C D _ R k k' t t' →
+    min k k'' ≤ k' → @citi_Forall2 _ _ I C D _ R k k' t t' →
       citi_Forall2 (k':=k'') R t' t'' → citi_Forall2 R t t''.
   Proof. exact: citi_Forall2_compose. Qed.
   #[export] Instance citi_Forall2_trans' `{!∀ s, @Transitive (D s) (R s)} {k} :
-    Transitive (@citi_Forall2 _ I C _ _ R k _).
+    Transitive (@citi_Forall2 _ _ I C _ _ R k _).
   Proof. move=> ???. apply citi_Forall2_trans. lia. Qed.
 
   (** [citi_Forall2] preserves equivalence-ness *)
   #[export] Instance citi_Forall2_equivalence
     `{!∀ s, @Equivalence (D s) (R s)} {k} :
-    Equivalence (@citi_Forall2 _ I C _ _ R k _).
+    Equivalence (@citi_Forall2 _ _ I C _ _ R k _).
   Proof. split; exact _. Qed.
 
   (** Convert universally quantified [citg_Forall2], under UIP over [SEL] *)
   Lemma citi_Forall2_forall `{!Uip SEL, !Inhabited A} {D D' R k k' t t'} :
-    (∀ a : A, @citi_Forall2 _ I C D D' (R a) k k' t t') →
+    (∀ a : A, @citi_Forall2 _ _ I C D D' (R a) k k' t t') →
       citi_Forall2 (λ _ d d', ∀ a, R a _ d d') t t'.
   Proof.
     move: k' t t'. elim: k; [done|]=> ? IH. case; [done|]=>/= ???.
@@ -344,7 +344,7 @@ Section citi_Forall2.
 
   (** Unfold [≡] over [citi], under UIP over [SEL] *)
   Lemma citi_equiv_Forall2' {D k t t'} `{!Uip SEL} :
-    t ≡ t' ↔ @citi_Forall2 _ I C D _ (λ _, (≡)) k _ t t'.
+    t ≡ t' ↔ @citi_Forall2 _ _ I C D _ (λ _, (≡)) k _ t t'.
   Proof.
     rewrite citi_equiv_Forall2. split.
     - move=> /citi_Forall2_forall. by apply citi_Forall2_mono=> ??? /equiv_dist.
@@ -355,7 +355,7 @@ End citi_Forall2.
 (** ** [citi_map]: Map over [citi] *)
 
 Section citi_map.
-  Context {SEL} {I C : SEL → Type} {D D' : SEL → ofe}.
+  Context {SI SEL} {I C : SEL → Type} {D D' : SEL → ofe}.
   Context (f : ∀ s, D s → D' s).
   (** [citi_map]: Map over [citi] *)
   Fixpoint citi_map {k} : citi I C D k → citi I C D' k :=
@@ -363,25 +363,25 @@ Section citi_map.
 End citi_map.
 
 Section citi_map.
-  Context {SEL} {I C : SEL → Type}.
+  Context {SI SEL} {I C : SEL → Type}.
 
   (** [citi_map] is non-expansive *)
   #[export] Instance citi_map_ne_gen {D D' n} :
     Proper (forall_relation (λ _, (≡{n}≡) ==> (≡{n}≡)) ==>
       forall_relation (λ _, (≡{n}≡) ==> (≡{n}≡)))
-      (@citi_map _ I C D D').
+      (@citi_map _ _ I C D D').
   Proof. move=> ???. elim; solve_proper. Qed.
 
   (** [citi_map] over an identity function *)
   Lemma citi_map_id {D f k t} :
-    (∀ s d, f s d ≡ d) → @citi_map _ I C D _ f k t ≡ t.
+    (∀ s d, f s d ≡ d) → @citi_map _ _ I C D _ f k t ≡ t.
   Proof.
     move=> ?. move: t. elim: k; [done|]=>/= ???. exact: citg_map_id.
   Qed.
 
   (** [citi_map] over [∘] *)
   Lemma citi_map_compose {D D' D'' f g k t} :
-    citi_map g (@citi_map _ I C D D' f k t) ≡
+    citi_map g (@citi_map _ _ I C D D' f k t) ≡
       citi_map (D':=D'') (λ s, g s ∘ f s) t.
   Proof.
     apply equiv_dist=> ?. move: t. elim: k; [done|]=>/= ??. elim=>/= *.
@@ -391,7 +391,8 @@ End citi_map.
 
 (** ** [wfcit]: Approximation sequence of [citi] is well-formed *)
 Section wfcit.
-  Context {SEL} {I C : SEL → Type} {D : SEL → ofe}.
+  Context {SI SEL} {I C : SEL → Type} {D : SEL → ofe}.
+
   CoInductive wfcit
     (* Head *) (t : citi I C D 1)
     (* Tail *) (tl : ∀ k, citi I C D (S (S k))) : Prop := Wfcit {
@@ -409,16 +410,16 @@ Section wfcit.
   }.
 End wfcit.
 Add Printing Constructor wfcit.
-Arguments Wfcit {_ _ _ _ _ _}. Arguments wfc_sel {_ _ _ _ _ _}.
-Arguments wfc_ikids {_ _ _ _ _ _}. Arguments wfc_ckids {_ _ _ _ _ _}.
-Arguments wfc_data {_ _ _ _ _ _}.
+Arguments Wfcit {_ _ _ _ _ _ _}. Arguments wfc_sel {_ _ _ _ _ _ _}.
+Arguments wfc_ikids {_ _ _ _ _ _ _}. Arguments wfc_ckids {_ _ _ _ _ _ _}.
+Arguments wfc_data {_ _ _ _ _ _ _}.
 
 Section wfcit.
-  Context {SEL} {I C : SEL → Type} {D : SEL → ofe}.
+  Context {SI SEL} {I C : SEL → Type} {D : SEL → ofe}.
 
   (** [wfcit] into equivalence between the head and an element in the tail *)
   Lemma wfcit_equiv_ht {t tl} k :
-    @wfcit _ I C D t tl → citi_Forall2 (λ _, (≡)) t (tl k).
+    @wfcit _ _ I C D t tl → citi_Forall2 (λ _, (≡)) t (tl k).
   Proof.
     move: tl. elim: t=>/= s ti IH tc d tl[/=sel ?? deq].
     apply (Citgf2 (t:=Citg s _ _ _) (sel k)); [|done..]=>/= i.
@@ -426,7 +427,7 @@ Section wfcit.
   Qed.
   (** [wfcit] into equivalence between elements in the tail *)
   Lemma wfcit_equiv_tt {t tl k k'} :
-    @wfcit _ I C D t tl → citi_Forall2 (λ _, (≡)) (tl k) (tl k').
+    @wfcit _ _ I C D t tl → citi_Forall2 (λ _, (≡)) (tl k) (tl k').
   Proof.
     move=> wf. wlog: k k' / k < k'.
     { move=> goal. have : k < k' ∨ k = k' ∨ k > k' by lia.
@@ -449,7 +450,7 @@ Section wfcit.
   Lemma equiv_wfcit `{!Uip SEL} {t tl} :
     (∀ k, citi_Forall2 (λ _, (≡)) t (tl k)) →
     (∀ k k', k < k' → citi_Forall2 (λ _, (≡)) (tl k) (tl k')) →
-      @wfcit _ I C D t tl.
+      @wfcit _ _ I C D t tl.
   Proof.
     move: t tl. cofix FIX. move=> [????]?/= hteq tteq.
     apply (Wfcit (λ k, (hteq k).(citgf2_sel)))=>/=.
@@ -469,13 +470,13 @@ Section wfcit.
   Qed.
   Lemma equiv_wfcit' `{!Uip SEL} {ts} :
     (∀ k k', k < k' → citi_Forall2 (λ _, (≡)) (ts k) (ts k')) →
-      @wfcit _ I C D (ts 0) (λ k, ts (S k)).
+      @wfcit _ _ I C D (ts 0) (λ k, ts (S k)).
   Proof. move=> F. apply equiv_wfcit=> *; apply F; lia. Qed.
 End wfcit.
 
 (** ** [cita]: Coinductive-inductive tree by approximation *)
 Section cita.
-  Context {SEL} (I C : SEL → Type) (D : SEL → ofe).
+  Context {SI SEL} (I C : SEL → Type) (D : SEL → ofe).
   #[projections(primitive)]
   Record cita : Type := Cita {
     cita_head : citi I C D 1;
@@ -484,17 +485,17 @@ Section cita.
   }.
 End cita.
 Add Printing Constructor cita.
-Arguments Cita {_ _ _ _}. Arguments cita_head {_ _ _ _}.
-Arguments cita_tail {_ _ _ _}. Arguments cita_wf {_ _ _ _}.
+Arguments Cita {_ _ _ _ _}. Arguments cita_head {_ _ _ _ _}.
+Arguments cita_tail {_ _ _ _ _}. Arguments cita_wf {_ _ _ _ _}.
 
 (** Whole sequence of [cita] *)
-Definition cita_seq {SEL I C D} (ta : @cita SEL I C D) (k : nat)
+Definition cita_seq {SI SEL I C D} (ta : @cita _ SEL I C D) (k : nat)
   : citi I C D (S k) :=
   match k with 0 => ta.(cita_head) | S k' => ta.(cita_tail) k' end.
 Coercion cita_seq : cita >-> Funclass.
 
 Section cita.
-  Context {SEL} {I C : SEL → Type} {D : SEL → ofe}.
+  Context {SI SEL} {I C : SEL → Type} {D : SEL → ofe}.
 
   (** Elements of [cita] are equivalent *)
   Lemma cita_seq_equiv {ta : cita I C D} {k k'} :
@@ -511,14 +512,14 @@ Section cita.
 End cita.
 
 (** Universal relation over [cita] *)
-Definition cita_rel {SEL I C D D'}
-  (R : ∀ k, @citi SEL I C D k → citi I C D' k → Prop)
+Definition cita_rel {SI SEL I C D D'}
+  (R : ∀ k, @citi _ SEL I C D k → citi I C D' k → Prop)
   (ta : cita I C D) (ta' : cita I C D') : Prop :=
   ∀ k, R _ (ta k) (ta' k).
 
 (** ** OFE for [cita] *)
 Section citaO.
-  Context {SEL} {I C : SEL → Type} {D : SEL → ofe}.
+  Context {SI SEL} {I C : SEL → Type} {D : SEL → ofe}.
 
   (** Distance for [cita] *)
   Local Instance cita_dist : Dist (cita I C D) :=
@@ -536,21 +537,21 @@ Section citaO.
       { move=> eq ?. apply equiv_dist=> ?. apply eq. }
     - move=> ?. split. { by move=> ??. } { move=> ????. by symmetry. }
       { move=> ??? eq ??. by etrans; [exact: eq|]. }
-    - move=> ???? eq ??. eapply dist_lt; [|done]. apply eq.
+    - move=> ???? eq ??. eapply dist_le; [|done]. apply eq.
   Qed.
   (** OFE of [cita] *)
   Canonical citaO : ofe := Ofe (cita I C D) cita_ofe_mixin.
 End citaO.
-Arguments citaO {_} _ _ _.
+Arguments citaO {_ _} _ _ _.
 
 (** ** [cit]: Coinductive-inductive tree *)
-Definition citO {SEL} (I C : SEL → Type) (D : SEL → ofe) : ofe :=
+Definition citO {SI SEL} (I C : SEL → Type) (D : SEL → ofe) : ofe :=
   citgO I C D (citaO I C D).
-Definition cit {SEL} (I C : SEL → Type) (D : SEL → ofe) : Type :=
+Definition cit {SI SEL} (I C : SEL → Type) (D : SEL → ofe) : Type :=
   citO I C D.
 
 Section citO.
-  Context {SEL} {I C : SEL → Type} {D : SEL → ofe}.
+  Context {SI SEL} {I C : SEL → Type} {D : SEL → ofe}.
 
   (** [citgO I C D CIT] is discrete if [D] and [CIT] are discrete *)
   #[export] Instance citgO_discrete {CIT}
@@ -573,11 +574,11 @@ Section citO.
   (** [Citg] is non-expansive *)
   #[export] Instance Citg_ne {CIT s n} :
     Proper (pointwise_relation _ (≡{n}≡) ==> pointwise_relation _ (≡{n}≡) ==>
-      (≡{n}≡) ==> (≡{n}≡)) (@Citg _ I C D CIT s).
+      (≡{n}≡) ==> (≡{n}≡)) (@Citg _ _ I C D CIT s).
   Proof. move=> ?*?*?*. exact: citg_Forall2_eq. Qed.
   #[export] Instance Citg_proper {CIT s} :
     Proper (pointwise_relation _ (≡) ==> pointwise_relation _ (≡) ==>
-      (≡) ==> (≡)) (@Citg _ I C D CIT s).
+      (≡) ==> (≡)) (@Citg _ _ I C D CIT s).
   Proof.
     move=> ??. rewrite citg_equiv_unseal=> eqi ???????.
     apply citg_Forall2_eq=>/= >. { apply eqi. } { by apply equiv_dist. }
@@ -587,7 +588,7 @@ Section citO.
   (** [Citg] preserves discreteness *)
   #[export] Instance Citg_discrete {CIT s ti tc d}
     `{!∀ i, Discrete (ti i), !∀ c, Discrete (tc c), !Discrete d} :
-    Discrete (@Citg _ I C D CIT s ti tc d).
+    Discrete (@Citg _ _ I C D CIT s ti tc d).
   Proof.
     move=> [????][/=?]. subst=>/= Ei Ec deq. apply equiv_dist=> ?.
     apply citg_Forall2_eq.
@@ -616,7 +617,7 @@ End citO.
 
 (** ** Conversion between [cit] and [cita] *)
 Section of_cit.
-  Context {SEL} {I C : SEL → Type} {D : SEL → ofe}.
+  Context {SI SEL} {I C : SEL → Type} {D : SEL → ofe}.
 
   (** [of_cit]: Convert [cit] into [cita] *)
   Program CoFixpoint wf_of_cit (t : cit I C D) :
@@ -708,12 +709,12 @@ End of_cit.
 (** ** Map over [cit] and [cita] *)
 
 Section cit_map.
-  Context {SEL} {I C : SEL → Type} {D D' : SEL → ofe}.
+  Context {SI SEL} {I C : SEL → Type} {D D' : SEL → ofe}.
 
   (** [wfcit] over [citi_map] *)
   Local Lemma wfcit_map' `{!∀ s, NonExpansive (f s)} {t tl tl'} :
     (∀ k, tl' k = citi_map f (tl k)) → wfcit t tl →
-      wfcit (@citi_map _ I C D D' f _ t) tl'.
+      wfcit (@citi_map _ _ I C D D' f _ t) tl'.
   Proof.
     move: t tl tl'. cofix FIX. move=> [s ti tc d] tl tl' eq [/=sel wfi wfc deq].
     apply (Wfcit (t:=Citg s _ _ _)
@@ -729,7 +730,7 @@ Section cit_map.
       subst=>/= deq'. apply equiv_dist=> ?. f_equiv. by apply equiv_dist.
   Qed.
   Lemma wfcit_map `{!∀ s, NonExpansive (f s)} {t tl} :
-    wfcit t tl → wfcit (@citi_map _ I C D D' f _ t) (λ k, citi_map f (tl k)).
+    wfcit t tl → wfcit (@citi_map _ _ I C D D' f _ t) (λ k, citi_map f (tl k)).
   Proof. by apply wfcit_map'. Qed.
 
   (** [cita_map]: Map over [cita] *)
@@ -745,17 +746,17 @@ Section cit_map.
 End cit_map.
 
 Section cit_map.
-  Context {SEL} {I C : SEL → Type}.
+  Context {SI SEL} {I C : SEL → Type}.
 
   (** [cita_seq] over [cita_map] *)
   Lemma cita_seq_map {D D' f ta k} :
-    @cita_map _ I C D D' f ta k = citi_map f (ta k).
+    @cita_map _ _ I C D D' f ta k = citi_map f (ta k).
   Proof. by case: k. Qed.
 
   (** [cita_map] is non-expansive *)
   #[export] Instance cita_map_ne_gen {D D' n} :
     Proper (forall_relation (λ _, (≡{n}≡)) ==> (≡{n}≡) ==> (≡{n}≡))
-      (@cita_map _ I C D D').
+      (@cita_map _ _ I C D D').
   Proof.
     move=> ?? eq ????. rewrite !cita_seq_map. apply citi_map_ne_gen; [|done].
     move=> ???<-. apply eq.
@@ -763,36 +764,37 @@ Section cit_map.
 
   (** [cita_map] over an identity function *)
   Lemma cita_map_id {D ta} {f : ∀ s, D s -n> _} :
-    (∀ s d, f s d ≡ d) → @cita_map _ I C D _ f ta ≡ ta.
+    (∀ s d, f s d ≡ d) → @cita_map _ _ I C D _ f ta ≡ ta.
   Proof. move=> ??. by rewrite cita_seq_map citi_map_id. Qed.
 
   (** [cita_map] over [∘] *)
   Lemma cita_map_compose {D D' D'' f g ta} :
-    cita_map g (@cita_map _ I C D D' f ta) ≡
+    cita_map g (@cita_map _ _ I C D D' f ta) ≡
       cita_map (D':=D'') (λ s, g s ◎ f s) ta.
   Proof. move=> ?. rewrite !cita_seq_map. apply citi_map_compose. Qed.
 
   (** [cit_map] is non-expansive *)
   #[export] Instance cit_map_ne_gen {D D' n} :
     Proper (forall_relation (λ _, (≡{n}≡)) ==> (≡{n}≡) ==> (≡{n}≡))
-      (@cit_map _ I C D D').
+      (@cit_map _ _ I C D D').
   Proof.
     move=> ?? to ???. apply citg_map_ne_gen; [..|done].
     { move=> ???<-. apply to. }
     move=> ???. exact: cita_map_ne_gen.
   Qed.
   #[export] Instance cit_map_ne {D D' f} :
-    NonExpansive (@cit_map _ I C D D' f).
+    NonExpansive (@cit_map _ _ I C D D' f).
   Proof. move=> ?. apply cit_map_ne_gen. solve_proper. Qed.
 
   (** [cit_map] over an identity function *)
   Lemma cit_map_id {D t} {f : ∀ s, D s -n> _} :
-    (∀ s d, f s d ≡ d) → @cit_map _ I C D _ f t ≡ t.
+    (∀ s d, f s d ≡ d) → @cit_map _ _ I C D _ f t ≡ t.
   Proof. move=> ?. apply citg_map_id; [done|]=> ?. exact: cita_map_id. Qed.
 
   (** [cit_map] over [∘] *)
   Lemma cit_map_compose {D D' D'' f g t} :
-    cit_map g (@cit_map _ I C D D' f t) ≡ cit_map (D':=D'') (λ s, g s ◎ f s) t.
+    cit_map g (@cit_map _ _ I C D D' f t) ≡
+      cit_map (D':=D'') (λ s, g s ◎ f s) t.
   Proof.
     apply equiv_dist=> ?. elim: t=> ?? IH ??.
     apply citg_Forall2_eq=>// ?. apply equiv_dist, cita_map_compose.
@@ -800,7 +802,7 @@ Section cit_map.
 
   (** [of_cit] over [cit_map] *)
   Lemma of_cit_map {D D' f t} :
-    of_cit (@cit_map _ I C D D' f t) ≡ cita_map f (of_cit t).
+    of_cit (@cit_map _ _ I C D D' f t) ≡ cita_map f (of_cit t).
   Proof.
     rewrite !of_cit_unseal=> k. apply citi_equiv_Forall2=> n. case: k=>/=.
     { etrans; [apply citg_map_compose|].
@@ -812,19 +814,19 @@ Section cit_map.
 End cit_map.
 
 (** ** [cit_fold]: Fold [cit] *)
-Definition cit_fold {SEL} {I C : SEL → Type} {D : SEL → ofe} {A : ofe}
+Definition cit_fold {SI SEL} {I C : SEL → Type} {D : SEL → ofe} {A : ofe}
   (f : ∀ s, (I s -d> A) → (C s -d> citO I C D) → D s → A) : citO I C D → A :=
   citg_fold (λ s ri tc d, f s ri (λ c, to_cit (tc c)) d).
 
 Section cit_fold.
-  Context {SEL} {I C : SEL → Type}.
+  Context {SI SEL} {I C : SEL → Type}.
   Implicit Type (D : SEL → ofe) (CIT A : ofe).
 
   (** [cit_fold] is non-expansive, under UIP over [SEL] *)
   #[export] Instance cit_fold_ne_gen `{!Uip SEL} {D A n} :
     Proper (forall_relation (λ _,
       (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡)) ==>
-      (≡{n}≡) ==> (≡{n}≡)) (@cit_fold _ I C D A).
+      (≡{n}≡) ==> (≡{n}≡)) (@cit_fold _ _ I C D A).
   Proof.
     move=> ?? to ???. apply citg_fold_ne_gen; [|done]=> ??*?*?*. apply to=>// ?.
     by do 2 f_equiv.
@@ -832,57 +834,61 @@ Section cit_fold.
   #[export] Instance cit_fold_ne `{!Uip SEL} {D A n}
     `{∀ s, Proper (pointwise_relation _ (≡{n}≡) ==>
         pointwise_relation _ (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡)) (f s)} :
-    Proper ((≡{n}≡) ==> (≡{n}≡)) (@cit_fold _ I C D A f).
+    Proper ((≡{n}≡) ==> (≡{n}≡)) (@cit_fold _ _ I C D A f).
   Proof. apply cit_fold_ne_gen. solve_proper. Qed.
   #[export] Instance cit_fold_equiv `{!Uip SEL} {D A}
     `{!∀ n s, Proper (pointwise_relation _ (≡{n}≡) ==>
         pointwise_relation _ (≡{n}≡) ==> (≡{n}≡) ==> (≡{n}≡)) (f s)} :
-    Proper ((≡) ==> (≡)) (@cit_fold _ I C D A f).
+    Proper ((≡) ==> (≡)) (@cit_fold _ _ I C D A f).
   Proof. apply ne_proper, _. Qed.
 End cit_fold.
 
 (** ** Productivity structure for [cita] and [cit] *)
 
-(** [citaPR]: Productivity structure for [cita] *)
-Program Canonical citaPR {SEL} I C D :=
-  Prost (@citaO SEL I C D) (λ k ta ta', ta k ≡ ta' k) _ _ _.
-Next Obligation. split=> ?* //. by etrans. Qed.
-Next Obligation.
-  move=> ???? k k' ta ta' ? /equiv_dist F. apply equiv_dist=> ?.
-  apply citi_dist_Forall2.
-  eapply citi_Forall2_trans; [|exact (cita_seq_dist (k':=k))|]; [lia|].
-  eapply citi_Forall2_trans; [| |exact (cita_seq_dist (k:=k))]; [lia|].
-  by apply citi_dist_Forall2.
-Qed.
-Next Obligation. move=> >. split; [done|]=> eq ?. apply eq. Qed.
+Section citPR.
+  Context {SI}.
 
-(** [citPR]: Productivity structure for [cit], under UIP over [SEL] *)
-Definition proeqv_cit_def {SEL I C D} (k : nat) (t t' : @cit SEL I C D)
-  : Prop := of_cit t ≡[k]≡ of_cit t'.
-Lemma proeqv_cit_aux : seal (@proeqv_cit_def). Proof. by eexists. Qed.
-Definition proeqv_cit {SEL I C D} := proeqv_cit_aux.(unseal) SEL I C D.
-Lemma proeqv_cit_unseal : @proeqv_cit = @proeqv_cit_def.
-Proof. exact: seal_eq. Qed.
-Program Canonical citPR {SEL} `{!Uip SEL} I C D :=
-  Prost (@citO SEL I C D) proeqv_cit _ _ _.
-Next Obligation.
-  rewrite proeqv_cit_unseal /proeqv_cit_def. split=> ?* //. by etrans.
-Qed.
-Next Obligation. rewrite proeqv_cit_unseal=> *. by eapply proeqv_anti. Qed.
-Next Obligation.
-  rewrite proeqv_cit_unseal /proeqv_cit_def=> ????? t t'. split.
-  - move=> eq ?. by rewrite eq.
-  - move=> ?. rewrite -(to_of_cit (t:=t)) -(to_of_cit (t:=t')). by f_equiv.
-Qed.
+  (** [citaPR]: Productivity structure for [cita] *)
+  Program Canonical citaPR {SEL} I C D :=
+    Prost (@citaO _ SEL I C D) (λ k ta ta', ta k ≡ ta' k) _ _ _.
+  Next Obligation. split=> ?* //. by etrans. Qed.
+  Next Obligation.
+    move=> ???? k k' ta ta' ? /equiv_dist F. apply equiv_dist=> ?.
+    apply citi_dist_Forall2.
+    eapply citi_Forall2_trans; [|exact (cita_seq_dist (k':=k))|]; [lia|].
+    eapply citi_Forall2_trans; [| |exact (cita_seq_dist (k:=k))]; [lia|].
+    by apply citi_dist_Forall2.
+  Qed.
+  Next Obligation. move=> >. split; [done|]=> eq ?. apply eq. Qed.
+
+  (** [citPR]: Productivity structure for [cit], under UIP over [SEL] *)
+  Definition proeqv_cit_def {SEL I C D} (k : nat) (t t' : @cit _ SEL I C D)
+    : Prop := of_cit t ≡[k]≡ of_cit t'.
+  Lemma proeqv_cit_aux : seal (@proeqv_cit_def). Proof. by eexists. Qed.
+  Definition proeqv_cit {SEL I C D} := proeqv_cit_aux.(unseal) SEL I C D.
+  Lemma proeqv_cit_unseal : @proeqv_cit = @proeqv_cit_def.
+  Proof. exact: seal_eq. Qed.
+  Program Canonical citPR {SEL} `{!Uip SEL} I C D :=
+    Prost (@citO _ SEL I C D) proeqv_cit _ _ _.
+  Next Obligation.
+    rewrite proeqv_cit_unseal /proeqv_cit_def. split=> ?* //. by etrans.
+  Qed.
+  Next Obligation. rewrite proeqv_cit_unseal=> *. by eapply proeqv_anti. Qed.
+  Next Obligation.
+    rewrite proeqv_cit_unseal /proeqv_cit_def=> ????? t t'. split.
+    - move=> eq ?. by rewrite eq.
+    - move=> ?. rewrite -(to_of_cit (t:=t)) -(to_of_cit (t:=t')). by f_equiv.
+  Qed.
+End citPR.
 
 Section citPR.
-  Context {SEL} {I C : SEL → Type} {D : SEL → ofe}.
+  Context {SI SEL} {I C : SEL → Type} {D : SEL → ofe}.
 
   (** Unfold [proeqv] over [cita] and [cit] *)
-  Lemma cita_proeqv : @proeqv (citaPR I C D) = λ k ta ta', ta k ≡ ta' k.
+  Lemma cita_proeqv : @proeqv _ (citaPR I C D) = λ k ta ta', ta k ≡ ta' k.
   Proof. done. Qed.
   Lemma cit_proeqv `{!Uip SEL} :
-    @proeqv (citPR I C D) = λ k t t', of_cit t ≡[k]≡ of_cit t'.
+    @proeqv _ (citPR I C D) = λ k t t', of_cit t ≡[k]≡ of_cit t'.
   Proof. by rewrite /proeqv /= proeqv_cit_unseal. Qed.
 
   (** [Citg] is size-preserving over the inductive arguments
@@ -900,14 +906,14 @@ Section citPR.
   Qed.
 
   (** [of_cit] is size-preserving *)
-  #[export] Instance of_cit_preserv `{!Uip SEL} : Preserv (@of_cit _ I C D).
+  #[export] Instance of_cit_preserv `{!Uip SEL} : Preserv (@of_cit _ _ I C D).
   Proof. move=> ???. by rewrite cit_proeqv. Qed.
 End citPR.
 
 (** ** Completeness of [cita] and [cit] *)
 
 Section cit_cprost.
-  Context {SEL} {I C : SEL → Type} {D : SEL → ofe} `{!Uip SEL}.
+  Context {SI SEL} {I C : SEL → Type} {D : SEL → ofe} `{!Uip SEL}.
 
   (** Limit over [cita] *)
   Program Definition cita_prolimit (c : prochain (citaPR I C D))
@@ -946,26 +952,30 @@ Section cit_cprost.
   Qed.
 End cit_cprost.
 
-(** ** [citOF]: [oFunctor] for [cit] *)
-Program Definition citOF {SEL} I C (D : SEL → oFunctor) : oFunctor := {|
-  oFunctor_car A _ B _ := citO I C (λ s, (D s).(oFunctor_car) A B);
-  oFunctor_map _ _ _ _ _ _ _ _ fg :=
-    OfeMor (cit_map (λ s, oFunctor_map (D s) fg));
-|}.
-Next Obligation.
-  move=> > [[??][??]][[??][??]][/=??]?/=. f_equiv. solve_proper.
-Qed.
-Next Obligation. move=>/= *. apply cit_map_id=> >. apply oFunctor_map_id. Qed.
-Next Obligation.
-  move=>/= *. rewrite cit_map_compose. apply equiv_dist=> ?. f_equiv=> ??.
-  apply equiv_dist, oFunctor_map_compose.
-Qed.
+Section citOF.
+  Context {SI SEL}.
 
-(** [citOF I C D] is contractive when [D] is contractive *)
-#[export] Instance citOF_contractive {SEL I C}
-  `{!∀ s, oFunctorContractive (D s)} :
-  oFunctorContractive (citOF (SEL:=SEL) I C D).
-Proof.
-  move=> > ? * ? /=. apply cit_map_ne_gen; [|done]=> ??.
-  exact: oFunctor_map_contractive.
-Qed.
+  (** ** [citOF]: [oFunctor] for [cit] *)
+  Program Definition citOF I C (D : SEL → oFunctor) : oFunctor := {|
+    oFunctor_car A _ B _ := citO I C (λ s, (D s).(oFunctor_car) A B);
+    oFunctor_map _ _ _ _ _ _ _ _ fg :=
+      OfeMor (cit_map (λ s, oFunctor_map (D s) fg));
+  |}.
+  Next Obligation.
+    move=> > [[??][??]][[??][??]][/=??]?/=. f_equiv. solve_proper.
+  Qed.
+  Next Obligation. move=>/= *. apply cit_map_id=> >. apply oFunctor_map_id. Qed.
+  Next Obligation.
+    move=>/= *. rewrite cit_map_compose. apply equiv_dist=> ?. f_equiv=> ??.
+    apply equiv_dist, oFunctor_map_compose.
+  Qed.
+
+  (** [citOF I C D] is contractive when [D] is contractive *)
+  #[export] Instance citOF_contractive {I C}
+    `{!∀ s, oFunctorContractive (D s)} :
+    oFunctorContractive (citOF I C D).
+  Proof.
+    move=> > ? * ? /=. apply cit_map_ne_gen; [|done]=> ??.
+    exact: oFunctor_map_contractive.
+  Qed.
+End citOF.

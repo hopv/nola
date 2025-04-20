@@ -307,7 +307,8 @@ Section borrow.
     move=> [?[/Some_equiv_eq[?[++]] /Some_includedN_total +]].
     rewrite lookup_of_depo_stl=> /fmap_Some[[?[??]][? ->]]<-.
     move=> /prod_includedN[/prod_includedN/=[+ ?] ?].
-    move=> /to_agree_includedN/leibniz_equiv_iff ?. subst. by eexists _, _.
+    move=> /to_agree_includedN/discrete_iff/leibniz_equiv_iff eq. subst.
+    by eexists _, _.
   Qed.
 
   (** Agreement between [depo_stl_tok] and [lend_itok] *)

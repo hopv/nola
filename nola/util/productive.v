@@ -3,8 +3,10 @@
 From nola Require Export prelude.
 From iris.algebra Require Export ofe.
 
+Implicit Type SI : sidx.
+
 (** ** [prost]: Productivity structure *)
-Structure prost := Prost {
+Structure prost {SI} := Prost {
   (** Underlying OFE] *) prost_car :> ofe;
   (** Equivalences up to a level *)
     #[canonical=no] proeqv : nat → relation prost_car;
@@ -17,14 +19,13 @@ Structure prost := Prost {
     #[canonical=no] equiv_proeqv {a a'} : a ≡ a' ↔ (∀ k, proeqv k a a');
 }.
 Add Printing Constructor prost.
-Arguments proeqv {PR} : rename, simpl never.
-Arguments proeqv_equivalence {PR _} : rename.
-Arguments proeqv_anti {PR _ _ _ _} : rename.
-Arguments equiv_proeqv {PR _ _} : rename.
-Implicit Type PR : prost.
+Arguments Prost {_}. Arguments proeqv {_ PR} : rename, simpl never.
+Arguments proeqv_equivalence {_ PR _} : rename.
+Arguments proeqv_anti {_ PR _ _ _ _} : rename.
+Arguments equiv_proeqv {_ PR _ _} : rename.
 
 (** [proeqv_later]: [proeqv] with the level deferred by 1 *)
-Definition proeqv_later {PR} k : relation PR :=
+Definition proeqv_later {SI} {PR : prost} k : relation PR :=
   match k with 0 => λ _ _, True | S k' => proeqv k' end.
 
 Module ProeqvNotation.
@@ -43,77 +44,82 @@ Module ProeqvNotation.
 End ProeqvNotation.
 Import ProeqvNotation.
 
-(** [proeqv] is proper *)
-#[export] Instance proeqv_proper {PR k} :
-  Proper ((≡) ==> (≡) ==> (↔)) (≡[k]@{PR}≡).
-Proof.
-  have pro : Proper ((≡) ==> (≡) ==> impl) (≡[k]@{PR}≡); last first.
-  { move=> ?*?*. by split; apply pro. }
-  move=> ?? /equiv_proeqv eq ?? /equiv_proeqv eq' ?.
-  etrans; [symmetry; exact: eq|]. by etrans.
-Qed.
+Section proeqv.
+  Context {SI}.
 
-(** [proeqv_later] is an equivalence relation *)
-#[export] Instance proeqv_later_equivalence {PR k} :
-  Equivalence (≡[<k]@{PR}≡).
-Proof. case: k=>//=. exact _. Qed.
-(** [proeqv_later] is proper *)
-#[export] Instance proeqv_later_proper {PR k} :
-  Proper ((≡) ==> (≡) ==> (↔)) (≡[<k]@{PR}≡).
-Proof. case: k; solve_proper. Qed.
-(** [proeqv] to [proeqv_later] *)
-Lemma proeqv_to_later {PR k a a'} : a ≡[k]@{PR}≡ a' → a ≡[<k]≡ a'.
-Proof. case: k=>//= ?. apply proeqv_anti. lia. Qed.
-(** [proeqv_later] is antinone *)
-Lemma proeqv_later_anti {PR k k' a a'} :
-  k ≥ k' → a ≡[<k]@{PR}≡ a' → a ≡[<k']≡ a'.
-Proof. case: k'=>//= ?. case: k; [lia|]=>/= ??. apply proeqv_anti. lia. Qed.
+  (** [proeqv] is proper *)
+  #[export] Instance proeqv_proper {PR k} :
+    Proper ((≡) ==> (≡) ==> (↔)) (≡[k]@{PR}≡).
+  Proof.
+    have pro : Proper ((≡) ==> (≡) ==> impl) (≡[k]@{PR}≡); last first.
+    { move=> ?*?*. by split; apply pro. }
+    move=> ?? /equiv_proeqv eq ?? /equiv_proeqv eq' ?.
+    etrans; [symmetry; exact: eq|]. by etrans.
+  Qed.
 
-(** ** Productivity structures *)
+  (** [proeqv_later] is an equivalence relation *)
+  #[export] Instance proeqv_later_equivalence {PR k} :
+    Equivalence (≡[<k]@{PR}≡).
+  Proof. case: k=>//=. exact _. Qed.
+  (** [proeqv_later] is proper *)
+  #[export] Instance proeqv_later_proper {PR k} :
+    Proper ((≡) ==> (≡) ==> (↔)) (≡[<k]@{PR}≡).
+  Proof. case: k; solve_proper. Qed.
+  (** [proeqv] to [proeqv_later] *)
+  Lemma proeqv_to_later {PR k a a'} : a ≡[k]@{PR}≡ a' → a ≡[<k]≡ a'.
+  Proof. case: k=>//= ?. apply proeqv_anti. lia. Qed.
+  (** [proeqv_later] is antinone *)
+  Lemma proeqv_later_anti {PR k k' a a'} :
+    k ≥ k' → a ≡[<k]@{PR}≡ a' → a ≡[<k']≡ a'.
+  Proof. case: k'=>//= ?. case: k; [lia|]=>/= ??. apply proeqv_anti. lia. Qed.
 
-(** Discrete structure *)
-Program Definition discretePR (A : ofe) : prost := Prost A (λ _, (≡)) _ _ _.
-Next Obligation. done. Qed.
-Next Obligation. move=> ???. split=>// eq. apply eq, 0. Qed.
-(** Unfold [proeqv] over [discretePR] *)
-Lemma discrete_proeqv {A} : @proeqv (discretePR A) = λ _, (≡).
-Proof. done. Qed.
-(** Unfold [proeqv_later] over [discretePR] *)
-Lemma discrete_proeqv_later {A k a a'} :
-  a ≡[<k]@{discretePR A}≡ a' ↔ k = 0 ∨ a ≡ a'.
-Proof. case: k=>/= >; [split; by [left|]|split; by [right|case]]. Qed.
+  (** ** Productivity structures *)
 
-(** Product *)
-Program Canonical prodPR (A B : prost) : prost :=
-  Prost (prodO A B) (λ k, prod_relation (≡[k]≡) (≡[k]≡)) _ _ _.
-Next Obligation. move=> > ?[??]. split; by eapply proeqv_anti. Qed.
-Next Obligation.
-  move=> >. split. { move=> [??]?. split; by apply equiv_proeqv. }
-  { move=> eq. split; apply equiv_proeqv; apply eq. }
-Qed.
+  (** Discrete structure *)
+  Program Definition discretePR (A : ofe) : prost := Prost A (λ _, (≡)) _ _ _.
+  Next Obligation. done. Qed.
+  Next Obligation. move=> ???. split=>// eq. apply eq, 0. Qed.
+  (** Unfold [proeqv] over [discretePR] *)
+  Lemma discrete_proeqv {A} : proeqv (PR:=discretePR A) = λ _, (≡).
+  Proof. done. Qed.
+  (** Unfold [proeqv_later] over [discretePR] *)
+  Lemma discrete_proeqv_later {A k a a'} :
+    a ≡[<k]@{discretePR A}≡ a' ↔ k = 0 ∨ a ≡ a'.
+  Proof. case: k=>/= >; [split; by [left|]|split; by [right|case]]. Qed.
 
-(** Function *)
-Program Canonical funPR {A} (PRF : A → prost) : prost :=
-  Prost (discrete_funO PRF) (λ k f g, ∀ a, proeqv k (f a) (g a)) _ _ _.
-Next Obligation.
-  move=> ???. split. { by move=> ??. } { move=> ????. by symmetry. }
-  { move=> ??? e ??. etrans; by [apply e|]. }
-Qed.
-Next Obligation. move=> *?. by eapply proeqv_anti. Qed.
-Next Obligation.
-  move=> >. split. { move=> *. by apply equiv_proeqv. }
-  { move=> eq ?. apply equiv_proeqv=> ?. apply eq. }
-Qed.
-(** Unfold [proeqv] over [funPR] *)
-Lemma fun_proeqv {A PRF} : @proeqv (@funPR A PRF) = λ k f g, ∀ a, f a ≡[k]≡ g a.
-Proof. done. Qed.
-(** Unfold [proeqv_later] over [funPR] *)
-Lemma fun_proeqv_later {A PRF k f g} :
-  @proeqv_later (@funPR A PRF) k f g ↔ ∀ a, proeqv_later k (f a) (g a).
-Proof. by case: k. Qed.
+  (** Product *)
+  Program Canonical prodPR (A B : prost) : prost :=
+    Prost (prodO A B) (λ k, prod_relation (≡[k]≡) (≡[k]≡)) _ _ _.
+  Next Obligation. move=> > ?[??]. split; by eapply proeqv_anti. Qed.
+  Next Obligation.
+    move=> >. split. { move=> [??]?. split; by apply equiv_proeqv. }
+    { move=> eq. split; apply equiv_proeqv; apply eq. }
+  Qed.
+
+  (** Function *)
+  Program Canonical funPR {A} (PRF : A → prost) : prost :=
+    Prost (discrete_funO PRF) (λ k f g, ∀ a, proeqv k (f a) (g a)) _ _ _.
+  Next Obligation.
+    move=> ???. split. { by move=> ??. } { move=> ????. by symmetry. }
+    { move=> ??? e ??. etrans; by [apply e|]. }
+  Qed.
+  Next Obligation. move=> *?. by eapply proeqv_anti. Qed.
+  Next Obligation.
+    move=> >. split. { move=> *. by apply equiv_proeqv. }
+    { move=> eq ?. apply equiv_proeqv=> ?. apply eq. }
+  Qed.
+  (** Unfold [proeqv] over [funPR] *)
+  Lemma fun_proeqv {A PRF} :
+    proeqv (PR:=@funPR A PRF) = λ k f g, ∀ a, f a ≡[k]≡ g a.
+  Proof. done. Qed.
+  (** Unfold [proeqv_later] over [funPR] *)
+  Lemma fun_proeqv_later {A PRF k f g} :
+    proeqv_later (PR:=@funPR A PRF) k f g ↔ ∀ a, proeqv_later k (f a) (g a).
+  Proof. by case: k. Qed.
+End proeqv.
 
 Module FunPRNotation.
-  Notation "A -pr> PR" := (@funPR A (λ _, PR))
+  Notation "A -pr> PR" := (funPR (A:=A) (λ _, PR))
     (at level 99, PR at level 200, right associativity).
 End FunPRNotation.
 
@@ -128,34 +134,40 @@ Notation Preserv f := (∀ k, Proper ((≡[k]≡) ==> (≡[k]≡)) f).
 Notation Preserv' PR PR' f := (∀ k, Proper ((≡[k]@{PR}≡) ==> (≡[k]@{PR'}≡)) f)
   (only parsing).
 
-(** [Productive] entails [Preserv] *)
-Lemma productive_preserv `(!Productive' PR PR' f) : Preserv f.
-Proof. move=> ????. f_equiv. exact: proeqv_to_later. Qed.
+Section Productive.
+  Context {SI}.
 
-(** [Preserv] entails [Proper] *)
-Lemma preserv_proper `(!Preserv' PR PR' f) : Proper ((≡) ==> (≡)) f.
-Proof. move=> ???. apply equiv_proeqv=> ?. f_equiv. by apply equiv_proeqv. Qed.
-Lemma productive_proper `(!Productive' PR PR' f) : Proper ((≡) ==> (≡)) f.
-Proof. apply preserv_proper, productive_preserv, _. Qed.
+  (** [Productive] entails [Preserv] *)
+  Lemma productive_preserv `(!Productive' PR PR' f) : Preserv f.
+  Proof. move=> ????. f_equiv. exact: proeqv_to_later. Qed.
 
-(** [pair] is size-preserving *)
-#[export] Instance pair_preserv {A B : prost} {k} :
-  Proper ((≡[k]≡) ==> (≡[k]≡) ==> (≡[k]≡)) (@pair A B).
-Proof. exact _. Qed.
+  (** [Preserv] entails [Proper] *)
+  Lemma preserv_proper `(!Preserv' PR PR' f) : Proper ((≡) ==> (≡)) f.
+  Proof.
+    move=> ???. apply equiv_proeqv=> ?. f_equiv. by apply equiv_proeqv.
+  Qed.
+  Lemma productive_proper `(!Productive' PR PR' f) : Proper ((≡) ==> (≡)) f.
+  Proof. apply preserv_proper, productive_preserv, _. Qed.
+
+  (** [pair] is size-preserving *)
+  #[export] Instance pair_preserv {A B : prost} {k} :
+    Proper ((≡[k]≡) ==> (≡[k]≡) ==> (≡[k]≡)) (@pair A B).
+  Proof. exact _. Qed.
+End Productive.
 
 (** ** Completeness *)
 
 (** [prochain]: Chain / Cauchy sequence over [prost] *)
-Record prochain PR : Type := Prochain {
+Record prochain {SI} (PR : prost) : Type := Prochain {
   prochain_seq :> nat → PR;
   prochain_eqv {k k'} : k ≤ k' → prochain_seq k ≡[k]≡ prochain_seq k';
 }.
 Add Printing Constructor prochain.
-Arguments Prochain {_}. Arguments prochain_seq {_}.
-Arguments prochain_eqv {_ c _ _} : rename.
+Arguments Prochain {_ _}. Arguments prochain_seq {_ _}.
+Arguments prochain_eqv {_ _ c _ _} : rename.
 
 (** [Cprost]: Complete [prost] *)
-Class Cprost PR : Type := CPROST {
+Class Cprost {SI} (PR : prost) : Type := CPROST {
   (** Limit *)
   prolimit : prochain PR → PR;
   (** For any level [k], [prolimit c] is equivalent [c k] up to [k] *)
@@ -165,59 +177,68 @@ Class Cprost PR : Type := CPROST {
     ((pointwise_relation _ (≡{n}≡) : relation (prochain _)) ==> (≡{n}≡))
     prolimit;
 }.
-Arguments CPROST {_}.
+Arguments CPROST {_ _}.
 
-(** [prolimit] is proper *)
-#[export] Instance prolimit_proper `{!Cprost PR} :
-  Proper ((pointwise_relation _ (≡) : relation (prochain _)) ==> (≡))
-    (@prolimit PR _).
-Proof.
-  move=> ???. apply equiv_dist=> ?. apply prolimit_ne=> ?. by apply equiv_dist.
-Qed.
+Section prolimit.
+  Context {SI}.
 
-(** [Cprost] over [discretePR] *)
-#[export] Program Instance discrete_cprost {A : ofe} :
-  Cprost (discretePR A) := CPROST (λ c, c 0) _ _.
-Next Obligation. move=> ???. apply: prochain_eqv. lia. Qed.
-Next Obligation. move=> ???? eq. apply eq. Qed.
+  (** [prolimit] is proper *)
+  #[export] Instance prolimit_proper `{!Cprost PR} :
+    Proper ((pointwise_relation _ (≡) : relation (prochain _)) ==> (≡))
+      (@prolimit _ PR _).
+  Proof.
+    move=> ???. apply equiv_dist=> ?. apply prolimit_ne=> ?.
+    by apply equiv_dist.
+  Qed.
 
-(** Project [prochain] over [prodPR] *)
-Program Definition prochain_proj1 {A B} (c : prochain (prodPR A B))
-  : prochain A :=
-  Prochain (λ k, (c k).1) _.
-Next Obligation. move=> ?? c ???/=. by apply c.(prochain_eqv). Qed.
-Program Definition prochain_proj2 {A B} (c : prochain (prodPR A B))
-  : prochain B :=
-  Prochain (λ k, (c k).2) _.
-Next Obligation. move=> ?? c ???/=. by apply c.(prochain_eqv). Qed.
-(** [Cprost] over [prodPR] *)
-#[export] Program Instance prod_cprost {A B} `{!Cprost A, !Cprost B} :
-  Cprost (prodPR A B) :=
-  CPROST (λ c, (prolimit (prochain_proj1 c), prolimit (prochain_proj2 c))) _ _.
-Next Obligation. move=> *. split; exact prolimit_eqv. Qed.
-Next Obligation. move=> ?*?? eq. split; apply prolimit_ne=> ?; apply eq. Qed.
+  (** [Cprost] over [discretePR] *)
+  #[export] Program Instance discrete_cprost {A : ofe} :
+    Cprost (discretePR A) := CPROST (λ c, c 0) _ _.
+  Next Obligation. move=> ???. apply: prochain_eqv. lia. Qed.
+  Next Obligation. move=> ???? eq. apply eq. Qed.
 
-(** Turn [prochain] over [funPR] *)
-Program Definition prochain_app {A PRF}
-  (c : prochain (@funPR A PRF)) (a : A) : prochain (PRF a) :=
-  Prochain (λ k, c k a) _.
-Next Obligation. move=> ?? c ????/=. by apply c.(prochain_eqv). Qed.
-(** [Cprost] over [funPR] *)
-#[export] Program Instance fun_cprost {A PRF} `{!∀ a, Cprost (PRF a)} :
-  Cprost (@funPR A PRF) := CPROST (λ c a, prolimit (prochain_app c a)) _ _.
-Next Obligation. move=> *>. by etrans; [exact prolimit_eqv|]. Qed.
-Next Obligation. move=> > ?? eq a. apply prolimit_ne=> k. exact: (eq k a). Qed.
+  (** Project [prochain] over [prodPR] *)
+  Program Definition prochain_proj1 {A B} (c : prochain (prodPR A B))
+    : prochain A :=
+    Prochain (λ k, (c k).1) _.
+  Next Obligation. move=> ?? c ???/=. by apply c.(prochain_eqv). Qed.
+  Program Definition prochain_proj2 {A B} (c : prochain (prodPR A B))
+    : prochain B :=
+    Prochain (λ k, (c k).2) _.
+  Next Obligation. move=> ?? c ???/=. by apply c.(prochain_eqv). Qed.
+  (** [Cprost] over [prodPR] *)
+  #[export] Program Instance prod_cprost {A B} `{!Cprost A, !Cprost B} :
+    Cprost (prodPR A B) :=
+    CPROST (λ c, (prolimit (prochain_proj1 c), prolimit (prochain_proj2 c)))
+      _ _.
+  Next Obligation. move=> *. split; exact prolimit_eqv. Qed.
+  Next Obligation. move=> ?*?? eq. split; apply prolimit_ne=> ?; apply eq. Qed.
 
+  (** Turn [prochain] over [funPR] *)
+  Program Definition prochain_app {A PRF}
+    (c : prochain (funPR PRF)) (a : A) : prochain (PRF a) :=
+    Prochain (λ k, c k a) _.
+  Next Obligation. move=> ?? c ????/=. by apply c.(prochain_eqv). Qed.
+  (** [Cprost] over [funPR] *)
+  #[export] Program Instance fun_cprost {A PRF} `{!∀ a, Cprost (PRF a)} :
+    Cprost (funPR (A:=A) PRF) :=
+    CPROST (λ c a, prolimit (prochain_app c a)) _ _.
+  Next Obligation. move=> *>. by etrans; [exact prolimit_eqv|]. Qed.
+  Next Obligation.
+    move=> > ?? eq a. apply prolimit_ne=> k. exact: (eq k a).
+  Qed.
+End prolimit.
 (** ** Fixed point *)
 
 Section profix.
+  Context {SI}.
+  Implicit Type PR : prost.
   Context `{!Inhabited PR, !Cprost PR}.
   Implicit Type f : PR → PR.
 
   (** Chain for [profix] *)
-  Program Definition profix_chain
-    (f : PR → PR) `{!Productive f} : prochain PR :=
-    Prochain (λ k, f (Nat.iter k f inhabitant)) _.
+  Program Definition profix_chain (f : PR → PR) `{!Productive f}
+    : prochain PR := Prochain (λ k, f (Nat.iter k f inhabitant)) _.
   Next Obligation.
     move=>/= ??. elim=>/=. { move=> *. by f_equiv. }
     move=> ? IH. case; [lia|]=> ??. f_equiv=>/=. apply IH. lia.

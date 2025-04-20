@@ -492,7 +492,7 @@ Section lemmas.
     apply own_uPred_holds, cmra_discrete_included_iff in own. move: own.
     have: ✓ iRes_at (i:=prophG_in) proph_name r.
     { apply cmra_discrete_valid, iRes_at_validN.
-      apply: cmra_validN_le; [done|lia]. }
+      apply: cmra_validN_le; [done|]. exact: SIdx.le_0_l. }
     unfold iRes_log. case: (iRes_at (i:=prophG_in) proph_name r); last first.
     { rewrite option_included=> ?. case; [done|]. by move=> [?[?[_[? _]]]]. }
     move=> [M] val /Some_included_total ?. apply pli_item_included_1.

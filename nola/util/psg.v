@@ -3,8 +3,10 @@
 From nola.util Require Export order.
 Import BigMJNotation FunPNotation.
 
+Implicit Type SI : sidx.
+
 Section psg.
-  Context `{!BigMeet OT}.
+  Context {SI} `{!BigMeet OT}.
   Implicit Type (f : OT → OT) (o : OT).
 
   (** ** [Psgoid]: Set of pseudo-gfp-oids *)
@@ -163,7 +165,7 @@ End psg.
 
 (** ** [psg f] agrees with [gfp f] when [f] is monotone *)
 Section psg_gfp.
-  Context `{!BigMeet OT, !BigJoin OT, !@Mono OT OT f}.
+  Context {SI} `{!BigMeet OT, !BigJoin OT, !@Mono _ OT OT f}.
 
  (** [gfp f] lower-bounds [Psgoid f] *)
   Lemma Psgoid_gfp {o} : Psgoid f o → gfp f ⊑ o.
