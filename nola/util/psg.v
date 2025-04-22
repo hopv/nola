@@ -43,7 +43,7 @@ Section psg.
   #[export] Instance Psgoid_proper {f} : Proper ((≡) ==> (≡)) (Psgoid f).
   Proof. move=> ???; split; exact: Psgoid_proper'. Qed.
 
-  (** ** [Psgoidp]: [Psgoid] parameterized with an inductive hypothesis [ih] *)
+  (** ** [Psgoidp]: [Psgoid] parameterized with an induction hypothesis [ih] *)
   Definition Psgoidp f (ih : OT -p> Prop) : OT -p> Prop :=
     lfp (aug_meet (Psgoid_gen f) ih).
 

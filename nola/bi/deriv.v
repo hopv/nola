@@ -39,11 +39,11 @@ Section deriv.
 
   (** ** [Deriv ih δ] : [δ] is a valid derivability candidate
 
-    [ih] is the inductive hypothesis, used for parameterized induction *)
+    [ih] is the induction hypothesis, used for parameterized induction *)
   Definition Deriv := Psgoidp (OT:=JUDG -n> PROP) (λ δ, OfeMor (dsem δ)).
   Existing Class Deriv.
 
-  (** [Deriv] is monotone over the inductive hypothesis *)
+  (** [Deriv] is monotone over the induction hypothesis *)
   Lemma Deriv_mono `{!Deriv ih δ} (ih' : _ → Prop) :
     (∀ δ', ih δ' → ih' δ') → Deriv ih' δ.
   Proof. move=> to. move: Deriv0. exact: Psgoidp_mono. Qed.
@@ -55,7 +55,7 @@ Section deriv.
   (** Factorize the application [δ J] by semantics *)
   Lemma Deriv_factor' `{!Deriv ih δ} {J} :
     ((* Take any valid derivability candidate [δ'] *) ∀ δ', ⌜Deriv ih δ'⌝ →
-      (* Can use the inductive hypothesis *) ⌜ih δ'⌝ →
+      (* Can use the induction hypothesis *) ⌜ih δ'⌝ →
       (* Can turn [δ] into the semantics at [δ'] *) ⌜dinto δ δ'⌝ →
       (* The semantics at [δ'] *) ⟦ J ⟧(δ')) ⊢
       (* The factorized application [δ J] *) δ J.
