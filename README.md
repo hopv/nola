@@ -14,6 +14,7 @@ Louisiana, USA, in memory of POPL 2020 held in that city.
 - [Publications](#publications)
 - [Getting Started](#getting-started)
 - [Connection with the PLDI 2025 Paper](#connection-with-the-pldi-2025-paper)
+- [Guide to the Rocq Code](#guide-to-the-rocq-code)
 - [Overview of the Rocq Code](#overview-of-the-rocq-code)
 
 ## Publications
@@ -217,6 +218,64 @@ All the proof rules are proved to be sound with respect to the semantic model.
     * Verifying mutation of a rich list over a mutable reference:
         [`mutlist_more.type_iter_mutlist_mut_fun`](nola/examples/rust_halt/verify/mutlist_more.v).
   + Adequacy: [`adequacy`](nola/examples/rust_halt/adequacy.v).
+
+## Guide to the Rocq Code
+
+When tackling the Rocq code of Nola, you can refer to the guide here.
+
+- [Notations](#notations)
+- [Typical contexts](#typical-contexts)
+
+### Notations
+
+Nola introduces the following notations, guarded under modules:
+
+- Modalities with a custom world satisfaction `W`: Add `[W]` in the middle, as
+    defined in [`nola.bi.modw`](nola/bi/modw.v).
+  + E.g., `|=[W]=> P`, `P =[W]=∗ Q`, `|=[W]{E}=> P`, `P -∗[W] Q`.
+- Weakest preconditions and Hoare triples with a custom world satisfaction `W`:
+    Add `[W]` before the expression, as defined in
+    [`nola.bi.wpw`](nola/bi/wpw.v).
+  + E.g., `WP[W] e [{ Ψ }]`, `[[{ P }]][W] e [[{ v, RET v; Ψ v }]]`.
+- Modalities with the except-0 modality `◇` : Add `◇`, as defined in
+    [`nola.bi.mod`](nola/bi/mod.v) and [`nola.bi.modw`](nola/bi/modw.v).
+  + E.g., `|==>◇ P`, `P ==∗◇ Q`, `P -∗[W]◇ Q`.
+- Iterative separating conjunction over `plist`
+    ([`nola.util.plist`](nola/util/plist.v)): Use `[∗ plist]`, as defined in
+    [`nola.bi.plist`](nola/bi/plist.v).
+  + E.g., `[∗ plist] x ∈ xl, Φ x`.
+- Custom product type `prod` ([`nola.util.prod`](nola/util/prod.v)): Add `'`, as defined in
+    [`nola.util.prod`](nola/util/prod.v).
+  + E.g., `(a, b, c)'`, `p.1'`.
+- General semantics under magic derivability: Use `⟦ ⟧`, as defined in
+    [`nola.bi.deriv`](nola/bi/deriv.v).
+  + E.g., `⟦ Px ⟧`, `⟦ Px ⟧(δ)`.
+- Semantics for `cif` ([`nola.iris.cif`](nola/iris/cif.v)): Use `⟦ ⟧ᶜ`, as
+    defined in [`nola.iris.cif`](nola/iris/cif.v).
+  + E.g., `⟦ Px ⟧ᶜ`, `⟦ Px ⟧ᶜ(δ)`.
+- Equivalence for productivity: Use `≡[ ]≡`, as defined in
+    [`nola.util.productive`](nola/util/productive.v).
+  + E.g., `a ≡[k]≡ b`, `a ≡[<k]≡ b`.
+
+### Typical contexts
+
+For extensibility, proofs using Nola are typically parameterized with various
+contexts, such as the following (`xxx` is a placeholder for a name):
+
+- `CON : cifcon`: The family of constructors for `cif`
+    ([`nola.iris.cif`](nola/iris/cif.v)).
+- `JUDG : ofe`: The judgment data type for magic derivability
+    ([`nola.bi.deriv`](nola/bi/deriv.v)).
+- `Csem CON JUDG Σ`: Semantics for the family of constructors `CON` for `cif`.
+- `Jsem JUDG (iProp Σ)`: Semantics for the judgment `JUDG`.
+- `xxxC ... CON`: Requires some constructors to be included in `CON`.
+- `xxxJ ... JUDG`: Requires some judgments to be included in `JUDG`.
+- `xxxCS ... CON JUDG Σ`: Designates the semantics of the required constructors
+    of `CON`.
+- `xxxJS ... JUDG Σ`: Designates the semantics of the required judgments
+    of `JUDG`.
+- `Deriv ih δ`: `δ` is a valid derivability candidate under the induction
+    hypothesis `ih` for magic derivability ([`nola.bi.deriv`](nola/bi/deriv.v)).
 
 ## Overview of the Rocq Code
 
