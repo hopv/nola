@@ -37,7 +37,7 @@ Section deriv.
   Context `{!Jsem JUDG PROP}.
   Implicit Type (J : JUDG) (δ : JUDG -n> PROP) (ih : (JUDG -n> PROP) → Prop).
 
-  (** ** [Deriv ih δ] : [δ] is a good derivability predicate
+  (** ** [Deriv ih δ] : [δ] is a valid derivability candidate
 
     [ih] is the inductive hypothesis, used for parameterized induction *)
   Definition Deriv := Psgoidp (OT:=JUDG -n> PROP) (λ δ, OfeMor (dsem δ)).
@@ -52,13 +52,13 @@ Section deriv.
   Lemma Deriv_ind `{!Deriv ih' δ} ih : Deriv (λ δ', ih δ' ∧ ih' δ') ⊑ ih → ih δ.
   Proof. exact: Psgoidp_ind. Qed.
 
-  (** Factorize the derivability [δ J] by semantics *)
+  (** Factorize the application [δ J] by semantics *)
   Lemma Deriv_factor' `{!Deriv ih δ} {J} :
-    ((* Take any good derivability predicate [δ'] *) ∀ δ', ⌜Deriv ih δ'⌝ →
+    ((* Take any valid derivability candidate [δ'] *) ∀ δ', ⌜Deriv ih δ'⌝ →
       (* Can use the inductive hypothesis *) ⌜ih δ'⌝ →
       (* Can turn [δ] into the semantics at [δ'] *) ⌜dinto δ δ'⌝ →
       (* The semantics at [δ'] *) ⟦ J ⟧(δ')) ⊢
-      (* The derivability at [δ] *) δ J.
+      (* The factorized application [δ J] *) δ J.
   Proof.
     iIntros "to". iApply (Psgoidp_factor' Deriv0). iIntros (?[?[??]]).
     by iApply "to".
@@ -133,7 +133,7 @@ Section deriv.
     rewrite Deriv_factor_all. repeat apply bi.forall_timeless=> ?. exact: Sem.
   Qed.
 
-  (** ** [der]: The best derivability predicate *)
+  (** ** [der]: The derivability predicate *)
   Definition der : JUDG -n> PROP :=
     psg (OT:=JUDG -n> PROP) (λ δ, OfeMor (dsem δ)).
 
