@@ -248,7 +248,7 @@ The Rocq code is all in [`nola/`](nola/) and is structured as follows:
   + [`order`](nola/bi/order.v) (Order theory),
     [`deriv`](nola/bi/deriv.v) (Magic derivability)
   + [`mod`](nola/bi/mod.v) (Modality classes),
-    [`modw`](nola/bi/modw.v) (Modality with a custom world satisfaction),
+    [`modw`](nola/bi/modw.v) (Modalities with custom world satisfactions),
     [`wpw`](nola/bi/wpw.v) (Weakest precondition with a custom world
       satisfaction)
   + [`judg`](nola/bi/judg.v) (Judgments)
