@@ -221,6 +221,7 @@ All the proof rules are proved to be sound with respect to the semantic model.
 ## Overview of the Rocq Code
 
 The Rocq code is all in [`nola/`](nola/) and is structured as follows:
+
 - [`prelude`](nola/prelude.v) : Prelude
 - [`util/`](nola/util/) : General-purpose utilities, extending
   [std++](https://gitlab.mpi-sws.org/iris/stdpp)
