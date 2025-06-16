@@ -21,7 +21,8 @@ Louisiana, USA, in memory of POPL 2020 held in that city.
 
 - Yusuke Matsushita and Takeshi Tsukada. Nola: Later-Free Ghost State for
     Verifying Termination in Iris. \
-  ACM PLDI 2025. June 2025.
+  ACM PLDI 2025. June 13, 2025.
+    [Paper](https://dl.acm.org/doi/pdf/10.1145/3729250).
   + Yusuke Matsushita and Takeshi Tsukada. Artifact for "Nola: Later-Free Ghost
       State for Verifying Termination in Iris". Zenodo. 2025.
       [Zenodo record](https://doi.org/10.5281/zenodo.15050271).
