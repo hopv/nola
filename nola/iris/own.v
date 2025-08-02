@@ -59,7 +59,7 @@ Section own.
     iRes_at γ (iRes_singleton (i:=i) γ a) ≡ Some a.
   Proof.
     rewrite /iRes_at /iRes_singleton discrete_fun_lookup_singleton.
-    rewrite lookup_singleton. case: i=> >. subst=>/=.
+    rewrite lookup_singleton_eq. case: i=> >. subst=>/=.
     by rewrite inG_fold_unfold.
   Qed.
   (** Adjunction between [iRes_singleton] and [iRes_at] *)
@@ -83,7 +83,7 @@ Section own.
     move=> γ'. rewrite lookup_op. case: (decide (γ = γ'))=> ?; last first.
     { rewrite lookup_singleton_ne; [|done]. rewrite lookup_insdel_ne; [|done].
       by rewrite left_id. }
-    subst. rewrite lookup_singleton lookup_insdel.
+    subst. rewrite lookup_singleton_eq lookup_insdel.
     have <- : inG_unfold ∘ cmra_transport inG_prf <$> Some a =
       Some (inG_unfold (cmra_transport inG_prf a)) by done.
     rewrite -cmra_morphism_op -eq /iRes_at.

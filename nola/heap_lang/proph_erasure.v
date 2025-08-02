@@ -793,11 +793,11 @@ Lemma pure_step_tp_safe t1 t2 e1 σ :
   (∀ e2, e2 ∈ t2 → not_stuck e2 σ) → pure_steps_tp t1 (erase_tp t2) →
   e1 ∈ t1 → not_stuck e1 (erase_state σ).
 Proof.
-  intros Ht2 Hpr [i He1]%elem_of_list_lookup_1.
+  intros Ht2 Hpr [i He1]%list_elem_of_lookup_1.
   eapply Forall2_lookup_l in Hpr as [e2' [He2' Hpr]]; simpl in *; eauto.
   rewrite /erase_tp list_lookup_fmap in He2'.
   destruct (t2 !! i) eqn:He2; simplify_eq/=.
-  apply elem_of_list_lookup_2, Ht2 in He2.
+  apply list_elem_of_lookup_2, Ht2 in He2.
   clear -Hpr He2.
   inversion Hpr as [|??? [? _]]; simplify_eq.
   - destruct He2 as [[? ?%of_to_val]|]; simplify_eq/=; first by left; eauto.
@@ -846,7 +846,7 @@ Proof.
   edestruct erased_prim_step_prim_step as
     (eio' & σ3 & κ' & efs' & ee & Heiopstp & Hprstps' & ?&?&?); first done;
     last simplify_eq/=.
-  { eapply adequate_not_stuck; eauto using elem_of_list_lookup_2. }
+  { eapply adequate_not_stuck; eauto using list_elem_of_lookup_2. }
   eexists _, _, _; repeat split.
   { etrans; first done.
     apply rtc_once; eexists.
@@ -859,7 +859,7 @@ Proof.
     by rewrite !length_insert length_fmap. }
   intros j x y.
   destruct (decide (i = j)); simplify_eq.
-  { rewrite !list_lookup_insert ?length_fmap; eauto using lookup_lt_Some; [].
+  { rewrite !list_lookup_insert_eq ?length_fmap; eauto using lookup_lt_Some; [].
     by intros ? ?; simplify_eq. }
   rewrite !list_lookup_insert_ne // list_lookup_fmap.
   intros ? ?.

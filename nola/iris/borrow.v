@@ -342,7 +342,7 @@ Section borrow.
     { by rewrite lookup_of_depo_stl eq. }
     apply prod_local_update; [apply prod_local_update|]=>/=; [done..|].
     rewrite fmap_delete. apply: delete_local_update; last first.
-    { by rewrite lookup_singleton. } exact _.
+    { by rewrite lookup_singleton_eq. } exact _.
   Qed.
 
   (** Add lenders w.r.t. [depo_stl_tok] *)
@@ -370,7 +370,7 @@ Section borrow.
     apply auth_update_alloc, gmap_local_update. move=> i'.
     case: (decide (i = i'))=> [<-|?]; last first.
     { rewrite lookup_insert_ne; [|done]. by rewrite lookup_singleton_ne. }
-    rewrite lookup_empty lookup_of_depo_stl eq !lookup_insert.
+    rewrite lookup_empty lookup_of_depo_stl eq !lookup_insert_eq.
     exact depo_stl_lend_add'.
   Qed.
 
@@ -533,11 +533,11 @@ Section borrow.
     iRewrite -("Ne" with "≡") in "PQ".
     iMod (depo_stl_lend_delete with "● l") as "●"; [done|].
     iMod (depo_stl_lend_add Qxl with "●") as "[● ls]".
-    { apply list_lookup_insert. exact: lookup_lt_Some. }
+    { apply list_lookup_insert_eq. exact: lookup_lt_Some. }
     iModIntro. iSplitR "ls"; last first.
     { rewrite big_sepM_map_without'. iApply (big_sepL_impl with "ls").
       iIntros "!> %% ⊑ [% ?]". iExists _. iSplit; [done|]. by iExists _, _. }
-    iExists _. iFrame "●". rewrite list_insert_insert.
+    iExists _. iFrame "●". rewrite list_insert_insert_eq.
     iDestruct (big_sepL_insert_acc with "Dl") as "[D →Dl]"; [done|]=>/=.
     iApply "→Dl". clear eq. iDestruct "D" as "[[Bl →Lm]|[† Lm]]".
     - iLeft. iFrame "Bl". iIntros "† Bl".
@@ -695,8 +695,8 @@ Section borrow.
     iSplitR "→Qm"=>/=; [by iApply "→Bl"|]. iIntros "† big".
     iApply ("→Qm" with "†"). rewrite -{2}(list_insert_id _ _ _ eq).
     iDestruct (big_sepL_insert_acc _ _ j with "big") as "[Px big]".
-    { apply list_lookup_insert. exact: lookup_lt_Some. }
-    setoid_rewrite list_insert_insert. iApply "big". rewrite prod_equivI /=.
+    { apply list_lookup_insert_eq. exact: lookup_lt_Some. }
+    setoid_rewrite list_insert_insert_eq. iApply "big". rewrite prod_equivI /=.
     iDestruct "≡" as "[≡ _]". by iRewrite ("Ne" with "≡").
   Qed.
   (** Open a borrower *)
@@ -739,8 +739,8 @@ Section borrow.
     iIntros "† big". iApply ("→Lm" with "†").
     rewrite -{2}(list_insert_id _ _ _ eq).
     iDestruct (big_sepL_insert_acc _ _ j with "big") as "[Px big]".
-    { apply list_lookup_insert. exact: lookup_lt_Some. }
-    setoid_rewrite list_insert_insert. iApply "big". case B'=>/= ??.
+    { apply list_lookup_insert_eq. exact: lookup_lt_Some. }
+    setoid_rewrite list_insert_insert_eq. iApply "big". case B'=>/= ??.
     rewrite prod_equivI /=. iDestruct "≡" as "[≡ _]".
     by iRewrite ("Ne" with "≡").
   Qed.

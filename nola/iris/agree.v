@@ -21,15 +21,15 @@ Section agree.
     ✓{n} ag → ag ≡{n}≡ ag' → unagree ag ≡{n}≡ unagree ag'.
   Proof.
     move: ag ag'=> [[//|??]?][[//|??]?]/= /agree_validN_def val [_ go].
-    move: (go _ (elem_of_list_here _ _))=> [a[el ?]].
-    move: (val _ _ el (elem_of_list_here _ _))=> ?. by etrans.
+    move: (go _ (list_elem_of_here _ _))=> [a[el ?]].
+    move: (val _ _ el (list_elem_of_here _ _))=> ?. by etrans.
   Qed.
   Lemma unagree_includedN {A : ofe} {ag ag' : agree A} {n} :
     ✓{n} ag → ag' ≼{n} ag → unagree ag ≡{n}≡ unagree ag'.
   Proof.
     move: ag ag'=> [[//|??]?][[//|??]?]/= /agree_validN_def val [?[_ go]].
-    move: (go _ (elem_of_list_here _ _))=> [a[el ?]].
-    move: (val _ _ el (elem_of_list_here _ _))=> ?. by etrans.
+    move: (go _ (list_elem_of_here _ _))=> [a[el ?]].
+    move: (val _ _ el (list_elem_of_here _ _))=> ?. by etrans.
   Qed.
   Lemma unagree_equiv {A : ofe} {ag ag' : agree A} :
     ✓ ag → ag ≡ ag' → unagree ag ≡ unagree ag'.

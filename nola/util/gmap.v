@@ -37,7 +37,7 @@ Lemma lookup_list_to_gmap' {A i l j} :
   list_to_gmap' (A:=A) i l !! (i + j) = l !! j.
 Proof.
   move: i j. elim: l; [done|]=>/= y l IH i [|j]/=.
-  { by rewrite Nat.add_0_r lookup_insert. }
+  { by rewrite Nat.add_0_r lookup_insert_eq. }
   rewrite lookup_insert_ne; [|lia]. rewrite -(IH (S i)). f_equal. lia.
 Qed.
 Lemma lookup_list_to_gmap {A l i} : list_to_gmap (A:=A) l !! i = l !! i.
@@ -54,7 +54,7 @@ Lemma list_to_gmap'_snoc {A i l x} :
   list_to_gmap' (A:=A) i (l ++ [x]) = <[i + length l := x]> (list_to_gmap' i l).
 Proof.
   move: i. elim: l=>/= [|y l IH] i. { f_equal. lia. }
-  rewrite IH insert_commute; [|lia]. f_equal. lia.
+  rewrite IH insert_insert_ne; [|lia]. f_equal. lia.
 Qed.
 Lemma list_to_gmap_snoc {A l x} :
   list_to_gmap (A:=A) (l ++ [x]) = <[length l := x]> (list_to_gmap l).
@@ -66,7 +66,7 @@ Lemma list_to_gmap_insert {A l i x} : i < length l →
 Proof.
   move=> ?. apply map_eq=> j. rewrite lookup_list_to_gmap.
   case (decide (i = j)).
-  - move=> <-. by rewrite lookup_insert list_lookup_insert.
+  - move=> <-. by rewrite lookup_insert_eq list_lookup_insert_eq.
   - move=> ?. rewrite lookup_insert_ne; [|done].
     rewrite list_lookup_insert_ne; [|done]. by rewrite lookup_list_to_gmap.
 Qed.
@@ -86,7 +86,7 @@ Section insdel.
 
   (** Lookup over [insdel] *)
   Lemma lookup_insdel {A i oa} {m : gmap K A} : insdel i oa m !! i = oa.
-  Proof. case: oa=> [?|]; [apply lookup_insert|apply lookup_delete]. Qed.
+  Proof. case: oa=> [?|]; [apply lookup_insert_eq|apply lookup_delete_eq]. Qed.
   Lemma lookup_insdel_ne {A i j oa} {m : gmap K A} :
     i ≠ j → insdel i oa m !! j = m !! j.
   Proof. case: oa=> [?|]; [apply lookup_insert_ne|apply lookup_delete_ne]. Qed.

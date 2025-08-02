@@ -306,7 +306,7 @@ Section lft.
   Proof.
     rewrite !big_opMS_elements=> /lft_incl_elem_of inc. iIntros "α".
     iApply big_sepL_forall. iIntros (?? elem).
-    apply elem_of_list_lookup_2 in elem. move: elem.
+    apply list_elem_of_lookup_2 in elem. move: elem.
     rewrite gmultiset_elem_of_elements=> ?. rewrite big_sepL_elem_of; [done|].
     rewrite gmultiset_elem_of_elements. auto.
   Qed.

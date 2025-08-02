@@ -445,14 +445,14 @@ Section lemmas.
       ∃ ai : proph_aitemR TY, M !! aprvar_id ξ = Some (Cinr ai) ∧
         existT' _ xπ = unagree ai.
   Proof.
-    rewrite elem_of_list_join. split.
-    - move=> [L[el /elem_of_list_fmap[[i it][? /elem_of_map_to_list eq]]]].
+    rewrite list_elem_of_join. split.
+    - move=> [L[el /list_elem_of_fmap[[i it][? /elem_of_map_to_list eq]]]].
       subst. move: el eq. case: it=> [?|ai|]/=; try by move=>/elem_of_nil.
-      move=> /elem_of_list_singleton. unfold proph_aitem_log_item=> ??.
+      move=> /list_elem_of_singleton. unfold proph_aitem_log_item=> ??.
       simplify_eq=>/=. by exists ai.
     - move=> [ai[/elem_of_map_to_list ? eq]]. exists [.{ξ := xπ}].
-      split; [by apply elem_of_list_singleton|].
-      apply elem_of_list_fmap. exists (aprvar_id ξ, Cinr ai)=>/=.
+      split; [by apply list_elem_of_singleton|].
+      apply list_elem_of_fmap. exists (aprvar_id ξ, Cinr ai)=>/=.
       split; [|done]. f_equal. rewrite /proph_aitem_log_item -eq. clear.
       move: ξ xπ=> [?[h ?]]?. by rewrite (proof_irrel (synty_to_inhab _) h).
   Qed.
@@ -462,7 +462,7 @@ Section lemmas.
     case: pli=> ξ xπ. move=> val /lookup_included inc.
     apply elem_of_proph_map_log.
     move: {val}(val (aprvar_id ξ)) {inc}(inc (aprvar_id ξ)).
-    rewrite /pli_item lookup_singleton.
+    rewrite /pli_item lookup_singleton_eq.
     case eq: (M !! aprvar_id ξ)=> [it|]; last first.
     { by move=> _ /option_included'. }
     move=> + /option_included'. rewrite csum_equiv' csum_included' /=. move: eq.
@@ -478,7 +478,7 @@ Section lemmas.
     apply lookup_included=> i. rewrite /pli_item /=.
     case: (decide (aprvar_id ξ = i))=> ?; last first.
     { rewrite lookup_singleton_ne; [|done]. by apply option_included'. }
-    subst. rewrite lookup_singleton eq. apply option_included'. right.
+    subst. rewrite lookup_singleton_eq eq. apply option_included'. right.
     apply csum_included'=>/=. rewrite eq'. exact to_agree_unagree.
   Qed.
   Local Lemma of_proph_obs_uPred_holds {n r φπ} :
@@ -526,18 +526,18 @@ Section lemmas.
     move=> [val[L[[sim sim'] ?]]]. set i := fresh (dom M ∪ pl_ids L).
     exists (ProphCar {[i := fitem 1]}). split; [by eexists _|]. split=>/=.
     - move=> j. rewrite lookup_op. case: (decide (j = i)).
-      + move=> ->. rewrite lookup_singleton. have ->: M !! i = None; [|done].
+      + move=> ->. rewrite lookup_singleton_eq. have ->: M !! i = None; [|done].
         apply (not_elem_of_dom M), (not_elem_of_union _ _ (pl_ids L)), is_fresh.
       + move=> ?. rewrite lookup_singleton_ne; [|done]. by rewrite left_id.
     - exists L. split; [|done]. split.
       + move=> ξ [q +]. rewrite lookup_op. case: (decide (ξ.(prvar_id) = i)).
-        * move=> eq _ /(elem_of_list_fmap_1 (λ ξ, aprvar_id ξ)). rewrite eq.
+        * move=> eq _ /(list_elem_of_fmap_2 (λ ξ, aprvar_id ξ)). rewrite eq.
           eapply (not_elem_of_list_to_set (C:=gset _) i (_ <$> _)), proj2,
             not_elem_of_union, is_fresh.
         * move=> ?. rewrite lookup_singleton_ne; [|done]. rewrite left_id=> ?.
           apply sim. by exists q.
       + move=> ξ ?. rewrite lookup_op. case: (decide (ξ.(prvar_id) = i)).
-        * move=> ->. rewrite lookup_singleton.
+        * move=> ->. rewrite lookup_singleton_eq.
           case: (M !! i)=>/=; [case=> > eq|move=> eq]; apply (inj Some) in eq;
             inversion eq.
         * move=> ?. rewrite lookup_singleton_ne; [|done]. rewrite left_id.
@@ -596,25 +596,25 @@ Section lemmas.
     exists (.{ξ := xπ} :: L)=>/=. split.
     - move: val sim. rewrite -!assoc. move: (_ ⋅ M)=> M' val sim. split=>/=.
       + move=> ζ [r eq]. apply not_elem_of_cons. split.
-        { move=> ?. subst. move: eq. rewrite lookup_op lookup_singleton.
+        { move=> ?. subst. move: eq. rewrite lookup_op lookup_singleton_eq.
           apply aitem_no_fitem. }
         apply sim. exists r. move: eq. rewrite !lookup_op.
         case: (decide (ζ.(prvar_id) = ξ.(prvar_id))).
-        { move=> ->. by rewrite !lookup_singleton=> /aitem_no_fitem. }
+        { move=> ->. by rewrite !lookup_singleton_eq=> /aitem_no_fitem. }
         move=> ?. rewrite !lookup_singleton_ne; [|done..].
         by rewrite left_id=> ->.
       + move=> ζ yπ eq. apply elem_of_cons.
         case: (decide (ζ.(prvar_id) = ξ.(prvar_id))); last first.
         { move=> ?. right. apply sim. move: eq. rewrite !lookup_op.
           by rewrite !lookup_singleton_ne; [|done..]. }
-        move=> eqi. move: eq. rewrite eqi lookup_op lookup_singleton.
+        move=> eqi. move: eq. rewrite eqi lookup_op lookup_singleton_eq.
         move=> /aitem_eq_agree. move: eqi. clear.
         move: ξ ζ xπ yπ=> [?[h ?]][?[h' ?]]/= ??. left. simplify_eq.
         by rewrite (proof_irrel h h').
     - apply (proph_sim_op_l val) in sim. apply cmra_valid_op_l in val.
       split; [|split; [|done]].
       { apply (proph_sim_op_l val) in sim. apply sim. exists 1%Qp.
-        by rewrite lookup_singleton. }
+        by rewrite lookup_singleton_eq. }
       move=> ?? eqπ. apply dep=> η el. apply eqπ. apply not_elem_of_cons.
       move: val sim. rewrite big_cmra_opL_ProphCar.
       case: (big_cmra_opL_included (C:=proph_mapUR TY)
@@ -622,10 +622,10 @@ Section lemmas.
       rewrite assoc=> val /(proph_sim_op_l val) sim.
       apply cmra_valid_op_l in val. split.
       + move=> ?. subst. move: (val ξ.(prvar_id)). clear.
-        rewrite lookup_op !lookup_singleton Some_valid Cinl_valid frac_valid.
+        rewrite lookup_op !lookup_singleton_eq Some_valid Cinl_valid frac_valid.
         by eapply Qp.not_add_le_l.
       + apply (proph_sim_op_r val) in sim. apply sim. exists q.
-        by rewrite lookup_singleton.
+        by rewrite lookup_singleton_eq.
   Qed.
   (** Resolve a prophecy *)
   Lemma proph_resolve_dep ηl ξ xπ q : proph_dep xπ ηl →
@@ -655,7 +655,7 @@ Section lemmas.
     move: (val ξ.(prvar_id)). rewrite big_cmra_opL_ProphCar.
     case: (big_cmra_opL_included (C:=proph_mapUR TY) (λ pli,
       {[aprvar_id pli.(pli_var) := aitem pli.(pli_val)]}) el)=> [M ->]=>/=.
-    rewrite lookup_op lookup_singleton.
+    rewrite lookup_op lookup_singleton_eq.
     case: (M !! ξ.(prvar_id)); [|by rewrite right_id]. case; [done| |done].
     move=> ? /Some_valid/Cinr_valid val'. apply Some_proper.
     apply (Cinr_proper (B:=proph_aitemR TY)). symmetry.

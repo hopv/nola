@@ -162,7 +162,7 @@ Proof.
     { eapply heap_array_map_disjoint;
         rewrite length_replicate Z2Nat.id; auto with lia. }
     destruct Hix as [(?&?&?&?&?&[-> Hlt%inj_lt]%lookup_replicate_1)%heap_array_lookup|
-                     [j Hj]%elem_of_map_to_list%elem_of_list_lookup_1].
+                     [j Hj]%elem_of_map_to_list%list_elem_of_lookup_1].
     + simplify_eq/=. rewrite !Z2Nat.id in Hlt; eauto with lia.
     + apply map_Forall_to_list in Hσ.
       by eapply Forall_lookup in Hσ; eauto; simpl in *.
@@ -208,9 +208,9 @@ Proof.
     end. by case (vs !! _); simplify_option_eq.
   - destruct (decide _) as [[??]|[<-%dec_stable|[<-%dec_stable ?]]%not_and_l_alt].
     + rewrite !binder_delete_insert // !binder_delete_delete; eauto with f_equal.
-    + by rewrite /= delete_insert_delete delete_idemp.
-    + by rewrite /= binder_delete_insert // delete_insert_delete
-        !binder_delete_delete delete_idemp.
+    + by rewrite /= delete_insert_eq delete_delete_eq.
+    + by rewrite /= binder_delete_insert // delete_insert_eq
+        !binder_delete_delete delete_delete_eq.
 Qed.
 Lemma subst_map_singleton x v e :
   subst_map {[x:=v]} e = subst x v e.
@@ -230,7 +230,7 @@ Lemma subst_map_binder_insert_2 b1 v1 b2 v2 vs e :
 Proof.
   destruct b1 as [|s1], b2 as [|s2]=> /=; auto using subst_map_insert.
   rewrite subst_map_insert. destruct (decide (s1 = s2)) as [->|].
-  - by rewrite delete_idemp subst_subst delete_insert_delete.
+  - by rewrite delete_delete_eq subst_subst delete_insert_eq.
   - by rewrite delete_insert_ne // subst_map_insert subst_subst_ne.
 Qed.
 Lemma subst_map_binder_insert_2_empty b1 v1 b2 v2 e :
